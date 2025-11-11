@@ -17,7 +17,7 @@ in einer offenen Architektur zusammenwirken können.
 
 ---
 
-## 🌍 Offener Unterstützungsansatz / Open Support Model
+## Offener Unterstützungsansatz / Open Support Model
 
 BitGridAI ist ein offenes Forschungsprojekt an der Schnittstelle von  
 Künstlicher Intelligenz, Energieoptimierung und Human-Computer-Interaction.  
