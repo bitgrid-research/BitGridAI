@@ -33,10 +33,10 @@ Der Fokus liegt auf Datenflüssen, Kommunikationsmustern und der Interaktion zwi
 ## Komponenteninteraktion / Component Interaction
 
 ```mermaid
-description LR
-    PV[PV-Sensor] -->|MQTT| Core(BitGrid Core)
+flowchart LR
+    PV[PV-Sensor] -->|MQTT| Core[BitGrid Core]
     Battery[Batteriespeicher] -->|Statusdaten| Core
-    Core -->|REST API| Miner(Mining Node)
+    Core -->|REST API| Miner[Mining Node]
     Core -->|Log + Erklärung| UI[Erklärschnittstelle]
     UI -->|Feedback| Core
 ```
