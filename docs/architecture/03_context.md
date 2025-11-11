@@ -15,8 +15,8 @@ um **transparente, erklärbare und reversible Steuerung** zu ermöglichen.
 |-------|---------------|
 | **Nutzer:in / Prosumer** | Betreibt PV-Anlage, speichert und nutzt Energie lokal |
 | **BitGrid Core** | Lokale Entscheidungslogik, Steuerung und Datenhaltung |
-| **Externe Systeme** | Z. B. Home Assistant, Wechselrichter, Messgeräte, Mining-Controller |
-| **Forschende / Entwickler:innen** | Analysieren Verhalten, Evaluieren Erklärbarkeit, entwickeln Module weiter |
+| **Externe Systeme** | z. B. Home Assistant, Wechselrichter, Messgeräte, Mining-Controller |
+| **Forschende / Entwickler** | Analysieren Verhalten, Evaluieren Erklärbarkeit, entwickeln Module weiter |
 
 > | Role | Description |
 > |------|-------------|
@@ -48,7 +48,7 @@ um **transparente, erklärbare und reversible Steuerung** zu ermöglichen.
 ---
 
 ## Kontextdiagramm / Context Diagram
-[ Nutzer:in ]
+[ Nutzer ]
 ↓
 [ Lokale Erklärschnittstelle ]
 ↓
