@@ -101,3 +101,4 @@ Die Laufzeitsicht zeigt, wie BitGridAI **Energieflüsse in Echtzeit verarbeitet*
 
 > The runtime view demonstrates how BitGridAI **processes energy data in real time** and makes **explainable decisions**. Its modular, local-first design ensures transparency and user control even without cloud connectivity.
 
+* [07 Deployment-Sicht / Deployment View](./07_deployment_view.md)
