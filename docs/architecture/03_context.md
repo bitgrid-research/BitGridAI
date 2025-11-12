@@ -13,7 +13,7 @@ um **transparente, erklärbare und reversible Steuerung** zu ermöglichen.
 ## Akteure / Actors
 | Rolle | Beschreibung |
 |-------|---------------|
-| **Nutzer:in / Prosumer** | Betreibt PV-Anlage, speichert und nutzt Energie lokal |
+| **Nutzer / Prosumer** | Betreibt PV-Anlage, speichert und nutzt Energie lokal |
 | **BitGrid Core** | Lokale Entscheidungslogik, Steuerung und Datenhaltung |
 | **Externe Systeme** | z. B. Home Assistant, Wechselrichter, Messgeräte, Mining-Controller |
 | **Forschende / Entwickler** | Analysieren Verhalten, Evaluieren Erklärbarkeit, entwickeln Module weiter |
