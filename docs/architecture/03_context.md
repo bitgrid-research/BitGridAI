@@ -111,4 +111,4 @@ und fördert damit *Vertrauen, Kontrolle und Transparenz* im Energiesystem.
 > It translates complex energy data into understandable action models,  
 > fostering *trust, control, and transparency* within the energy system.
 
-* [04 Lösungsstrategie / Solution Strategy](./architecture/04_solution_strategy.md)
+* [04 Lösungsstrategie / Solution Strategy](./04_solution_strategy.md)
