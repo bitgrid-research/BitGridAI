@@ -46,9 +46,8 @@ offener, vertrauenswürdiger und selbstverwahrter Wertflüsse.
 <div align="left">
   <img src="./docs/media/bitgrid_donation_qr.png" alt="Bitcoin QR" width="140" style="border:1px solid #ccc; border-radius:10px; padding:5px;"/>
   <br/>
-  <sub>Bitcoin-Adressen sollten niemals manuell abgetippt werden.  
-  Überprüfe stets den Anfang und das Ende des Hashes auf deiner Hardware-Wallet,  
-  um sicherzustellen, dass die angezeigte Adresse mit der hier veröffentlichten übereinstimmt.</sub>
+  <sub>Adresse niemals abtippen.  
+Gesamte Empfangsadresse, besonders Anfang und Ende, direkt auf der Hardware-Wallet prüfen.</sub>
 </div>
 
 ---
