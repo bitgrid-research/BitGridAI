@@ -121,3 +121,5 @@ Sie gewährleisten, dass BitGridAI nicht nur **funktional korrekt**, sondern auc
 
 > The quality scenarios serve as the basis for continuous evaluation and improvement.
 > They ensure that BitGridAI operates not only **functionally correctly** but also **trustworthy, efficient, and explainable**.
+
+* [11 Risiken & Technische Schulden / Risks and Technical Debt](./11_risks_and_technical_debt.md)
