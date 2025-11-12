@@ -24,7 +24,7 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 |                  ↓             ↓                     |
 |            [ data/ ]       [ ui/ ]                   |
 |                  ↓                                   |
-|          [ Nutzer:innen / Dashboard ]                |
+|          [ Nutzer / Dashboard ]                |
 +------------------------------------------------------+
 ```
 
