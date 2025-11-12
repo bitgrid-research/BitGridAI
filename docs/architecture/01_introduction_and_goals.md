@@ -53,3 +53,6 @@ Das Projekt verbindet Human-Computer Interaction, erneuerbare Energie und transp
 > - Developers (Open Source)  
 > - Energy Prosumers / Homeowners  
 > - Academic Institutions
+
+
+* [02 Rahmenbedingungen / Constraints](./architecture/02_constraints.md)
