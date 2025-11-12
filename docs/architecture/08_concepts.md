@@ -91,7 +91,7 @@ Das System nutzt PV-Überschuss intelligent, reduziert Energieverbrauch und för
 ## Sicherheit und Autonomie / Security and Autonomy
 
 Sicherheit wird nicht durch Cloud-Dienste, sondern durch **lokale Isolation und Ownership** erreicht.
-Nutzer:innen behalten die Kontrolle über alle Daten, Schlüssel und Automatisierungsregeln.
+Nutzer behalten die Kontrolle über alle Daten, Schlüssel und Automatisierungsregeln.
 Der Betrieb ist offline-fähig, resilient und unabhängig von Dritten.
 
 > Security is achieved not through cloud services but through **local isolation and user ownership**.
