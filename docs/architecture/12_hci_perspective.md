@@ -22,8 +22,8 @@ Jede Automatisierung soll **verständlich, rücknehmbar und vertrauenswürdig** 
 ---
 
 ## Beispiel / Example
-> *„Mining pausiert – PV-Leistung unter 1,5 kW.“*  
-> Das System erklärt nicht nur **was** es tut, sondern **warum**.
+ *„Mining pausiert – PV-Leistung unter 1,5 kW.“*  
+ Das System erklärt nicht nur **was** es tut, sondern **warum**.
 
 > *“Mining paused – PV input below 1.5 kW.”*  
 > The system explains not only **what** it does but **why**.
