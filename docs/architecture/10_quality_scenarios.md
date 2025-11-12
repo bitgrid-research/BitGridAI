@@ -15,7 +15,7 @@ Sie dienen zur Überprüfung, ob die Systemarchitektur die angestrebten Qualitä
 | Qualität                | Beschreibung                                                     |
 | ----------------------- | ---------------------------------------------------------------- |
 | **Transparenz**         | Alle Systementscheidungen sind nachvollziehbar und begründet.    |
-| **Erklärbarkeit**       | Nutzer:innen verstehen Systemverhalten in Echtzeit.              |
+| **Erklärbarkeit**       | Nutzer verstehen Systemverhalten in Echtzeit.              |
 | **Nachhaltigkeit**      | Energieverbrauch wird an erneuerbare Erzeugung angepasst.        |
 | **Datenschutz**         | Keine externen Datenströme, vollständige lokale Kontrolle.       |
 | **Resilienz**           | System bleibt auch bei Teilausfällen funktionsfähig.             |
@@ -38,7 +38,7 @@ Sie dienen zur Überprüfung, ob die Systemarchitektur die angestrebten Qualitä
 
 **Auslöser:** Änderung der PV-Leistung.
 **Erwartetes Verhalten:** System aktualisiert Entscheidung und generiert automatisch eine Erklärung.
-**Qualitätsziel:** Nachvollziehbare Logik und visuelle Rückmeldung für Nutzer:innen.
+**Qualitätsziel:** Nachvollziehbare Logik und visuelle Rückmeldung für Nutzer.
 
 > **Trigger:** Change in PV output.
 > **Expected Behavior:** System updates decision and automatically generates an explanation.
@@ -72,7 +72,7 @@ Sie dienen zur Überprüfung, ob die Systemarchitektur die angestrebten Qualitä
 
 ## Szenario 4 – Nutzerfeedback und Override
 
-**Auslöser:** Nutzer:in lehnt automatische Entscheidung ab.
+**Auslöser:** Nutzer lehnt automatische Entscheidung ab.
 **Erwartetes Verhalten:** System akzeptiert Override, speichert Feedback und passt Regelmodell an.
 **Qualitätsziel:** Erklärbarkeit, Vertrauen, lernfähige Interaktion.
 
