@@ -6,6 +6,23 @@ in einer offenen Architektur zusammenwirken können.
 
 > Research-driven local energy system for human-centered and explainable automation.
 
+**Dokumentation / Documentation:**  
+[→ Zu den technischen Unterlagen und Architektur-Docs](./docs/README.md)
+
+
+---
+
+### Projektstatus / Project Status
+
+BitGridAI befindet sich derzeit in der **Konzeptions- und Architekturphase (MVP)**.  
+Der Fokus liegt auf der Ausarbeitung der Systemarchitektur, der Dokumentation nach dem arc42-Modell  
+und dem Aufbau eines transparenten Forschungsrahmens für lokale Energieflüsse und erklärbare Automatisierung.
+
+> BitGridAI is currently in the **concept and architecture (MVP) phase**.  
+> The focus is on developing the system architecture, documenting according to the arc42 framework,  
+> and establishing a transparent research foundation for local energy flows and explainable automation.
+
+
 ---
 
 ### Fokus / Focus
@@ -84,10 +101,10 @@ für unbestätigte Transaktionen – bevor sie dauerhaft in die Blockchain gesch
 - [https://mempool.space/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2](https://mempool.space/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2)  
 - [https://blockstream.info/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2](https://blockstream.info/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2)
 
-> 💡 **Hinweis / Note:**  
-> Custodial-Produkte („Paper Bitcoin“) ermöglichen oft keine echten On-Chain-Transaktionen.  
-> BitGridAI nutzt On-Chain-Transparenz bewusst, um Selbstverwahrung und Dezentralität im  
-> Forschungsumfeld sichtbar und nachvollziehbar zu machen.  
+ 💡 **Hinweis / Note:**  
+ Custodial-Produkte („Paper Bitcoin“) ermöglichen oft keine echten On-Chain-Transaktionen.  
+ BitGridAI nutzt On-Chain-Transparenz bewusst, um Selbstverwahrung und Dezentralität im  
+ Forschungsumfeld sichtbar und nachvollziehbar zu machen.  
 
 > Custodial or synthetic Bitcoin products may not support true on-chain transactions.  
 > BitGridAI deliberately demonstrates self-custody as part of its research into  
