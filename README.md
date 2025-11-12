@@ -12,7 +12,7 @@ in einer offenen Architektur zusammenwirken können.
 
 ---
 
-### Projektstatus / Project Status
+## Projektstatus / Project Status
 
 BitGridAI befindet sich derzeit in der **Konzeptions- und Architekturphase (MVP)**.  
 Der Fokus liegt auf der Ausarbeitung der Systemarchitektur, der Dokumentation nach dem arc42-Modell  
@@ -25,7 +25,7 @@ und dem Aufbau eines transparenten Forschungsrahmens für lokale Energieflüsse 
 
 ---
 
-### Fokus / Focus
+## Fokus / Focus
 - Mensch-Computer-Interaktion (HCI)  
 - Erklärbare KI (XAI)  
 - Energieoptimierung im Smart-Home-Kontext  
