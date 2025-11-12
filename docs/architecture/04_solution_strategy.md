@@ -65,3 +65,5 @@ PV → Energiespeicher → BitGrid Core → Flexibler Verbraucher (z. B. Mining 
 > - **Modularity** ensures reusability, extensibility, and clear responsibilities  
 > - **Explainability** increases user acceptance and supports scientific evaluation  
 > - **Sustainability** is treated as an integrated control parameter, not a secondary outcome
+
+* [05 Bausteinsicht / Building Block View](./05_building_block_view.md)
