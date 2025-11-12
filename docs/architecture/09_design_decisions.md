@@ -121,3 +121,5 @@ Sie bilden das Rückgrat der technischen und ethischen Ausrichtung des Projekts.
 > These architectural decisions secure the core values of BitGridAI:
 > **local autonomy, transparency, sustainability, and explainability.**
 > They form the backbone of the project's technical and ethical orientation.
+
+* [10 Qualitätsszenarien / Quality Scenarios](./10_quality_scenarios.md)
