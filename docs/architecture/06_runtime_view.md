@@ -16,7 +16,7 @@ Dieses Kapitel beschreibt die **Laufzeitsicht (Runtime View)** von BitGridAI –
 2. **BitGrid Core** empfängt die Nachricht und berechnet die aktuelle Lastverteilung.
 3. Bei Überschuss > 1.5 kW wird die **flexible Last** (z. B. Mining Node) über eine lokale REST-API oder MQTT-Nachricht aktiviert.
 4. Entscheidung wird im **Decision Log** protokolliert und an die **Erklärschnittstelle** übermittelt.
-5. Nutzer:in sieht im UI eine Erklärung: *„PV-Ertrag über Schwelle – Mining gestartet.“*
+5. Nutzer sieht im UI eine Erklärung: *„PV-Ertrag über Schwelle – Mining gestartet.“*
 
 > **Example:** PV system produces surplus → BitGrid Core evaluates → mining node activated.
 >
@@ -100,3 +100,4 @@ sequenceDiagram
 Die Laufzeitsicht zeigt, wie BitGridAI **Energieflüsse in Echtzeit verarbeitet** und **erklärbare Entscheidungen** trifft. Der lokale, modulare Aufbau ermöglicht Transparenz und Kontrolle – auch ohne externe Server.
 
 > The runtime view demonstrates how BitGridAI **processes energy data in real time** and makes **explainable decisions**. Its modular, local-first design ensures transparency and user control even without cloud connectivity.
+
