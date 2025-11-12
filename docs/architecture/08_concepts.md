@@ -147,3 +147,5 @@ Sie gewährleisten, dass technologische Entscheidungen stets mit ökologischen u
 > The crosscutting concepts form the foundation of BitGridAI:
 > **explainability, transparency, sustainability, security, and human-centered design.**
 > They ensure that technological decisions remain aligned with ecological and ethical principles.
+
+* [09 Designentscheidungen / Design Decisions](./09_design_decisions.md)
