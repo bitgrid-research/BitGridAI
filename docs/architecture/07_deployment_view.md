@@ -137,3 +137,5 @@ Durch lokale Netzwerke, offene Protokolle und minimalistische Hardware bleibt da
 > The deployment view presents BitGridAI as a **locally distributed, energy-autonomous system**
 > connecting physical devices, digital logic, and human interaction in a secure and transparent way.
 > Through local networks, open protocols, and minimalist hardware, the system remains efficient, controllable, and fully transparent.
+
+* [08 Konzepte / Concepts](./08_concepts.md)
