@@ -110,3 +110,5 @@ und fördert damit *Vertrauen, Kontrolle und Transparenz* im Energiesystem.
 > BitGridAI positions itself **between physical infrastructure and human decision autonomy**.  
 > It translates complex energy data into understandable action models,  
 > fostering *trust, control, and transparency* within the energy system.
+
+* [04 Lösungsstrategie / Solution Strategy](./architecture/04_solution_strategy.md)
