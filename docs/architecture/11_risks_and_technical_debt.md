@@ -94,3 +94,5 @@ ohne seine Grundwerte – **Lokalität, Transparenz und Nachhaltigkeit** – zu 
 
 > The risk management ensures that BitGridAI remains stable, transparent, and extensible in the long term.
 > By documenting technical debt consciously, the project can evolve strategically without compromising its core principles – **locality, transparency, and sustainability**.
+
+* [12 HCI-Perspektive / HCI Perspective](./12_hci_perspective.md)
