@@ -13,7 +13,7 @@ um **transparente, erklärbare und reversible Steuerung** zu ermöglichen.
 ## Akteure / Actors
 | Rolle | Beschreibung |
 |-------|---------------|
-| **Nutzer:in / Prosumer** | Betreibt PV-Anlage, speichert und nutzt Energie lokal |
+| **Nutzer / Prosumer** | Betreibt PV-Anlage, speichert und nutzt Energie lokal |
 | **BitGrid Core** | Lokale Entscheidungslogik, Steuerung und Datenhaltung |
 | **Externe Systeme** | z. B. Home Assistant, Wechselrichter, Messgeräte, Mining-Controller |
 | **Forschende / Entwickler** | Analysieren Verhalten, Evaluieren Erklärbarkeit, entwickeln Module weiter |
@@ -110,3 +110,5 @@ und fördert damit *Vertrauen, Kontrolle und Transparenz* im Energiesystem.
 > BitGridAI positions itself **between physical infrastructure and human decision autonomy**.  
 > It translates complex energy data into understandable action models,  
 > fostering *trust, control, and transparency* within the energy system.
+
+* [04 Lösungsstrategie / Solution Strategy](./04_solution_strategy.md)

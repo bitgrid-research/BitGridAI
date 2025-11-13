@@ -21,7 +21,7 @@ Es dient dazu, **Konsistenz, Verständlichkeit und Nachvollziehbarkeit** innerha
 | **MQTT**                                      | Leichtgewichtiges Messaging-Protokoll für asynchrone Kommunikation zwischen Geräten und Modulen.              |
 | **PV**                                        | Photovoltaik – Technologie zur Stromerzeugung aus Sonnenlicht.                                                |
 | **HCI (Human-Computer Interaction)**          | Forschungsbereich zur Interaktion zwischen Mensch und Computer, mit Fokus auf Verständlichkeit und Vertrauen. |
-| **XAI (Explainable Artificial Intelligence)** | KI-Ansatz zur Erklärbarkeit von Entscheidungen und Prozessen für Nutzer:innen.                                |
+| **XAI (Explainable Artificial Intelligence)** | KI-Ansatz zur Erklärbarkeit von Entscheidungen und Prozessen für Nutzer.                                |
 | **AGPLv3**                                    | Lizenz, die Transparenz und Offenlegung von Quellcode bei verteilten Anwendungen sicherstellt.                |
 | **Local-First**                               | Prinzip, nach dem alle Berechnungen und Daten lokal auf Nutzerhardware ausgeführt werden.                     |
 | **Mining Node**                               | Rechner, der flexibel Energieüberschüsse nutzt, z. B. für Bitcoin-Mining.                                     |

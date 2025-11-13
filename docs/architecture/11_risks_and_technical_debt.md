@@ -16,10 +16,10 @@ Ziel ist es, potenzielle Schwachstellen frühzeitig zu erkennen, deren Auswirkun
 | ----------------------------------- | ----------------------------------------------------- | ------------------ | ---------- | -------------------------------------------------- |
 | **Hardwareausfall**                 | Defekte Sensoren oder Instabilität auf Raspberry Pi   | Mittel             | Hoch       | Redundante Sensoren, automatisches Recovery-Skript |
 | **MQTT-Broker-Ausfall**             | Kommunikationsunterbrechung zwischen Modulen          | Hoch               | Mittel     | Fallback-Mechanismus, lokale Zwischenspeicherung   |
-| **Fehlerhafte Regeldefinitionen**   | Nutzer:innen konfigurieren inkonsistente Regeln       | Mittel             | Mittel     | Validierung und Simulation vor Aktivierung         |
+| **Fehlerhafte Regeldefinitionen**   | Nutzer konfigurieren inkonsistente Regeln       | Mittel             | Mittel     | Validierung und Simulation vor Aktivierung         |
 | **Speicherüberlauf / Logwachstum**  | Dauerhafte Protokollierung führt zu Speicherknappheit | Niedrig            | Hoch       | Periodische Bereinigung, Archivierung alter Logs   |
 | **Nachhaltigkeitsmetriken ungenau** | Unpräzise Erfassung der PV- oder Verbrauchsdaten      | Mittel             | Mittel     | Kalibrierung, Plausibilitätsprüfungen              |
-| **UI-Verständlichkeit**             | Nutzer:innen interpretieren Erklärungen falsch        | Niedrig            | Mittel     | Usability-Tests, iteratives HCI-Feedback           |
+| **UI-Verständlichkeit**             | Nutzer interpretieren Erklärungen falsch        | Niedrig            | Mittel     | Usability-Tests, iteratives HCI-Feedback           |
 
 > | Risk                                  | Description                                   | Probability | Impact | Mitigation                                  |
 > | ------------------------------------- | --------------------------------------------- | ----------- | ------ | ------------------------------------------- |
@@ -94,3 +94,5 @@ ohne seine Grundwerte – **Lokalität, Transparenz und Nachhaltigkeit** – zu 
 
 > The risk management ensures that BitGridAI remains stable, transparent, and extensible in the long term.
 > By documenting technical debt consciously, the project can evolve strategically without compromising its core principles – **locality, transparency, and sustainability**.
+
+* [12 HCI-Perspektive / HCI Perspective](./12_hci_perspective.md)

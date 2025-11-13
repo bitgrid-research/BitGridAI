@@ -8,16 +8,16 @@ ein offenes, nutzerzentriertes Energiesystem für transparente und erklärbare l
 
 ---
 
-## 📂 Struktur / Structure
+##  Struktur / Structure
 
-### ⚙️ 00 – Setup
+### 00 – Setup
 
 Entwicklungsumgebung & Systemeinrichtung:
 
 * [00.1 SSH unter Windows](./setup/ssh_windows_setup.md)
 * [00.2 Entwicklungsumgebung / Development Environment](./setup/dev_environment.md)
 
-### 🧩 01–12 Architektur (arc42)
+### 01–12 Architektur (arc42)
 
 Systemdokumentation basierend auf dem [arc42](https://arc42.org) Template:
 
@@ -35,7 +35,7 @@ Systemdokumentation basierend auf dem [arc42](https://arc42.org) Template:
 * [12 HCI-Perspektive / HCI Perspective](./architecture/12_hci_perspective.md)
 * [99 Glossar / Glossary](./architecture/99_glossar.md)
 
-### 🧠 20–29 Forschung / Research
+### 20–29 Forschung / Research
 
 Mensch-Technik-Interaktion, Erklärbarkeit und Energieethik:
 
@@ -45,7 +45,7 @@ Mensch-Technik-Interaktion, Erklärbarkeit und Energieethik:
 
 ---
 
-## ✍️ Stil / Style
+## Stil / Style
 
 * Markdown first
 * Erklärbarkeit vor Komplexität

@@ -38,7 +38,7 @@ Alle Architekturentscheidungen folgen dem ADR-Format (Architecture Decision Reco
 **Entscheidung:** BitGridAI wird vollständig lokal ausgeführt (kein Cloud-Backend).
 **Begründung:** Maximale Datenhoheit, Energieautonomie und Nachvollziehbarkeit.
 **Alternativen:** Hybrid- oder Cloud-System mit API-Anbindung.
-**Auswirkungen:** Erhöhte Wartungsverantwortung lokal, aber volle Kontrolle durch Nutzer:innen.
+**Auswirkungen:** Erhöhte Wartungsverantwortung lokal, aber volle Kontrolle durch Nutzer.
 
 > **Context:** Privacy, resilience, and energy efficiency are core requirements.
 > **Decision:** BitGridAI runs fully locally (no cloud backend).
@@ -121,3 +121,5 @@ Sie bilden das Rückgrat der technischen und ethischen Ausrichtung des Projekts.
 > These architectural decisions secure the core values of BitGridAI:
 > **local autonomy, transparency, sustainability, and explainability.**
 > They form the backbone of the project's technical and ethical orientation.
+
+* [10 Qualitätsszenarien / Quality Scenarios](./10_quality_scenarios.md)

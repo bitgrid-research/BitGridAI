@@ -108,3 +108,5 @@ eine nachhaltige, vertrauenswürdige und reproduzierbare Energieautomatisierung.
 > where energy control, data processing, and user interaction remain clearly separated and transparent.  
 > Each component contributes to the explainable overall logic and supports  
 > sustainable, trustworthy, and reproducible energy automation.
+
+* [06 Laufzeitsicht / Runtime View](./06_runtime_view.md)

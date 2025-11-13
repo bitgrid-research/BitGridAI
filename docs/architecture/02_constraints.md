@@ -93,3 +93,6 @@ Sie bilden das Fundament für eine Architektur, die technologische Offenheit mit
 
 > The defined constraints ensure that BitGridAI operates **independently, transparently, and sustainably**.
 > They form the foundation for an architecture that combines technological openness with ethical responsibility.
+
+* [03 Systemkontext / System Context](./03_context.md)
+
