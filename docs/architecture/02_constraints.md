@@ -63,7 +63,7 @@ Ziel ist ein Gleichgewicht zwischen **lokaler Kontrolle, Nachhaltigkeit und Inte
 > | --- | --- |
 > | **Research Context** | Academic project (HCI & energy informatics) with in-home field trials. |
 > | **Traceability** | Architecture & decision documentation mandatory (ADRs in `09_design_decisions.md`). |
-| **Collaboration** | Open interfaces for partners (meters, sensors, prosumer groups). |
+> | **Collaboration** | Open interfaces for partners (meters, sensors, prosumer groups). |
 > | **Resource Constraints** | Limited budget/time → focus on MVP and core features. |
 > | **Config Discipline** | Changes via versioned YAML; reproducible builds. |
 
@@ -135,3 +135,4 @@ Sie bilden das Fundament für eine Architektur, die technologische Offenheit mit
 > They form the foundation for an architecture that combines technological openness with ethical responsibility.
 
 *Weiter mit **[03 – Systemkontext / System Context](./03_context.md)**.*
+
