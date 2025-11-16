@@ -48,7 +48,7 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 
 | Komponente                              | Beschreibung                    | Energiebezug           |
 | --------------------------------------- | ------------------------------- | ---------------------- |
-| **Controller (z. B. Raspberry Pi 5)**   | Führt Core, Module und UI aus   | Lokale Versorgung / PV |
+| **Controller**   | Führt Core, Module und UI aus   | Lokale Versorgung / PV |
 | **PV-Wechselrichter**                   | Liefert Leistungsdaten          | Erzeugt PV-Energie     |
 | **Energiespeicher (z. B. LiFePo4)**     | Puffert Überschussenergie       | Lokale Kapazität       |
 | **Mining Node / Flexibler Verbraucher** | Dynamischer Energieverbraucher  | Regelbar über Core     |
@@ -56,7 +56,7 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 
 > | Component                             | Description                    | Power Source        |
 > | ------------------------------------- | ------------------------------ | ------------------- |
-> | **Controller (e.g., Raspberry Pi 5)** | Runs core, modules, and UI     | Local supply / PV   |
+> | **Controller** | Runs core, modules, and UI     | Local supply / PV   |
 > | **PV Inverter**                       | Provides power data            | Generates PV energy |
 > | **Energy Storage (e.g., LiFePo4)**    | Buffers surplus energy         | Local capacity      |
 > | **Mining Node / Flexible Load**       | Dynamic energy consumer        | Controlled by Core  |
