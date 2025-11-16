@@ -151,4 +151,4 @@ Durch lokale Netzwerke, offene Protokolle und minimalistische Hardware bleibt da
 > connecting physical devices, digital logic, and human interaction in a secure and transparent way.
 > Through local networks, open protocols, and minimalist hardware, the system remains efficient, controllable, and fully transparent.
 
-* [08 Konzepte / Concepts](./08_concepts.md)
+*Weiter mit **[08 Konzepte / Concepts](./08_concepts.md)**.*
