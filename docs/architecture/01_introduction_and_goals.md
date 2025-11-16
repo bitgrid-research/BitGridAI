@@ -85,23 +85,24 @@ Ein **lokales, KI-gestütztes System**, das …
 ---
 
 ## KPIs / Success Metrics
-- **Netzbezug ??"** um ?%? X % w�hrend Versuchsphase.  
-- **Flapping ??"** (Start/Stop-Wechsel) um ?%? Y % durch Deadband.  
-- **Erkl�rungs-Abdeckung** ?%? Z % (alle Entscheidungen liefern Reason/Trigger/Parameter).  
-- **Vertrauen** (Likert-Skala) ?%? T/5 in Nutzerstudie.  
-- **Thermal-Safety-Events**: 0 ungeplante ?obertemperaturen.  
-- **Energy?Sats-Effizienz** ?%? E sats/kWh bei aktivem Mining/Hodl.  
-- **Hodl/Export-Traceability**: 100?% der Blockfenster loggen `preferred_path` inkl. Grund.  
-- **PoW-Sicherheitsverletzungen**: 0 ungekl�rte Hashrate-/Effizienzabweichungen (via R2/R3 abgefangen).
+- **Netzbezug**: >= X% Reduktion während der Versuchsphase.  
+- **Flapping** (Start/Stop-Wechsel): >= Y% Reduktion dank Deadband.  
+- **Erklärungs-Abdeckung**: >= Z% (alle Decisions liefern Reason/Trigger/Parameter).  
+- **Vertrauens-Score**: >= T/5 (Likert) in Nutzerstudien.  
+- **Thermal-Safety-Events**: 0 ungeplante Übertemperaturen.  
+- **Energy-to-Sats-Effizienz**: >= E sats/kWh bei aktivem Mining/Hodl.  
+- **Hodl/Export-Traceability**: 100% der Blockfenster loggen `preferred_path` inkl. Begründung.  
+- **PoW-Sicherheitsverletzungen**: 0 ungeklärte Hashrate-/Effizienzabweichungen (durch R2/R3 abgefangen).
 
-> ??? **Grid import ??"** by ?%? X% during trials;  
-> ??? **Flapping ??"** by ?%? Y% via deadband;  
-> ??? **Explanation coverage** ?%? Z%;  
-> ??? **Trust score** ?%? T/5;  
-> ??? **Thermal safety**: 0 unexpected over-temperature events;  
-> ??? **Energy?sats efficiency** ?%? E sats/kWh whenever mining/hodl is active;  
-> ??? **Hodl/export traceability**: 100?% of block windows log `preferred_path` + rationale;  
-> ??? **PoW safety violations**: 0 unexplained hashrate/efficiency deviations (caught by R2/R3).
+> - **Grid import** reduced by >= X% during trials.  
+> - **Flapping** reduced by >= Y% via deadband.  
+> - **Explanation coverage** >= Z%.  
+> - **Trust score** >= T/5.  
+> - **Thermal safety**: 0 unexpected over-temperature events.  
+> - **Energy-to-sats efficiency** >= E sats/kWh whenever mining/hodl is active.  
+> - **Hodl/export traceability**: 100% of block windows log `preferred_path` plus rationale.  
+> - **PoW safety violations**: 0 unexplained hashrate/efficiency deviations (caught by R2/R3).
+
 ---
 
 ## Abgrenzung / Out of Scope
