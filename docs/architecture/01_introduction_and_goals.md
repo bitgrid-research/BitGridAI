@@ -1,4 +1,4 @@
-﻿# 01 – Einführung und Ziele / Introduction and Goals
+# 01 – Einführung und Ziele / Introduction and Goals
 
 > **Kurzüberblick:**
 >
@@ -23,6 +23,17 @@ BitGridAI untersucht, wie lokale Energieautomatisierung **erklärbar, vertrauens
 Das System folgt dabei Bitcoin-nahen Leitmotiven: *Bitcoin ist Zeit* (Blocktakt als Automatisierungsrhythmus), *Proof-of-Work* als klare Energieschnittstelle und der Option, Überschussenergie bewusst zu **hodln** statt sofort zu verbrauchen. Entscheidungen balancieren das Blockchain-Trilemma, indem sie Dezentralisierung und Sicherheit vor globale Skalierung stellen.
 
 > Bitcoin-aligned principles guide the system: *Bitcoin is time* (block cadence drives automation), *proof-of-work* provides a clear energy interface, and surplus energy can deliberately be **hodled** instead of consumed. Decisions balance the blockchain trilemma by prioritizing decentralization and security over global scale.
+
+Die Architektur nutzt Prinzipien aus dem Bitcoin-Kontext als energiesystemische Referenzmodelle:
+(1) „Bitcoin ist Zeit“ beschreibt Blockintervalle als deterministische, extern nicht manipulierbare Taktgeber für Automatisierungsentscheidungen.
+(2) Proof-of-Work fungiert als klare energetische Schnittstelle, da Rechenleistung proportional zum realen Energieeinsatz ist.
+(3) Überschussenergie kann im Sinne ökonomischer Zeitpräferenzen aufgeschoben bzw. in Hashing transformiert werden.
+
+> The architecture adopts principles from the Bitcoin domain as reference models for energy-aware system design: 
+> (1) “Bitcoin is time” conceptualizes block intervals as deterministic and manipulation-resistant cadence drivers for automation.
+> (2) Proof-of-work provides a clear energetic interface, as computational output scales proportionally with real energy expenditure.
+> (3) Surplus energy can be deferred or transformed into hashing in line with economic time-preference considerations.
+The decision logic incorporates the blockchain trilemma by modeling decentralization and security as primary system parameters.
 
 ---
 
@@ -85,61 +96,21 @@ Ein **lokales, KI-gestütztes System**, das …
 ---
 
 ## KPIs / Success Metrics
-- **Netzbezug ??"** um ?%? X % w�hrend Versuchsphase.  
-- **Flapping ??"** (Start/Stop-Wechsel) um ?%? Y % durch Deadband.  
-- **Erkl�rungs-Abdeckung** ?%? Z % (alle Entscheidungen liefern Reason/Trigger/Parameter).  
-- **Vertrauen** (Likert-Skala) ?%? T/5 in Nutzerstudie.  
-- **Thermal-Safety-Events**: 0 ungeplante ?obertemperaturen.  
-- **Energy?Sats-Effizienz** ?%? E sats/kWh bei aktivem Mining/Hodl.  
-- **Hodl/Export-Traceability**: 100?% der Blockfenster loggen `preferred_path` inkl. Grund.  
-- **PoW-Sicherheitsverletzungen**: 0 ungekl�rte Hashrate-/Effizienzabweichungen (via R2/R3 abgefangen).
+- **Netzbezug**: >= X% Reduktion während der Versuchsphase.  
+- **Flapping** (Start/Stop-Wechsel): >= Y% Reduktion dank Deadband.  
+- **Erklärungs-Abdeckung**: >= Z% (alle Decisions liefern Reason/Trigger/Parameter).  
+- **Vertrauens-Score**: >= T/5 (Likert) in Nutzerstudien.  
+- **Thermal-Safety-Events**: 0 ungeplante Übertemperaturen.  
+- **Energy-to-Sats-Effizienz**: >= E sats/kWh bei aktivem Mining/Hodl.  
+- **Hodl/Export-Traceability**: 100% der Blockfenster loggen `preferred_path` inkl. Begründung.  
+- **PoW-Sicherheitsverletzungen**: 0 ungeklärte Hashrate-/Effizienzabweichungen (durch R2/R3 abgefangen).
 
-> ??? **Grid import ??"** by ?%? X% during trials;  
-> ??? **Flapping ??"** by ?%? Y% via deadband;  
-> ??? **Explanation coverage** ?%? Z%;  
-> ??? **Trust score** ?%? T/5;  
-> ??? **Thermal safety**: 0 unexpected over-temperature events;  
-> ??? **Energy?sats efficiency** ?%? E sats/kWh whenever mining/hodl is active;  
-> ??? **Hodl/export traceability**: 100?% of block windows log `preferred_path` + rationale;  
-> ??? **PoW safety violations**: 0 unexplained hashrate/efficiency deviations (caught by R2/R3).
----
+> - **Grid import** reduced by >= X% during trials.  
+> - **Flapping** reduced by >= Y% via deadband.  
+> - **Explanation coverage** >= Z%.  
+> - **Trust score** >= T/5.  
+> - **Thermal safety**: 0 unexpected over-temperature events.  
+> - **Energy-to-sats efficiency** >= E sats/kWh whenever mining/hodl is active.  
+> - **Hodl/export traceability**: 100% of block windows log `preferred_path` plus rationale.  
+> - **PoW safety violations**: 0 unexplained hashrate/efficiency deviations (caught by R2/R3).
 
-## Abgrenzung / Out of Scope
-✘ Trading, Wallets, Custody  
-✘ Profitmaximierung  
-✘ Cloud-Services  
-✘ Hardware-Modifikation gefährlicher Komponenten
-
-> ✘ Trading/wallet custody, ✘ profit maximization, ✘ cloud services, ✘ hazardous hardware modifications.
-
----
-
-## Stakeholder
-- **Forschende** (HCI, Explainability, Energiesysteme)  
-- **Entwickler*innen** (Open Source)  
-- **Prosumers / Hausbesitzer**  
-- **Akademische Institutionen**
-
-> • **Researchers** (HCI, explainability, energy)  
-> • **Developers** (open source)  
-> • **Prosumers / homeowners**  
-> • **Academic institutions**
-
----
-
-## Annahmen / Assumptions
-- PV-Anlage vorhanden; Messung von Erzeugung/Verbrauch möglich.  
-- Miner/Last **fernsteuerbar** (API/Relais).  
-- Home-Assistant-fähige Sensorik/Zähler verfügbar.  
-- Kein externer Cloud-Zwang; Internet optional.
-
-> PV system in place; metering available.  
-> Controllable flexible load (API/relay).  
-> Home-Assistant compatible sensors/meters.  
-> No mandatory cloud; internet optional.
-
----
-
-## Navigation
-Weiter mit **[02 – Rahmenbedingungen / Constraints](./02_constraints.md)**, danach **[03 – Kontext / Context](./03_context.md)**.  
-- **Explain-Agent & Research Services:** Siehe [14](./14_explain_agent_and_research.md).
