@@ -20,20 +20,9 @@ BitGridAI untersucht, wie lokale Energieautomatisierung **erklärbar, vertrauens
 > BitGridAI explores how **local** energy automation can become **explainable, trustworthy, and user-centered**.  
 > It combines Human-Computer Interaction (HCI), renewables, and **transparent on-device AI** into one cohesive approach.
 
-Das System folgt dabei Bitcoin-nahen Leitmotiven: *Bitcoin ist Zeit* (Blocktakt als Automatisierungsrhythmus), *Proof-of-Work* als klare Energieschnittstelle und der Option, Überschussenergie bewusst zu **hodln** statt sofort zu verbrauchen. Entscheidungen balancieren das Blockchain-Trilemma, indem sie Dezentralisierung und Sicherheit vor globale Skalierung stellen.
+Das System folgt dabei Bitcoin-nahen Leitmotiven: *Bitcoin ist Zeit* (Blocktakt als Automatisierungsrhythmus), *Proof-of-Work* als klare Energieschnittstelle und der Option, Überschussenergie bewusst zu **hodln** statt sofort zu verbrauchen. Entscheidungen balancieren das **Blockchain-Trilemma**, indem sie Dezentralisierung und Sicherheit vor globale Skalierung stellen.
 
 > Bitcoin-aligned principles guide the system: *Bitcoin is time* (block cadence drives automation), *proof-of-work* provides a clear energy interface, and surplus energy can deliberately be **hodled** instead of consumed. Decisions balance the blockchain trilemma by prioritizing decentralization and security over global scale.
-
-Die Architektur nutzt Prinzipien aus dem Bitcoin-Kontext als energiesystemische Referenzmodelle:
-(1) „Bitcoin ist Zeit“ beschreibt Blockintervalle als deterministische, extern nicht manipulierbare Taktgeber für Automatisierungsentscheidungen.
-(2) Proof-of-Work fungiert als klare energetische Schnittstelle, da Rechenleistung proportional zum realen Energieeinsatz ist.
-(3) Überschussenergie kann im Sinne ökonomischer Zeitpräferenzen aufgeschoben bzw. in Hashing transformiert werden.
-
-> The architecture adopts principles from the Bitcoin domain as reference models for energy-aware system design: 
-> (1) “Bitcoin is time” conceptualizes block intervals as deterministic and manipulation-resistant cadence drivers for automation.
-> (2) Proof-of-work provides a clear energetic interface, as computational output scales proportionally with real energy expenditure.
-> (3) Surplus energy can be deferred or transformed into hashing in line with economic time-preference considerations.
-The decision logic incorporates the blockchain trilemma by modeling decentralization and security as primary system parameters.
 
 ---
 
