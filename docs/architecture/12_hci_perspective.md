@@ -1,10 +1,12 @@
 # 12 – HCI-Perspektive / HCI Perspective
 
-> **Kurzüberblick / TL;DR**
+> **Kurzüberblick:**
+> 
 > HCI ist Kern von BitGridAI: **erklärbar, rücknehmbar, vertrauensbildend**.
 > Muster: **Explain → Act → Confirm**, **Warum jetzt?**, **Was-wäre-wenn?**, **Next‑Block Preview**, **Manual Override** (block‑begrenzt), **Timeline & KPIs** — alles **lokal** und **privacy‑by‑default**.
 
-> **TL;DR (EN)**
+> **TL;DR (EN):**
+> 
 > HCI is core to BitGridAI: **explainable, reversible, trust‑building**.
 > Patterns: **Explain → Act → Confirm**, **Why now?**, **What‑if?**, **Next‑block preview**, **manual override** (block‑scoped), **timeline & KPIs** — all **local** and **privacy‑by‑default**.
 
