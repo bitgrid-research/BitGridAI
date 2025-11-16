@@ -1,10 +1,10 @@
 # 09 – Architekturentscheidungen / Architectural Decisions
 
-**Kurzüberblick / TL;DR**
-Entscheidungen orientieren sich an **Local‑First**, **Erklärbarkeit**, **Nachhaltigkeit** und **Determinismus**.
-Kernelemente: **R1–R5**, **10‑Min‑BlockScheduler**, **EnergyState (SSoT)**, **Deadband**, **DecisionEvents**, **AGPLv3**, **kein Cloud‑Backend**.
+> **Kurzüberblick / TL;DR:**
+> Entscheidungen orientieren sich an **Local‑First**, **Erklärbarkeit**, **Nachhaltigkeit** und **Determinismus**.
+> Kernelemente: **R1–R5**, **10‑Min‑BlockScheduler**, **EnergyState (SSoT)**, **Deadband**, **DecisionEvents**, **AGPLv3**, **kein Cloud‑Backend**.
 
-> **TL;DR (EN)**
+> **TL;DR (EN):**
 > Decisions follow **local‑first**, **explainability**, **sustainability**, and **determinism**.
 > Core: **R1–R5**, **10‑min block scheduler**, **EnergyState (SSoT)**, **deadband**, **DecisionEvents**, **AGPLv3**, **no cloud backend**.
 
@@ -12,202 +12,57 @@ Kernelemente: **R1–R5**, **10‑Min‑BlockScheduler**, **EnergyState (SSoT)**
 
 ## ADR‑Format / Decision Record Format
 
-Alle Architekturentscheidungen folgen dem ADR‑Format (Architecture Decision Record):
+Alle ADRs enthalten: **Kontext → Entscheidung → Begründung → Alternativen → Auswirkungen**.
 
-1. **Kontext / Context** · 2) **Entscheidung / Decision** · 3) **Begründung / Rationale** · 4) **Alternativen / Alternatives** · 5) **Auswirkungen / Consequences**
-
-> All ADRs follow: 1) **Context** · 2) **Decision** · 3) **Rationale** · 4) **Alternatives** · 5) **Consequences**
+> All ADRs include: **Context → Decision → Rationale → Alternatives → Consequences**.
 
 ---
 
-## ADR‑001 – Lokale Architektur (Local‑First)
+## Tabellarische Übersicht (DE) / Tabular Overview (DE)
 
-**Status:** Accepted
-**Kontext:** Datenschutz, Resilienz und Energieeffizienz sind zentral.
-**Entscheidung:** BitGridAI läuft vollständig **lokal**, kein Cloud‑Backend.
-**Begründung:** Datenhoheit, Energieautonomie, Nachvollziehbarkeit; entspricht OneNote 00 (Ziele/Abgrenzung).
-**Alternativen:** Hybrid/Cloud.
-**Auswirkungen:** Mehr lokale Betriebsverantwortung, volle Kontrolle.
-
-> **Context:** Privacy, resilience, efficiency. **Decision:** fully on‑prem. **Rationale:** sovereignty, autonomy, traceability. **Consequences:** local ops overhead, full control.
-
----
-
-## ADR‑002 – MQTT als Kommunikationsbus
-
-**Status:** Accepted
-**Kontext:** Lose Kopplung und Erweiterbarkeit der Module/Geräte.
-**Entscheidung:** **MQTT** als zentraler Bus (Topics für State/Commands/Events).
-**Begründung:** Asynchron, leichtgewichtig, Standard im Home/Edge.
-**Alternativen:** REST‑only, proprietäre Protokolle.
-**Auswirkungen:** Flexible Integration, klare Contracts.
-
-> **Decision:** MQTT is the central bus; REST remains for queries/control.
+|     ADR | Titel                                         | Status   | Kontext                                | Entscheidung                                                                                          | Begründung                                 | Alternativen                       | Auswirkungen                                          |
+| ------: | --------------------------------------------- | -------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------ | ---------------------------------- | ----------------------------------------------------- |
+| **001** | Lokale Architektur (Local‑First)              | Accepted | Datenschutz, Resilienz, Effizienz      | Vollständig **lokal**, kein Cloud‑Backend                                                             | Datenhoheit, Autarkie, Nachvollziehbarkeit | Hybrid/Cloud                       | Mehr lokale Ops, volle Kontrolle                      |
+| **002** | MQTT als Kommunikationsbus                    | Accepted | Lose Kopplung/Erweiterbarkeit          | **MQTT** als Bus (State/Commands/Events); REST optional                                               | Asynchron, leichtgewichtig, Standard       | REST‑only, proprietär              | Flexible Integration, klare Contracts                 |
+| **003** | Persistenz: SQLite + Parquet                  | Accepted | Audit ohne Netzabhängigkeit            | **SQLite** (Betrieb/Abfrage) + **Parquet** (Langzeit/Replay)                                          | Portabel, wartungsarm, reproduzierbar      | PostgreSQL, Time‑Series‑DBs, Cloud | Einfache Backups, Skalierung begrenzt (ok für MVP)    |
+| **004** | Erklärungsschnittstelle statt „nur“ Dashboard | Accepted | HCI‑Fokus Vertrauen/Transparenz        | **Explainability‑UI** (Reasons/Trigger/Params, Timeline, Preview)                                     | Verständnis > reine Visualisierung         | Performance‑Dashboards             | Höherer semantischer Wert, moderate UI‑Komplexität    |
+| **005** | Nachhaltigkeit als Steuergröße                | Accepted | PV‑Kopplung, Effizienz                 | **Surplus‑basiertes** Schalten; Preisgrenzen                                                          | Effizienz, Autarkie, Forschung             | Starre Zeitprofile                 | Verbrauch↓, dynamische Anpassung, klare KPIs          |
+| **006** | 10‑Minuten BlockScheduler                     | Accepted | Flapping vermeiden, Audit vereinfachen | Entscheidungen im **10‑Min‑Takt** (`block=floor(epoch/600)`)                                          | Stabilität, Erklärbarkeit „pro Block“      | Sekunden‑Granularität, Event‑Only  | Kleine Latenz; **R4** mildert (Pre‑start)             |
+| **007** | Deterministische Regelengine (R1–R5)          | Accepted | Vertrauen & Reproduzierbarkeit         | **R1–R5** im Kern; **keine Black‑Box‑ML** im Regelpfad                                                | Testbar, erklärbar, replizierbar           | Rein ML‑basierte Policy            | Priorität: **R3 > R2 > R5 > R1/R4**                   |
+| **008** | EnergyState als SSoT                          | Accepted | Konsistenz über Module                 | **Energy Context** ist **einziger Schreiber**; alle anderen lesen                                     | Eine Wahrheit, weniger Race‑Conditions     | Mehrere Writer                     | Klare Verantwortlichkeit; Adapter harmonisieren Werte |
+| **009** | Deadband & Hysterese                          | Accepted | Grenzbereichsrauschen                  | **Deadband** hält Zustand **D Blöcke**; nur **R2/R3** brechen                                         | Stabilität, Hardware‑Schutz                | Keine Stabilisierung               | Weniger Start/Stop, bessere UX                        |
+| **010** | Manual Override (Block‑Scoped)                | Accepted | Nutzerautonomie                        | `override(action, ttl)` bis **Blockende/TTL**; Reason `manual_override`                               | Kontrolle ohne Policy‑Änderung             | Permanente manuelle Modi           | Sicherheit hat Vorrang (R2/R3 können brechen)         |
+| **011** | Lokale Forecast‑Nutzung (R4)                  | Accepted | Frühstart bei stabiler Erwartung       | **Lokaler** Forecast (Datei/Dienst) beeinflusst nur **R4**                                            | Bessere Starts, kein Cloud‑Zwang           | Externe APIs/Cloud                 | Fehler werden durch **R2/R3** abgefangen              |
+| **012** | Datenhaltung & Audit (Append‑Only)            | Accepted | Forschung/Audit                        | **Append‑only Logs**, versionierte **YAML‑Configs**                                                   | Wiederholbarkeit, Vergleichbarkeit         | Ephemere Zustände                  | Speicherplanung nötig; einfache Backups               |
+| **013** | Lizenz & Offenheit                            | Accepted | Transparenz/Wiederverwendung           | **AGPLv3** + klare 3rd‑Party‑Lizenzen                                                                 | Offen, copyleft‑kompatibel                 | MIT/Apache, proprietär             | Ableitungen bleiben offen, Forschung fördert          |
+| **014** | Privacy by Default (No Telemetry)             | Accepted | DSGVO, Vertrauen                       | **Keine** ausgehende Telemetrie; lokale Auth; Minimal‑Ports                                           | Minimale Angriffsfläche, Hoheit            | Opt‑in Telemetrie                  | Monitoring/Support lokal (Health, Logs)               |
+| **015** | Safety‑First: Stop → Safe                     | Accepted | Thermik/SoC‑Grenzen                    | Harte Limits (**R3/R2**) stoppen sofort; Deadband ignoriert; Hysterese für Resume                     | Hardware‑Schutz, Vertrauen                 | Weiche Limits                      | Verfügbarkeit < Sicherheit; klar in UI                |
+| **016** | Schnittstellen‑Vertrag (MQTT & REST)          | Accepted | Interoperabilität                      | MQTT: `energy/state/#`, `miner/cmd/set`, `explain/events/#`; REST: `/state`, `/timeline`, `/override` | Klare, testbare Contracts                  | Ad‑hoc Endpunkte                   | Leichte Integration, bessere Tests                    |
+| **017** | KPIs als Zielgröße                            | Accepted | Wirkung messbar machen                 | KPIs im Core loggen, in Studien auswerten                                                             | Messbare Wirkung statt Behauptung          | Informell                          | Klare Erfolgsdefinition, kontinuierliches Tracking    |
 
 ---
 
-## ADR‑003 – SQLite + Parquet als Persistenz
+## English Summary Table (EN)
 
-**Status:** Accepted
-**Kontext:** Auditierbare, einfache Speicherung ohne Netzabhängigkeit.
-**Entscheidung:** **SQLite** für Betrieb/Abfragen, **Parquet** für Langzeit‑Logs/Replays.
-**Begründung:** Portabel, wartungsarm, reproduzierbar.
-**Alternativen:** PostgreSQL, Timeseries‑DBs, Cloud‑Speicher.
-**Auswirkungen:** Einfache Backups; begrenzte Skalierung (ausreichend für MVP/Feldstudie).
-
----
-
-## ADR‑004 – Erklärungsschnittstelle (statt „nur“ Dashboard)
-
-**Status:** Accepted
-**Kontext:** HCI‑Fokus (Vertrauen, Transparenz) laut OneNote.
-**Entscheidung:** **Explainability‑UI** mit Reasons/Trigger/Params + Timeline + „Next‑Block Preview“.
-**Begründung:** Verständnis > reine Visualisierung.
-**Alternativen:** Performance‑Dashboards ohne Erklärlayer.
-**Auswirkungen:** Höherer semantischer Wert; UI‑Komplexität moderat.
-
----
-
-## ADR‑005 – Nachhaltigkeit als Steuergröße
-
-**Status:** Accepted
-**Kontext:** Energieeinsatz an PV‑Ertrag koppeln (MVP‑Ziel).
-**Entscheidung:** **Surplus‑basiertes** Schalten; Mining nur bei Überschuss/Preisgrenzen.
-**Begründung:** Effizienz, Autarkie, Forschungsevaluierung.
-**Alternativen:** Starre Zeitprofile.
-**Auswirkungen:** Verbrauch↓, dynamische Anpassung, klare KPIs.
-
----
-
-## ADR‑006 – 10‑Minuten BlockScheduler (Block‑Aligned Control)
-
-**Status:** Accepted
-**Kontext:** Flapping vermeiden, Erklärbarkeit erhöhen.
-**Entscheidung:** Entscheidungen im **10‑Min‑Takt**; `block_id=floor(epoch/600)`.
-**Begründung:** Stabilität, einfache Audits/Erklärungen („pro Block“).
-**Alternativen:** Sekunden‑Granularität, Event‑Only.
-**Auswirkungen:** Leichte Reaktionslatenz; **R4 Pre‑start** mildert.
-
----
-
-## ADR‑007 – Deterministische Regelengine (R1–R5)
-
-**Status:** Accepted
-**Kontext:** Vertrauen & Reproduzierbarkeit.
-**Entscheidung:** Kernsteuerung über **R1–R5** (Start, Autarkie, Thermo, Prognose, Deadband); **keine Black‑Box‑ML im Regelpfad**.
-**Begründung:** Testbar, erklärbar, replizierbar.
-**Alternativen:** Rein ML‑basierte Policy.
-**Auswirkungen:** Klarer Prioritäten‑Order: **R3 > R2 > R5 > R1/R4**.
-
----
-
-## ADR‑008 – EnergyState als Single Source of Truth (SSoT)
-
-**Status:** Accepted
-**Kontext:** Konsistenz & Nachvollziehbarkeit across modules.
-**Entscheidung:** **Energy Context** ist **einziger Schreiber**; alle anderen lesen **EnergyState**.
-**Begründung:** Eine Wahrheit, weniger Race‑Conditions.
-**Alternativen:** Mehrere schreibende Komponenten.
-**Auswirkungen:** Klare Verantwortlichkeit; Adapter vereinheitlichen Messwerte.
-
----
-
-## ADR‑009 – Deadband & Hysterese (Anti‑Flapping)
-
-**Status:** Accepted
-**Kontext:** Grenzbereichsrauschen bei PV/Last.
-**Entscheidung:** **Deadband** hält Zustand **D Blöcke**; nur **R2/R3** dürfen brechen.
-**Begründung:** Stabilität, Hardware‑Schutz.
-**Alternativen:** Keine Stabilisierung.
-**Auswirkungen:** Weniger Start/Stop‑Wechsel; bessere UX.
-
----
-
-## ADR‑010 – Manual Override (Block‑Scoped)
-
-**Status:** Accepted
-**Kontext:** Nutzerautonomie (HCI‑Ziel, OneNote).
-**Entscheidung:** `override(action, ttl)` bis **Blockende/TTL**; Reason `manual_override`.
-**Begründung:** Kontrolle ohne dauerhafte Policy‑Änderung.
-**Alternativen:** Permanente manuelle Modi.
-**Auswirkungen:** Sicherheit bleibt Vorrang (**R2/R3** können Override brechen).
-
----
-
-## ADR‑011 – Lokale Forecast‑Nutzung (R4)
-
-**Status:** Accepted
-**Kontext:** Frühzeitiger Start bei stabiler Erwartung.
-**Entscheidung:** **Lokaler** Forecast (Datei/Dienst) beeinflusst nur **Pre‑start** (**R4**).
-**Begründung:** Bessere Starts, kein Cloudzwang.
-**Alternativen:** Externe APIs, Cloud‑Forecasts.
-**Auswirkungen:** Prognosefehler werden durch **R2/R3** abgefangen.
-
----
-
-## ADR‑012 – Datenhaltung & Audit (Append‑Only)
-
-**Status:** Accepted
-**Kontext:** Forschung/Audit/Reproducibility.
-**Entscheidung:** **Append‑only Logs** (SQLite/Parquet), versionierte **YAML‑Configs**.
-**Begründung:** Wiederholbarkeit, einfache Vergleiche.
-**Alternativen:** Ephemere/undokumentierte Zustände.
-**Auswirkungen:** Speicherplanung nötig; einfache Backups.
-
----
-
-## ADR‑013 – Lizenz & Offenheit
-
-**Status:** Accepted
-**Kontext:** Transparenz & Wiederverwendung.
-**Entscheidung:** **AGPLv3** + klare Third‑Party‑Lizenzen.
-**Begründung:** Offen, aber copyleft‑kompatibel mit Forschungszielen.
-**Alternativen:** MIT/Apache, proprietär.
-**Auswirkungen:** Ableitungen müssen offen bleiben, was Forschung fördert.
-
----
-
-## ADR‑014 – Privacy by Default (No Outbound Telemetry)
-
-**Status:** Accepted
-**Kontext:** DSGVO, Nutzervertrauen.
-**Entscheidung:** **Keine** ausgehende Telemetrie; lokale Auth; Minimal‑Ports.
-**Begründung:** Minimale Angriffsfläche, maximale Hoheit.
-**Alternativen:** Opt‑in Cloud‑Telemetry.
-**Auswirkungen:** Monitoring/Support lokal zu lösen (UI‑Health, Logs).
-
----
-
-## ADR‑015 – Safety‑First: Stop → Safe
-
-**Status:** Accepted
-**Kontext:** Thermik/SoC‑Grenzen, Feldstudie.
-**Entscheidung:** Harte Limits (**R3/R2**) stoppen sofort; Deadband wird ignoriert; Wiederanlauf mit Hysterese.
-**Begründung:** Hardware‑Schutz, Vertrauen.
-**Alternativen:** Weiche Limits.
-**Auswirkungen:** Verfügbarkeit < Sicherheit; klar kommuniziert in UI.
-
----
-
-## ADR‑016 – Schnittstellen‑Vertrag (Topics & REST)
-
-**Status:** Accepted
-**Kontext:** Interoperabilität mit HA/Adaptern.
-**Entscheidung:** MQTT‑Topics (`energy/state/#`, `miner/cmd/set`, `explain/events/#`) + REST (`/state`, `/timeline`, `/override`).
-**Begründung:** Klare, testbare Contracts.
-**Alternativen:** Ad‑hoc Endpunkte.
-**Auswirkungen:** Leichte Integration, bessere Tests.
-
----
-
-## ADR‑017 – KPIs als Projektzielgröße
-
-**Status:** Accepted
-**Kontext:** MVP/KPIs (Grid‑Import↓, Flapping↓, Coverage↑, Trust↑, Thermal=0).
-**Entscheidung:** KPIs werden im Core geloggt und in Studien ausgewertet.
-**Begründung:** Messbare Wirkung statt Behauptung.
-**Alternativen:** Informelle Bewertung.
-**Auswirkungen:** Klare Erfolgsdefinition, fortlaufendes Tracking.
+| ADR | Title                           | Status   | Context                         | Decision                                               | Rationale                           | Alternatives            | Consequences                         |
+| --: | ------------------------------- | -------- | ------------------------------- | ------------------------------------------------------ | ----------------------------------- | ----------------------- | ------------------------------------ |
+| 001 | Local‑first architecture        | Accepted | Privacy, resilience, efficiency | Fully on‑prem; no cloud backend                        | Sovereignty, autonomy, traceability | Hybrid/cloud            | Local ops; full control              |
+| 002 | MQTT as message bus             | Accepted | Loose coupling                  | MQTT for state/cmd/events; REST optional               | Async, lightweight, common          | REST‑only, proprietary  | Flexible integration                 |
+| 003 | SQLite + Parquet                | Accepted | Auditable storage               | SQLite runtime; Parquet long‑term/replay               | Portable, low‑maintenance           | Postgres, TS‑DBs, cloud | Easy backups; limited scale (OK MVP) |
+| 004 | Explanation UI                  | Accepted | HCI focus                       | Explainability UI with reasons, timeline, preview      | Understanding > visuals             | Perf dashboards         | Higher semantic value                |
+| 005 | Sustainability as control       | Accepted | PV‑coupling                     | Surplus‑/price‑based switching                         | Efficiency, autonomy                | Fixed schedules         | Lower consumption; clear KPIs        |
+| 006 | 10‑min block scheduler          | Accepted | Anti‑flapping, audit            | Decisions per 10‑min block                             | Stability, explainability           | Per‑second, event‑only  | Small latency; R4 mitigates          |
+| 007 | Deterministic R1–R5             | Accepted | Trust & reproducibility         | No black‑box ML on control path                        | Testable, explainable               | ML‑only policy          | Priority: R3>R2>R5>R1/R4             |
+| 008 | EnergyState as SSoT             | Accepted | Consistency                     | Single writer: Energy Context                          | One truth                           | Multi writers           | Clear responsibility                 |
+| 009 | Deadband & hysteresis           | Accepted | Threshold noise                 | Hold D blocks; only R2/R3 may break                    | Stability, HW protection            | No stabilization        | Fewer toggles                        |
+| 010 | Manual override                 | Accepted | User autonomy                   | Override action+ttl; block‑scoped                      | Control without policy change       | Permanent manual modes  | Safety overrides                     |
+| 011 | Local forecast (R4)             | Accepted | Early start                     | Local forecast only affects R4                         | Better starts; no cloud             | External APIs           | Safety catches errors                |
+| 012 | Append‑only + versioned configs | Accepted | Audit/replay                    | Append‑only logs; YAML configs                         | Reproducibility                     | Ephemeral states        | Storage planning                     |
+| 013 | License (AGPLv3)                | Accepted | Openness                        | AGPLv3 + 3rd‑party clarity                             | Copyleft aligns with research       | MIT/Apache, proprietary | Derivatives stay open                |
+| 014 | Privacy by default              | Accepted | GDPR, trust                     | No outbound telemetry; local auth                      | Minimal attack surface              | Opt‑in telemetry        | Local monitoring                     |
+| 015 | Safety first                    | Accepted | Thermal/SoC                     | Hard stops (R3/R2); ignore deadband; hysteresis resume | HW protection, trust                | Soft limits             | Availability < safety                |
+| 016 | Interface contract              | Accepted | Interop                         | MQTT topics + REST endpoints                           | Clear, testable                     | Ad‑hoc endpoints        | Easier integration, tests            |
+| 017 | KPIs as objectives              | Accepted | Measurable impact               | Log in core; evaluate in studies                       | Evidence‑driven                     | Informal                | Clear success tracking               |
 
 ---
 
