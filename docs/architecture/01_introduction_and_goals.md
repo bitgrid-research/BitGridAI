@@ -114,3 +114,5 @@ Ein **lokales, KI-gestütztes System**, das …
 > - **Hodl/export traceability**: 100% of block windows log `preferred_path` plus rationale.  
 > - **PoW safety violations**: 0 unexplained hashrate/efficiency deviations (caught by R2/R3).
 
+---
+
