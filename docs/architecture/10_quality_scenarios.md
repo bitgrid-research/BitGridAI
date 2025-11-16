@@ -1,8 +1,8 @@
 # 10 – Qualitätsszenarien / Quality Scenarios
 
-> **Kurzüberblick / TL;DR**
-> Szenarien validieren **Transparenz, Erklärbarkeit, Nachhaltigkeit, Resilienz, Vorhersagbarkeit**.
-> Geprüft werden **R1–R5**, **10‑Min‑BlockScheduler**, **EnergyState (SSoT)**, **Deadband**, **Override‑TTL**, **Safety (Stop → Safe)**.
+**Kurzüberblick / TL;DR**
+Szenarien validieren **Transparenz, Erklärbarkeit, Nachhaltigkeit, Resilienz, Vorhersagbarkeit**.
+Geprüft werden **R1–R5**, **10‑Min‑BlockScheduler**, **EnergyState (SSoT)**, **Deadband**, **Override‑TTL**, **Safety (Stop → Safe)**.
 
 > **TL;DR (EN)**
 > Scenarios validate **transparency, explainability, sustainability, resilience, predictability**.
