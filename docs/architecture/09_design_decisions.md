@@ -1,10 +1,12 @@
 # 09 – Architekturentscheidungen / Architectural Decisions
 
-> **Kurzüberblick / TL;DR:**
+> **Kurzüberblick:**
+> 
 > Entscheidungen orientieren sich an **Local‑First**, **Erklärbarkeit**, **Nachhaltigkeit** und **Determinismus**.
 > Kernelemente: **R1–R5**, **10‑Min‑BlockScheduler**, **EnergyState (SSoT)**, **Deadband**, **DecisionEvents**, **AGPLv3**, **kein Cloud‑Backend**.
 
 > **TL;DR (EN):**
+> 
 > Decisions follow **local‑first**, **explainability**, **sustainability**, and **determinism**.
 > Core: **R1–R5**, **10‑min block scheduler**, **EnergyState (SSoT)**, **deadband**, **DecisionEvents**, **AGPLv3**, **no cloud backend**.
 
