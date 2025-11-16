@@ -1,9 +1,16 @@
 # 01 – Einführung und Ziele / Introduction and Goals
 
-> **Kurzüberblick / TL;DR**  
+> **Kurzüberblick:**
+>
 > BitGridAI erforscht lokale, erklärbare Energieautomatisierung ohne Cloud.  
 > PV-Überschuss wird als flexible Last (u. a. Bitcoin-Mining) genutzt.  
 > Fokus: Transparenz, Vertrauen, Sicherheit und Wiederholbarkeit.
+
+> **TL;DR (EN):**
+>
+> BitGridAI researches local, explainable energy automation with no cloud.  
+> PV surplus is used as a flexible load (incl. Bitcoin mining).  
+> Focus: transparency, trust, safety, and reproducibility.
 
 ---
 
