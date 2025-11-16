@@ -1,10 +1,12 @@
 # 11 – Risiken und Technische Schulden / Risks and Technical Debt
 
-> **Kurzüberblick / TL;DR**
+> **Kurzüberblick:**
+> 
 > Bewertung entlang der BitGrid‑Leitplanken: **Local‑First**, **R1–R5**, **10‑Min‑BlockScheduler**, **EnergyState (SSoT)**, **Deadband**, **Privacy‑by‑Default**.
 > Fokus: Betriebssicherheit (**Stop → Safe**), Datenkonsistenz, Erklärbarkeit, Wartbarkeit.
 
-> **TL;DR (EN)**
+> **TL;DR (EN):**
+> 
 > Assessed against BitGrid guardrails: **local‑first**, **R1–R5**, **10‑min block scheduler**, **EnergyState (SSoT)**, **deadband**, **privacy‑by‑default**.
 > Focus: operational safety (**stop → safe**), data consistency, explainability, maintainability.
 
