@@ -1,9 +1,11 @@
 # 06 – Laufzeitsicht / Runtime View
 
-**Kurzüberblick / TL;DR**
-BitGridAI verarbeitet Energie- und Zustandsdaten **block‑basiert (10 min)**, entscheidet deterministisch per **R1–R5**, steuert Aktoren und liefert **Erklärungen in Echtzeit**. Logging & KPIs laufen lokal – ohne Cloud.
+> **Kurzüberblick:**
+> 
+> BitGridAI verarbeitet Energie- und Zustandsdaten **block‑basiert (10 min)**, entscheidet deterministisch per **R1–R5**, steuert Aktoren und liefert **Erklärungen in Echtzeit**. Logging & KPIs laufen lokal – ohne Cloud.
 
-> **TL;DR (EN)**
+> **TL;DR (EN):**
+> 
 > BitGridAI operates on a **10‑minute block cadence**, evaluates deterministic rules **R1–R5**, actuates devices, and emits **real‑time explanations**. Logging & KPIs are local—no cloud.
 
 ---
@@ -247,3 +249,4 @@ Die Laufzeitsicht zeigt, wie BitGridAI **Energie in Echtzeit block‑weise** ver
 > The runtime view shows how BitGridAI **processes energy in real‑time, block‑wise** and makes **explainable decisions**. Local, modular design ensures transparency and control—**without external servers**.
 
 *Weiter mit **[07 – Deployment‑Sicht / Deployment View](./07_deployment_view.md)**.*
+
