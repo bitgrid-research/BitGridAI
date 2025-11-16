@@ -1,5 +1,15 @@
 # 08 – Querschnittliche Konzepte / Crosscutting Concepts
 
+> **Kurzüberblick:**
+> 
+> Systemweite Leitplanken: **Erklärbarkeit**, **Datentransparenz**, **Nachhaltigkeit**, **Sicherheit & Autonomie**, **menschzentrierte Interaktion** - alles **lokal**, nachvollziehbar, ohne Cloud. Mechanismen: Reasons/Trigger/Parameter, append-only Logs (SQLite/JSON), Deadband/Hysterese, lokale Auth & Offline-Fallback, Overrides & Research-Mode.
+
+> **TL;DR (EN):**
+>  
+> System-wide guardrails: **explainability**, **data transparency**, **sustainability**, **security & autonomy**, **human-centered interaction** - all **local**, auditable, no cloud.  Mechanisms: reasons/trigger/parameters, append-only logs (SQLite/JSON), deadband/hysteresis, local auth & offline fallback, overrides & research mode.
+
+---
+
 ## Überblick / Overview
 
 Dieses Kapitel beschreibt die systemweit geltenden Konzepte und Prinzipien von BitGridAI.
