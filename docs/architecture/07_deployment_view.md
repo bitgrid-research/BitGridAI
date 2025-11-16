@@ -1,5 +1,16 @@
 # 07 – Verteilungssicht / Deployment View
 
+> **Kurzüberblick:**
+> 
+> Lokal verteilter Stack im **geschlossenen LAN**: Core, Module und UI **on-prem**; Kommunikation über **MQTT/REST/WebSocket**; **kein Cloud-Backend**. Betriebsvarianten: **Standalone**, **Distributed Local Network**, **Hybrid (optional, verschlüsselte Spiegelung)**.
+
+> **TL;DR (EN):**
+> 
+> Locally distributed stack in a **closed LAN**: core, modules, and UI **on-prem**; communication via **MQTT/REST/WebSocket**; **no cloud backend**.  
+> Deployment variants: **standalone**, **distributed local network**, **hybrid (optional, encrypted mirroring)**.
+
+---
+
 ## Überblick / Overview
 
 Die Verteilungssicht beschreibt, wie BitGridAI auf Hardware- und Netzebene installiert und betrieben wird.
