@@ -1,10 +1,12 @@
 # 13 – UI‑Spezifikation / UI Specification
 
-**Kurzüberblick / TL;DR**
-Die UI ist **lokal, erklärbar und block‑orientiert**. Kernbausteine: **Decision‑Toast**, **Why‑Now? Panel**, **Next‑Block Preview**, **Timeline**, **Override‑Chip**, **Health‑Banner**, **KPI‑Widget**. Alle Texte sind **DE zuerst**, dann **EN**.
-Performance‑Ziele: **Explanation‑Latency < 2 s**, **Decision‑Latency < 300 ms**, **State‑Propagation < 500 ms**.
+> **Kurzüberblick:**
+> 
+> Die UI ist **lokal, erklärbar und block‑orientiert**. Kernbausteine: **Decision‑Toast**, **Why‑Now? Panel**, **Next‑Block Preview**, **Timeline**, **Override‑Chip**, **Health‑Banner**, **KPI‑Widget**. Alle Texte sind **DE zuerst**, dann **EN**.
+> Performance‑Ziele: **Explanation‑Latency < 2 s**, **Decision‑Latency < 300 ms**, **State‑Propagation < 500 ms**.
 
-> **TL;DR (EN)**
+> **TL;DR (EN):**
+> 
 > The UI is **local, explainable, and block‑aligned**. Core components: **decision toast**, **why‑now panel**, **next‑block preview**, **timeline**, **override chip**, **health banner**, **KPI widget**. All copy is **German first**, then **English**.
 > Performance targets: **explanation latency < 2 s**, **decision latency < 300 ms**, **state propagation < 500 ms**.
 
@@ -179,24 +181,36 @@ sequenceDiagram
 
 ## Dateien & Struktur / Files & Structure (UI)
 
-```
+```text
 ui/
   components/
-    DecisionToast.vue
-    WhyNowPanel.vue
-    NextBlockPreview.vue
-    OverrideChip.vue
-    HealthBanner.vue
-    KpiWidget.vue
+    decision_toast/
+    why_now_panel/
+    next_block_preview/
+    override_chip/
+    health_banner/
+    kpi_widget/
   pages/
-    Dashboard.vue
-    Decisions.vue
-    Devices.vue
-    Energy.vue
-    Settings.vue
+    dashboard/
+    decisions/
+    devices/
+    energy/
+    settings/
+  adapters/
+    rest_client/
+    mqtt_client/
+  state/
+    energy_state/
+    decision_events/
+  i18n/
+    de/
+    en/
+  styles/
+    tokens/
+    components/
 ```
 
-> Technology‑agnostic; names reflect components and pages.
+> **Neutral & framework‑agnostic.** Ordner repräsentieren Komponenten und Seiten. Implementierung möglich als **Web Components**, **React**, **Svelte**, **HA‑Panel**, o. Ä. — ohne Vorgabe einer konkreten Library oder Dateiendungen.
 
 ---
 
@@ -205,5 +219,3 @@ ui/
 Die UI macht Entscheidungen **sichtbar, begründet und steuerbar** – im Sinne von **Explainable by Design** und **Local‑First**. Komponenten bleiben schlank, deterministisch gebunden an **EnergyState**, **DecisionEvents** und **R1–R5**.
 
 > The UI renders decisions **visible, justified, and controllable**—aligned with **explainable by design** and **local‑first**. Components are lean, deterministically bound to **EnergyState**, **DecisionEvents**, and **R1–R5**.
-
-
