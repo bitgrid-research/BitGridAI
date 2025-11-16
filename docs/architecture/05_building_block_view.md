@@ -148,4 +148,4 @@ eine nachhaltige, vertrauenswürdige und reproduzierbare Energieautomatisierung.
 > Each component contributes to the explainable overall logic and supports
 > sustainable, trustworthy, and reproducible energy automation.
 
-* [06 Laufzeitsicht / Runtime View](./06_runtime_view.md)
+*Weiter mit **[06 Laufzeitsicht / Runtime View](./06_runtime_view.md)**.*
