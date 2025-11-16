@@ -1,5 +1,19 @@
 # 05 – Bausteinsicht / Building Block View
 
+> **Kurzüberblick:**
+> 
+> Sauber getrennte **Bausteine**: `core/`, `modules/`, `ui/`, `data/`, `docs/`.  
+> **EnergyState (SSoT)**, **MQTT/REST**-Adapter, **Explainability-UI**, **append-only Logs & KPIs**.  
+> Ziel: **erweiterbar**, **testbar**, **nachvollziehbar** – ohne Cloud.
+
+> **TL;DR (EN):**
+> 
+> Clear **building blocks**: `core/`, `modules/`, `ui/`, `data/`, `docs/`.  
+> **EnergyState (SSoT)**, **MQTT/REST** adapters, **explainability UI**, **append-only logs & KPIs**.  
+> Goal: **extensible**, **testable**, **traceable** — no cloud.
+
+---
+
 ## Überblick / Overview
 
 BitGridAI ist in klar abgegrenzte, lose gekoppelte Bausteine gegliedert.
@@ -58,15 +72,17 @@ auch wenn neue Energiequellen, Verbraucher oder Forschungsadapter hinzugefügt w
 
 ## Strukturskizze / Structural Overview
 
+```
 [ PV / Speicher / Sensoren ]
-↓
-[ modules/ ]
-↓
-[ core/ ]
-↙ ↘
-[ data/ ] [ ui/ ]
-↓
-[ docs/ ]
+            ↓
+        [ modules/ ]
+            ↓
+        [ core/ ]
+      ↙          ↘
+  [ data/ ]    [ ui/ ]
+        ↓
+     [ docs/ ]
+```
 
 > ```
 > [ PV / Storage / Sensors ]
