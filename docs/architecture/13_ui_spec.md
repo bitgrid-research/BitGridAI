@@ -1,8 +1,8 @@
 # 13 – UI‑Spezifikation / UI Specification
 
-> **Kurzüberblick / TL;DR**
-> Die UI ist **lokal, erklärbar und block‑orientiert**. Kernbausteine: **Decision‑Toast**, **Why‑Now? Panel**, **Next‑Block Preview**, **Timeline**, **Override‑Chip**, **Health‑Banner**, **KPI‑Widget**. Alle Texte sind **DE zuerst**, dann **EN**.
-> Performance‑Ziele: **Explanation‑Latency < 2 s**, **Decision‑Latency < 300 ms**, **State‑Propagation < 500 ms**.
+**Kurzüberblick / TL;DR**
+Die UI ist **lokal, erklärbar und block‑orientiert**. Kernbausteine: **Decision‑Toast**, **Why‑Now? Panel**, **Next‑Block Preview**, **Timeline**, **Override‑Chip**, **Health‑Banner**, **KPI‑Widget**. Alle Texte sind **DE zuerst**, dann **EN**.
+Performance‑Ziele: **Explanation‑Latency < 2 s**, **Decision‑Latency < 300 ms**, **State‑Propagation < 500 ms**.
 
 > **TL;DR (EN)**
 > The UI is **local, explainable, and block‑aligned**. Core components: **decision toast**, **why‑now panel**, **next‑block preview**, **timeline**, **override chip**, **health banner**, **KPI widget**. All copy is **German first**, then **English**.
