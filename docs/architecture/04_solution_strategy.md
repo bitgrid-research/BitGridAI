@@ -1,5 +1,15 @@
 # 04 – Lösungsstrategie / Solution Strategy
 
+> **Kurzüberblick:**
+> 
+> Lokale, modulare und erklärbare Architektur: deterministische R1–R5 auf 10‑Min‑Blocktakt, Explainability‑UI ("Warum jetzt?"), MQTT/REST‑Adapter, SQLite/JSON‑Logging. Keine Cloud, klare Schnittstellen, Nachhaltigkeit als Steuergröße.
+
+> **TL;DR (EN):**
+> 
+> Modular, local‑first, and explainable architecture: deterministic R1–R5 on a 10‑minute block cadence, explainability UI ("Why now?"), MQTT/REST adapters, SQLite/JSON logging. No cloud, clear contracts, sustainability as a control parameter.
+
+---
+
 ## Ansatz / Approach
 BitGridAI verfolgt eine **modulare, lokale und erklärbare Systemarchitektur**,  
 die Energieoptimierung, Entscheidungsnachvollziehbarkeit und Nutzervertrauen vereint.  
