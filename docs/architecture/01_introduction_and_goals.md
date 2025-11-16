@@ -126,4 +126,3 @@ Ein **lokales, KI-gestütztes System**, das …
 
 ## Navigation
 Weiter mit **[02 – Rahmenbedingungen / Constraints](./02_constraints.md)**, danach **[03 – Kontext / Context](./03_context.md)**.  
-Siehe außerdem **[12 – HCI Perspective](./12_hci_perspective.md)** für UX/XAI-Leitlinien und **[99 – Glossar](./99_glossar.md)**.
