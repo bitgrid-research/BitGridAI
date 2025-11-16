@@ -50,7 +50,7 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 | --------------------------------------- | ------------------------------- | ---------------------- |
 | **Controller**   | Führt Core, Module und UI aus   | Lokale Versorgung / PV |
 | **PV-Wechselrichter**                   | Liefert Leistungsdaten          | Erzeugt PV-Energie     |
-| **Energiespeicher (z. B. LiFePo4)**     | Puffert Überschussenergie       | Lokale Kapazität       |
+| **Energiespeicher**     | Puffert Überschussenergie       | Lokale Kapazität       |
 | **Mining Node / Flexibler Verbraucher** | Dynamischer Energieverbraucher  | Regelbar über Core     |
 | **Nutzergerät (Tablet, Browser)**       | Zugriff auf Erklärschnittstelle | WLAN / LAN lokal       |
 
@@ -58,7 +58,7 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 > | ------------------------------------- | ------------------------------ | ------------------- |
 > | **Controller** | Runs core, modules, and UI     | Local supply / PV   |
 > | **PV Inverter**                       | Provides power data            | Generates PV energy |
-> | **Energy Storage (e.g., LiFePo4)**    | Buffers surplus energy         | Local capacity      |
+> | **Energy Storage**    | Buffers surplus energy         | Local capacity      |
 > | **Mining Node / Flexible Load**       | Dynamic energy consumer        | Controlled by Core  |
 > | **User Device (Tablet, Browser)**     | Accesses explanation interface | Local WLAN / LAN    |
 
@@ -88,13 +88,13 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 
 | Variante                      | Beschreibung                                      | Einsatz                                  |
 | ----------------------------- | ------------------------------------------------- | ---------------------------------------- |
-| **Standalone**                | Kompletter Stack auf einem Raspberry Pi           | Prototyping, Forschung, lokale Steuerung |
+| **Standalone**                | Kompletter Stack auf einem Thin Client           | Prototyping, Forschung, lokale Steuerung |
 | **Distributed Local Network** | Core, Module und UI auf getrennten Geräten        | Skalierte Forschungsumgebungen           |
 | **Hybrid Mode**               | Optionale externe Datenspiegelung (verschlüsselt) | Vergleichende Evaluationen / Backup      |
 
 > | Variant                       | Description                                  | Use Case                             |
 > | ----------------------------- | -------------------------------------------- | ------------------------------------ |
-> | **Standalone**                | Full stack on a single Raspberry Pi          | Prototyping, research, local control |
+> | **Standalone**                | Full stack on a single thin client          | Prototyping, research, local control |
 > | **Distributed Local Network** | Core, modules, and UI on separate devices    | Scaled research setups               |
 > | **Hybrid Mode**               | Optional external data mirroring (encrypted) | Comparative evaluation / backup      |
 
