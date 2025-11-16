@@ -24,19 +24,21 @@ Die UI übersetzt **EnergyState (SSoT)**, **R1–R5‑Entscheidungen** und **Blo
 
 | Ansicht       | Zweck                             | Primäre Elemente                                        |
 | ------------- | --------------------------------- | ------------------------------------------------------- |
-| **Dashboard** | Schnellüberblick, aktuelle Aktion | Decision‑Toast, KPI‑Widget, Health‑Banner               |
-| **Decisions** | Erklärungen & Verlauf             | Why‑Now? Panel, Timeline, Filter                        |
-| **Devices**   | Gerätestatus & Steuerung          | Miner‑Kacheln (Start/Stop/Level), Temperaturen          |
+| **Dashboard** | Schnellüberblick, aktuelle Aktion | Decision-Toast, KPI-Widget, Health-Banner, Research-Toggle |
+| **Decisions** | Erklärungen & Verlauf             | Why-Now? Panel, Timeline, Filter, Explain-Agent-Ausgabe                        |
+| **Devices**   | Gerätestatus & Steuerung          | Miner-Kacheln (Start/Stop/Level), Temperaturen          |
 | **Energy**    | Datenlage & Schwellen             | EnergyState Snapshot, Schwellenanzeige, Preis           |
-| **Settings**  | Regeln & Parameter                | R1–R5‑Parameter, Deadband, Block‑Dauer, Override‑Policy |
+| **Research**  | KPIs / Export / Replay            | Research-Toggle, Export-Panel, Replay-Runner-Status     |
+| **Settings**  | Regeln & Parameter                | R1–R5-Parameter, Deadband, Block-Dauer, Override-Policy, Explain-Prompts |
 
 > | View          | Purpose                      | Primary elements                                            |
 > | ------------- | ---------------------------- | ----------------------------------------------------------- |
-> | **Dashboard** | Quick status, current action | decision toast, KPI widget, health banner                   |
-> | **Decisions** | Explanations & history       | why‑now panel, timeline, filters                            |
-> | **Devices**   | Device status & control      | miner tiles (start/stop/level), temperatures                |
-> | **Energy**    | Data & thresholds            | EnergyState snapshot, thresholds, price                     |
-> | **Settings**  | Rules & parameters           | R1–R5 parameters, deadband, block duration, override policy |
+> | **Dashboard** | Quick status, current action | decision toast, KPI widget, health banner, research toggle |
+> | **Decisions** | Explanations & history       | why-now panel, timeline, filters, explain-agent output |
+> | **Devices**   | Device status & control      | miner tiles (start/stop/level), temperatures |
+> | **Energy**    | Data & thresholds            | EnergyState snapshot, thresholds, price |
+> | **Research**  | KPIs / export / replay       | research toggle, export panel, replay runner status |
+> | **Settings**  | Rules & parameters           | R1–R5 parameters, deadband, block duration, override policy, explain prompts |
 
 ---
 
@@ -46,37 +48,46 @@ Die UI übersetzt **EnergyState (SSoT)**, **R1–R5‑Entscheidungen** und **Blo
 | ---------------------- | --------------------------------------- | ----------------------------------------------------- | --------------------------------- |
 | **Decision‑Toast**     | Sofortige Begründung einer Aktion       | `DecisionEvent{reason, trigger, params, valid_until}` | `info`, `warning`, `alarm`        |
 | **Why‑Now? Panel**     | Details zu **Reason/Trigger/Parameter** | `EnergyState`, `DecisionEvent`, Schwellen             | `ok`, `blocked(R2/R3)`, `pending` |
+| **Explain-Agent Output** | Was-wäre-wenn & Microcopy              | `EnergyState`, `prompt`, `research_mode`              | `simulated`, `live`, `error`      |
 | **Next‑Block Preview** | Erwartete Aktion im nächsten Block      | `forecast_surplus[]`, `deadband_until`                | `continue`, `start`, `stop`       |
-| **Timeline**           | Verlauf der Entscheidungen              | `DecisionEvent[]`                                     | Filter, Paging                    |
+| **Timeline**           | Verlauf der Entscheidungen              | `DecisionEvent[]`, `ExplainSession[]`                 | Filter, Paging                    |
 | **Override‑Chip**      | Manueller Start/Stop/Level mit TTL      | `override{action, ttl}`                               | `active(countdown)`, `expired`    |
 | **KPI‑Widget**         | Trust, Coverage, Flapping               | `kpi_records[]`                                       | Trendpfeile                       |
 | **Health‑Banner**      | Störungen/Warnungen                     | `health{broker, drift, stale}`                        | `ok`, `warn`, `error`             |
+| **Research‑Toggle**    | Opt-in/Opt-out für Forschungsdaten       | `research_state{enabled, last_export}`                | `on`, `off`, `pending`            |
+| **Export/Replay Panel**| KPI-Reports & Log-Replay                | `replay_jobs[]`, `export_queue[]`                     | `idle`, `running`, `error`        |
 
 > | Component              | Purpose                                   | Inputs (binding)                                      | States                            |
 > | ---------------------- | ----------------------------------------- | ----------------------------------------------------- | --------------------------------- |
 > | **Decision toast**     | Immediate rationale for an action         | `DecisionEvent{reason, trigger, params, valid_until}` | `info`, `warning`, `alarm`        |
-> | **Why‑now panel**      | Details for **reason/trigger/parameters** | `EnergyState`, `DecisionEvent`, thresholds            | `ok`, `blocked(R2/R3)`, `pending` |
-> | **Next‑block preview** | Expected action next block                | `forecast_surplus[]`, `deadband_until`                | `continue`, `start`, `stop`       |
-> | **Timeline**           | Decision history                          | `DecisionEvent[]`                                     | filters, paging                   |
+> | **Why-now panel**      | Details for **reason/trigger/parameters** | `EnergyState`, `DecisionEvent`, thresholds            | `ok`, `blocked(R2/R3)`, `pending` |
+> | **Explain-agent output** | What-if & microcopy surface             | `EnergyState`, `prompt`, `research_mode`              | `simulated`, `live`, `error`      |
+> | **Next-block preview** | Expected action next block                | `forecast_surplus[]`, `deadband_until`                | `continue`, `start`, `stop`       |
+> | **Timeline**           | Decision history                          | `DecisionEvent[]`, `ExplainSession[]`                 | filters, paging                   |
 > | **Override chip**      | Manual start/stop/level with TTL          | `override{action, ttl}`                               | `active(countdown)`, `expired`    |
 > | **KPI widget**         | Trust, coverage, flapping                 | `kpi_records[]`                                       | trend arrows                      |
 > | **Health banner**      | Incidents/warnings                        | `health{broker, drift, stale}`                        | `ok`, `warn`, `error`             |
+> | **Research toggle**    | Opt-in/out for research data              | `research_state{enabled, last_export}`                | `on`, `off`, `pending`            |
+> | **Export/replay panel**| KPI reports & log replay                  | `replay_jobs[]`, `export_queue[]`                     | `idle`, `running`, `error`        |
 
 ---
 
 ## Datenbindung / Data Binding
 
-**Quellen:** `EnergyState`, `DecisionEvent`, `kpi_records`, `health` (lokal).
+**Quellen:** `EnergyState`, `DecisionEvent`, `ExplainSession`, `research_state`, `kpi_records`, `health` (lokal).
 **Bindings (Beispiele):**
 
-* Decision‑Toast ← `DecisionEvent.reason/trigger/parameters/valid_until`.
-* Why‑Now? ← `EnergyState` + `R1–R5‑Schwellen` (aus `config`).
-* Preview ← `forecast_surplus[]`, `deadband_until`.
-* KPI‑Widget ← Aggregation aus `kpi_records` (lokal berechnet).
-* Health‑Banner ← `health` (Broker down, Drift, Sensor‑Stale).
+* Decision-Toast ⇄ `DecisionEvent.reason/trigger/parameters/valid_until`.
+* Why-Now? ⇄ `EnergyState` + `R1-R5-Schwellen` (aus `config`).
+* Explain-Agent ⇄ `ExplainSession{prompt, result, ttl}`.
+* Preview ⇄ `forecast_surplus[]`, `deadband_until`.
+* Research-Toggle ⇄ `research_state{enabled, last_export}`.
+* Export/Replay ⇄ `export_queue[]`, `replay_jobs[]`.
+* KPI-Widget ⇄ `kpi_records` (Trend, Coverage, Trust).
+* Health-Banner ⇄ `health` (Broker down, Drift, Sensor-Stale).
 
-> **Sources:** `EnergyState`, `DecisionEvent`, `kpi_records`, `health` (local).
-> **Examples:** toast ← `DecisionEvent`; why‑now ← `EnergyState` + thresholds; preview ← forecast + deadband; KPI ← aggregated local KPIs; health ← local health.
+> **Sources:** `EnergyState`, `DecisionEvent`, `ExplainSession`, `research_state`, `kpi_records`, `health` (local).
+> **Examples:** toast ⇄ `DecisionEvent`; why-now ⇄ `EnergyState` + thresholds; explain-agent ⇄ `ExplainSession`; preview ⇄ forecast + deadband; research toggle ⇄ `research_state`; export/replay ⇄ `export_queue`/`replay_jobs`; KPI ⇄ local KPIs; health ⇄ local health.
 
 ---
 
@@ -136,12 +147,15 @@ sequenceDiagram
 
 * `GET /state` – aktueller **EnergyState**.
 * `GET /timeline?since=…` – **DecisionEvents**.
-* `GET /preview` – Next‑Block‑Prognose.
+* `GET /preview` – Next-Block-Prognose.
 * `POST /override {action, ttl}` – manueller Override.
+* `POST /research/toggle {enabled}` – Opt-in/out Forschung.
+* `POST /research/export` – Exportiert Timeline/KPIs (nur bei Opt-in).
+* `POST /replay` – Startet lokalen Replay-Job (`dataset`, `speed`, `notes`).
 
 **MQTT Topics:**
 
-* `energy/state/#` (Snapshots), `explain/events/#` (DecisionEvents), `miner/state/#`, `miner/cmd/set`.
+* `energy/state/#` (Snapshots), `explain/events/#` (DecisionEvents), `explain/session/#` (Explain-Agent), `research/toggle`, `replay/jobs/#`, `miner/state/#`, `miner/cmd/set`.
 
 > Local REST and MQTT only; no external APIs.
 
@@ -172,7 +186,7 @@ sequenceDiagram
 
 ## Navigations- & Tastenkürzel / Navigation & Shortcuts
 
-* `?` Hilfe/Glossar, `o` Override‑Dialog, `t` Timeline, `p` Preview.
+* `?` Hilfe/Glossar, `o` Override‑Dialog, `t` Timeline, `p` Preview, `r` Research‑Panel.
 * Breadcrumbs: **Dashboard → Decisions → Detail**.
 
 > Shortcuts accelerate expert use; always provide a discoverable help sheet.
@@ -186,15 +200,19 @@ ui/
   components/
     decision_toast/
     why_now_panel/
+    explain_agent_panel/
     next_block_preview/
     override_chip/
     health_banner/
     kpi_widget/
+    research_toggle/
+    export_replay_panel/
   pages/
     dashboard/
     decisions/
     devices/
     energy/
+    research/
     settings/
   adapters/
     rest_client/
@@ -216,6 +234,6 @@ ui/
 
 ## Zusammenfassung / Summary
 
-Die UI macht Entscheidungen **sichtbar, begründet und steuerbar** – im Sinne von **Explainable by Design** und **Local‑First**. Komponenten bleiben schlank, deterministisch gebunden an **EnergyState**, **DecisionEvents** und **R1–R5**.
+Die UI macht Entscheidungen **sichtbar, begründet und steuerbar** – im Sinne von **Explainable by Design** und **Local-First**. Komponenten bleiben schlank, deterministisch gebunden an **EnergyState**, **DecisionEvents**, **ExplainSessions** und **R1–R5**; Research-Funktionen (Toggle, Export, Replay) sind erstklassige Bürger.
 
-> The UI renders decisions **visible, justified, and controllable**—aligned with **explainable by design** and **local‑first**. Components are lean, deterministically bound to **EnergyState**, **DecisionEvents**, and **R1–R5**.
+> The UI renders decisions **visible, justified, and controllable**—aligned with **explainable by design** and **local-first**. Components stay lean, deterministically tied to **EnergyState**, **DecisionEvents**, **ExplainSessions**, and **R1–R5**; research features (toggle, export, replay) are first-class citizens.

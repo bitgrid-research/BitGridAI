@@ -1,4 +1,4 @@
-# 01 – Einführung und Ziele / Introduction and Goals
+﻿# 01 – Einführung und Ziele / Introduction and Goals
 
 > **Kurzüberblick:**
 >
@@ -19,6 +19,10 @@ BitGridAI untersucht, wie lokale Energieautomatisierung **erklärbar, vertrauens
 
 > BitGridAI explores how **local** energy automation can become **explainable, trustworthy, and user-centered**.  
 > It combines Human-Computer Interaction (HCI), renewables, and **transparent on-device AI** into one cohesive approach.
+
+Das System folgt dabei Bitcoin-nahen Leitmotiven: *Bitcoin ist Zeit* (Blocktakt als Automatisierungsrhythmus), *Proof-of-Work* als klare Energieschnittstelle und der Option, Überschussenergie bewusst zu **hodln** statt sofort zu verbrauchen. Entscheidungen balancieren das Blockchain-Trilemma, indem sie Dezentralisierung und Sicherheit vor globale Skalierung stellen.
+
+> Bitcoin-aligned principles guide the system: *Bitcoin is time* (block cadence drives automation), *proof-of-work* provides a clear energy interface, and surplus energy can deliberately be **hodled** instead of consumed. Decisions balance the blockchain trilemma by prioritizing decentralization and security over global scale.
 
 ---
 
@@ -81,18 +85,23 @@ Ein **lokales, KI-gestütztes System**, das …
 ---
 
 ## KPIs / Success Metrics
-- **Netzbezug ↓** um ≥ X % während Versuchsphase.  
-- **Flapping ↓** (Start/Stop-Wechsel) um ≥ Y % durch Deadband.  
-- **Erklärungs-Abdeckung** ≥ Z % (alle Entscheidungen liefern Reason/Trigger/Parameter).  
-- **Vertrauen** (Likert-Skala) ≥ T/5 in Nutzerstudie.  
-- **Thermal-Safety-Events**: 0 ungeplante Übertemperaturen.
+- **Netzbezug ??"** um ?%? X % w�hrend Versuchsphase.  
+- **Flapping ??"** (Start/Stop-Wechsel) um ?%? Y % durch Deadband.  
+- **Erkl�rungs-Abdeckung** ?%? Z % (alle Entscheidungen liefern Reason/Trigger/Parameter).  
+- **Vertrauen** (Likert-Skala) ?%? T/5 in Nutzerstudie.  
+- **Thermal-Safety-Events**: 0 ungeplante ?obertemperaturen.  
+- **Energy?Sats-Effizienz** ?%? E sats/kWh bei aktivem Mining/Hodl.  
+- **Hodl/Export-Traceability**: 100?% der Blockfenster loggen `preferred_path` inkl. Grund.  
+- **PoW-Sicherheitsverletzungen**: 0 ungekl�rte Hashrate-/Effizienzabweichungen (via R2/R3 abgefangen).
 
-> • **Grid import ↓** by ≥ X% during trials;  
-> • **Flapping ↓** by ≥ Y% via deadband;  
-> • **Explanation coverage** ≥ Z%;  
-> • **Trust score** ≥ T/5;  
-> • **Thermal safety**: 0 unexpected over-temperature events.
-
+> ??? **Grid import ??"** by ?%? X% during trials;  
+> ??? **Flapping ??"** by ?%? Y% via deadband;  
+> ??? **Explanation coverage** ?%? Z%;  
+> ??? **Trust score** ?%? T/5;  
+> ??? **Thermal safety**: 0 unexpected over-temperature events;  
+> ??? **Energy?sats efficiency** ?%? E sats/kWh whenever mining/hodl is active;  
+> ??? **Hodl/export traceability**: 100?% of block windows log `preferred_path` + rationale;  
+> ??? **PoW safety violations**: 0 unexplained hashrate/efficiency deviations (caught by R2/R3).
 ---
 
 ## Abgrenzung / Out of Scope
@@ -133,3 +142,4 @@ Ein **lokales, KI-gestütztes System**, das …
 
 ## Navigation
 Weiter mit **[02 – Rahmenbedingungen / Constraints](./02_constraints.md)**, danach **[03 – Kontext / Context](./03_context.md)**.  
+- **Explain-Agent & Research Services:** Siehe [14](./14_explain_agent_and_research.md).

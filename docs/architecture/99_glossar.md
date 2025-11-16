@@ -30,8 +30,14 @@ Es dient dazu, **Konsistenz, Verständlichkeit und Nachvollziehbarkeit** innerha
 | **EnergyStateChangedEvent**                 | Domain‑Event bei Aktualisierung des EnergyState.                                                                      |
 | **DeadbandActivatedEvent**                  | Event, das die Aktivierung eines Haltefensters signalisiert.                                                          |
 | **Erklärschnittstelle (Explainability UI)** | Lokale UI zur Begründung von Entscheidungen und Anzeige der Timeline.                                                 |
+| **Explain-Agent (On-Device LLM)**           | Lokal ausgeführtes Sprachmodell (quantisiert), generiert Microcopy & Was-wäre-wenn-Ausgaben, bleibt read-only zum Regelpfad. |
+| **ExplainSession**                          | Persistentes Artefakt pro Erklärung/Simulation (`prompt`, `result`, `confidence`, `valid_until`), verlinkt zu DecisionEvents. |
 | **Next‑Block Preview**                      | Vorschau der erwarteten Aktion im nächsten Block inkl. Schwellen.                                                     |
 | **Manual Override**                         | Temporäre manuelle Steuerung (Start/Stop/Level) bis Blockende/TTL.                                                    |
+| **Research Toggle**                         | Opt-in/Opt-out-Schalter für Forschung, steuert Export/Replay und UI-Hinweise.                                         |
+| **Research Service**                        | Lokaler Dienst/CLI für `/research/toggle`, `/research/export`, `/replay` inkl. Audit-Logs.                             |
+| **ExportBundle**                            | Verschlüsseltes Paket (Timeline, KPIs, ExplainSessions, Hash) für Forschung/Sharing.                                  |
+| **Replay Runner**                           | Tool, das Parquet/SQLite-Logs deterministisch abspielt (1x–20x) und KPIs vergleicht.                                  |
 | **KPI**                                     | Kennzahlen zur Wirkung (Grid‑Import↓, Flapping↓, Explanation‑Coverage↑, Trust‑Score↑, Thermal‑Incidents=0).           |
 | **Grid‑Import**                             | Netzbezug; KPI zur Reduktion durch lokale Optimierung.                                                                |
 | **Flapping**                                | Häufige Zustandswechsel Start/Stop; zu minimieren via Deadband.                                                       |
@@ -111,6 +117,9 @@ Es dient dazu, **Konsistenz, Verständlichkeit und Nachvollziehbarkeit** innerha
 | **HCI**   | Human‑Computer Interaction                              |
 | **XAI**   | Explainable Artificial Intelligence                     |
 | **R1–R5** | Regelwerk (Start, Autarkie, Thermo, Prognose, Deadband) |
+| **LLM**   | Large Language Model (z. B. Explain-Agent)              |
+| **GGML**  | Quantisiertes LLM-Format (für CPU/GPU, on-device)       |
+| **CLI**   | Command Line Interface                                  |
 
 > | Abbr.     | Meaning                                                 |
 > | --------- | ------------------------------------------------------- |
@@ -135,6 +144,9 @@ Es dient dazu, **Konsistenz, Verständlichkeit und Nachvollziehbarkeit** innerha
 > | **HCI**   | Human‑Computer Interaction                              |
 > | **XAI**   | Explainable Artificial Intelligence                     |
 > | **R1–R5** | Rule set (start, autonomy, thermal, forecast, deadband) |
+> | **LLM**   | Large Language Model (e.g., explain agent)              |
+> | **GGML**  | Quantised LLM format (CPU/GPU friendly)                 |
+> | **CLI**   | Command Line Interface                                  |
 
 ---
 

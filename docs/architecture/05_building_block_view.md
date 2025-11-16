@@ -35,6 +35,24 @@ und trägt durch seine Schnittstellen und Logs zur **Erklärbarkeit und Nachvoll
 | `data/`        | Logging & Simulation                 | Speicherung von Ereignissen, Messdaten und Evaluationsergebnissen  |
 | `docs/`        | Architektur & Forschung              | System- und Forschungsdokumentation (arc42, HCI, Evaluation)       |
 
+### Bitcoin-Leitplanken in den Bausteinen
+
+| Komponente                 | Beitrag zu *Bitcoin ist Zeit / Hodl / PoW*                                                                 |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `core/block_scheduler`     | Erzwingt 10-Minuten-Blockfenster, vergibt `valid_until`-Deadbands und synchronisiert Explainability-Logs. |
+| `modules/miner_controller` | Liefert Proof-of-Work-Telemetrie (Hashrate, J/TH, Temperatur) und koppelt Safety-Signale (R2/R3).         |
+| `core/hodl_policy`         | Bewertet Energiepfade (*Export*, *Heat*, *Hodl*) und schreibt Energy-to-Value-Korrelationen in `data/`.   |
+| `ui/research_panels`       | Visualisiert Blockzeit, Energy→Sats-Effizienz und Trilemma-Trade-offs für Forschung & Betrieb.            |
+| `data/energy_to_value`     | Append-only Nachweis gehodlter kWh/Sats; liefert Input für KPIs und Risiko-Reviews.                       |
+
+> | Component                  | Contribution to *Bitcoin is Time / Hodl / PoW*                                                             |
+> | -------------------------- | ---------------------------------------------------------------------------------------------------------- |
+> | `core/block_scheduler`     | Enforces 10-minute windows, assigns `valid_until` deadbands, syncs explainability logs by block time.      |
+> | `modules/miner_controller` | Streams proof-of-work telemetry (hashrate, J/TH, temperature) and wires in safety signals (R2/R3).         |
+> | `core/hodl_policy`         | Evaluates energy paths (*export*, *heat*, *hodl*) and writes energy-to-value correlations into `data/`.    |
+> | `ui/research_panels`       | Displays block time, energy→sats efficiency, and trilemma trade-offs for research & operations.            |
+> | `data/energy_to_value`     | Append-only record of hodled kWh/sats; feeds KPIs and risk reviews.                                        |
+
 > | Module / Folder | Responsibility                 | Description                                                       |
 > | --------------- | ------------------------------ | ----------------------------------------------------------------- |
 > | `core/`         | Energy flow and decision logic | Manages states, rules, and priorities                             |

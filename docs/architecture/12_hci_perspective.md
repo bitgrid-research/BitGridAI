@@ -14,11 +14,24 @@
 
 ## Motivation
 
-Die Mensch‑Computer‑Interaktion (HCI) ist zentral für BitGridAI.
-Jede Automatisierung bleibt **verständlich**, **rücknehmbar** und **vertrauenswürdig**; Erklärungen sind Teil der Steuerlogik, nicht ein Add‑on.
+Die Mensch-Computer-Interaktion (HCI) ist zentral für BitGridAI.
+Jede Automatisierung bleibt **verständlich**, **rücknehmbar** und **vertrauenswürdig**; Erklärungen sind Teil der Steuerlogik, nicht ein Add-on.
 
 > HCI is central to BitGridAI.
-> Every automation remains **understandable**, **reversible**, and **trustworthy**; explanations are part of the control logic, not an add‑on.
+> Every automation remains **understandable**, **reversible**, and **trustworthy**; explanations are part of the control logic, not an add-on.
+
+---
+
+## Nutzungskontexte & Personas / Usage Contexts & Personas
+
+| Persona | Bedürfnisse | Implikation für UI/HCI |
+| --- | --- | --- |
+| **P1 Prosumer** | Möchte PV-Überschuss transparent sehen, eingreifen können und Sicherheit spüren. | Schwellen visualisieren, Overrides prominent platzieren, Safety-Hinweise mit Runbooks. |
+| **P2 Researcher** | Benötigt Explainability-Daten und Nutzungslogs ohne Cloud. | Timeline-Export, Annotations, Opt-in-Schalter für Forschungsmodus. |
+| **P3 Developer** | Testet Module oder Policies, braucht Debug-Ansicht & Replay. | EnergyState-Snapshots, Replay-Buttons, Feature-Flags via UI. |
+| **P4 Community Member** | Teilt Best Practices und vergleicht KPIs lokal. | KPI-Widgets, Export anonymisierter Reports, Hinweis auf Datenscope. |
+
+> Personas verknüpfen UI-Entscheidungen mit konkreten Erwartungen und stellen sicher, dass Explainability, Overrides und Privacy jeweils den passenden Schwerpunkt erhalten.
 
 ---
 
@@ -26,13 +39,15 @@ Jede Automatisierung bleibt **verständlich**, **rücknehmbar** und **vertrauens
 
 * Entscheidungen **verständlich** darstellen (Reason/Trigger/Parameter, Schwellen sichtbar).
 * **Manuelle Eingriffe** jederzeit ermöglichen (Overrides mit TTL bis Blockende).
-* **Feedback‑Loops** schaffen, die Vertrauen fördern (Bestätigung, Undo, Wirkung).
-* **Forschung** durch **lokale**, **anonymisierte** Nutzungsdaten (Opt‑in) unterstützen.
+* **Feedback-Loops** schaffen, die Vertrauen fördern (Bestätigung, Undo, Wirkung).
+* **Forschung & Evaluation** über lokale, anonymisierte Nutzungsdaten (Opt-in) ermöglichen.
+* **Barrierearme Nutzung** sicherstellen (Keyboard-Flows, Kontraste, „Bewegung reduzieren“).
 
-> - Present decisions with **human‑readable** reasoning (thresholds visible).
-> - Allow **manual overrides** at any time (block‑scoped TTL).
+> - Present decisions with **human-readable** reasoning (thresholds visible).
+> - Allow **manual overrides** at any time (block-scoped TTL).
 > - Create **feedback loops** that foster trust (acknowledge, undo, effects).
-> - Support **research** via **local**, **anonymized**, **opt‑in** usage data.
+> - Support **research** via **local**, **anonymized**, **opt-in** usage data.
+> - Keep the UI **accessible** (keyboard, contrast, reduce-motion respect).
 
 ---
 
@@ -56,27 +71,30 @@ Jede Automatisierung bleibt **verständlich**, **rücknehmbar** und **vertrauens
 
 ---
 
-## UI‑Bausteine / UI Building Blocks
+## UI-Bausteine / UI Building Blocks
 
-| Baustein               | Zweck                                   | Hinweise                           |
-| ---------------------- | --------------------------------------- | ---------------------------------- |
-| **Decision‑Toast**     | Sofortige Erklärung bei Aktion          | 2‑Zeiler; Link zu Details/Timeline |
-| **Why‑Now? Panel**     | Reason/Trigger/Parameter, Schwellen     | zeigt R1–R5‑Status (ok/block)      |
-| **Next‑Block Preview** | Vorschau auf nächsten Block             | „gilt bis Block +D“ (Deadband)     |
-| **Timeline**           | Verlauf von DecisionEvents              | Filter: Regel, Gerät, Zeitraum     |
-| **Override‑Chip**      | Manueller Start/Stop/Level + TTL        | Countdown, Rücksprung zur Policy   |
-| **Health‑Banner**      | Störungen (Broker, Drift, Sensor‑Stale) | Link zu Runbook/Abhilfe            |
-| **KPI‑Widget**         | Trust/Coverage/Flapping‑Metriken        | lokal berechnet, anonymisiert      |
+| Baustein               | Zweck                                         | Hinweise & Instrumentierung                            |
+| ---------------------- | --------------------------------------------- | ------------------------------------------------------- |
+| **Decision-Toast**     | Sofortige Erklärung bei Aktion                | 2-Zeiler, Link zu Details/Timeline, Event 	oast_shown |
+| **Why-Now? Panel**     | Reason/Trigger/Parameter, Schwellen           | Zeigt R1-R5-Status, Snapshot-Button export_reason     |
+| **Next-Block Preview** | Vorschau auf nächsten Block + Confidence      | "gilt bis Block +D", Forecast-Stabilität, Alternativen  |
+| **Timeline**           | Verlauf von DecisionEvents & Overrides        | Filter, Annotationen, Export nach JSON/CSV             |
+| **Override-Chip**      | Manueller Start/Stop/Level + TTL              | Countdown, Policy-Rücksprung, Logging override_enter  |
+| **Health-Banner**      | Störungen (Broker, Drift, Sensor-Stale)       | Severity-Icons, Link zu Runbook, Aggregat für KPIs      |
+| **KPI-Widget**         | Trust/Coverage/Flapping-Metriken              | Lokal berechnet, anonymisiert, Export kpi_report      |
+| **Research-Toggle**    | Opt-in/out für Forschungsdaten, Privacy-Info  | Zeigt Datenscope, Audit-Log 
+esearch_mode_changed     |
 
-> | Component              | Purpose                                 | Notes                             |
-> | ---------------------- | --------------------------------------- | --------------------------------- |
-> | **Decision toast**     | Immediate explanation on action         | 2‑liner; link to details/timeline |
-> | **Why‑now panel**      | Reason/trigger/parameters, thresholds   | shows R1–R5 status (ok/blocked)   |
-> | **Next‑block preview** | Preview of next block                   | “valid until block +D” (deadband) |
-> | **Timeline**           | History of DecisionEvents               | filters: rule, device, time range |
-> | **Override chip**      | Manual start/stop/level + TTL           | countdown, return to policy       |
-> | **Health banner**      | Incidents (broker, drift, sensor‑stale) | link to runbook/remedy            |
-> | **KPI widget**         | Trust/coverage/flapping metrics         | computed locally, anonymized      |
+> | Component              | Purpose                                    | Notes                                         |
+> | ---------------------- | ------------------------------------------- | --------------------------------------------- |
+> | **Decision toast**     | Immediate explanation on action             | 2-liner; link to details/timeline + event log |
+> | **Why-now panel**      | Reason/trigger/parameters, thresholds       | Shows R1-R5 status, allows snapshot export    |
+> | **Next-block preview** | Preview of next block incl. confidence      | Highlights forecast stability & alternatives  |
+> | **Timeline**           | History of DecisionEvents & overrides       | Filters, annotations, export                  |
+> | **Override chip**      | Manual start/stop/level + TTL               | Countdown, reverts to policy, logs enter/exit |
+> | **Health banner**      | Broker/drift/sensor issues                  | Runbook link, severity icon                   |
+> | **KPI widget**         | Trust/coverage/flapping metrics             | Computed locally, anonymized                  |
+> | **Research toggle**    | Opt-in/out for research logging             | Shows scope, audit trail                      |
 
 ---
 
@@ -114,35 +132,58 @@ Jede Automatisierung bleibt **verständlich**, **rücknehmbar** und **vertrauens
 
 ## Nutzerreisen / User Journeys
 
-**J1 – Normaler Start (R1)**
+**J1 – Warum läuft der Miner jetzt? (R1/R4)**
 
-1. Toast „Start (R1) …“, 2) Why‑Now‑Panel mit Schwellen, 3) Timeline‑Eintrag, 4) Preview für nächsten Block.
-   **Erfolg:** Explanation‑Latency < 2 s; Nutzer versteht Aktion.
+1. Decision-Toast „Start (R1) – PV > 1.5 kW“.
+2. Why-Now-Panel zeigt Reason/Trigger, Schwellen und Forecast-Confidence.
+3. Timeline speichert Event + EnergyState Snapshot (Export-Button).
+4. Next-Block Preview visualisiert Deadband und Alternativpfade (Hodl/Export).
+5. KPI-Widget aktualisiert Explanation Coverage (Hook).
 
-> **J1 – Normal start (R1)**
+**Erfolg:** Nutzer versteht Reason/Trigger und kann ggf. einen Stop auslösen; Event zählt als „erklärt“.
+
+> **J1 – Why is the miner running now?**
 >
-> 1. toast “Start (R1) …”, 2) why‑now panel with thresholds, 3) timeline entry, 4) next‑block preview.
->    **Success:** explanation latency < 2 s; user understands the action.
+> Toast + why-now panel + timeline snapshot + preview + KPI hook = transparency & control.
 
-**J2 – Safety‑Stop (R3)**
+**J2 – Safety-Stop (R3)**
 
-1. Alarm‑Banner „Übertemperatur“, 2) Stop, 3) Hinweis auf Wiederaufnahmebedingung (T_RESUME), 4) Link zu Runbook.
-   **Erfolg:** Thermal‑Incidents = 0.
+1. Alarm-Banner „Übertemperatur“ mit Runbook-Link.
+2. System führt sofort Stop aus, ignoriert Deadband.
+3. Hinweis zeigt Wiederaufnahmebedingung (T_RESUME) + Countdown.
+4. Timeline markiert R3 over_temp, KPI-Widget zählt Safety-Hit.
+
+**Erfolg:** Thermal-Incidents = 0; Nutzer erkennt Ursache & nächste Schritte.
 
 > **J2 – Safety stop (R3)**
 >
-> 1. alarm banner “over temperature”, 2) stop, 3) show resume condition (T_RESUME), 4) link to runbook.
->    **Success:** thermal incidents = 0.
+> Banner + forced stop + resume condition + runbook -> zero incidents.
 
 **J3 – Manueller Override**
 
-1. Override‑Chip „Start (00:45)“, 2) Countdown, 3) Timeline „manual_override“, 4) automatische Rückkehr zur Policy.
-   **Erfolg:** Override‑Latency < 300 ms; klares Ende am Block.
+1. Override-Chip „Start (00:45)“ blendet TTL ein.
+2. Countdown läuft, Timeline zeigt manual_override.
+3. System protokolliert override_enter/exit (KPI „manual control share“).
+4. Automatische Rückkehr zur Policy am Blockende; Next-Block Preview zeigt Normalzustand.
+
+**Erfolg:** Override-Latenz < 300 ms; Ende klar kommuniziert.
 
 > **J3 – Manual override**
 >
-> 1. override chip “Start (00:45)”, 2) countdown, 3) timeline “manual_override”, 4) automatic return to policy.
->    **Success:** override latency < 300 ms; clear end at block boundary.
+> Chip + countdown + timeline + rollback = safe temporary control.
+
+**J4 – Was-wäre-wenn? Analyse**
+
+1. Nutzer öffnet Preview-Tab und simuliert geänderte Schwellen (z. B. Surplus 1.2 kW).
+2. UI berechnet hypothetische Entscheidung und kennzeichnet sie als „Simulation – nicht aktiv“.
+3. Export-Button legt JSON im lokalen 
+esearch/-Ordner ab.
+
+**Erfolg:** Prosumer gewinnt Transparenz ohne Policy-Anpassung; Researcher erhält reproduzierbare Artefakte.
+
+> **J4 – What-if analysis**
+>
+> Preview simulation + export keeps the active policy untouched while producing evidence.
 
 ---
 
@@ -158,19 +199,21 @@ Jede Automatisierung bleibt **verständlich**, **rücknehmbar** und **vertrauens
 
 ---
 
-## Studienaufbau / Study Design (A–C)
+## Studienaufbau / Study Design (A–D)
 
-| Phase               | Ziel                     | Methode                   | Artefakte                  |
-| ------------------- | ------------------------ | ------------------------- | -------------------------- |
-| **A – Elicitation** | Mental Models, Begriffe  | Interviews, Card‑Sort     | Glossar, UI‑Mikrotexte     |
-| **B – Prototyping** | UI‑Flüsse, Erklärbarkeit | Think‑Aloud, Wizard‑of‑Oz | Wireframes, Decision‑Toast |
-| **C – Feldstudie**  | Reales Nutzungsverhalten | In‑situ Logging (Opt‑in)  | Timeline‑Logs, KPI‑Bericht |
+| Phase               | Ziel                      | Methode                      | Artefakte                         |
+| ------------------- | ------------------------- | ---------------------------- | --------------------------------- |
+| **A – Elicitation** | Mental Models, Begriffe   | Interviews, Card‑Sort        | Glossar, UI‑Mikrotexte            |
+| **B – Prototyping** | UI-Flüsse, Erklärbarkeit  | Think-Aloud, Wizard-of-Oz    | Wireframes, Decision-Toast        |
+| **C – Feldstudie**  | Reales Nutzungsverhalten  | In-situ Logging (Opt-in)     | Timeline-Logs, KPI-Bericht        |
+| **D – Replay Tests**| Reproduzierbarkeit & a11y | Log-Replay, Heuristische Eval| Annotierte Screencasts, Findings  |
 
-> | Phase               | Goal                       | Method                    | Artifacts                  |
-> | ------------------- | -------------------------- | ------------------------- | -------------------------- |
-> | **A – Elicitation** | Mental models, terminology | interviews, card sort     | glossary, UI microcopy     |
-> | **B – Prototyping** | UI flows, explainability   | think‑aloud, wizard‑of‑oz | wireframes, decision toast |
-> | **C – Field Study** | Real usage behaviour       | in‑situ logging (opt‑in)  | timeline logs, KPI report  |
+> | Phase               | Goal                        | Method                       | Artifacts                        |
+> | ------------------- | -------------------------- | ---------------------------- | -------------------------------- |
+> | **A – Elicitation** | Mental models, terminology | interviews, card sort        | glossary, UI microcopy           |
+> | **B – Prototyping** | UI flows, explainability   | think-aloud, wizard-of-oz    | wireframes, decision toast       |
+> | **C – Field Study** | Real usage behaviour       | in-situ logging (opt-in)     | timeline logs, KPI report        |
+> | **D – Replay Tests**| Reproducibility & a11y     | log replay, heuristic review  | annotated screen casts, findings |
 
 ---
 
@@ -196,15 +239,19 @@ Jede Automatisierung bleibt **verständlich**, **rücknehmbar** und **vertrauens
 
 ## Accessibility (a11y) – Minimalset / Minimal Set
 
-* Tastaturbedienbarkeit (Fokus‑Reihenfolge, sichtbarer Fokus).
-* ARIA‑Labels für Toasts/Banner/Chips.
+* Tastaturbedienbarkeit (Fokus-Reihenfolge, sichtbarer Fokus).
+* ARIA-Labels für Toasts/Banner/Chips.
 * Kontrast ≥ WCAG AA, skalierbare Schrift.
 * „Bewegung reduzieren“ respektieren.
+* Live-Regionen für Statusmeldungen und Pausier-Option für Auto-Updates.
+* Keine reine Farbkommunikation: Icon + Text + Pattern (insb. Health-Banner).
 
 > - Keyboard operability (focus order, visible focus).
 > - ARIA labels for toasts/banners/chips.
 > - Contrast ≥ WCAG AA, scalable type.
 > - Respect “reduce motion”.
+> - Live regions + pause auto updates.
+> - Never rely on color alone; pair with icon/text/pattern.
 
 ---
 

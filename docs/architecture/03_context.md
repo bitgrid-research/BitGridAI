@@ -27,14 +27,14 @@ Es verbindet physische Energieflüsse mit digitalen Entscheidungsprozessen, um *
 | Rolle                       | Beschreibung                                                                  |
 | --------------------------- | ----------------------------------------------------------------------------- |
 | **Nutzer / Prosumer**       | Betreibt PV, Speicher und flexible Lasten; kann Vorgaben/Overrides setzen.    |
-| **BitGrid Core**            | Lokale Entscheidungslogik (R1–R5), BlockScheduler, Logging, Explainability.   |
+| **BitGrid Core + Explain-Agent** | Lokale Entscheidungslogik (R1–R5), BlockScheduler, Logging, Explainability & On-Device-LLM-Microcopy.   |
 | **Externe Systeme**         | Home Assistant, Wechselrichter, Zähler/Sensorik, Speicher, Mining-Controller. |
 | **Forschende / Entwickler** | Analysieren Verhalten, evaluieren Erklärbarkeit, entwickeln Module.           |
 
 > | Role                         | Description                                                             |
 > | ---------------------------- | ----------------------------------------------------------------------- |
 > | **User / Prosumer**          | Operates PV, storage and flexible loads; can set preferences/overrides. |
-> | **BitGrid Core**             | Local decision logic (R1–R5), block scheduler, logging, explainability. |
+> | **BitGrid Core + Explain Agent** | Local decision logic (R1–R5), block scheduler, logging, explainability, on-device LLM microcopy. |
 > | **External Systems**         | Home Assistant, inverters, meters/sensors, storage, mining controllers. |
 > | **Researchers / Developers** | Analyze behavior, evaluate explainability, build modules.               |
 
@@ -50,7 +50,8 @@ Es verbindet physische Energieflüsse mit digitalen Entscheidungsprozessen, um *
 | **Energiespeicher**           | API / MQTT             | SoC, Lade-/Entladeleistung, Prioritäten.                  |
 | **Mining-Controller**         | LAN / API              | Leistungsstufen, Start/Stop, Temperatur-/Lüfterdaten.     |
 | **Preis/Forecast (optional)** | Datei / lokaler Dienst | Tarife, PV-/Lastprognosen für R1/R4 (lokal verarbeitet).  |
-| **Erklär-UI**                 | WebSocket / REST       | Visualisierung von Energieflüssen & Entscheidungsgründen. |
+| **Erklär-UI**                 | WebSocket / REST       | Visualisierung von Energieflüssen & Entscheidungsgründen; Research-Toggle. |
+| **Research/Replay Node**      | Datei / CLI / SSH      | Auslesen von Logs, KPI-Berechnung, Was-wäre-wenn-Replay. |
 
 > | System                    | Interface        | Purpose                                                      |
 > | ------------------------- | ---------------- | ------------------------------------------------------------ |
@@ -60,7 +61,8 @@ Es verbindet physische Energieflüsse mit digitalen Entscheidungsprozessen, um *
 > | **Energy Storage**        | API / MQTT       | SoC, charge/discharge power, priorities.                     |
 > | **Mining Controller**     | LAN / API        | Power levels, start/stop, temp/fan data.                     |
 > | **Price/Forecast (opt.)** | File / local svc | Tariffs and PV/load forecasts for R1/R4 (processed locally). |
-> | **Explainability UI**     | WebSocket / REST | Energy flow & rationale visualization.                       |
+> | **Explainability UI**     | WebSocket / REST | Energy flow & rationale visualization, research toggle.      |
+> | **Research/Replay Node**  | File / CLI       | Extract logs, run KPIs, what-if replay locally.              |
 
 ---
 
@@ -69,8 +71,9 @@ Es verbindet physische Energieflüsse mit digitalen Entscheidungsprozessen, um *
 ```mermaid
 flowchart TB
   U["User / Prosumer"]
-  UI["Local Explanation UI"]
+  UI["Local Explanation UI\n+ Research Toggle"]
   CORE["BitGrid Core"]
+  EXP["Explain-Agent\n(On-device LLM)"]
   HA["Home Assistant"]
   INV["Inverter"]
   STOR["Storage"]
@@ -80,6 +83,8 @@ flowchart TB
 
   U --> UI
   UI --> CORE
+  CORE --> EXP
+  EXP --> UI
   CORE --> HA
   CORE --> INV
   CORE --> STOR
@@ -88,6 +93,7 @@ flowchart TB
   STOR --> MTR
   MINER --> MTR
   MTR --> RES
+  UI --> RES
 ```
 
 ---
@@ -96,14 +102,14 @@ flowchart TB
 
 * **Innerhalb von BitGridAI / Inside BitGridAI**
 
-  * **Decision & Rule Engine** (R1–R5), **BlockScheduler** (10-Min-Takt).
-  * **EnergyState (SSoT)**, **KPI/Logging**, **Explainability-Layer**.
+  * **Decision & Rule Engine** (R1–R5), **BlockScheduler** (10-Min-Takt), **Explain-Agent** (On-Device-LLM).
+  * **EnergyState (SSoT)**, **KPI/Logging**, **Explainability-Layer**, **Research-Toggle**.
   * **Lokale Adapter** für PV, Speicher, Zähler, Mining (MQTT/REST/Modbus).
 
 * **Außerhalb von BitGridAI / Outside BitGridAI**
 
   * Physische Hardware (PV, Speicher, Miner), fremde UIs, Home Assistant Core.
-  * Externe Forschungstools/Statistik-Pakete.
+  * Externe Forschungstools/Statistik-Pakete, optionale Research/Replay-Workstations.
   * Optionale lokale Dienste (Tarif/Forecast), sofern nicht im Core gehostet.
 
 > **Inside BitGridAI:**
@@ -141,10 +147,12 @@ flowchart TB
 * **Surplus** – berechnete Größe (Erzeugung – Last ± Speicherstrategie).
 * **BlockInterval (10 min)** – Zeitscheibe für Entscheidungen & Deadband.
 * **Decision** – Ergebnis der Regelprüfung inkl. **Reason/Trigger/Parameter**.
-* **Events** – `EnergyStateChangedEvent`, `DecisionEvent`, `DeadbandActivatedEvent`.
+* **ResearchToggleState** – Opt-in/Opt-out für Forschungsexporte und Replay.
+* **ExplainSession** – Kontext für Was-wäre-wenn-Simulationen (Prompt, Ergebnis, Gültigkeit).
+* **Events** – `EnergyStateChangedEvent`, `DecisionEvent`, `DeadbandActivatedEvent`, `ResearchToggleChanged`, `ExplainSessionCreated`.
 
-> **Objects**: EnergyState, Surplus, BlockInterval, Decision.
-> **Events**: EnergyStateChangedEvent, DecisionEvent, DeadbandActivatedEvent.
+> **Objects**: EnergyState, Surplus, BlockInterval, Decision, ResearchToggleState, ExplainSession.
+> **Events**: EnergyStateChangedEvent, DecisionEvent, DeadbandActivatedEvent, ResearchToggleChanged, ExplainSessionCreated.
 
 ---
 
@@ -155,10 +163,10 @@ flowchart TB
   * `energy/state/#`, `miner/cmd/set`, `miner/state/#`, `explain/events/#`.
 * **REST Endpunkte** (lokal):
 
-  * `POST /decisions`, `GET /state`, `GET /timeline`, `POST /override`.
+  * `POST /decisions`, `GET /state`, `GET /timeline`, `POST /override`, `POST /research/toggle`.
 * **Datei-/DB-Ablage**:
 
-  * Append-only Logs (Parquet/SQLite), versionierte YAML-Konfiguration.
+  * Append-only Logs (Parquet/SQLite), versionierte YAML-Konfiguration, Replay-Bundles (`data/replay/*.zip`).
 
 > MQTT, REST and local storage provide stable, auditable contracts for integrations.
 

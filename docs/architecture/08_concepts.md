@@ -84,6 +84,46 @@ Nachhaltigkeit ist kein Nebeneffekt, sondern Bestandteil der Systemlogik. BitGri
 
 ---
 
+## Bitcoin ist Zeit / Bitcoin as Time
+
+BitGridAI interpretiert Bitcoin als **zeitbasierte Energieaustauschschicht**: Durch den 10-Minuten-Blocktakt entsteht ein natürlicher Rhythmus für lokale Automatisierung. Entscheidungen orientieren sich daher an Blockfenstern und nutzen Deadbands, um unnötige Schaltzyklen zu vermeiden.
+
+> BitGridAI treats Bitcoin as a **time-denominated energy exchange layer**. The 10-minute block cadence becomes a natural rhythm for local automation, so decisions align with block windows and apply deadbands to avoid unnecessary switching.
+
+**Kernmechanismen:**
+
+* Block-aligned Scheduler (10-Minuten-Fenster für Start/Stop)
+* Zeithomogene Explainability-Logs (Entscheidungen nach Blockzeit)
+* Korrelation von Energieprofilen mit Mempool-/Difficulty-Signalen
+
+> **Core mechanisms:**
+>
+> * Block-aligned scheduler (10-minute start/stop windows)
+> * Time-homogeneous explainability logs (decisions tagged by block time)
+> * Correlating energy profiles with mempool/difficulty signals
+
+---
+
+## Hodl als Energiespeicher / Hodl as Energy Reserve
+
+Überschussenergie kann in Form von **selbst geminten Satoshis „gehodlt“** werden. Das System bietet Policies, die entscheiden, ob Energie sofort als Wärme/Verbrauch genutzt oder in Bitcoin umgewandelt und langfristig gehalten wird.
+
+> Surplus energy may be “hodled” as self-mined satoshis. Policies decide whether energy is spent immediately (heat/consumption) or converted into bitcoin as a long-term local reserve.
+
+**Kernmechanismen:**
+
+* Energy-to-Value Tracking (kWh → sats) für Transparenz
+* Wallet-agnostische Accounting-Schnittstelle (nur Hash-/Proof-Logs)
+* Forschungskanal für Vergleich „hodl vs. sofortige Nutzung“
+
+> **Core mechanisms:**
+>
+> * Energy-to-value tracking (kWh → sats) for transparency
+> * Wallet-agnostic accounting interface (hash/proof logs only)
+> * Research hooks comparing “hodl vs. immediate consumption”
+
+---
+
 ## Opportunitätskosten / Energy Opportunity Cost
 
 BitGridAI berücksichtigt energetische **Opportunitätskosten** als konzeptionelles Prinzip: jede Kilowattstunde PV-Überschuss kann **exportiert** oder **lokal genutzt** werden (z. B. Mining, Wärme, Speicherung). Die Steuerlogik bewertet diese Alternativen transparent und regelbasiert, ohne Black-Box-Optimierer.
@@ -103,8 +143,28 @@ BitGridAI berücksichtigt energetische **Opportunitätskosten** als konzeptionel
 > * Comparing local value vs. export revenue (implicitly via price/thresholds in R1)
 > * Giving priority to autonomy and safety (R2/R3 over opportunity cost)
 > * Incorporating time preference via block cadence & deadband (stability over reactive flapping)
-> * Optional “energy path policies”: *export-first*, *local-first*, *adaptive*
-> * Transparent UI feedback: showing which option was **not** chosen — and why
+> * Optional „energy path policies“: *export-first*, *local-first*, *adaptive*
+> * Transparent UI feedback: showing which option was **not** chosen – and why
+
+---
+
+## Blockchain-Trilemma / Blockchain Trilemma
+
+BitGridAI orientiert sich am **Trilemma aus Dezentralisierung, Sicherheit und Skalierbarkeit**. Lokale Steuerung bevorzugt Dezentralisierung & Sicherheit, akzeptiert bewusst begrenzte Skalierung (nur Haushaltslast) und nutzt modulare Schnittstellen statt globaler Cloud-Kontrolle.
+
+> BitGridAI follows the **decentralization–security–scalability trilemma**. Local control favors decentralization and security, deliberately limiting scale to the household scope while exposing modular interfaces instead of global cloud control.
+
+**Kernmechanismen:**
+
+* Lokale Validierung aller Sensor-/Aktordaten
+* Modulgrenzen mit klar definierten APIs statt zentraler Broker
+* Messgrößen für Sicherheit (Thermal, Deadband) höher priorisiert als Durchsatz
+
+> **Core mechanisms:**
+>
+> * Local validation of all sensor/actuator data
+> * Module boundaries with clear APIs instead of central brokers
+> * Safety metrics (thermal, deadband) take precedence over throughput
 
 ---
 
@@ -127,6 +187,26 @@ Sicherheit wird nicht durch Cloud-Dienste, sondern durch **lokale Isolation und 
 > * No external data traffic
 > * Optional encrypted logs
 > * Fallback mode in case of network loss
+
+---
+
+## Proof-of-Work als Energieschnittstelle / Proof-of-Work as Energy Interface
+
+Proof-of-Work transformiert elektrische Energie in einen unumkehrbaren Hash-Beitrag. BitGridAI behandelt Miner daher wie **deterministische Energiesenken** mit messbarem Nutzen (Hashrate) und strengen Sicherheitsgrenzen.
+
+> Proof-of-Work turns electrical energy into an irreversible hash contribution. BitGridAI thus treats miners as **deterministic energy sinks** with measurable benefit (hash rate) and strict safety limits.
+
+**Kernmechanismen:**
+
+* Telemetrie für Hashrate, Effizienz (J/TH) und Temperatur im Explainability-Layer
+* R3/R4-Regeln überwachen thermische Sicherheit und Forecast-Pläne für PoW-Lasten
+* Fail-safe Shutdowns (Stop → Safe) koppeln Mining-Prozesse an Energieverfügbarkeit
+
+> **Core mechanisms:**
+>
+> * Telemetry for hash rate, efficiency (J/TH), and temperature in the explainability layer
+> * R3/R4 rules supervise thermal safety and forecast plans for PoW loads
+> * Fail-safe shutdowns (stop → safe) tie mining processes to energy availability
 
 ---
 

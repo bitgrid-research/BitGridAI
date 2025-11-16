@@ -31,12 +31,13 @@ Ziel ist ein Gleichgewicht zwischen **lokaler Kontrolle, Nachhaltigkeit und Inte
 | **Offline-Fähigkeit** | Grundfunktionen bleiben ohne Internet verfügbar (Steuerung, Logging, UI). |
 | **Hardwareunabhängigkeit** | Keine Bindung an proprietäre Smart-Home-Hubs oder Cloud-APIs. |
 | **Single Source of Truth** | **EnergyState** als zentraler Zustand (Messwerte, Prognosen, Preis/SoC, Temperaturen). |
-| **Deterministische Regelengine** | **R1–R5** (Start, Autarkie-Schutz, Thermo-Schutz, Prognose-Start, Deadband) sind deterministisch; kein Black-Box-ML im Regelpfad. |
+| **Deterministische Regelengine** | **R1‑R5** (Start, Autarkie-Schutz, Thermo-Schutz, Prognose-Start, Deadband) sind deterministisch; kein Black-Box-ML im Regelpfad. |
+| **Explain-Agent (On-Device LLM)** | Microcopy, Was-wäre-wenn-Simulationen und HCI-Studien laufen lokal auf quantisierten Modellen; keine Cloud-Abfragen. |
 | **Block-Scheduler** | Entscheidungen im **10-Min-Takt** (BlockInterval) zur Stabilität und Anti-Flapping. |
 | **Explainability by Design** | Jede Aktion liefert **Reason/Trigger/Parameter** und erzeugt ein DecisionEvent. |
 | **Safety & Fail States** | Klare Grenzwerte (SoC/Temperatur) → **Stop → Safe**; kein OC/UV von Mining-HW. |
-| **Logging & KPIs** | Append-only Log lokal; Reproduzierbarkeit über versionierte Konfiguration (YAML). |
-| **Security/Privacy** | Keine Telemetrie nach außen; minimale offenen Ports; lokale Auth (z. B. HA-User). |
+| **Logging & KPIs** | Append-only Log lokal; Reproduzierbarkeit über versionierte Konfiguration (YAML); Research-Toggle steuert Export. |
+| **Security/Privacy** | Keine Telemetrie nach außen; minimale offenen Ports; lokale Auth (z. B. HA-User); Research-Exports nur via Opt-in. |
 
 > | Area | Description |
 > | --- | --- |
@@ -46,12 +47,13 @@ Ziel ist ein Gleichgewicht zwischen **lokaler Kontrolle, Nachhaltigkeit und Inte
 > | **Offline Capability** | Core functions (control, logging, UI) work without internet. |
 > | **Hardware Independence** | No reliance on proprietary hubs or cloud APIs. |
 > | **Single Source of Truth** | **EnergyState** centralizes metering, forecasts, prices/SoC, temperatures. |
-> | **Deterministic Rule Engine** | **R1–R5** are deterministic; no black-box ML in the control loop. |
+> | **Deterministic Rule Engine** | **R1‑R5** are deterministic; no black-box ML in the control loop. |
+> | **Explain Agent (on-device LLM)** | Microcopy and what-if simulations run locally on quantized models; no cloud calls. |
 > | **Block Scheduler** | Decisions align to a **10-minute rhythm** for stability and anti-flapping. |
 > | **Explainability by Design** | Every action includes **reason/trigger/parameters** and emits a DecisionEvent. |
 > | **Safety & Fail States** | Hard limits (SoC/temperature) → **stop → safe**; no OC/UV of mining HW. |
-> | **Logging & KPIs** | Append-only local log; reproducible, versioned YAML configuration. |
-> | **Security/Privacy** | No outbound telemetry; minimal open ports; local auth (e.g., HA users). |
+> | **Logging & KPIs** | Append-only local log; reproducible, versioned YAML configuration; research toggle gates exports. |
+> | **Security/Privacy** | No outbound telemetry; minimal open ports; local auth (e.g., HA users); research exports require opt-in. |
 
 ---
 
@@ -63,7 +65,7 @@ Ziel ist ein Gleichgewicht zwischen **lokaler Kontrolle, Nachhaltigkeit und Inte
 | **Nachvollziehbarkeit** | Architektur- & Entscheidungsdoku obligatorisch (ADR in `09_design_decisions.md`). |
 | **Kooperationen** | Offene Schnittstellen für Partner (Messgeräte, Zähler, Prosumer-Communities). |
 | **Ressourcenbegrenzung** | Budget/Zeitrahmen limitiert → Fokus auf MVP + Kernfunktionen. |
-| **Konfigurationsdisziplin** | Änderungen nur über versionierte YAMLs; reproducible builds. |
+| **Konfigurationsdisziplin** | Änderungen nur über versionierte YAMLs; reproducible builds; Explain-Agent-Prompts versioniert. |
 
 > | Area | Description |
 > | --- | --- |
@@ -71,7 +73,7 @@ Ziel ist ein Gleichgewicht zwischen **lokaler Kontrolle, Nachhaltigkeit und Inte
 > | **Traceability** | Architecture & decision documentation mandatory (ADRs in `09_design_decisions.md`). |
 > | **Collaboration** | Open interfaces for partners (meters, sensors, prosumer groups). |
 > | **Resource Constraints** | Limited budget/time → focus on MVP and core features. |
-> | **Config Discipline** | Changes via versioned YAML; reproducible builds. |
+> | **Config Discipline** | Changes via versioned YAML; reproducible builds; explain-agent prompts under version control. |
 
 ---
 
@@ -122,14 +124,14 @@ Ziel ist ein Gleichgewicht zwischen **lokaler Kontrolle, Nachhaltigkeit und Inte
 | **User Autonomy** | Manuelle Override-Möglichkeiten mit klarer Rücknahme-Logik (Timeout/Next-Block). |
 | **Erklärungspflicht** | Jede Entscheidung erzeugt eine **lesbare Begründung** (Reason, Trigger, Parameter). |
 | **Vorhersage-Feedback** | UI zeigt „**Was passiert im nächsten Block?**“ inkl. Start/Stop-Schwellen. |
-| **Audit-Trail** | Zeitachse mit DecisionEvents, EnergyState-Snapshots und KPI-Hinweisen. |
+| **Audit-Trail** | Zeitachse mit DecisionEvents, EnergyState-Snapshots, Was-wäre-wenn-Simulationen und KPI-Hinweisen. |
 
 > | Area | Description |
 > | --- | --- |
 > | **User Autonomy** | Manual overrides with clear rollback logic (timeout/next block). |
 > | **Explanation Duty** | Each decision includes **human-readable rationale**. |
 > | **Predictive Feedback** | UI previews “**what happens next block**” incl. thresholds. |
-> | **Audit Trail** | Timeline of DecisionEvents, EnergyState snapshots, KPI hints. |
+> | **Audit Trail** | Timeline of DecisionEvents, EnergyState snapshots, what-if simulations, KPI hints. |
 
 ---
 

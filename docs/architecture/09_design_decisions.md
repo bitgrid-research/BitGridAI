@@ -41,6 +41,8 @@ Alle ADRs enthalten: **Kontext → Entscheidung → Begründung → Alternativen
 | **015** | Safety‑First: Stop → Safe                     | Accepted | Thermik/SoC‑Grenzen                    | Harte Limits (**R3/R2**) stoppen sofort; Deadband ignoriert; Hysterese für Resume                     | Hardware‑Schutz, Vertrauen                 | Weiche Limits                      | Verfügbarkeit < Sicherheit; klar in UI                |
 | **016** | Schnittstellen‑Vertrag (MQTT & REST)          | Accepted | Interoperabilität                      | MQTT: `energy/state/#`, `miner/cmd/set`, `explain/events/#`; REST: `/state`, `/timeline`, `/override` | Klare, testbare Contracts                  | Ad‑hoc Endpunkte                   | Leichte Integration, bessere Tests                    |
 | **017** | KPIs als Zielgröße                            | Accepted | Wirkung messbar machen                 | KPIs im Core loggen, in Studien auswerten                                                             | Messbare Wirkung statt Behauptung          | Informell                          | Klare Erfolgsdefinition, kontinuierliches Tracking    |
+| **018** | Energy-Path-Policies (Export/Heat/Hodl)        | Accepted | Überschuss flexibel nutzen             | Policy-Set (*export-first*, *heat-first*, *hodl-first*, *adaptive*) + Logging (`energy_path_decision`) | Transparente Opportunitätskosten, Forschung| Ad-hoc Umschalten                  | Zusätzliche Telemetrie/KPIs, blockweise Nachvollziehbarkeit |
+| **019** | Proof-of-Work Telemetrie & Hash-Nachweis       | Accepted | Mining als sichere Energiesenke        | Miner-Controller streamt Hashrate/J·TH/Temperatur + periodische Hashproben, R2/R3 verknüpfen          | Sicherheit, Compliance, Forschung          | „Black-Box“-Miner ohne Messwerte   | Mehr Sensorik, klare Audit-Spur, Stop→Safe bei Abweichung |
 
 ---
 
@@ -64,7 +66,9 @@ Alle ADRs enthalten: **Kontext → Entscheidung → Begründung → Alternativen
 | 014 | Privacy by default              | Accepted | GDPR, trust                     | No outbound telemetry; local auth                      | Minimal attack surface              | Opt‑in telemetry        | Local monitoring                     |
 | 015 | Safety first                    | Accepted | Thermal/SoC                     | Hard stops (R3/R2); ignore deadband; hysteresis resume | HW protection, trust                | Soft limits             | Availability < safety                |
 | 016 | Interface contract              | Accepted | Interop                         | MQTT topics + REST endpoints                           | Clear, testable                     | Ad‑hoc endpoints        | Easier integration, tests            |
-| 017 | KPIs as objectives              | Accepted | Measurable impact               | Log in core; evaluate in studies                       | Evidence‑driven                     | Informal                | Clear success tracking               |
+| 017 | KPIs as objectives              | Accepted | Measurable impact               | Log in core; evaluate in studies                       | Evidence-driven                     | Informal                | Clear success tracking               |
+| 018 | Energy-path policies            | Accepted | Flexible surplus allocation     | Policy set (*export/heat/hodl/adaptive*) + `energy_path_decision` logging | Transparent opportunity costs, research | Ad-hoc toggles          | Extra telemetry/KPIs; per-block traceability |
+| 019 | PoW telemetry & hash proof      | Accepted | Mining as deterministic load    | Miner streams hashrate/J·TH/temp + periodic hash samples linked to R2/R3 | Safety, compliance, research        | Treat miner as black box | More instrumentation; Stop→Safe on anomalies |
 
 ---
 

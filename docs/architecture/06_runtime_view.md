@@ -183,6 +183,34 @@ sequenceDiagram
 
 ---
 
+## Bitcoin‑aligned Runtime Extensions
+
+### Energy Path / Hodl Decision Flow
+
+1. **Energy Context** generiert für jedes Blockfenster (`block_id`) Kandidaten der Energiepfade *Export*, *Heat* und *Hodl*.
+2. **Hodl Policy** (im Core) bewertet Opportunitätskosten, Deadband und Zeitpräferenz und protokolliert `energy_path_decision` in `data/energy_to_value`.
+3. **DecisionEvent** erhält zusätzliche Felder (`preferred_path`, `rejected_path`, `sats_per_kWh`), sodass UI und Forschung klar sehen, warum Hodl gewählt oder verworfen wurde.
+4. **UI Research Panels** zeigen Blockzeit, sats/kWh‑Effizienz sowie „was wäre passiert“-Alternativen.
+
+> Every runtime tick therefore exposes the Bitcoin‑specific trade-off rather than hiding it in the miner adapter.
+
+### Proof‑of‑Work Telemetry Loop
+
+1. **Miner Controller** liefert Hashrate, Effizienz (J/TH), Temperatur und ggf. Hash‑Proben an **Energy Context**.
+2. **R2/R3** verknüpfen diese Telemetrie mit Autarkie- und Thermo-Schutz; Abweichungen vom Zielbereich erzeugen Warnungen + aktiven Leistungs-Limiter.
+3. **Explainability/KPI Logger** persistieren `pow_hash_sample` + Energieverbrauch als Nachweis lokaler PoW-Nutzung.
+4. **Risk Monitor** prüft regulatorische Limits (Lautstärke, Zeitfenster) und setzt ggf. `stop → safe` über den Blockscheduler.
+
+### Blockchain‑Trilemma Guardrails
+
+* **Dezentralisierung**: Jede Entscheidung wird lokal (ohne Cloud) gefällt; Remote-Kommandos laufen via `POST /override` mit Audit-Log.
+* **Sicherheit**: Safety-Pfade (R2/R3) dürfen Bitcoin-Last jederzeit stoppen; Proof-of-Work Telemetrie ist Pflicht.
+* **Skalierung**: Der 10-Minuten-Takt limitiert bewusst globale Skalierungsambitionen, liefert aber deterministische Stabilität für den Haushalt.
+
+> Runtime behavior makes the trilemma explicit: decentralization + security prioritized, scalability scoped to the household.
+
+---
+
 ## Runtime‑Kontrakte / Runtime Contracts
 
 **MQTT Topics (Beispiele / Examples)**

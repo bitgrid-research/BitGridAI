@@ -34,6 +34,8 @@ Dieses Kapitel beschreibt identifizierte **Risiken** und bestehende **technische
 | **UI‑Missverständnis**             | Erklärungen falsch interpretiert                          | Niedrig            | Mittel     | HCI‑Tests, Glossar‑Tooltips, „Warum?“-Dialog, A11y (ADR‑004)                        |
 | **Sicherheitslücken (Ports)**      | Unnötige Dienste/Ports offen                              | Niedrig            | Hoch       | **Default‑Deny** Firewall, Port‑Cheatsheet, mTLS optional (ADR‑014)                 |
 | **Modbus/Adapter‑Instabilität**    | Inverter/Smart‑Meter Timings                              | Mittel             | Mittel     | Adapter‑Timeouts, Circuit‑Breaker, Caching Frames                                   |
+| **Hodl-Fehlparametrisierung**      | Falsches Energy-Path-Weighting → Liquiditäts-/Opportunitykosten | Mittel        | Mittel     | KPI-Governance (Energy→Sats, Traceability), Policy-Simulation, Double-Entry-Logs (ADR‑005/009) |
+| **PoW-Regulatorik/Telemetrielücke**| Fehlende Hash-/Effizienzbelege → Compliance- oder Netzrisiken   | Niedrig        | Hoch       | Pflicht-Telemetrie & Hash-Sampling (ADR‑015), Alerts aus S12, exportierbarer Audit-Trail        |
 
 > | Risk                     | Description                                      | Probability | Impact | Mitigation                                                                    |
 > | ------------------------ | ------------------------------------------------ | ----------- | ------ | ----------------------------------------------------------------------------- |
@@ -47,7 +49,8 @@ Dieses Kapitel beschreibt identifizierte **Risiken** und bestehende **technische
 > | **UI misinterpretation** | Rationale misunderstood                          | Low         | Medium | HCI tests, glossary tooltips, “Why?” dialog, a11y (ADR‑004)                   |
 > | **Open ports**           | Unneeded services exposed                        | Low         | High   | Default‑deny firewall, port cheatsheet, mTLS optional (ADR‑014)               |
 > | **Adapter instability**  | Inverter/smart‑meter timing                      | Medium      | Medium | Timeouts, circuit breaker, frame caching                                      |
-
+> | **Hodl policy misconfiguration** | Wrong energy-path weighting ? liquidity/opportunity loss | Medium | Medium | KPIs (energy?sats, traceability), policy simulation, double-entry logs (ADR-005/009) |
+> | **PoW compliance/telemetry gap** | Missing hash/efficiency proof ? regulatory or grid risk | Low | High | Mandatory telemetry + hash sampling (ADR-015), alerts from S12, exportable audit trail |
 ---
 
 ## Technische Schulden / Technical Debt
@@ -139,6 +142,8 @@ Dieses Kapitel beschreibt identifizierte **Risiken** und bestehende **technische
 | Low SoC            | S7                  | ADR‑015     |
 | Flapping           | S8                  | ADR‑009     |
 | UI‑Missverständnis | S1/S4               | ADR‑004/010 |
+| Hodl-Traceability  | S11                 | ADR‑005/009 |
+| PoW-Telemetrie     | S12                 | ADR‑015     |
 
 ---
 

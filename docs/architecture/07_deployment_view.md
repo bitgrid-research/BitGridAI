@@ -26,44 +26,45 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 ## Zielarchitektur / Target Architecture
 
 ```
-+------------------------------------------------------+
-|                    Lokales Netzwerk                  |
-|------------------------------------------------------|
-|  [ PV-Wechselrichter ]     [ Speicher ]              |
-|          ↓                        ↓                  |
-|        [ modules/ ] → [ core/ ] ← [ MQTT Broker ]    |
-|                  ↓             ↓                     |
-|            [ data/ ]       [ ui/ ]                   |
-|                  ↓                                   |
-|          [ Nutzer / Dashboard ]                |
-+------------------------------------------------------+
++----------------------------------------------------------------+
+|                        Lokales Netzwerk                        |
+|----------------------------------------------------------------|
+|  [ PV-Wechselrichter ]   [ Speicher ]      [ Mining / Flexible ]|
+|          ↓                     ↓                   ↓            |
+|        [ modules/ ] → [ core + Explain-Agent ] ← [ MQTT Broker ]|
+|                  ↓             ↓                ↓              |
+|         [ data/ + replay ]   [ ui/ ]        [ research node ]  |
+|                  ↓                                   ↓         |
+|          [ Nutzer / Dashboard ]          [ Research Toggle ]   |
++----------------------------------------------------------------+
 ```
 
 > ```
-> +------------------------------------------------------+
-> |                    Local Network                     |
-> |------------------------------------------------------|
-> |  [ PV Inverter ]           [ Storage Unit ]          |
-> |          ↓                        ↓                  |
-> |        [ modules/ ] → [ core/ ] ← [ MQTT Broker ]    |
-> |                  ↓             ↓                     |
-> |            [ data/ ]       [ ui/ ]                   |
-> |                  ↓                                   |
-> |          [ User / Local Dashboard ]                  |
-> +------------------------------------------------------+
+> +----------------------------------------------------------------+
+> |                         Local Network                          |
+> |----------------------------------------------------------------|
+> |  [ PV inverter ]       [ storage ]        [ miner/flex load ]  |
+> |          ↓                     ↓                   ↓           |
+> |        [ modules/ ] → [ core + explain agent ] ← [ MQTT broker ]|
+> |                  ↓             ↓                ↓             |
+> |      [ data + replay ]      [ ui/ ]        [ research node ]  |
+> |                  ↓                                   ↓        |
+> |        [ user / dashboard ]             [ research toggle ]   |
+> +----------------------------------------------------------------+
 > ```
 
 ---
 
 ## Hardwareumgebung / Hardware Environment
 
-| Komponente                              | Beschreibung                    | Energiebezug           |
-| --------------------------------------- | ------------------------------- | ---------------------- |
-| **Controller**   | Führt Core, Module und UI aus   | Lokale Versorgung / PV |
-| **PV-Wechselrichter**                   | Liefert Leistungsdaten          | Erzeugt PV-Energie     |
-| **Energiespeicher**     | Puffert Überschussenergie       | Lokale Kapazität       |
-| **Mining Node / Flexibler Verbraucher** | Dynamischer Energieverbraucher  | Regelbar über Core     |
-| **Nutzergerät (Tablet, Browser)**       | Zugriff auf Erklärschnittstelle | WLAN / LAN lokal       |
+| Komponente                              | Beschreibung                                        | Energiebezug           |
+| --------------------------------------- | --------------------------------------------------- | ---------------------- |
+| **Controller / Edge Node**              | Führt Core, Explain-Agent (On-Device-LLM) und UI aus| Lokale Versorgung / PV |
+| **PV-Wechselrichter**                   | Liefert Leistungsdaten                              | Erzeugt PV-Energie     |
+| **Energiespeicher**                     | Puffert Überschussenergie                           | Lokale Kapazität       |
+| **Mining Node / Flexible Last**         | Dynamischer Energieverbraucher                      | Regelbar über Core     |
+| **Research/Replay Terminal**            | Offline-Analyse, Export, KPI-Reports                | Lokale Versorgung      |
+| **Nutzergerät (Tablet, Browser)**       | Zugriff auf Erklärschnittstelle & Research-Toggle   | WLAN / LAN lokal       |
 
 > | Component                             | Description                    | Power Source        |
 > | ------------------------------------- | ------------------------------ | ------------------- |
@@ -77,13 +78,14 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 
 ## Softwareumgebung / Software Environment
 
-| Komponente              | Technologie                                    | Beschreibung                        |
-| ----------------------- | ---------------------------------------------- | ----------------------------------- |
-| **Core**                | Python                                         | Regel-Engine und Entscheidungslogik |
-| **Module**              | Python / MQTT                                  | Adapter für Geräteintegration       |
-| **Datenbank**           | SQLite / JSON                                  | Lokales Logging und Replay          |
-| **Erklärschnittstelle** | Svelte / Tailwind oder Home Assistant Frontend | Visualisierung und Feedback         |
-| **Betriebssystem**      | Raspberry Pi OS / Linux                        | Lokaler Edge-Betrieb                |
+| Komponente              | Technologie                                    | Beschreibung                                   |
+| ----------------------- | ---------------------------------------------- | ---------------------------------------------- |
+| **Core**                | Python                                         | Regel-Engine, BlockScheduler, Hodl-Policies    |
+| **Explain-Agent**       | On-Device LLM / Transformers (quantisiert)     | Microcopy & What-if-Erklärungen, läuft offline |
+| **Module**              | Python / MQTT / Modbus                         | Adapter für Geräteintegration                  |
+| **Datenhaltung**        | SQLite / Parquet / JSON                        | Logging, KPIs, Replay Runner                   |
+| **Erklärschnittstelle** | Svelte/Tailwind oder Home Assistant Frontend   | Visualisierung, Overrides, Research-Toggle     |
+| **Betriebssystem**      | Raspberry Pi OS / Debian / Ubuntu Server       | Lokaler Edge-Betrieb                           |
 
 > | Component                 | Technology                                   | Description                     |
 > | ------------------------- | -------------------------------------------- | ------------------------------- |
@@ -100,8 +102,8 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 | Variante                      | Beschreibung                                      | Einsatz                                  |
 | ----------------------------- | ------------------------------------------------- | ---------------------------------------- |
 | **Standalone**                | Kompletter Stack auf einem Thin Client           | Prototyping, Forschung, lokale Steuerung |
-| **Distributed Local Network** | Core, Module und UI auf getrennten Geräten        | Skalierte Forschungsumgebungen           |
-| **Hybrid Mode**               | Optionale externe Datenspiegelung (verschlüsselt) | Vergleichende Evaluationen / Backup      |
+| **Distributed Local Network** | Core, Explain-Agent, Module und UI auf getrennten Geräten | Skalierte Forschungsumgebungen, A/B-Tests |
+| **Hybrid Mode**               | Optionale externe Datenspiegelung (verschlüsselt)       | Vergleichende Evaluationen / Backup      |
 
 > | Variant                       | Description                                  | Use Case                             |
 > | ----------------------------- | -------------------------------------------- | ------------------------------------ |
@@ -115,8 +117,8 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 
 * **Protokolle:** MQTT, REST, WebSocket (ausschließlich lokal)
 * **Sicherheit:** TLS optional, lokale Firewall aktiv
-* **Adressierung:** statisch (z. B. `192.168.178.50`)
-* **Datenschutz:** keine Telemetrie, keine Cloud-Synchronisation
+* **Adressierung:** statisch (z. B. `192.168.178.50`), mDNS für UI und Research-Panel
+* **Datenschutz & Forschung:** Research-Toggle steuert Export; keine Cloud-Synchronisation; Replay-Files bleiben lokal
 
 > - **Protocols:** MQTT, REST, WebSocket (local only)
 > - **Security:** optional TLS, local firewall active
