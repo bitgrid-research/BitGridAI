@@ -1,58 +1,129 @@
 # 01 – Einführung und Ziele / Introduction and Goals
 
-## Zweck / Purpose
-BitGridAI erforscht, wie lokale Energieautomatisierung **erklärbar, vertrauenswürdig und nutzerzentriert** gestaltet werden kann.  
-Das Projekt verbindet Human-Computer Interaction, erneuerbare Energie und transparente KI zu einem einheitlichen Systemansatz.
+> **Kurzüberblick / TL;DR**  
+> BitGridAI erforscht lokale, erklärbare Energieautomatisierung ohne Cloud.  
+> PV-Überschuss wird als flexible Last (u. a. Bitcoin-Mining) genutzt.  
+> Fokus: Transparenz, Vertrauen, Sicherheit und Wiederholbarkeit.
 
-> BitGridAI explores how local energy automation can become explainable, trustworthy, and user-centered.  
-> It connects Human-Computer Interaction, renewable energy, and transparent AI principles into one cohesive design.
+---
+
+## Zweck / Purpose
+BitGridAI untersucht, wie lokale Energieautomatisierung **erklärbar, vertrauenswürdig und nutzerzentriert** gestaltet werden kann. Das Projekt verbindet Human-Computer Interaction (HCI), erneuerbare Energien und **transparente, lokal laufende KI** zu einem einheitlichen Systemansatz.
+
+> BitGridAI explores how **local** energy automation can become **explainable, trustworthy, and user-centered**.  
+> It combines Human-Computer Interaction (HCI), renewables, and **transparent on-device AI** into one cohesive approach.
 
 ---
 
 ## Ziele / Goals
-1. **Erklärbare Automatisierung** in Energiesystemen ermöglichen  
-2. **Nutzervertrauen und Kontrolle** durch verständliche Oberflächen fördern  
-3. **Lokal und transparent** arbeiten – ohne Cloud-Abhängigkeit  
-4. **Erneuerbare Überschussenergie** für flexible Berechnungen nutzen (z. B. Bitcoin-Mining)  
-5. **Offene Forschungskooperationen** fördern  
+1. **Erklärbare Automatisierung** (XAI) in Energiesystemen ermöglichen.  
+2. **Nutzervertrauen & Kontrolle** durch klare Oberflächen und Begründungen stärken.  
+3. **Lokal & transparent** arbeiten – ohne Cloud-Abhängigkeit (Local-First).  
+4. **PV-Überschuss** für flexible Berechnungen nutzen (z. B. Bitcoin-Mining).  
+5. **Offene Forschung & Zusammenarbeit** fördern (Daten, Tools, Templates).
 
-> 1. Enable explainable automation in energy systems  
-> 2. Foster user trust and control through clear interfaces  
-> 3. Operate locally and transparently without cloud dependency  
-> 4. Utilize renewable surplus energy for flexible computation (e.g., Bitcoin mining)  
-> 5. Encourage open research collaboration  
+> 1. Enable **explainable automation** (XAI) in energy systems.  
+> 2. Foster **user trust & control** via clear UIs and rationales.  
+> 3. Operate **locally and transparently**—no cloud lock-in.  
+> 4. Utilize **PV surplus** for flexible computation (e.g., Bitcoin mining).  
+> 5. Encourage **open collaboration** (data, tools, templates).
 
 ---
 
 ## Qualitätsziele / Quality Goals
 | Qualität | Beschreibung |
-|-----------|---------------|
-| **Transparenz** | Jede Entscheidung ist nachvollziehbar |
-| **Autonomie** | Lokaler Betrieb, keine Cloudbindung |
-| **Nachhaltigkeit** | Nutzung erneuerbarer Energiequellen |
-| **Vertrauen** | Erklärbare Logik und vorhersehbare Rückmeldungen |
-| **Reproduzierbarkeit** | Offene Daten und modulare Architektur |
+|---|---|
+| **Transparenz** | Jede Entscheidung ist nachvollziehbar (Reason, Trigger, Parameter). |
+| **Autonomie** | Vollständig lokaler Betrieb; keine externen Abhängigkeiten. |
+| **Nachhaltigkeit** | Effiziente Nutzung erneuerbarer Energie & Lastverschiebung. |
+| **Vorhersagbarkeit** | Deterministische Regeln, Deadband/Anti-Flapping. |
+| **Sicherheit** | Thermo-Schutz und Fail-States (Stop → Safe). |
+| **Reproduzierbarkeit** | Offene Daten, modulare Architektur, klare KPIs. |
 
 > | Quality | Description |
-> |----------|-------------|
-> | Transparency | Users can see and understand every decision |
-> | Autonomy | Operates locally without cloud lock-in |
-> | Sustainability | Uses renewable energy efficiently |
-> | Trust | Provides explainable logic and feedback |
-> | Reproducibility | Open data and modular architecture |
+> |---|---|
+> | **Transparency** | Every decision is explainable (reason, trigger, parameters). |
+> | **Autonomy** | Fully local stack; no external dependencies. |
+> | **Sustainability** | Efficient use of renewables and load shifting. |
+> | **Predictability** | Deterministic rules, deadband/anti-flapping. |
+> | **Safety** | Thermal protection and fail states (stop → safe). |
+> | **Reproducibility** | Open data, modular architecture, clear KPIs. |
+
+---
+
+## MVP – Definition / MVP – Definition
+Ein **lokales, KI-gestütztes System**, das …
+- PV-Überschuss erkennt und **Mining als flexible Last** ansteuert.  
+- Entscheidungen **erklärt** (Explainability-Layer in der UI).  
+- **R1–R5** konsequent anwendet:  
+  - **R1 Startregel** (Überschuss + Preis),  
+  - **R2 Autarkie-Schutz** (SoC),  
+  - **R3 Thermo-Schutz** (Temperatur),  
+  - **R4 Prognose-Start** (Forecast-Stabilität),  
+  - **R5 Deadband / Anti-Flapping** (zeitbasierte Stabilität).  
+- vollständig **lokal** läuft (Home Assistant, Rule-Engine, On-device-LLM).  
+- **Block-aligned** denkt (10-Min-Takt) für robuste Schaltentscheidungen.
+
+> A **local, AI-assisted system** that …  
+> • detects PV surplus and **drives mining as a flexible load**;  
+> • **explains** its decisions (UI explainability layer);  
+> • applies **R1–R5** (start, autonomy, thermal, forecast, deadband);  
+> • runs **entirely on-prem** (Home Assistant, rule engine, on-device LLM);  
+> • uses a **10-minute block rhythm** for stable scheduling.
+
+---
+
+## KPIs / Success Metrics
+- **Netzbezug ↓** um ≥ X % während Versuchsphase.  
+- **Flapping ↓** (Start/Stop-Wechsel) um ≥ Y % durch Deadband.  
+- **Erklärungs-Abdeckung** ≥ Z % (alle Entscheidungen liefern Reason/Trigger/Parameter).  
+- **Vertrauen** (Likert-Skala) ≥ T/5 in Nutzerstudie.  
+- **Thermal-Safety-Events**: 0 ungeplante Übertemperaturen.
+
+> • **Grid import ↓** by ≥ X% during trials;  
+> • **Flapping ↓** by ≥ Y% via deadband;  
+> • **Explanation coverage** ≥ Z%;  
+> • **Trust score** ≥ T/5;  
+> • **Thermal safety**: 0 unexpected over-temperature events.
+
+---
+
+## Abgrenzung / Out of Scope
+✘ Trading, Wallets, Custody  
+✘ Profitmaximierung  
+✘ Cloud-Services  
+✘ Hardware-Modifikation gefährlicher Komponenten
+
+> ✘ Trading/wallet custody, ✘ profit maximization, ✘ cloud services, ✘ hazardous hardware modifications.
 
 ---
 
 ## Stakeholder
-- Forschende (HCI, KI-Ethik, Energiesysteme)  
-- Entwickler (Open Source)  
-- Prosumer / Hausbesitzer 
-- Akademische Institutionen  
+- **Forschende** (HCI, Explainability, Energiesysteme)  
+- **Entwickler*innen** (Open Source)  
+- **Prosumers / Hausbesitzer**  
+- **Akademische Institutionen**
 
-> - Researchers (HCI, AI Ethics, Energy Systems)  
-> - Developers (Open Source)  
-> - Energy Prosumers / Homeowners  
-> - Academic Institutions
+> • **Researchers** (HCI, explainability, energy)  
+> • **Developers** (open source)  
+> • **Prosumers / homeowners**  
+> • **Academic institutions**
 
+---
 
-* [02 Rahmenbedingungen / Constraints](./02_constraints.md)
+## Annahmen / Assumptions
+- PV-Anlage vorhanden; Messung von Erzeugung/Verbrauch möglich.  
+- Miner/Last **fernsteuerbar** (API/Relais).  
+- Home-Assistant-fähige Sensorik/Zähler verfügbar.  
+- Kein externer Cloud-Zwang; Internet optional.
+
+> PV system in place; metering available.  
+> Controllable flexible load (API/relay).  
+> Home-Assistant compatible sensors/meters.  
+> No mandatory cloud; internet optional.
+
+---
+
+## Navigation
+Weiter mit **[02 – Rahmenbedingungen / Constraints](./02_constraints.md)**, danach **[03 – Kontext / Context](./03_context.md)**.  
+Siehe außerdem **[12 – HCI Perspective](./12_hci_perspective.md)** für UX/XAI-Leitlinien und **[99 – Glossar](./99_glossar.md)**.

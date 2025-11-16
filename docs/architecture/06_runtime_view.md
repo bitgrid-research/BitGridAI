@@ -1,30 +1,34 @@
 # 06 – Laufzeitsicht / Runtime View
 
+**Kurzüberblick / TL;DR**
+BitGridAI verarbeitet Energie- und Zustandsdaten **block-basiert (10 min)**, entscheidet deterministisch per **R1–R5**, steuert Aktoren und liefert **Erklärungen in Echtzeit**. Logging & KPIs laufen lokal – ohne Cloud.
+
+> **TL;DR (EN)**
+> BitGridAI operates on a **10‑minute block cadence**, evaluates deterministic rules **R1–R5**, actuates devices, and emits **real‑time explanations**. Logging & KPIs are local—no cloud.
+
+---
+
 ## Überblick / Overview
 
-Dieses Kapitel beschreibt die **Laufzeitsicht (Runtime View)** von BitGridAI – also, wie die Systemkomponenten zur Laufzeit interagieren. Der Fokus liegt auf Datenflüssen, Kommunikationsmustern und der Interaktion zwischen Energiequellen, Steuerlogik und Benutzeroberfläche.
+Dieses Kapitel beschreibt die **Laufzeitsicht (Runtime View)** – also, wie Komponenten zur Laufzeit interagieren: Datenfluss, Kommunikationsmuster und die Interaktion zwischen Energiequellen, Steuerlogik und Benutzeroberfläche.
 
-> This chapter describes the **Runtime View** of BitGridAI, focusing on how system components interact during execution. It highlights data flow, communication patterns, and the interaction between energy sources, control logic, and user interface.
+> This chapter describes the **Runtime View**—how components interact during execution: data flow, communication patterns, and the interplay between energy sources, control logic, and the user interface.
 
 ---
 
 ## Hauptszenario / Main Runtime Scenario
 
-**Beispiel:** PV-Anlage erzeugt Energie → BitGrid Core bewertet Überschuss → Mining Node wird aktiviert.
+**Beispiel:** PV erzeugt Überschuss → BitGrid Core bewertet → Mining wird gestartet (R1) und erklärt.
 
-1. **PV-Sensor meldet aktuellen Ertrag** über MQTT-Topic `sensor/pv_power`.
-2. **BitGrid Core** empfängt die Nachricht und berechnet die aktuelle Lastverteilung.
-3. Bei Überschuss > 1.5 kW wird die **flexible Last** (z. B. Mining Node) über eine lokale REST-API oder MQTT-Nachricht aktiviert.
-4. Entscheidung wird im **Decision Log** protokolliert und an die **Erklärschnittstelle** übermittelt.
-5. Nutzer sieht im UI eine Erklärung: *„PV-Ertrag über Schwelle – Mining gestartet.“*
+1. **PV‑Sensor** publiziert aktuelle Leistung (`p_pv`) via MQTT (z. B. `sensor/pv_power`).
+2. **Energy Context** aktualisiert den **EnergyState (SSoT)** und berechnet `surplus`.
+3. **BlockScheduler** (10 min) triggert die **Rule Engine (R1–R5)**.
+4. Bei `surplus ≥ 1.5 kW` und `price ≤ 18 ct` (Beispiel) entscheidet **R1 → start**.
+5. **Actuation** sendet `start` / `set_power(level)` an den **Mining‑Controller**.
+6. **Explainability** erzeugt Begründung (**Reason/Trigger/Parameter**) und **DecisionEvent**.
+7. **UI** zeigt: „PV über Schwelle – **Mining gestartet** (R1). Deadband bis Block +2 (R5).“
 
-> **Example:** PV system produces surplus → BitGrid Core evaluates → mining node activated.
->
-> 1. PV sensor publishes via MQTT topic `sensor/pv_power`.
-> 2. BitGrid Core processes data and calculates power balance.
-> 3. If surplus > 1.5 kW → REST call or MQTT message triggers flexible load.
-> 4. Decision is logged and sent to the explanation interface.
-> 5. User sees explanation: *“PV power above threshold – mining activated.”*
+> **Example:** PV produces surplus → Core evaluates → mining starts (R1) with an explanation.
 
 ---
 
@@ -32,73 +36,170 @@ Dieses Kapitel beschreibt die **Laufzeitsicht (Runtime View)** von BitGridAI –
 
 ```mermaid
 flowchart LR
-    PV[PV-Sensor] -->|MQTT| Core[BitGrid Core]
-    Battery[Batteriespeicher] -->|Statusdaten| Core
-    Core -->|REST / MQTT| Miner[Mining Node]
-    Core -->|Log + Erklärung| UI[Erklärschnittstelle]
-    UI -->|Feedback| Core
+    subgraph Sources
+      PV[PV / Inverter]
+      SM[Smart Meter]
+      ES[Energy Storage]
+      PR[Price/Forecast (local)]
+    end
+    EC[Energy Context\nEnergyState (SSoT)]
+    RE[Rule Engine\nR1–R5]
+    BS[BlockScheduler\n10‑min cadence]
+    AC[Actuation\nMiner API / Relais]
+    UI[Explainability UI\nWS/REST]
+    LOG[Logging & KPI\nSQLite/Parquet]
+
+    PV -->|MQTT/Modbus| EC
+    SM -->|MQTT/SML| EC
+    ES -->|MQTT/API| EC
+    PR -->|file/local svc| EC
+    EC --> RE
+    BS --> RE
+    RE --> AC
+    RE --> UI
+    RE --> LOG
+    EC --> LOG
+    UI -->|override| RE
 ```
 
-**Beschreibung:**
+**Beschreibung / Description**: Messquellen → **EnergyState** → **Regeln** (R1–R5) im Blocktakt → **Actuation**/**UI**/**Logs**.
 
-* **PV** und **Batterie** liefern Echtzeitdaten an den **Core**.
-* **Core** entscheidet über Aktivierung von Lasten (z. B. Mining Node) über REST oder MQTT.
-* **UI** zeigt Entscheidungen und erlaubt Nutzerfeedback.
-* Entscheidungen und Energiezustände werden lokal gespeichert.
+---
 
-> **Description:**
->
-> * **PV** and **Battery** provide real-time data to the **Core**.
-> * **Core** manages activation of loads (e.g., mining) via REST or MQTT.
-> * **UI** explains actions and allows user feedback.
-> * All data and logs are stored locally.
+## Blocktakt & Entscheidungszyklus / Block Cadence & Decision Cycle
+
+1. **Tick**: `block_id = floor(epoch / 600)`; Scheduler triggert Evaluierung.
+2. **Safety‑Checks**: **R3** (Temperatur), **R2** (SoC) haben Vorrang → ggf. **stop**.
+3. **Stabilität**: **R5 Deadband** hält Zustand bis `valid_until = block_id + D`.
+4. **Start‑Kandidaten**: **R1** (Überschuss+Preis) und optional **R4** (Forecast‑Stabilität).
+5. **Actuation** ausführen, **DecisionEvent**+Erklärung publizieren, **Logs** schreiben.
+6. **UI‑Preview**: „Was passiert im **nächsten Block**?“ inkl. Schwellen.
+
+> Hard safety first (R3) → autonomy (R2) → stability (R5) → start (R1/R4).
+
+---
+
+## Alternative Szenarien / Alternate Scenarios
+
+### A) Safety‑Stop (R3)
+
+* **Trigger**: `t_miner ≥ T_MAX`.
+* **Aktion**: sofort **stop**, Deadband ignorieren, UI meldet Übertemperatur.
+* **Recovery**: Resume erst bei `t_miner ≤ T_RESUME`.
+
+### B) Deadband‑Hold (R5)
+
+* **Trigger**: Wechsel nahe Schwelle; Zustand wird für `D` Blöcke gehalten.
+* **Aktion**: **hold** bis `valid_until`; nur **R2/R3** dürfen unterbrechen.
+
+### C) Manueller Override
+
+* **Trigger**: User setzt `override(start/stop, ttl)` in UI.
+* **Aktion**: Core respektiert Override bis **Blockende**/TTL, loggt Reason `manual_override`.
+* **Rebound**: automatische Rückkehr zur Policy, UI zeigt Countdown.
 
 ---
 
 ## Nebenprozesse / Secondary Processes
 
-| Prozess                   | Beschreibung                                                                    |
-| ------------------------- | ------------------------------------------------------------------------------- |
-| **Logging-Service**       | Zeichnet Systementscheidungen und Statusänderungen auf.                         |
-| **Energy Forecaster**     | Prognostiziert PV-Erträge auf Basis historischer Daten.                         |
-| **Health Monitor**        | Überwacht Hardwarezustand und Sensorverfügbarkeit.                              |
-| **User Feedback Handler** | Nimmt Nutzerentscheidungen (z. B. Override) entgegen und bewertet Auswirkungen. |
-
-> | Process                   | Description                                                           |
-> | ------------------------- | --------------------------------------------------------------------- |
-> | **Logging Service**       | Records all decisions and system state changes.                       |
-> | **Energy Forecaster**     | Predicts PV yield based on historical data.                           |
-> | **Health Monitor**        | Monitors hardware health and sensor availability.                     |
-> | **User Feedback Handler** | Captures user actions and integrates their effects into system logic. |
+| Prozess / Process     | Beschreibung / Description                                             |
+| --------------------- | ---------------------------------------------------------------------- |
+| **Logging‑Service**   | Zeichnet EnergyState, Decisions, Events (append‑only) auf.             |
+| **Energy Forecaster** | Lokale PV/Last‑Prognosen; liefert Eingang für **R4**.                  |
+| **Health Monitor**    | Watchdog für Sensor‑Stale/Adapter‑Fehler; kann **hold/stop** auslösen. |
+| **Feedback Handler**  | Bewertet User‑Feedback/Overrides und protokolliert Effekte auf KPIs.   |
 
 ---
 
-## Ereignisflussdiagramm / Event Flow Diagram
+## Ereignisfluss‑Sequenzen / Event Flow Sequences
+
+### 1) Normaler Start (R1)
 
 ```mermaid
 sequenceDiagram
-    participant PV as PV-System
-    participant Core as BitGrid Core
-    participant Miner as Mining Node
-    participant UI as Erklärschnittstelle
+    participant PV as PV/System
+    participant EC as Energy Context
+    participant BS as BlockScheduler
+    participant RE as Rule Engine (R1–R5)
+    participant AC as Actuation (Miner)
+    participant UI as Explainability UI
 
-    PV->>Core: publish(pv_power)
-    Core->>Core: evaluate_surplus()
-    alt Überschuss > 1.5 kW
-        Core->>Miner: activate() (via REST or MQTT)
-        Core->>UI: log(decision + reason)
-    else Keine Aktion
-        Core->>UI: display("Keine Aktivierung")
+    PV->>EC: publish(p_pv)
+    EC->>EC: update EnergyState (surplus)
+    BS->>RE: tick(block_id)
+    RE->>RE: check R3/R2/R5
+    alt surplus ≥ 1.5 kW & price ≤ 18 ct
+        RE->>AC: start/set_power
+        RE->>UI: DecisionEvent + rationale
+        RE->>EC: (read‑only)
+    else no start
+        RE->>UI: rationale("no action")
     end
-    UI->>Core: user_feedback(approve/deny)
 ```
+
+### 2) Safety‑Stop (R3)
+
+```mermaid
+sequenceDiagram
+    participant S as Sensors
+    participant EC as Energy Context
+    participant RE as Rule Engine
+    participant AC as Actuation
+    participant UI as UI
+
+    S->>EC: publish(t_miner)
+    EC->>RE: state(t_miner ≥ T_MAX)
+    RE->>AC: stop()
+    RE->>UI: DecisionEvent(reason="R3 over temp")
+```
+
+---
+
+## Runtime‑Kontrakte / Runtime Contracts
+
+**MQTT Topics (Beispiele)**
+
+* `energy/state/#` – publizierter **EnergyState** Snapshots.
+* `miner/cmd/set` – Kommandos (`start|stop|set_power`).
+* `miner/state/#` – Rückmeldungen (`level`, `t_miner`, `fan`).
+* `explain/events/#` – **DecisionEvents** & Gründe.
+
+**REST Endpunkte (lokal)**
+
+* `GET /state` – aktueller **EnergyState**.
+* `GET /timeline?since=…` – Decisions/Events.
+* `GET /preview` – erwartete Aktion im nächsten Block.
+* `POST /override {action, ttl}` – manueller Override.
+* `POST /decisions` – (optional) Injection für Replays/Tests.
+
+---
+
+## Timing & Performance Ziele / Targets
+
+| Ziel              | Vorgabe                             |
+| ----------------- | ----------------------------------- |
+| State‑Propagation | < 500 ms vom Sensor bis EnergyState |
+| Decision‑Latency  | < 300 ms nach Block‑Tick            |
+| UI‑Erklärung      | < 200 ms nach DecisionEvent         |
+| Log‑Persistenz    | < 100 ms (async, append‑only)       |
+
+> Werte sind Richtgrößen für MVP‑Eval; an Hardware anpassbar.
+
+---
+
+## Fehlerbehandlung / Failure Handling
+
+* **Sensor‑Stale** → markiere State, **hold** statt **start**, UI Warnhinweis.
+* **Adapter‑Fehler** → Retry mit Backoff; bei Persistenz → **stop → safe**.
+* **Zeitdrift** → 1 Block **hold**, NTP re‑sync, dann normal weiter.
+* **Inkonsistente Daten** → invalidiere Frame, letzten konsistenten State halten.
 
 ---
 
 ## Zusammenfassung / Summary
 
-Die Laufzeitsicht zeigt, wie BitGridAI **Energieflüsse in Echtzeit verarbeitet** und **erklärbare Entscheidungen** trifft. Der lokale, modulare Aufbau ermöglicht Transparenz und Kontrolle – auch ohne externe Server.
+Die Laufzeitsicht zeigt, wie BitGridAI **Energie in Echtzeit block‑weise** verarbeitet und **erklärbare Entscheidungen** trifft. Der lokale, modulare Aufbau ermöglicht Transparenz & Kontrolle – **ohne externe Server**.
 
-> The runtime view demonstrates how BitGridAI **processes energy data in real time** and makes **explainable decisions**. Its modular, local-first design ensures transparency and user control even without cloud connectivity.
+> The runtime view shows how BitGridAI **processes energy in real‑time, block‑wise** and makes **explainable decisions**. Local, modular design ensures transparency and control—**without external servers**.
 
-* [07 Deployment-Sicht / Deployment View](./07_deployment_view.md)
+*Weiter mit **[07 – Deployment‑Sicht / Deployment View](./07_deployment_view.md)**.*

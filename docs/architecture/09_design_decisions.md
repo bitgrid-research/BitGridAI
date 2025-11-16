@@ -1,125 +1,220 @@
 # 09 – Architekturentscheidungen / Architectural Decisions
 
-## Überblick / Overview
+**Kurzüberblick / TL;DR**
+Entscheidungen orientieren sich an **Local‑First**, **Erklärbarkeit**, **Nachhaltigkeit** und **Determinismus**.
+Kernelemente: **R1–R5**, **10‑Min‑BlockScheduler**, **EnergyState (SSoT)**, **Deadband**, **DecisionEvents**, **AGPLv3**, **kein Cloud‑Backend**.
 
-Dieses Kapitel dokumentiert die zentralen Architekturentscheidungen von BitGridAI.
-Jede Entscheidung wurde mit Blick auf **Nachvollziehbarkeit, Nachhaltigkeit und lokale Autonomie** getroffen.
-Sie dient als Referenz für zukünftige Entwicklung, Forschung und Systemerweiterung.
-
-> This chapter documents the key architectural decisions of BitGridAI.
-> Each decision was made with a focus on **traceability, sustainability, and local autonomy**.
-> It serves as a reference for future development, research, and system evolution.
+> **TL;DR (EN)**
+> Decisions follow **local‑first**, **explainability**, **sustainability**, and **determinism**.
+> Core: **R1–R5**, **10‑min block scheduler**, **EnergyState (SSoT)**, **deadband**, **DecisionEvents**, **AGPLv3**, **no cloud backend**.
 
 ---
 
-## ADR-Format / Decision Record Format
+## ADR‑Format / Decision Record Format
 
-Alle Architekturentscheidungen folgen dem ADR-Format (Architecture Decision Record):
+Alle Architekturentscheidungen folgen dem ADR‑Format (Architecture Decision Record):
 
-1. **Kontext / Context** – Ausgangslage und Rahmenbedingungen
-2. **Entscheidung / Decision** – gewählte Option
-3. **Begründung / Rationale** – warum diese Entscheidung
-4. **Alternativen / Alternatives** – verworfene Optionen
-5. **Auswirkungen / Consequences** – erwartete Effekte
+1. **Kontext / Context** · 2) **Entscheidung / Decision** · 3) **Begründung / Rationale** · 4) **Alternativen / Alternatives** · 5) **Auswirkungen / Consequences**
 
-> All architectural decisions follow the ADR format:
->
-> 1. **Context** – initial situation and constraints
-> 2. **Decision** – chosen option
-> 3. **Rationale** – reason for the choice
-> 4. **Alternatives** – discarded options
-> 5. **Consequences** – expected impact
+> All ADRs follow: 1) **Context** · 2) **Decision** · 3) **Rationale** · 4) **Alternatives** · 5) **Consequences**
 
 ---
 
-## ADR-001 – Lokale Architektur
+## ADR‑001 – Lokale Architektur (Local‑First)
 
-**Kontext:** Datenschutz, Resilienz und Energieeffizienz sind zentrale Anforderungen.
-**Entscheidung:** BitGridAI wird vollständig lokal ausgeführt (kein Cloud-Backend).
-**Begründung:** Maximale Datenhoheit, Energieautonomie und Nachvollziehbarkeit.
-**Alternativen:** Hybrid- oder Cloud-System mit API-Anbindung.
-**Auswirkungen:** Erhöhte Wartungsverantwortung lokal, aber volle Kontrolle durch Nutzer.
+**Status:** Accepted
+**Kontext:** Datenschutz, Resilienz und Energieeffizienz sind zentral.
+**Entscheidung:** BitGridAI läuft vollständig **lokal**, kein Cloud‑Backend.
+**Begründung:** Datenhoheit, Energieautonomie, Nachvollziehbarkeit; entspricht OneNote 00 (Ziele/Abgrenzung).
+**Alternativen:** Hybrid/Cloud.
+**Auswirkungen:** Mehr lokale Betriebsverantwortung, volle Kontrolle.
 
-> **Context:** Privacy, resilience, and energy efficiency are core requirements.
-> **Decision:** BitGridAI runs fully locally (no cloud backend).
-> **Rationale:** Ensures full data sovereignty, energy autonomy, and transparency.
-> **Alternatives:** Hybrid or cloud systems with API connection.
-> **Consequences:** Increased local maintenance responsibility, but complete user control.
+> **Context:** Privacy, resilience, efficiency. **Decision:** fully on‑prem. **Rationale:** sovereignty, autonomy, traceability. **Consequences:** local ops overhead, full control.
 
 ---
 
-## ADR-002 – Nutzung von MQTT als Kommunikationsbus
+## ADR‑002 – MQTT als Kommunikationsbus
 
-**Kontext:** Geräte und Module sollen lose gekoppelt und erweiterbar sein.
-**Entscheidung:** MQTT wird als zentrales Kommunikationsprotokoll verwendet.
-**Begründung:** Asynchrone Kommunikation, standardisiert, leichtgewichtig.
-**Alternativen:** REST-only Kommunikation oder proprietäre Protokolle.
-**Auswirkungen:** Hohe Flexibilität, einfache Integration neuer Geräte.
+**Status:** Accepted
+**Kontext:** Lose Kopplung und Erweiterbarkeit der Module/Geräte.
+**Entscheidung:** **MQTT** als zentraler Bus (Topics für State/Commands/Events).
+**Begründung:** Asynchron, leichtgewichtig, Standard im Home/Edge.
+**Alternativen:** REST‑only, proprietäre Protokolle.
+**Auswirkungen:** Flexible Integration, klare Contracts.
 
-> **Context:** Devices and modules should be loosely coupled and extensible.
-> **Decision:** MQTT is chosen as the central communication protocol.
-> **Rationale:** Asynchronous, standardized, lightweight communication.
-> **Alternatives:** REST-only or proprietary protocols.
-> **Consequences:** High flexibility and easy device integration.
+> **Decision:** MQTT is the central bus; REST remains for queries/control.
 
 ---
 
-## ADR-003 – SQLite als lokale Persistenzschicht
+## ADR‑003 – SQLite + Parquet als Persistenz
 
-**Kontext:** System benötigt auditierbare, einfache Datenspeicherung ohne externe Abhängigkeiten.
-**Entscheidung:** Verwendung von SQLite als persistente lokale Datenbank.
-**Begründung:** Portabel, zuverlässig, wartungsarm, ideal für Edge-Systeme.
-**Alternativen:** PostgreSQL, InfluxDB oder Cloud-basierte Speicherlösungen.
-**Auswirkungen:** Keine Netzwerkabhängigkeit, einfache Backups, begrenzte Skalierbarkeit.
-
-> **Context:** The system requires auditable, simple data storage without external dependencies.
-> **Decision:** Use SQLite as the persistent local database.
-> **Rationale:** Portable, reliable, low-maintenance, ideal for edge systems.
-> **Alternatives:** PostgreSQL, InfluxDB, or cloud-based storage.
-> **Consequences:** No network dependency, easy backups, limited scalability.
+**Status:** Accepted
+**Kontext:** Auditierbare, einfache Speicherung ohne Netzabhängigkeit.
+**Entscheidung:** **SQLite** für Betrieb/Abfragen, **Parquet** für Langzeit‑Logs/Replays.
+**Begründung:** Portabel, wartungsarm, reproduzierbar.
+**Alternativen:** PostgreSQL, Timeseries‑DBs, Cloud‑Speicher.
+**Auswirkungen:** Einfache Backups; begrenzte Skalierung (ausreichend für MVP/Feldstudie).
 
 ---
 
-## ADR-004 – Erklärungsschnittstelle statt klassischem Dashboard
+## ADR‑004 – Erklärungsschnittstelle (statt „nur“ Dashboard)
 
-**Kontext:** Fokus auf Erklärbarkeit statt nur Visualisierung.
-**Entscheidung:** Nutzung einer lokalen Erklärschnittstelle anstelle eines Dashboards.
-**Begründung:** Priorisierung von Nutzerverständnis und Forschung zu HCI statt reiner UI.
-**Alternativen:** Grafisch orientiertes Dashboard mit Fokus auf Performance.
-**Auswirkungen:** Höherer semantischer Wert, geringerer visueller Overhead.
-
-> **Context:** Focus on explainability rather than pure visualization.
-> **Decision:** Use a local explanation interface instead of a dashboard.
-> **Rationale:** Prioritize user understanding and HCI research over UI aesthetics.
-> **Alternatives:** Graphical dashboards optimized for performance.
-> **Consequences:** Higher semantic value, lower visual overhead.
+**Status:** Accepted
+**Kontext:** HCI‑Fokus (Vertrauen, Transparenz) laut OneNote.
+**Entscheidung:** **Explainability‑UI** mit Reasons/Trigger/Params + Timeline + „Next‑Block Preview“.
+**Begründung:** Verständnis > reine Visualisierung.
+**Alternativen:** Performance‑Dashboards ohne Erklärlayer.
+**Auswirkungen:** Höherer semantischer Wert; UI‑Komplexität moderat.
 
 ---
 
-## ADR-005 – Nachhaltigkeit als Steuergröße
+## ADR‑005 – Nachhaltigkeit als Steuergröße
 
-**Kontext:** Energieeinsatz soll effizient, nachvollziehbar und an PV-Ertrag gekoppelt sein.
-**Entscheidung:** Nachhaltigkeit wird als Parameter der Entscheidungslogik integriert.
-**Begründung:** Ermöglicht energieadaptive Steuerung (z. B. Mining nur bei Überschuss).
-**Alternativen:** Fixe Zeit- oder Regelprofile ohne Kontextbezug.
-**Auswirkungen:** Reduzierter Energieverbrauch, dynamische Anpassung, Forschungspotenzial.
+**Status:** Accepted
+**Kontext:** Energieeinsatz an PV‑Ertrag koppeln (MVP‑Ziel).
+**Entscheidung:** **Surplus‑basiertes** Schalten; Mining nur bei Überschuss/Preisgrenzen.
+**Begründung:** Effizienz, Autarkie, Forschungsevaluierung.
+**Alternativen:** Starre Zeitprofile.
+**Auswirkungen:** Verbrauch↓, dynamische Anpassung, klare KPIs.
 
-> **Context:** Energy usage should be efficient, traceable, and linked to PV output.
-> **Decision:** Integrate sustainability as a parameter in decision logic.
-> **Rationale:** Enables energy-adaptive control (e.g., mining only during surplus).
-> **Alternatives:** Fixed time or rule profiles without context awareness.
-> **Consequences:** Reduced energy use, dynamic adaptation, research potential.
+---
+
+## ADR‑006 – 10‑Minuten BlockScheduler (Block‑Aligned Control)
+
+**Status:** Accepted
+**Kontext:** Flapping vermeiden, Erklärbarkeit erhöhen.
+**Entscheidung:** Entscheidungen im **10‑Min‑Takt**; `block_id=floor(epoch/600)`.
+**Begründung:** Stabilität, einfache Audits/Erklärungen („pro Block“).
+**Alternativen:** Sekunden‑Granularität, Event‑Only.
+**Auswirkungen:** Leichte Reaktionslatenz; **R4 Pre‑start** mildert.
+
+---
+
+## ADR‑007 – Deterministische Regelengine (R1–R5)
+
+**Status:** Accepted
+**Kontext:** Vertrauen & Reproduzierbarkeit.
+**Entscheidung:** Kernsteuerung über **R1–R5** (Start, Autarkie, Thermo, Prognose, Deadband); **keine Black‑Box‑ML im Regelpfad**.
+**Begründung:** Testbar, erklärbar, replizierbar.
+**Alternativen:** Rein ML‑basierte Policy.
+**Auswirkungen:** Klarer Prioritäten‑Order: **R3 > R2 > R5 > R1/R4**.
+
+---
+
+## ADR‑008 – EnergyState als Single Source of Truth (SSoT)
+
+**Status:** Accepted
+**Kontext:** Konsistenz & Nachvollziehbarkeit across modules.
+**Entscheidung:** **Energy Context** ist **einziger Schreiber**; alle anderen lesen **EnergyState**.
+**Begründung:** Eine Wahrheit, weniger Race‑Conditions.
+**Alternativen:** Mehrere schreibende Komponenten.
+**Auswirkungen:** Klare Verantwortlichkeit; Adapter vereinheitlichen Messwerte.
+
+---
+
+## ADR‑009 – Deadband & Hysterese (Anti‑Flapping)
+
+**Status:** Accepted
+**Kontext:** Grenzbereichsrauschen bei PV/Last.
+**Entscheidung:** **Deadband** hält Zustand **D Blöcke**; nur **R2/R3** dürfen brechen.
+**Begründung:** Stabilität, Hardware‑Schutz.
+**Alternativen:** Keine Stabilisierung.
+**Auswirkungen:** Weniger Start/Stop‑Wechsel; bessere UX.
+
+---
+
+## ADR‑010 – Manual Override (Block‑Scoped)
+
+**Status:** Accepted
+**Kontext:** Nutzerautonomie (HCI‑Ziel, OneNote).
+**Entscheidung:** `override(action, ttl)` bis **Blockende/TTL**; Reason `manual_override`.
+**Begründung:** Kontrolle ohne dauerhafte Policy‑Änderung.
+**Alternativen:** Permanente manuelle Modi.
+**Auswirkungen:** Sicherheit bleibt Vorrang (**R2/R3** können Override brechen).
+
+---
+
+## ADR‑011 – Lokale Forecast‑Nutzung (R4)
+
+**Status:** Accepted
+**Kontext:** Frühzeitiger Start bei stabiler Erwartung.
+**Entscheidung:** **Lokaler** Forecast (Datei/Dienst) beeinflusst nur **Pre‑start** (**R4**).
+**Begründung:** Bessere Starts, kein Cloudzwang.
+**Alternativen:** Externe APIs, Cloud‑Forecasts.
+**Auswirkungen:** Prognosefehler werden durch **R2/R3** abgefangen.
+
+---
+
+## ADR‑012 – Datenhaltung & Audit (Append‑Only)
+
+**Status:** Accepted
+**Kontext:** Forschung/Audit/Reproducibility.
+**Entscheidung:** **Append‑only Logs** (SQLite/Parquet), versionierte **YAML‑Configs**.
+**Begründung:** Wiederholbarkeit, einfache Vergleiche.
+**Alternativen:** Ephemere/undokumentierte Zustände.
+**Auswirkungen:** Speicherplanung nötig; einfache Backups.
+
+---
+
+## ADR‑013 – Lizenz & Offenheit
+
+**Status:** Accepted
+**Kontext:** Transparenz & Wiederverwendung.
+**Entscheidung:** **AGPLv3** + klare Third‑Party‑Lizenzen.
+**Begründung:** Offen, aber copyleft‑kompatibel mit Forschungszielen.
+**Alternativen:** MIT/Apache, proprietär.
+**Auswirkungen:** Ableitungen müssen offen bleiben, was Forschung fördert.
+
+---
+
+## ADR‑014 – Privacy by Default (No Outbound Telemetry)
+
+**Status:** Accepted
+**Kontext:** DSGVO, Nutzervertrauen.
+**Entscheidung:** **Keine** ausgehende Telemetrie; lokale Auth; Minimal‑Ports.
+**Begründung:** Minimale Angriffsfläche, maximale Hoheit.
+**Alternativen:** Opt‑in Cloud‑Telemetry.
+**Auswirkungen:** Monitoring/Support lokal zu lösen (UI‑Health, Logs).
+
+---
+
+## ADR‑015 – Safety‑First: Stop → Safe
+
+**Status:** Accepted
+**Kontext:** Thermik/SoC‑Grenzen, Feldstudie.
+**Entscheidung:** Harte Limits (**R3/R2**) stoppen sofort; Deadband wird ignoriert; Wiederanlauf mit Hysterese.
+**Begründung:** Hardware‑Schutz, Vertrauen.
+**Alternativen:** Weiche Limits.
+**Auswirkungen:** Verfügbarkeit < Sicherheit; klar kommuniziert in UI.
+
+---
+
+## ADR‑016 – Schnittstellen‑Vertrag (Topics & REST)
+
+**Status:** Accepted
+**Kontext:** Interoperabilität mit HA/Adaptern.
+**Entscheidung:** MQTT‑Topics (`energy/state/#`, `miner/cmd/set`, `explain/events/#`) + REST (`/state`, `/timeline`, `/override`).
+**Begründung:** Klare, testbare Contracts.
+**Alternativen:** Ad‑hoc Endpunkte.
+**Auswirkungen:** Leichte Integration, bessere Tests.
+
+---
+
+## ADR‑017 – KPIs als Projektzielgröße
+
+**Status:** Accepted
+**Kontext:** MVP/KPIs (Grid‑Import↓, Flapping↓, Coverage↑, Trust↑, Thermal=0).
+**Entscheidung:** KPIs werden im Core geloggt und in Studien ausgewertet.
+**Begründung:** Messbare Wirkung statt Behauptung.
+**Alternativen:** Informelle Bewertung.
+**Auswirkungen:** Klare Erfolgsdefinition, fortlaufendes Tracking.
 
 ---
 
 ## Zusammenfassung / Summary
 
-Diese Architekturentscheidungen sichern die Grundwerte von BitGridAI:
-**lokale Autonomie, Transparenz, Nachhaltigkeit und Erklärbarkeit.**
-Sie bilden das Rückgrat der technischen und ethischen Ausrichtung des Projekts.
+Diese Architekturentscheidungen verankern **lokale Autonomie, Transparenz, Nachhaltigkeit und Erklärbarkeit** im Systemdesign. Sie bilden das Rückgrat der technischen und forschungspraktischen Ausrichtung von BitGridAI.
 
-> These architectural decisions secure the core values of BitGridAI:
-> **local autonomy, transparency, sustainability, and explainability.**
-> They form the backbone of the project's technical and ethical orientation.
+> These ADRs embed **local autonomy, transparency, sustainability, and explainability** into the design. They are the backbone for technical execution and research practice.
 
-* [10 Qualitätsszenarien / Quality Scenarios](./10_quality_scenarios.md)
+*Weiter mit **[10 – Qualitätsszenarien / Quality Scenarios](./10_quality_scenarios.md)**.*

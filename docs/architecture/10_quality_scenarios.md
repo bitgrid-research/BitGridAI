@@ -1,125 +1,239 @@
 # 10 – Qualitätsszenarien / Quality Scenarios
 
+> **Kurzüberblick / TL;DR**
+> Szenarien validieren **Transparenz, Erklärbarkeit, Nachhaltigkeit, Resilienz, Vorhersagbarkeit**.
+> Geprüft werden **R1–R5**, **10‑Min‑BlockScheduler**, **EnergyState (SSoT)**, **Deadband**, **Override‑TTL**, **Safety (Stop → Safe)**.
+
+> **TL;DR (EN)**
+> Scenarios validate **transparency, explainability, sustainability, resilience, predictability**.
+> We test **R1–R5**, **10‑min block scheduler**, **EnergyState (SSoT)**, **deadband**, **override TTL**, **safety (stop → safe)**.
+
+---
+
 ## Überblick / Overview
 
-Dieses Kapitel beschreibt die Qualitätsszenarien, die das Verhalten und die Stabilität von BitGridAI in realen Betriebssituationen definieren.
-Sie dienen zur Überprüfung, ob die Systemarchitektur die angestrebten Qualitätsziele – **Transparenz, Erklärbarkeit, Nachhaltigkeit und Resilienz** – erfüllt.
+Dieses Kapitel beschreibt Qualitätsszenarien, die das Verhalten von BitGridAI in realen Betriebssituationen definieren. Die Szenarien überprüfen, ob die Architektur die Kernziele – **Transparenz, Erklärbarkeit, Nachhaltigkeit, Resilienz** – erfüllt.
 
-> This chapter defines the quality scenarios that describe BitGridAI’s behavior and stability under real-world operating conditions.
-> They verify whether the architecture achieves its core quality goals – **transparency, explainability, sustainability, and resilience**.
+> This chapter defines quality scenarios describing BitGridAI’s behaviour under real‑world conditions. They verify whether the architecture achieves its core goals – **transparency, explainability, sustainability, resilience**.
 
 ---
 
 ## Zielqualitäten / Quality Attributes
 
-| Qualität                | Beschreibung                                                     |
-| ----------------------- | ---------------------------------------------------------------- |
-| **Transparenz**         | Alle Systementscheidungen sind nachvollziehbar und begründet.    |
-| **Erklärbarkeit**       | Nutzer verstehen Systemverhalten in Echtzeit.              |
-| **Nachhaltigkeit**      | Energieverbrauch wird an erneuerbare Erzeugung angepasst.        |
-| **Datenschutz**         | Keine externen Datenströme, vollständige lokale Kontrolle.       |
-| **Resilienz**           | System bleibt auch bei Teilausfällen funktionsfähig.             |
-| **Erweiterbarkeit**     | Neue Module können ohne Eingriff in Kernlogik integriert werden. |
-| **Benutzbarkeit (HCI)** | Interfaces fördern Vertrauen, Kontrolle und Verständnis.         |
+| Qualität                | Beschreibung                                                                       |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| **Transparenz**         | Alle Entscheidungen sind nachvollziehbar und begründet (Reason/Trigger/Parameter). |
+| **Erklärbarkeit**       | Nutzer verstehen Systemverhalten in Echtzeit (UI‑Timeline, Next‑Block‑Preview).    |
+| **Nachhaltigkeit**      | Verbrauch passt sich an PV‑Erzeugung/Preis an (Surplus, R1/R4).                    |
+| **Datenschutz**         | Keine externen Datenströme; Local‑First; minimale Ports.                           |
+| **Resilienz**           | Betrieb bei Teilfehlern (Sensor‑Stale, Broker‑Ausfall) gesichert.                  |
+| **Vorhersagbarkeit**    | Deterministische Regeln, 10‑Min‑Blöcke, Deadband/Anti‑Flapping.                    |
+| **Erweiterbarkeit**     | Module ohne Kernänderungen integrierbar (Adapter).                                 |
+| **Benutzbarkeit (HCI)** | UI fördert Vertrauen, Kontrolle, Overrides.                                        |
+| **Sicherheit**          | Stop → Safe bei SoC/Temperatur; Hysterese.                                         |
 
-> | Quality             | Description                                                    |
-> | ------------------- | -------------------------------------------------------------- |
-> | **Transparency**    | All system decisions are traceable and justified.              |
-> | **Explainability**  | Users understand system behavior in real time.                 |
-> | **Sustainability**  | Energy use adapts to renewable generation.                     |
-> | **Privacy**         | No external data streams; full local control.                  |
-> | **Resilience**      | System remains operational despite partial failures.           |
-> | **Extensibility**   | New modules can be integrated without changing the core logic. |
-> | **Usability (HCI)** | Interfaces foster trust, control, and understanding.           |
-
----
-
-## Szenario 1 – Transparente Entscheidungsbegründung
-
-**Auslöser:** Änderung der PV-Leistung.
-**Erwartetes Verhalten:** System aktualisiert Entscheidung und generiert automatisch eine Erklärung.
-**Qualitätsziel:** Nachvollziehbare Logik und visuelle Rückmeldung für Nutzer.
-
-> **Trigger:** Change in PV output.
-> **Expected Behavior:** System updates decision and automatically generates an explanation.
-> **Quality Goal:** Traceable logic and visual user feedback.
+> | Quality             | Description                                                  |
+> | ------------------- | ------------------------------------------------------------ |
+> | **Transparency**    | Decisions are explainable with reason/trigger/parameters.    |
+> | **Explainability**  | Real‑time understanding (timeline, next‑block preview).      |
+> | **Sustainability**  | Consumption adapts to PV/price (surplus, R1/R4).             |
+> | **Privacy**         | No outbound data; local‑first; minimal open ports.           |
+> | **Resilience**      | Operates under partial failures (sensor stale, broker down). |
+> | **Predictability**  | Deterministic rules, 10‑min blocks, deadband/anti‑flapping.  |
+> | **Extensibility**   | New modules via adapters; no core changes.                   |
+> | **Usability (HCI)** | UI promotes trust, control, overrides.                       |
+> | **Safety**          | Stop → Safe on SoC/temperature with hysteresis.              |
 
 ---
 
-## Szenario 2 – Energieadaptive Steuerung
+## Szenario‑Template / Scenario Template
 
-**Auslöser:** PV-Erzeugung fällt unter vordefinierten Schwellenwert.
-**Erwartetes Verhalten:** System reduziert Last (z. B. Mining pausieren) und dokumentiert Grund.
-**Qualitätsziel:** Energieeffizienz und nachhaltige Nutzung.
+**Struktur:** *Preconditions · Stimulus · Environment · Response · Response Measure · Logs/Events · UI*
 
-> **Trigger:** PV generation drops below threshold.
-> **Expected Behavior:** System reduces load (e.g., pauses mining) and logs rationale.
-> **Quality Goal:** Energy efficiency and sustainable operation.
+> **Structure:** *Preconditions · Stimulus · Environment · Response · Response Measure · Logs/Events · UI*
 
 ---
 
-## Szenario 3 – Lokale Fehlertoleranz
+## S1 – Transparente Entscheidungsbegründung (Explainability)
 
-**Auslöser:** Verlust der Netzwerkverbindung oder MQTT-Broker-Ausfall.
-**Erwartetes Verhalten:** Core arbeitet im Offline-Modus weiter; Logs werden lokal zwischengespeichert.
-**Qualitätsziel:** Resilienz und autarke Funktionsfähigkeit.
-
-> **Trigger:** Network connection loss or MQTT broker failure.
-> **Expected Behavior:** Core continues in offline mode; logs are buffered locally.
-> **Quality Goal:** Resilience and autonomous operation.
-
----
-
-## Szenario 4 – Nutzerfeedback und Override
-
-**Auslöser:** Nutzer lehnt automatische Entscheidung ab.
-**Erwartetes Verhalten:** System akzeptiert Override, speichert Feedback und passt Regelmodell an.
-**Qualitätsziel:** Erklärbarkeit, Vertrauen, lernfähige Interaktion.
-
-> **Trigger:** User rejects automatic decision.
-> **Expected Behavior:** System accepts override, stores feedback, and adapts rule model.
-> **Quality Goal:** Explainability, trust, adaptive interaction.
+**Preconditions**: Live‑Daten aktiv; UI verbunden.
+**Stimulus**: PV‑Leistung ↑ führt zu `surplus` ≥ **1.5 kW**, Preis ≤ **18 ct**.
+**Environment**: normal; keine Deadband‑Sperre.
+**Response**: **R1 start**; DecisionEvent mit Reason/Trigger/Parameter; Timeline‑Eintrag.
+**Response Measure**: **Explanation Latency** < **2 s** nach Decision.
+**Logs/Events**: `DecisionEvent{reason=R1, trigger={surplus, price}}`.
+**UI**: Toast „**Start (R1)** … Deadband bis +2“ + Next‑Block‑Preview.
 
 ---
 
-## Szenario 5 – Erweiterung durch neues Modul
+## S2 – Energieadaptive Steuerung (Sustainability)
 
-**Auslöser:** Integration eines neuen Sensors oder Verbrauchertyps.
-**Erwartetes Verhalten:** Neues Modul wird per MQTT registriert und in Core integriert, ohne Neustart.
-**Qualitätsziel:** Erweiterbarkeit und Modularität.
+**Preconditions**: Mining läuft; Deadband nicht aktiv.
+**Stimulus**: `surplus` fällt **unter 1.5 kW** oder Preis > **18 ct**.
+**Environment**: normal.
+**Response**: **stop** (R1 Bedingung entfällt); Begründung dokumentiert.
+**Response Measure**: **Grid‑Import↓** vs. Baseline; **Flapping↓** um ≥ **Y %**.
+**Logs/Events**: DecisionEvent `stop`, EnergyState Snapshot.
+**UI**: Erklärung „Unter Schwelle – Stop“.
 
-> **Trigger:** Addition of a new sensor or load type.
-> **Expected Behavior:** New module registers via MQTT and integrates into core without restart.
-> **Quality Goal:** Extensibility and modularity.
+---
+
+## S3 – Lokale Fehlertoleranz (Resilience)
+
+**Preconditions**: Normalbetrieb.
+**Stimulus**: MQTT‑Broker kurzzeitig **down** oder Netzverlust.
+**Environment**: offline; Sensor‑Frames fehlen.
+**Response**: **hold** (R5) bis `valid_until`; Logs **puffern**; UI Warnhinweis.
+**Response Measure**: **System Availability** > **99 %**; kein ungeplanter Stop durch Kommunikationsfehler.
+**Logs/Events**: Health‑Event `broker_down`; später `broker_up`.
+**UI**: Banner „Offline‑Puffer aktiv“.
+
+---
+
+## S4 – Nutzer‑Override (HCI)
+
+**Preconditions**: Mining **stop**, Block läuft.
+**Stimulus**: User `POST /override {action=start, ttl=1 block}`.
+**Environment**: normal; **R2/R3** okay.
+**Response**: **start** bis Blockende; Reason=`manual_override`; Countdown.
+**Response Measure**: **Override‑Latency** < **300 ms**; Auto‑Rollback am Blockende.
+**Logs/Events**: DecisionEvent `manual_override`.
+**UI**: Chip „Override (00:xx)“.
+
+---
+
+## S5 – Erweiterung durch neues Modul (Extensibility)
+
+**Preconditions**: Core läuft.
+**Stimulus**: Neues Modul publiziert auf `energy/state/…` oder registriert Device‑Topics.
+**Environment**: gleichbleibend.
+**Response**: Core **konsumiert** Daten ohne Neustart; neue Felder optional ignoriert.
+**Response Measure**: **Hot‑plug success**; **Zero‑downtime**.
+**Logs/Events**: Adapter‑Register‑Event.
+**UI**: neues Gerät sichtbar.
+
+---
+
+## S6 – Safety‑Stop bei Temperatur (R3)
+
+**Preconditions**: Mining läuft.
+**Stimulus**: `t_miner ≥ T_MAX` (z. B. 75 °C).
+**Environment**: normal.
+**Response**: **sofort stop**; Deadband ignorieren; Resume erst `t_miner ≤ T_RESUME`.
+**Response Measure**: **Thermal‑Incidents** = **0** (ungeplante Übertemperatur).
+**Logs/Events**: DecisionEvent `R3 over_temp`.
+**UI**: Alarm + Handlungshinweis.
+
+---
+
+## S7 – Autarkie‑Schutz bei SoC (R2)
+
+**Preconditions**: Mining läuft; SoC sinkt.
+**Stimulus**: `soc ≤ SOC_MIN` (z. B. 25 %).
+**Environment**: normal.
+**Response**: **stop/block**; erst `soc ≥ SOC_RESUME` wieder **start**.
+**Response Measure**: **Self‑supply preserved**; keine Tiefentladung.
+**Logs/Events**: DecisionEvent `R2 low_soc`.
+**UI**: Hinweis „Autarkie‑Schutz aktiv“.
+
+---
+
+## S8 – Deadband‑Stabilität (R5)
+
+**Preconditions**: Grenzbereich um Schwelle.
+**Stimulus**: `surplus` rauscht ±0.2 kW um **1.5 kW**.
+**Environment**: normal.
+**Response**: **hold** für `D` Blöcke; nur R2/R3 dürfen brechen.
+**Response Measure**: **Switches/h** ↓ um ≥ **Y %** ggü. Baseline.
+**Logs/Events**: `DeadbandActivatedEvent`.
+**UI**: Badge „Stabilisierung aktiv“.
+
+---
+
+## S9 – Prognose‑Start (R4)
+
+**Preconditions**: Mining stop; Forecast lokal verfügbar.
+**Stimulus**: **stabile** `forecast_surplus` für `N` Blöcke; `margin ≥ 0.3 kW`.
+**Environment**: normal; Preis ≤ **P_MAX**.
+**Response**: **pre‑start** → **start** zu Blockbeginn.
+**Response Measure**: **Abgebrochene Starts** ↓; **Ertrag↑** ohne zusätzliche Flaps.
+**Logs/Events**: DecisionEvent `R4 forecast_start`.
+**UI**: Preview „Start im nächsten Block“.
+
+---
+
+## S10 – Zeitdrift & Re‑Sync
+
+**Preconditions**: Betrieb; NTP driftet.
+**Stimulus**: Drift > Δt.
+**Environment**: normal.
+**Response**: **hold 1 block**, Re‑Sync, dann normal; Hinweis im UI.
+**Response Measure**: Keine Doppel‑Decisions im selben Block.
+**Logs/Events**: `time_drift_detected`, `resynced`.
 
 ---
 
 ## Bewertung / Evaluation Criteria
 
-| Kriterium                       | Metrik / Beobachtung                      | Zielwert     |
-| ------------------------------- | ----------------------------------------- | ------------ |
-| **Erklärzeit**                  | Zeit zwischen Entscheidung und Erklärung  | < 2 Sekunden |
-| **Energieeffizienz**            | Anteil der Betriebszeit mit PV-Überschuss | > 70%        |
-| **Systemverfügbarkeit**         | Betriebszeit ohne kritische Fehler        | > 99%        |
-| **Datenschutzprüfung**          | Externe Verbindungen erkannt              | 0            |
-| **Nutzerakzeptanz (HCI-Tests)** | Subjektive Zufriedenheit (Likert-Skala)   | > 4/5        |
+| Kriterium                 | Metrik / Beobachtung          | Zielwert     |
+| ------------------------- | ----------------------------- | ------------ |
+| **Explanation Latency**   | Decision → UI‑Erklärung       | < **2 s**    |
+| **Decision Latency**      | Block‑Tick → Decision         | < **300 ms** |
+| **State Propagation**     | Sensor → EnergyState          | < **500 ms** |
+| **Grid‑Import↓**          | (Baseline − Trial)/Baseline   | ≥ **X %**    |
+| **Flapping↓**             | Switches/h ggü. Baseline      | ≥ **Y %**    |
+| **Explanation Coverage↑** | Decisions mit Reason / alle   | ≥ **Z %**    |
+| **Trust‑Score↑**          | Nutzerstudie (Likert)         | ≥ **T/5**    |
+| **Thermal‑Incidents**     | ungeplante Übertemperaturen   | **0**        |
+| **Privacy Check**         | erkannte externe Verbindungen | **0**        |
 
-> | Criterion                       | Metric / Observation                   | Target      |
-> | ------------------------------- | -------------------------------------- | ----------- |
-> | **Explanation Latency**         | Time between decision and explanation  | < 2 seconds |
-> | **Energy Efficiency**           | Operating time with PV surplus         | > 70%       |
-> | **System Availability**         | Runtime without critical failure       | > 99%       |
-> | **Privacy Check**               | External connections detected          | 0           |
-> | **User Acceptance (HCI Tests)** | Subjective satisfaction (Likert scale) | > 4/5       |
+> Werte **X/Y/Z/T** projektspezifisch aus **01/04/08** ableiten.
+
+---
+
+## Testdaten & Replay / Test Data & Replay
+
+* **Replay‑Runner** liest Parquet/SQLite und spielt Frames in Echtzeit/Accelerated ab.
+* **Ziel**: deterministische Reproduktion; Vergleich Baseline ↔ Regel‑Varianten.
+* **Artefakte**: `data/parquet/*.parq`, `data/bitgrid.sqlite`, `config/*.yaml`.
+
+```bash
+# Beispiel CLI
+bitgrid-replay \
+  --state data/parquet/2025-11-*.parq \
+  --config config/rules.yaml \
+  --speed 10x \
+  --kpi out/kpi_report.json
+```
+
+---
+
+## Traceability‑Matrix (ADR ↔ Szenarien ↔ KPIs)
+
+| Szenario | ADR‑Bezug                                    | KPIs                    |
+| -------- | -------------------------------------------- | ----------------------- |
+| S1, S4   | ADR‑004 (Explainability), ADR‑010 (Override) | Coverage↑, Trust↑       |
+| S2, S9   | ADR‑005 (Sustainability), ADR‑011 (Forecast) | Grid‑Import↓, Flapping↓ |
+| S3, S10  | ADR‑014 (Privacy/Local), ADR‑006 (Block)     | Availability↑           |
+| S6, S7   | ADR‑015 (Safety), ADR‑007 (Rules)            | Thermal=0, Self‑supply  |
+| S8       | ADR‑009 (Deadband)                           | Flapping↓               |
+
+---
+
+## Akzeptanzkriterien (MVP) / Acceptance Criteria (MVP)
+
+* **100 % Explanation Coverage** für Decisions im Testfenster.
+* **Flapping↓** um ≥ **Y %** ggü. Baseline.
+* **Thermal‑Incidents = 0**.
+* **Privacy Check = 0** externe Verbindungen.
+* **Trust‑Score ≥ T/5** in Nutzerstudie.
 
 ---
 
 ## Zusammenfassung / Summary
 
-Die Qualitätsszenarien bilden die Grundlage für kontinuierliche Evaluation und Verbesserung.
-Sie gewährleisten, dass BitGridAI nicht nur **funktional korrekt**, sondern auch **vertrauenswürdig, effizient und nachvollziehbar** arbeitet.
+Die Szenarien beweisen, dass BitGridAI **funktional korrekt** und zugleich **vertrauenswürdig, effizient und erklärbar** arbeitet – im Sinne der Ziele aus **01/04** und der Prinzipien **Local‑First / No Cloud / Explainable by Design**.
 
-> The quality scenarios serve as the basis for continuous evaluation and improvement.
-> They ensure that BitGridAI operates not only **functionally correctly** but also **trustworthy, efficient, and explainable**.
+> The scenarios demonstrate that BitGridAI is **functionally correct** and **trustworthy, efficient, explainable**—aligned with goals from **01/04** and principles **local‑first / no cloud / explainable by design**.
 
-* [11 Risiken & Technische Schulden / Risks and Technical Debt](./11_risks_and_technical_debt.md)
+*Weiter mit **[11 – Risiken & Technische Schulden / Risks and Technical Debt](./11_risks_and_technical_debt.md)**.*

@@ -2,7 +2,7 @@
 
 ## Überblick / Overview
 
-Das Glossar enthält zentrale Begriffe, Konzepte und Abkürzungen, die in der BitGridAI-Architektur verwendet werden.
+Das Glossar enthält zentrale Begriffe, Konzepte und Abkürzungen, die in der BitGridAI‑Architektur verwendet werden.
 Es dient dazu, **Konsistenz, Verständlichkeit und Nachvollziehbarkeit** innerhalb der Dokumentation sicherzustellen.
 
 > The glossary provides key terms, concepts, and abbreviations used in the BitGridAI architecture.
@@ -12,74 +12,136 @@ Es dient dazu, **Konsistenz, Verständlichkeit und Nachvollziehbarkeit** innerha
 
 ## Fachbegriffe / Technical Terms
 
-| Begriff                                       | Definition                                                                                                    |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **BitGridAI**                                 | Lokales, erklärbares Energiesystem zur Optimierung von PV-Überschussstrom und nachhaltigem Computing.         |
-| **Core**                                      | Zentrale Entscheidungs- und Regel-Engine, die Energieflüsse analysiert und steuert.                           |
-| **Module**                                    | Erweiterbare Adapter für die Integration externer Systeme wie PV-Wechselrichter, Speicher und Miner.          |
-| **Erklärschnittstelle**                       | Lokale Benutzerschnittstelle zur Darstellung und Begründung von Systementscheidungen.                         |
-| **MQTT**                                      | Leichtgewichtiges Messaging-Protokoll für asynchrone Kommunikation zwischen Geräten und Modulen.              |
-| **PV**                                        | Photovoltaik – Technologie zur Stromerzeugung aus Sonnenlicht.                                                |
-| **HCI (Human-Computer Interaction)**          | Forschungsbereich zur Interaktion zwischen Mensch und Computer, mit Fokus auf Verständlichkeit und Vertrauen. |
-| **XAI (Explainable Artificial Intelligence)** | KI-Ansatz zur Erklärbarkeit von Entscheidungen und Prozessen für Nutzer.                                |
-| **AGPLv3**                                    | Lizenz, die Transparenz und Offenlegung von Quellcode bei verteilten Anwendungen sicherstellt.                |
-| **Local-First**                               | Prinzip, nach dem alle Berechnungen und Daten lokal auf Nutzerhardware ausgeführt werden.                     |
-| **Mining Node**                               | Rechner, der flexibel Energieüberschüsse nutzt, z. B. für Bitcoin-Mining.                                     |
-| **Sustainability Parameter**                  | Steuergröße zur Priorisierung energieeffizienter Entscheidungen.                                              |
-| **Decision Log**                              | Protokoll aller Systementscheidungen mit Kontext, Erklärung und Zeitstempel.                                  |
-| **Eventbus**                                  | Interner Kommunikationsmechanismus zwischen Modulen, Core und UI.                                             |
-| **Home Assistant**                            | Open-Source-Plattform zur lokalen Automatisierung und Geräteintegration.                                      |
+| Begriff                                     | Definition                                                                                                            |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **BitGridAI**                               | Lokales, erklärbares Energiesystem zur Nutzung von PV‑Überschuss und zur Steuerung flexibler Lasten.                  |
+| **EnergyState (SSoT)**                      | Zentraler, schreibgeschützter Zustand („Single Source of Truth“) für alle Leser (Core, UI, Logger).                   |
+| **Surplus**                                 | Überschussleistung: `p_pv − p_load − p_charge_req + p_discharge_avail`.                                               |
+| **BlockInterval (10 min)**                  | Zeitraster für deterministische Entscheidungen: `block_id = floor(epoch/600)`.                                        |
+| **BlockScheduler**                          | Orchestriert Regelbewertung im 10‑Min‑Takt und setzt Deadband‑Fenster.                                                |
+| **Deadband**                                | Anti‑Flapping‑Mechanismus: hält den Zustand für `D` Blöcke, außer Safety‑Regeln greifen.                              |
+| **Rule Engine (R1–R5)**                     | Deterministische Kernlogik: Start (R1), Autarkie‑Schutz (R2), Thermo‑Schutz (R3), Prognose‑Start (R4), Deadband (R5). |
+| **R1 Startregel**                           | Start bei Überschuss + ggf. Preisgrenzen.                                                                             |
+| **R2 Autarkie‑Schutz**                      | Stop/Block bei niedrigem SoC zum Schutz der Eigenversorgung.                                                          |
+| **R3 Thermo‑Schutz**                        | Sofort‑Stop bei Übertemperatur; Wiederaufnahme mit Hysterese.                                                         |
+| **R4 Prognose‑Start**                       | Frühstart bei stabiler lokaler Überschussprognose.                                                                    |
+| **R5 Deadband / Anti‑Flapping**             | Stabilisierung zur Vermeidung häufiger Start/Stop‑Wechsel.                                                            |
+| **DecisionEvent**                           | Domain‑Event mit Aktion, Grund (Reason), Triggern, Parametern und Gültigkeit.                                         |
+| **EnergyStateChangedEvent**                 | Domain‑Event bei Aktualisierung des EnergyState.                                                                      |
+| **DeadbandActivatedEvent**                  | Event, das die Aktivierung eines Haltefensters signalisiert.                                                          |
+| **Erklärschnittstelle (Explainability UI)** | Lokale UI zur Begründung von Entscheidungen und Anzeige der Timeline.                                                 |
+| **Next‑Block Preview**                      | Vorschau der erwarteten Aktion im nächsten Block inkl. Schwellen.                                                     |
+| **Manual Override**                         | Temporäre manuelle Steuerung (Start/Stop/Level) bis Blockende/TTL.                                                    |
+| **KPI**                                     | Kennzahlen zur Wirkung (Grid‑Import↓, Flapping↓, Explanation‑Coverage↑, Trust‑Score↑, Thermal‑Incidents=0).           |
+| **Grid‑Import**                             | Netzbezug; KPI zur Reduktion durch lokale Optimierung.                                                                |
+| **Flapping**                                | Häufige Zustandswechsel Start/Stop; zu minimieren via Deadband.                                                       |
+| **Trust‑Score**                             | Nutzervertrauen (z. B. Likert‑Skala) aus Studien/Feedback.                                                            |
+| **SoC (State of Charge)**                   | Ladezustand des Speichers (0…1); Schutz via R2.                                                                       |
+| **T_MAX / T_RESUME**                        | Temperatur‑Schwellen für Stop/Resume des Miners (R3).                                                                 |
+| **MQTT**                                    | Leichtgewichtiges Messaging‑Protokoll für asynchrone Kopplung.                                                        |
+| **Modbus (TCP)**                            | Industriestandard‑Protokoll zur Datenabfrage z. B. am Inverter.                                                       |
+| **REST / WebSocket**                        | Lokale HTTP‑/WS‑Schnittstellen für State, Timeline, Events.                                                           |
+| **SQLite / Parquet**                        | Lokale Speicherung (Online‑DB / Langzeit‑Logs & Replay).                                                              |
+| **Mosquitto**                               | Lokaler MQTT‑Broker für Topics wie `energy/state/#` oder `explain/events/#`.                                          |
+| **Home Assistant (HA)**                     | Open‑Source‑Plattform für lokale Automatisierung und Geräteintegration.                                               |
+| **Mining Node**                             | Flexible Last (z. B. Bitcoin‑Miner), die Überschussenergie nutzt.                                                     |
+| **Local‑First**                             | Prinzip: Berechnung und Datenhaltung ausschließlich auf Nutzerhardware.                                               |
+| **AGPLv3**                                  | Lizenz, die Transparenz und Copyleft bei Netzbetrieb sicherstellt.                                                    |
 
-> | Term                                          | Definition                                                                                        |
-> | --------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-> | **BitGridAI**                                 | Local, explainable energy system for optimizing PV surplus and sustainable computing.             |
-> | **Core**                                      | Central decision and rule engine analyzing and managing energy flows.                             |
-> | **Modules**                                   | Extensible adapters integrating external systems such as inverters, storage, and miners.          |
-> | **Explanation Interface**                     | Local user interface for displaying and justifying system decisions.                              |
-> | **MQTT**                                      | Lightweight messaging protocol for asynchronous device communication.                             |
-> | **PV**                                        | Photovoltaics – technology for converting sunlight into electricity.                              |
-> | **HCI (Human-Computer Interaction)**          | Field studying interaction between humans and computers, focusing on understandability and trust. |
-> | **XAI (Explainable Artificial Intelligence)** | AI paradigm that emphasizes interpretability of decisions and processes.                          |
-> | **AGPLv3**                                    | License ensuring transparency and open-source distribution of network-deployed systems.           |
-> | **Local-First**                               | Principle that all computation and data processing occur locally on user hardware.                |
-> | **Mining Node**                               | Compute node that flexibly uses surplus energy, e.g., for Bitcoin mining.                         |
-> | **Sustainability Parameter**                  | Control variable prioritizing energy-efficient decisions.                                         |
-> | **Decision Log**                              | Record of all system decisions with context, explanation, and timestamp.                          |
-> | **Eventbus**                                  | Internal communication mechanism between modules, core, and UI.                                   |
-> | **Home Assistant**                            | Open-source platform for local home automation and device integration.                            |
+> | Term                            | Definition                                                                                                      |
+> | ------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+> | **BitGridAI**                   | Local, explainable energy system leveraging PV surplus and controlling flexible loads.                          |
+> | **EnergyState (SSoT)**          | Central read‑only state (“Single Source of Truth”) for core, UI, and logger.                                    |
+> | **Surplus**                     | Excess power: `p_pv − p_load − p_charge_req + p_discharge_avail`.                                               |
+> | **BlockInterval (10 min)**      | Time grid for deterministic control: `block_id = floor(epoch/600)`.                                             |
+> | **BlockScheduler**              | Orchestrates rule evaluation every 10 min and sets deadband windows.                                            |
+> | **Deadband**                    | Anti‑flapping mechanism: holds state for `D` blocks unless safety rules apply.                                  |
+> | **Rule Engine (R1–R5)**         | Deterministic core: Start (R1), Self‑supply guard (R2), Thermal guard (R3), Forecast start (R4), Deadband (R5). |
+> | **R1 Start rule**               | Start on surplus and optional price constraints.                                                                |
+> | **R2 Self‑supply guard**        | Stop/block on low SoC to preserve autonomy.                                                                     |
+> | **R3 Thermal guard**            | Immediate stop on over‑temperature; resume with hysteresis.                                                     |
+> | **R4 Forecast start**           | Early start when local surplus forecast is stable.                                                              |
+> | **R5 Deadband / Anti‑flapping** | Stabilization to avoid frequent toggling.                                                                       |
+> | **DecisionEvent**               | Domain event with action, reason, triggers, parameters, validity.                                               |
+> | **EnergyStateChangedEvent**     | Event on EnergyState update.                                                                                    |
+> | **DeadbandActivatedEvent**      | Event signalling that a holding window is active.                                                               |
+> | **Explainability UI**           | Local UI explaining decisions and showing the timeline.                                                         |
+> | **Next‑block preview**          | Preview of the expected action next block incl. thresholds.                                                     |
+> | **Manual override**             | Temporary manual control (start/stop/level) until block end/TTL.                                                |
+> | **KPI**                         | Metrics (grid import↓, flapping↓, explanation coverage↑, trust score↑, thermal incidents=0).                    |
+> | **Grid import**                 | Power drawn from the grid; KPI to reduce via local optimization.                                                |
+> | **Flapping**                    | Frequent start/stop toggling; minimized through deadband.                                                       |
+> | **Trust score**                 | User trust (e.g., Likert scale) from studies/feedback.                                                          |
+> | **SoC (State of Charge)**       | Battery state of charge (0…1); guarded via R2.                                                                  |
+> | **T_MAX / T_RESUME**            | Temperature thresholds for stop/resume of the miner (R3).                                                       |
+> | **MQTT**                        | Lightweight messaging protocol for asynchronous coupling.                                                       |
+> | **Modbus (TCP)**                | Industrial protocol to query devices like inverters.                                                            |
+> | **REST / WebSocket**            | Local HTTP/WS endpoints for state, timeline, events.                                                            |
+> | **SQLite / Parquet**            | Local storage (operational DB / long‑term logs & replay).                                                       |
+> | **Mosquitto**                   | Local MQTT broker for topics like `energy/state/#` or `explain/events/#`.                                       |
+> | **Home Assistant (HA)**         | Open‑source platform for local automation and device integration.                                               |
+> | **Mining node**                 | Flexible load (e.g., Bitcoin miner) consuming surplus energy.                                                   |
+> | **Local‑first**                 | Principle: computation and data remain on user‑owned hardware.                                                  |
+> | **AGPLv3**                      | License ensuring transparency and copyleft for network use.                                                     |
 
 ---
 
 ## Abkürzungen / Abbreviations
 
-| Kürzel   | Bedeutung                                              |
-| -------- | ------------------------------------------------------ |
-| **ADR**  | Architecture Decision Record                           |
-| **API**  | Application Programming Interface                      |
-| **CLI**  | Command Line Interface                                 |
-| **DB**   | Database                                               |
-| **UI**   | User Interface                                         |
-| **UX**   | User Experience                                        |
-| **a11y** | Accessibility (Barrierefreiheit)                       |
-| **CO₂**  | Kohlendioxid, relevante Kenngröße für Energieeffizienz |
+| Kürzel    | Bedeutung                                               |
+| --------- | ------------------------------------------------------- |
+| **ADR**   | Architecture Decision Record                            |
+| **API**   | Application Programming Interface                       |
+| **CLI**   | Command Line Interface                                  |
+| **DB**    | Database                                                |
+| **UI**    | User Interface                                          |
+| **UX**    | User Experience                                         |
+| **a11y**  | Accessibility (Barrierefreiheit)                        |
+| **CO₂**   | Kohlendioxid, Kenngröße für Energieeffizienz            |
+| **SSoT**  | Single Source of Truth (EnergyState)                    |
+| **SoC**   | State of Charge (Ladezustand)                           |
+| **KPI**   | Key Performance Indicator                               |
+| **NTP**   | Network Time Protocol                                   |
+| **TLS**   | Transport Layer Security                                |
+| **PII**   | Personally Identifiable Information                     |
+| **WS**    | WebSocket                                               |
+| **LAN**   | Local Area Network                                      |
+| **VLAN**  | Virtual LAN                                             |
+| **HA**    | Home Assistant                                          |
+| **HCI**   | Human‑Computer Interaction                              |
+| **XAI**   | Explainable Artificial Intelligence                     |
+| **R1–R5** | Regelwerk (Start, Autarkie, Thermo, Prognose, Deadband) |
 
-> | Abbr.    | Meaning                                               |
-> | -------- | ----------------------------------------------------- |
-> | **ADR**  | Architecture Decision Record                          |
-> | **API**  | Application Programming Interface                     |
-> | **CLI**  | Command Line Interface                                |
-> | **DB**   | Database                                              |
-> | **UI**   | User Interface                                        |
-> | **UX**   | User Experience                                       |
-> | **a11y** | Accessibility                                         |
-> | **CO₂**  | Carbon dioxide, relevant metric for energy efficiency |
+> | Abbr.     | Meaning                                                 |
+> | --------- | ------------------------------------------------------- |
+> | **ADR**   | Architecture Decision Record                            |
+> | **API**   | Application Programming Interface                       |
+> | **CLI**   | Command Line Interface                                  |
+> | **DB**    | Database                                                |
+> | **UI**    | User Interface                                          |
+> | **UX**    | User Experience                                         |
+> | **a11y**  | Accessibility                                           |
+> | **CO₂**   | Carbon dioxide, metric for energy efficiency            |
+> | **SSoT**  | Single Source of Truth (EnergyState)                    |
+> | **SoC**   | State of Charge                                         |
+> | **KPI**   | Key Performance Indicator                               |
+> | **NTP**   | Network Time Protocol                                   |
+> | **TLS**   | Transport Layer Security                                |
+> | **PII**   | Personally Identifiable Information                     |
+> | **WS**    | WebSocket                                               |
+> | **LAN**   | Local Area Network                                      |
+> | **VLAN**  | Virtual LAN                                             |
+> | **HA**    | Home Assistant                                          |
+> | **HCI**   | Human‑Computer Interaction                              |
+> | **XAI**   | Explainable Artificial Intelligence                     |
+> | **R1–R5** | Rule set (start, autonomy, thermal, forecast, deadband) |
 
 ---
 
 ## Zusammenfassung / Summary
 
-Das Glossar definiert die zentralen Begriffe von BitGridAI, um eine **gemeinsame Sprache** zwischen Entwicklung, Forschung und Anwendung zu schaffen.
-Es stellt sicher, dass technische und konzeptionelle Elemente konsistent und nachvollziehbar kommuniziert werden.
+Das Glossar schafft eine **gemeinsame Sprache** zwischen Entwicklung, Forschung und Anwendung.
+Es stellt sicher, dass technische und konzeptionelle Elemente von BitGridAI konsistent und nachvollziehbar kommuniziert werden.
 
-> The glossary defines the key terms of BitGridAI to establish a **shared vocabulary** between development, research, and application.
-> It ensures consistent and transparent communication of technical and conceptual elements.
+> The glossary establishes a **shared vocabulary** between development, research, and application.
+> It ensures that BitGridAI’s technical and conceptual elements are communicated consistently and transparently.
