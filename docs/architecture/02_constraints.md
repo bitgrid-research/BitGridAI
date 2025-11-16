@@ -1,10 +1,12 @@
 # 02 – Rahmenbedingungen / Constraints
 
-> **Kurzüberblick:**  
+> **Kurzüberblick:**
+>   
 > BitGridAI ist **local-first**, **open-source** und **erklärbar**.  
 > Keine Cloud, keine proprietären Abhängigkeiten, deterministische Regeln (**R1–R5**), 10-Min-Blocktakt, Safety & Logging als Pflicht.
 
-> **TL;DR (EN):**  
+> **TL;DR (EN):**
+> 
 > BitGridAI is **local-first**, **open-source**, and **explainable**.  
 > No cloud, no proprietary dependencies; deterministic rules (**R1–R5**), 10-minute block cadence; safety & logging are mandatory.
 
@@ -139,5 +141,6 @@ Sie bilden das Fundament für eine Architektur, die technologische Offenheit mit
 > They form the foundation for an architecture that combines technological openness with ethical responsibility.
 
 *Weiter mit **[03 – Systemkontext / System Context](./03_context.md)**.*
+
 
 
