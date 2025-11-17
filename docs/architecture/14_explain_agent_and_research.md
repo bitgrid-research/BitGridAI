@@ -113,7 +113,7 @@ sequenceDiagram
 | **Explain Coverage**    | ExplainSession/Decision | ≥ 95 %                  |
 | **Explain Latency**     | Decision → Explain      | < 2 s                   |
 | **Research Opt-in**     | ResearchToggleState     | projektspezifisch (z. B. ≥ 60 %) |
-| **Replay Success Rate** | ReplayJob.status        | 100 % abgeschlossen     |
+| **Replay Success Rate** | ReplayJob.status        | 100 %                   |
 | **Export Integrity**    | `hash` + Verify         | 100 %                   |
 
 KPIs werden lokal berechnet und erscheinen im Research-Panel der UI.
