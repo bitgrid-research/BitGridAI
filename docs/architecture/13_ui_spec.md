@@ -238,3 +238,6 @@ ui/
 Die UI macht Entscheidungen **sichtbar, begründet und steuerbar** – im Sinne von **Explainable by Design** und **Local-First**. Komponenten bleiben schlank, deterministisch gebunden an **EnergyState**, **DecisionEvents**, **ExplainSessions** und **R1–R5**; Research-Funktionen (Toggle, Export, Replay) sind erstklassige Bürger.
 
 > The UI renders decisions **visible, justified, and controllable**—aligned with **explainable by design** and **local-first**. Components stay lean, deterministically tied to **EnergyState**, **DecisionEvents**, **ExplainSessions**, and **R1–R5**; research features (toggle, export, replay) are first-class citizens.
+
+
+*Weiter mit **[14 – Explain-Agent & Research Services](./14_explain_agent_and_research.md)**.*

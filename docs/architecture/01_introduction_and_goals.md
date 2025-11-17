@@ -85,23 +85,27 @@ Ein **lokales, KI-gestütztes System**, das …
 ---
 
 ## KPIs / Success Metrics
-- **Netzbezug**: >= X% Reduktion während der Versuchsphase.  
-- **Flapping** (Start/Stop-Wechsel): >= Y% Reduktion dank Deadband.  
-- **Erklärungs-Abdeckung**: >= Z% (alle Decisions liefern Reason/Trigger/Parameter).  
-- **Vertrauens-Score**: >= T/5 (Likert) in Nutzerstudien.  
-- **Thermal-Safety-Events**: 0 ungeplante Übertemperaturen.  
-- **Energy-to-Sats-Effizienz**: >= E sats/kWh bei aktivem Mining/Hodl.  
-- **Hodl/Export-Traceability**: 100% der Blockfenster loggen `preferred_path` inkl. Begründung.  
-- **PoW-Sicherheitsverletzungen**: 0 ungeklärte Hashrate-/Effizienzabweichungen (durch R2/R3 abgefangen).
+| KPI | Zielwert | Messmethode/Quelle |
+| --- | --- | --- |
+| **Netzbezug-Reduktion** | ≥ 25 % weniger Import in Testzeitraum (30 Tage) | Vergleich `grid_import_kwh` gegen Baseline-Log |
+| **Flapping-Rate** | ≤ 2 Start/Stop-Wechsel pro Tag (≥ 60 % Reduktion ggü. Baseline) | `DecisionEvent`-Analyse (`start`/`stop`) |
+| **Erklärungs-Abdeckung** | ≥ 98 % der Decisions mit `reason/trigger/params` | Timeline-Export (`explain_coverage`) |
+| **Vertrauens-Score** | ≥ 4/5 Likert in Prosumer-Studien (n=10) | Research-Panel Survey |
+| **Thermal-Safety-Events** | 0 ungeplante Übertemperaturen `t_miner > 85 °C` | Health-Log + Sensorwerte |
+| **Energy-to-Sats-Effizienz** | ≥ 45 sats/kWh (rolling 7 Tage) | `energy_to_value`-Dataset |
+| **Hodl/Export-Traceability** | 100 % Blockfenster loggen `preferred_path` + Rationale | Append-only Hodl-Log |
+| **PoW-Sicherheitsverletzungen** | 0 ungeklärte Hashrate-/Effizienzabweichungen | `miner_state` + KPI-Alerts |
 
-> - **Grid import** reduced by >= X% during trials.  
-> - **Flapping** reduced by >= Y% via deadband.  
-> - **Explanation coverage** >= Z%.  
-> - **Trust score** >= T/5.  
-> - **Thermal safety**: 0 unexpected over-temperature events.  
-> - **Energy-to-sats efficiency** >= E sats/kWh whenever mining/hodl is active.  
-> - **Hodl/export traceability**: 100% of block windows log `preferred_path` plus rationale.  
-> - **PoW safety violations**: 0 unexplained hashrate/efficiency deviations (caught by R2/R3).
+> | KPI | Target | Measurement |
+> | --- | --- | --- |
+> | **Grid import reduction** | ≥ 25 % less import during a 30-day trial | Compare `grid_import_kwh` vs. baseline |
+> | **Flapping rate** | ≤ 2 start/stop switches per day (≥ 60 % drop) | `DecisionEvent` start/stop analysis |
+> | **Explanation coverage** | ≥ 98 % of decisions emit `reason/trigger/params` | Timeline export (`explain_coverage`) |
+> | **Trust score** | ≥ 4/5 Likert in prosumer study (n=10) | Research panel survey |
+> | **Thermal safety events** | 0 unplanned `t_miner > 85 °C` | Health log + sensors |
+> | **Energy-to-sats efficiency** | ≥ 45 sats/kWh (rolling 7 days) | `energy_to_value` dataset |
+> | **Hodl/export traceability** | 100 % of block windows log `preferred_path` plus rationale | Append-only hodl log |
+> | **PoW safety violations** | 0 unexplained hashrate deviations | `miner_state` + KPI alerts |
 
 ---
 

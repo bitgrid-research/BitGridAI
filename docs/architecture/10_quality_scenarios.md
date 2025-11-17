@@ -247,6 +247,20 @@ bitgrid-replay \
 
 ---
 
+## Runbooks & Verantwortlichkeiten
+
+| Kürzel | Zweck | Schritte | Owner |
+| --- | --- | --- | --- |
+| **RB-01 Deadband-Tuning** | Stabilität sichern (S2/S8) | `replay surplus-edge-case` → KPI `flapping_rate` prüfen → `config/bitgrid_rules.yaml` aktualisieren → ADR-Update | Core |
+| **RB-02 Safety Stop Drill** | R3-Reaktion testen (S6) | `fault_inject --type=heater` → `DecisionEvent.reason=R3` + UI Banner prüfen → `health acknowledge` | Hardware |
+| **RB-03 Drift Recovery** | Clock-Drift beheben (S10) | `ntpctl skew +120s` → Block-Hold beobachten → `ntpctl correct` + `health clear` | DevOps |
+| **RB-04 Explain Audit** | Coverage sichern (S1) | `/research/export scope=["timeline","kpi"]` → `scripts/kpi_check --metric=explain_coverage` | HCI |
+| **RB-05 Forecast Disable** | R4 deaktivieren (S9) | `config/flags.yaml: r4_enabled=false` → `bin/apply-config` → Replay `forecast-storm` | Research |
+
+Runbook-Ergebnisse werden im Research-Journal dokumentiert (Datum, Blockrange, KPI Outcome).
+
+---
+
 ## Akzeptanzkriterien (MVP) / Acceptance Criteria (MVP)
 
 * **100 % Explanation Coverage** für Decisions im Testfenster.

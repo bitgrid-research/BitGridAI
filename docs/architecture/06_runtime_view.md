@@ -79,13 +79,31 @@ flowchart LR
 ## Blocktakt & Entscheidungszyklus / Block Cadence & Decision Cycle
 
 1. **Tick**: `block_id = floor(epoch / 600)`; Scheduler triggert Evaluierung.
-2. **Safety‑Checks**: **R3** (Temperatur), **R2** (SoC) haben Vorrang → ggf. **stop**.
+2. **Safety-Checks**: **R3** (Temperatur), **R2** (SoC) haben Vorrang → ggf. **stop**.
 3. **Stabilität**: **R5 Deadband** hält Zustand bis `valid_until = block_id + D`.
-4. **Start‑Kandidaten**: **R1** (Überschuss+Preis) und optional **R4** (Forecast‑Stabilität).
+4. **Start-Kandidaten**: **R1** (Überschuss+Preis) und optional **R4** (Forecast-Stabilität).
 5. **Actuation** ausführen, **DecisionEvent**+Erklärung publizieren, **Logs** schreiben.
-6. **UI‑Preview**: „Was passiert im **nächsten Block**?“ inkl. Schwellen.
+6. **UI-Preview**: „Was passiert im **nächsten Block**?“ inkl. Schwellen.
 
 > Hard safety first (R3) → autonomy (R2) → stability (R5) → start (R1/R4).
+
+### Schwellen & Regelparameter (MVP)
+
+| Regel | Parameter | Wert | Quelle |
+| --- | --- | --- | --- |
+| **R1 Startregel** | `surplus_min_kw` | 1.5 kW (rolling average 1 Block) | Feldmessungen PV 6 kWp |
+| | `price_max_ct_kwh` | 18 ct | lokaler Tarif (2024) |
+| | `min_runtime_blocks` | 2 (20 min) | Hardware-Warmup |
+| **R2 Autarkie-Schutz** | `soc_stop_pct` | 35 % | Batteriehersteller |
+| | `soc_resume_pct` | 45 % | Reserve für Haushalt |
+| **R3 Thermo-Schutz** | `t_stop_c` | 85 °C | ASIC-Spezifikation |
+| | `t_resume_c` | 75 °C | 10 °C Hysterese |
+| **R4 Prognose-Start** | `forecast_surplus_kw` | ≥ 1.2 kW durchschnittlich über nächste 3 Blöcke | PV-Prognosemodell |
+| | `forecast_confidence` | ≥ 0.7 | Lokal berechneter Score |
+| **R5 Deadband** | `hold_blocks` | 2 Blöcke nach jeder state change | Anti-Flapping KPI |
+| **Override TTL** | `max_override_blocks` | 3 (30 min) | UX-Test (P1 Prosumer) |
+
+Alle Werte werden als YAML (`config/bitgrid_rules.yaml`) versioniert und über ADR-Änderungen dokumentiert (siehe Kap. 09 & 14).
 
 ---
 

@@ -97,6 +97,38 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 
 ---
 
+## Betriebssystem & Hardening (ergänzt)
+
+| Ebene | Maßnahme | Tools / Hinweise |
+| --- | --- | --- |
+| **OS** | Minimal-Image (Debian 12 / Ubuntu 24.04 LTS). Nur `openssh`, `python`, `mosquitto`, `bitgrid-core`. | `ansible/playbooks/os_hardening.yml` |
+| **Netzwerk** | Dediziertes LAN bzw. IoT-VLAN mit Firewall „deny all“ + Allowlist (MQTT 1883, UI 8443). | `ufw`/`nftables`; getrennte Segmente wie im Deployment-Setup für HA/IoT. |
+| **Fail-Safe** | Miner geht OFF bei Sensor- oder Netzwerkfehler (Safety-Design). | Studien-Template „Fail-Safe-Design“. |
+| **USV-Integration** | Geordneter Shutdown bei Stromausfall. | USV-Add-on triggert Stop-Sequenz. |
+| **Secrets** | Keine Cloud-Keys; `.env` → `chmod 600`; SSH via ed25519/YubiKey. | `setup/scripts/lockdown.ps1`. |
+| **Updates** | Rolling Updates nach bestandenem Replay + Wartungsplan (HA, Unraid, Miner). | „Updates & Wartung“-Playbook, `bin/apply-config`. |
+| **Monitoring** | `healthd` (CPU/Temp/Disk) + Shelly Plug & Temp-Sensor aus Deployment-Rig. | MQTT `health/#`, Hardware-Sensoren. |
+| **Backup** | Tägliches DB-/Config-Backup. | Borg/Duplicati Jobs. |
+| **Security Docs** | security.txt, HSTS, TLS überall, Responsible Disclosure. | Hinweise aus Security-Kapitel. |
+
+---
+
+## Ressourcen & Performance Budgets (ergänzt)
+
+| Komponente | Minimum | Empfehlung | Notizen |
+| --- | --- | --- | --- |
+| **Edge Node / Controller** | 4 vCPU, 4 GB RAM, 64 GB SSD | 6 vCPU, 8 GB RAM, 256 GB NVMe | LLM (Mistral 7B ~3 GB RAM); Unraid-Server im Keller-Rig möglich |
+| **MQTT Broker** | 1 vCPU, 512 MB RAM | 2 vCPU, 1 GB RAM | Co-located oder separat |
+| **Home Assistant / Unraid** | 2 vCPU, 2 GB RAM | 4 vCPU, 4 GB RAM | Deployment-Rig nutzt Unraid + HA-Add-ons |
+| **Netzwerk** | 1 GbE / WiFi6 | 1 GbE kabelgebunden | VLAN-Trennung (IoT) empfohlen |
+| **Power Budget** | < 25 W Idle | < 40 W Peak | USV Pflicht |
+| **Sensorik** | — | Shelly Plug + Temp-Sensor | Aus Hardware-Setup |
+| **Storage Throughput** | 50 MB/s | 150 MB/s NVMe | Für Replay/Exports |
+| **LLM-Runtime** | — | 3 GB RAM + 1 vCPU | Local-first Mistral |
+| **Backup-System** | — | Borg/Duplicati | tägliche Jobs |
+
+Performance-Grenzen spiegeln UI-Budgets (Kap. 13) und Laufzeitpfade (Kap. 06). Deployment-Playbooks (`setup/ansible/*`) führen `scripts/post_deploy_check.py` nach jedem Rollout aus.
+
 ## Deployment-Varianten / Deployment Variants
 
 | Variante                      | Beschreibung                                      | Einsatz                                  |

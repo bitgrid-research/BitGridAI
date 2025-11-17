@@ -104,6 +104,13 @@ sequenceDiagram
 
 > Security-first: read-only agent, deterministic prompts, opt-in research.
 
+### Prompt- & Regel-Governance
+
+1. **Change Flow:** Jede Anpassung an `prompts/*.yaml` oder `config/bitgrid_rules.yaml` benötigt einen PR + ADR mit Impact-Analyse. `scripts/validate_rules.py` prüft Grenzwerte, `scripts/prompt_snapshot.py` erzeugt Hashes für Diff-Review.
+2. **Version Pinning:** Deployments referenzieren `config/version.lock` (`rules=v20250115`, `prompts=v20250112`). ExplainSessions speichern `prompt_version`, DecisionEvents `rule_version`.
+3. **Rollback:** Bei Regression `bin/apply-config --version=<prev>` ausführen und via `replay --dataset=last24h` validieren. Ergebnis wird in `config/change_log.md` dokumentiert.
+4. **Audit Trail:** Monatlich `/research/export` mit Scope `["config","timeline","kpi"]` erzeugen und Hash im Research-Journal notieren.
+
 ---
 
 ## Monitoring & KPIs

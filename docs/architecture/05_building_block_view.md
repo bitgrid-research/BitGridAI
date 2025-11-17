@@ -75,6 +75,44 @@ und trägt durch seine Schnittstellen und Logs zur **Erklärbarkeit und Nachvoll
 > - **Local Event Bus** – internal communication between modules and the core logic
 > - **File-based Logs** – persistent storage of decisions and states
 
+### Adapter- & Payload-Katalog
+
+| Integration | Transport | Topic/Endpoint | Payload-Ausschnitt |
+| --- | --- | --- | --- |
+| PV/Inverter Adapter | MQTT (`sensor/pv_power`, `sensor/pv_voltage`) | `{"p_pv_kw": 3.2, "u_dc_v": 425}` | Werte werden in SI-Einheiten publiziert, `retain=true` |
+| Smart-Meter Adapter | MQTT (`meter/grid`) | `{"p_import_kw": 0.8, "p_export_kw": 0.0, "phase": {"l1":0.3,"l2":0.3,"l3":0.2}}` | 1 Hz Updates, Clock synchronisiert über NTP |
+| Speicher Adapter | REST `GET /storage/state` + MQTT Kommandos | Response `{"soc_pct":54,"p_charge_kw":0.5,"p_discharge_kw":0}` | Adapter schreibt nur bei lokalem Token |
+| Miner Controller | REST `POST /miner/cmd` + MQTT `miner/state` | Command `{"action":"set_power","value_kw":2.0}`; State `{"hashrate_ths":92,"t_miner_c":72}` | Alle Kommandos haben `command_id` zur Korrelation |
+| Explainability UI | WebSocket `ws://ui/events` | Stream `{"type":"decision","payload": DecisionEvent}` | Direktes Mapping auf Datenmodell |
+| Research Exporter | REST `POST /research/export` | Request `{"scope":["timeline","kpi"],"since_block":812345}` | Antwort enthält signiertes ZIP (`hash_sha256`) |
+
+#### REST-Beispiele
+
+`GET /state`  
+```json
+{
+  "ts": "2025-01-17T10:20:00Z",
+  "block_id": 812345,
+  "p_pv_kw": 4.1,
+  "p_load_kw": 2.3,
+  "surplus_kw": 1.8,
+  "soc_pct": 58,
+  "t_miner_c": 71,
+  "price_ct_kwh": 17.2
+}
+```
+
+`POST /override`
+```json
+{
+  "action": "stop",
+  "ttl_blocks": 2,
+  "note": "PV forecast drop due to clouds"
+}
+```
+
+Antwort: `{"accepted": true, "valid_until_block": 812347, "command_id": "ovr-2025-01-17T10:20:05Z"}`.
+
 ---
 
 ## Interne Struktur / Internal Structure
