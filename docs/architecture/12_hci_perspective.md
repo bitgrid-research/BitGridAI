@@ -82,8 +82,7 @@ Jede Automatisierung bleibt **verständlich**, **rücknehmbar** und **vertrauens
 | **Override-Chip**      | Manueller Start/Stop/Level + TTL              | Countdown, Policy-Rücksprung, Logging override_enter  |
 | **Health-Banner**      | Störungen (Broker, Drift, Sensor-Stale)       | Severity-Icons, Link zu Runbook, Aggregat für KPIs      |
 | **KPI-Widget**         | Trust/Coverage/Flapping-Metriken              | Lokal berechnet, anonymisiert, Export kpi_report      |
-| **Research-Toggle**    | Opt-in/out für Forschungsdaten, Privacy-Info  | Zeigt Datenscope, Audit-Log 
-esearch_mode_changed     |
+| **Research-Toggle**    | Opt-in/out für Forschungsdaten, Privacy-Info  | Zeigt Datenscope, Audit-Log                            |
 
 > | Component              | Purpose                                    | Notes                                         |
 > | ---------------------- | ------------------------------------------- | --------------------------------------------- |
