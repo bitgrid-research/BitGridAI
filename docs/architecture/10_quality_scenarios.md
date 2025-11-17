@@ -175,6 +175,29 @@ Dieses Kapitel beschreibt Qualitätsszenarien, die das Verhalten von BitGridAI i
 
 ---
 
+## S11 – Hodl-Entscheidung & Traceability
+
+**Preconditions**: `surplus = 1.5?kW`, BlockScheduler aktiv, Hodl-Policy = *local-first*.
+**Stimulus**: Block-Tick triggert Energy-Path-Bewertung; Exportpreis < Grenzwert, Hodl erlaubt.
+**Environment**: Keine Safety-Hits (R2/R3); Deadband frei.
+**Response**: DecisionEvent enthält `preferred_path=hodl`, `rejected_path=export`, `sats_per_kWh`; Miner-Level wird innerhalb Blockfenster gesetzt.
+**Response Measure**: 100?% der Energy-Path-Entscheidungen erzeugen Logeintrag (`energy_to_value`) < **500?ms**; UI zeigt Alternativvergleich.
+**Logs/Events**: `energy_path_decision{block_id, preferred_path, sats_per_kWh}`, `energy_to_value.append`.
+**UI**: Research-Panel mit Blockzeit, sats/kWh, Hinweis „Export verworfen (Preis < Schwelle)“.
+
+---
+
+## S12 – Proof-of-Work Telemetrie & Sicherheit
+
+**Preconditions**: Mining aktiv; Telemetrie (`hashrate`, `efficiency`, `t_miner`) verfügbar.
+**Stimulus**: Effizienz driftet > **5?%** vom Ziel oder Temperatur nähert sich `T_MAX - 2?°C`.
+**Environment**: Normalbetrieb; keine weiteren Faults.
+**Response**: Miner-Controller limitiert Leistung oder sendet `stop`; DecisionEvent dokumentiert `pow_hash_sample`; R3 löst ggf. Stop ? Safe aus.
+**Response Measure**: Reaktion < **2?s** nach Telemetrie-Anomalie; Temperatur bleibt < `T_MAX`; Hashprobe protokolliert.
+**Logs/Events**: `telemetry_warning{metric=efficiency}`, `DecisionEvent{reason=R3, pow_hash_sample=...}`.
+**UI**: Warnkarte „PoW Effizienzabweichung – Leistung limitiert“ mit Link zur Hashprobe.
+
+
 ## Bewertung / Evaluation Criteria
 
 | Kriterium                 | Metrik / Beobachtung          | Zielwert     |
@@ -210,29 +233,6 @@ bitgrid-replay \
 
 ---
 
-## S11 � Hodl-Entscheidung & Traceability
-
-**Preconditions**: `surplus = 1.5?kW`, BlockScheduler aktiv, Hodl-Policy = *local-first*.
-**Stimulus**: Block-Tick triggert Energy-Path-Bewertung; Exportpreis < Grenzwert, Hodl erlaubt.
-**Environment**: Keine Safety-Hits (R2/R3); Deadband frei.
-**Response**: DecisionEvent enth�lt `preferred_path=hodl`, `rejected_path=export`, `sats_per_kWh`; Miner-Level wird innerhalb Blockfenster gesetzt.
-**Response Measure**: 100?% der Energy-Path-Entscheidungen erzeugen Logeintrag (`energy_to_value`) < **500?ms**; UI zeigt Alternativvergleich.
-**Logs/Events**: `energy_path_decision{block_id, preferred_path, sats_per_kWh}`, `energy_to_value.append`.
-**UI**: Research-Panel mit Blockzeit, sats/kWh, Hinweis �Export verworfen (Preis < Schwelle)�.
-
----
-
-## S12 � Proof-of-Work Telemetrie & Sicherheit
-
-**Preconditions**: Mining aktiv; Telemetrie (`hashrate`, `efficiency`, `t_miner`) verf�gbar.
-**Stimulus**: Effizienz driftet > **5?%** vom Ziel oder Temperatur n�hert sich `T_MAX - 2?�C`.
-**Environment**: Normalbetrieb; keine weiteren Faults.
-**Response**: Miner-Controller limitiert Leistung oder sendet `stop`; DecisionEvent dokumentiert `pow_hash_sample`; R3 l�st ggf. Stop ? Safe aus.
-**Response Measure**: Reaktion < **2?s** nach Telemetrie-Anomalie; Temperatur bleibt < `T_MAX`; Hashprobe protokolliert.
-**Logs/Events**: `telemetry_warning{metric=efficiency}`, `DecisionEvent{reason=R3, pow_hash_sample=...}`.
-**UI**: Warnkarte �PoW Effizienzabweichung � Leistung limitiert� mit Link zur Hashprobe.
-
----
 ## Traceability‑Matrix (ADR ↔ Szenarien ↔ KPIs)
 
 | Szenario | ADR‑Bezug                                    | KPIs                    |
@@ -242,8 +242,9 @@ bitgrid-replay \
 | S3, S10  | ADR‑014 (Privacy/Local), ADR‑006 (Block)     | Availability↑           |
 | S6, S7   | ADR‑015 (Safety), ADR‑007 (Rules)            | Thermal=0, Self‑supply  |
 | S8       | ADR‑009 (Deadband)                           | Flapping↓               |
-| S11      | ADR??'005/009 (Energy-Path Policies)           | Energy?Sats, Traceability |
-| S12      | ADR??'015 (Safety)                             | PoW-Sicherheit, Thermal  |
+| S11      | ADR-005/-009/-018 (Energy-Path Policies)           | Energy?Sats, Traceability |
+| S12      | ADR-19/-015 (Safety)                             | PoW-Sicherheit, Thermal  |
+
 ---
 
 ## Akzeptanzkriterien (MVP) / Acceptance Criteria (MVP)
