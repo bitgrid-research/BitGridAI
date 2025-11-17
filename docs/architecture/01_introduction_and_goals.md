@@ -109,4 +109,14 @@ Ein **lokales, KI-gestütztes System**, das …
 
 ---
 
+## Zusammenfassung / Summary
+
+BitGridAI definiert einen **lokalen, erklärbaren Energie-MVP**: klare Ziele, Qualitätskriterien und KPIs sichern Transparenz, Sicherheit und Nachhaltigkeit; R1–R5 geben jedem Entscheidungszyklus einen nachvollziehbaren Rahmen.  
+Das Kapitel verankert damit, warum BitGridAI existiert, welche Resultate erwartet werden und wie Erfolg messbar bleibt – die Basis für alle folgenden arc42-Abschnitte.
+
+> BitGridAI’s vision is a **local-first, explainable energy automation MVP** with explicit goals, guardrails, and KPIs that keep transparency, safety, and sustainability measurable.  
+> This chapter grounds every later decision by spelling out the mission, rule set (R1–R5), and success metrics.
+
+---
+
 *Weiter mit **[02 Rahmenbedingungen / Constraints](./02_constraints.md)**.*

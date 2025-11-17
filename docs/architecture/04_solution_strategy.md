@@ -82,4 +82,14 @@ PV → Energiespeicher → BitGrid Core + Explain-Agent → Flexibler Verbrauche
 > - **Sustainability** is treated as an integrated control parameter, not a secondary outcome  
 > - **Research readiness** (toggle + replay) secures evidence-based results
 
+---
+
+## Zusammenfassung / Summary
+
+Die Lösungsstrategie fasst BitGridAI als **lokales, deterministisches und erklärbares System** zusammen: Module bleiben klar getrennt, Entscheidungen laufen block-synchron über R1–R5, und sämtliche Schnittstellen (UI, Explain-Agent, Research-Services) sind lokal auditierbar.  
+Damit bildet das Kapitel den Fahrplan für alle folgenden Sichten – von Bausteinen bis Deployment – und stellt sicher, dass Transparenz, Nachhaltigkeit und Forschungstauglichkeit durchgängig berücksichtigt werden.
+
+> The solution strategy distills BitGridAI into a **local-first, deterministic, explainable architecture**: separated modules, block-aligned decisions (R1–R5), and local contracts for UI, explain agent, and research services.  
+> It acts as the blueprint for the remaining arc42 chapters, ensuring transparency, sustainability, and research readiness stay embedded throughout.
+
 * [05 Bausteinsicht / Building Block View](./05_building_block_view.md)
