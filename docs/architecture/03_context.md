@@ -45,7 +45,7 @@ Es verbindet physische Energieflüsse mit digitalen Entscheidungsprozessen, um *
 | System                        | Schnittstelle          | Zweck                                                     |
 | ----------------------------- | ---------------------- | --------------------------------------------------------- |
 | **Home Assistant**            | MQTT / REST            | Austausch von Zuständen, Kommandos, UI-Einbindung.        |
-| **PV-Wechselrichter**         | Modbus/TCP / API       | Erzeugungs-, Spannungs- und Statusdaten.                  |
+| **PV-Wechselrichter**         | Modbus/ TCP / API       | Erzeugungs-, Spannungs- und Statusdaten.                  |
 | **Smart Meter / Zähler**      | MQTT / SML / API       | Netzbezug/-einspeisung, Phasenleistung, Momentanwerte.    |
 | **Energiespeicher**           | API / MQTT             | SoC, Lade-/Entladeleistung, Prioritäten.                  |
 | **Mining-Controller**         | LAN / API              | Leistungsstufen, Start/Stop, Temperatur-/Lüfterdaten.     |
