@@ -62,7 +62,7 @@ Ziel ist ein Gleichgewicht zwischen **lokaler Kontrolle, Nachhaltigkeit und Inte
 | Bereich | Beschreibung |
 | --- | --- |
 | **Forschungskontext** | Universitäres Projekt (HCI & Energieinformatik) mit Feldstudien im Haushalt. |
-| **Nachvollziehbarkeit** | Architektur- & Entscheidungsdoku obligatorisch (ADR in `09_design_decisions.md`). |
+| **Nachvollziehbarkeit** | Architektur- & Entscheidungsdoku obligatorisch (ADR in [09 Designentscheidungen](./09_design_decisions.md)). |
 | **Kooperationen** | Offene Schnittstellen für Partner (Messgeräte, Zähler, Prosumer-Communities). |
 | **Ressourcenbegrenzung** | Budget/Zeitrahmen limitiert → Fokus auf MVP + Kernfunktionen. |
 | **Konfigurationsdisziplin** | Änderungen nur über versionierte YAMLs; reproducible builds; Explain-Agent-Prompts versioniert. |
@@ -70,7 +70,7 @@ Ziel ist ein Gleichgewicht zwischen **lokaler Kontrolle, Nachhaltigkeit und Inte
 > | Area | Description |
 > | --- | --- |
 > | **Research Context** | Academic project (HCI & energy informatics) with in-home field trials. |
-> | **Traceability** | Architecture & decision documentation mandatory (ADRs in `09_design_decisions.md`). |
+> | **Traceability** | Architecture & decision documentation mandatory (ADRs in [09 design_decisions.md](./09_design_decisions.md)). |
 > | **Collaboration** | Open interfaces for partners (meters, sensors, prosumer groups). |
 > | **Resource Constraints** | Limited budget/time → focus on MVP and core features. |
 > | **Config Discipline** | Changes via versioned YAML; reproducible builds; explain-agent prompts under version control. |
@@ -143,6 +143,7 @@ Sie bilden das Fundament für eine Architektur, die technologische Offenheit mit
 > They form the foundation for an architecture that combines technological openness with ethical responsibility.
 
 *Weiter mit **[03 – Systemkontext / System Context](./03_context.md)**.*
+
 
 
 
