@@ -184,7 +184,7 @@ flowchart TB
 
 ---
 
-## Kontextzusammenfassung / Context Summary
+## Zusammenfassung / Summary
 
 BitGridAI positioniert sich **zwischen physikalischer Infrastruktur und menschlicher Entscheidungsautonomie**.
 Es übersetzt komplexe Energiedaten in nachvollziehbare Handlungsmodelle und stärkt so **Vertrauen, Kontrolle und Transparenz**.
