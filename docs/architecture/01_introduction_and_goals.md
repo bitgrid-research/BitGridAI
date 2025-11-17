@@ -105,3 +105,4 @@ Ein **lokales, KI-gestütztes System**, das …
 
 ---
 
+*Weiter mit **[02 Rahmenbedingungen / Constraints](./02_constraints.md)**.*
