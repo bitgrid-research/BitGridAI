@@ -262,6 +262,8 @@ sequenceDiagram
 | **UI‑Erklärung**      | < **200 ms** nach DecisionEvent         |
 | **Log‑Persistenz**    | < **100 ms** (async, append‑only)       |
 
+Werte sind Richtgrößen für MVP‑Eval; an Hardware anpassbar.
+
 > | Target                  | Budget                            |
 > | ----------------------- | --------------------------------- |
 > | **State propagation**   | < **500 ms** sensor → EnergyState |
@@ -269,7 +271,6 @@ sequenceDiagram
 > | **Explanation latency** | < **200 ms** after DecisionEvent  |
 > | **Log persistence**     | < **100 ms** (async, append‑only) |
 
-> Werte sind Richtgrößen für MVP‑Eval; an Hardware anpassbar.
 > Values are indicative for the MVP and may be tuned per hardware.
 
 ---

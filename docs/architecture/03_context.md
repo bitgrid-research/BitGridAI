@@ -159,8 +159,8 @@ flowchart TB
 | Objekt | Felder & Typen (Einheiten) | Beschreibung |
 | --- | --- | --- |
 | **EnergyState** | `ts` (ISO8601), `block_id` (int), `p_pv_kw`, `p_load_kw`, `surplus_kw`, `soc_pct`, `t_miner_c`, `price_ct_kwh`, `forecast_surplus_kw[0..5]`, `grid_import_kw`, `grid_export_kw` | SSoT – nur vom Energy Context beschrieben. Alle Werte in SI-Einheiten, Forecast array bildet 5 kommende Blöcke ab. |
-| **DecisionEvent** | `id` (UUID), `block_id`, `action` (`start|stop|hold|set_level`), `reason` (`R1–R5|manual_override|safety`), `trigger` (Key/Value), `params` (JSON), `valid_until`, `override_ttl`, `preferred_path` | Ergebnis der Regelengine; dient UI, Logging, Research. |
-| **Override** | `origin` (`ui|api|policy`), `action`, `ttl_blocks`, `created_at`, `note` | Temporäre manuelle Eingriffe; laufen spätestens am Blockende aus. |
+| **DecisionEvent** | `id` (UUID), `block_id`, `action` (`start\|stop\|hold\|set_level`), `reason` (`R1-R5\|manual_override\|safety`), `trigger` (Key/Value), `params` (JSON), `valid_until`, `override_ttl`, `preferred_path` | Ergebnis der Regelengine; dient UI, Logging, Research. |
+| **Override** | `origin` (`ui\|api\|policy`), `action`, `ttl_blocks`, `created_at`, `note` | Temporäre manuelle Eingriffe; laufen spätestens am Blockende aus. |
 | **ExplainSession** | `id`, `decision_id`, `prompt_version`, `result_text_de`, `result_text_en`, `confidence`, `valid_until` | Microcopy/Was-wäre-wenn-Ausgaben inkl. Versionierung. |
 | **ResearchToggleState** | `enabled` (bool), `actor`, `ts`, `justification` | Nachweis für DSGVO-konformes Opt-in. |
 
