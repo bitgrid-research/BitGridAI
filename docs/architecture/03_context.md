@@ -34,7 +34,7 @@ Es verbindet physische Energieflüsse mit digitalen Entscheidungsprozessen, um *
 > | Role                         | Description                                                             |
 > | ---------------------------- | ----------------------------------------------------------------------- |
 > | **User / Prosumer**          | Operates PV, storage and flexible loads; can set preferences/overrides. |
-> | **BitGrid Core + Explain Agent** | Local decision logic (R1–R5), block scheduler, logging, explainability, on-device LLM microcopy. |
+> | **BitGrid Core + Explain-Agent** | Local decision logic (R1-R5), block scheduler, logging, explainability, on-device LLM microcopy. |
 > | **External Systems**         | Home Assistant, inverters, meters/sensors, storage, mining controllers. |
 > | **Researchers / Developers** | Analyze behavior, evaluate explainability, build modules.               |
 
@@ -148,7 +148,7 @@ flowchart TB
 * **BlockInterval (10 min)** – Zeitscheibe für Entscheidungen & Deadband.
 * **Decision** – Ergebnis der Regelprüfung inkl. **Reason/Trigger/Parameter**.
 * **ResearchToggleState** – Opt-in/Opt-out für Forschungsexporte und Replay.
-* **ExplainSession** – Kontext für Was-wäre-wenn-Simulationen (Prompt, Ergebnis, Gültigkeit).
+* **ExplainSession** – Kontext für Live- vs. Was-wäre-wenn-Erklärungen (Prompt, Ergebnis, Gültigkeit, Typ).
 * **Events** – `EnergyStateChangedEvent`, `DecisionEvent`, `DeadbandActivatedEvent`, `ResearchToggleChanged`, `ExplainSessionCreated`.
 
 > **Objects**: EnergyState, Surplus, BlockInterval, Decision, ResearchToggleState, ExplainSession.
@@ -161,7 +161,7 @@ flowchart TB
 | **EnergyState** | `ts` (ISO8601), `block_id` (int), `p_pv_kw`, `p_load_kw`, `surplus_kw`, `soc_pct`, `t_miner_c`, `price_ct_kwh`, `forecast_surplus_kw[0..5]`, `grid_import_kw`, `grid_export_kw` | SSoT – nur vom Energy Context beschrieben. Alle Werte in SI-Einheiten, Forecast array bildet 5 kommende Blöcke ab. |
 | **DecisionEvent** | `id` (UUID), `block_id`, `action` (`start\|stop\|hold\|set_level`), `reason` (`R1-R5\|manual_override\|safety`), `trigger` (Key/Value), `params` (JSON), `valid_until`, `override_ttl`, `preferred_path` | Ergebnis der Regelengine; dient UI, Logging, Research. |
 | **Override** | `origin` (`ui\|api\|policy`), `action`, `ttl_blocks`, `created_at`, `note` | Temporäre manuelle Eingriffe; laufen spätestens am Blockende aus. |
-| **ExplainSession** | `id`, `decision_id`, `prompt_version`, `result_text_de`, `result_text_en`, `confidence`, `valid_until` | Microcopy/Was-wäre-wenn-Ausgaben inkl. Versionierung. |
+| **ExplainSession** | `id`, `decision_id`, `block_id`, `prompt_version`, `result_text_de`, `result_text_en`, `confidence`, `type (live\|what_if)`, `valid_until` | Microcopy/Was-wäre-wenn-Ausgaben inkl. Version & Typ. |
 | **ResearchToggleState** | `enabled` (bool), `actor`, `ts`, `justification` | Nachweis für DSGVO-konformes Opt-in. |
 
 > All JSON payloads follow this model; units are always explicit (kW, °C, %, €ct). The glossary links abbreviations back to these tables.

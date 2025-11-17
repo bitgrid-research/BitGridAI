@@ -45,7 +45,7 @@ Alle Komponenten kommunizieren innerhalb eines **geschlossenen lokalen Netzwerks
 > |----------------------------------------------------------------|
 > |  [ PV inverter ]       [ storage ]        [ miner/flex load ]  |
 > |          ↓                     ↓                   ↓           |
-> |        [ modules/ ] → [ core + explain agent ] ← [ MQTT broker ]|
+> |        [ modules/ ] → [ core + Explain-Agent ] ← [ MQTT broker ]|
 > |                  ↓             ↓                ↓             |
 > |      [ data + replay ]      [ ui/ ]        [ research node ]  |
 > |                  ↓                                   ↓        |

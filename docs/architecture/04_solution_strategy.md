@@ -6,7 +6,7 @@
 
 > **TL;DR (EN):**
 > 
-> Modular, local‑first, and explainable architecture: deterministic R1–R5 on a 10‑minute block cadence, explainability UI + on-device explain agent ("Why now?"/what-if), MQTT/REST adapters, SQLite/Parquet logging & replay, research toggle. No cloud, clear contracts, sustainability as a control parameter.
+> Modular, local‑first, and explainable architecture: deterministic R1–R5 on a 10‑minute block cadence, explainability UI + on-device Explain-Agent ("Why now?"/what-if), MQTT/REST adapters, SQLite/Parquet logging & replay, research toggle. No cloud, clear contracts, sustainability as a control parameter.
 
 ---
 
@@ -33,7 +33,7 @@ durch transparente Prozesse, klare Schnittstellen und nachvollziehbare Entscheid
 > 1. **Separation of concerns** – logic, modules, and the explanation interface are clearly decoupled  
 > 2. **Transparency first** – every decision is traceable and verifiable  
 > 3. **Local over cloud** – all data processing remains under user control  
-> 4. **Real-time explainability** – decisions are communicated and justified via an on-device explain agent  
+> 4. **Real-time explainability** – decisions are communicated and justified via an on-device Explain-Agent  
 > 5. **Sustainability as a design goal** – control logic adapts to the availability and quality of renewable resources  
 > 6. **Research & replay readiness** – research toggle, KPIs, and local replays are first-class.
 
@@ -53,7 +53,7 @@ durch transparente Prozesse, klare Schnittstellen und nachvollziehbare Entscheid
 > |-------|-------------|----------|
 > | **Core Logic** | Python | Rule and decision engine for energy flow management |
 > | **Communication** | MQTT / REST | Asynchronous coupling between modules and devices |
-> | **Explanation Interface & Explain Agent** | Local UI + on-device LLM | Transparent visualization, microcopy, what-if simulations |
+> | **Explanation Interface & Explain-Agent** | Local UI + on-device LLM | Transparent visualization, microcopy, what-if simulations |
 > | **Storage & Replay** | SQLite / Parquet / JSON | Reproducible data persistence, KPI computation, log replay |
 > | **Research Services** | CLI / Python tooling | KPI runner, opt-in export, anonymized reports |
 
@@ -64,7 +64,7 @@ PV → Energiespeicher → BitGrid Core + Explain-Agent → Flexibler Verbrauche
 
 
 > ```
-> PV → Energy Buffer → BitGrid Core + Explain Agent → Flexible Load (e.g., Mining Node) → Local Explanation/Research Interface → KPI/Replay
+> PV → Energy Buffer → BitGrid Core + Explain-Agent → Flexible Load (e.g., Mining Node) → Local Explanation/Research Interface → KPI/Replay
 > ```
 
 ---
@@ -78,7 +78,7 @@ PV → Energiespeicher → BitGrid Core + Explain-Agent → Flexibler Verbrauche
 
 > - **Local-first architecture** reinforces privacy, trust, and user autonomy  
 > - **Modularity** ensures reusability, extensibility, and clear responsibilities  
-> - **Explainability** (explain agent + UI) increases user acceptance and supports scientific evaluation  
+> - **Explainability** (Explain-Agent + UI) increases user acceptance and supports scientific evaluation  
 > - **Sustainability** is treated as an integrated control parameter, not a secondary outcome  
 > - **Research readiness** (toggle + replay) secures evidence-based results
 
@@ -89,7 +89,7 @@ PV → Energiespeicher → BitGrid Core + Explain-Agent → Flexibler Verbrauche
 Die Lösungsstrategie fasst BitGridAI als **lokales, deterministisches und erklärbares System** zusammen: Module bleiben klar getrennt, Entscheidungen laufen block-synchron über R1–R5, und sämtliche Schnittstellen (UI, Explain-Agent, Research-Services) sind lokal auditierbar.  
 Damit bildet das Kapitel den Fahrplan für alle folgenden Sichten – von Bausteinen bis Deployment – und stellt sicher, dass Transparenz, Nachhaltigkeit und Forschungstauglichkeit durchgängig berücksichtigt werden.
 
-> The solution strategy distills BitGridAI into a **local-first, deterministic, explainable architecture**: separated modules, block-aligned decisions (R1–R5), and local contracts for UI, explain agent, and research services.  
+> The solution strategy distills BitGridAI into a **local-first, deterministic, explainable architecture**: separated modules, block-aligned decisions (R1–R5), and local contracts for UI, Explain-Agent, and research services.  
 > It acts as the blueprint for the remaining arc42 chapters, ensuring transparency, sustainability, and research readiness stay embedded throughout.
 
 * [05 Bausteinsicht / Building Block View](./05_building_block_view.md)

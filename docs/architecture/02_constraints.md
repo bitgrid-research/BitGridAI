@@ -48,7 +48,7 @@ Ziel ist ein Gleichgewicht zwischen **lokaler Kontrolle, Nachhaltigkeit und Inte
 > | **Hardware Independence** | No reliance on proprietary hubs or cloud APIs. |
 > | **Single Source of Truth** | **EnergyState** centralizes metering, forecasts, prices/SoC, temperatures. |
 > | **Deterministic Rule Engine** | **R1‑R5** are deterministic; no black-box ML in the control loop. |
-> | **Explain Agent (on-device LLM)** | Microcopy and what-if simulations run locally on quantized models; no cloud calls. |
+> | **Explain-Agent (On-Device LLM)** | Microcopy and what-if simulations run locally on quantized models; no cloud calls. |
 > | **Block Scheduler** | Decisions align to a **10-minute rhythm** for stability and anti-flapping. |
 > | **Explainability by Design** | Every action includes **reason/trigger/parameters** and emits a DecisionEvent. |
 > | **Safety & Fail States** | Hard limits (SoC/temperature) → **stop → safe**; no OC/UV of mining HW. |
@@ -73,7 +73,7 @@ Ziel ist ein Gleichgewicht zwischen **lokaler Kontrolle, Nachhaltigkeit und Inte
 > | **Traceability** | Architecture & decision documentation mandatory (ADRs in [09 design_decisions.md](./09_design_decisions.md)). |
 > | **Collaboration** | Open interfaces for partners (meters, sensors, prosumer groups). |
 > | **Resource Constraints** | Limited budget/time → focus on MVP and core features. |
-> | **Config Discipline** | Changes via versioned YAML; reproducible builds; explain-agent prompts under version control. |
+> | **Config Discipline** | Changes via versioned YAML; reproducible builds; Explain-Agent prompts under version control. |
 
 ---
 

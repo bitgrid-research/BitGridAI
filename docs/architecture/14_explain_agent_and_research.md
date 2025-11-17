@@ -4,14 +4,14 @@
 > Der Explain-Agent erzeugt lokale „Warum jetzt?“-Microcopy, Was-wäre-wenn-Simulationen und Forschungsartefakte (Export, Replay) – vollständig **on-device**, block-synchron und privacy-by-default. Research-Services (Toggle, Export, Replay) sichern Nachvollziehbarkeit und KPI-basierte Evaluation.
 >
 > **TL;DR (EN):**  
-> The explain agent delivers local “why now?” copy, what-if simulations and research artefacts (export, replay). Everything runs **on-device**, block-aligned and privacy-first. Research services (toggle, export, replay) ensure traceability and KPI-driven evaluation.
+> The Explain-Agent delivers local “why now?” copy, what-if simulations and research artefacts (export, replay). Everything runs **on-device**, block-aligned and privacy-first. Research services (toggle, export, replay) ensure traceability and KPI-driven evaluation.
 
 ---
 
 ## Überblick / Overview
 Der Explain-Agent ist ein quantisiertes On-Device-LLM, das aus Entscheidungsdaten Microcopy generiert und Was-wäre-wenn-Szenarien berechnet. Ergänzt wird er durch Research-Services, die Opt-in-Kontrolle, Exporte und deterministische Log-Replays bereitstellen – ohne Cloud oder externe Abhängigkeiten.
 
-> The explain agent is a quantised on-device LLM that creates microcopy and what-if scenarios from decision data. Research services add opt-in control, exports and deterministic log replays—no cloud required.
+> The Explain-Agent is a quantised on-device LLM that creates microcopy and what-if scenarios from decision data. Research services add opt-in control, exports and deterministic log replays—no cloud required.
 
 ---
 
@@ -42,14 +42,45 @@ Der Explain-Agent ist ein quantisiertes On-Device-LLM, das aus Entscheidungsdate
 
 > Components are modular and local-first; prompts and binaries are version controlled.
 
+### Explain-Agent Pipeline
+
+1. **Input Collation:** Die Regel-Engine publiziert `DecisionEvent` + `EnergyState`-Snapshot in eine Explain-Queue (`decision_id`, Schwellen, Messwerte, Lokalisation).  
+2. **Prompt Composer:** `Prompt Registry` (YAML) wird mit Runtime-Daten gemerged; Policies erzwingen Pflichtfelder (z. B. Deadband-Status, Override-Herkunft).  
+3. **LLM Inferencing:** Quantisiertes GGML-Modell (Q4 Default, Q5 optional) läuft isoliert als Service `bitgrid-explain`. Modelgröße < 1 GB, Token-Limit 256, Zeitbudget < 1 s auf aktueller Edge-Hardware.  
+4. **Post-Processing:** Strukturierte Antwort (`reason_code`, `result_text_de`, `result_text_en`, `confidence`) wird per JSON-Schema validiert und auf max. drei Kernaussagen gekürzt.  
+5. **Delivery & Cache:** Ergebnis fließt in `ExplainSession`, wird via MQTT gepusht und 24 h gecacht, damit UI/Research alte Sessions erneut anzeigen können.
+
+> Gleiche Inputs (inkl. Prompt-/Rule-Version) erzeugen identische Explain-Ergebnisse → deterministische Replays.
+
+### Was-wäre-wenn / Simulation Flow
+
+| Schritt                  | Beschreibung                                                                                         |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| **Scenario Definition**  | UI/CLI liefert Parameter (`what_if`: Regeln an/aus, neue Schwellen, alternative Preise).             |
+| **Sandboxed Eval**       | Core erstellt `EnergyState`-Klon und führt Regeln mit überschriebenen Parametern aus (kein Live-Effekt). |
+| **Explain Stitching**    | Explain-Agent erhält Simulationsergebnis + Delta zur echten Entscheidung (z. B. „würde R4 greifen“).   |
+| **Timeline Overlay**     | Ergebnis landet als Overlay (`ExplainSession.type = what_if`) in der bestehenden Timeline.            |
+| **Expiry & Cleanup**     | TTL standardmäßig 1 Block (10 min); Aufräumjob entfernt abgelaufene Szenarien.                        |
+
+Simulationen erzeugen keine Steuerbefehle und laufen strikt im Research-Namespace (`/sim`). KPI-Deltas (Autarkie, Kosten, CO₂) können optional mitgerechnet werden.
+
+### Research Services Deep Dive
+
+- **Toggle Service:** Signiert Requests, schreibt Hash in Audit-Log und broadcastet über `research/toggle`. Default `false`, UI blendet Research-Controls aus.  
+- **Export Service:** Filtert nach `scope` (Timeline, Config, Sessions). Jeder Export erzeugt `manifest.json` + ZIP in `exports/<ts>.zip`, inkl. Prompt-/Regelversionen und Hashes. Optional `anonymize=true`.  
+- **Replay Runner:** Liest Parquet/SQLite (`data/logs/*.parquet`), spielt Blöcke in Core+Explain-Agent (Replay-Modus) ein, protokolliert KPIs und verifiziert Hashes. Ergebnis landet als `ReplayJob`-Artefakt.  
+- **CLI & UI Hooks:** `bg research export --scope timeline --since 2025-01-01` sowie UI-Button „Research Export“ nutzen denselben REST-Endpunkt und zeigen Hash + Speicherort.
+
+Research-Services laufen als separate Systemd-Units (`bitgrid-research`, `bitgrid-replay`) mit read-only Zugriff auf Produktivdaten; nur Replays nutzen `/tmp/replay/*` temporär.
+
 ---
 
 ## Datenmodelle / Data Models
 
 | Objekt               | Felder                                               | Beschreibung                                                 |
 | -------------------- | ---------------------------------------------------- | ------------------------------------------------------------ |
-| `ExplainSession`     | `id`, `block_id`, `prompt`, `result`, `confidence`, `valid_until` | Speicher für Microcopy und Was-wäre-wenn-Ergebnisse.         |
-| `ResearchToggleState`| `enabled`, `timestamp`, `actor`, `note`              | Nachweis des Opt-in/Opt-out-Status.                          |
+| `ExplainSession`     | `id`, `decision_id`, `block_id`, `prompt_version`, `result_text_de`, `result_text_en`, `confidence`, `type (live\|what_if)`, `valid_until` | Persistente Microcopy/Simulation pro Decision inkl. Version & Typ. |
+| `ResearchToggleState`| `enabled`, `actor`, `ts`, `justification`            | Signierter Opt-in/Opt-out-Nachweis (Audit-Log & UI-Hinweis). |
 | `ReplayJob`          | `job_id`, `dataset`, `speed`, `status`, `created_at`, `log_path` | Verwaltung laufender/wartender Replays.                      |
 | `ExportBundle`       | `bundle_id`, `scope`, `kpi_summary`, `file_path`, `hash` | Paketierte Exporte (Timeline, KPIs, ExplainSessions).        |
 
@@ -130,5 +161,5 @@ KPIs werden lokal berechnet und erscheinen im Research-Panel der UI.
 ## Zusammenfassung / Summary
 Der Explain-Agent und die Research-Services stellen sicher, dass BitGridAI gleichzeitig **erklärbar**, **privacy-konform** und **forschungstauglich** bleibt. Alle Artefakte entstehen lokal, sind versioniert und nur nach Opt-in exportierbar – so wird Vertrauen, Kontrolle und Reproduzierbarkeit gewahrt.
 
-> Explain agent + research services keep BitGridAI explainable, privacy-safe and research-ready—fully local, fully auditable.
+> Explain-Agent + research services keep BitGridAI explainable, privacy-safe and research-ready—fully local, fully auditable.
 

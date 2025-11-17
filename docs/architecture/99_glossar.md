@@ -31,7 +31,7 @@ Es dient dazu, **Konsistenz, Verständlichkeit und Nachvollziehbarkeit** innerha
 | **DeadbandActivatedEvent**                  | Event, das die Aktivierung eines Haltefensters signalisiert.                                                          |
 | **Erklärschnittstelle (Explainability UI)** | Lokale UI zur Begründung von Entscheidungen und Anzeige der Timeline.                                                 |
 | **Explain-Agent (On-Device LLM)**           | Lokal ausgeführtes Sprachmodell (quantisiert), generiert Microcopy & Was-wäre-wenn-Ausgaben, bleibt read-only zum Regelpfad. |
-| **ExplainSession**                          | Persistentes Artefakt pro Erklärung/Simulation (`prompt`, `result`, `confidence`, `valid_until`), verlinkt zu DecisionEvents. |
+| **ExplainSession**                          | Persistenter Datensatz pro Erklärung/Simulation (`decision_id`, `prompt_version`, `result_text_de/_en`, `confidence`, `type`, `valid_until`), verlinkt zu DecisionEvents. |
 | **Next‑Block Preview**                      | Vorschau der erwarteten Aktion im nächsten Block inkl. Schwellen.                                                     |
 | **Manual Override**                         | Temporäre manuelle Steuerung (Start/Stop/Level) bis Blockende/TTL.                                                    |
 | **Research Toggle**                         | Opt-in/Opt-out-Schalter für Forschung, steuert Export/Replay und UI-Hinweise.                                         |
@@ -144,7 +144,7 @@ Es dient dazu, **Konsistenz, Verständlichkeit und Nachvollziehbarkeit** innerha
 > | **HCI**   | Human‑Computer Interaction                              |
 > | **XAI**   | Explainable Artificial Intelligence                     |
 > | **R1–R5** | Rule set (start, autonomy, thermal, forecast, deadband) |
-> | **LLM**   | Large Language Model (e.g., explain agent)              |
+> | **LLM**   | Large Language Model (e.g., Explain-Agent)              |
 > | **GGML**  | Quantised LLM format (CPU/GPU friendly)                 |
 > | **CLI**   | Command Line Interface                                  |
 
