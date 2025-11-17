@@ -75,6 +75,7 @@ Die UI übersetzt **EnergyState (SSoT)**, **R1–R5‑Entscheidungen** und **Blo
 ## Datenbindung / Data Binding
 
 **Quellen:** `EnergyState`, `DecisionEvent`, `ExplainSession`, `research_state`, `kpi_records`, `health` (lokal).
+
 **Bindings (Beispiele):**
 
 * Decision-Toast ⇄ `DecisionEvent.reason/trigger/parameters/valid_until`.
