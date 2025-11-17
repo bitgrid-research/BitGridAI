@@ -35,6 +35,15 @@ und trägt durch seine Schnittstellen und Logs zur **Erklärbarkeit und Nachvoll
 | `data/`        | Logging & Simulation                 | Speicherung von Ereignissen, Messdaten und Evaluationsergebnissen  |
 | `docs/`        | Architektur & Forschung              | System- und Forschungsdokumentation (arc42, HCI, Evaluation)       |
 
+> | Module / Folder | Responsibility                 | Description                                                       |
+> | --------------- | ------------------------------ | ----------------------------------------------------------------- |
+> | `core/`         | Energy flow and decision logic | Manages states, rules, and priorities                             |
+> | `modules/`      | Integration adapters           | Connects external systems (e.g., Home Assistant, inverter, miner) |
+> | `ui/`           | Local explanation interface    | Displays energy states, decisions, and rationales                 |
+> | `data/`         | Logging & simulation           | Stores events, measurements, and evaluation data                  |
+> | `docs/`         | Architecture & research        | System and research documentation (arc42, HCI, evaluation)        |
+
+
 ### Bitcoin-Leitplanken in den Bausteinen
 
 | Komponente                 | Beitrag zu *Bitcoin ist Zeit / Hodl / PoW*                                                                 |
@@ -52,14 +61,6 @@ und trägt durch seine Schnittstellen und Logs zur **Erklärbarkeit und Nachvoll
 > | `core/hodl_policy`         | Evaluates energy paths (*export*, *heat*, *hodl*) and writes energy-to-value correlations into `data/`.    |
 > | `ui/research_panels`       | Displays block time, energy→sats efficiency, and trilemma trade-offs for research & operations.            |
 > | `data/energy_to_value`     | Append-only record of hodled kWh/sats; feeds KPIs and risk reviews.                                        |
-
-> | Module / Folder | Responsibility                 | Description                                                       |
-> | --------------- | ------------------------------ | ----------------------------------------------------------------- |
-> | `core/`         | Energy flow and decision logic | Manages states, rules, and priorities                             |
-> | `modules/`      | Integration adapters           | Connects external systems (e.g., Home Assistant, inverter, miner) |
-> | `ui/`           | Local explanation interface    | Displays energy states, decisions, and rationales                 |
-> | `data/`         | Logging & simulation           | Stores events, measurements, and evaluation data                  |
-> | `docs/`         | Architecture & research        | System and research documentation (arc42, HCI, evaluation)        |
 
 ---
 
