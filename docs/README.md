@@ -38,7 +38,7 @@ Systemdokumentation basierend auf dem [arc42](https://arc42.org)‑Template:
 * [11 Risiken und Technische Schulden / Risks and Technical Debt](./architecture/11_risks_and_technical_debt.md)
 * [12 HCI‑Perspektive / HCI Perspective](./architecture/12_hci_perspective.md)
 * [13 UI‑Spezifikation / UI Specification](./architecture/13_ui_spec.md)
-* [14 Explain-Agent & Research Services](./14_explain_agent_and_research.md)
+* [14 Explain-Agent & Research Services](./architecture/14_explain_agent_and_research.md)
 * [99 Glossar / Glossary](./architecture/99_glossar.md)
 
 > **Architecture** — arc42‑based documentation covering goals, constraints, context, solution strategy, building blocks, runtime, deployment, crosscutting concepts, decisions, quality scenarios, risks/debt, HCI perspective, and UI specification.
