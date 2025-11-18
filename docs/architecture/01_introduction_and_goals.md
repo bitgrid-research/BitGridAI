@@ -72,7 +72,7 @@ Ein **lokales, KI-gestütztes System**, das …
   - **R3 Thermo-Schutz** – zu hohe Geräte- oder Raumtemperaturen bremsen oder stoppen das System automatisch.  
   - **R4 Prognose-Start** – erst wenn die Kurzfrist-Prognose stabil genug aussieht, wird der nächste Block geplant.  
   - **R5 Deadband / Anti-Flapping** – Entscheidungen bleiben für ein Zeitfenster gültig, damit nichts hektisch an/aus springt.  
-- vollständig **lokal** läuft (Home Assistant, Rule-Engine, On-device-LLM).  
+- vollständig **lokal** läuft (Home Assistant oder als Docker-Container innerhalb von umbrelOS, Rule-Engine, On-device-LLM).  
 - **Block-aligned** denkt (10-Min-Takt) für robuste Schaltentscheidungen.
 
 > A **local, AI-assisted system** that …  
