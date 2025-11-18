@@ -23,6 +23,20 @@ BitGridAI untersucht, wie lokale Energieautomatisierung **erklärbar, vertrauens
 
 ![Venn-Diagramm](../media/venn_diagramm.svg)
 
+Die Regelengine (R1–R5) ist das operative Gewissen von BitGridAI: 
+- **R1 Startregel** sorgt dafür, dass Mining nur bei ausreichendem PV‑Überschuss und sinnvollem Strompreis startet. 
+- **R2 Energie & Autarkie-Schutz** schützt Energiehaushalt und Autarkie, indem der Speicher genügend Reserve für Haushalt behält.
+- **R3 Thermo- & Hardware-Schutz** überwacht Thermik und Hardware und bremst oder stoppt die Last bei Übertemperaturen. 
+- **R4 Prognose-Start** koppelt Schaltentscheidungen an robuste Kurzfrist‑Prognosen, bevor der nächste Block geplant wird.
+- **R5 Stabilität / Anti-Flapping** sichert Stabilität durch Deadband/Anti‑Flapping, damit das System nicht nervös an‑ und ausschaltet.
+
+> The rule engine (R1–R5) is the operational conscience of BitGridAI:
+> - **R1 Start Rule** ensures mining only begins when PV surplus is sufficient and the electricity price is reasonable.
+> - **R2 Energy & Self-Sufficiency Protection** safeguards the household energy budget and self-sufficiency by keeping enough battery reserve for the home.
+> - **R3 Thermal & Hardware Protection monitors** thermals and hardware, throttling or stopping the load if temperatures exceed limits.
+> - **R4 Forecast Start links switching decisions** to robust short-term forecasts before the next block is scheduled.
+> - **R5 Stability / Anti-Flapping** enforces stability via a deadband/anti-flapping window so the system doesn’t nervously switch on and off.
+
 Das System folgt dabei Bitcoin-nahen Leitmotiven: *Bitcoin ist Zeit* (Blocktakt als Automatisierungsrhythmus), *Proof-of-Work* als klare Energieschnittstelle und der Option, Überschussenergie bewusst zu **hodln** statt sofort zu verbrauchen. Entscheidungen balancieren das **Blockchain-Trilemma**, indem sie Dezentralisierung und Sicherheit vor globale Skalierung stellen.
 
 > Bitcoin-aligned principles guide the system: *Bitcoin is time* (block cadence drives automation), *proof-of-work* provides a clear energy interface, and surplus energy can deliberately be **hodled** instead of consumed. Decisions balance the blockchain trilemma by prioritizing decentralization and security over global scale.
