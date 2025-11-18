@@ -15,10 +15,13 @@
 ---
 
 ## Zweck / Purpose
+
 BitGridAI untersucht, wie lokale Energieautomatisierung **erklärbar, vertrauenswürdig und nutzerzentriert** gestaltet werden kann. Das Projekt verbindet Human-Computer Interaction (HCI), erneuerbare Energien und **transparente, lokal laufende KI** zu einem einheitlichen Systemansatz.
 
 > BitGridAI explores how **local** energy automation can become **explainable, trustworthy, and user-centered**.  
 > It combines Human-Computer Interaction (HCI), renewables, and **transparent on-device AI** into one cohesive approach.
+
+![Venn-Diagramm](../media/venn_diagramm.svg)
 
 Das System folgt dabei Bitcoin-nahen Leitmotiven: *Bitcoin ist Zeit* (Blocktakt als Automatisierungsrhythmus), *Proof-of-Work* als klare Energieschnittstelle und der Option, Überschussenergie bewusst zu **hodln** statt sofort zu verbrauchen. Entscheidungen balancieren das **Blockchain-Trilemma**, indem sie Dezentralisierung und Sicherheit vor globale Skalierung stellen.
 
