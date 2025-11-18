@@ -50,7 +50,7 @@ Der Explain-Agent ist ein quantisiertes On-Device-LLM, das aus Entscheidungsdate
 4. **Post-Processing:** Strukturierte Antwort (`reason_code`, `result_text_de`, `result_text_en`, `confidence`) wird per JSON-Schema validiert und auf max. drei Kernaussagen gekürzt.  
 5. **Delivery & Cache:** Ergebnis fließt in `ExplainSession`, wird via MQTT gepusht und 24 h gecacht, damit UI/Research alte Sessions erneut anzeigen können.
 
-> Gleiche Inputs (inkl. Prompt-/Rule-Version) erzeugen identische Explain-Ergebnisse → deterministische Replays.
+> Same inputs (including prompt and rule versions) always yield identical explain results - deterministic replays.
 
 ### Was-wäre-wenn / Simulation Flow
 
@@ -64,6 +64,8 @@ Der Explain-Agent ist ein quantisiertes On-Device-LLM, das aus Entscheidungsdate
 
 Simulationen erzeugen keine Steuerbefehle und laufen strikt im Research-Namespace (`/sim`). KPI-Deltas (Autarkie, Kosten, CO₂) können optional mitgerechnet werden.
 
+> Simulations run inside the `/sim` namespace, never emit control commands and may optionally calculate KPI deltas (autarky, cost, CO2) while overlaying results on the live timeline with short TTLs.
+
 ### Research Services Deep Dive
 
 - **Toggle Service:** Signiert Requests, schreibt Hash in Audit-Log und broadcastet über `research/toggle`. Default `false`, UI blendet Research-Controls aus.  
@@ -72,6 +74,8 @@ Simulationen erzeugen keine Steuerbefehle und laufen strikt im Research-Namespac
 - **CLI & UI Hooks:** `bg research export --scope timeline --since 2025-01-01` sowie UI-Button „Research Export“ nutzen denselben REST-Endpunkt und zeigen Hash + Speicherort.
 
 Research-Services laufen als separate Systemd-Units (`bitgrid-research`, `bitgrid-replay`) mit read-only Zugriff auf Produktivdaten; nur Replays nutzen `/tmp/replay/*` temporär.
+
+> Toggle requests are signed and broadcast, exports bundle manifests + hashes (with optional anonymisation), replay jobs read Parquet/SQLite logs in a dedicated mode and CLI/UI hooks reuse the same endpoints. Both services run as separate read-only systemd units; only replays allocate temporary `/tmp/replay/*` space.
 
 ---
 
@@ -83,6 +87,8 @@ Research-Services laufen als separate Systemd-Units (`bitgrid-research`, `bitgri
 | `ResearchToggleState`| `enabled`, `actor`, `ts`, `justification`            | Signierter Opt-in/Opt-out-Nachweis (Audit-Log & UI-Hinweis). |
 | `ReplayJob`          | `job_id`, `dataset`, `speed`, `status`, `created_at`, `log_path` | Verwaltung laufender/wartender Replays.                      |
 | `ExportBundle`       | `bundle_id`, `scope`, `kpi_summary`, `file_path`, `hash` | Paketierte Exporte (Timeline, KPIs, ExplainSessions).        |
+
+> Explain sessions persist both languages plus versions, toggle state records signed opt-in/out events, replay jobs track datasets + speed and export bundles encapsulate KPIs alongside file paths and hashes.
 
 ---
 
@@ -101,6 +107,8 @@ Research-Services laufen als separate Systemd-Units (`bitgrid-research`, `bitgri
 - `research/replay/jobs/#` – Fortschritt der ReplayJobs.
 
 Alle Payloads sind JSON, Signaturen optional (`hash`/`signature`).
+
+> REST endpoints remain local-only and aligned with the CLI, while MQTT topics push explain sessions, toggles and replay job updates; every payload is JSON and can optionally include a hash/signature.
 
 ---
 
@@ -123,6 +131,8 @@ sequenceDiagram
   RESEARCH -->> UI: Replay job status / KPIs
 ```
 
+> The sequence highlights how decisions trigger explain sessions, while research exports/replays remain opt-in flows that return hashed artefacts and KPI streams back to the UI.
+
 ---
 
 ## Governance & Sicherheit / Governance & Safety
@@ -142,6 +152,8 @@ sequenceDiagram
 3. **Rollback:** Bei Regression `bin/apply-config --version=<prev>` ausführen und via `replay --dataset=last24h` validieren. Ergebnis wird in `config/change_log.md` dokumentiert.
 4. **Audit Trail:** Monatlich `/research/export` mit Scope `["config","timeline","kpi"]` erzeugen und Hash im Research-Journal notieren.
 
+> Governance enforces PR+ADR for every prompt or rule change, pins versions per deployment, validates rollbacks via the replay pipeline and captures monthly exports as part of the audit trail.
+
 ---
 
 ## Monitoring & KPIs
@@ -155,6 +167,8 @@ sequenceDiagram
 | **Export Integrity**    | `hash` + Verify         | 100 %                   |
 
 KPIs werden lokal berechnet und erscheinen im Research-Panel der UI.
+
+> Targets stay local-first: >=95% coverage, <2s latency, project-specific opt-in rates plus 100% replay and export integrity, all visualised inside the research panel.
 
 ---
 

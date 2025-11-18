@@ -67,11 +67,11 @@ Ein **lokales, KI-gestütztes System**, das …
 - PV-Überschuss erkennt und **Mining als flexible Last** ansteuert.  
 - Entscheidungen **erklärt** (Explainability-Layer in der UI).  
 - **R1–R5** konsequent anwendet:  
-  - **R1 Startregel** (Überschuss + Preis),  
-  - **R2 Autarkie-Schutz** (SoC),  
-  - **R3 Thermo-Schutz** (Temperatur),  
-  - **R4 Prognose-Start** (Forecast-Stabilität),  
-  - **R5 Deadband / Anti-Flapping** (zeitbasierte Stabilität).  
+  - **R1 Startregel** – Mining läuft nur, wenn genug PV-Überschuss vorhanden ist und der Strompreis stimmt.  
+  - **R2 Autarkie-Schutz** – der Speicher bleibt so gefüllt, dass Haushalt/Essentials weiterlaufen können.  
+  - **R3 Thermo-Schutz** – zu hohe Geräte- oder Raumtemperaturen bremsen oder stoppen das System automatisch.  
+  - **R4 Prognose-Start** – erst wenn die Kurzfrist-Prognose stabil genug aussieht, wird der nächste Block geplant.  
+  - **R5 Deadband / Anti-Flapping** – Entscheidungen bleiben für ein Zeitfenster gültig, damit nichts hektisch an/aus springt.  
 - vollständig **lokal** läuft (Home Assistant, Rule-Engine, On-device-LLM).  
 - **Block-aligned** denkt (10-Min-Takt) für robuste Schaltentscheidungen.
 
