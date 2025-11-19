@@ -37,6 +37,8 @@ Die Regelengine (R1–R5) ist das operative Gewissen von BitGridAI:
 > - **R4 Forecast Start links switching decisions** to robust short-term forecasts before the next block is scheduled.
 > - **R5 Stability / Anti-Flapping** enforces stability via a deadband/anti-flapping window so the system doesn’t nervously switch on and off.
 
+
+
 Das System folgt Bitcoin-nahen Leitmotiven: *Bitcoin ist Zeit* (Blocktakt als Automatisierungsrhythmus), *Proof-of-Work* als klare Energieschnittstelle und flexible Last, die Überschussenergie gezielt in einen durch Arbeit erzeugten Wert konserviert, statt gestrandete PV-Leistung ungenutzt zu lassen. Durch dieses System lassen sich im Privathaushalt PV-Spitzen gezielt abfangen, das Verteilnetz entlasten, Eigenverbrauch und Autarkie erhöhen und netzschädliche Rückspeisespitzen vermeiden. Entscheidungen bleiben lokal, deterministisch und erklärbar (R1–R5), sodass Stabilität, Dezentralisierung und Sicherheit vor globaler Skalierung priorisiert werden.
 
 > The system follows Bitcoin-aligned principles: *Bitcoin is time* (block cadence as the automation rhythm), and *proof-of-work* serves as a clear energy interface and flexible load that conserves surplus energy as work-derived value rather than leaving stranded PV output unused. With this approach, PV peaks in residential homes can be actively absorbed, relieving the distribution grid, increasing self-consumption and autonomy, and avoiding grid-harmful feed-in spikes. Decisions remain local, deterministic, and explainable (R1–R5), thereby prioritizing stability, decentralization, and security over global scaling.
