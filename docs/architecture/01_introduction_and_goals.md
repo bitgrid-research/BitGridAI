@@ -69,17 +69,17 @@ Das System orientiert sich an Bitcoin-nahen Leitmotiven. Der Grundsatz „*Bitco
 
 
 > **1. Develop explainable energy automation:** BitGridAI aims to create an energy management system in which all decisions are fully transparent and explicitly justified. Every action (start, stop, hold, set-level) is documented with its reason, trigger and parameters, and stored in a versioned, auditable data format. This establishes a robust foundation for trust, scientific traceability, reproducibility and XAI-based evaluation of real-world energy systems.
-
+> 
 > **2. Strengthen user trust, sense of control and mental models:** The system provides clear, consistent and timely explanations that enable users to correctly interpret, question and override energy decisions when necessary. Interfaces such as the decision timeline and next-block preview support a coherent mental model of energy flows, system logic and the consequences of automated actions.
-
+> 
 >  **3. Implement a fully local, data-sovereign energy system:** The architecture follows a strictly local-first design. Measurements, rule sets, models, explanations and logs remain entirely on the edge device and are never transmitted to external services. This increases privacy, operational security and prevents any form of opaque cloud-based optimisation.
-
+> 
 >  **4. Channel PV surplus into flexible loads in a meaningful way:** Surplus photovoltaic energy is utilised effectively rather than wasted or fed back into the grid in a potentially harmful manner. Proof-of-Work–based mining loads serve as dynamically controllable energy sinks that convert surplus energy into value secured through physical work.
-
+> 
 > **5. Use the block rhythm as a stable basis for decision-making:** The ten-minute block interval, established by Bitcoin, serves as a deterministic temporal unit within the system. This rhythm smooths switching behaviour, synchronises load transitions and provides a stable, predictable automation cycle.
-
+> 
 > **6. Promote sustainability through load shifting and self-sufficiency:** The architecture is designed to increase self-consumption, steer battery discharge strategically and reduce grid imports. Sustainability is addressed at both the technical level (energy efficiency) and the human level (awareness, behaviour, clarity).
-
+> 
 > **7. Enable open research and reusability:** All data formats, models and tools are structured for reproducibility. The goal is to provide an open, transparent research environment that can be reused in teaching, projects and future empirical studies.
 
 ---
