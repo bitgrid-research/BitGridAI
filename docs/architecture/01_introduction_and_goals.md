@@ -39,24 +39,46 @@ Die Regelengine (R1–R5) ist das operative Gewissen von BitGridAI:
 
 
 
-Das System folgt Bitcoin-nahen Leitmotiven: *Bitcoin ist Zeit* (Blocktakt als Automatisierungsrhythmus), *Proof-of-Work* als klare Energieschnittstelle und flexible Last, die Überschussenergie gezielt in einen durch Arbeit erzeugten Wert konserviert, statt gestrandete PV-Leistung ungenutzt zu lassen. Durch dieses System lassen sich im Privathaushalt PV-Spitzen gezielt abfangen, das Verteilnetz entlasten, Eigenverbrauch und Autarkie erhöhen und netzschädliche Rückspeisespitzen vermeiden. Entscheidungen bleiben lokal, deterministisch und erklärbar (R1–R5), sodass Stabilität, Dezentralisierung und Sicherheit vor globaler Skalierung priorisiert werden.
+Das System orientiert sich an Bitcoin-nahen Leitmotiven. Der Grundsatz „*Bitcoin ist Zeit*“ beschreibt einen stabilen, zyklischen Takt, der im Bitcoin-Netzwerk durch die etwa zehnminütige Blockzeit entsteht. BitGridAI übernimmt diesen zeitlichen Rahmen als determinischen Automatisierungsrhythmus, um Schaltentscheidungen zu glätten, Lastwechsel zu synchronisieren und instabiles Flapping zu vermeiden. 
 
-> The system follows Bitcoin-aligned principles: *Bitcoin is time* (block cadence as the automation rhythm), and *proof-of-work* serves as a clear energy interface and flexible load that conserves surplus energy as work-derived value rather than leaving stranded PV output unused. With this approach, PV peaks in residential homes can be actively absorbed, relieving the distribution grid, increasing self-consumption and autonomy, and avoiding grid-harmful feed-in spikes. Decisions remain local, deterministic, and explainable (R1–R5), thereby prioritizing stability, decentralization, and security over global scaling.
+*Proof of Work* dient gleichzeitig als klar definierte energetische Schnittstelle und als flexible Last, die lokal erzeugte Überschussenergie nicht ungenutzt lässt, sondern in durch physikalische Arbeit abgesicherte Wertschöpfung überführt. Auf diese Weise können im Privathaushalt PV-Erzeugungsspitzen gezielt abgefangen, das Verteilnetz entlastet, der Eigenverbrauch gesteigert und netzschädliche Rückspeisespitzen reduziert werden. BitGridAI trifft alle Entscheidungen vollständig lokal, deterministisch und erklärbar entsprechend den Regeln R1 bis R5, wodurch Stabilität, Dezentralisierung und Sicherheit gegenüber einer globalen Skalierungslogik priorisiert bleiben.
+
+> The system is guided by Bitcoin-aligned design principles. The notion that “*Bitcoin is time*” refers to the stable, cyclical rhythm created by the network’s approximately ten-minute block interval. BitGridAI adopts this temporal structure as a deterministic automation cadence that smooths switching behaviour, synchronizes load transitions, and prevents unstable flapping.
+>
+> *Proof of Work* functions simultaneously as a clearly defined energetic interface and as a flexible load that ensures locally generated surplus energy is not wasted but instead converted into value secured through physical work. In a residential setting, this makes it possible to absorb PV generation peaks, reduce stress on the distribution grid, increase self-consumption, and mitigate harmful feed-in spikes. BitGridAI executes all decisions locally, deterministically and with full explainability according to rules R1 to R5, ensuring that stability, decentralization and safety are prioritized over global optimization or cloud-dependent control models.
 
 ---
 
 ## Ziele / Goals
-1. **Erklärbare Automatisierung** (XAI) in Energiesystemen ermöglichen.  
-2. **Nutzervertrauen & Kontrolle** durch klare Oberflächen und Begründungen stärken.  
-3. **Lokal & transparent** arbeiten – ohne Cloud-Abhängigkeit (Local-First).  
-4. **PV-Überschuss** für flexible Berechnungen nutzen (z. B. Bitcoin-Mining).  
-5. **Offene Forschung & Zusammenarbeit** fördern (Daten, Tools, Templates).
+1. **Erklärbare Energieautomatisierung entwickeln**: BitGridAI verfolgt das Ziel, ein Energiemanagementsystem zu schaffen, das sämtliche Entscheidungen vollständig transparent begründet. Jede Aktion (Start, Stop, Hold, Level-Set) wird mit Reason, Trigger und Parametern dokumentiert und in einem versionierten, auditierbaren Format gespeichert. Dadurch entsteht eine robuste Grundlage für Vertrauen, wissenschaftliche Nachvollziehbarkeit, Wiederholbarkeit und XAI-basierte Evaluation realer Energiesysteme.
 
-> 1. Enable **explainable automation** (XAI) in energy systems.  
-> 2. Foster **user trust & control** via clear UIs and rationales.  
-> 3. Operate **locally and transparently**—no cloud lock-in.  
-> 4. Utilize **PV surplus** for flexible computation (e.g., Bitcoin mining).  
-> 5. Encourage **open collaboration** (data, tools, templates).
+3. **Stärkung von Nutzervertrauen, Kontrolle und mentalen Modellen**:   Das System stellt verständliche, konsistente und zeitnahe Erklärungen bereit, die Nutzer in die Lage versetzen, Energieentscheidungen korrekt zu interpretieren, zu hinterfragen und bei Bedarf zu überschreiben. Interfaces, Decision-Timeline und Next-Block-Vorschau fördern ein stabiles mentales Modell über Energieflüsse, Systemlogik und Handlungskonsequenzen.
+   
+4. **Umsetzung eines vollständig lokalen, datensouveränen Energiesystems**:   Die Architektur ist vollständig lokal-first ausgelegt. Messwerte, Regelwerke, Modelle, Erklärungen und Logs verbleiben auf dem Edge-Gerät und werden nicht an externe Dienste übertragen. Diese Ausrichtung erhöht Datenschutz und Betriebssicherheit und verhindert intransparentes Cloud-Tuning.
+   
+5. **PV-Überschuss zielgerichtet in flexible Lasten überführen**:   Überschussenergie aus photovoltaischer Erzeugung wird sinnvoll genutzt, statt ungenutzt zu bleiben oder netzschädlich rückgespeist zu werden. Proof-of-Work-basierte Mining-Lasten fungieren dabei als dynamisch regulierbarer Energiesenke, welche Überschussenergie kontrolliert in physikalisch abgesicherte Wertschöpfung überführt.
+   
+6. **Block-Rhythmus als stabile Entscheidungsbasis nutzen**:   Der durch Bitcoin etablierte zehnminütige Blocktakt dient als deterministische Zeiteinheit im System. Dieser Rhythmus reduziert Schaltflattern, synchronisiert Lastwechsel und schafft ein stabiles, vorhersehbares Automatisierungsmodell.
+ 
+7. **Nachhaltigkeit durch Lastverschiebung und Autarkie fördern**:   Die Architektur ist darauf ausgerichtet, Eigenverbrauch zu erhöhen, Batterieentladung strategisch zu steuern und Netzbezug spürbar zu reduzieren. Nachhaltigkeit wird sowohl technisch (Energieeffizienz) als auch menschzentriert (Bewusstsein, Verhalten, Klarheit) adressiert.
+   
+8. **Offene Forschung und Wiederverwendbarkeit ermöglichen**:   Alle Datenformate, Modelle und Tools sind reproduzierbar strukturiert. Ziel ist eine offene, nachvollziehbare Forschungsumgebung, die in Lehre, Projekten und zukünftigen Studien wiederverwendet werden kann.
+
+
+
+> 1. Develop explainable energy automation: BitGridAI aims to create an energy management system in which all decisions are fully transparent and justified. Every action (start, stop, hold, level-set) is documented with its reason, trigger, and parameters and stored in a versioned, auditable format. This provides a rigorous foundation for trust, scientific traceability, reproducibility, and XAI-based evaluation of real-world energy systems.
+>
+> 2. Strengthen user trust, control, and mental models: The system provides clear, consistent, and timely explanations that enable users to correctly interpret, question, and—if necessary—override energy decisions. Interfaces such as the decision timeline and next-block preview support the formation of stable mental models regarding energy flows, system logic, and behavioral consequences.
+>
+> 3. Implement a fully local, data-sovereign energy system: The architecture follows a strict local-first approach. Measurements, rule sets, models, explanations, and logs remain on the edge device and are never transmitted to external services. This increases privacy, operational resilience, and reproducibility while preventing any form of opaque cloud-side optimization.
+>
+> 4. Convert PV surplus into flexible loads with purpose: Surplus energy from photovoltaic generation is meaningfully utilized rather than wasted or fed into the grid in destabilizing peaks. Proof-of-Work mining loads serve as a dynamically controllable energy sink that transforms surplus energy into physically secured value creation.
+>
+> 5. Use the block rhythm as a stable decision cadence: The ten-minute block interval established by Bitcoin provides the deterministic time unit for scheduling. This rhythmic structure reduces switching noise, synchronizes load transitions, and creates a stable, predictable automation model.
+>
+> 6. Promote sustainability through load shifting and self-sufficiency: The architecture is designed to increase self-consumption, manage battery discharge strategically, and measurably reduce grid import. Sustainability is addressed both technically (energy efficiency, demand shaping) and human-centrically (awareness, behavior, clarity).
+>
+> 7. Enable open research and reusability: All data formats, models, and tools follow a reproducible structure. The goal is to provide an open, transparent research environment that can be reused in teaching, projects, and future studies.
 
 ---
 
