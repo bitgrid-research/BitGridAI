@@ -110,19 +110,19 @@ Ein **lokales, KI-gestütztes System**, das …
 - PV-Überschuss erkennt und **Mining als flexible Last** ansteuert.  
 - Entscheidungen **erklärt** (Explainability-Layer in der UI).  
 - **R1–R5** konsequent anwendet:  
-  - **R1 Startregel** – Mining läuft nur, wenn genug PV-Überschuss vorhanden ist und der Strompreis stimmt.  
-  - **R2 Autarkie-Schutz** – der Speicher bleibt so gefüllt, dass Haushalt/Essentials weiterlaufen können.  
-  - **R3 Thermo-Schutz** – zu hohe Geräte- oder Raumtemperaturen bremsen oder stoppen das System automatisch.  
-  - **R4 Prognose-Start** – erst wenn die Kurzfrist-Prognose stabil genug aussieht, wird der nächste Block geplant.  
-  - **R5 Deadband / Anti-Flapping** – Entscheidungen bleiben für ein Zeitfenster gültig, damit nichts hektisch an/aus springt.  
-- vollständig **lokal** läuft (Home Assistant oder als Docker-Container innerhalb von umbrelOS, Rule-Engine, On-device-LLM).  
-- **Block-aligned** denkt (10-Min-Takt) für robuste Schaltentscheidungen.
+  - **R1 Startregel** – Mining beginnt nur bei ausreichendem PV-Überschuss und sinnvollem Strompreis.  
+  - **R2 Autarkie-Schutz** – der Batteriespeicher behält genügend Reserve für Haushalt und Essentials. 
+  - **R3 Thermo-Schutz** – Übertemperaturen führen zu automatischem Drosseln oder Stoppen.
+  - **R4 Prognose-Start** – Schaltentscheidungen basieren auf stabilen Kurzfristprognosen des nächsten Blocks. 
+  - **R5 Deadband / Anti-Flapping** – Deadband-Fenster verhindern unnötige Schaltwechsel bei kurzen Schwankungen.
+- vollständig **lokal** ausgeführt wird (Home Assistant oder Docker/umbrelOS; Rule-Engine, On-Device-LLM).
+- einen **block-alignierten 10-Min-Takt** nutzt, um Entscheidungen zeitlich zu glätten und Lastwechsel zu synchronisieren.
 
 > A **local, AI-assisted system** that …  
 > • detects PV surplus and **drives mining as a flexible load**;  
 > • **explains** its decisions (UI explainability layer);  
 > • applies **R1–R5** (start, autonomy, thermal, forecast, deadband);  
-> • runs **entirely on-prem** (Home Assistant, rule engine, on-device LLM);  
+> • runs **entirely on-prem** (Home Assistant or Docker/umbrelOS, rule engine, on-device LLM);  
 > • uses a **10-minute block rhythm** for stable scheduling.
 
 ---
