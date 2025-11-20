@@ -24,18 +24,18 @@ BitGridAI untersucht, wie lokale Energieautomatisierung **erklärbar, vertrauens
 ![Venn-Diagramm](../media/venn_diagramm.svg)
 
 Die Regelengine (R1–R5) ist das operative Gewissen von BitGridAI: 
-- **R1 Startregel** sorgt dafür, dass Mining nur bei ausreichendem PV‑Überschuss und sinnvollem Strompreis startet. 
-- **R2 Energie & Autarkie-Schutz** schützt Energiehaushalt und Autarkie, indem der Speicher genügend Reserve für Haushalt behält.
-- **R3 Thermo- & Hardware-Schutz** überwacht Thermik und Hardware und bremst oder stoppt die Last bei Übertemperaturen. 
-- **R4 Prognose-Start** koppelt Schaltentscheidungen an robuste Kurzfrist‑Prognosen, bevor der nächste Block geplant wird.
-- **R5 Stabilität / Anti-Flapping** sichert Stabilität durch Deadband/Anti‑Flapping, damit das System nicht nervös an‑ und ausschaltet.
+- **R1 Startregel:** Aktiviert die flexible Last nur, wenn der PV-Überschuss eine definierte Schwelle überschreitet und der Strompreis innerhalb eines akzeptablen Bereichs liegt. Die Regel koppelt Energieverfügbarkeit und Wirtschaftlichkeit zu einer transparenten Startlogik.
+- **R2 Energie- & Autarkie-Schutz:** Sichert die Haushaltsversorgung, indem der Batteriespeicher eine Mindestreserve einhalten muss. Wird der SoC-Schwellwert unterschritten, stoppt das System automatisch und priorisiert die Grundversorgung des Haushalts.
+- **R3 Thermo- & Hardware-Schutz:** Überwacht Miner-Temperatur, Raumklima und Systemhardware. Bei Übertemperaturen oder Hardware-Warnsignalen wird die Last gedrosselt oder sofort gestoppt, um Geräte und Systemintegrität zu schützen.
+- **R4 Prognose-Start:** Bindet Startentscheidungen an stabile, kurzfristige Prognosen. Nur wenn die PV-Vorhersage konsistent genug ist, wird ein Start im nächsten Zehn-Minuten-Block vorbereitet. Damit werden Fehlstarts und spätere Stop-Ereignisse reduziert.
+- **R5 Stabilität / Anti-Flapping:** Verhindert unnötige Schaltwechsel, indem ein Deadband-Fenster kurzfristige Schwankungen ausfiltert. Entscheidungen bleiben blockweise stabil, wodurch nervöses An-/Ausschalten (Flapping) vermieden wird.
 
 > The rule engine (R1–R5) is the operational conscience of BitGridAI:
-> - **R1 Start Rule** ensures mining only begins when PV surplus is sufficient and the electricity price is reasonable.
-> - **R2 Energy & Self-Sufficiency Protection** safeguards the household energy budget and self-sufficiency by keeping enough battery reserve for the home.
-> - **R3 Thermal & Hardware Protection monitors** thermals and hardware, throttling or stopping the load if temperatures exceed limits.
-> - **R4 Forecast Start links switching decisions** to robust short-term forecasts before the next block is scheduled.
-> - **R5 Stability / Anti-Flapping** enforces stability via a deadband/anti-flapping window so the system doesn’t nervously switch on and off.
+> - **R1 Start Rule:** ensures mining only begins when PV surplus is sufficient and the electricity price is reasonable.
+> - **R2 Energy & Self-Sufficiency Protection:** safeguards the household energy budget and self-sufficiency by keeping enough battery reserve for the home.
+> - **R3 Thermal & Hardware Protection monitors:** thermals and hardware, throttling or stopping the load if temperatures exceed limits.
+> - **R4 Forecast Start links switching decisions:** to robust short-term forecasts before the next block is scheduled.
+> - **R5 Stability / Anti-Flapping:** enforces stability via a deadband/anti-flapping window so the system doesn’t nervously switch on and off.
 
 
 
@@ -52,54 +52,56 @@ Das System orientiert sich an Bitcoin-nahen Leitmotiven. Der Grundsatz „*Bitco
 ## Ziele / Goals
 1. **Erklärbare Energieautomatisierung entwickeln**: BitGridAI verfolgt das Ziel, ein Energiemanagementsystem zu schaffen, das sämtliche Entscheidungen vollständig transparent begründet. Jede Aktion (Start, Stop, Hold, Level-Set) wird mit Reason, Trigger und Parametern dokumentiert und in einem versionierten, auditierbaren Format gespeichert. Dadurch entsteht eine robuste Grundlage für Vertrauen, wissenschaftliche Nachvollziehbarkeit, Wiederholbarkeit und XAI-basierte Evaluation realer Energiesysteme.
 
-3. **Stärkung von Nutzervertrauen, Kontrolle und mentalen Modellen**:   Das System stellt verständliche, konsistente und zeitnahe Erklärungen bereit, die Nutzer in die Lage versetzen, Energieentscheidungen korrekt zu interpretieren, zu hinterfragen und bei Bedarf zu überschreiben. Interfaces, Decision-Timeline und Next-Block-Vorschau fördern ein stabiles mentales Modell über Energieflüsse, Systemlogik und Handlungskonsequenzen.
+3. **Stärkung von Nutzervertrauen, Kontrolle und mentalen Modellen**: Das System stellt verständliche, konsistente und zeitnahe Erklärungen bereit, die Nutzer in die Lage versetzen, Energieentscheidungen korrekt zu interpretieren, zu hinterfragen und bei Bedarf zu überschreiben. Interfaces, Decision-Timeline und Next-Block-Vorschau fördern ein stabiles mentales Modell über Energieflüsse, Systemlogik und Handlungskonsequenzen. 
+
+4. **Stärkung von Nutzervertrauen, Kontrolle und mentalen Modellen**:   Das System stellt verständliche, konsistente und zeitnahe Erklärungen bereit, die Nutzer in die Lage versetzen, Energieentscheidungen korrekt zu interpretieren, zu hinterfragen und bei Bedarf zu überschreiben. Interfaces, Decision-Timeline und Next-Block-Vorschau fördern ein stabiles mentales Modell über Energieflüsse, Systemlogik und Handlungskonsequenzen.
    
-4. **Umsetzung eines vollständig lokalen, datensouveränen Energiesystems**:   Die Architektur ist vollständig lokal-first ausgelegt. Messwerte, Regelwerke, Modelle, Erklärungen und Logs verbleiben auf dem Edge-Gerät und werden nicht an externe Dienste übertragen. Diese Ausrichtung erhöht Datenschutz und Betriebssicherheit und verhindert intransparentes Cloud-Tuning.
+5. **Umsetzung eines vollständig lokalen, datensouveränen Energiesystems**:   Die Architektur ist vollständig lokal-first ausgelegt. Messwerte, Regelwerke, Modelle, Erklärungen und Logs verbleiben auf dem Edge-Gerät und werden nicht an externe Dienste übertragen. Diese Ausrichtung erhöht Datenschutz und Betriebssicherheit und verhindert intransparentes Cloud-Tuning.
    
-5. **PV-Überschuss zielgerichtet in flexible Lasten überführen**:   Überschussenergie aus photovoltaischer Erzeugung wird sinnvoll genutzt, statt ungenutzt zu bleiben oder netzschädlich rückgespeist zu werden. Proof-of-Work-basierte Mining-Lasten fungieren dabei als dynamisch regulierbarer Energiesenke, welche Überschussenergie kontrolliert in physikalisch abgesicherte Wertschöpfung überführt.
+6. **PV-Überschuss zielgerichtet in flexible Lasten überführen**:   Überschussenergie aus photovoltaischer Erzeugung wird sinnvoll genutzt, statt ungenutzt zu bleiben oder netzschädlich rückgespeist zu werden. Proof-of-Work-basierte Mining-Lasten fungieren dabei als dynamisch regulierbarer Energiesenke, welche Überschussenergie kontrolliert in physikalisch abgesicherte Wertschöpfung überführt.
    
-6. **Block-Rhythmus als stabile Entscheidungsbasis nutzen**:   Der durch Bitcoin etablierte zehnminütige Blocktakt dient als deterministische Zeiteinheit im System. Dieser Rhythmus reduziert Schaltflattern, synchronisiert Lastwechsel und schafft ein stabiles, vorhersehbares Automatisierungsmodell.
+7. **Block-Rhythmus als stabile Entscheidungsbasis nutzen**:   Der durch Bitcoin etablierte zehnminütige Blocktakt dient als deterministische Zeiteinheit im System. Dieser Rhythmus reduziert Schaltflattern, synchronisiert Lastwechsel und schafft ein stabiles, vorhersehbares Automatisierungsmodell.
  
-7. **Nachhaltigkeit durch Lastverschiebung und Autarkie fördern**:   Die Architektur ist darauf ausgerichtet, Eigenverbrauch zu erhöhen, Batterieentladung strategisch zu steuern und Netzbezug spürbar zu reduzieren. Nachhaltigkeit wird sowohl technisch (Energieeffizienz) als auch menschzentriert (Bewusstsein, Verhalten, Klarheit) adressiert.
+8. **Nachhaltigkeit durch Lastverschiebung und Autarkie fördern**:   Die Architektur ist darauf ausgerichtet, Eigenverbrauch zu erhöhen, Batterieentladung strategisch zu steuern und Netzbezug spürbar zu reduzieren. Nachhaltigkeit wird sowohl technisch (Energieeffizienz) als auch menschzentriert (Bewusstsein, Verhalten, Klarheit) adressiert.
    
-8. **Offene Forschung und Wiederverwendbarkeit ermöglichen**:   Alle Datenformate, Modelle und Tools sind reproduzierbar strukturiert. Ziel ist eine offene, nachvollziehbare Forschungsumgebung, die in Lehre, Projekten und zukünftigen Studien wiederverwendet werden kann.
+9. **Offene Forschung und Wiederverwendbarkeit ermöglichen**:   Alle Datenformate, Modelle und Tools sind reproduzierbar strukturiert. Ziel ist eine offene, nachvollziehbare Forschungsumgebung, die in Lehre, Projekten und zukünftigen Studien wiederverwendet werden kann.
 
 
 
-> 1. Develop explainable energy automation: BitGridAI aims to create an energy management system in which all decisions are fully transparent and justified. Every action (start, stop, hold, level-set) is documented with its reason, trigger, and parameters and stored in a versioned, auditable format. This provides a rigorous foundation for trust, scientific traceability, reproducibility, and XAI-based evaluation of real-world energy systems.
->
-> 2. Strengthen user trust, control, and mental models: The system provides clear, consistent, and timely explanations that enable users to correctly interpret, question, and—if necessary—override energy decisions. Interfaces such as the decision timeline and next-block preview support the formation of stable mental models regarding energy flows, system logic, and behavioral consequences.
->
-> 3. Implement a fully local, data-sovereign energy system: The architecture follows a strict local-first approach. Measurements, rule sets, models, explanations, and logs remain on the edge device and are never transmitted to external services. This increases privacy, operational resilience, and reproducibility while preventing any form of opaque cloud-side optimization.
->
-> 4. Convert PV surplus into flexible loads with purpose: Surplus energy from photovoltaic generation is meaningfully utilized rather than wasted or fed into the grid in destabilizing peaks. Proof-of-Work mining loads serve as a dynamically controllable energy sink that transforms surplus energy into physically secured value creation.
->
-> 5. Use the block rhythm as a stable decision cadence: The ten-minute block interval established by Bitcoin provides the deterministic time unit for scheduling. This rhythmic structure reduces switching noise, synchronizes load transitions, and creates a stable, predictable automation model.
->
-> 6. Promote sustainability through load shifting and self-sufficiency: The architecture is designed to increase self-consumption, manage battery discharge strategically, and measurably reduce grid import. Sustainability is addressed both technically (energy efficiency, demand shaping) and human-centrically (awareness, behavior, clarity).
->
-> 7. Enable open research and reusability: All data formats, models, and tools follow a reproducible structure. The goal is to provide an open, transparent research environment that can be reused in teaching, projects, and future studies.
+> **1. Develop explainable energy automation:** BitGridAI aims to create an energy management system in which all decisions are fully transparent and explicitly justified. Every action (start, stop, hold, set-level) is documented with its reason, trigger and parameters, and stored in a versioned, auditable data format. This establishes a robust foundation for trust, scientific traceability, reproducibility and XAI-based evaluation of real-world energy systems.
+
+> **2. Strengthen user trust, sense of control and mental models:** The system provides clear, consistent and timely explanations that enable users to correctly interpret, question and override energy decisions when necessary. Interfaces such as the decision timeline and next-block preview support a coherent mental model of energy flows, system logic and the consequences of automated actions.
+
+>  **3. Implement a fully local, data-sovereign energy system:** The architecture follows a strictly local-first design. Measurements, rule sets, models, explanations and logs remain entirely on the edge device and are never transmitted to external services. This increases privacy, operational security and prevents any form of opaque cloud-based optimisation.
+
+>  **4. Channel PV surplus into flexible loads in a meaningful way:** Surplus photovoltaic energy is utilised effectively rather than wasted or fed back into the grid in a potentially harmful manner. Proof-of-Work–based mining loads serve as dynamically controllable energy sinks that convert surplus energy into value secured through physical work.
+
+> **5. Use the block rhythm as a stable basis for decision-making:** The ten-minute block interval, established by Bitcoin, serves as a deterministic temporal unit within the system. This rhythm smooths switching behaviour, synchronises load transitions and provides a stable, predictable automation cycle.
+
+> **6. Promote sustainability through load shifting and self-sufficiency:** The architecture is designed to increase self-consumption, steer battery discharge strategically and reduce grid imports. Sustainability is addressed at both the technical level (energy efficiency) and the human level (awareness, behaviour, clarity).
+
+> **7. Enable open research and reusability:** All data formats, models and tools are structured for reproducibility. The goal is to provide an open, transparent research environment that can be reused in teaching, projects and future empirical studies.
 
 ---
 
 ## Qualitätsziele / Quality Goals
 | Qualität | Beschreibung |
 |---|---|
-| **Transparenz** | Jede Entscheidung ist nachvollziehbar (Reason, Trigger, Parameter). |
-| **Autonomie** | Vollständig lokaler Betrieb; keine externen Abhängigkeiten. |
-| **Nachhaltigkeit** | Effiziente Nutzung erneuerbarer Energie & Lastverschiebung. |
-| **Vorhersagbarkeit** | Deterministische Regeln, Deadband/Anti-Flapping. |
-| **Sicherheit** | Thermo-Schutz und Fail-States (Stop → Safe). |
-| **Reproduzierbarkeit** | Offene Daten, modulare Architektur, klare KPIs. |
+| **Transparenz** | Jede Entscheidung ist durch Reason, Trigger und Parameter nachvollziehbar dokumentiert. Alle Erklärungstexte werden versioniert, um zeitliche Änderungen zu analysieren. Dadurch lassen sich Modelle, Schwellenwerte und Nutzerreaktionen wissenschaftlich evaluieren. |
+| **Autonomie** | Der gesamte Stack läuft lokal-first ohne externe Cloud- oder KI-Services. Dies stärkt digitale Souveränität, verhindert Black-Box-Verhalten und ermöglicht belastbare Offline-Betriebsmodi. Gleichzeitig erhöht die lokale Ausführung Datenschutz und Systemkontrolle. |
+| **Nachhaltigkeit** | PV-Überschuss wird konsequent in flexible Lasten überführt, anstatt ungenutzt zu bleiben oder das Verteilnetz zu belasten. Durch intelligente Lastverschiebung können Eigenverbrauch und Autarkie deutlich verbessert werden. Das System unterstützt nachhaltige Verhaltensweisen durch verständliche Visualisierungen und Erklärungen. |
+| **Vorhersagbarkeit** | Durch deterministische Regeln, Deadband/Anti-Flapping und das 10-Minuten-Blockintervall entstehen stabile, gut erklärbare Schaltmuster. Nutzer können Entscheidungen antizipieren und mental modellieren. Prognosen werden nur genutzt, wenn sie stabil und konsistent sind. |
+| **Sicherheit** | Thermo-Schutz, SoC-Schutz und definierte Fail-States („Stop → Safe“) verhindern kritische Zustände und schützen Hardware zuverlässig. Unterschiede zwischen normalen und sicherheitsrelevanten Abschaltungen bleiben erklärbar. Alle sicherheitsrelevanten Events werden geloggt und versioniert. |
+| **Reproduzierbarkeit** | Alle Datenformate, Modelle und Logs sind standardisiert und können für Replays genutzt werden. KPIs ermöglichen quantitative Vergleichbarkeit zwischen Varianten, Nutzenden und Zeiträumen. Forschungsergebnisse können vollständig repliziert werden. |
 
 > | Quality | Description |
 > |---|---|
-> | **Transparency** | Every decision is explainable (reason, trigger, parameters). |
-> | **Autonomy** | Fully local stack; no external dependencies. |
-> | **Sustainability** | Efficient use of renewables and load shifting. |
-> | **Predictability** | Deterministic rules, deadband/anti-flapping. |
-> | **Safety** | Thermal protection and fail states (stop → safe). |
-> | **Reproducibility** | Open data, modular architecture, clear KPIs. |
+> | **Transparency** | Every decision is explainable through reason, trigger, and parameters; explanations are versioned to support auditing and traceability. |
+> | **Autonomy** | Fully local-first architecture with no external dependencies, ensuring privacy, resilience, and freedom from opaque cloud-side optimisation. |
+> | **Sustainability** | Efficient use of renewables through targeted load shifting; improves self-consumption, reduces feed-in peaks, and supports grid-friendly operation. |
+> | **Predictability** | Deterministic rules and deadband/anti-flapping logic provide stable switching behaviour; the 10-minute block rhythm reinforces temporal consistency.  |
+> | **Safety** | Thermal and hardware protection plus defined fail states (stop → safe); prevents critical conditions and uncontrolled system behaviour. |
+> | **Reproducibility** | Open data formats, modular architecture, and explicit KPIs enable repeatable experiments, transparent evaluation, and reuse in teaching and research. |
 
 ---
 
