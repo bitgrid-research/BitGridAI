@@ -37,7 +37,7 @@ Die Regelengine (R1–R5) ist das operative Gewissen von BitGridAI:
 > - **R4 Forecast Start links switching decisions:** to robust short-term forecasts before the next block is scheduled.
 > - **R5 Stability / Anti-Flapping:** enforces stability via a deadband/anti-flapping window so the system doesn’t nervously switch on and off.
 
-
+![Core-Prinzip](../media/core_principle.png)
 
 Das System orientiert sich an Bitcoin-nahen Leitmotiven. Der Grundsatz „*Bitcoin ist Zeit*“ beschreibt einen stabilen, zyklischen Takt, der im Bitcoin-Netzwerk durch die etwa zehnminütige Blockzeit entsteht. BitGridAI übernimmt diesen zeitlichen Rahmen als determinischen Automatisierungsrhythmus, um Schaltentscheidungen zu glätten, Lastwechsel zu synchronisieren und instabiles Flapping zu vermeiden. 
 
