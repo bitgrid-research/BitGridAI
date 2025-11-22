@@ -21,7 +21,7 @@ BitGridAI untersucht, wie lokale Energieautomatisierung **erklärbar, vertrauens
 > BitGridAI explores how **local** energy automation can become **explainable, trustworthy, and user-centered**.  
 > It combines Human-Computer Interaction (HCI), renewables, and **transparent on-device AI** into one cohesive approach.
 
-![Venn-Diagramm](../media/venn_diagramm.svg)
+![Venn-Diagramm](../media/venn_diagramm.png)
 
 Die Regelengine (R1–R5) ist das operative Gewissen von BitGridAI: 
 - **R1 Startregel:** Aktiviert die flexible Last nur, wenn der PV-Überschuss eine definierte Schwelle überschreitet und der Strompreis innerhalb eines akzeptablen Bereichs liegt. Die Regel koppelt Energieverfügbarkeit und Wirtschaftlichkeit zu einer transparenten Startlogik.
