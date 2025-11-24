@@ -49,6 +49,9 @@ Das System orientiert sich an Bitcoin-nahen Leitmotiven. Der Grundsatz „*Bitco
 
 ---
 
+[]
+
+
 ## Ziele / Goals
 1. **Erklärbare Energieautomatisierung entwickeln**: BitGridAI verfolgt das Ziel, ein Energiemanagementsystem zu schaffen, das sämtliche Entscheidungen vollständig transparent begründet. Jede Aktion (Start, Stop, Hold, Level-Set) wird mit Reason, Trigger und Parametern dokumentiert und in einem versionierten, auditierbaren Format gespeichert. Dadurch entsteht eine robuste Grundlage für Vertrauen, wissenschaftliche Nachvollziehbarkeit, Wiederholbarkeit und XAI-basierte Evaluation realer Energiesysteme.
 
