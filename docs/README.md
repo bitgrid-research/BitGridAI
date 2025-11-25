@@ -10,18 +10,7 @@ Ein offenes, nutzerzentriertes Energiesystem für transparente und erklärbare l
 
 ## Struktur / Structure
 
-### 00 – Setup
-
-Entwicklungsumgebung & Systemeinrichtung:
-
-* [00.1 SSH unter Windows](./setup/ssh_windows_setup.md)
-* [00.2 Entwicklungsumgebung / Development Environment](./setup/dev_environment.md)
-
-> **Setup** — development environment & system installation: SSH on Windows, local dev environment.
-
----
-
-### 01–13 Architektur (arc42) / Architecture (arc42)
+### 01–14 Architektur / Architecture
 
 Systemdokumentation basierend auf dem [arc42](https://arc42.org)‑Template:
 
@@ -54,6 +43,17 @@ Mensch‑Technik‑Interaktion, Erklärbarkeit und Energieethik:
 * [22 Literaturübersicht / Literature Review](./research/literature_review.md)
 
 > **Research** — HCI, explainability, and energy ethics.
+
+---
+
+### 30 – Setup
+
+Entwicklungsumgebung & Systemeinrichtung:
+
+* [30.1 SSH unter Windows](./setup/ssh_windows_setup.md)
+* [30.2 Entwicklungsumgebung / Development Environment](./setup/dev_environment.md)
+
+> **Setup** — development environment & system installation: SSH on Windows, local dev environment.
 
 ---
 
