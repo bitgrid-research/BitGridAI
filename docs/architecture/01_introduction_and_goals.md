@@ -86,6 +86,9 @@ Das System orientiert sich an Bitcoin-nahen Leitmotiven. Der Grundsatz „*Bitco
 ---
 
 ## Qualitätsziele / Quality Goals
+
+![quality](../media/quality.png)
+
 | Qualität | Beschreibung |
 |---|---|
 | **Transparenz** | Jede Entscheidung ist durch Reason, Trigger und Parameter nachvollziehbar dokumentiert. Alle Erklärungstexte werden versioniert, um zeitliche Änderungen zu analysieren. Dadurch lassen sich Modelle, Schwellenwerte und Nutzerreaktionen wissenschaftlich evaluieren. |
