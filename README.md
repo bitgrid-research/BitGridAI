@@ -40,7 +40,7 @@ und dem Aufbau eines transparenten Forschungsrahmens für lokale Energieflüsse 
 
 ---
 
-### Offener Unterstützungsansatz / Open Support Model
+## Offener Unterstützungsansatz / Open Support Model
 
 BitGridAI versteht sich als offenes Forschungsprojekt an der Schnittstelle von  
 Künstlicher Intelligenz, Energieoptimierung und Human-Computer-Interaction.  
@@ -54,11 +54,7 @@ offener, vertrauenswürdiger und selbstverwahrter Wertflüsse.
 > transparent, sustainable, and decentralized value flows at the intersection  
 > of AI, energy optimization, and human-computer interaction.
 
----
-
 ### Bitcoin-Empfangsadresse / Bitcoin Receiving Address
-
-`bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2`
 
 <div align="left">
   <img src="./docs/media/bitgrid_donation_qr.png" alt="Bitcoin QR" width="140" style="border:1px solid #ccc; border-radius:10px; padding:5px;"/>
@@ -67,7 +63,11 @@ offener, vertrauenswürdiger und selbstverwahrter Wertflüsse.
 Gesamte Empfangsadresse, besonders Anfang und Ende, direkt auf der Hardware-Wallet prüfen.</sub>
 </div>
 
----
+
+```text
+bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2
+```
+
 
 ⚠️ **Sicherheitshinweis / Security Disclaimer**  
  - Verwende **ausschließlich eine Hardware-Wallet mit eigenem Display**, um die Empfangsadresse visuell zu verifizieren.  
@@ -84,8 +84,6 @@ sichere Selbstverwahrung und überprüfbare Transparenz praktisch zu vermitteln.
 > the receiving address before sending any transaction.  
 > The QR code is provided **for educational and transparency purposes only**,  
 > not as a financial solicitation.  
-
----
 
 ### Transparenzbeleg / Transparency Reference
 
