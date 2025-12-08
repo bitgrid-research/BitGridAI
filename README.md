@@ -38,9 +38,9 @@ Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und P
 
 ## Schnellzugriffe
 - Architektur → [./docs/architecture](./docs/architecture/01_introduction_and_goals.md)
-- Regeln R1–R5 → `./docs/rules.md`
-- Datenmodell → `./docs/data-model.md`
-- Home-Assistant Setup → `./docs/ha-setup.md`
+- Prinzipien → [./docs/media/...](./docs/research/bitgrid_principles.md)
+- Datenmodell → `...`
+- Home-Assistant Setup → `...`
 ---
 
 <details>
