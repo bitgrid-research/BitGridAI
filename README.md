@@ -45,47 +45,60 @@ Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und P
 
 <details>
 <summary><strong>Transparenz & Unterstützung (optional)</strong></summary>
+&nbsp;
 
-Offenes Forschungsprojekt an der Schnittstelle von Energieoptimierung und HCI.  
-Freiwillige Beiträge dienen Lern- und Demonstrationszwecken (Selbstverwahrung, On-Chain-Transparenz).
-
-<img src="./docs/media/bitgrid_donation_qr.png" alt="Bitcoin QR" width="120" style="border:1px solid #ddd; border-radius:8px; padding:4px;"/>
+Ich freue mich, wenn dir meine Inhalte weiterhelfen. Falls du meine Projekt rund um Energie, Bitcoin und Selbstverwahrung unterstützen möchtest, findest du hier eine optionale Adresse und einen QR-Code. Alles selbstverständlich transparent und nachvollziehbar.
+&nbsp;
+<table border="0">
+  <tr>
+    <td>
+      <img src="./docs/media/bitgrid_donation_qr.png" width="120" />
+      <img src="./docs/media/bithamster.png" width="120" />
+    </td>
+    <td>
+      <code>Ich mache Energie & Bitcoin verständlich.
+Dein Support fließt in offene Lern- und Demo-Projekte 
+zu Selbstverwahrung & Transparenz.</code>
+    </td>
+  </tr>
+</table>
 
 ```text
 bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2
 ```
 
-⚠️ **Sicherheitshinweis / Security Disclaimer**  
-Adresse niemals abtippen. Gesamte Empfangsadresse, besonders Anfang und Ende, direkt auf der Hardware-Wallet prüfen.
+&nbsp;
 
- - Verwende **ausschließlich eine Hardware-Wallet mit eigenem Display**, um die Empfangsadresse visuell zu verifizieren.  
- - Scanne den QR-Code nur mit **vertrauenswürdiger, quelloffener Wallet-Software**.  
-- Vergleiche die Adresse auf dem Display deiner Hardware-Wallet mit der hier angegebenen Adresse.  
+⚠️ **Kurzer Sicherheitshinweis** 
+
+Damit alles zuverlässig funktioniert, lohnt sich ein schneller Blick auf ein paar bewährte Vorgehensweisen:
+
+ - Prüfe die vollständige Empfangsadresse direkt auf deiner Hardware-Wallet.
+ - Nutze eine Wallet-App, der du vertraust und die idealerweise quelloffen ist. 
+- Vergleiche die angezeigte Adresse mit der hier angegebenen, bevor du fortfährst.  
 
  So wird sichergestellt, dass die Zieladresse **nicht durch UI-Fakes oder Schadsoftware manipuliert** wurde.  
 **Fehleingaben oder manipulierte Adressen können zum unwiderruflichen Verlust von Mitteln führen.**  
 
-Der QR-Code dient ausschließlich als **Lern- und Demonstrationselement**, um  
-sichere Selbstverwahrung und überprüfbare Transparenz praktisch zu vermitteln.  
+Diese Hinweise sollen dir einfach helfen, Adressfehler oder Missverständnisse zu vermeiden.
 
+Der QR-Code dient als Lern- und Demonstrationselement, um zu zeigen, wie sichere Selbstverwahrung und Transparenz praktisch funktionieren.
+
+&nbsp;
 
 ### Transparenzbeleg / Transparency Reference
 
-Alle eingehenden Transaktionen sind öffentlich einsehbar.  
-Sie erscheinen zunächst im **Mempool** (Memory Pool) – dem globalen Wartebereich  
-für unbestätigte Transaktionen – bevor sie dauerhaft in die Blockchain geschrieben werden.
-
+Alle eingehenden Transaktionen kannst du öffentlich einsehen.
+Sie erscheinen zunächst im Mempool, bevor sie dauerhaft in die Blockchain übernommen werden.
 
 **Beispiele / Examples:**  
 - [https://mempool.space/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2](https://mempool.space/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2)  
 - [https://blockstream.info/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2](https://blockstream.info/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2)
 
- 💡 **Hinweis / Note:**  
- Custodial-Produkte („Paper Bitcoin“) ermöglichen oft keine echten On-Chain-Transaktionen.  
- BitGridAI nutzt On-Chain-Transparenz bewusst, um Selbstverwahrung und Dezentralität im  
- Forschungsumfeld sichtbar und nachvollziehbar zu machen.  
+ 💡 **Hinweis**  
+ Custodial-Produkte („Paper Bitcoin“) ermöglichen oft keine echten On-Chain-Transaktionen. BitGridAI nutzt On-Chain-Transparenz bewusst, um Selbstverwahrung und Dezentralität im Forschungsumfeld sichtbar und nachvollziehbar zu machen.  
 
-
+&nbsp;
 </details>
 
 ---
