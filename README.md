@@ -7,6 +7,8 @@ Doku: [./docs/README.md](./docs/README.md)
 ---
 
 ## Status
+
+![Status](./docs/media/status.png)
 - [x] ~~Scoping & Research~~
 - [x] ~~Ideation & Synthese~~
 - [ ] Konzept (MVP Architektur)
