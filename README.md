@@ -8,15 +8,10 @@ Doku: [./docs/README.md](./docs/README.md)
 
 ## Status
 
+`Aktueller Status: Konzeptphase (MVP-Architektur)`
+
 ![Status](./docs/media/status.png)
-- [x] ~~Scoping & Research~~
-- [x] ~~Ideation & Synthese~~
-- [ ] Konzept (MVP Architektur)
-- [ ] Prototyping: HA-Adapter, R1–R5 Basis
-- [ ] Validierung: Aufgaben & KPIs
-- [ ] Roadmap/Backlog finalisieren
-- [ ] Delivery: Sprint 0
-- [ ] Delivery: Sprint 1
+
 
 
 ---
