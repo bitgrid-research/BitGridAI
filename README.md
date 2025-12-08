@@ -8,9 +8,11 @@ Doku: [./docs/README.md](./docs/README.md)
 
 ## Status
 
-`Aktueller Status: Konzeptphase (MVP-Architektur)`
+![Status](https://img.shields.io/badge/Status-Konzeptphase_(MVP_Architektur)-blue)
+
 
 ![Status](./docs/media/status.png)
+
 
 
 
@@ -22,7 +24,6 @@ Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und P
 
 ![Core-Prinzip](./docs/media/core_principle.png)
 
----
 
 ## Was kann’s (MVP)
 - **Regeln (R1–R5):** Start/Stop, SoC-Schutz, Temperaturschutz, Prognose, Deadband
