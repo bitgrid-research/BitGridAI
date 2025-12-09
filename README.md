@@ -4,7 +4,7 @@ Lokale Energie‑Automatisierung. Ohne Cloud. Verständlich erklärt.
 
 Doku: [./docs/README.md](./docs/README.md)
 
-![NoCloud](./docs/media/nocloud.png)
+![Welcome](./docs/media/welcome.png)
 
 
 ---
@@ -103,6 +103,8 @@ Sie erscheinen zunächst im Mempool, bevor sie dauerhaft in die Blockchain über
 </details>
 
 ---
+
+![NoCloud](./docs/media/nocloud.png)
 
 ### Lizenz / License
 AGPL-3.0 — **bitgrid.research@proton.me**
