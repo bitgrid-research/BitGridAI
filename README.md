@@ -4,9 +4,12 @@ Lokale Energie‑Automatisierung. Ohne Cloud. Verständlich erklärt.
 
 Doku: [./docs/README.md](./docs/README.md)
 
+![NoCloud](./docs/media/nocloud.png)
+
+
 ---
 
-## Status
+## Fortschritt
 
 ![Status](https://img.shields.io/badge/Status-Konzeptphase_(MVP_Architektur)-blue)
 
