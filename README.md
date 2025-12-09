@@ -17,8 +17,6 @@ Doku: [./docs/README.md](./docs/README.md)
 ![Status](./docs/media/status.png)
 
 
-
-
 ---
 
 ## Kurz erklärt
@@ -28,12 +26,12 @@ Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und P
 ![Overview](./docs/media/overview_hamster.png)
 
 
-## Was kann’s (MVP)
+## Was umfasst das MVP?
 - **Regeln (R1–R5):** Start/Stop, SoC-Schutz, Temperaturschutz, Prognose, Deadband
-- **Erklärungen:** Klarer Grundtext zu jeder Entscheidung
-- **Home Assistant:** Lokale Sensoren/Aktoren, kein Cloud-Zwang
-- **Steuerung:** Miner an/aus/pause, Sperrzeiten
-- **Protokoll:** Entscheidungen & einfache Kennzahlen
+- **Erklärungen:** Verständliche Begründung zu jeder Entscheidung
+- **Home Assistant/Docker:** Integration lokaler Sensoren und Aktoren zur Entscheidungs- und Steuerlogik
+- **Steuerung:** Miner starten, stoppen, pausieren; Sperrzeiten berücksichtigen
+- **Protokoll:** Entscheidungen dokumentiert, ergänzt um einfache Kennzahlen
   
 ---
 
