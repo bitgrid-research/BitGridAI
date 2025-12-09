@@ -25,7 +25,7 @@ Doku: [./docs/README.md](./docs/README.md)
 BitGridAI nutzt **PV-Überschuss** automatisch – z. B. für **Bitcoin-Mining als flexible Last**.  
 Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und Parametern.
 
-![Core-Prinzip](./docs/media/core_principle.png)
+![Overview](./docs/media/overview_hamster.png)
 
 
 ## Was kann’s (MVP)
