@@ -65,7 +65,7 @@ bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2
 
 Damit alles zuverlässig funktioniert, lohnt sich ein schneller Blick auf ein paar bewährte Vorgehensweisen:
 
- - Prüfe die vollständige Empfangsadresse direkt auf deiner Hardware-Wallet.
+ - Prüfe die vollständige Empfangsadresse direkt auf deiner **Hardware-Wallet**.
  - Nutze eine Wallet-App, der du vertraust und die idealerweise quelloffen ist. 
 - Vergleiche die angezeigte Adresse mit der hier angegebenen, bevor du fortfährst.  
 
