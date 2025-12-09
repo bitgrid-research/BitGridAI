@@ -37,13 +37,6 @@ Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und P
   
 ---
 
-## Schnellzugriffe
-- Architektur → [./docs/architecture](./docs/architecture/01_introduction_and_goals.md)
-- Prinzipien → [./docs/media/...](./docs/research/bitgrid_principles.md)
-- Datenmodell → `...`
-- Home-Assistant Setup → `...`
----
-
 <details>
 <summary><strong>Transparenz & Unterstützung (optional)</strong></summary>
 &nbsp;
