@@ -38,7 +38,7 @@ Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und P
 ---
 
 <details>
-<summary><strong>Transparenz & Unterstützung (optional)</strong></summary>
+<summary><strong>⚡ Transparenz & Unterstützung (optional)</strong></summary>
 &nbsp;
 
 Ich freue mich, wenn dir meine Inhalte weiterhelfen. Falls du meine Projekt rund um Energie, Bitcoin und Selbstverwahrung unterstützen möchtest, findest du hier eine optionale Adresse und einen QR-Code. Alles selbstverständlich transparent und nachvollziehbar.
