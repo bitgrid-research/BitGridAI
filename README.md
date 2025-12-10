@@ -83,7 +83,7 @@ Der QR-Code dient als Lern- und Demonstrationselement, um zu zeigen, wie sichere
 Alle eingehenden Transaktionen kannst du öffentlich einsehen.
 Sie erscheinen zunächst im Mempool, bevor sie dauerhaft in die Blockchain übernommen werden.
 
-**Beispiele / Examples:**  
+**Beispiele:**  
 - [https://mempool.space/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2](https://mempool.space/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2)  
 - [https://blockstream.info/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2](https://blockstream.info/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2)
 
