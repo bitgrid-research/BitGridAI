@@ -1,5 +1,7 @@
 # 052 – Whitebox-Sicht / White Box View
 
+TODO: Das Hauptdiagramm und die Beschreibung der Top-Level-Architektur. Hier siehst du, welche Module es gibt, wofür sie zuständig sind und mit wem sie Daten austauschen.
+
 > **Kurzüberblick:**  
 > Innere Struktur von BitGridAI: Kernkomponenten, Verantwortlichkeiten und interne Flüsse. Alles **lokal-first, deterministisch (R1–R5), erklärbar**.
 
