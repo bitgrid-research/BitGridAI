@@ -1,5 +1,7 @@
 # 021 – Technische Rahmenbedingungen / Technical Constraints
 
+TODO: Harte Fakten zur Technik. Welche Hardware ist vorgegeben? Welche Betriebssysteme oder externen APIs müssen wir zwingend nutzen?
+
 > **Kurzüberblick:**  
 > **Local-first**, **Open-Source-Stack**, deterministische **R1–R5**, **10-Min-Blocktakt**, Explainability & Logging als Pflicht, keine Cloud-Abhängigkeiten.
 
