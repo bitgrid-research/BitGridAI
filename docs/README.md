@@ -35,7 +35,9 @@ So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.or
 
 ## 2. Forschung
 
-Mensch‑Technik‑Interaktion, Erklärbarkeit und Energieethik:
+Hier beschäftigen wir uns mit den Hintergründen: 
+
+Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar und welche ethischen Fragen spielen dabei eine Rolle?
 
 * [20 BitGrid Prinzipien](./research/bitgrid_principles.md)
 * [21 Evaluationsrahmen](./research/evaluation_framework.md)
@@ -45,7 +47,7 @@ Mensch‑Technik‑Interaktion, Erklärbarkeit und Energieethik:
 
 ### 3. Setup
 
-Entwicklungsumgebung & Systemeinrichtung:
+Damit du direkt loslegen kannst: Hier findest du alles zur Einrichtung deiner Entwicklungsumgebung und den ersten Schritten.
 
 * [30.1 SSH unter Windows](./setup/ssh_windows_setup.md)
 * [30.2 Entwicklungsumgebung / Development Environment](./setup/dev_environment.md)
