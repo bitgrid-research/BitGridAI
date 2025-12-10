@@ -17,3 +17,10 @@ Wir haben die Struktur in zwei Hauptbereiche unterteilt, die du in den entsprech
 
 * **[Level 2: Die Whitebox (Innenleben)](./052_whitebox/)**
     * *Kurzbeschreibung:* Jetzt öffnen wir den Deckel der Blackbox. Wir zerlegen das System in seine Hauptkomponenten (z.B. Frontend, API-Gateway, Core-Services, Datenbanken) und erklären deren Aufgaben und Schnittstellen untereinander.
+ 
+---
+> **Nächster Schritt:** Wir wissen jetzt, aus welchen Teilen das Auto besteht. Jetzt starten wir den Motor. Im nächsten Kapitel schauen wir uns an, wie die Komponenten zur Laufzeit zusammenspielen (Abläufe & Prozesse).
+>
+> 👉 Weiter zu **[06 Laufzeitsicht](../06_runtime_view/README.md)**
+>
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
