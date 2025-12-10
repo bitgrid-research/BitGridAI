@@ -22,4 +22,4 @@ Hier liegt der zentrale Plan des Innenlebens. Diese Sicht ist der Ausgangspunkt 
 >
 > 👉 Weiter zu **[06 Laufzeitsicht](../../06_runtime_view)**
 >
-> 🔙 Zurück zur **[Kapitelübersicht (05_Bausteinsicht)](../README.md)**
+> 🔙 Zurück zur **[Kapitelübersicht (05 Bausteinsicht))](../README.md)**
