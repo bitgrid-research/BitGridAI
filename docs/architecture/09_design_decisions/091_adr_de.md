@@ -38,6 +38,6 @@ Diese Tabelle fasst die wichtigsten, das System prägenden strategischen Entsche
 ---
 > **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die möglichen Risiken dieser Entscheidungen und wie wir sie mindern.
 >
-> 👉 Weiter zu **[10 Risikoanalyse](../10_risk_analysis/README.md)**
+> 👉 Weiter zu **[10 Risikoanalyse](../10_risk_analysis/)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
