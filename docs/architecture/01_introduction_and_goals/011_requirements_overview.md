@@ -92,3 +92,10 @@ Genauso wichtig wie das, was wir tun, ist das, was wir bewusst *nicht* tun:
 * Wir bauen keine Abrechnungsplattform für Stromtarife (Billing).
 * Wir sind kein SCADA-System für riesige Kraftwerke, sondern fokussieren uns auf "Residential & Small Commercial".
 * Wir übernehmen keine **Verwahrung von Bitcoin (Custody)**. Wir steuern die Mining-Hardware lediglich an (Start/Stop), aber die Erträge fließen direkt in dein eigenes Wallet. Deine Keys, deine Coins.
+
+---
+> **Nächster Schritt:** Nachdem wir geklärt haben, *was* wir bauen, schauen wir uns an, nach welchen Maßstäben wir die Qualität messen.
+>
+> 👉 Weiter zu **[01.2 Qualitätsziele](./012_quality_goals.md)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
