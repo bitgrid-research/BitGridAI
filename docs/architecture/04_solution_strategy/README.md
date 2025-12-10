@@ -17,3 +17,11 @@ In diesem Ordner liegt das zentrale Dokument für unsere Marschrichtung:
 * **[4.1 Die grundlegende Strategie](./041_solution_strategy.md)**
     * *Kurzbeschreibung:* Hier fassen wir die wichtigsten Lösungsansätze zusammen. Welche Architekturmuster (Patterns) wenden wir an? 
                           Welche zentralen Technologien haben wir gewählt und warum? Wie zerlegen wir das System grob, um die Qualitätsziele zu erreichen?
+
+---
+
+> **Nächster Schritt:** Der strategische Plan steht. Jetzt wird es Zeit, die Ärmel hochzukrempeln. Im nächsten Kapitel zerlegen wir das System in seine konkreten Software-Komponenten und schauen uns an, was wo läuft.
+>
+> 👉 Weiter zu **[05 Bausteinsicht](../05_building_block_view/README.md)**
+>
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
