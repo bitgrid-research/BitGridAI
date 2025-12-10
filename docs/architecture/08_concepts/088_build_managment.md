@@ -1,5 +1,7 @@
 # 088 – Build- & Konfigurationsmanagement
 
+TODO: Von der Codezeile zum laufenden System. Wie sieht unsere CI/CD-Pipeline aus und wie automatisieren wir den Weg in die Produktion?
+
 > **Kurzüberblick:**  
 > Versionierte YAML-Configs, reproducible Builds, klare Artefakte (Tarball/.deb), Checksums; Updates erst nach Replay/Tests. Keine Cloud-Builds nötig.
 
