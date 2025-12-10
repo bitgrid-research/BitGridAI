@@ -24,4 +24,4 @@ Dies ist der zentrale Einstiegspunkt für die Blackbox-Sicht. Da die Schnittstel
 >
 > 👉 Weiter zu **[Level 2: Die Whitebox (Innenleben)](../052_whitebox)**
 >
-> 🔙 Zurück zur **[Kapitelübersicht](../README.md)**
+> 🔙 Zurück zur **[Kapitelübersicht (05 Bausteinsicht)](../README.md)**
