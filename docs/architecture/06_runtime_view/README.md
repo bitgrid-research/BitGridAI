@@ -26,3 +26,10 @@ Wir haben exemplarisch einige der wichtigsten Laufzeitszenarien für BitGridAI d
 
 * **[6.4 Manuelles Überschreiben](./064_manuell_override.md)**
     * *Kurzbeschreibung:* Der Eingriff durch den Nutzer. Was passiert im System, wenn ein Operator die Automatik übersteuert und manuell eingreift? Welche Komponenten sind beteiligt und wie wird der Normalbetrieb wiederaufgenommen?
+
+---
+> **Nächster Schritt:** Wir wissen jetzt, wie die Software arbeitet. Aber auf welcher Hardware landet sie eigentlich und wie kommt sie dorthin? Im nächsten Kapitel schauen wir uns die Infrastruktur an.
+>
+> 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view)**
+>
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
