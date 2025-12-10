@@ -90,4 +90,4 @@ Das Glossar enthält zentrale Begriffe, Konzepte und Abkürzungen, die in der Bi
 | **XAI** | Explainable Artificial Intelligence. |
 
 ---
-🔙 Zurück zur **[Kapitelübersicht](../README.md)**
+🔙 Zurück zur **[Kapitelübersicht](../12_glossary/)**
