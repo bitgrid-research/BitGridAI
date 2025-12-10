@@ -16,3 +16,10 @@ Hier liegt der zentrale Plan des Innenlebens. Diese Sicht ist der Ausgangspunkt 
     * *Kurzbeschreibung:* Das Hauptdiagramm und die Beschreibung der Top-Level-Architektur. Hier siehst du, welche Module es gibt, wofür sie zuständig sind und mit wem sie Daten austauschen.
 
 *(Hinweis: Sollten einzelne dieser Bausteine selbst sehr komplex sein, können sie in weiteren Unterordnern (Level 3, Level 4...) noch detaillierter als eigene Whiteboxen beschrieben werden.)*
+
+---
+> **Nächster Schritt:** Wir kennen jetzt die Bausteine und ihre Schnittstellen. Aber wie "tanzen" sie zusammen? Im nächsten Kapitel bringen wir Leben in die Bude und schauen uns die dynamischen Abläufe an.
+>
+> 👉 Weiter zu **[06 Laufzeitsicht](../../06_runtime_view)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht (05_Bausteinsicht)](../README.md)**
