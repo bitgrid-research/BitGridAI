@@ -1,5 +1,7 @@
 # 081 – Domain Models / Datenmodelle
 
+TODO: Unsere gemeinsame Sprache. Wie definieren wir zentrale Begriffe wie "Nutzer", "Energiequelle" oder "Messwert" im Code, damit alle dasselbe darunter verstehen?
+
 > **Kurzüberblick:**  
 > **EnergyState** als Single Source of Truth, **DecisionEvent** für jede Aktion, **ExplainSession** für Microcopy, **Override** und **ResearchToggle** als Kontrollobjekte.
 
