@@ -1,5 +1,7 @@
 # 102 – Qualitätsszenarien (Auszug)
 
+Das Herzstück der Qualitätskontrolle. Hier beschreiben wir spezifische Situationen ("Szenarien"), um die Anforderungen zu testen.
+
 > **Kurzüberblick:**  
 > Szenarien aus Kap. 10 prüfen **Transparenz, Nachhaltigkeit, Resilienz, HCI, Safety, Stabilität, Hodl/PoW-Traceability**.
 
