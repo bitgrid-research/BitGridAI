@@ -19,4 +19,8 @@ Wir nutzen ein etabliertes Format, um unsere Entscheidungen zu strukturieren:
     * *Kurzbeschreibung:* Das Herzstück dieses Kapitels. Wir nutzen **Architecture Decision Records (ADRs)**, um wichtige, strukturprägende Entscheidungen nachvollziehbar zu dokumentieren. Dieses Dokument enthält entweder die Sammlung unserer ADRs oder das Template, das wir dafür verwenden.
 
 ---
-> **Hinweis:** Nach arc42 ist es essenziell, nicht nur das Ergebnis ("Wir nutzen Datenbank X"), sondern auch den Weg dorthin ("Wir haben X gewählt, weil Y zu teuer und Z zu langsam war") zu dokumentieren. Das verhindert, dass dieselben Diskussionen immer wieder geführt werden.
+> **Nächster Schritt:** Die Entscheidungen sind gefallen. Aber halten sie auch der Realität stand? Im nächsten Kapitel testen wir die Architektur gegen konkrete Szenarien, um die Qualität zu prüfen.
+>
+> 👉 Weiter zu **[10 Qualitätsszenarien](../10_quality_scenarios/README.md)**
+>
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
