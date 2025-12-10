@@ -9,16 +9,6 @@ Hier greifen alle Zahnräder ineinander: Sensoren, State, Scheduler, Regeln und 
 *(Platzhalter für ein Bild: Die Sonne scheint auf das Haus, die Batterien sind grün, und der Hamster legt gut gelaunt den großen Hebel auf "ON".)*
 ![Hamster startet das Mining](../../media/pixel_art_hamster_mining_start.png)
 
-## Kurzüberblick
-
-> **Der Ablauf in Kürze:**
-> PV-Überschuss → **EnergyState** aktualisiert → **BlockScheduler (10 Min)** triggert **R1** → Mining startet inkl. **DecisionEvent + Erklärung**.
-
-> **TL;DR (EN):**
-> PV surplus → EnergyState → 10-min scheduler triggers **R1** → start mining with DecisionEvent + rationale.
-
----
-
 ## Sequenzdiagramm (Der Ablauf)
 
 Wie wird aus Sonnenstrahlen Hashrate?
