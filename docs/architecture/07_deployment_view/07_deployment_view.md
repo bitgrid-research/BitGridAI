@@ -1,80 +1,108 @@
-# 07 – Deployment-Sicht / Deployment View
+# 07.1 Infrastruktur & Deployment
 
-TODO: Kurzbeschreibung: Das zentrale Dokument für das Deployment. Es zeigt die Verteilung der Software-Artefakte auf Knoten (Server, Container, etc.). Wir definieren hier auch verschiedene Umgebungen wie Entwicklung (Dev), Test (Staging) und Produktion (Prod) und deren Unterschiede.
+Wo der Hamster wohnt.
 
-> **Kurzüberblick:**  
-> Vollständig **lokal im geschlossenen LAN**: Core, Module, Explain-Agent, UI on-prem; Kommunikation via **MQTT/REST/WebSocket**; kein Cloud-Backend. Varianten: **Standalone**, **Distributed Local Network**, optional **Hybrid (verschlüsselte Spiegelung)**.
+In dieser Sicht verlassen wir den reinen Code und betrachten die physische Welt. **BitGridAI** ist konsequent als **Local-First** System im geschlossenen LAN konzipiert. Es gibt kein Cloud-Backend, kein "Phone Home" und keinen Zwang zur Internetverbindung für den Regelbetrieb.
 
-> **TL;DR (EN):**  
-> Fully local in a closed LAN: core/modules/explain-agent/UI on-prem; MQTT/REST/WS; no cloud backend. Variants: standalone, distributed local, optional hybrid mirror.
+Wir definieren hier, auf welcher Hardware die Komponenten laufen, wie sie vernetzt sind und wie wir das System gegen Ausfälle und Angriffe härten.
 
----
+*(Platzhalter für ein Bild: Ein Querschnitt durch ein Haus. Im Keller steht ein Server-Rack mit einem Raspberry Pi, verbunden mit Wechselrichter und Miner. Ein dicker "No Cloud"-Stempel ist auf dem Bild.)*
+![Deployment Übersicht](../../media/pixel_art_deployment_overview.png)
 
-## Zielarchitektur
+## 1. Die Zielarchitektur
 
+Das System folgt einer klaren Pipeline: Von den Sensoren über die Adapter in den Core und schließlich zur UI oder Datenbank. Der **MQTT-Broker** fungiert dabei als zentrales Nervensystem.
+
+```mermaid
+graph TD
+    subgraph "Peripherie (LAN/Modbus)"
+        HW_PV[☀️ PV / Speicher]
+        HW_Sens[📏 Sensoren / Meter]
+        HW_Miner[⛏️ Mining Hardware]
+    end
+
+    subgraph "Edge Node (Controller)"
+        Modules[("🔌 Modules / Adapters<br>(Python)")]
+        Core[("🧠 Core + Explain-Agent<br>(Python/RuleEngine)")]
+        MQTT[("📡 MQTT Broker<br>(Local Bus)")]
+        UI[("🖥️ User Interface<br>(Svelte/HA)")]
+        
+        HW_PV & HW_Sens --> Modules
+        Modules --> MQTT
+        MQTT <--> Core
+        Core --> HW_Miner
+        MQTT --> UI
+    end
+
+    subgraph "Research & Data"
+        DB[("💾 Data / Replay<br>(SQLite/Parquet)")]
+        Research[("🎓 Research Node<br>(Offline Analysis)")]
+        
+        Core --> DB
+        DB -.-> Research
+    end
 ```
-[ PV / Storage / Sensoren ]
-        → 
-    [ modules/ ]
-        → 
-[ core + Explain-Agent ]
-        ↔         →
-   [ MQTT ]     [ ui/ ]
-        →         →
- [ data/replay ] [ research node ]
-```
 
-> Local network only; MQTT broker + UI share state/logs; research node optional for exports/replays.
+## 2. Hardware & Software Stack
 
----
+Worauf läuft BitGridAI? Wir unterscheiden zwischen dem Steuerungs-Knoten und der Peripherie.
 
-## Hardware & Software (Kurzfassung)
+### Hardware-Komponenten
 
-| Komponente | Beschreibung |
-| --- | --- |
-| **Controller / Edge Node** | Führt Core, Explain-Agent (on-device LLM) und UI aus. |
-| **PV-Wechselrichter & Speicher** | liefern Daten für EnergyState; bleiben lokal erreichbar. |
-| **Mining / Flexible Last** | Dynamischer Verbraucher, gesteuert über Core. |
-| **MQTT Broker** | Lokaler Bus für State/Command/Explain-Events. |
-| **Research/Replay Terminal** | Offline-Analyse, Export, KPI-Reports. |
+| Komponente | Rolle & Beschreibung |
+| :--- | :--- |
+| **Controller / Edge Node** 🧠 | **Der Chef.** Ein Einplatinencomputer (z.B. Raspberry Pi 4/5, Intel NUC) oder eine VM. Führt Core, Explain-Agent (On-Device LLM) und UI aus. |
+| **PV & Speicher** ☀️ | **Die Quellen.** Wechselrichter und Batteriemanagementsysteme. Bleiben lokal via Modbus/TCP oder API erreichbar. |
+| **Mining / Flexible Last** ⛏️ | **Der Verbraucher.** ASICs oder PCs, die dynamisch als steuerbare Last agieren. Steuerung via API (z.B. Stratum/HTTP) über den Core. |
+| **Research Terminal** 🎓 | **Der Analyst.** Ein optionaler, separater Rechner (Laptop/Desktop) im LAN für Offline-Analysen, KPI-Reports und Replays der Parquet-Logs. |
 
-| Software | Zweck |
-| --- | --- |
-| **Core (Python)** | Regel-Engine, BlockScheduler, Hodl-Policy. |
-| **Module (Python/MQTT/Modbus)** | Adapter für Geräteintegration. |
-| **UI (Svelte/HA-Frontend)** | Explainability, Overrides, Research-Toggle. |
-| **Datenhaltung (SQLite/Parquet/JSON)** | Logging, KPIs, Replay Runner. |
+### Software-Stack
+
+| Layer | Technologie | Zweck |
+| :--- | :--- | :--- |
+| **Core** | Python 3.x | Beherbergt die Regel-Engine (R1–R5), den BlockScheduler und die Hodl-Policy. |
+| **Module** | Python / Modbus | Adapter, die proprietäre Hardware-Protokolle auf interne Events übersetzen. |
+| **Bus** | MQTT (Mosquitto) | Lokaler Austausch von State, Commands und Explain-Events in Echtzeit. |
+| **UI** | Svelte / HA-Frontend | Visualisierung, Overrides und Research-Toggle. |
+| **Data** | SQLite / Parquet | **SQLite:** Hot Data (aktueller EnergyState).<br>**Parquet:** Cold Data (Langzeit-Logs, effizient & append-only). |
 
 ---
 
-## Betrieb & Hardening (Essentials)
+## 3. Deployment-Varianten
 
-- Minimal-OS (Debian/Ubuntu/RPi), nur notwendige Dienste.  
-- Firewall **deny-all + Allowlist** (MQTT 1883, UI 8443).  
-- **Stop → Safe** bei Sensor-/Netzfehler; USV für geordneten Shutdown.  
-- `config/` + DB täglich sichern (Borg/Duplicati).  
-- TLS optional; lokale Auth (HA-User); keine Telemetrie.
+Je nach Ausbaustufe und Zielsetzung kann BitGridAI unterschiedlich ausgerollt werden:
 
----
-
-## Deployment-Varianten
-
-| Variante | Einsatz |
-| --- | --- |
-| **Standalone** | Voller Stack auf Thin Client – Prototyping/Feldstudie. |
-| **Distributed Local Network** | Core, Module, UI getrennt – A/B-Tests, Skalierung. |
-| **Hybrid (optional)** | Verschlüsselte Datenspiegelung für Backup/Evaluation. |
+| Variante | Einsatzzweck | Beschreibung |
+| :--- | :--- | :--- |
+| **A. Standalone** | 🏠 Standard | **"All-in-One".** Der gesamte Stack (Core, Broker, UI, DB) läuft als Docker-Compose-Verbund auf einem einzigen Edge Device (z.B. Raspberry Pi). Ideal für Prototypen und Feldstudien. |
+| **B. Distributed** | 🏢 Skalierung | **"Verteilt".** Core und UI laufen getrennt von den Hardware-Adaptern (die z.B. näher an den Sensoren platziert sind). Kommunikation rein über MQTT im LAN. Gut für A/B-Tests. |
+| **C. Hybrid** | ☁️ Optional | **"Backup".** Wie Standalone, aber mit einer *verschlüsselten*, unidirektionalen Spiegelung ausgewählter Logs auf einen externen Server zur Datensicherung (nur bei explizitem Opt-in). |
 
 ---
 
-## Netzwerkkonfiguration
+## 4. Betrieb & Sicherheit (Hardening)
 
-- Protokolle: MQTT, REST, WebSocket **nur lokal**.  
-- Statische Adressen / mDNS für UI & Research.  
-- Privacy: kein Cloud-Backhaul, Research-Exports nur via Opt-in Toggle.
+Da wir physische Hardware steuern, ist Sicherheit kein Feature, sondern Pflicht.
+
+### Netzwerk & Firewall 🛡️
+* **Protokolle:** MQTT (Port 1883), REST, WebSocket. Alles **nur lokal** im LAN.
+* **Firewall:** Prinzip "Deny-All".
+    * *Eingehend:* Nur SSH (Key-Auth), MQTT (lokal), HTTP/UI (lokal).
+    * *Ausgehend:* Nur NTP (Zeit), Updates (OS/Container), Preis-API (HTTPS).
+* **Kein Cloud-Backhaul:** Es gibt keinen Tunnel nach draußen. Fernzugriff erfolgt ausschließlich via VPN (z.B. WireGuard) in das Heimnetz, nicht direkt auf das Device.
+
+### System-Hardening 🔒
+* **OS:** Minimales Linux (Debian/Ubuntu Server/Raspbian Lite). Keine unnötigen Desktop-Dienste.
+* **Fail-Safe:** Bei Sensor- oder Netzwerkfehlern gilt immer: **Stop $\rightarrow$ Safe**. Das System geht in einen sicheren Zustand (Miner aus), bevor Hardware beschädigt wird.
+* **Power:** Eine **USV (Unterbrechungsfreie Stromversorgung)** wird dringend empfohlen, um bei Stromausfall Datenbank-Korruption zu verhindern und einen sauberen Shutdown zu ermöglichen.
+
+### Backup & Privacy 💾
+* **Sicherung:** Tägliches Backup von `config/` und der SQLite-DB (z.B. via BorgBackup oder Duplicati auf lokales NAS).
+* **Privacy:** Keine Telemetrie standardmäßig. Research-Exports erfolgen nur, wenn der "Research-Toggle" aktiv ist (Opt-in).
 
 ---
-
-## Zusammenfassung
-
-Deployment bleibt **lokal, energieeffizient und auditierbar**: offene Protokolle, minimierte Ports, klare Trennung zwischen Core, Adaptern, UI und Research-Knoten.
+> **Nächster Schritt:** Die Hardware steht, die Container laufen. Aber was hält alles im Innersten zusammen? Im nächsten Kapitel widmen wir uns den Themen, die *alle* Bausteine betreffen.
+>
+> 👉 Weiter zu **[08 Querschnittliche Konzepte](../08_concepts/README.md)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
