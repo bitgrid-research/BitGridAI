@@ -25,6 +25,6 @@ Wir haben die Grundlagen in drei kompakte Bereiche aufgeteilt, damit du schnell 
 
 > **Nächster Schritt:** Wir kennen jetzt das Ziel. Im nächsten Kapitel schauen wir uns die Leitplanken an, die uns die Realität (Technik & Organisation) vorgibt.
 >
-> 👉 Weiter zu **[02 Randbedingungen](../02_architecture_constraints/README.md)**
+> 👉 Weiter zu **[02 Randbedingungen](../02_architecture_constraints)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
