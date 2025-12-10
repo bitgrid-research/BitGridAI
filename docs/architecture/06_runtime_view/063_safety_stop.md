@@ -1,4 +1,4 @@
-# 062 – Runtime: Safety-Stop (R3/R2)
+# 06.3 – Runtime: Safety-Stop (R3)
 
 TODO: Ein kritischer Ablauf. Was passiert, wenn ein Notfall eintritt (z.B. Hardwareausfall, Grenzwertüberschreitung)? Wie wird das System sicher in einen definierten Ruhezustand gebracht?
 
