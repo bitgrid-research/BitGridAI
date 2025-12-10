@@ -35,4 +35,10 @@ TODO: Wer sind die Menschen (und Systeme), die BitGridAI nutzen oder beeinflusse
 - **P3 Developer:** testet Module/Policies, nutzt Replay & Debug-Ansicht.  
 - **P4 Community Member:** vergleicht KPIs und Best Practices lokal.
 
-> Derived from HCI perspective: transparency, control, research opt-in, and local evidence matter to all roles.
+
+> ---
+> **Nächster Schritt:** Damit wissen wir, für wen wir BitGridAI bauen. Jetzt wird es ernst: Wir verlassen die Zielebene und schauen uns die harten Leitplanken an, die unsere Architektur einschränken.
+>
+> 👉 Weiter zu **[02 Randbedingungen](../02_architecture_constraints/README.md)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
