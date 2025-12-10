@@ -1,13 +1,13 @@
-# 08 Querschnittskonzepte
+# 08 Querschnittkonzepte
 
 Willkommen in der "Abteilung für allgemeine Angelegenheiten".
 
-Wir haben die Bausteine definiert, wir wissen, wo sie laufen. Aber wie stellen wir sicher, dass sie alle dieselbe "Sprache" sprechen, wenn es um grundlegende technische Fragen geht?
+Wir haben die Bausteine definiert, wir wissen, wo sie laufen. Aber wie stellen wir sicher, dass alle dieselbe "Sprache" sprechen, wenn es um grundlegende technische Fragen geht?
 
-In diesem Kapitel beschreiben wir die übergreifenden Prinzipien und Muster, die in **BitGridAI** angewendet werden. Das sind die technischen Leitplanken, die dafür sorgen, dass das System "aus einem Guss" ist und nicht wie ein zusammengeklebter Flickenteppich wirkt. Es geht um Themen, die *jeden* Entwickler betreffen, egal an welchem Baustein er gerade arbeitet.
+In diesem Kapitel beschreiben wir die übergreifenden Prinzipien und Muster, die in **BitGridAI** angewendet werden. Das sind die technischen Leitplanken, die dafür sorgen, dass das System "aus einem Guss" ist und nicht wie ein zusammengeklebter Flickenteppich wirkt. Es geht um Themen, die **jeden** Entwickler betreffen, egal an welchem Baustein er gerade arbeitet.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster, der wie ein Dirigent vor verschiedenen technischen Symbolen steht (Datenbank-Tonne, Log-Datei, UI-Fenster, Warnschild) und sie koordiniert, oder einen großen, dicken Ordner mit der Aufschrift "REGELN" hält.)*
-![Hamster mit dem Regelwerk](link_zum_konzepte_bild.png)
+![Hamster mit dem Regelwerk](link_zum_regelwerk_bild.png)
 
 ## Inhalt dieses Kapitels
 
@@ -32,14 +32,14 @@ Wir haben eine ganze Reihe von wichtigen Themen identifiziert, die zentral gereg
     * *Kurzbeschreibung:* Die Blackbox des Systems. Was schreiben wir wo mit, um im Nachhinein verstehen zu können, was passiert ist (insbesondere bei verteilten Abläufen)?
 
 * **[8.7 Testbarkeit & Simulation](./087_testability_and_simulation.md)**
-    * *Kurzbeschreibung:* Wie machen wir es uns leicht, das System zu testen – auch wenn die echte Hardware gerade nicht verfügbar ist? (Stichwort: Mocking, Simulatoren).
+    * *Kurzbeschreibung:* Wie machen wir es uns leicht, das System zu testen – auch wenn die echte Hardware nicht verfügbar ist? (Stichwort: Mocking, Simulatoren).
 
 * **[8.8 Build- & Release-Management](./088_build_managment.md)**
     * *Kurzbeschreibung:* Von der Codezeile zum laufenden System. Wie sieht unsere CI/CD-Pipeline aus und wie automatisieren wir den Weg in die Produktion?
 
 ---
-> **Nächster Schritt:** Das Regelwerk steht. Aber der Weg dorthin war sicher nicht ohne Kreuzungen. Im nächsten Kapitel dokumentieren wir die bewussten Entscheidungen (und Alternativen), die uns hierher geführt haben.
+> **Nächster Schritt:** Alle Konzepte sind jetzt definiert. Im nächsten Kapitel dokumentieren wir die wichtigsten strategischen Entscheidungen, die zur aktuellen Architektur geführt haben.
 >
-> 👉 Weiter zu **[09 Architekturentscheidungen](../09_design_decisions)**
+> 👉 Weiter zu **[09 Designentscheidungen](../09_design_decisions/)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
