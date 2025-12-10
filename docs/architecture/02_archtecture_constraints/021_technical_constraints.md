@@ -8,6 +8,8 @@ Diese Einschränkungen sind nicht verhandelbar. Sie ergeben sich aus der physisc
 
 Unsere Architektur muss innerhalb dieser Grenzen eine optimale Lösung finden.
 
+![Hamster lötet im Keller am Edge-Device](link_zu_image_40.png)
+
 ## Die Liste der harten Fakten
 
 | ID | Randbedingung | Beschreibung & Motivation |
@@ -19,3 +21,11 @@ Unsere Architektur muss innerhalb dieser Grenzen eine optimale Lösung finden.
 | **TC-5** | **Heterogene Geräte-Landschaft (Protokoll-Zoo)** 🗣️ | Das System muss zwingend die gängigsten Industrieprotokolle sprechen, um mit Wechselrichtern, Zählern und Wallboxen zu kommunizieren.<br>**Pflicht-Protokolle:** Modbus TCP, MQTT, REST/HTTP. |
 | **TC-6** | **On-Device AI Inference** 🧠 | Das KI-Modell für Prognosen und der "Explain-Agent" (On-Device LLM) müssen lokal ausgeführt werden.<br>**Konsequenz:** Keine Nutzung von Cloud-KI-APIs. Modelle müssen für CPU-Inferenz auf Edge-Geräten optimiert sein. |
 | **TC-7** | **Lokale Sicherheit & Auth** 🔒 | Sicherheit darf nicht von externen Providern abhängen.<br>**Vorgabe:** Die Authentifizierung erfolgt lokal (z.B. über vorhandene Home Assistant User). Es werden nur minimale Netzwerk-Ports nach außen geöffnet. |
+
+---
+
+> **Nächster Schritt:** Technik ist das eine, aber wer bezahlt das Ganze und wann muss es fertig sein? Im nächsten Abschnitt schauen wir uns die organisatorischen Rahmenbedingungen an.
+>
+> 👉 Weiter zu **[02.2 Organisatorische Randbedingungen](./022_organizational_constraints.md)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
