@@ -13,10 +13,10 @@ Ohne ein klares Ziel verläuft man sich schnell – daher definieren wir hier de
 Wir haben die Grundlagen in drei kompakte Bereiche aufgeteilt, damit du schnell findest, was du suchst:
 
 * **[1.1 Anforderungen](./011_requirements_overview.md)**
-    * *Kurzbeschreibung:* Was genau bauen wir hier? Ein Überblick über die wesentlichen Features und Use-Cases.
+    * Was genau bauen wir hier? Ein Überblick über die wesentlichen Features und Use-Cases.
 
 * **[1.2 Qualitätsziele](./012_quality_goals.md)**
-    * *Kurzbeschreibung:* Worauf legen wir besonderen Wert? (z.B. Benutzerfreundlichkeit, Effizienz, Zuverlässigkeit).
+    * Worauf legen wir besonderen Wert? (z.B. Transparenz, Autonomie, Nachhaltigkeit).
 
 * **[1.3 Stakeholder](./013_steakholder.md)**
     * *Kurzbeschreibung:* Wer sind die Menschen (und Systeme), die BitGridAI nutzen oder beeinflussen?
