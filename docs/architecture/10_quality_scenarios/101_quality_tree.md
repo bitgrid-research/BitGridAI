@@ -1,5 +1,7 @@
 # 101 – Quality Tree / Qualitätsbaum
 
+TODO: Eine strukturierte Übersicht (Mindmap oder Hierarchie) der für uns relevanten Qualitätsmerkmale (z.B. Performance, Zuverlässigkeit, Sicherheit, Wartbarkeit). Dies stellt sicher, dass wir keinen wichtigen Aspekt vergessen.
+
 > **Kurzüberblick:**  
 > Hauptqualitäten: **Transparenz & Erklärbarkeit**, **Autonomie/Privacy**, **Nachhaltigkeit**, **Vorhersagbarkeit/Stabilität**, **Sicherheit**, **Reproduzierbarkeit/Erweiterbarkeit**.
 
