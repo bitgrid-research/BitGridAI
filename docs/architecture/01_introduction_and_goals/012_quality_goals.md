@@ -34,3 +34,10 @@ Wie messen wir objektiv, ob wir unsere Ziele erreichen? Wir haben harte Zahlen (
 | **Thermal-Safety-Events** | **0 ungeplante Übertemperaturen** (> 85 °C) | Überwachung des Health-Logs und der Sensorwerte. |
 | **Energy-to-Sats-Effizienz** | **≥ 45 sats/kWh** (im rolling 7-Tage-Schnitt) | Auswertung des `energy_to_value`-Datasets. |
 | **Traceability (Nachweisbarkeit)** | **100 %** der Blockfenster loggen den gewählten Pfad und die Begründung | Prüfung des manipulationssicheren "Append-only Hodl-Log". |
+
+---
+> **Nächster Schritt:** Nachdem wir geklärt haben, was "gut" für BitGridAI bedeutet, schauen wir uns an, für wen wir das alles eigentlich machen.
+>
+> 👉 Weiter zu **[01.3 Stakeholder](./013_stakeholder.md)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
