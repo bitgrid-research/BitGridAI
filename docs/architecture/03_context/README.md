@@ -25,4 +25,4 @@ Um die Übersicht zu behalten, trennen wir die fachliche "Brille" von der techni
 >
 > 👉 Weiter zu **[04 Lösungsstrategie](../04_solution_strategy)**
 >
-> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
+> 🔙 Zurück zur **[Hauptübersicht](../../README.md)**
