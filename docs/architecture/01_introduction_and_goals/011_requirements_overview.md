@@ -1,5 +1,7 @@
 # 011 – Requirements Overview / Anforderungen
 
+TODO: Kurzbeschreibung: Was genau bauen wir hier? Ein Überblick über die wesentlichen Features und Use-Cases.
+
 > **Kurzüberblick:**  
 > BitGridAI ist **local-first**, erklärbar (R1–R5, 10-Min-Blocktakt), priorisiert **Sicherheit, Autarkie und Transparenz** und muss komplett ohne Cloud laufen.
 
