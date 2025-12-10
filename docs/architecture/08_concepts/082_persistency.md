@@ -1,5 +1,7 @@
 # 082 – Persistenz / Persistency
 
+TODO: Wo und wie speichern wir Daten dauerhaft? Welche Datenbanktechnologien nutzen wir für welche Art von Daten?
+
 > **Kurzüberblick:**  
 > **Append-only** Speicherung (SQLite/Parquet/JSON), versionierte YAML-Configs, lokale Replays; kein Cloud-Backend.
 
