@@ -97,5 +97,5 @@ Sie erscheinen zunächst im Mempool, bevor sie dauerhaft in die Blockchain über
 
 ![NoCloud](./docs/media/nocloud.png)
 
-### Lizenz / License
+### Lizenz / Kontakt
 AGPL-3.0 — **bitgrid.research@proton.me**
