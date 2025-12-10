@@ -1,7 +1,10 @@
 # BitGridAI Dokumentation
 
-Willkommen im Dokumentationsbereich von **BitGridAI** –
-Ein offenes, nutzerzentriertes Energiesystem für transparente und erklärbare lokale Automatisierung.
+Hey! Willkommen in der **BitGridAI**-Doku.
+
+BitGridAI ist ein offenes, nutzerfreundliches Energiesystem für transparente und verständliche lokale Automatisierung.
+
+Lass uns loslegen!
 
 ![Status](./media/doku.png)
 
