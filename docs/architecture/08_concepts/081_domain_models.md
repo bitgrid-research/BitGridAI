@@ -95,3 +95,34 @@ class DecisionEvent(BaseModel):
     trigger_metrics: dict  # Snapshot der Werte, die ausgelöst haben: {"surplus": 4.2, "limit": 1.5}
     
     is_override: bool      # True, wenn dies durch manuellen User-Eingriff entstand
+```
+
+## 4. Die `UserConfig` (Die Vorgaben) ⚙️
+
+Die statische Konfiguration, die der Nutzer in der `config.yaml` oder im UI einstellt. Sie definiert die Grenzen, innerhalb derer sich die Automatik bewegen darf.
+
+| Sektion | Feld | Default | Bedeutung |
+| :--- | :--- | :--- | :--- |
+| **Profil** | `strategy_mode` | `eco` | `eco` (Autarkie vor Profit) vs `profit` (Aggressiv mining). |
+| **Limits** | `min_home_soc` | `20` | Unter 20% Akku darf der Miner nicht laufen (Notreserve für die Nacht). |
+| **Hardware** | `max_miner_temp`| `80` | Not-Aus Temperatur für den Chip (R3 Threshold). |
+| **Netz** | `grid_cap_kw` | `10` | Maximale Netzanschlussleistung (Blackout-Schutz/Sicherung). |
+
+## 5. Das `ExplainSession` Objekt (Der Dialog) 💬
+
+Für den On-Device Agenten. Wenn der Nutzer im UI fragt "Warum läuft der Miner gerade?", wird dieses Objekt generiert.
+
+* **Zweck:** Entkoppelt die komplexe technische Entscheidung von der menschenlesbaren Antwort.
+* **Inhalt:**
+    * `session_id`: Eindeutige ID für diesen Dialog.
+    * `context_snapshot`: Referenz auf den `EnergyState` zum exakten Zeitpunkt der Frage.
+    * `decision_ref`: Welches `DecisionEvent` ist gerade aktiv? (Die technische Basis der Antwort).
+    * `generated_text`: Die finale Antwort des LLM oder der Template-Engine (z.B. *"Weil die Sonne scheint und der Akku voll ist."*).
+    * `language`: `de` oder `en` (Spracheinstellung des Nutzers).
+
+---
+> **Nächster Schritt:** Wir wissen jetzt, wie die Daten *im Speicher* aussehen. Aber wie legen wir sie langfristig auf die Festplatte, damit sie einen Stromausfall überleben?
+>
+> 👉 Weiter zu **[08.2 Persistenz (Datenhaltung)](./082_persistency.md)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
