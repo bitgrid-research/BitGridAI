@@ -1,5 +1,7 @@
 # 062 – Runtime: Safety-Stop (R3/R2)
 
+TODO: Ein kritischer Ablauf. Was passiert, wenn ein Notfall eintritt (z.B. Hardwareausfall, Grenzwertüberschreitung)? Wie wird das System sicher in einen definierten Ruhezustand gebracht?
+
 > **Kurzüberblick:**  
 > **Thermo- oder SoC-Schutz** bricht jede Deadband, setzt **Stop → Safe** und erklärt Ursache & Wiederaufnahmeschwelle.
 
