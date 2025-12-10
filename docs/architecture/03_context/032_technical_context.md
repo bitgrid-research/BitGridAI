@@ -1,5 +1,8 @@
 # 032 – Technischer Kontext / Technical Context
 
+TODO: Die Sicht unter der Haube. Mit welchen konkreten APIs, Protokollen, Datenbanken oder Hardware-Komponenten kommuniziert BitGridAI auf technischer Ebene?
+
+
 > **Kurzüberblick:**  
 > Lokale Kopplung von PV, Speicher, Smart Meter, Miner – orchestriert durch **EnergyState (SSoT)**, **BlockScheduler (10 Min)** und **Rule Engine R1–R5**. Kommunikation über **MQTT/REST/WS**, alles im **geschlossenen LAN**.
 
