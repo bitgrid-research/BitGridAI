@@ -1,37 +1,43 @@
-# 091 – Architekturentscheidungen (DE · Kurzfassung)
+# 09.1 Architektur-Entscheidungen (Kurzfassung)
 
-TODO: Das Herzstück dieses Kapitels. Wir nutzen Architecture Decision Records (ADRs), um wichtige, strukturprägende Entscheidungen nachvollziehbar zu dokumentieren. Dieses Dokument enthält entweder die Sammlung unserer ADRs oder das Template, das wir dafür verwenden.
+Die DNA von BitGridAI.
 
-> **Kurzüberblick:**  
-> ADRs verankern **Local-First**, **Erklärbarkeit**, **Nachhaltigkeit**, **Determinismus**. Kernpunkte: **R1–R5**, **10-Min-BlockScheduler**, **EnergyState (SSoT)**, **Deadband**, **MQTT+REST**, **AGPLv3**, **kein Cloud-Backend**.
+Dieses Dokument dient als zentrale Ankerstelle für alle **Architecture Decision Records (ADRs)**. ADRs sind strukturierte Dokumente, die wichtige, strukturprägende Entscheidungen transparent, nachvollziehbar und mit ihrer ursprünglichen Begründung festhalten.
 
-> **TL;DR (EN):**  
-> ADRs lock in local-first, explainability, sustainability, deterministic control (R1–R5, 10-min cadence, EnergyState, deadband, MQTT/REST, AGPLv3, no cloud).
+Die hier gesammelten Entscheidungen legen die Kernprinzipien von BitGridAI fest: **Lokalität, Determinismus, Erklärbarkeit** und **Nachhaltigkeit**.
 
----
+*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt vor einem großen Schild, das die wichtigsten ADRs auflistet (z.B. "ADR 007: Deterministische Regeln").)*
+![Hamster überprüft ADRs](../../media/pixel_art_hamster_adrs.png)
 
 ## ADR-Übersicht (Auszug)
 
-| ADR | Entscheidung | Begründung |
-| --- | --- | --- |
-| **001 Local-First** | Alles on-prem, keine Cloud. | Datenschutz, Autonomie, Resilienz. |
-| **002 MQTT-Bus** | MQTT für State/Cmd/Events; REST optional. | Lose Kopplung, Standard, leichtgewichtig. |
-| **003 SQLite + Parquet** | Runtime-DB + Langzeit/Replay. | Portabel, auditierbar, wartungsarm. |
-| **004 Explainability-UI** | „Warum jetzt?“ + Timeline + Preview. | Vertrauen > reine Visualisierung. |
-| **005 Nachhaltigkeit** | Surplus/Preis als Steuergröße. | Effizienz, Autarkie, Forschung. |
-| **006 10-Min-BlockScheduler** | `block=floor(epoch/600)`. | Stabilität, Anti-Flapping, Audit. |
-| **007 Deterministische R1–R5** | Kein Black-Box-ML im Regelpfad. | Testbar, erklärbar. |
-| **008 EnergyState SSoT** | Ein Schreiber, viele Leser. | Konsistenz, weniger Race-Conditions. |
-| **009 Deadband/Hysterese** | Haltefenster D Blöcke. | Weniger Flapping, Hardware-Schutz. |
-| **010 Manual Override** | Block-TTL, Reason `manual_override`. | Nutzerkontrolle ohne Policy-Drift. |
-| **011 Lokale Forecasts** | R4 nutzt nur lokale Quellen. | Keine Cloud, reduzierte Abhängigkeit. |
-| **012 Append-only + YAML-Version** | Logs/Configs versioniert. | Reproducibility, Audit. |
-| **013 Lizenz AGPLv3** | Copyleft, Klarheit 3rd-Party. | Offenheit, Forschung. |
-| **014 Privacy by Default** | Keine Telemetrie, minimale Ports. | DSGVO, Vertrauen. |
-| **015 Safety First** | Stop → Safe bei SoC/Temperatur. | Hardware-Schutz, Vertrauen. |
-| **016 MQTT/REST Contract** | Topics/Endpoints klar definiert. | Interop, Tests. |
-| **017 KPIs als Ziele** | Wirkung messen (Grid↓, Flapping↓, Coverage). | Evidenz statt Behauptung. |
-| **018 Energy-Path-Policies** | Export/Heat/Hodl Policy-Set + Logging. | Transparente Opportunitätskosten. |
-| **019 PoW Telemetrie & Hash-Proof** | Pflichtwerte/Proben vom Miner. | Sicherheit, Compliance, Forschung. |
+Diese Tabelle fasst die wichtigsten, das System prägenden strategischen Entscheidungen zusammen:
 
-> Vollständige Tabellen/EN-Version: `docs/architecture/09_design_decisions.md`.
+| ADR | Entscheidung | Begründung | Querschnittliche Konzepte |
+| :--- | :--- | :--- | :--- |
+| **001 Local-First** | Das gesamte System läuft on-prem im lokalen Netzwerk. **Keine Cloud-Abhängigkeit.** | Maximaler **Datenschutz**, Autonomie bei Internetausfall (**Resilienz**). | Deployment, Privacy-by-Default |
+| **002 MQTT-Bus** | MQTT wird als zentraler Event-/Command-Bus für State/Cmd/Events verwendet. | Erzeugt lose Kopplung (Hexagonal), ist leichtgewichtig und Industriestandard (IoT). | Whitebox, Logging & Tracing |
+| **003 SQLite + Parquet**| Nutzung von SQLite für Laufzeit-Daten (Hot Data) und **Parquet** für Langzeit-Logs/Replay (Cold Data). | Portabel, wartungsarm (SQLite), **Auditierbar** und **effizient** für analytische Abfragen. | Persistenz, Testbarkeit |
+| **004 Explainability-UI**| Die UI muss nicht nur den State, sondern auch die **Regel** (`R1-R5`), den **Trigger** und die **Timeline** zeigen. | Baut **Vertrauen** auf, ermöglicht Auditierung durch den Nutzer. | UI, Explainability |
+| **005 Nachhaltigkeit** | Surplus und Preis werden als primäre Steuergrößen (R1, R4) etabliert. | Effizienz, Autarkie, Forschung. | Anforderungen, Regeln R1/R4 |
+| **006 10-Min-BlockScheduler** | Die Entscheidungen der Regel-Engine werden an den festen Takt `block=floor(epoch/600)` gebunden. | **Stabilität**, Anti-Flapping (R5), Vereinfacht **Audit** und **Replay**. | Laufzeit, Testbarkeit |
+| **007 Deterministische R1–R5** | Der Kern der Regel-Engine verzichtet auf Black-Box-ML-Modelle. | Garantiert **Testbarkeit** und **Erklärbarkeit** (R1–R5 sind Code, keine Blackbox). | Regeln, Testbarkeit |
+| **008 EnergyState SSoT** | Der `EnergyState` ist die Single Source of Truth mit einem Schreiber (Core) und vielen Lesern. | Gewährleistet Konsistenz und vermeidet Race-Conditions. | Domain Models, Whitebox |
+| **009 Deadband/Hysterese** | R5 erzwingt ein Haltefenster (D Blöcke) nach jedem Schaltvorgang. | Reduziert Flapping und schont die angeschlossene Hardware. | Regeln R5, Fehlerbehandlung |
+| **010 Manual Override** | Ein manueller Eingriff erhält eine **Block-TTL** und wird als `manual_override` im Log gespeichert. | Garantiert **Nutzerkontrolle** ohne Policy-Drift. | Laufzeit, UI |
+| **011 Lokale Forecasts** | R4 nutzt nur lokale Quellen, keine externen Cloud-APIs. | Reduzierte Abhängigkeit, erhöhte Ausfallsicherheit. | Regeln R4, Deployment |
+| **012 Append-only + YAML-Version** | Logs und Configs werden mit Version/Hash gespeichert. | Garantiert **Reproducibility** und Auditierbarkeit. | Persistenz, Logging |
+| **013 Lizenz AGPLv3** | Das Projekt wird unter der Affero General Public License Version 3 veröffentlicht. | Stellt Offenheit und die Verfügbarkeit des Codes für Forschung sicher. | Legal, Querschnitt |
+| **014 Privacy by Default** | Keine Telemetrie, minimale Ports, lokale Datenhaltung. | Erfüllung der DSGVO-Prinzipien, Aufbau von Vertrauen. | Deployment, Privacy |
+| **015 Safety First** | Kritische Regeln (R3/R2) erzwingen immer den Zustand **Stop → Safe** und brechen alle Overrides. | Absoluter Schutz der Hardware und des Hauses. | Regeln R2/R3, Fehlerbehandlung |
+| **016 MQTT/REST Contract** | Topics/Endpoints sind im Vorfeld klar definiert und versioniert. | Stellt Interoperabilität und Testbarkeit sicher. | Whitebox, Integration |
+| **017 KPIs als Ziele** | Die Systemwirkung wird über lokal gemessene KPIs (Grid Import ↓, Flapping Rate ↓) evaluiert. | **Evidenz** der Wirksamkeit statt Behauptung. | Testbarkeit, UI |
+| **018 Energy-Path-Policies** | Die Opportunitätskosten (Export/Heat/Hodl) werden transparent geloggt. | Transparenz über die ökonomische Entscheidungsgrundlage. | Regeln, Logging |
+| **019 PoW Telemetrie & Hash-Proof** | Pflichtwerte/Proben (Hash-Proof) werden vom Miner erfasst. | Sicherheit, Compliance und Forschung an der Effizienz. | Domain Models, Logging |
+
+---
+> **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die möglichen Risiken dieser Entscheidungen und wie wir sie mindern.
+>
+> 👉 Weiter zu **[10 Risikoanalyse](../10_risk_analysis/README.md)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
