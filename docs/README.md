@@ -15,7 +15,7 @@ Lass uns loslegen!
 So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.org)-Templates, damit die Technik für dich übersichtlich und nachvollziehbar bleibt.
 
 * [01 Einführung & Ziele](./architecture/01_introduction_and_goals)
-* [02 Rahmenbedingungen](./architecture/02_constraints)
+* [02 Rahmenbedingungen](./architecture/02_archtecture_constraints)
 * [03 Systemkontext](./architecture/03_context)
 * [04 Lösungsstrategie](./architecture/04_solution_strategy)
 * [05 Bausteinsicht](./architecture/05_building_block_view)
@@ -25,7 +25,7 @@ So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.or
 * [09 Designentscheidungen](./architecture/09_design_decisions)
 * [10 Qualitätsszenarien](./architecture/10_quality_scenarios)
 * [11 Risiken & Technische Schulden](./architecture/11_risks_and_technical_debt)
-* [12 Glossar](./architecture/99_glossar)
+* [12 Glossar](./architecture/12_glossary)
   
 <img src="./media/architectur.png" alt="Status" width="1000" />
 
