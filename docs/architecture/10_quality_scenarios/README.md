@@ -20,4 +20,8 @@ Wir strukturieren unsere Qualitätsanforderungen auf zwei Wegen:
     * *Beispiel:* "Wenn ein Energieversorger ein Lastabwurf-Signal sendet, müssen 95% der betroffenen lokalen Geräte innerhalb von 2 Sekunden reagieren."
 
 ---
-> **Hinweis:** Nach arc42 sind solche Szenarien der effektivste Weg, um sicherzustellen, dass Architekten und Stakeholder dasselbe Verständnis von den Qualitätszielen haben. Sie bilden oft die Basis für Last- und Integrationstests.
+> **Nächster Schritt:** Qualität ist definiert. Aber was, wenn Dinge schiefgehen oder wir bewusst Abkürzungen genommen haben? Im nächsten Kapitel listen wir die Risiken und technischen Schulden auf, die uns auf die Füße fallen könnten.
+>
+> 👉 Weiter zu **[11 Risiken & Technische Schulden](../11_risks_and_technical_debt/)**
+>
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
