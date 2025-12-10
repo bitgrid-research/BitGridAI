@@ -18,3 +18,10 @@ Dies ist der zentrale Einstiegspunkt für die Blackbox-Sicht. Da die Schnittstel
     * *Kurzbeschreibung:* Das Hauptdokument dieses Levels. Es zeigt das Gesamtsystem als einen Block, eingebettet in seinen Kontext. Hier werden die wichtigsten externen Schnittstellen (APIs, UIs) und die darüber ausgetauschten Datenströme definiert.
 
 *(Platzhalter für zukünftige, detailliertere Schnittstellenbeschreibungen, z.B. "Spezifikation der Energy-Provider-API" oder "Nutzer-Interface Definition")*
+
+---
+> **Nächster Schritt:** Wir haben das System von außen betrachtet und die Schnittstellen geklärt. Jetzt wird es spannend: Wir öffnen den Deckel der Blackbox und schauen uns an, welche Komponenten im Inneren arbeiten.
+>
+> 👉 Weiter zu **[Level 2: Die Whitebox (Innenleben)](../052_whitebox)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](../README.md)**
