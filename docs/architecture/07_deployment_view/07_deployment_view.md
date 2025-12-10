@@ -1,5 +1,7 @@
 # 07 – Deployment-Sicht / Deployment View
 
+TODO: Kurzbeschreibung: Das zentrale Dokument für das Deployment. Es zeigt die Verteilung der Software-Artefakte auf Knoten (Server, Container, etc.). Wir definieren hier auch verschiedene Umgebungen wie Entwicklung (Dev), Test (Staging) und Produktion (Prod) und deren Unterschiede.
+
 > **Kurzüberblick:**  
 > Vollständig **lokal im geschlossenen LAN**: Core, Module, Explain-Agent, UI on-prem; Kommunikation via **MQTT/REST/WebSocket**; kein Cloud-Backend. Varianten: **Standalone**, **Distributed Local Network**, optional **Hybrid (verschlüsselte Spiegelung)**.
 
