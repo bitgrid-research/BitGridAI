@@ -1,11 +1,12 @@
 # 03 Systemkontext
 
-Kein System ist eine Insel. Um zu verstehen, was **BitGridAI** tut, müssen wir wissen, wo die Grenzen verlaufen und wer die "Nachbarn" sind.
+Kein System ist eine Insel. 
+
+Um zu verstehen, was **BitGridAI** tut, müssen wir wissen, wo die Grenzen verlaufen und wer die "Nachbarn" sind.
 
 In diesem Kapitel definieren wir den Scope: Was gehört genau zum System, und was liegt außerhalb? Wir betrachten die Schnittstellen zu Nutzern, anderen IT-Systemen oder Hardware in der realen Welt.
 
-Das neue Bild zeigt den Hamster, der sich mit einer Schnittstelle (dem Tablet) verbindet – genau darum geht es hier.
-
+(Das neue Bild zeigt den Hamster, der sich mit einer Schnittstelle (dem Tablet) verbindet – genau darum geht es hier.)
 ![Cyborg Hamster zeigt Schnittstellen](link_zu_image_6.png)
 
 ## Inhalt dieses Kapitels
@@ -17,3 +18,11 @@ Um die Übersicht zu behalten, trennen wir die fachliche "Brille" von der techni
 
 * **[3.2 Technischer Kontext](./032_technical_context.md)**
     * *Kurzbeschreibung:* Die Sicht unter der Haube. Mit welchen konkreten APIs, Protokollen, Datenbanken oder Hardware-Komponenten kommuniziert BitGridAI auf technischer Ebene?
+
+---
+ 
+ > **Nächster Schritt:** Kontext geklärt. Jetzt widmen wir uns der großen Strategie, wie wir das System innerlich aufbauen.
+>
+> 👉 Weiter zu **[04 Lösungsstrategie](../04_solution_strategy)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
