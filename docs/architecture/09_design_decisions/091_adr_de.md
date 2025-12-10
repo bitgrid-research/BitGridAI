@@ -36,8 +36,8 @@ Diese Tabelle fasst die wichtigsten, das System prägenden strategischen Entsche
 | **019 PoW Telemetrie & Hash-Proof** | Pflichtwerte/Proben (Hash-Proof) werden vom Miner erfasst. | Sicherheit, Compliance und Forschung an der Effizienz. | Domain Models, Logging |
 
 ---
-> **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die möglichen Risiken dieser Entscheidungen und wie wir sie mindern.
+> **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die wichtigsten Qualitätsanforderungen im Detail.
 >
-> 👉 Weiter zu **[10 Risikoanalyse](../10_risk_analysis/)**
+> 👉 Weiter zu **[10 Qualitätsszenarien](../../10_quality_scenarios/)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
