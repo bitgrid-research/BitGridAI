@@ -1,5 +1,7 @@
 # 085 – Fehler- & Ausnahmebehandlung / Error & Exception Handling
 
+TODO: Wenn es knallt: Wie fangen wir Fehler einheitlich ab, ohne dass das System abstürzt, und wie informieren wir den Nutzer (oder das Log)?
+
 > **Kurzüberblick:**  
 > Fehler führen zu **sicheren, erklärbaren Zuständen**: Sensor-Stale → hold, Adapterfehler → Retry/Circuit-Breaker, Safety-Stop bei kritischen Werten, Zeitdrift → Block-Hold & Re-Sync.
 
