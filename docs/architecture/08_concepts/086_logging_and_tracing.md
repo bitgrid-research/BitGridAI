@@ -1,5 +1,7 @@
 # 086 – Logging & Tracing
 
+TODO: Die Blackbox des Systems. Was schreiben wir wo mit, um im Nachhinein verstehen zu können, was passiert ist (insbesondere bei verteilten Abläufen)?
+
 > **Kurzüberblick:**  
 > **Append-only** Logging (SQLite/Parquet/JSON), Events nach **DecisionEvent/EnergyState/ExplainSession**, lokale KPIs & Replay; keine Telemetrie nach außen.
 
