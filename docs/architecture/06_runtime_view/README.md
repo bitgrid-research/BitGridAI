@@ -1,6 +1,6 @@
 # 06 Laufzeitsicht
 
-Hier kommt Leben in die Bude! 
+Hier kommt Leben in die Bude!
 
 Wir haben die Bausteine definiert – jetzt schauen wir ihnen bei der Arbeit zu.
 
@@ -13,23 +13,29 @@ Das ist der Ort für Sequenz-, Aktivitäts- oder Zustandsdiagramme, die erkläre
 
 ## Inhalt dieses Kapitels
 
-Wir haben exemplarisch einige der wichtigsten Laufzeitszenarien für BitGridAI dokumentiert. Diese Liste ist nicht abschließend, deckt aber die kritischen Pfade ab:
+Wir haben die wichtigsten Laufzeitszenarien anhand unseres Regelwerks (R1–R5) dokumentiert. Diese Szenarien decken die kritischen Pfade ab:
 
-* **[6.1 Normaler Startvorgang](./061_normal_start.md)**
-    * *Kurzbeschreibung:* Wie fährt das System hoch? Welche Initialisierungsschritte werden durchlaufen, bis BitGridAI betriebsbereit ist und den Regelbetrieb aufnimmt?
+* **[6.1 Normaler Start (R1)](./061_normal_start.md)**
+    * Der "Happy Path". Wie fährt das System hoch und entscheidet aufgrund von PV-Überschuss und Strompreis, das Mining zu starten?
 
-* **[6.2 Sicherheitsstopp (Safety Stop)](./062_safety_stop.md)**
-    * *Kurzbeschreibung:* Ein kritischer Ablauf. Was passiert, wenn ein Notfall eintritt (z.B. Hardwareausfall, Grenzwertüberschreitung)? Wie wird das System sicher in einen definierten Ruhezustand gebracht?
+* **[6.2 Autarkie-Schutz (R2)](./062_autarky_protection.md)**
+    * Der Haus-Beschützer. Wie verhindert das System, dass die Hausbatterie leergesaugt wird oder teurer Netzstrom bezogen wird?
 
-* **[6.3 Totband-Halten (Deadband Hold)](./063_deadband_hold.md)**
-    * *Kurzbeschreibung:* Ein spezifisches Regelungsszenario. Wie verhält sich das System, wenn sich eine Messgröße innerhalb eines definierten Toleranzbereichs (Totband) bewegt, um unnötige Schaltvorgänge zu vermeiden?
+* **[6.3 Sicherheitsstopp (R3)](./063_safety_stop.md)**
+    * Die Notbremse. Was passiert bei Überhitzung oder Verbindungsabbruch? Wie wird der sofortige "Safety Stop" ausgelöst (Interrupt)?
 
-* **[6.4 Manuelles Überschreiben](./064_manuell_override.md)**
-    * *Kurzbeschreibung:* Der Eingriff durch den Nutzer. Was passiert im System, wenn ein Operator die Automatik übersteuert und manuell eingreift? Welche Komponenten sind beteiligt und wie wird der Normalbetrieb wiederaufgenommen?
+* **[6.4 Prognose-Optimierung (R4)](./064_forecast_control.md)**
+    * Der Blick in die Zukunft. Wie verhindern Wetter- und Preisprognosen einen Start, der sich in 15 Minuten nicht mehr lohnen würde?
+
+* **[6.5 Stabilität & Totband (R5)](./065_deadband_stability.md)**
+    * Die Ruhe im System. Wie verhindern wir "Flapping" (schnelles An/Aus) durch Wolkenzug mithilfe von Totbändern?
+
+* **[6.6 Manuelles Überschreiben](./066_manual_override.md)**
+    * Der Eingriff durch den Nutzer. Was passiert, wenn ein Operator die Automatik übersteuert ("Boost")?
 
 ---
 > **Nächster Schritt:** Wir wissen jetzt, wie die Software arbeitet. Aber auf welcher Hardware landet sie eigentlich und wie kommt sie dorthin? Im nächsten Kapitel schauen wir uns die Infrastruktur an.
 >
-> 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view)**
+> 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view/README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
