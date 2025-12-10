@@ -1,5 +1,7 @@
 # 013 – Stakeholder
 
+TODO: Wer sind die Menschen (und Systeme), die BitGridAI nutzen oder beeinflussen?
+
 > **Kurzüberblick:**  
 > Kern-Stakeholder: Prosumer/Nutzende, BitGrid Core + Explain-Agent, externe Systeme (HA, Inverter, Meter, Miner) sowie Forschung/Entwicklung.
 
