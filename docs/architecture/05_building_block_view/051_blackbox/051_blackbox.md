@@ -1,5 +1,7 @@
 # 051 – Blackbox-Sicht / Black Box View
 
+TODO: Das Hauptdokument dieses Levels. Es zeigt das Gesamtsystem als einen Block, eingebettet in seinen Kontext. Hier werden die wichtigsten externen Schnittstellen (APIs, UIs) und die darüber ausgetauschten Datenströme definiert.
+
 > **Kurzüberblick:**  
 > Äußere Schnittstellen von BitGridAI: was von außen sichtbar ist (Inputs/Outputs), nicht wie es innen umgesetzt ist. Fokus auf **lokale, erklärbare Steuerung** ohne Cloud.
 
