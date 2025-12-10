@@ -1,5 +1,7 @@
 # 012 – Qualitätsziele / Quality Goals
 
+TODO: Worauf legen wir besonderen Wert? (z.B. Benutzerfreundlichkeit, Effizienz, Zuverlässigkeit).
+
 > **Kurzüberblick:**  
 > Transparenz, Autonomie, Nachhaltigkeit, Vorhersagbarkeit, Sicherheit, Reproduzierbarkeit – alle lokal und erklärbar.
 
