@@ -1,5 +1,7 @@
 # 091 – Architekturentscheidungen (DE · Kurzfassung)
 
+TODO: Das Herzstück dieses Kapitels. Wir nutzen Architecture Decision Records (ADRs), um wichtige, strukturprägende Entscheidungen nachvollziehbar zu dokumentieren. Dieses Dokument enthält entweder die Sammlung unserer ADRs oder das Template, das wir dafür verwenden.
+
 > **Kurzüberblick:**  
 > ADRs verankern **Local-First**, **Erklärbarkeit**, **Nachhaltigkeit**, **Determinismus**. Kernpunkte: **R1–R5**, **10-Min-BlockScheduler**, **EnergyState (SSoT)**, **Deadband**, **MQTT+REST**, **AGPLv3**, **kein Cloud-Backend**.
 
