@@ -36,3 +36,10 @@ Wir haben eine ganze Reihe von wichtigen Themen identifiziert, die zentral gereg
 
 * **[8.8 Build- & Release-Management](./088_build_managment.md)**
     * *Kurzbeschreibung:* Von der Codezeile zum laufenden System. Wie sieht unsere CI/CD-Pipeline aus und wie automatisieren wir den Weg in die Produktion?
+
+---
+> **Nächster Schritt:** Das Regelwerk steht. Aber der Weg dorthin war sicher nicht ohne Kreuzungen. Im nächsten Kapitel dokumentieren wir die bewussten Entscheidungen (und Alternativen), die uns hierher geführt haben.
+>
+> 👉 Weiter zu **[09 Architekturentscheidungen](../09_design_decisions)**
+>
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
