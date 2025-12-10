@@ -2,7 +2,7 @@
 
 Hey! Willkommen in der **BitGridAI**-Doku.
 
-BitGridAI ist ein offenes, nutzerfreundliches Energiesystem für transparente und verständliche lokale Automatisierung.
+BitGridAI ist ein offenes Energiemanagementsystem, das lokale Automatisierung so gestaltet, dass sie für Nutzer intuitiv erfassbar und leicht bedienbar bleibt.
 
 Lass uns loslegen!
 
@@ -10,9 +10,7 @@ Lass uns loslegen!
 
 ---
 
-## Struktur / Structure
-
-### 01–14 Architektur / Architecture
+## 1. Architektur
 
 Systemdokumentation basierend auf dem [arc42](https://arc42.org)‑Template:
 
@@ -32,11 +30,10 @@ Systemdokumentation basierend auf dem [arc42](https://arc42.org)‑Template:
 * [14 Explain-Agent & Research Services](./architecture/14_explain_agent_and_research.md)
 * [99 Glossar / Glossary](./architecture/99_glossar.md)
 
-> **Architecture** — arc42‑based documentation covering goals, constraints, context, solution strategy, building blocks, runtime, deployment, crosscutting concepts, decisions, quality scenarios, risks/debt, HCI perspective, and UI specification.
 
 ---
 
-### 20–29 Forschung / Research
+## 2. Forschung
 
 Mensch‑Technik‑Interaktion, Erklärbarkeit und Energieethik:
 
@@ -44,29 +41,12 @@ Mensch‑Technik‑Interaktion, Erklärbarkeit und Energieethik:
 * [21 Evaluationsrahmen / Evaluation Framework](./research/evaluation_framework.md)
 * [22 Literaturübersicht / Literature Review](./research/literature_review.md)
 
-> **Research** — HCI, explainability, and energy ethics.
-
 ---
 
-### 30 – Setup
+### 3. Setup
 
 Entwicklungsumgebung & Systemeinrichtung:
 
 * [30.1 SSH unter Windows](./setup/ssh_windows_setup.md)
 * [30.2 Entwicklungsumgebung / Development Environment](./setup/dev_environment.md)
 
-> **Setup** — development environment & system installation: SSH on Windows, local dev environment.
-
----
-
-## Stil / Style
-
-* **Markdown first**
-* **Erklärbarkeit vor Komplexität**
-* **Visuelle + textuelle Modelle**
-* **Nachhaltigkeit & Vertrauen** als wiederkehrende Qualitätsmerkmale
-
-> - **Markdown first**
-> - **Explainability over complexity**
-> - **Visual + textual models**
-> - **Sustainability and trust** as recurring quality goals
