@@ -6,13 +6,16 @@ BitGridAI ist ein offenes Energiemanagementsystem, das lokale Automatisierung so
 
 Lass uns loslegen!
 
-![Status](./media/doku.png)
+
+<img src="./media/doku.png" alt="Status" width="1000" />
 
 ---
 
 ## 1. Architektur
 
-Systemdokumentation basierend auf dem [arc42](https://arc42.org)‑Template:
+So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.org)-Templates, damit die Technik für dich übersichtlich und nachvollziehbar bleibt.
+
+<img src="./media/architectur.png" alt="Status" width="1000" />
 
 * [01 Einführung & Ziele / Introduction & Goals](./architecture/01_introduction_and_goals.md)
 * [02 Rahmenbedingungen / Constraints](./architecture/02_constraints.md)
@@ -29,6 +32,7 @@ Systemdokumentation basierend auf dem [arc42](https://arc42.org)‑Template:
 * [13 UI‑Spezifikation / UI Specification](./architecture/13_ui_spec.md)
 * [14 Explain-Agent & Research Services](./architecture/14_explain_agent_and_research.md)
 * [99 Glossar / Glossary](./architecture/99_glossar.md)
+
 
 
 ---
