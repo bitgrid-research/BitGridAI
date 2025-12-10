@@ -20,3 +20,11 @@ Wir haben die Grundlagen in drei kompakte Bereiche aufgeteilt, damit du schnell 
 
 * **[1.3 Stakeholder](./013_steakholder.md)**
     * *Kurzbeschreibung:* Wer sind die Menschen (und Systeme), die BitGridAI nutzen oder beeinflussen?
+
+---
+
+> **Nächster Schritt:** Wir kennen jetzt das Ziel. Im nächsten Kapitel schauen wir uns die Leitplanken an, die uns die Realität (Technik & Organisation) vorgibt.
+>
+> 👉 Weiter zu **[02 Randbedingungen](../02_architecture_constraints/README.md)**
+>
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
