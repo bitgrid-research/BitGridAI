@@ -1,6 +1,8 @@
 # 12 Glossar
 
-Damit wir nicht aneinander vorbeireden. Willkommen im Wörterbuch von **BitGridAI**.
+Damit wir nicht aneinander vorbeireden. 
+
+Willkommen im Wörterbuch von **BitGridAI**.
 
 In einem Projekt, das komplexe Energietechnik mit moderner Softwareentwicklung verbindet, wimmelt es nur so von Fachbegriffen, Akronymen und spezifischem Jargon. Meint der Energie-Experte wirklich dasselbe mit "Lastspitze", wie der Backend-Entwickler?
 
