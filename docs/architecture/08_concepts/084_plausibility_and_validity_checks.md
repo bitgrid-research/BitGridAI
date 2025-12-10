@@ -1,5 +1,7 @@
 # 084 – Plausibilitäts- & Validitätsprüfungen
 
+TODO: Vertrauen ist gut, Kontrolle ist besser. Wie stellen wir an zentraler Stelle sicher, dass keine unsinnigen Daten ins System gelangen?
+
 > **Kurzüberblick:**  
 > Mess- und Prognosedaten werden **lokal geprüft**: Schwellen, Hysterese, Confidence, Stale-Erkennung. Nur valide Frames fließen in **EnergyState** und damit in **R1–R5** ein.
 
