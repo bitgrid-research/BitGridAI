@@ -6,7 +6,6 @@ BitGridAI ist ein offenes Energiemanagementsystem, das lokale Automatisierung so
 
 Lass uns loslegen!
 
-
 <img src="./media/doku.png" alt="Status" width="1000" />
 
 ---
@@ -15,23 +14,20 @@ Lass uns loslegen!
 
 So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.org)-Templates, damit die Technik für dich übersichtlich und nachvollziehbar bleibt.
 
+* 🎯 **[01 Einführung & Ziele](./architecture/01_introduction_and_goals.md)**
+* 🚧 **[02 Rahmenbedingungen](./architecture/02_constraints.md)**
+* 🌍 **[03 Systemkontext](./architecture/03_context.md)**
+* 💡 **[04 Lösungsstrategie](./architecture/04_solution_strategy.md)**
+* 🧱 **[05 Bausteinsicht](./architecture/05_building_block_view.md)**
+* ⏱️ **[06 Laufzeitsicht](./architecture/06_runtime_view.md)**
+* 📦 **[07 Deployment‑Sicht](./architecture/07_deployment_view.md)**
+* 🧠 **[08 Konzepte](./architecture/08_concepts.md)**
+* 🤔 **[09 Designentscheidungen](./architecture/09_design_decisions.md)**
+* 🛡️ **[10 Qualitätsszenarien](./architecture/10_quality_scenarios.md)**
+* ⚠️ **[11 Risiken und Technische Schulden](./architecture/11_risks_and_technical_debt.md)**
+* 📖 **[12 Glossar](./architecture/99_glossar.md)**
+  
 <img src="./media/architectur.png" alt="Status" width="1000" />
-
-* [01 Einführung & Ziele / Introduction & Goals](./architecture/01_introduction_and_goals.md)
-* [02 Rahmenbedingungen / Constraints](./architecture/02_constraints.md)
-* [03 Systemkontext / System Context](./architecture/03_context.md)
-* [04 Lösungsstrategie / Solution Strategy](./architecture/04_solution_strategy.md)
-* [05 Bausteinsicht / Building Block View](./architecture/05_building_block_view.md)
-* [06 Laufzeitsicht / Runtime View](./architecture/06_runtime_view.md)
-* [07 Deployment‑Sicht / Deployment View](./architecture/07_deployment_view.md)
-* [08 Konzepte / Concepts](./architecture/08_concepts.md)
-* [09 Designentscheidungen / Design Decisions](./architecture/09_design_decisions.md)
-* [10 Qualitätsszenarien / Quality Scenarios](./architecture/10_quality_scenarios.md)
-* [11 Risiken und Technische Schulden / Risks and Technical Debt](./architecture/11_risks_and_technical_debt.md)
-* [12 HCI‑Perspektive / HCI Perspective](./architecture/12_hci_perspective.md)
-* [13 UI‑Spezifikation / UI Specification](./architecture/13_ui_spec.md)
-* [14 Explain-Agent & Research Services](./architecture/14_explain_agent_and_research.md)
-* [99 Glossar / Glossary](./architecture/99_glossar.md)
 
 
 
@@ -41,9 +37,9 @@ So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.or
 
 Mensch‑Technik‑Interaktion, Erklärbarkeit und Energieethik:
 
-* [20 BitGrid Prinzipien / Principles](./research/bitgrid_principles.md)
-* [21 Evaluationsrahmen / Evaluation Framework](./research/evaluation_framework.md)
-* [22 Literaturübersicht / Literature Review](./research/literature_review.md)
+* [20 BitGrid Prinzipien](./research/bitgrid_principles.md)
+* [21 Evaluationsrahmen](./research/evaluation_framework.md)
+* [22 Literaturübersicht](./research/literature_review.md)
 
 ---
 
