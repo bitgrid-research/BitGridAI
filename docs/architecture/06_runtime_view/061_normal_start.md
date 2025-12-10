@@ -1,5 +1,7 @@
 # 061 – Runtime: Normaler Start (R1)
 
+TODO: Wie fährt das System hoch? Welche Initialisierungsschritte werden durchlaufen, bis BitGridAI betriebsbereit ist und den Regelbetrieb aufnimmt?
+
 > **Kurzüberblick:**  
 > PV-Überschuss → **EnergyState** aktualisiert → **BlockScheduler (10 Min)** triggert **R1** → Mining startet inkl. **DecisionEvent + Erklärung**.
 
