@@ -1,5 +1,7 @@
 # 12 – Glossar / Glossary (Auszug)
 
+TODO: Die alphabetische Auflistung aller wichtigen Fachbegriffe und Abkürzungen, die im BitGridAI-Projekt verwendet werden, inklusive ihrer genauen Definitionen in unserem Kontext.
+
 > **Kurzüberblick:**  
 > Gemeinsame Sprache für BitGridAI: zentrale Begriffe (**EnergyState, DecisionEvent, R1–R5, BlockInterval**) und Abkürzungen. Vollständiges Glossar siehe `docs/architecture/99_glossar.md`.
 
