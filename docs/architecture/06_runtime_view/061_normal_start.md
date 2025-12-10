@@ -1,30 +1,74 @@
-# 061 – Runtime: Normaler Start (R1)
+# 06.1 Szenario: Normaler Start (Regel R1)
 
-TODO: Wie fährt das System hoch? Welche Initialisierungsschritte werden durchlaufen, bis BitGridAI betriebsbereit ist und den Regelbetrieb aufnimmt?
+Der Klassiker: Die Sonne scheint, der Miner läuft.
 
-> **Kurzüberblick:**  
+Dies ist der "Happy Path" von BitGridAI. Wir beschreiben hier den Standard-Ablauf, bei dem das System einen PV-Überschuss erkennt und basierend auf Regel **R1 (Profitability)** entscheidet, das Mining zu starten.
+
+Hier greifen alle Zahnräder ineinander: Sensoren, State, Scheduler, Regeln und Aktoren.
+
+*(Platzhalter für ein Bild: Die Sonne scheint auf das Haus, die Batterien sind grün, und der Hamster legt gut gelaunt den großen Hebel auf "ON".)*
+![Hamster startet das Mining](../../media/pixel_art_hamster_mining_start.png)
+
+## Kurzüberblick
+
+> **Der Ablauf in Kürze:**
 > PV-Überschuss → **EnergyState** aktualisiert → **BlockScheduler (10 Min)** triggert **R1** → Mining startet inkl. **DecisionEvent + Erklärung**.
 
-> **TL;DR (EN):**  
+> **TL;DR (EN):**
 > PV surplus → EnergyState → 10-min scheduler triggers **R1** → start mining with DecisionEvent + rationale.
 
 ---
 
-## Ablauf / Sequence
+## Sequenzdiagramm (Der Ablauf)
 
-1. PV-Sensor publiziert Leistung (MQTT/Modbus).  
-2. **Energy Context** aktualisiert **EnergyState (SSoT)** und berechnet `surplus`.  
-3. **BlockScheduler** (`block_id=floor(epoch/600)`) ruft **Rule Engine (R1–R5)** auf.  
-4. Wenn `surplus ≥ 1.5 kW` **und** `price ≤ 18 ct` (Beispiel) → **R1 start**.  
-5. **Actuation** sendet `start/set_power` an Miner-Controller.  
-6. **Explainability** erzeugt **DecisionEvent** mit Reason/Trigger/Parameter.  
-7. **UI** zeigt Toast + Next-Block-Preview; Deadband (R5) hält Zustand für D Blöcke.
+Wie wird aus Sonnenstrahlen Hashrate?
+
+```mermaid
+sequenceDiagram
+    participant PV as ☀️ PV/Sensor
+    participant MQTT as 📡 MQTT/Adapter
+    participant SSoT as 🧠 EnergyState
+    participant Sched as ⏱️ BlockScheduler
+    participant Rules as 📜 RuleEngine (R1)
+    participant Miner as ⛏️ Miner/Adapter
+    participant UI as 🖥️ UI/User
+
+    Note over PV, UI: 1. Sensing & State Update
+    PV->>MQTT: Publish 4000W Power
+    MQTT->>SSoT: Update p_pv_kw=4.0
+    SSoT->>SSoT: Recalc Surplus (avg)
+
+    Note over Sched, Rules: 2. Scheduling (New Block)
+    Sched->>Sched: Wait for 10-Min Tick
+    Sched->>Rules: Trigger Eval (Block #N)
+
+    Note over Rules: 3. Decision (R1)
+    Rules->>SSoT: Get State (Surplus & Price)
+    Rules->>Rules: Check: Surplus > 1.5kW AND Price < 18ct?
+    Rules-->>Rules: YES -> Action: START
+
+    Note over Rules, Miner: 4. Actuation & Explanation
+    Rules->>Miner: CMD: start / set_power
+    Rules->>UI: DecisionEvent (Reason: "Surplus high")
+    
+    Note right of UI: Toast: "Mining started via R1"
+    Note right of UI: Preview: "Valid for next 10 mins"
+````
+
+## Wichtige Konfigurations-Parameter (MVP)
+
+Damit dieser Ablauf funktioniert, sind folgende Schwellenwerte im System hinterlegt:
+
+| Parameter | Wert (Beispiel) | Beschreibung |
+| :--- | :--- | :--- |
+| `surplus_min_kw` | **1.5 kW** | Mindest-Überschuss (gleitender Durchschnitt), damit R1 feuert. |
+| `price_max_ct_kwh` | **18 ct/kWh** | Die "Schmerzgrenze" beim Strompreis. Darüber bleibt der Miner aus. |
+| `min_runtime_blocks` | **2 Blöcke** | (20 Min) Mindestlaufzeit nach Start, um die Hardware zu schonen (Short-Cycling-Schutz). |
+| `deadband_hold_blocks` | **2 Blöcke** | (20 Min) Nach dem Einschalten wird dieser Zustand "festgehalten" (siehe Regel R5), um Flapping zu verhindern. |
 
 ---
-
-## Wichtige Parameter (MVP)
-
-- `surplus_min_kw = 1.5` (rolling Ø 1 Block)  
-- `price_max_ct_kwh = 18`  
-- `min_runtime_blocks = 2` (Warmup)  
-- Deadband: `hold_blocks = 2` nach state change.
+> **Nächster Schritt:** Das war der Idealfall bei schönem Wetter. Aber was passiert, wenn plötzlich eine kritische Grenze überschritten wird?
+>
+> 👉 Weiter zu **[06.2 Sicherheitsstopp (Safety Stop)](./062_safety_stop.md)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
