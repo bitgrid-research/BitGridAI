@@ -20,3 +20,11 @@ Wir unterteilen die Einschränkungen in drei Bereiche, um die Übersicht zu beha
 
 * **[2.3 Konventionen](./023_conventions.md)**
     * *Kurzbeschreibung:* Unsere internen Gesetze. Wie schreiben wir Code? Wie benennen wir Dinge? An welche Standards halten wir uns, damit alle im Team effizient zusammenarbeiten?
+
+---
+
+> **Nächster Schritt:** Wir kennen jetzt den Spielraum. Im nächsten Kapitel schauen wir uns an, wie BitGridAI in seine Umwelt eingebettet ist und mit wem es interagiert.
+>
+> 👉 Weiter zu **[03 Kontextabgrenzung](../03_context)**
+>
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
