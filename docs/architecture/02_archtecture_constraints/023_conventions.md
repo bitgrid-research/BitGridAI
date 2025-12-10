@@ -1,5 +1,7 @@
 # 023 – Leitplanken & Konventionen / Conventions
 
+TODO: Unsere internen Gesetze. Wie schreiben wir Code? Wie benennen wir Dinge? An welche Standards halten wir uns, damit alle im Team effizient zusammenarbeiten?
+
 > **Kurzüberblick:**  
 > Datenschutz (DSGVO), Open-Source-Lizenz **AGPLv3**, Sicherheit & Umwelt, Explainability-Pflicht, keine Cloud-Abhängigkeit.
 
