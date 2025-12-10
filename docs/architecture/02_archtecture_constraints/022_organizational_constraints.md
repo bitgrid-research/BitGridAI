@@ -1,5 +1,7 @@
 # 022 – Organisatorische Rahmenbedingungen / Organizational Constraints
 
+TODO: Der Rahmen um das Projekt herum. Hier geht es um Budget, Zeitpläne, Teamstruktur und rechtliche Vorgaben (z.B. DSGVO, Energiegesetze).
+
 > **Kurzüberblick:**  
 > Universitärer Forschungskontext, nachvollziehbare Doku (ADRs), offene Schnittstellen, begrenzte Ressourcen, strikte Konfigurationsdisziplin.
 
