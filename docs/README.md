@@ -43,6 +43,8 @@ Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar un
 * [21 Evaluationsrahmen](./research/evaluation_framework.md)
 * [22 Literaturübersicht](./research/literature_review.md)
 
+<img src="./media/research.png" alt="Status" width="1000" />
+
 ---
 
 ### 3. Setup
