@@ -1,8 +1,10 @@
 # 07 Verteilungssicht
 
-Genug der Theorie, jetzt wird's handfest. Wo "wohnt" **BitGridAI** eigentlich?
+Genug der Theorie, jetzt wird's handfest. 
 
-In der Verteilungssicht bringen wir die Software-Bausteine aus Kapitel 5 auf die Straße – oder besser gesagt: auf die Server. Wir beschreiben die technische Infrastruktur, auf der das System läuft. Das umfasst Hardware, Netzwerke, Cloud-Umgebungen und alles, was man anfassen (oder zumindest pingen) kann.
+Wo "wohnt" **BitGridAI** eigentlich?
+
+In der Verteilungssicht bringen wir die Software-Bausteine aus Kapitel 5 auf die Straße – oder besser gesagt: auf die Server. Wir beschreiben die technische Infrastruktur, auf der das System läuft. Das umfasst Hardware, Netzwerke und alles, was man anfassen (oder zumindest pingen) kann.
 
 Hier klären wir, welche Komponente auf welchem Server läuft und wie die Maschinen miteinander vernetzt sind.
 
