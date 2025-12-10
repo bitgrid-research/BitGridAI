@@ -1,6 +1,8 @@
 # 04 Lösungsstrategie
 
-Jetzt wird es konkret. Wir kennen die Ziele und die Einschränkungen – hier ist unser Masterplan, um beides unter einen Hut zu bekommen.
+Jetzt wird es konkret. 
+
+Wir kennen die Ziele und die Einschränkungen – hier ist unser Masterplan, um beides unter einen Hut zu bekommen.
 
 In diesem Kapitel beschreiben wir die fundamentalen Entscheidungen, die die Architektur von **BitGridAI** prägen. Das ist der "rote Faden", der sicherstellt, 
 dass wir uns nicht in Details verlieren, sondern eine kohärente Lösung bauen. Es geht um die großen technologischen Weichenstellungen und die grobe Strukturierung des Systems.
