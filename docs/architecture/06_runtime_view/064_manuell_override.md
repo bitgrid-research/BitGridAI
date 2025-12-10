@@ -1,5 +1,7 @@
 # 064 – Runtime: Manueller Override
 
+TODO: Der Eingriff durch den Nutzer. Was passiert im System, wenn ein Operator die Automatik übersteuert und manuell eingreift? Welche Komponenten sind beteiligt und wie wird der Normalbetrieb wiederaufgenommen?
+
 > **Kurzüberblick:**  
 > Nutzer kann **Start/Stop/Level** temporär setzen (`ttl_blocks`), wird geloggt als `manual_override` und fällt am Blockende automatisch zur Policy zurück.
 
