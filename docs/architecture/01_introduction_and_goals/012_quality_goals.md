@@ -1,43 +1,36 @@
-# 012 – Qualitätsziele / Quality Goals
+# 01.2 Qualitätsziele
 
-TODO: Worauf legen wir besonderen Wert? (z.B. Benutzerfreundlichkeit, Effizienz, Zuverlässigkeit).
+Qualität ist kein Zufall.
 
-> **Kurzüberblick:**  
-> Transparenz, Autonomie, Nachhaltigkeit, Vorhersagbarkeit, Sicherheit, Reproduzierbarkeit – alle lokal und erklärbar.
+Hier definieren wir schwarz auf weiß, was "gut" für **BitGridAI** bedeutet. Es geht uns nicht nur um technische Spezifikationen, sondern um das Vertrauen der Nutzer und die messbare Nachhaltigkeit des Gesamtsystems.
 
-> **TL;DR (EN):**  
-> Transparency, autonomy, sustainability, predictability, safety, reproducibility—all local and explainable.
+Wir bauen kein System, das nur "funktioniert", sondern eines, das man versteht und dem man gerne die Kontrolle über sein Hausnetz überlässt.
 
----
+![Hamster dirigiert die Qualität](link_zu_image_31.png)
 
-## Ziele / Goals
+## Unsere zentralen Qualitätsmerkmale
 
-| Qualität | Beschreibung |
-|---|---|
-| **Transparenz** | Jede Entscheidung enthält Reason/Trigger/Parameter; Explainability-UI + versionierte Texte. |
-| **Autonomie** | Vollständig lokal-first, keine Cloud- oder API-Abhängigkeiten; Offline-Modus möglich. |
-| **Nachhaltigkeit** | PV-Überschuss konsequent nutzen (Mining/Heat/Hodl), Deadband glättet Flapping. |
-| **Vorhersagbarkeit** | 10-Min-Blocktakt + deterministische Regeln (**R1–R5**) machen Verhalten antizipierbar. |
-| **Sicherheit** | SoC-/Thermo-Schutz (**R2/R3**), Stop → Safe, klar getrennte Fail-States. |
-| **Reproduzierbarkeit** | Standardisierte Datenformate (SQLite/Parquet/JSON) und Replays für Forschung/Tests. |
+Diese sechs Säulen tragen unsere Architektur. An ihnen messen wir jede Designentscheidung:
 
-> | Quality | Description |
-> |---|---|
-> | **Transparency** | Decisions carry reason/trigger/params; explainability UI + versioned microcopy. |
-> | **Autonomy** | Fully local-first; no cloud/API dependency; offline-capable. |
-> | **Sustainability** | Use PV surplus via controlled flexible loads; deadband smooths flapping. |
-> | **Predictability** | 10-minute cadence + deterministic **R1–R5**. |
-> | **Safety** | SoC/thermal guards (**R2/R3**), stop → safe, explicit fail states. |
-> | **Reproducibility** | Standardised data formats and replays for research/tests. |
+| Qualität | Was bedeutet das für uns? |
+| :--- | :--- |
+| **Transparenz 🔍** | Keine Blackbox. Jede Entscheidung des Systems ist nachvollziehbar – mit Grund, Auslöser und Parametern dokumentiert. Wir versionieren alle Erklärungstexte, damit man auch später noch versteht, *warum* das System so gehandelt hat. Das ist die Basis für Vertrauen und wissenschaftliche Auswertungen. |
+| **Autonomie 🛡️** | Wir sind radikal "local-first". Der gesamte Stack läuft bei dir zu Hause, ohne Cloud-Zwang oder externe KI-Dienste. Das bedeutet: Deine Daten gehören dir (digitale Souveränität), das System funktioniert auch ohne Internet (belastbare Offline-Modi), und du hast die volle Kontrolle. |
+| **Nachhaltigkeit 🌱** | Wir verschwenden nichts. PV-Überschuss wird nicht abgeregelt, sondern sinnvoll in flexiblen Lasten genutzt. Durch intelligente Lastverschiebung erhöhen wir deinen Eigenverbrauch und deine Autarkie. Zudem helfen wir dir mit verständlichen Infos, selbst nachhaltigere Entscheidungen zu treffen. |
+| **Vorhersagbarkeit ⏱️** | Kein nervöses Hin und Her. Durch deterministische Regeln, ein "Deadband" gegen schnelles Schalten und den stabilen **10-Minuten-Blocktakt** verhält sich das System ruhig und vorhersehbar. Du kannst dich darauf verlassen, was als Nächstes passiert. Prognosen nutzen wir nur, wenn sie stabil sind. |
+| **Sicherheit 🔒** | Safety First. Wir haben eingebaute Schutzmechanismen für Temperatur und Batterieladestand (SoC). Wenn's kritisch wird, geht das System in einen definierten, sicheren Zustand ("Stop → Safe"), um deine Hardware zu schützen. Auch diese Sicherheitsabschaltungen sind erklärbar und werden protokolliert. |
+| **Reproduzierbarkeit 🔄** | Für die Wissenschaft. Alle Daten, Modelle und Logs sind standardisiert. Das ermöglicht es, Szenarien exakt "abzuspielen" (Replays) und Ergebnisse objektiv zu vergleichen – egal ob für deine eigene Analyse oder für Forschungsprojekte. |
 
----
+## KPIs / Erfolgsmetriken
 
-## Messgrößen (KPIs) / Measures
+Wie messen wir objektiv, ob wir unsere Ziele erreichen? Wir haben harte Zahlen (Key Performance Indicators) definiert, an denen wir uns messen lassen:
 
-- **Grid-Import-Reduktion** ggü. Baseline (Target ~25 %).  
-- **Flapping-Rate** Start/Stop-Wechsel pro Tag (Target ≤ 2).  
-- **Explanation Coverage** ≥ 98 % Decisions mit Reason/Trigger/Params.  
-- **Trust-Score** ≥ 4/5 (Likert, Prosumer-Studie).  
-- **Thermal Incidents** = 0 ungeplante Übertemperaturen.
-
-> Grid import drop, low flapping, high explanation coverage, trust score ≥ 4/5, zero thermal incidents.
+| KPI (Messgröße) | Unser Ziel | Wie wir das messen |
+| :--- | :--- | :--- |
+| **Netzbezug-Reduktion** | **≥ 25 % weniger** Stromzukauf im Testzeitraum (30 Tage) | Vergleich des aktuellen `grid_import_kwh` mit einem Basiswert (Baseline-Log). |
+| **Flapping-Rate (Nervosität)** | **≤ 2 Start/Stop-Wechsel** pro Tag (≥ 60 % Reduktion) | Wir zählen die `DecisionEvents` für `start` und `stop` in den Logs. |
+| **Erklärungs-Abdeckung** | **≥ 98 %** aller Decisions haben dokumentierten Grund, Auslöser & Parameter | Analyse des Timeline-Exports auf Vollständigkeit (`explain_coverage`). |
+| **Vertrauens-Score** | **≥ 4/5 Punkten** in Nutzerumfragen (Likert-Skala, n=10) | Durchführung von Befragungen im Research-Panel. |
+| **Thermal-Safety-Events** | **0 ungeplante Übertemperaturen** (> 85 °C) | Überwachung des Health-Logs und der Sensorwerte. |
+| **Energy-to-Sats-Effizienz** | **≥ 45 sats/kWh** (im rolling 7-Tage-Schnitt) | Auswertung des `energy_to_value`-Datasets. |
+| **Traceability (Nachweisbarkeit)** | **100 %** der Blockfenster loggen den gewählten Pfad und die Begründung | Prüfung des manipulationssicheren "Append-only Hodl-Log". |
