@@ -13,7 +13,7 @@ Diese Vorgaben sind in der Regel nicht verhandelbar und haben direkten Einfluss 
 Wir unterteilen die Einschränkungen in drei Bereiche, um die Übersicht zu behalten:
 
 * **[2.1 Technische Randbedingungen](./021_technical_constraints.md)**
-    * *Kurzbeschreibung:* Harte Fakten zur Technik. Welche Hardware ist vorgegeben? Welche Betriebssysteme oder externen APIs müssen wir zwingend nutzen?
+    * Harte Fakten zur Technik. Welche Hardware ist vorgegeben? Welche Betriebssysteme oder externen APIs müssen wir zwingend nutzen?
 
 * **[2.2 Organisatorische Randbedingungen](./022_organizational_constraints.md)**
     * *Kurzbeschreibung:* Der Rahmen um das Projekt herum. Hier geht es um Budget, Zeitpläne, Teamstruktur und rechtliche Vorgaben (z.B. DSGVO, Energiegesetze).
