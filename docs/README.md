@@ -1,10 +1,9 @@
-# BitGridAI Dokumentation / Documentation
+# BitGridAI Dokumentation
 
 Willkommen im Dokumentationsbereich von **BitGridAI** –
 Ein offenes, nutzerzentriertes Energiesystem für transparente und erklärbare lokale Automatisierung.
 
-> Welcome to the documentation space of **BitGridAI** —
-> an open, human‑centered energy system for transparent and explainable local automation.
+![Status](./media/doku.png)
 
 ---
 
