@@ -1,5 +1,7 @@
 # 063 – Runtime: Deadband / Hold (R5)
 
+TODO: Ein spezifisches Regelungsszenario. Wie verhält sich das System, wenn sich eine Messgröße innerhalb eines definierten Toleranzbereichs (Totband) bewegt, um unnötige Schaltvorgänge zu vermeiden?
+
 > **Kurzüberblick:**  
 > **R5** stabilisiert Grenzbereiche: Zustand wird für `D` Blöcke gehalten (`valid_until`), nur Safety-Regeln dürfen brechen.
 
