@@ -1,5 +1,7 @@
 # 11 – Risiken & Technische Schulden (Kurzfassung)
 
+TODO: Eine priorisierte Liste der identifizierten Risiken und technischen Schulden. Für jeden Punkt sollten wir idealerweise auch festhalten, welche Maßnahmen wir planen (z.B. "Beobachten", "Beheben bis Version X", "Akzeptieren").
+
 > **Kurzüberblick:**  
 > Risiken entlang **Local-First / R1–R5 / 10-Min-Block / EnergyState / Deadband / Privacy-by-Default**. Fokus: Betriebssicherheit (Stop → Safe), Datenkonsistenz, Erklärbarkeit, Wartbarkeit.
 
