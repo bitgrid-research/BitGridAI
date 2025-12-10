@@ -51,6 +51,7 @@ Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar un
 
 Damit du direkt loslegen kannst: Hier findest du alles zur Einrichtung deiner Entwicklungsumgebung und den ersten Schritten.
 
-* [30.1 SSH unter Windows](./setup/ssh_windows_setup.md)
-* [30.2 Entwicklungsumgebung / Development Environment](./setup/dev_environment.md)
+* [30.1 SSH unter Windows/Linux](./setup/ssh_windows_setup.md)
+* [30.2 Entwicklungsumgebung](./setup/dev_environment.md)
 
+<img src="./media/setup.png" alt="Status" width="1000" />
