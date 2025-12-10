@@ -1,5 +1,7 @@
 # 031 – Business Context / Geschäfts- & Nutzungskontext
 
+TODO: Die Sicht von außen auf Prozessebene. Wer sind die Nutzer? Welche externen Ereignisse stoßen etwas in BitGridAI an, oder welche Nachbarsysteme erwarten Informationen von uns?
+
 > **Kurzüberblick:**  
 > BitGridAI vermittelt lokal zwischen PV, Speicher, flexiblen Lasten und Nutzenden. Ziel: **PV-Überschuss sinnvoll nutzen**, Vertrauen durch Erklärbarkeit schaffen und Forschung ermöglichen – ohne Cloud.
 
