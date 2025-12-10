@@ -1,5 +1,7 @@
 # 041 – Lösungsstrategie / Solution Strategy
 
+TODO: Hier fassen wir die wichtigsten Lösungsansätze zusammen. Welche Architekturmuster (Patterns) wenden wir an? Welche zentralen Technologien haben wir gewählt und warum? Wie zerlegen wir das System grob, um die Qualitätsziele zu erreichen?
+
 > **Kurzüberblick:**  
 > **Modular, local-first, erklärbar**: deterministische **R1–R5** im **10-Min-Blocktakt**, Explainability-UI + on-device Explain-Agent, MQTT/REST-Adapter, SQLite/Parquet-Logging & Replay, Research-Toggle. Keine Cloud.
 
