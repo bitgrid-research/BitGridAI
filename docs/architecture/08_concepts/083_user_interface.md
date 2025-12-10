@@ -1,5 +1,7 @@
 # 083 – User Interface / Explainability UI
 
+TODO: Wie sieht BitGridAI für den Menschen aus? Übergreifende Prinzipien für Design, Usability und Frontend-Technologie.
+
 > **Kurzüberblick:**  
 > HCI ist Kern: **Explain → Act → Confirm**, „Warum jetzt?“, „Was-wäre-wenn?“, **Next-Block-Preview**, **Manual Override** (Block-TTL), **Timeline & KPIs**, alles **lokal** und **privacy-by-default**.
 
