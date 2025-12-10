@@ -1,5 +1,7 @@
 # 087 – Testbarkeit & Simulation
 
+TODO: Wie machen wir es uns leicht, das System zu testen – auch wenn die echte Hardware gerade nicht verfügbar ist? (Stichwort: Mocking, Simulatoren).
+
 > **Kurzüberblick:**  
 > Deterministische Regeln (**R1–R5**) + **Replay-Runner** ermöglichen reproduzierbare Tests (Unit, Integration, Field-Replay). KPIs messen Wirkung (Flapping↓, Grid-Import↓, Explanation Coverage).
 
