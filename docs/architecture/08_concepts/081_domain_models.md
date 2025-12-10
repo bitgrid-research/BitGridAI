@@ -1,34 +1,97 @@
-# 081 – Domain Models / Datenmodelle
+# 08.1 Fachliche Modelle (Domain Models)
 
-TODO: Unsere gemeinsame Sprache. Wie definieren wir zentrale Begriffe wie "Nutzer", "Energiequelle" oder "Messwert" im Code, damit alle dasselbe darunter verstehen?
+Unsere gemeinsame Sprache.
 
-> **Kurzüberblick:**  
-> **EnergyState** als Single Source of Truth, **DecisionEvent** für jede Aktion, **ExplainSession** für Microcopy, **Override** und **ResearchToggle** als Kontrollobjekte.
+Damit Code, Dokumentation und Team-Kommunikation synchron bleiben, definieren wir hier die zentralen Datenobjekte ("Domain Models"). Diese Klassen bilden das Rückgrat der Anwendung. Sie werden im gesamten System – vom Sensor-Adapter bis zur UI – einheitlich verwendet.
 
-> **TL;DR (EN):**  
-> **EnergyState** (SSoT), **DecisionEvent** per action, **ExplainSession** for microcopy, **Override/ResearchToggle** for control.
+**Wichtiges Prinzip:** Unsere Modelle sind größtenteils **immutable** (unveränderlich). Ein `EnergyState` wird einmal gemessen und nie wieder verändert. Das garantiert die Reproduzierbarkeit für die Forschung.
 
----
+*(Platzhalter für ein Bild: Der Hamster mit Brille steht vor einer Tafel und zeigt mit einem Zeigestock auf ein Klassendiagramm. "A = A" steht an der Tafel.)*
+![Hamster erklärt die Modelle](../../media/pixel_art_hamster_teacher.png)
 
-## Kernobjekte / Core Objects
+## Überblick: Das Klassendiagramm
 
-| Objekt | Felder (Auszug) | Zweck |
-| --- | --- | --- |
-| **EnergyState** | `ts`, `block_id`, `p_pv_kw`, `p_load_kw`, `surplus_kw`, `soc_pct`, `t_miner_c`, `price_ct_kwh`, `forecast_surplus_kw[0..5]`, `grid_import_kw`, `grid_export_kw` | Schreibgeschützter SSoT aus dem Energy Context. |
-| **DecisionEvent** | `id`, `block_id`, `action (start|stop|hold|set_level)`, `reason (R1-R5|manual_override|safety)`, `trigger`, `params`, `valid_until`, `override_ttl`, `preferred_path` | Ergebnis der Regelengine; treibt UI, Logging, Research. |
-| **Override** | `origin`, `action`, `ttl_blocks`, `created_at`, `note` | Temporärer manueller Eingriff bis Blockende/TTL. |
-| **ExplainSession** | `id`, `decision_id`, `block_id`, `prompt_version`, `result_text_de/en`, `confidence`, `type (live|what_if)`, `valid_until` | Persistente Microcopy/Simulation; versioniert. |
-| **ResearchToggleState** | `enabled`, `actor`, `ts`, `justification` | Nachweis für DSGVO-konformes Opt-in. |
+Hier siehst du, wie die wichtigsten Objekte zusammenhängen:
 
-> Canonical data model keeps units explicit (kW, °C, %, ¢ct) and ties UI/research back to decisions.
+```mermaid
+classDiagram
+    class BlockContext {
+        +int block_id
+        +timestamp start_time
+        +timestamp valid_until
+    }
 
----
+    class EnergyState {
+        +timestamp ts
+        +float pv_power_kw
+        +float grid_import_kw
+        +float battery_soc_pct
+        +float miner_hashrate_th
+        +bool is_valid()
+    }
 
-## Events (Auszug)
+    class DecisionEvent {
+        +string rule_id
+        +string action
+        +string reason_code
+        +dict trigger_values
+    }
 
-- `EnergyStateChangedEvent` – neues Mess-/Forecast-Frame.  
-- `DecisionEvent` – Aktion + Reason/Trigger/Params.  
-- `DeadbandActivatedEvent` – Stabilisierung aktiv.  
-- `ResearchToggleChanged`, `ExplainSessionCreated`.
+    class ExplainSession {
+        +string session_id
+        +string user_query
+        +string llm_response
+    }
 
-> Event catalogue aligns adapters, UI, and research tooling.
+    BlockContext "1" --* "*" EnergyState : contains
+    BlockContext "1" --> "1" DecisionEvent : produces
+    DecisionEvent --> "1" ExplainSession : explains
+```
+
+## 1. Der `EnergyState` (Single Source of Truth) 🧠
+
+Das wichtigste Objekt im System. Es ist ein Schnappschuss der Realität zu einem genauen Zeitpunkt `t`.
+
+* **Verwendung:** Wird von Adaptern befüllt, von der Rule Engine gelesen und in Parquet gespeichert.
+* **Charakter:** Immutable (Unveränderlich). Einmal gemessen, bleibt der Wert für immer so – wichtig für Replays.
+* **Format:** Flat Dictionary / Pydantic Model.
+
+| Feld | Typ | Einheit | Beschreibung |
+| :--- | :--- | :--- | :--- |
+| `ts` | `datetime` | UTC | Der exakte Zeitstempel der Messung. |
+| `p_pv_kw` | `float` | kW | Aktuelle Erzeugungsleistung der PV-Anlage. |
+| `p_load_kw` | `float` | kW | Hausverbrauch (ohne Miner/Ladung). |
+| `p_grid_kw` | `float` | kW | Positiv = Bezug, Negativ = Einspeisung (Saldo). |
+| `surplus_kw` | `float` | kW | Berechneter Überschuss (`pv - load`). |
+| `soc_pct` | `float` | % | State of Charge der Hausbatterie (0.0 - 100.0). |
+| `miner_power_w` | `int` | Watt | Tatsächlicher Verbrauch des Miners (Telemetrie). |
+| `miner_temp_c` | `float` | °C | Heißester Chip-Sensorwert (für R3 Safety). |
+| `price_ct_kwh` | `float` | ct | Aktueller dynamischer Strompreis (inkl. Gebühren). |
+
+## 2. Der `BlockContext` (Der Takt) ⏱️
+
+BitGridAI "denkt" in 10-Minuten-Blöcken. Der Kontext hält Metadaten zum aktuellen Zeitfenster.
+
+| Feld | Typ | Beschreibung |
+| :--- | :--- | :--- |
+| `block_height` | `int` | Fortlaufende Nummer (ähnlich Bitcoin Block Height). Berechnet als `floor(unix_timestamp / 600)`. |
+| `window_start` | `datetime` | Beginn des Blocks (z.B. 14:10:00). |
+| `window_end` | `datetime` | Ende des Blocks (z.B. 14:20:00). |
+| `avg_surplus` | `float` | Der gleitende Durchschnitt des Überschusses in diesem Block (geglättet, um Wolken zu ignorieren). |
+
+## 3. Das `DecisionEvent` (Die Entscheidung) ⚖️
+
+Wenn die Regel-Engine (R1–R5) feuert, entsteht dieses Objekt. Es ist das Ergebnis der Berechnung und enthält alle "Warum"-Informationen für die Explainability.
+
+```python
+class DecisionEvent(BaseModel):
+    timestamp: datetime
+    rule_applied: str      # z.B. "R1_PROFITABILITY", "R3_SAFETY", "R5_DEADBAND"
+    action: ActionType     # Enum: START, STOP, PAUSE, SET_POWER, HOLD
+    parameters: dict       # z.B. {"target_power_w": 1500}
+    
+    # Explainability Data (für den Nutzer)
+    reason: str            # Human readable: "PV Surplus high enough"
+    trigger_metrics: dict  # Snapshot der Werte, die ausgelöst haben: {"surplus": 4.2, "limit": 1.5}
+    
+    is_override: bool      # True, wenn dies durch manuellen User-Eingriff entstand
