@@ -1,4 +1,4 @@
-# 01.1 Anforderungen & Überblick (Requirements Overview)
+# 01.1 Anforderungen & Überblick
 
 Willkommen im Herzstück des Projekts. 
 
