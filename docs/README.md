@@ -14,18 +14,18 @@ Lass uns loslegen!
 
 So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.org)-Templates, damit die Technik für dich übersichtlich und nachvollziehbar bleibt.
 
-* 🎯 **[01 Einführung & Ziele](./architecture/01_introduction_and_goals.md)**
-* 🚧 **[02 Rahmenbedingungen](./architecture/02_constraints.md)**
-* 🌍 **[03 Systemkontext](./architecture/03_context.md)**
-* 💡 **[04 Lösungsstrategie](./architecture/04_solution_strategy.md)**
-* 🧱 **[05 Bausteinsicht](./architecture/05_building_block_view.md)**
-* ⏱️ **[06 Laufzeitsicht](./architecture/06_runtime_view.md)**
-* 📦 **[07 Deployment‑Sicht](./architecture/07_deployment_view.md)**
-* 🧠 **[08 Konzepte](./architecture/08_concepts.md)**
-* 🤔 **[09 Designentscheidungen](./architecture/09_design_decisions.md)**
-* 🛡️ **[10 Qualitätsszenarien](./architecture/10_quality_scenarios.md)**
-* ⚠️ **[11 Risiken und Technische Schulden](./architecture/11_risks_and_technical_debt.md)**
-* 📖 **[12 Glossar](./architecture/99_glossar.md)**
+*  **[01 Einführung & Ziele](./architecture/01_introduction_and_goals.md)**
+*  **[02 Rahmenbedingungen](./architecture/02_constraints.md)**
+*  **[03 Systemkontext](./architecture/03_context.md)**
+*  **[04 Lösungsstrategie](./architecture/04_solution_strategy.md)**
+*  **[05 Bausteinsicht](./architecture/05_building_block_view.md)**
+*  **[06 Laufzeitsicht](./architecture/06_runtime_view.md)**
+*  **[07 Deployment‑Sicht](./architecture/07_deployment_view.md)**
+*  **[08 Konzepte](./architecture/08_concepts.md)**
+*  **[09 Designentscheidungen](./architecture/09_design_decisions.md)**
+*  **[10 Qualitätsszenarien](./architecture/10_quality_scenarios.md)**
+*  **[11 Risiken und Technische Schulden](./architecture/11_risks_and_technical_debt.md)**
+*  **[12 Glossar](./architecture/99_glossar.md)**
   
 <img src="./media/architectur.png" alt="Status" width="1000" />
 
