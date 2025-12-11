@@ -22,8 +22,7 @@ Lokale Energie‑Automatisierung. Ohne Cloud. Verständlich erklärt.
 ## Kurz erklärt
 BitGridAI nutzt **PV-Überschuss** automatisch – z. B. für **Bitcoin-Mining als flexible Last**. Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und Parametern.
 
-Das Projekt dient der **Forschung, Demonstration und Wissensvermittlung** rund um lokale Energie-Automatisierung, transparente Entscheidungslogik und Selbstverwahrung.
-
+Das Projekt fokussiert sich auf lokale Energie-Automatisierung, transparente Entscheidungslogik und Selbstverwahrung.
 
 ![Overview](./docs/media/overview_hamster.png)
 
@@ -35,20 +34,15 @@ Das Projekt dient der **Forschung, Demonstration und Wissensvermittlung** rund u
 - **Steuerung:** Miner starten, stoppen, pausieren; Sperrzeiten berücksichtigen
 - **Protokoll:** Entscheidungen dokumentiert, ergänzt um einfache Kennzahlen
 
----
+## Kontext
 
-### Einordnung & Verantwortung
+Als **offenes Forschungs- und Lernprojekt** widmet sich BitGridAI der lokalen Energie-Automatisierung.
+Im Mittelpunkt stehen **nachvollziehbare Entscheidungen** und **transparente Steuerlogik** – nicht Produktbetrieb oder wirtschaftliche Versprechen.
 
-BitGridAI ist **kein Produkt**, sondern ein **offenes Forschungs- und Lernprojekt**.  
-Es stellt **keine Anlage-, Energie-, Steuer- oder Rechtsberatung** dar.
+Die gezeigten Konzepte und Beispiele (z. B. Bitcoin-Mining als flexible Last) dienen der **Demonstration**.
+Der praktische Einsatz elektrischer Verbraucher erfolgt **in eigener Verantwortung** unter Beachtung lokaler Vorgaben.
 
-Der Betrieb von elektrischen Verbrauchern (z. B. Mining-Hardware) erfolgt **auf eigene Verantwortung**.  
-Lokale Vorschriften zu Netzanschluss, Sicherheit, Genehmigungen oder Meldepflichten sind vom jeweiligen Betreiber zu prüfen und einzuhalten.
-
-Die Software wird **„as is“** bereitgestellt – ohne Gewähr für Funktion, Sicherheit oder Eignung für einen bestimmten Zweck.
-
-  
----
+Die Software wird als Open Source im aktuellen Forschungsstand bereitgestellt.
 
 <details>
 <summary><strong>⚡ Transparenz & Unterstützung (optional)</strong></summary>
