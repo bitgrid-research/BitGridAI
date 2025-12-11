@@ -2,7 +2,7 @@
 
 Lokale Energie‑Automatisierung. Ohne Cloud. Verständlich erklärt.
 
-Doku: [./docs/README.md](./docs/README.md)
+* [📚 Doku](./docs/README.md)
 
 ![Welcome](./docs/media/welcome.png)
 
