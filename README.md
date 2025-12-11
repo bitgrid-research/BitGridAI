@@ -46,6 +46,7 @@ Die Software wird als Open Source im aktuellen Forschungsstand bereitgestellt.
 
 <details>
 <summary><strong>⚡ Transparenz & Unterstützung (optional)</strong></summary>
+
 &nbsp;
 
 Ein offenes Wort zur Entstehung: Da ich dieses Projekt noch alleine erforsche, setze ich bewusst auf KI-Unterstützung und generierte Grafiken, um meine Fähigkeiten am Projektzweck zu schulen und das Ergebnis mit viel Liebe zum Detail umzusetzen.
@@ -70,9 +71,9 @@ zu Selbstverwahrung & Transparenz.</code>
 bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2
 ```
 
- 💡 **Hinweis zur Unterstützung**
- 
- Die genannte Bitcoin-Adresse dient der **freiwilligen Unterstützung ohne Gegenleistung**. Es besteht kein Anspruch auf Funktionen, Support oder Einfluss auf das Projekt. Bitcoin-Transaktionen sind technisch **unumkehrbar**. Bitte prüfe die Zieladresse sorgfältig – idealerweise direkt auf deiner Hardware-Wallet. Der QR-Code ist ein **Lern- und Demonstrationselement** für transparente On-Chain-Selbstverwahrung.
+> 💡 **Hinweis zur Unterstützung**
+> 
+> Die genannte Bitcoin-Adresse dient der freiwilligen Unterstützung ohne Gegenleistung. Es besteht kein Anspruch auf Funktionen, Support oder Einfluss auf das Projekt. Bitcoin-Transaktionen sind technisch unumkehrbar. Bitte prüfe die Zieladresse sorgfältig – idealerweise direkt auf deiner Hardware-Wallet. Der QR-Code ist ein Lern- und Demonstrationselement für transparente On-Chain-Selbstverwahrung.
 
 &nbsp;
 
@@ -85,16 +86,16 @@ Sie erscheinen zunächst im Mempool, bevor sie dauerhaft in die Blockchain über
 - [https://mempool.space/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2](https://mempool.space/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2)  
 - [https://blockstream.info/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2](https://blockstream.info/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2)
 
- 💡 **Hinweis zur On-Chain-Transparenz**  
- 
- Custodial-Produkte („Paper Bitcoin“) ermöglichen oft keine echten On-Chain-Transaktionen. BitGridAI nutzt On-Chain-Transparenz bewusst, um Selbstverwahrung und Dezentralität im Forschungsumfeld sichtbar und nachvollziehbar zu machen.  
-
-&nbsp;
+ > 💡 **Hinweis zur On-Chain-Transparenz**  
+ >
+ > Custodial-Produkte („Paper Bitcoin“) ermöglichen oft keine echten On-Chain-Transaktionen. BitGridAI nutzt On-Chain-Transparenz bewusst, um Selbstverwahrung und Dezentralität im Forschungsumfeld sichtbar und nachvollziehbar zu machen.  
 </details>
 
 ---
 
 ![NoCloud](./docs/media/nocloud.png)
+
+* [📚 Doku ?](./docs/README.md)
 
 ### Lizenz / Kontakt
 AGPL-3.0 — **bitgrid.research@proton.me**
