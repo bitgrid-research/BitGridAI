@@ -58,4 +58,4 @@ Damit du direkt loslegen kannst: Hier findest du alles zur Einrichtung deiner En
 
 ---
 
-> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../README.md)**
