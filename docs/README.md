@@ -55,3 +55,7 @@ Damit du direkt loslegen kannst: Hier findest du alles zur Einrichtung deiner En
 * [30.2 Entwicklungsumgebung](./setup/dev_environment.md)
 
 <img src="./media/setup.png" alt="Status" width="1000" />
+
+---
+
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
