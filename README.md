@@ -20,7 +20,7 @@ Lokale Energie‑Automatisierung. Ohne Cloud. Verständlich erklärt.
 ---
 
 ## Kurz erklärt
-BitGridAI nutzt **PV-Überschuss** automatisch – z. B. für **Bitcoin-Mining als flexible Last**. Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und Parametern.
+BitGridAI nutzt **PV-Überschuss** automatisch. Im MVP dient Bitcoin-Mining als Beispiel für eine flexible Last, da sich Leistung und Laufzeit präzise steuern lassen. Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und Parametern.
 
 Das Projekt fokussiert sich auf lokale Energie-Automatisierung, transparente Entscheidungslogik und Selbstverwahrung.
 
@@ -36,13 +36,13 @@ Das Projekt fokussiert sich auf lokale Energie-Automatisierung, transparente Ent
 
 ## Kontext
 
-Als **offenes Forschungs- und Lernprojekt** widmet sich BitGridAI der lokalen Energie-Automatisierung.
-Im Mittelpunkt stehen **nachvollziehbare Entscheidungen** und **transparente Steuerlogik** – nicht Produktbetrieb oder wirtschaftliche Versprechen.
+BitGridAI ist ein offenes Forschungs- und Lernprojekt zur lokalen Energie-Automatisierung. Es geht darum, Entscheidungen in Energiesystemen verständlich zu machen und Steuerlogik so aufzubauen, dass sie nachvollziehbar bleibt.
 
-Die gezeigten Konzepte und Beispiele (z. B. Bitcoin-Mining als flexible Last) dienen der **Demonstration**.
-Der praktische Einsatz elektrischer Verbraucher erfolgt **in eigener Verantwortung** unter Beachtung lokaler Vorgaben.
+Der Fokus liegt auf Konzepten und Architektur – nicht auf Produktbetrieb oder wirtschaftlichen Versprechen. Die Beispiele im Projekt dienen zur Einordnung des Ansatzes. Wie und ob elektrische Verbraucher praktisch eingesetzt werden, liegt in der Verantwortung der jeweiligen Nutzer.
 
 Die Software wird als Open Source im aktuellen Forschungsstand bereitgestellt.
+
+
 
 <details>
 <summary><strong>⚡ Transparenz & Unterstützung (optional)</strong></summary>
