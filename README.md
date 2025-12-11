@@ -20,8 +20,10 @@ Lokale Energie‑Automatisierung. Ohne Cloud. Verständlich erklärt.
 ---
 
 ## Kurz erklärt
-BitGridAI nutzt **PV-Überschuss** automatisch – z. B. für **Bitcoin-Mining als flexible Last**.  
-Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und Parametern.
+BitGridAI nutzt **PV-Überschuss** automatisch – z. B. für **Bitcoin-Mining als flexible Last**. Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und Parametern.
+
+Das Projekt dient der **Forschung, Demonstration und Wissensvermittlung** rund um lokale Energie-Automatisierung, transparente Entscheidungslogik und Selbstverwahrung.
+
 
 ![Overview](./docs/media/overview_hamster.png)
 
@@ -32,6 +34,19 @@ Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und P
 - **Home Assistant/Docker:** Integration lokaler Sensoren und Aktoren zur Entscheidungs- und Steuerlogik
 - **Steuerung:** Miner starten, stoppen, pausieren; Sperrzeiten berücksichtigen
 - **Protokoll:** Entscheidungen dokumentiert, ergänzt um einfache Kennzahlen
+
+---
+
+### Einordnung & Verantwortung
+
+BitGridAI ist **kein Produkt**, sondern ein **offenes Forschungs- und Lernprojekt**.  
+Es stellt **keine Anlage-, Energie-, Steuer- oder Rechtsberatung** dar.
+
+Der Betrieb von elektrischen Verbrauchern (z. B. Mining-Hardware) erfolgt **auf eigene Verantwortung**.  
+Lokale Vorschriften zu Netzanschluss, Sicherheit, Genehmigungen oder Meldepflichten sind vom jeweiligen Betreiber zu prüfen und einzuhalten.
+
+Die Software wird **„as is“** bereitgestellt – ohne Gewähr für Funktion, Sicherheit oder Eignung für einen bestimmten Zweck.
+
   
 ---
 
@@ -61,22 +76,9 @@ zu Selbstverwahrung & Transparenz.</code>
 bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2
 ```
 
-&nbsp;
-
-⚠️ **Kurzer Sicherheitshinweis** 
-
-Damit alles zuverlässig funktioniert, lohnt sich ein schneller Blick auf ein paar bewährte Vorgehensweisen:
-
- - Prüfe die vollständige Empfangsadresse direkt auf deiner **Hardware-Wallet**.
- - Nutze eine Wallet-App, der du vertraust und die idealerweise quelloffen ist. 
-- Vergleiche die angezeigte Adresse mit der hier angegebenen, bevor du fortfährst.  
-
- So wird sichergestellt, dass die Zieladresse **nicht durch UI-Fakes oder Schadsoftware manipuliert** wurde.  
-**Fehleingaben oder manipulierte Adressen können zum unwiderruflichen Verlust von Mitteln führen.**  
-
-Diese Hinweise sollen dir einfach helfen, Adressfehler oder Missverständnisse zu vermeiden.
-
-Der QR-Code dient als Lern- und Demonstrationselement, um zu zeigen, wie sichere Selbstverwahrung und Transparenz praktisch funktionieren.
+ 💡 **Hinweis zur Unterstützung**
+ 
+ Die genannte Bitcoin-Adresse dient der **freiwilligen Unterstützung ohne Gegenleistung**. Es besteht kein Anspruch auf Funktionen, Support oder Einfluss auf das Projekt. Bitcoin-Transaktionen sind technisch **unumkehrbar**. Bitte prüfe die Zieladresse sorgfältig – idealerweise direkt auf deiner Hardware-Wallet. Der QR-Code ist ein **Lern- und Demonstrationselement** für transparente On-Chain-Selbstverwahrung.
 
 &nbsp;
 
@@ -89,7 +91,8 @@ Sie erscheinen zunächst im Mempool, bevor sie dauerhaft in die Blockchain über
 - [https://mempool.space/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2](https://mempool.space/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2)  
 - [https://blockstream.info/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2](https://blockstream.info/address/bc1qvkdu9q8nprf4n52tmdx8p29xm40xxajwcgams2)
 
- 💡 **Hinweis**  
+ 💡 **Hinweis zur On-Chain-Transparenz**  
+ 
  Custodial-Produkte („Paper Bitcoin“) ermöglichen oft keine echten On-Chain-Transaktionen. BitGridAI nutzt On-Chain-Transparenz bewusst, um Selbstverwahrung und Dezentralität im Forschungsumfeld sichtbar und nachvollziehbar zu machen.  
 
 &nbsp;
