@@ -39,6 +39,8 @@ Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und P
 <summary><strong>⚡ Transparenz & Unterstützung (optional)</strong></summary>
 &nbsp;
 
+Ein offenes Wort zur Entstehung: Da ich dieses Projekt noch alleine erforsche, setze ich bewusst auf KI-Unterstützung und generierte Grafiken, um meine Fähigkeiten am Projektzweck zu schulen und das Ergebnis mit viel Liebe zum Detail umzusetzen.
+
 Ich freue mich, wenn dir meine Inhalte weiterhelfen. Falls du meine Projekt rund um Energie, Bitcoin und Selbstverwahrung unterstützen möchtest, findest du hier eine optionale Adresse und einen QR-Code. Alles selbstverständlich transparent und nachvollziehbar.
 &nbsp;
 <table border="0">
