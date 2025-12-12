@@ -7,7 +7,7 @@ Lokale Energie‑Automatisierung. Ohne Cloud. Verständlich erklärt.
 ![Welcome](./docs/media/welcome.png)
 
 
----
+&nbsp;
 
 ## Fortschritt
 
@@ -16,7 +16,7 @@ Lokale Energie‑Automatisierung. Ohne Cloud. Verständlich erklärt.
 ![Status](./docs/media/status.png)
 
 
----
+&nbsp;
 
 ## Kurz erklärt
 BitGridAI nutzt **PV-Überschuss** automatisch. Im MVP dient Bitcoin-Mining als Beispiel für eine flexible Last, da sich Leistung und Laufzeit präzise steuern lassen. Entscheidungen sind **nachvollziehbar**: Jede Aktion kommt mit Begründung und Parametern.
@@ -41,7 +41,7 @@ Der Fokus liegt auf Konzepten und Architektur – nicht auf Produktbetrieb oder 
 
 Die Software wird als Open Source im aktuellen Forschungsstand bereitgestellt.
 
-
+&nbsp;
 
 <details>
 <summary><strong>⚡ Transparenz & Unterstützung (optional)</strong></summary>
