@@ -11,9 +11,10 @@ Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage
 **Das Problem 🏝️:** In modernen Haushalten und Gewerben wimmelt es von Technik: PV-Anlagen, Batteriespeicher, Wallboxen für E-Autos und Wärmepumpen. Doch aktuell sind das oft "Inseln". Sie reden nicht miteinander, und du musst ständig manuell eingreifen, um Energie effizient zu nutzen.
 
 **Unsere Lösung (BitGridAI) 🎻:** Wir bauen den "lokalen Dirigenten". BitGridAI ist die Software-Plattform, die hardware-agnostisch verschiedene Erzeuger und Verbraucher vernetzt. Sie nutzt KI-gestützte Prognosen, um Energieflüsse vollautomatisch zu optimieren.
+
 * **Das Ziel:** Eigenverbrauch maximieren, Kosten senken und das lokale Netz stabilisieren – ohne dass deine Daten das Haus verlassen.
 
-![Hamster als Dirigent der Energieflüsse](link_zum_dirigenten_bild.png)
+<img src="../../media/bithamster_conductor.png" alt="Hamster Dirigent" width="1000" />
 
 ---
 
