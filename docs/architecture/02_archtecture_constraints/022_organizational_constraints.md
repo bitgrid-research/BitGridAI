@@ -9,6 +9,8 @@ Unsere Architektur kann noch so brillant sein – wenn sie das Budget sprengt od
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster im Anzug sitzt an einem Konferenztisch mit Aktenordnern, einem Taschenrechner und einer großen Uhr im Hintergrund.)*
 ![Hamster im Konferenzraum](link_zum_organisations_bild.png)
 
+&nbsp;
+
 ## Die Liste der organisatorischen Fakten
 
 Wir müssen unsere Lösung innerhalb folgender nicht-technischer Grenzen entwickeln:
