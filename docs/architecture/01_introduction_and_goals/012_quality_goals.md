@@ -8,6 +8,7 @@ Wir bauen kein System, das nur "funktioniert", sondern eines, das man versteht u
 
 ![Hamster dirigiert die Qualität](link_zu_image_31.png)
 
+&nbsp;
 
 ## Unsere zentralen Qualitätsmerkmale
 
@@ -23,6 +24,8 @@ Diese sechs Säulen tragen unsere Architektur. An ihnen messen wir jede Designen
 | **Vorhersagbarkeit ⏱️** | Kein nervöses Hin und Her. Durch deterministische Regeln, ein "Deadband" gegen schnelles Schalten und den stabilen **10-Minuten-Blocktakt** verhält sich das System ruhig und vorhersehbar. Du kannst dich darauf verlassen, was als Nächstes passiert. Prognosen nutzen wir nur, wenn sie stabil sind. |
 | **Sicherheit 🔒** | Safety First. Wir haben eingebaute Schutzmechanismen für Temperatur und Batterieladestand (SoC). Wenn's kritisch wird, geht das System in einen definierten, sicheren Zustand ("Stop → Safe"), um deine Hardware zu schützen. Auch diese Sicherheitsabschaltungen sind erklärbar und werden protokolliert. |
 | **Reproduzierbarkeit 🔄** | Für die Wissenschaft. Alle Daten, Modelle und Logs sind standardisiert. Das ermöglicht es, Szenarien exakt "abzuspielen" (Replays) und Ergebnisse objektiv zu vergleichen – egal ob für deine eigene Analyse oder für Forschungsprojekte. |
+
+&nbsp;
 
 ## KPIs / Erfolgsmetriken
 
