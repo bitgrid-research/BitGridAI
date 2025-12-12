@@ -8,7 +8,7 @@ Lass uns loslegen!
 
 <img src="./media/doku.png" alt="Status" width="1000" />
 
----
+&nbsp;
 
 ## 1. Architektur
 
@@ -29,9 +29,7 @@ So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.or
   
 <img src="./media/architectur.png" alt="Status" width="1000" />
 
-
-
----
+&nbsp;
 
 ## 2. Forschung
 
@@ -45,7 +43,7 @@ Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar un
 
 <img src="./media/research.png" alt="Status" width="1000" />
 
----
+&nbsp;
 
 ### 3. Setup
 
@@ -57,5 +55,4 @@ Damit du direkt loslegen kannst: Hier findest du alles zur Einrichtung deiner En
 <img src="./media/setup.png" alt="Status" width="1000" />
 
 ---
-
 > 🏠 Zurück zur **[Hauptübersicht](../README.md)**
