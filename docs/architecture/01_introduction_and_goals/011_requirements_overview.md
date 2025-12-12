@@ -6,6 +6,8 @@ Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage
 
 **BitGridAI** ist unsere Antwort darauf, wie lokale Energiesysteme in Zukunft aussehen müssen: intelligent, dezentral und vor allem *einfach* für dich als Endanwender.
 
+&nbsp;
+
 ## Das Kernproblem & Unsere Lösung
 
 **Das Problem 🏝️:** In modernen Haushalten und Gewerben wimmelt es von Technik: PV-Anlagen, Batteriespeicher, Wallboxen für E-Autos und Wärmepumpen. Doch aktuell sind das oft "Inseln". Sie reden nicht miteinander, und du musst ständig manuell eingreifen, um Energie effizient zu nutzen.
@@ -16,7 +18,7 @@ Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage
 
 <img src="../../media/bithamster_conductor.png" alt="Hamster Dirigent" width="1000" />
 
----
+&nbsp;
 
 ## Wesentliche Features (Was das System draufhaben muss)
 
@@ -42,7 +44,7 @@ Cloud ist nett, lokal ist lebenswichtig.
 * **Anforderung:** Die Kernfunktionen (Steuerung, Sicherheit) müssen vollständig lokal auf einem Edge-Device laufen.
 * **Ziel:** Wenn das Internet ausfällt, optimiert BitGridAI weiter. Dein Haus bleibt intelligent.
 
----
+&nbsp;
 
 ## Kernanforderungen (Technical Deep Dive)
 
@@ -54,15 +56,15 @@ Jetzt wird es konkret. Damit die Vision funktioniert, gelten folgende harte tech
 * **Block-Scheduler:** Wir takten das System wie Bitcoin. Entscheidungen sind an den **10-Minuten-Block** gebunden. Das bringt Ruhe rein. Deadbands vergeben ein `valid_until`, um Flattern zu verhindern.
 * **EnergyState (SSoT):** Es gibt genau eine "Single Source of Truth" für Messwerte, Prognosen, Preise, SoC und Temperaturen. Keine Daten-Duplikate.
 
-<img src="../../media/bithamster_overview_coreprinciples.png" alt="Hamster Dirigent" width="1000" />
-
 ### Architektur & Sicherheit
 * **Explainability by Design:** Jede Aktion liefert `reason`, `trigger` und `params`. Dazu gibt es eine Timeline und eine "Next-Block-Preview". Wir wollen wissen, *warum* das System etwas tut.
 * **Safety First:** Hardware-Schutz geht vor Profit. Bei Verletzung von SoC- oder Temperaturgrenzen gilt: **Stop → Safe**. Das Wiedereinschalten (Resume) erfolgt nur mit Hysterese.
 * **Local-first / No Cloud:** Keine externen Abhängigkeiten für den Betrieb. Offline-Fähigkeit ist Pflicht.
 * **Auditierbares Logging:** Wir schreiben Logs "Append-only" (z.B. SQLite oder Parquet). Configs sind versioniert (YAML). Damit ist alles für die Forschung reproduzierbar (Research-Toggle).
 
----
+<img src="../../media/bithamster_overview_coreprinciples.png" alt="Hamster Dirigent" width="1000" />
+
+&nbsp;
 
 ## MVP-Scope (Was ist in Version 1.0 drin?)
 
@@ -74,7 +76,7 @@ Für das Minimal Viable Product konzentrieren wir uns auf diese Komponenten:
 4.  **KPI-Tracking:** Wir messen Grid-Import (↓), Flapping-Rate (↓), Explanation Coverage, Trust-Score und stellen sicher, dass Thermal Incidents = 0 sind.
 5.  **Replay & Forschung:** Tools für Log-Replay und "Was-wäre-wenn"-Simulationen inkl. Export-Bundles.
 
----
+&nbsp;
 
 ## Wesentliche Anwendungsfälle (Top Use Cases)
 
@@ -85,7 +87,7 @@ Für das Minimal Viable Product konzentrieren wir uns auf diese Komponenten:
 | **UC-3** | **Manueller Override** | Du brauchst "Boost"? Du kriegst Boost. Das System priorisiert sofort deinen Wunsch (z.B. Wallbox), auch wenn es unwirtschaftlich ist. | Nutzer |
 | **UC-4** | **Sicherheitsüberwachung** | Kritische Temperatur? BitGridAI fährt das betroffene Subsystem sofort kontrolliert herunter (`Stop -> Safe`). | Safety |
 
----
+&nbsp;
 
 ## Abgrenzung (Was wir NICHT bauen) 🚫
 
