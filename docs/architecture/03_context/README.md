@@ -14,10 +14,10 @@ In diesem Kapitel definieren wir den Scope: Was gehört genau zum System, und wa
 Um die Übersicht zu behalten, trennen wir die fachliche "Brille" von der technischen:
 
 * **[3.1 Fachlicher Kontext](./031_business_context.md)**
-    * *Kurzbeschreibung:* Die Sicht von außen auf Prozessebene. Wer sind die Nutzer? Welche externen Ereignisse stoßen etwas in BitGridAI an, oder welche Nachbarsysteme erwarten Informationen von uns?
+    * Die Sicht von außen auf Prozessebene. Wer sind die Nutzer? Welche externen Ereignisse stoßen etwas in BitGridAI an, oder welche Nachbarsysteme erwarten Informationen von uns?
 
 * **[3.2 Technischer Kontext](./032_technical_context.md)**
-    * *Kurzbeschreibung:* Die Sicht unter der Haube. Mit welchen konkreten APIs, Protokollen, Datenbanken oder Hardware-Komponenten kommuniziert BitGridAI auf technischer Ebene?
+    * Die Sicht unter der Haube. Mit welchen konkreten APIs, Protokollen, Datenbanken oder Hardware-Komponenten kommuniziert BitGridAI auf technischer Ebene?
 
 ---
  
