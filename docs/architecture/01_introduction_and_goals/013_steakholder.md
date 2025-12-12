@@ -8,6 +8,8 @@ Wir müssen ihre Brille aufsetzen, um zu verstehen, was das System leisten muss,
 
 ![Stakeholder Meeting mit Hamster](../media/pixel_art_hamster_meeting.png)
 
+&nbsp;
+
 ## Unsere wichtigsten Interessengruppen
 
 Wir haben vier Hauptgruppen identifiziert, deren Bedürfnisse unsere Architektur maßgeblich beeinflussen:
