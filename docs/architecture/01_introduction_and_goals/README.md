@@ -19,7 +19,7 @@ Wir haben die Grundlagen in drei kompakte Bereiche aufgeteilt, damit du schnell 
 * **[1.3 Stakeholder](./013_steakholder.md)**
     * Wer sind die Menschen (und Systeme), die BitGridAI nutzen oder beeinflussen?
  
-&nbsp;
+---
 
   <img src="../../media/bithamster_plan.png" alt="Hamster Plan" width="1000" />
 
