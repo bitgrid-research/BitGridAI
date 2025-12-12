@@ -9,6 +9,8 @@ Sie existieren nicht, um uns zu gängeln, sondern damit wir uns im Code des ande
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster mit einer strengen Brille hält ein dickes Regelbuch und einen Stempel in der Hand. Neben ihm ein Zollstock.)*
 ![Hamster mit dem Regelwerk](link_zum_konventionen_bild.png)
 
+&nbsp;
+
 ## Unsere Konventionen
 
 Diese Standards gelten für jeden, der Code oder Dokumentation zu BitGridAI beiträgt:
