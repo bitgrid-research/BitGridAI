@@ -13,7 +13,6 @@ Lokale Energie‑Automatisierung. Ohne Cloud. Verständlich erklärt.
 
 ![Status](https://img.shields.io/badge/Status-Konzeptphase_(MVP_Architektur)-blue)
 
-
 ![Status](./docs/media/status.png)
 
 
