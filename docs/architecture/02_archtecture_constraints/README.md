@@ -8,6 +8,8 @@ Diese Vorgaben sind in der Regel nicht verhandelbar und haben direkten Einfluss 
 
 ![Technischer Hamster mit Vorgaben](link_zu_image_4.png)
 
+&nbsp;
+
 ## Inhalt dieses Kapitels
 
 Wir unterteilen die Einschränkungen in drei Bereiche, um die Übersicht zu behalten:
