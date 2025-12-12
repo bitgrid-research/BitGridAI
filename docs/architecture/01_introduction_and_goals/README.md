@@ -1,6 +1,6 @@
 # 01 Einführung & Ziele
 
-So fängt alles an. 
+So fängt alles an. 🌱
 
 In diesem Kapitel klären wir die Basis für **BitGridAI**: Was soll das System eigentlich tun, wer hat ein Interesse daran und welche Qualitätsmaßstäbe setzen wir an?
 
