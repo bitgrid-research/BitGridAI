@@ -48,12 +48,13 @@ Cloud ist nett, lokal ist lebenswichtig.
 
 Jetzt wird es konkret. Damit die Vision funktioniert, gelten folgende harte technische Regeln:
 
-![Hamster taktet die 10-Minuten-Blöcke](link_zum_block_takt_bild.png)
-
 ### Die Core-Logik
+
 * **R1–R5 Deterministisch:** Das System folgt strengen Regeln für Start, Autarkie-Schutz, Thermo-Schutz, Prognose-Check und Anti-Flapping. Kein "Voodoo", sondern nachvollziehbare Logik.
 * **Block-Scheduler:** Wir takten das System wie Bitcoin. Entscheidungen sind an den **10-Minuten-Block** gebunden. Das bringt Ruhe rein. Deadbands vergeben ein `valid_until`, um Flattern zu verhindern.
 * **EnergyState (SSoT):** Es gibt genau eine "Single Source of Truth" für Messwerte, Prognosen, Preise, SoC und Temperaturen. Keine Daten-Duplikate.
+
+<img src="../../media/core_principle.png" alt="Hamster Dirigent" width="1000" />
 
 ### Architektur & Sicherheit
 * **Explainability by Design:** Jede Aktion liefert `reason`, `trigger` und `params`. Dazu gibt es eine Timeline und eine "Next-Block-Preview". Wir wollen wissen, *warum* das System etwas tut.
