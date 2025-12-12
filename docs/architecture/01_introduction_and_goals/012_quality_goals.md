@@ -8,9 +8,12 @@ Wir bauen kein System, das nur "funktioniert", sondern eines, das man versteht u
 
 ![Hamster dirigiert die Qualität](link_zu_image_31.png)
 
+
 ## Unsere zentralen Qualitätsmerkmale
 
 Diese sechs Säulen tragen unsere Architektur. An ihnen messen wir jede Designentscheidung:
+
+<img src="../../media/quality.png" alt="Qualitaet" width="1000" />
 
 | Qualität | Was bedeutet das für uns? |
 | :--- | :--- |
