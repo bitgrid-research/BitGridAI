@@ -1,6 +1,6 @@
 # 01.1 Anforderungen & Überblick
 
-Willkommen im Herzstück des Projekts. 
+Willkommen im Herzstück des Projekts. ♥️
 
 Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage klären: Was bauen wir hier eigentlich?
 
@@ -12,7 +12,7 @@ Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage
 
 **Unsere Lösung (BitGridAI) 🎻:** Wir bauen den "lokalen Dirigenten". BitGridAI ist die Software-Plattform, die hardware-agnostisch verschiedene Erzeuger und Verbraucher vernetzt. Sie nutzt KI-gestützte Prognosen, um Energieflüsse vollautomatisch zu optimieren.
 
-* **Das Ziel:** Eigenverbrauch maximieren, Kosten senken und das lokale Netz stabilisieren – ohne dass deine Daten das Haus verlassen.
+**Das Ziel:** Eigenverbrauch maximieren, Kosten senken und das lokale Netz stabilisieren – ohne dass deine Daten das Haus verlassen.
 
 <img src="../../media/bithamster_conductor.png" alt="Hamster Dirigent" width="1000" />
 
