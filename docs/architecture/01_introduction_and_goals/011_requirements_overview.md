@@ -54,7 +54,7 @@ Jetzt wird es konkret. Damit die Vision funktioniert, gelten folgende harte tech
 * **Block-Scheduler:** Wir takten das System wie Bitcoin. Entscheidungen sind an den **10-Minuten-Block** gebunden. Das bringt Ruhe rein. Deadbands vergeben ein `valid_until`, um Flattern zu verhindern.
 * **EnergyState (SSoT):** Es gibt genau eine "Single Source of Truth" für Messwerte, Prognosen, Preise, SoC und Temperaturen. Keine Daten-Duplikate.
 
-<img src="../../media/core_principle.png" alt="Hamster Dirigent" width="1000" />
+<img src="../../media/bithamster_overview_coreprinciples.png" alt="Hamster Dirigent" width="1000" />
 
 ### Architektur & Sicherheit
 * **Explainability by Design:** Jede Aktion liefert `reason`, `trigger` und `params`. Dazu gibt es eine Timeline und eine "Next-Block-Preview". Wir wollen wissen, *warum* das System etwas tut.
