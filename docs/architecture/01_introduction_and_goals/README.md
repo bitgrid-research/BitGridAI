@@ -6,8 +6,6 @@ In diesem Kapitel klären wir die Basis für **BitGridAI**: Was soll das System 
 
 Ohne ein klares Ziel verläuft man sich schnell – daher definieren wir hier den Kurs.
 
-![Hamster plant das Projekt](link_zu_deinem_neuen_bild.png)
-
 ## Inhalt dieses Kapitels
 
 Wir haben die Grundlagen in drei kompakte Bereiche aufgeteilt, damit du schnell findest, was du suchst:
@@ -20,6 +18,10 @@ Wir haben die Grundlagen in drei kompakte Bereiche aufgeteilt, damit du schnell 
 
 * **[1.3 Stakeholder](./013_steakholder.md)**
     * Wer sind die Menschen (und Systeme), die BitGridAI nutzen oder beeinflussen?
+ 
+&nbsp;
+
+  <img src="../../media/bithamster_plan.png" alt="Hamster Plan" width="1000" />
 
 ---
 
