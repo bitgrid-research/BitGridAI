@@ -8,7 +8,7 @@ Diese Einschränkungen sind nicht verhandelbar. Sie ergeben sich aus der physisc
 
 Unsere Architektur muss innerhalb dieser Grenzen eine optimale Lösung finden.
 
-![Hamster lötet im Keller am Edge-Device](link_zu_image_40.png)
+<img src="../../media/bithamster_technical.png" alt="Hamster tech" width="1000" />
 
 ## Die Liste der harten Fakten
 
