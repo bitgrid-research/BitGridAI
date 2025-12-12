@@ -19,7 +19,7 @@ Wir haben die Grundlagen in drei kompakte Bereiche aufgeteilt, damit du schnell 
     * Worauf legen wir besonderen Wert? (z.B. Transparenz, Autonomie, Nachhaltigkeit).
 
 * **[1.3 Stakeholder](./013_steakholder.md)**
-    * *Kurzbeschreibung:* Wer sind die Menschen (und Systeme), die BitGridAI nutzen oder beeinflussen?
+    * Wer sind die Menschen (und Systeme), die BitGridAI nutzen oder beeinflussen?
 
 ---
 
