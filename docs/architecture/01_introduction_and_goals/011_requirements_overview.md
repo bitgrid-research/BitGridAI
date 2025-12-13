@@ -10,11 +10,11 @@ Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage
 
 ## Das Kernproblem & Unsere Lösung
 
-**Das Problem 🏝️:** In modernen Haushalten und Gewerben wimmelt es von Technik: PV-Anlagen, Batteriespeicher, Wallboxen für E-Autos und Wärmepumpen. Doch aktuell sind das oft "Inseln". Sie reden nicht miteinander, und du musst ständig manuell eingreifen, um Energie effizient zu nutzen.
+**Das Problem 🏝️:** PV-Anlagen erzeugen den meisten Strom mittags. Wird dieser Strom nicht genutzt oder gespeichert, verliert er seinen größten Wert: den Ersatz von teurem Netzstrom zu anderen Zeiten. Statt maximalem Eigenverbrauch entstehen Abregelung, Netzbelastung und unnötige Kosten.
 
-**Unsere Lösung (BitGridAI) 🎻:** Wir bauen den "lokalen Dirigenten". BitGridAI ist die Software-Plattform, die hardware-agnostisch verschiedene Erzeuger und Verbraucher vernetzt. Sie nutzt KI-gestützte Prognosen, um Energieflüsse vollautomatisch zu optimieren.
+**Unsere Lösung (BitGridAI) 🪄:** Wir bauen den „lokalen Dirigenten“. BitGridAI ist die Software-Plattform, die verschiedene Erzeuger und Verbraucher miteinander verbindet. Mit KI-gestützten Prognosen optimiert sie Energieflüsse vollautomatisch im Hintergrund und erklärt ihre Entscheidungen so, dass sie für dich nachvollziehbar bleiben.
 
-**Das Ziel:** Eigenverbrauch maximieren, Kosten senken und das lokale Netz stabilisieren – ohne dass deine Daten das Haus verlassen.
+**Das Ziel:** Mehr von deinem eigenen Strom selbst nutzen, weniger teuren Netzstrom beziehen und das lokale Netz entlasten, automatisch und zuverlässig mit voller Datenhoheit bei dir zu Hause.
 
 <img src="../../media/bithamster_conductor.png" alt="Hamster Dirigent" width="1000" />
 
