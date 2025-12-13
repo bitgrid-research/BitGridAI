@@ -6,7 +6,7 @@ Willkommen am runden Tisch von **BitGridAI**. Software wird nicht für Computer 
 
 Wir müssen ihre Brille aufsetzen, um zu verstehen, was das System leisten muss, damit es ein Erfolg wird.
 
-![Stakeholder Meeting mit Hamster](../media/pixel_art_hamster_meeting.png)
+<img src="../../media/stakeholder.png" alt="Qualitaet" width="1000" />
 
 &nbsp;
 
@@ -20,6 +20,7 @@ Wir haben vier Hauptgruppen identifiziert, deren Bedürfnisse unsere Architektur
 | **Forschung & Wissenschaft 🎓** | Die Community, die BitGridAI weiterentwickelt und studiert. Sie braucht eine offene, transparente Umgebung, in der Daten und Modelle standardisiert und **reproduzierbar** sind. Das Ziel ist es, die Ergebnisse in Lehre und Forschung nutzen zu können und eine solide Basis für die wissenschaftliche Auswertung von nachvollziehbaren KI-Systemen (XAI) in realen Energiesystemen zu schaffen. |
 | **Verteilnetz(betreiber) ⚡** | Die Leute, die das Stromnetz stabil halten. Sie profitieren davon, wenn BitGridAI die Leistungsspitzen deiner PV-Anlage lokal abfängt (z.B. durch Mining als flexible Last), bevor sie ins Netz eingespeist werden. Weniger Rückspeisespitzen bedeuten ein stabileres Netz für alle, ohne teuren Netzausbau. |
 | **Das "System Haus" (als Einheit) 👨‍👩‍👧‍👦** | Die wichtigste Einheit, die einfach funktionieren muss. Die oberste Priorität ist die Sicherung der Grundversorgung. Unsere Schutzregeln (wie **R2**) stellen sicher, dass der Batteriespeicher immer eine eiserne Reserve für den Haushalt bereithält. Wird es knapp, stoppt BitGridAI sofort alle flexiblen Lasten, damit das Licht anbleibt. |
+
 
 ---
 > **Nächster Schritt:** Damit wissen wir, für wen wir BitGridAI bauen. Jetzt wird es ernst: Wir verlassen die Zielebene und schauen uns die harten Leitplanken an, die unsere Architektur einschränken.
