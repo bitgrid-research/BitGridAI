@@ -24,25 +24,17 @@ Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage
 
 Wir konzentrieren uns auf vier Kernfunktionen, die das System ausmachen:
 
-### 1. Hardware-Agnostische Konnektivität 🔌
-Kein "Vendor Lock-in". Wir spielen mit allen.
-* **Anforderung:** BitGridAI muss über Standardprotokolle (z.B. Modbus TCP, MQTT, EEBUS) mit einer breiten Palette an gängigen Wechselrichtern, Zählern und Wallboxen kommunizieren können.
-* **Ziel:** Echte "Plug & Play"-Erfahrung bei der Installation neuer Hardware.
+**1. Hardware-agnostische Konnektivität**
+Standardprotokolle (Modbus TCP, MQTT, EEBUS); echtes Plug-and-Play ohne Vendor Lock-in.
 
-### 2. KI-basierte Optimierung (Der "AI"-Teil) 🧠
-Das System reagiert nicht nur, es denkt voraus.
-* **Anforderung:** Integration von Machine-Learning-Modellen, die basierend auf historischen Daten und Wetterprognosen die Erzeugung und den Verbrauch für die nächsten 12 Stunden vorhersagen.
-* **Ziel:** Ein Batteriespeicher wird nicht stumpf geladen, nur weil die Sonne scheint. Er wird intelligent gesteuert, damit er voll ist, wenn dein E-Auto am Abend ankommt.
+**2. KI-basierte Optimierung**
+12-h Prognosen für Erzeugung und Verbrauch; intelligente Speicher- und Ladestrategien.
 
-### 3. Intuitive Nutzersteuerung & Transparenz 📱
-Technik, die man versteht, ohne Ingenieurstudium.
-* **Anforderung:** Ein modernes, responsives Web-Interface, das dir in Echtzeit zeigt: "Wo fließt mein Strom gerade hin?".
-* **Ziel:** Vertrauen. Du brauchst einfache Möglichkeiten, Präferenzen zu setzen, ohne dich durch komplexe Menüs zu wühlen.
+**3. Intuitive Nutzersteuerung & Transparenz**
+Responsives Web-UI mit Echtzeit-Energieflüssen; einfache Präferenzen, volle Transparenz.
 
-### 4. Lokale Autonomie & Resilienz 🛡️
-Cloud ist nett, lokal ist lebenswichtig.
-* **Anforderung:** Die Kernfunktionen (Steuerung, Sicherheit) müssen vollständig lokal auf einem Edge-Device laufen.
-* **Ziel:** Wenn das Internet ausfällt, optimiert BitGridAI weiter. Dein Haus bleibt intelligent.
+**4. Lokale Autonomie & Resilienz**
+Kernfunktionen laufen lokal auf Edge-Device; Betrieb und Optimierung auch ohne Internet.
 
 &nbsp;
 
