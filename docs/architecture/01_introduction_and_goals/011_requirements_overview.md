@@ -10,11 +10,11 @@ Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage
 
 ## Das Kernproblem & Unsere Lösung
 
-**Das Problem 🏝️:** PV-Anlagen erzeugen den meisten Strom mittags. Wird dieser Strom nicht genutzt oder gespeichert, verliert er seinen größten Wert: den Ersatz von teurem Netzstrom zu anderen Zeiten. Statt maximalem Eigenverbrauch entstehen Abregelung, Netzbelastung und unnötige Kosten.
+**Das Problem 🏝️:** PV-Anlagen erzeugen den meisten Strom mittags. Wird dieser Strom nicht genutzt oder gespeichert, bleibt er lokal *gestrandet* und verliert seinen größten Wert: den Ersatz von teurem Netzstrom zu anderen Zeiten. Statt maximalem Eigenverbrauch entstehen Abregelung, Netzbelastung und unnötige Kosten.
 
-**Unsere Lösung (BitGridAI) 🪄:** Wir bauen den „lokalen Dirigenten“. BitGridAI ist die Software-Plattform, die verschiedene Erzeuger und Verbraucher miteinander verbindet. Mit KI-gestützten Prognosen optimiert sie Energieflüsse vollautomatisch im Hintergrund und erklärt ihre Entscheidungen so, dass sie für dich nachvollziehbar bleiben.
+**Unsere Lösung 🎼:** Wir bauen den „lokalen Dirigenten“. BitGridAI ist die Software-Plattform, die verschiedene Erzeuger und Verbraucher miteinander verbindet. Mit KI-gestützten Prognosen optimiert sie Energieflüsse vollautomatisch im Hintergrund und erklärt, warum sie so entscheidet.
 
-**Das Ziel:** Mehr von deinem eigenen Strom selbst nutzen, weniger teuren Netzstrom beziehen und das lokale Netz entlasten, automatisch und zuverlässig mit voller Datenhoheit bei dir zu Hause.
+**Das Ziel 🎯:** Mehr von deinem eigenen Strom selbst nutzen, weniger teuren Netzstrom beziehen und das lokale Netz entlasten, automatisch und zuverlässig mit voller Datenhoheit bei dir zu Hause.
 
 <img src="../../media/bithamster_conductor.png" alt="Hamster Dirigent" width="1000" />
 
