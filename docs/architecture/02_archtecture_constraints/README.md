@@ -6,8 +6,6 @@ Jedes Softwareprojekt bewegt sich innerhalb gewisser Grenzen – sei es durch vo
 
 Diese Vorgaben sind in der Regel nicht verhandelbar und haben direkten Einfluss auf unsere Architekturentscheidungen.
 
-![Technischer Hamster mit Vorgaben](link_zu_image_4.png)
-
 &nbsp;
 
 ## Inhalt dieses Kapitels
@@ -22,6 +20,10 @@ Wir unterteilen die Einschränkungen in drei Bereiche, um die Übersicht zu beha
 
 * **[2.3 Konventionen](./023_conventions.md)**
     * Unsere internen Gesetze. Wie schreiben wir Code? Wie benennen wir Dinge? An welche Standards halten wir uns, damit alle im Team effizient zusammenarbeiten?
+
+---
+
+  <img src="../../media/bithamster_conventions.png" alt="Hamster konventionen" width="1000" />
 
 ---
 
