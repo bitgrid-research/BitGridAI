@@ -6,7 +6,7 @@ Hier definieren wir schwarz auf weiß, was "gut" für **BitGridAI** bedeutet. Es
 
 Wir bauen kein System, das nur "funktioniert", sondern eines, das man versteht und dem man gerne die Kontrolle über sein Hausnetz überlässt.
 
-![Hamster dirigiert die Qualität](link_zu_image_31.png)
+<img src="../../media/qualityplan.png" alt="Qualitaet" width="1000" />
 
 &nbsp;
 
@@ -14,16 +14,17 @@ Wir bauen kein System, das nur "funktioniert", sondern eines, das man versteht u
 
 Diese sechs Säulen tragen unsere Architektur. An ihnen messen wir jede Designentscheidung:
 
-<img src="../../media/quality_pillar.png" alt="Qualitaet" width="1000" />
-
 | Qualität | Was bedeutet das für uns? |
 | :--- | :--- |
-| **Transparenz 🔍** | Keine Blackbox. Jede Entscheidung des Systems ist nachvollziehbar – mit Grund, Auslöser und Parametern dokumentiert. Wir versionieren alle Erklärungstexte, damit man auch später noch versteht, *warum* das System so gehandelt hat. Das ist die Basis für Vertrauen und wissenschaftliche Auswertungen. |
-| **Autonomie 🛡️** | Wir sind radikal "local-first". Der gesamte Stack läuft bei dir zu Hause, ohne Cloud-Zwang oder externe KI-Dienste. Das bedeutet: Deine Daten gehören dir (digitale Souveränität), das System funktioniert auch ohne Internet (belastbare Offline-Modi), und du hast die volle Kontrolle. |
-| **Nachhaltigkeit 🌱** | Wir verschwenden nichts. PV-Überschuss wird nicht abgeregelt, sondern sinnvoll in flexiblen Lasten genutzt. Durch intelligente Lastverschiebung erhöhen wir deinen Eigenverbrauch und deine Autarkie. Zudem helfen wir dir mit verständlichen Infos, selbst nachhaltigere Entscheidungen zu treffen. |
-| **Vorhersagbarkeit ⏱️** | Kein nervöses Hin und Her. Durch deterministische Regeln, ein "Deadband" gegen schnelles Schalten und den stabilen **10-Minuten-Blocktakt** verhält sich das System ruhig und vorhersehbar. Du kannst dich darauf verlassen, was als Nächstes passiert. Prognosen nutzen wir nur, wenn sie stabil sind. |
-| **Sicherheit 🔒** | Safety First. Wir haben eingebaute Schutzmechanismen für Temperatur und Batterieladestand (SoC). Wenn's kritisch wird, geht das System in einen definierten, sicheren Zustand ("Stop → Safe"), um deine Hardware zu schützen. Auch diese Sicherheitsabschaltungen sind erklärbar und werden protokolliert. |
-| **Reproduzierbarkeit 🔄** | Für die Wissenschaft. Alle Daten, Modelle und Logs sind standardisiert. Das ermöglicht es, Szenarien exakt "abzuspielen" (Replays) und Ergebnisse objektiv zu vergleichen – egal ob für deine eigene Analyse oder für Forschungsprojekte. |
+| **Transparenz🔍** | Keine Blackbox. Jede Entscheidung des Systems ist nachvollziehbar – mit Grund, Auslöser und Parametern dokumentiert. Wir versionieren alle Erklärungstexte, damit man auch später noch versteht, *warum* das System so gehandelt hat. Das ist die Basis für Vertrauen und wissenschaftliche Auswertungen. |
+| **Autonomie🏠** | Wir sind radikal "local-first". Der gesamte Stack läuft bei dir zu Hause, ohne Cloud-Zwang oder externe KI-Dienste. Das bedeutet: Deine Daten gehören dir (digitale Souveränität), das System funktioniert auch ohne Internet (belastbare Offline-Modi), und du hast die volle Kontrolle. |
+| **Nachhaltigkeit🌱** | Wir verschwenden nichts. PV-Überschuss wird nicht abgeregelt, sondern sinnvoll in flexiblen Lasten genutzt. Durch intelligente Lastverschiebung erhöhen wir deinen Eigenverbrauch und deine Autarkie. Zudem helfen wir dir mit verständlichen Infos, selbst nachhaltigere Entscheidungen zu treffen. |
+| **Vorhersagbarkeit⏱️** | Kein nervöses Hin und Her. Durch deterministische Regeln, ein "Deadband" gegen schnelles Schalten und den stabilen **10-Minuten-Blocktakt** verhält sich das System ruhig und vorhersehbar. Du kannst dich darauf verlassen, was als Nächstes passiert. Prognosen nutzen wir nur, wenn sie stabil sind. |
+| **Sicherheit🛡️** | Safety First. Wir haben eingebaute Schutzmechanismen für Temperatur und Batterieladestand (SoC). Wenn's kritisch wird, geht das System in einen definierten, sicheren Zustand ("Stop → Safe"), um deine Hardware zu schützen. Auch diese Sicherheitsabschaltungen sind erklärbar und werden protokolliert. |
+| **Reproduzierbarkeit🔄** | Für die Wissenschaft. Alle Daten, Modelle und Logs sind standardisiert. Das ermöglicht es, Szenarien exakt "abzuspielen" (Replays) und Ergebnisse objektiv zu vergleichen – egal ob für deine eigene Analyse oder für Forschungsprojekte. |
+
+
+<img src="../../media/quality_pillar.png" alt="Qualitaet" width="1000" />
 
 &nbsp;
 
