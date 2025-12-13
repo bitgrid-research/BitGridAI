@@ -14,7 +14,7 @@ Wir bauen kein System, das nur "funktioniert", sondern eines, das man versteht u
 
 Diese sechs Säulen tragen unsere Architektur. An ihnen messen wir jede Designentscheidung:
 
-<img src="../../media/quality.png" alt="Qualitaet" width="1000" />
+<img src="../../media/quality_pillar.png" alt="Qualitaet" width="1000" />
 
 | Qualität | Was bedeutet das für uns? |
 | :--- | :--- |
