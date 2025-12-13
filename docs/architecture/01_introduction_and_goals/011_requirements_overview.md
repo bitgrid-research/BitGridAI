@@ -12,7 +12,7 @@ Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage
 
 **Das Problem 🏝️:** PV-Anlagen erzeugen den meisten Strom mittags. Wird dieser Strom nicht genutzt oder gespeichert, bleibt er lokal *gestrandet* und verliert seinen größten Wert: den Ersatz von teurem Netzstrom zu anderen Zeiten. Statt maximalem Eigenverbrauch entstehen Abregelung, Netzbelastung und unnötige Kosten.
 
-**Unsere Lösung 🎼:** Wir bauen den „lokalen Dirigenten“. BitGridAI ist die Software-Plattform, die verschiedene Erzeuger und Verbraucher miteinander verbindet. Mit KI-gestützten Prognosen optimiert sie Energieflüsse vollautomatisch im Hintergrund und erklärt, warum sie so entscheidet.
+**Unsere Lösung 🎼:** Wir bauen den „*lokalen Dirigenten*“. BitGridAI ist die Software-Plattform, die verschiedene Erzeuger und Verbraucher miteinander verbindet. Mit KI-gestützten Prognosen optimiert sie Energieflüsse vollautomatisch im Hintergrund und erklärt, warum sie so entscheidet.
 
 **Das Ziel 🎯:** Mehr von deinem eigenen Strom selbst nutzen, weniger teuren Netzstrom beziehen und das lokale Netz entlasten, automatisch und zuverlässig mit voller Datenhoheit bei dir zu Hause.
 
@@ -24,49 +24,29 @@ Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage
 
 Wir konzentrieren uns auf vier Kernfunktionen, die das System ausmachen:
 
-**1. Hardware-agnostische Konnektivität**
-Standardprotokolle (Modbus TCP, MQTT, EEBUS); echtes Plug-and-Play ohne Vendor Lock-in.
+**1. Hardware-agnostische Konnektivität:** Standardprotokolle; echtes Plug-and-Play ohne Vendor Lock-in.
 
-**2. KI-basierte Optimierung**
-12-h Prognosen für Erzeugung und Verbrauch; intelligente Speicher- und Ladestrategien.
+**2. KI-basierte Optimierung**: 12-h Prognosen für Erzeugung und Verbrauch; intelligente Speicher- und Ladestrategien.
 
-**3. Intuitive Nutzersteuerung & Transparenz**
-Responsives Web-UI mit Echtzeit-Energieflüssen; einfache Präferenzen, volle Transparenz.
+**3. Intuitive Nutzersteuerung & Transparenz:** Responsives Web-UI mit Echtzeit-Energieflüssen; einfache Präferenzen, volle Transparenz.
 
-**4. Lokale Autonomie & Resilienz**
-Kernfunktionen laufen lokal auf Edge-Device; Betrieb und Optimierung auch ohne Internet.
+**4. Lokale Autonomie & Resilienz:** Kernfunktionen laufen lokal auf Edge-Device; Betrieb und Optimierung auch ohne Internet.
 
-&nbsp;
 
-## Kernanforderungen (Technical Deep Dive)
 
-Jetzt wird es konkret. Damit die Vision funktioniert, gelten folgende harte technische Regeln:
-
-### Die Core-Logik
-
-* **R1–R5 Deterministisch:** Das System folgt strengen Regeln für Start, Autarkie-Schutz, Thermo-Schutz, Prognose-Check und Anti-Flapping. Kein "Voodoo", sondern nachvollziehbare Logik.
-* **Block-Scheduler:** Wir takten das System wie Bitcoin. Entscheidungen sind an den **10-Minuten-Block** gebunden. Das bringt Ruhe rein. Deadbands vergeben ein `valid_until`, um Flattern zu verhindern.
-* **EnergyState (SSoT):** Es gibt genau eine "Single Source of Truth" für Messwerte, Prognosen, Preise, SoC und Temperaturen. Keine Daten-Duplikate.
-
-### Architektur & Sicherheit
-* **Explainability by Design:** Jede Aktion liefert `reason`, `trigger` und `params`. Dazu gibt es eine Timeline und eine "Next-Block-Preview". Wir wollen wissen, *warum* das System etwas tut.
-* **Safety First:** Hardware-Schutz geht vor Profit. Bei Verletzung von SoC- oder Temperaturgrenzen gilt: **Stop → Safe**. Das Wiedereinschalten (Resume) erfolgt nur mit Hysterese.
-* **Local-first / No Cloud:** Keine externen Abhängigkeiten für den Betrieb. Offline-Fähigkeit ist Pflicht.
-* **Auditierbares Logging:** Wir schreiben Logs "Append-only" (z.B. SQLite oder Parquet). Configs sind versioniert (YAML). Damit ist alles für die Forschung reproduzierbar (Research-Toggle).
-
-<img src="../../media/bithamster_overview_coreprinciples.png" alt="Hamster Dirigent" width="1000" />
-
-&nbsp;
-
-## MVP-Scope (Was ist in Version 1.0 drin?)
-
-Für das Minimal Viable Product konzentrieren wir uns auf diese Komponenten:
-
-1.  **Mining als flexible Last:** Erkennung von PV-Überschuss und entsprechende Steuerung (Start/Stop/Drosselung).
-2.  **Explainability-Layer:** UI und ein On-Device "Explain-Agent" mit Timeline, Vorschau und manuellen Overrides (mit Block-TTL).
-3.  **Lokale Adapter:** Volle Unterstützung für MQTT, REST und Modbus zur Anbindung von PV, Speicher, Smart Meter und Minern.
-4.  **KPI-Tracking:** Wir messen Grid-Import (↓), Flapping-Rate (↓), Explanation Coverage, Trust-Score und stellen sicher, dass Thermal Incidents = 0 sind.
-5.  **Replay & Forschung:** Tools für Log-Replay und "Was-wäre-wenn"-Simulationen inkl. Export-Bundles.
+> 💡 Hinweis zum MVP-Scope *(Was ist in Version 1.0 drin?)*
+>
+> Für das erste Release konzentrieren wir uns auf einen klar abgegrenzten Funktionsumfang. Ziel ist es, den zentralen Nutzen von BitGridAI zuverlässig abzubilden und nachvollziehbar zu machen.
+> 
+> **1. Mining als flexible Last**: *PV-Überschüsse werden erkannt und genutzt, indem Mining-Hardware automatisch gestartet, gestoppt oder gedrosselt wird.*
+> 
+>**2. Explainability-Layer:** *Eine lokale Benutzeroberfläche zeigt Entscheidungen im zeitlichen Verlauf. Ein On-Device-Explain-Agent erklärt, warum das System so schaltet, ermöglicht Vorschauen und erlaubt manuelle Eingriffe mit zeitlicher Begrenzung.*
+> 
+>**3. Lokale Geräteanbindung:** *PV-Anlagen, Speicher, Smart Meter und Miner werden über gängige Schnittstellen wie MQTT, REST und Modbus angebunden.*
+> 
+>**4. Messbare Wirkung:** *Zentrale Kennzahlen wie Netzbezug, Schalthäufigkeit und Erklärungsabdeckung werden erfasst. Der sichere Betrieb hat dabei immer Vorrang.*
+> 
+>**5. Analyse & Replay:** *Systemläufe können nachvollzogen und in einfachen Szenarien erneut abgespielt werden, inklusive Export für Analyse und Forschung.*
 
 &nbsp;
 
@@ -75,8 +55,8 @@ Für das Minimal Viable Product konzentrieren wir uns auf diese Komponenten:
 | ID | Titel | Beschreibung | Akteur |
 | :--- | :--- | :--- | :--- |
 | **UC-1** | **Maximierung Eigenverbrauch** | BitGridAI erkennt PV-Überschuss und entscheidet dynamisch, ob Speicher geladen oder Mining gestartet wird. | System |
-| **UC-2** | **Netzdienliches Laden** | Anpassung an externe Signale (z.B. Tarif-Fenster), ohne den Nutzerkomfort zu gefährden. | System |
-| **UC-3** | **Manueller Override** | Du brauchst "Boost"? Du kriegst Boost. Das System priorisiert sofort deinen Wunsch (z.B. Wallbox), auch wenn es unwirtschaftlich ist. | Nutzer |
+| **UC-2** | **Netzdienliches Laden** | Anpassung an externe Signale, ohne den Nutzerkomfort zu gefährden. | System |
+| **UC-3** | **Manueller Override** | Du brauchst "Boost"? Du kriegst Boost. Das System priorisiert sofort deinen Wunsch, auch wenn es unwirtschaftlich ist. | Nutzer |
 | **UC-4** | **Sicherheitsüberwachung** | Kritische Temperatur? BitGridAI fährt das betroffene Subsystem sofort kontrolliert herunter (`Stop -> Safe`). | Safety |
 
 &nbsp;
