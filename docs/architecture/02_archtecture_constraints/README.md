@@ -16,7 +16,7 @@ Wir unterteilen die Einschränkungen in drei Bereiche, um die Übersicht zu beha
     * Harte Fakten zur Technik. Welche Hardware ist vorgegeben? Welche Betriebssysteme oder externen APIs müssen wir zwingend nutzen?
 
 * **[2.2 Organisatorische Randbedingungen](./022_organizational_constraints.md)**
-    * Der Rahmen um das Projekt herum. Hier geht es um Budget, Zeitpläne, Teamstruktur und rechtliche Vorgaben (z.B. DSGVO, Energiegesetze).
+    * Der Rahmen um das Projekt herum. Hier geht es um Budget, Zeitpläne, Teamstruktur und rechtliche Vorgaben.
 
 * **[2.3 Konventionen](./023_conventions.md)**
     * Unsere internen Gesetze. Wie schreiben wir Code? Wie benennen wir Dinge? An welche Standards halten wir uns, damit alle im Team effizient zusammenarbeiten?
