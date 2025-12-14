@@ -6,8 +6,7 @@ Wir haben ein gemeinsames Ziel und nutzen die gleiche Technik. Aber wie arbeiten
 
 Sie existieren nicht, um uns zu gängeln, sondern damit wir uns im Code des anderen zurechtfinden, Fehler vermeiden und effizient vorankommen. Kurz gesagt: Damit das Ganze wie aus einem Guss wirkt und nicht wie ein Flickenteppich.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster mit einer strengen Brille hält ein dickes Regelbuch und einen Stempel in der Hand. Neben ihm ein Zollstock.)*
-![Hamster mit dem Regelwerk](link_zum_konventionen_bild.png)
+ <img src="../../media/bithamster_convention.png" alt="Hamster orga" width="1000" />
 
 &nbsp;
 
