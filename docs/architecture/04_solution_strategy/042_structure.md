@@ -2,13 +2,16 @@
 
 Vom Plan zur Form.
 
-Nachdem wir die **architektonischen Grundpfeiler** definiert haben, geht es nun einen Schritt weiter: Wie übersetzen wir diese Haltung in eine **tragfähige Gesamtstruktur**?
+Nachdem wir die **architektonischen Grundpfeiler** festgelegt haben, stellt sich die nächste logische Frage:  
+Wie übersetzen wir diese Haltung in eine **tragfähige Struktur**, die langfristig stabil bleibt?
 
-Dieses Kapitel beschreibt die **grobe Systemstruktur** von **BitGridAI**. Noch ohne Klassen, noch ohne Details – aber klar genug, um zu verstehen, *welche großen Bausteine es gibt*, *welche Verantwortung sie tragen* und *wie sie zusammenspielen*.
+Dieses Kapitel beschreibt die **grobe Systemstruktur** von **BitGridAI**.  
 
-Wir beantworten hier nicht die Frage *"Wie ist etwas implementiert?"*, sondern:
+Noch ohne Klassen, noch ohne Implementierungsdetails – aber klar genug, um zu verstehen, **welche großen Teile es gibt**, **welche Verantwortung sie tragen** und **wie sie zusammenwirken**.
 
-> **Wo gehört etwas grundsätzlich hin – und wo bewusst nicht?**
+Wir beantworten hier bewusst nicht die Frage *„Wie ist etwas implementiert?“*, sondern:
+
+> **Wo gehört etwas grundsätzlich hin – und wo ganz bewusst nicht?**
 
 *(Platzhalter für ein Bild: Der Hamster steht vor einem Bauplan. Große Blöcke sind eingezeichnet, verbunden durch dicke Pfeile. Keine Schrauben, keine Kabel – nur Struktur.)*
 
@@ -18,110 +21,49 @@ Wir beantworten hier nicht die Frage *"Wie ist etwas implementiert?"*, sondern:
 
 BitGridAI folgt einer einfachen, aber strengen Ordnung:
 
-* **Ein klarer Kern**, der entscheidet
-* **Klare Ränder**, die messen, handeln oder erklären
-* **Keine Querverbindungen**, die Verantwortung verwischen
+* **Ein klarer Kern**, der entscheidet  
+* **Klare Ränder**, die messen, handeln oder erklären  
+* **Keine Querverbindungen**, die Verantwortung verwischen  
 
-Diese Struktur ist kein Selbstzweck. Sie ist die direkte Konsequenz aus unseren Grundpfeilern:
-Local-First, Transparenz, Determinismus und Forschungsfähigkeit erzwingen eine Architektur, die **ruhig**, **nachvollziehbar** und **robust** ist.
+Diese Ordnung ist kein Selbstzweck.  
+Sie ist die direkte Konsequenz aus unseren Grundpfeilern:
 
----
-
-## Die vier strukturellen Ebenen
-
-Auf grober Ebene lässt sich BitGridAI in vier Schichten gliedern. Jede Schicht hat eine klar definierte Rolle – und kennt ihre Grenzen.
-
-### 1. Der Entscheidungskern (Core)
-
-Das Herz des Systems.
-
-Hier werden **keine Geräte gesteuert**, **keine Protokolle gesprochen** und **keine UI-Details verarbeitet**. Der Core kennt nur:
-
-* den aktuellen Zustand (`EnergyState`)
-* die Zeit (BlockScheduler)
-* die Regeln (R1–R5)
-
-Seine Aufgabe ist es, aus einem gegebenen Zustand eine **deterministische Entscheidung** abzuleiten.
-
-> Der Core *denkt* – er handelt nicht selbst.
+Local First, Transparenz, Determinismus und Forschungsfähigkeit erzwingen eine Architektur, die **ruhig**, **nachvollziehbar** und **robust** ist – auch dann, wenn das System wächst.
 
 ---
 
-### 2. Die Adapter-Schicht (Ports & Adapters)
+## Die vier strukturellen Ebenen – Überblick
 
-Die Übersetzer zur realen Welt.
+Auf hoher Ebene lässt sich BitGridAI in vier klar abgegrenzte Ebenen gliedern.  
+Jede Ebene hat eine eindeutige Rolle – und kennt ihre Grenzen.
 
-Adapter sprechen die Sprache der Geräte und Dienste:
-Modbus, MQTT, REST, APIs, Dateien.
-
-Ihre Aufgabe ist es:
-
-* externe Signale in **interne Events** zu übersetzen
-* Entscheidungen des Cores in **konkrete Befehle** zu überführen
-
-Adapter enthalten **keine Fachlogik**. Sie wissen *wie* man etwas sagt – nicht *warum*.
-
----
-
-### 3. Die Interaktionsschicht (Explain & Control)
-
-Die Schnittstelle zum Menschen.
-
-Diese Ebene macht Entscheidungen **sichtbar**, **verständlich** und **beeinflussbar**:
-
-* Visualisierung von Zuständen und Flüssen
-* Erklärung von Entscheidungen („Warum läuft der Miner?“)
-* kontrollierte Eingriffe (Overrides, Preview)
-
-Wichtig: Auch hier wird **nicht entschieden**. Eingriffe werden als Events an den Core zurückgespielt.
-
----
-
-### 4. Die Gedächtnisschicht (Data & Research)
-
-Was passiert ist, bleibt nachvollziehbar.
-
-Diese Ebene speichert:
-
-* operative Zustände (für den laufenden Betrieb)
-* historische Daten (für Analyse und Forschung)
-
-Append-only, versioniert und reproduzierbar.
-
-> Ohne Gedächtnis keine Wissenschaft.
+| Ebene | Rolle im System | Verantwortlichkeiten | Bewusste Abgrenzung |
+| :--- | :--- | :--- | :--- |
+| **Entscheidungskern (Core)** ⚙️ | Das Herz des Systems. Trifft fachliche Entscheidungen. | • Lesen des `EnergyState`<br>• Zeitliche Taktung (BlockScheduler)<br>• Auswertung der Regeln (R1–R5)<br>• Erzeugen von DecisionEvents | • Steuert keine Geräte<br>• Spricht keine Protokolle<br>• Kennt keine UI |
+| **Adapter-Schicht (Ports & Adapters)** 🔌 | Übersetzer zwischen System und Außenwelt. | • Lesen externer Messwerte<br>• Übersetzen von Protokollen (Modbus, MQTT, REST)<br>• Umsetzen von Entscheidungen in Befehle | • Keine Fachlogik<br>• Keine Regeln<br>• Keine Entscheidungen |
+| **Interaktionsschicht (Explain & Control)** 🖥️ | Schnittstelle zum Menschen. | • Visualisierung von Zuständen und Flüssen<br>• Erklärung von Entscheidungen<br>• Entgegennahme von Overrides und Previews | • Trifft keine Energieentscheidungen<br>• Verändert den Core nicht direkt |
+| **Gedächtnisschicht (Data & Research)** 💾 | Nachvollziehbarkeit und Forschung. | • Operative Speicherung (Hot Data)<br>• Historische Logs (Cold Data)<br>• Replays und KPI-Berechnung | • Keine Steuerung<br>• Kein Eingriff in den Betrieb |
 
 ---
 
 ## Bewusste Trennlinien
 
-Die grobe Struktur lebt von klaren Grenzen:
+Die Stabilität der Struktur entsteht durch klare Grenzen:
 
-* Der **Core** kennt keine Hardware.
-* Adapter kennen keine Regeln.
-* Die UI erklärt, entscheidet aber nicht.
-* Forschung liest Daten – sie steuert nichts.
+* Der **Core** kennt keine Hardware.  
+* Adapter kennen keine Regeln.  
+* Die UI erklärt, entscheidet aber nicht.  
+* Forschung liest Daten – sie steuert nichts.  
 
-Diese Trennungen sind absichtlich streng. Sie verhindern implizite Abhängigkeiten und machen das System langfristig wartbar.
+Diese Trennlinien sind **absichtlich streng**.  
 
----
+Sie verhindern implizite Abhängigkeiten und sorgen dafür, dass BitGridAI wartbar bleibt – auch dann, wenn neue Geräte, Regeln oder Auswertungen hinzukommen.
 
-## Einordnung (arc42)
-
-Dieses Kapitel beschreibt die **strategische Systemstruktur**:
-
-* grobe Aufteilung
-* Verantwortlichkeiten
-* Abhängigkeiten auf hoher Ebene
-
-Konkrete Module, Klassen und Laufzeitdetails folgen erst in den nächsten Kapiteln:
-
-* **Kapitel 5 – Bausteinsicht** (Was genau gibt es?)
-* **Kapitel 6 – Laufzeitsicht** (Wie arbeitet das System im Betrieb?)
 
 ---
 
 > **Nächster Schritt:** Die Struktur steht. Jetzt zoomen wir weiter hinein und betrachten die einzelnen Bausteine im Detail.
 >
 > 👉 Weiter zu **[4.3 Zentrale Architekturentscheidungen](./043_decisions.md)**
->
+> 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
