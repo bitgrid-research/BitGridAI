@@ -14,7 +14,7 @@ dass wir uns nicht in Details verlieren, sondern eine kohärente Lösung bauen. 
 
 ## Inhalt dieses Kapitels
 
-In diesem Ordner liegt das zentrale Dokument für unsere Marschrichtung:
+In diesem Ordner bündeln wir die zentralen Gedanken und Entscheidungen zur Lösungsstrategie von BitGridAI:
 
 * **[4.1 Leitende Architekturprinzipien (Haltung)](./041_principles.md)**
   * *Welche grundlegenden Überzeugungen und Qualitätsziele prägen jede Architekturentscheidung?*
