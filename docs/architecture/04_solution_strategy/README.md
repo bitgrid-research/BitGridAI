@@ -10,6 +10,8 @@ dass wir uns nicht in Details verlieren, sondern eine kohärente Lösung bauen. 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht selbstbewusst vor einem großen Whiteboard, auf dem ein grobes Architekturdiagramm mit Pfeilen und Blöcken gezeichnet ist.)*
 ![Hamster erklärt den Masterplan](link_zum_strategie_bild.png)
 
+&nbsp;
+
 ## Inhalt dieses Kapitels
 
 In diesem Ordner liegt das zentrale Dokument für unsere Marschrichtung:
