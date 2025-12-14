@@ -1,6 +1,6 @@
 # 02 Randbedingungen
 
-Willkommen im Kapitel der "Spielregeln". Nicht alles auf der grünen Wiese ist möglich.
+Willkommen im Kapitel der "Spielregeln". Nicht alles auf der grünen Wiese ist möglich.🍀
 
 Jedes Softwareprojekt bewegt sich innerhalb gewisser Grenzen – sei es durch vorgegebene Hardware, einzuhaltende Gesetze, Budgetlimits oder interne Entwicklungsstandards. In diesem Kapitel definieren wir die Leitplanken, innerhalb derer sich **BitGridAI** bewegen muss.
 
