@@ -19,6 +19,39 @@ und trifft erklärbare Entscheidungen für Nutzer und Forschung.
 BitGridAI kommuniziert mit folgenden Nachbarsystemen.
 Die Kommunikation erfolgt primär über **MQTT**, **REST** und **Modbus**.
 
+```mermaid
+flowchart TB
+
+    BitGridAI["BitGridAI (Local Orchestrator) SSoT: EnergyState"]
+
+    %% Externe Systeme
+    PV["PV / Wechselrichter"]
+    Meter["Smart Meter / Sensorik"]
+    Storage["Energiespeicher"]
+    Miner["Mining-Controller"]
+    HA["Home Assistant"]
+    Forecast["Preis- und Forecast-Dienst"]
+    UI["Explain- und User-Interface"]
+    Research["Research / Replay Node"]
+
+    %% Eingehende Daten
+    PV -->|Modbus / API\nErzeugungsdaten| BitGridAI
+    Meter -->|MQTT / SML\nMesswerte| BitGridAI
+    Storage -->|API / MQTT\nSoC| BitGridAI
+    Forecast -->|Datei / HTTP\nTarife, Prognosen| BitGridAI
+
+    %% Steuerung und Ausgaben
+    BitGridAI -->|LAN / API / SSH\nStart, Stop, Power| Miner
+    BitGridAI -->|WebSocket / REST\nStates, Erklaerungen| UI
+    UI -->|Overrides| BitGridAI
+
+    %% Integration
+    BitGridAI <-->|MQTT / REST\nState, Commands| HA
+
+    %% Forschung
+    BitGridAI -->|Datei / CLI\nLogs, Replays| Research
+```
+
 | System | Schnittstelle | Datenrichtung | Zweck & Beschreibung |
 | :--- | :--- | :--- | :--- |
 | **Home Assistant** 🏠 | MQTT / REST | In / Out | Integration ins Smart Home. Austausch von Statusdaten (`State`) und Empfang von Kommandos über das UI von Home Assistant. |
