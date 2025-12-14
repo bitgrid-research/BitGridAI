@@ -62,7 +62,8 @@ Sie verhindern implizite Abhängigkeiten und sorgen dafür, dass BitGridAI wartb
 
 ---
 
-> **Nächster Schritt:** Die Struktur steht. Jetzt zoomen wir weiter hinein und betrachten die einzelnen Bausteine im Detail.
+> **Nächster Schritt:** Die Form ist klar. Als Nächstes halten wir fest, 
+> **welche zentralen Weichenstellungen diese Struktur möglich gemacht haben – und warum wir sie genau so getroffen haben.**
 >
 > 👉 Weiter zu **[4.3 Zentrale Architekturentscheidungen (Weichenstellungen)](./043_decisions.md)**
 > 
