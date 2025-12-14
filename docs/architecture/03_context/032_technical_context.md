@@ -35,21 +35,21 @@ flowchart TB
     Research["Research / Replay Node"]
 
     %% Eingehende Daten
-    PV -->|Modbus / API\nErzeugungsdaten| BitGridAI
-    Meter -->|MQTT / SML\nMesswerte| BitGridAI
-    Storage -->|API / MQTT\nSoC| BitGridAI
-    Forecast -->|Datei / HTTP\nTarife, Prognosen| BitGridAI
+    PV -->|Modbus / API Erzeugungsdaten| BitGridAI
+    Meter -->|MQTT / SML -> Messwerte| BitGridAI
+    Storage -->|API / MQTT -> SoC| BitGridAI
+    Forecast -->|Datei / HTTP -> Tarife, Prognosen| BitGridAI
 
     %% Steuerung und Ausgaben
-    BitGridAI -->|LAN / API / SSH\nStart, Stop, Power| Miner
-    BitGridAI -->|WebSocket / REST\nStates, Erklaerungen| UI
+    BitGridAI -->|LAN / API / SSH -> Start, Stop, Power| Miner
+    BitGridAI -->|WebSocket / REST -> States, Erklaerungen| UI
     UI -->|Overrides| BitGridAI
 
     %% Integration
-    BitGridAI <-->|MQTT / REST\nState, Commands| HA
+    BitGridAI <-->|MQTT / REST -> State, Commands| HA
 
     %% Forschung
-    BitGridAI -->|Datei / CLI\nLogs, Replays| Research
+    BitGridAI -->|Datei / CLI -> Logs, Replays| Research
 ```
 
 | System | Schnittstelle | Datenrichtung | Zweck & Beschreibung |
