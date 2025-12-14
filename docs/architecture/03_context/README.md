@@ -1,4 +1,4 @@
-# 03 Systemkontext
+# 03 Kontextabgrenzung
 
 Kein System ist eine Insel. 
 
