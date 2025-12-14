@@ -8,8 +8,7 @@ In diesem Kapitel betrachten wir **BitGridAI als Blackbox**, eingebettet in sein
 
 Kurz gesagt: **Wer klopft an die Tür von BitGridAI – und wen ruft das System an, wenn es etwas zu melden hat?**
 
-*(Platzhalter für ein Kontextbild: Ein Pixel-Art-Hamster lehnt am Gartenzaun und plaudert mit seinen Nachbarn – einer Person (Nutzer), einer Sonne (Wetter) und einem Strommast (Netz).)*
-![Hamster und die Nachbarn](../media/pixel_art_hamster_neighbors.png)
+<img src="../../media/bithamster_businesscontext.png" alt="Hamster tech" width="1000" />
 
 ---
 
