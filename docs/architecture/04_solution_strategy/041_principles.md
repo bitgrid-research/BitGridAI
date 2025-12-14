@@ -1,4 +1,4 @@
-# 04.1 Leitende Architekturprinzipien
+# 04.1 Leitende Architekturprinzipien (Haltung)
 
 Willkommen bei den Grundpfeilern.
 
