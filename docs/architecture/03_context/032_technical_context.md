@@ -12,10 +12,7 @@ Es koppelt Energieerzeugung, -messung, -speicherung und Mining-Hardware über et
 Protokolle, hält einen konsistenten `EnergyState` als **Single Source of Truth (SSoT)**
 und trifft erklärbare Entscheidungen für Nutzer und Forschung.
 
-*(Platzhalter für ein technisches Kontextdiagramm: Der Hamster trägt nun einen
-Werkzeuggürtel und verbindet PV, Speicher, Zähler und Miner über Kabel und Funk
-mit einer zentralen Box.)*
-![Hamster verkabelt das System](../media/pixel_art_hamster_cables.png)
+<img src="../../media/bithamster_technicalcontext.png" alt="Hamster tech" width="1000" />
 
 ## Externe Systeme & Schnittstellen
 
