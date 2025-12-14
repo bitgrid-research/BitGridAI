@@ -1,12 +1,12 @@
 # 03 Kontextabgrenzung
 
-Kein System ist eine Insel. 
+Kein System ist eine Insel.
 
-Um zu verstehen, was **BitGridAI** tut, müssen wir wissen, wo die Grenzen verlaufen und wer die "Nachbarn" sind.
+Um zu verstehen, was BitGridAI tut, müssen wir wissen, wo die Grenzen verlaufen und wer die Nachbarn sind. In diesem Kapitel stecken wir den Kontext ab: Was gehört zum System, was liegt außerhalb – und über welche Schnittstellen steht BitGridAI mit seiner Umwelt in Kontakt?
 
-In diesem Kapitel definieren wir den Scope: Was gehört genau zum System, und was liegt außerhalb? Wir betrachten die Schnittstellen zu Nutzern, anderen IT-Systemen oder Hardware in der realen Welt.
+Dabei betrachten wir sowohl die fachliche Sicht von außen als auch die technische Verdrahtung unter der Haube.
 
-(Das neue Bild zeigt den Hamster, der sich mit einer Schnittstelle (dem Tablet) verbindet – genau darum geht es hier.)
+(Platzhalter für ein Kapitelbild: Der Hamster verbindet sich mit seiner Umwelt über klar definierte Schnittstellen – genau darum geht es hier.)
 ![Cyborg Hamster zeigt Schnittstellen](link_zu_image_6.png)
 
 ## Inhalt dieses Kapitels
