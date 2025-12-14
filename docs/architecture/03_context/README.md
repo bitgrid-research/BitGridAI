@@ -6,8 +6,7 @@ Um zu verstehen, was BitGridAI tut, müssen wir wissen, wo die Grenzen verlaufen
 
 Dabei betrachten wir sowohl die fachliche Sicht von außen als auch die technische Verdrahtung unter der Haube.
 
-(Platzhalter für ein Kapitelbild: Der Hamster verbindet sich mit seiner Umwelt über klar definierte Schnittstellen – genau darum geht es hier.)
-![Cyborg Hamster zeigt Schnittstellen](link_zu_image_6.png)
+<img src="../../media/context.png" alt="Hamster tech" width="1000" />
 
 ## Inhalt dieses Kapitels
 
