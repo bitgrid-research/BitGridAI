@@ -1,43 +1,47 @@
 # 03.1 Fachlicher Kontext (Business Context)
 
-Wer redet hier mit wem?
+Bevor wir Kabel ziehen, Logs analysieren oder Services zerlegen, sollten wir einen Schritt zurücktreten.
 
-Bevor wir Kabel ziehen, müssen wir verstehen, welche Akteure ein Interesse an **BitGridAI** haben und welche Informationen fließen müssen. Hier betrachten wir das System als "Blackbox" in seiner natürlichen Umgebung.
+*Wer spricht hier eigentlich mit wem – und warum?*
 
-Wir fragen uns: Welche Ereignisse von außen wecken das System auf? Und wen informiert das System, wenn es fertig ist?
+In diesem Kapitel betrachten wir **BitGridAI als Blackbox**, eingebettet in seine natürliche Umgebung. Uns interessiert nicht, *wie* intern entschieden wird, sondern *wer* von außen Erwartungen an das System heranträgt, *welche Informationen fließen* und *welche Ereignisse BitGridAI aus dem Schlaf holen*.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht am Gartenzaun und unterhält sich mit seinen Nachbarn: Einer Person (Nutzer), einer Sonne (Wetter) und einem Strommast (Netz).)*
+Kurz gesagt: **Wer klopft an die Tür von BitGridAI – und wen ruft das System an, wenn es etwas zu melden hat?**
+
+*(Platzhalter für ein Kontextbild: Ein Pixel-Art-Hamster lehnt am Gartenzaun und plaudert mit seinen Nachbarn – einer Person (Nutzer), einer Sonne (Wetter) und einem Strommast (Netz).)*
 ![Hamster und die Nachbarn](../media/pixel_art_hamster_neighbors.png)
+
+---
 
 ## Die fachlichen Nachbarn
 
-Wir interagieren mit fünf Hauptakteuren. Die folgende Tabelle zeigt, was diese Nachbarn von uns erwarten und was sie uns liefern:
+BitGridAI lebt nicht im luftleeren Raum. Es interagiert fachlich mit fünf zentralen Akteuren, die jeweils eigene Erwartungen mitbringen – und im Gegenzug bestimmte Leistungen erhalten. Die folgende Tabelle zeigt diese Nachbarschaften aus fachlicher Sicht, **bewusst ohne technische Details**.
 
-| Kommunikationspartner | Was kommt rein? (Input) | Was geht raus? (Output) | Beziehung & Beschreibung |
-| :--- | :--- | :--- | :--- |
-| **Der Prosumer (Nutzer) 🏠** | **Ziele & Befehle:** <br>• Präferenzen (z.B. "Auto morgen früh voll")<br>• Manuelle Overrides ("Boost jetzt!")<br>• Config-Updates | **Transparenz:** <br>• Echtzeit-Dashboard (Flows)<br>• Erklärungen ("Warum läuft der Miner?")<br>• Warnungen (Alerts) | Der Mensch, dem das Haus gehört. Er will Komfort und Rendite, aber keine Arbeit. Er ist der "Chef", dessen Befehle (Overrides) Vorrang vor der Automatik haben. |
-| **Die Umwelt (Wetter & Zeit) ☀️** | **Fakten:** <br>• Globalstrahlung (Sonne)<br>• Außentemperatur<br>• Zeit (Block-Takt) | *– (Nichts)* | Der wichtigste externe Taktgeber. Die Sonne diktiert die Produktion, die Zeit diktiert den 10-Minuten-Block. Wir können die Umwelt nicht beeinflussen, nur auf sie reagieren. |
-| **Das Öffentliche Stromnetz (Grid) ⚡** | **Energie:** <br>• Netzstrom (bei Mangel)<br>• Dynamische Preise (optional) | **Energie & Entlastung:** <br>• Überschuss-Einspeisung<br>• Netzdienliches Verhalten (Peak Shaving) | Der "Puffer". BitGridAI versucht, die Interaktion mit dem Netz zu minimieren (Autarkie) oder zu optimieren (günstig laden), aber das Netz ist der Fallback für die Versorgungssicherheit. |
-| **Der Mining-Pool ⛏️** | **Arbeitspakete:** <br>• Stratum Jobs (Difficulty) | **Rechenleistung (Hashes):** <br>• Validierte Shares (Proof-of-Work) | **Wichtig:** BitGridAI steuert nur die Hardware. Die finanzielle Belohnung (Payout) erfolgt vom Pool *direkt* an das Wallet des Nutzers (Non-Custodial). Wir liefern Shares, der Pool liefert Sats (an den Nutzer). |
-| **Forschung & Wissenschaft 🎓** | *– (Nichts im Betrieb)* | **Daten:** <br>• Anonymisierte Logs (Parquet)<br>• Replay-Exports | Passiver Konsument. Wenn der Nutzer zustimmt (Opt-in), werden hochauflösende, bereinigte Daten für wissenschaftliche Auswertungen bereitgestellt. |
+| Kommunikationspartner             | Was kommt rein? (Input)                                                                                                                       | Was geht raus? (Output)                                                                                            | Beziehung & Beschreibung                                                                                                                                                        |
+| :-------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Der Prosumer (Nutzer) 🏠**      | **Ziele & Befehle:**<br>• Präferenzen (z.B. „E-Auto morgen früh voll“)<br>• Manuelle Overrides („Boost jetzt!“)<br>• Konfigurationsänderungen | **Transparenz:**<br>• Aktuelle Energieflüsse<br>• Erklärungen („Warum läuft der Miner?“)<br>• Hinweise & Warnungen | Der Mensch hinter dem System. Er erwartet Komfort und Rendite, aber kein Mikromanagement. Greift er ein, hat sein Wort stets Vorrang vor jeder Automatik.                       |
+| **Die Umwelt (Wetter & Zeit) ☀️** | **Fakten:**<br>• Sonneneinstrahlung<br>• Außentemperatur<br>• Zeitlicher Takt                                                                 | –                                                                                                                  | Der wichtigste Taktgeber. Die Sonne entscheidet über Produktion, die Zeit strukturiert den Rhythmus. BitGridAI kann die Umwelt nicht beeinflussen – nur klug auf sie reagieren. |
+| **Das öffentliche Stromnetz ⚡**   | **Energie & Signale:**<br>• Netzstrom bei Unterdeckung<br>• Preisinformationen (optional)                                                     | **Energie & Entlastung:**<br>• Einspeisung von Überschüssen<br>• Netzdienliches Verhalten                          | Das Sicherheitsnetz. BitGridAI versucht, es möglichst wenig zu brauchen – verlässt sich aber darauf, wenn es darauf ankommt.                                                    |
+| **Der Mining-Pool ⛏️**            | **Arbeit:**<br>• Mining-Jobs und Schwierigkeitsparameter                                                                                      | **Rechenleistung:**<br>• Validierte Proof-of-Work-Shares                                                           | BitGridAI stellt Rechenleistung bereit – mehr nicht. Die Belohnung fließt direkt vom Pool zum Wallet des Nutzers, bewusst non-custodial.                                        |
+| **Forschung & Wissenschaft 🎓**   | – (im Normalbetrieb)                                                                                                                          | **Wissen:**<br>• Anonymisierte Betriebsdaten<br>• Replay-Exports                                                   | Ein stiller Beobachter. Nur mit ausdrücklicher Zustimmung des Nutzers werden Daten für Analyse und Forschung bereitgestellt.                                                    |
+
+---
 
 ## Externe Auslöser (Business Events)
 
-Wann muss BitGridAI aktiv werden? Wir unterscheiden drei Arten von Ereignissen:
+BitGridAI arbeitet ereignisgetrieben. Fachlich lassen sich drei Arten von Auslösern unterscheiden, die das System zum Handeln bringen:
 
-1.  **Zeit-Trigger (Der Herzschlag):**
-    * Alle 10 Minuten startet ein neuer **Block**. Das System wacht auf, liest Sensoren, berechnet die Strategie und setzt die Aktoren neu. (Das ist der Standard-Modus).
+1. **Zeit-Trigger – der Herzschlag:**
+   In festen Abständen beginnt ein neuer Entscheidungszyklus. BitGridAI schaut sich die Lage an, wägt Optionen ab und legt eine Strategie für die nächste Runde fest.
 
-2.  **Daten-Trigger (Die Veränderung):**
-    * **Wetterumschwung:** Eine dicke Wolke zieht auf → PV-Leistung bricht ein → System muss im nächsten Block reagieren (z.B. Miner stoppen).
-    * **Preisänderung:** Der dynamische Stromtarif wird günstiger → Strategie ändert sich auf "Laden".
+2. **Daten-Trigger – wenn sich etwas ändert:**
+   Zieht eine Wolke auf oder ändert sich der Strompreis, verschieben sich die Rahmenbedingungen. Das System reagiert darauf, indem es seine Strategie anpasst.
 
-3.  **Nutzer-Trigger (Der Eingriff):**
-    * **Override:** Der Nutzer drückt "E-Auto jetzt laden". Das System bricht den aktuellen Plan sofort ab (unterbricht ggf. den 10-Min-Takt oder wartet auf das nächste Fenster, je nach Prio) und führt den Befehl aus.
+3. **Nutzer-Trigger – der Eingriff:**
+   Der Prosumer greift ein: „Jetzt laden“, „Jetzt stoppen“. Solche Eingriffe stechen jede Automatik und werden gemäß ihrer fachlichen Priorität umgesetzt.
 
 ---
-> **Nächster Schritt:** Wir kennen die Akteure. Jetzt schauen wir unter die Haube: Über welche Leitungen und Protokolle sprechen wir mit ihnen?
->
+
+> **Nächster Schritt:** Wir kennen jetzt die Nachbarn und wissen, wer mit wem spricht. Im nächsten Kapitel schauen wir genauer hin: **Über welche Leitungen, Schnittstellen und Protokolle laufen diese Gespräche eigentlich?**
 > 👉 Weiter zu **[03.2 Technischer Kontext](./032_technical_context.md)**
->
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
