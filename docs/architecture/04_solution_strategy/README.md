@@ -14,9 +14,21 @@ dass wir uns nicht in Details verlieren, sondern eine kohärente Lösung bauen. 
 
 In diesem Ordner liegt das zentrale Dokument für unsere Marschrichtung:
 
-* **[4.1 Die grundlegende Strategie](./041_solution_strategy.md)**
+* **[4.0 Die grundlegende Strategie](./041_solution_strategy.md)**
     * *Kurzbeschreibung:* Hier fassen wir die wichtigsten Lösungsansätze zusammen. Welche Architekturmuster (Patterns) wenden wir an? 
                           Welche zentralen Technologien haben wir gewählt und warum? Wie zerlegen wir das System grob, um die Qualitätsziele zu erreichen?
+
+* **[4.1 Leitende Architekturprinzipien](./041_principles.md)**  
+  *Warum wir bestimmte Entwurfsprinzipien wie Local First, Ereignisorientierungund Explainability verfolgen.*
+
+* **[4.2 Grobe Systemstruktur](./042_structure.md)**  
+  *Wie BitGridAI auf hoher Ebene in Core, Adapter, UI und Data-Bereiche gegliedert ist – ohne Details.*
+
+* **[4.3 Zentrale Architekturentscheidungen](./043_decisions.md)**  
+  *Bewusste Weichenstellungen und ihre Begründungen.*
+
+* **[4.4 Abgrenzungen & bewusste Nicht-Ziele](./044_non_goals.md)**  
+  *Was BitGridAI explizit nicht sein will – und warum.*
 
 ---
 
