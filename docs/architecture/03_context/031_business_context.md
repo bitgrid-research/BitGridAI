@@ -16,6 +16,37 @@ Kurz gesagt: **Wer klopft an die Tür von BitGridAI – und wen ruft das System 
 
 BitGridAI lebt nicht im luftleeren Raum. Es interagiert fachlich mit fünf zentralen Akteuren, die jeweils eigene Erwartungen mitbringen – und im Gegenzug bestimmte Leistungen erhalten. Die folgende Tabelle zeigt diese Nachbarschaften aus fachlicher Sicht, **bewusst ohne technische Details**.
 
+
+```mermaid
+flowchart TB
+
+    BitGridAI["BitGridAI\n(Fachliche Blackbox)"]
+
+    Prosumer["Prosumer\n(Nutzer)"]
+    Environment["Umwelt\n(Wetter & Zeit)"]
+    Grid["Öffentliches Stromnetz"]
+    Pool["Mining-Pool"]
+    Research["Forschung & Wissenschaft"]
+
+    %% Prosumer
+    Prosumer -->|Ziele, Präferenzen, Overrides| BitGridAI
+    BitGridAI -->|Transparenz, Erklärungen, Warnungen| Prosumer
+
+    %% Umwelt
+    Environment -->|Sonne, Temperatur, Zeit| BitGridAI
+
+    %% Stromnetz
+    Grid -->|Netzstrom, Preissignale| BitGridAI
+    BitGridAI -->|Einspeisung, netzdienliches Verhalten| Grid
+
+    %% Mining-Pool
+    Pool -->|Mining-Jobs, Difficulty| BitGridAI
+    BitGridAI -->|Proof-of-Work Shares| Pool
+
+    %% Forschung
+    BitGridAI -->|Anonymisierte Logs, Replay-Exports, Opt-in| Research
+```
+
 | Kommunikationspartner             | Was kommt rein? (Input)                                                                                                                       | Was geht raus? (Output)                                                                                            | Beziehung & Beschreibung                                                                                                                                                        |
 | :-------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Der Prosumer (Nutzer) 🏠**      | **Ziele & Befehle:**<br>• Präferenzen (z.B. „E-Auto morgen früh voll“)<br>• Manuelle Overrides („Boost jetzt!“)<br>• Konfigurationsänderungen | **Transparenz:**<br>• Aktuelle Energieflüsse<br>• Erklärungen („Warum läuft der Miner?“)<br>• Hinweise & Warnungen | Der Mensch hinter dem System. Er erwartet Komfort und Rendite, aber kein Mikromanagement. Greift er ein, hat sein Wort stets Vorrang vor jeder Automatik.                       |
@@ -23,6 +54,7 @@ BitGridAI lebt nicht im luftleeren Raum. Es interagiert fachlich mit fünf zentr
 | **Das öffentliche Stromnetz ⚡**   | **Energie & Signale:**<br>• Netzstrom bei Unterdeckung<br>• Preisinformationen (optional)                                                     | **Energie & Entlastung:**<br>• Einspeisung von Überschüssen<br>• Netzdienliches Verhalten                          | Das Sicherheitsnetz. BitGridAI versucht, es möglichst wenig zu brauchen – verlässt sich aber darauf, wenn es darauf ankommt.                                                    |
 | **Der Mining-Pool ⛏️**            | **Arbeit:**<br>• Mining-Jobs und Schwierigkeitsparameter                                                                                      | **Rechenleistung:**<br>• Validierte Proof-of-Work-Shares                                                           | BitGridAI stellt Rechenleistung bereit – mehr nicht. Die Belohnung fließt direkt vom Pool zum Wallet des Nutzers, bewusst non-custodial.                                        |
 | **Forschung & Wissenschaft 🎓**   | – (im Normalbetrieb)                                                                                                                          | **Wissen:**<br>• Anonymisierte Betriebsdaten<br>• Replay-Exports                                                   | Ein stiller Beobachter. Nur mit ausdrücklicher Zustimmung des Nutzers werden Daten für Analyse und Forschung bereitgestellt.                                                    |
+
 
 ---
 
