@@ -6,8 +6,7 @@ Während die technischen Randbedingungen definieren, was physikalisch möglich i
 
 Unsere Architektur kann noch so brillant sein – wenn sie das Budget sprengt oder gegen Gesetze verstößt, wird sie nie Realität.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster im Anzug sitzt an einem Konferenztisch mit Aktenordnern, einem Taschenrechner und einer großen Uhr im Hintergrund.)*
-![Hamster im Konferenzraum](link_zum_organisations_bild.png)
+ <img src="../../media/bithamster_orga.png" alt="Hamster orga" width="1000" />
 
 &nbsp;
 
