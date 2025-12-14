@@ -15,7 +15,7 @@ Wir beantworten hier bewusst nicht die Frage *„Wie ist etwas implementiert?“
 
 *(Platzhalter für ein Bild: Der Hamster steht vor einem Bauplan. Große Blöcke sind eingezeichnet, verbunden durch dicke Pfeile. Keine Schrauben, keine Kabel – nur Struktur.)*
 
----
+&nbsp;
 
 ## Die Idee hinter der Struktur
 
@@ -25,12 +25,12 @@ BitGridAI folgt einer einfachen, aber strengen Ordnung:
 * **Klare Ränder**, die messen, handeln oder erklären  
 * **Keine Querverbindungen**, die Verantwortung verwischen  
 
-Diese Ordnung ist kein Selbstzweck.  
-Sie ist die direkte Konsequenz aus unseren Grundpfeilern:
+Diese Ordnung ist kein Selbstzweck.
 
+Sie ist die direkte Konsequenz aus unseren Grundpfeilern:
 Local First, Transparenz, Determinismus und Forschungsfähigkeit erzwingen eine Architektur, die **ruhig**, **nachvollziehbar** und **robust** ist – auch dann, wenn das System wächst.
 
----
+&nbsp;
 
 ## Die vier strukturellen Ebenen – Überblick
 
@@ -44,7 +44,7 @@ Jede Ebene hat eine eindeutige Rolle – und kennt ihre Grenzen.
 | **Interaktionsschicht (Explain & Control)** 🖥️ | Schnittstelle zum Menschen. | • Visualisierung von Zuständen und Flüssen<br>• Erklärung von Entscheidungen<br>• Entgegennahme von Overrides und Previews | • Trifft keine Energieentscheidungen<br>• Verändert den Core nicht direkt |
 | **Gedächtnisschicht (Data & Research)** 💾 | Nachvollziehbarkeit und Forschung. | • Operative Speicherung (Hot Data)<br>• Historische Logs (Cold Data)<br>• Replays und KPI-Berechnung | • Keine Steuerung<br>• Kein Eingriff in den Betrieb |
 
----
+&nbsp;
 
 ## Bewusste Trennlinien
 
@@ -61,7 +61,6 @@ Sie verhindern implizite Abhängigkeiten und sorgen dafür, dass BitGridAI wartb
 
 
 ---
-
 > **Nächster Schritt:** Die Form ist klar. Als Nächstes halten wir fest, 
 > **welche zentralen Weichenstellungen diese Struktur möglich gemacht haben – und warum wir sie genau so getroffen haben.**
 >
