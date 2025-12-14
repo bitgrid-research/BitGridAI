@@ -24,6 +24,6 @@ Wenn Kapitel 2 die äußeren Leitplanken beschreibt, dann definieren diese Prinz
 ---
 > **Nächster Schritt:** Aus Prinzipien wird Struktur. Im nächsten Kapitel betrachten wir die **grobe Systemstruktur** von BitGridAI.
 >
-> 👉 Weiter zu **[04.2 Grobe Systemstruktur](./042_structure.md)**
+> 👉 Weiter zu **[04.2 Grobe Systemstruktur (Form)](./042_structure.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
