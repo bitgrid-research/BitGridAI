@@ -42,5 +42,7 @@ BitGridAI arbeitet ereignisgetrieben. Fachlich lassen sich drei Arten von Auslö
 ---
 
 > **Nächster Schritt:** Wir kennen jetzt die Nachbarn und wissen, wer mit wem spricht. Im nächsten Kapitel schauen wir genauer hin: **Über welche Leitungen, Schnittstellen und Protokolle laufen diese Gespräche eigentlich?**
+> 
 > 👉 Weiter zu **[03.2 Technischer Kontext](./032_technical_context.md)**
+> 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
