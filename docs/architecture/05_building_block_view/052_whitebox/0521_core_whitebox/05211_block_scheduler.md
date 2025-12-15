@@ -4,7 +4,7 @@ Der Taktgeber des Systems.
 
 Der Block-Scheduler erzwingt den **10-Minuten-Rhythmus**, triggert die Regel-Auswertung und sorgt mit `valid_until` dafür, dass Entscheidungen **ruhig bleiben** und nicht flappen.
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -13,7 +13,7 @@ Der Block-Scheduler erzwingt den **10-Minuten-Rhythmus**, triggert die Regel-Aus
 - Setzt `valid_until` Deadbands zur Stabilisierung
 - Entkoppelt Entscheidungslogik von Echtzeitrauschen
 
----
+&nbsp;
 
 ## Struktur
 
@@ -29,7 +29,7 @@ Der Block-Scheduler erzwingt den **10-Minuten-Rhythmus**, triggert die Regel-Aus
 - **Clock Source**  
   Bevorzugt NTP-synchronisierte Systemuhr, Fallback auf Monotonic Clock.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -43,7 +43,7 @@ Der Block-Scheduler erzwingt den **10-Minuten-Rhythmus**, triggert die Regel-Aus
 - Konfiguration (Blockdauer, Grace Period)
 - Rueckmeldung ueber Regel-Laufzeit (Timeboxing)
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -53,7 +53,7 @@ Der Block-Scheduler erzwingt den **10-Minuten-Rhythmus**, triggert die Regel-Aus
 3. Der Deadband Manager berechnet `valid_until` aus Entscheidungstyp und Hysterese-Regeln.
 4. Tick- und Health-Events werden an Core, UI und Data publiziert.
 
----
+&nbsp;
 
 ## Qualitaet und Betrieb
 
