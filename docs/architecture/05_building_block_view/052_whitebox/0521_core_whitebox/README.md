@@ -86,5 +86,3 @@ Nur Zustand, Zeit und Regeln.
 > 👉 Weiter zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox/README.md)** 
 >
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
-> 
-> 🔙 Zurück zur **[5.1 Blackbox Gesamtsystem](../../051_blackbox/051_blackbox.md)**
