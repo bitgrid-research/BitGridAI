@@ -1,32 +1,56 @@
 # 05.2.2.3 Health Monitor
 
-Verantwortung: ueberwacht Verfuegbarkeit von Geraeten/Protokollen, sendet Heartbeats und Fehlermeldungen an Core/UI.
+Der Pulsmesser des Systems.
+
+Der Health Monitor überwacht kontinuierlich, **ob Geräte und Protokolle noch leben**.  
+Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI und Logs sichtbar.
+
+*(Platzhalter für ein Bild: Der Hamster trägt ein Stethoskop und prüft mehrere Geräte.
+Über jedem Gerät leuchtet eine Ampel: grün, gelb oder rot.)*
+![Hamster überwacht Systemgesundheit](../media/pixel_art_health_monitor.png)
+
+---
+
+## Verantwortung
+
+- Überwachung der Verfügbarkeit von Geräten und Protokollen
+- Versand periodischer Heartbeats
+- Erkennung von Ausfällen und Degradierungen
+- Transparente Weitergabe von Health-Status an Core, UI und Logging
+
+---
 
 ## Struktur
 
-- **Heartbeat Sender:** publiziert periodische Statusmeldungen pro Adapter/Geraet.
-- **Watchdog:** erkennt ausbleibende Telemetrie oder fehlgeschlagene Kommandos.
-- **Degradation Classifier:** stuft Health (ok/warn/error) ein und dokumentiert Ursache.
-- **Notifier:** sendet Health-Events auf `health/#` und an Logging.
+- **Heartbeat Sender**  
+  Publiziert periodische Statusmeldungen pro Adapter und Gerät.
+
+- **Watchdog**  
+  Erkennt ausbleibende Telemetrie oder fehlgeschlagene Kommandos.
+
+- **Degradation Classifier**  
+  Stuften den Zustand in `ok`, `warn` oder `error` ein und dokumentiert die Ursache.
+
+- **Notifier**  
+  Sendet Health-Events auf `health/#` und an das Logging.
+
+---
 
 ## Schnittstellen
 
-- **Provided:** Health-Events (`health/#`), Warnungen bei Telemetrie- oder Aktor-Ausfaellen.
-- **Required:** Signal ueber eingehende Telemetrie/Quittungen, Konfiguration fuer Heartbeat-Intervalle und Schwellen.
+**Provided**
+- Health-Events (`health/#`)
+- Warnungen bei Telemetrie- oder Aktor-Ausfällen
+
+**Required**
+- Signale über eingehende Telemetrie und Quittungen
+- Konfiguration für Heartbeat-Intervalle und Schwellenwerte
+
+---
 
 ## Ablauf (vereinfacht)
 
-1) Heartbeat Sender publiziert regelmaessig Status.  
-2) Watchdog verfolgt Telemetrie- und Quittungseingaenge; bei Zeitueberschreitung -> Warnung/Error.  
-3) Degradation Classifier bewertet Zustand; Notifier sendet Event.  
-4) Core/UI zeigen Status, Data persistiert Health-Log.
-
-## Qualitaet und Betrieb
-
-- Klare Schwellen pro Geraet/Protokoll; keine globalen One-size-Werte.  
-- Health bleibt entkoppelt: Ausfall eines Adapters blockiert Core nicht.  
-- Optionale Selbstheilung: automatischer Reconnect/Restart nach Backoff.
-
----
-> Zurueck zu **[5.2.2.x Adapter und Feld-I/O (Level 3)](./README.md)**  
-> Zurueck zu **[5.2.2 Whitebox Adapter und Feld-I/O](../0522_adapters_whitebox.md)**
+1. Heartbeat Sender publiziert regelmäßig Statusmeldungen.  
+2. Watchdog verfolgt Telemetrie- und Quittungseingänge; bei Timeout → Warnung oder Error.  
+3. Degradation Classifier bewertet den Zustand und bestimmt die Schwere.  
+4. Notifier
