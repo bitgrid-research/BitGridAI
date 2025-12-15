@@ -11,7 +11,7 @@ Er erzeugt verständliche Explain-Sessions zu jeder Entscheidung – rein lesend
 Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ und „Params“.)*
 ![Hamster erklärt Entscheidungen](../media/pixel_art_explain_agent.png)
 
----
+&nbsp;
 
 ## Scope
 
@@ -20,7 +20,7 @@ Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ u
 - Bereitstellung für UI und Research-Exporte
 - **Kein** Eingriff in Steuerung oder Regeln
 
----
+&nbsp;
 
 ## Struktur
 
@@ -36,7 +36,7 @@ Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ u
 - **Export Hook**  
   Stellt Sessions für UI und Research bereit.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -49,7 +49,7 @@ Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ u
 - Textbausteine (`explain/*.json`)
 - Optional lokales LLM-Backend (read-only)
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -58,7 +58,7 @@ Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ u
 3) Session Manager speichert und versioniert die Session.  
 4) UI erhält Push oder ruft Session gezielt ab.
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
@@ -68,7 +68,6 @@ Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ u
 - **Datenschutz:** keine externen API-Calls, alles lokal.
 
 ---
-
 > **Nächster Schritt:**  
 > Wir wissen jetzt, **warum** Entscheidungen getroffen werden.  
 > Im nächsten Baustein schauen wir uns an, **was passiert wäre**, wenn sich die Rahmenbedingungen geändert hätten – ohne echte Eingriffe.
