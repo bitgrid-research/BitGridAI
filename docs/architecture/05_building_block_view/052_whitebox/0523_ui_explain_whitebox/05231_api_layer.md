@@ -70,6 +70,14 @@ Schilder: „State“, „Timeline“, „Preview“, „Override (mit Ausweis)�
 - **Robustheit:** Backpressure im WS-Hub, Drop-Policy bei Überlast, Health-Events.
 
 ---
-> 🔙 Zurück zu **[5.2.3.x UI und Explainability (Level 3)](./README.md)**
+> **Nächster Schritt:**  
+> Der Empfang ist geklärt. Im nächsten Baustein schauen wir uns an,  
+> **wie diese Schnittstellen visuell genutzt werden** – das eigentliche Cockpit für den Nutzer.
+>
+> 👉 Weiter zu **[5.2.3.2 Web-UI](./05232_web_ui.md)**
+>
+> 🔙 Zurück zur **[5.2.3 Whitebox UI & Explainability](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2.3 Whitebox UI und Explainability](../0523_ui_explain_whitebox.md)**
+> 🏠 Zurück zur **[5.2 Level-2-Whiteboxes](../README.md)**
+
+
