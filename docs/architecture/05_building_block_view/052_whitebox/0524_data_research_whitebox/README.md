@@ -12,7 +12,7 @@ Alles folgt einem Prinzip: **Was entschieden wurde, muss später erklärbar und 
 Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
 ![Hamster im Datenarchiv](../media/pixel_art_data_research.png)
 
----
+&nbsp;
 
 ## Scope
 
@@ -21,7 +21,7 @@ Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
 - KPI-Berechnung für Transparenz und Forschung
 - Export- und Replay-Funktion **nur mit explizitem Opt-in**
 
----
+&nbsp;
 
 ## Enthaltene Bausteine (Level 3)
 
@@ -32,7 +32,7 @@ Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
 | **KPI / Reporting** | Aggregiert Kennzahlen (z.B. kWh → Sats, Verfügbarkeit). | Batch- oder on-demand, schreibt nach Parquet/JSON. |
 | **Export / Replay Service** | Erstellt signierte Export-Bundles für Forschung. | Opt-in gesteuert, liefert Hash + Manifest. |
 
----
+&nbsp;
 
 ## Level-3-Details
 
@@ -41,7 +41,7 @@ Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
 - [5.2.4.3 KPI / Reporting](./05243_kpi_reporting.md)
 - [5.2.4.4 Export / Replay Service](./05244_export_replay.md)
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -55,7 +55,7 @@ Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
 - Verfügbarer lokaler Speicher
 - Opt-in-Flags und Export-Aufträge
 
----
+&nbsp;
 
 ## Hauptdatenflüsse
 
@@ -63,7 +63,7 @@ Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
 2) KPIs → UI / Reports → optionaler Export  
 3) Export-Auftrag → Export Service → Parquet/ZIP-Bundle + Hash + Manifest  
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
