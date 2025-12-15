@@ -17,7 +17,7 @@ Jede Seite trägt einen Zeitstempel und ein kleines Schloss. Daneben liegen Parq
 und ein Prüfsummen-Stempel.)*
 ![Hamster im Event-Archiv](../media/pixel_art_event_log_store.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -29,7 +29,7 @@ und ein Prüfsummen-Stempel.)*
 - Grundlage für Replays, Audits und Exporte
 - Verwaltung von Retention und Speichergrenzen
 
----
+&nbsp;
 
 ## Struktur
 
@@ -49,7 +49,7 @@ und ein Prüfsummen-Stempel.)*
   Setzt Aufbewahrungsregeln durch (Rotation, Löschung, Archivierung)
   und meldet Status an Observability.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -63,7 +63,7 @@ und ein Prüfsummen-Stempel.)*
 - Konfigurierte Speicherpfade
 - Retention- und Aufbewahrungsregeln
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -73,7 +73,7 @@ und ein Prüfsummen-Stempel.)*
 4) Retention Manager prüft Speichergrenzen und rotiert bei Bedarf.  
 5) UI, Replay- oder Export-Services lesen die Dateien **read-only**.
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
@@ -90,7 +90,6 @@ und ein Prüfsummen-Stempel.)*
   Retention-Policies verhindern unkontrolliertes Wachstum.
 
 ---
-
 > **Nächster Schritt:**  
 > Ereignisse und Zustände sind jetzt dauerhaft und überprüfbar gespeichert.
 > Doch rohe Daten allein reichen nicht aus.
