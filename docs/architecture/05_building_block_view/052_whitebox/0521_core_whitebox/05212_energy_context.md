@@ -78,6 +78,10 @@ Er sorgt dafür, dass Regeln, Vorschauen und Replays **auf konsistenten, validie
   Jedes Feld trägt Quelle und Timestamp – audit- und replayfähig.
 
 ---
-
+> **Nächster Schritt:** Die Daten stehen. Jetzt wird entschieden.
+>
+> 👉 Weiter zu **[5.2.1.3 Rule Engine](./05213_rule_engine.md)**
+>
 > 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**  
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+
