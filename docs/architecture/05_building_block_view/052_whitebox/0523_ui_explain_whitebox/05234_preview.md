@@ -11,7 +11,7 @@ Es simuliert Regelentscheidungen mit hypothetischen Eingaben – **ohne** Aktori
 Darin erscheinen alternative Energieflüsse und ein gestrichelter Pfeil zur Entscheidung.)*
 ![Hamster mit Glaskugel](../media/pixel_art_preview.png)
 
----
+&nbsp;
 
 ## Scope
 
@@ -20,7 +20,7 @@ Darin erscheinen alternative Energieflüsse und ein gestrichelter Pfeil zur Ents
 - Unterstützung von UI-Interaktionen und Analyse
 - **Kein** Schreiben auf Geräte oder State
 
----
+&nbsp;
 
 ## Struktur
 
@@ -36,7 +36,7 @@ Darin erscheinen alternative Energieflüsse und ein gestrichelter Pfeil zur Ents
 - **Cache**  
   Zwischenspeichert Previews zur Beschleunigung häufiger Anfragen.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -49,7 +49,7 @@ Darin erscheinen alternative Energieflüsse und ein gestrichelter Pfeil zur Ents
 - Aktueller oder letzter konsistenter `EnergyState`
 - Hypothetische Inputs aus UI oder API
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -58,7 +58,7 @@ Darin erscheinen alternative Energieflüsse und ein gestrichelter Pfeil zur Ents
 3) Sandbox Runner führt die Rule Engine read-only aus.  
 4) Result Mapper liefert das erwartete Verhalten an die UI zurück.
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
@@ -68,7 +68,6 @@ Darin erscheinen alternative Energieflüsse und ein gestrichelter Pfeil zur Ents
 - **Timeboxed:** feste Laufzeitgrenzen, damit die UI reaktionsschnell bleibt.
 
 ---
-
 > **Nächster Schritt:**  
 > Wir haben gesehen, **was passieren würde**, ohne etwas auszulösen.  
 > Jetzt verlassen wir die Benutzeroberfläche und schauen dahin, wo alles festgehalten wird:  
