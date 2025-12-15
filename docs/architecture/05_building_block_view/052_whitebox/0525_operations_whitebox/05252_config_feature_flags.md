@@ -1,31 +1,70 @@
 # 05.2.5.2 Configuration & Feature Flags
 
-Verantwortung: verwaltet Profile/YAML, validiert Schemas, verteilt Flags und erlaubt Reload ohne Neustart.
+Der Werkzeugkasten für Verhalten.
+
+Dieses Modul definiert, **wie sich BitGridAI verhält**, ohne Code anzufassen.
+Profile, Defaults und Feature Flags werden sauber geladen, geprüft und verteilt –  
+Änderungen greifen **ohne Neustart**.
+
+*(Platzhalter für ein Bild: Der Hamster steht vor einem offenen Werkzeugkasten.
+YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload“ sind sichtbar.)*
+![Hamster Configuration](../media/pixel_art_configuration_flags.png)
+
+---
+
+## Verantwortung
+
+- Laden und Validieren von Konfigurationsprofilen
+- Verteilen von Feature Flags und Defaults
+- Sichere Reloads zur Laufzeit
+
+---
 
 ## Struktur
 
-- **Config Loader:** laedt `config/*.yaml`, prueft Schema, setzt Defaults.
-- **Integrity Check:** optionale Signatur/Checksum.
-- **Flag Dispatcher:** verteilt Feature Flags/Defaults an Core/Adapter/UI.
-- **Reload Hook:** Reload bei Aenderungen, mit Versionierung.
+- **Config Loader**  
+  Lädt `config/*.yaml`, prüft Schemas und setzt explizite Defaults.
+
+- **Integrity Check**  
+  Optionale Signatur- oder Checksum-Prüfung gegen Manipulation.
+
+- **Flag Dispatcher**  
+  Verteilt Flags und Profile an Core, Adapter und UI.
+
+- **Reload Hook**  
+  Erkennt Änderungen, führt Reloads durch und versioniert den Zustand.
+
+---
 
 ## Schnittstellen
 
-- **Provided:** valide Configs/Flags an Bausteine, Reload-Events.
-- **Required:** Config-Dateien, Schema-Definition, optional Signatur/Checksum.
+**Provided**
+- Valide Konfigurationen und Feature Flags
+- Reload- und Versions-Events
+
+**Required**
+- Konfigurationsdateien (`config/*.yaml`)
+- Schema-Definitionen
+- Optional: Signaturen/Checksummen
+
+---
 
 ## Ablauf (vereinfacht)
 
-1) Loader liest Config, prueft Schema/Checksum.  
-2) Flag Dispatcher schickt Werte an Abnehmer.  
-3) Reload Hook aktualisiert bei Aenderung, loggt Version.
-
-## Qualitaet und Betrieb
-
-- Klare Schemas, keine stillen Defaults.  
-- Versioniert und geloggt fuer Nachvollziehbarkeit.  
-- Fallback-Profile fuer Minimalbetrieb.
+1) **Config Loader** liest Dateien und prüft Schema/Integrität  
+2) **Flag Dispatcher** verteilt Werte an Abnehmer  
+3) **Reload Hook** aktiviert Änderungen und erhöht die Konfigurationsversion  
+4) Reload wird geloggt und als Event veröffentlicht
 
 ---
-> Zurueck zu **[5.2.5.x Operations (Level 3)](./README.md)**  
-> Zurueck zu **[5.2.5 Whitebox Operations](../0525_operations_whitebox.md)**
+
+## Qualitäts- und Betriebsaspekte
+
+- **Explizit:** keine stillen Defaults, alles ist benannt  
+- **Nachvollziehbar:** Versionierung und Logs bei jedem Reload  
+- **Robust:** Fallback-Profile für Minimalbetrieb bei Fehlern  
+
+---
+
+> 🔙 Zurück zu **[5.2.5.x Operations (Level 3)](./README.md)**  
+> 🔙 Zurück zu **[5.2.5 Whitebox Operations](../0525_operations_whitebox.md)**
