@@ -12,9 +12,9 @@ Scope: Security/Auth, Policies, Konfiguration und Observability als Querschnitt.
 
 ## Level-3-Details
 
-- [5.2.5.1 Security & Auth](./0525_operations_whitebox/05251_security_auth.md)
-- [5.2.5.2 Configuration & Feature Flags](./0525_operations_whitebox/05252_config_feature_flags.md)
-- [5.2.5.3 Observability & Monitoring](./0525_operations_whitebox/05253_observability.md)
+- [5.2.5.1 Security & Auth](./05251_security_auth.md)
+- [5.2.5.2 Configuration & Feature Flags](./05252_config_feature_flags.md)
+- [5.2.5.3 Observability & Monitoring](./05253_observability.md)
 
 ## Schnittstellen
 
