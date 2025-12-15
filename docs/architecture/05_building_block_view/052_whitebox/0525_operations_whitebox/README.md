@@ -12,7 +12,7 @@ Aber sie sorgt dafür, dass **alles andere verlässlich, kontrollierbar und sich
 Neben ihm ein Schloss, ein Zahnrad und ein Fernglas – Security, Config, Observability.)*
 ![Hamster Operations](../media/pixel_art_operations.png)
 
----
+&nbsp;
 
 ## Scope
 
@@ -22,7 +22,7 @@ Neben ihm ein Schloss, ein Zahnrad und ein Fernglas – Security, Config, Observ
 
 Alles **local-first**, ohne externe Abhängigkeiten.
 
----
+&nbsp;
 
 ## Enthaltene Bausteine (Level 3)
 
@@ -32,7 +32,7 @@ Alles **local-first**, ohne externe Abhängigkeiten.
 | **Configuration & Feature Flags** | Zentrale YAML-Profile, Schema-Validierung, Reload zur Laufzeit. | Optionale Signatur/Checksum, Default-Profile. |
 | **Observability & Monitoring** | Metriken, Logs, Health-Endpunkte, Alerts. | Konsolidiert Status aus Core, Adaptern und UI. |
 
----
+&nbsp;
 
 ## Level-3-Details
 
@@ -40,7 +40,7 @@ Alles **local-first**, ohne externe Abhängigkeiten.
 - [5.2.5.2 Configuration & Feature Flags](./05252_config_feature_flags.md)
 - [5.2.5.3 Observability & Monitoring](./05253_observability.md)
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -54,7 +54,7 @@ Alles **local-first**, ohne externe Abhängigkeiten.
 - Konfigurationsdateien (`config/*.yaml`)
 - Health-Signale aus Core, Adaptern und UI
 
----
+&nbsp;
 
 ## Hauptdatenflüsse
 
@@ -62,7 +62,7 @@ Alles **local-first**, ohne externe Abhängigkeiten.
 2) Config-Loader validiert Profile → verteilt Flags und Defaults an Core/Adapter/UI  
 3) Health- und Metrik-Streams → zentraler Sammelpunkt → UI / Logs / Alerts  
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
