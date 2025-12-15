@@ -20,7 +20,7 @@ Er hält einen Taschenrechner, daneben Pfeile von Events zu KPIs wie
 „kWh → Sats“, „Uptime“, „Deadband-Hit-Rate“.)*
 ![Hamster berechnet Kennzahlen](../media/pixel_art_kpi_reporting.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -29,7 +29,7 @@ Er hält einen Taschenrechner, daneben Pfeile von Events zu KPIs wie
 - Bereitstellung für UI, Reports und Exporte
 - Optionales Erkennen von Auffälligkeiten über Schwellwerte
 
----
+&nbsp;
 
 ## Struktur
 
@@ -52,7 +52,7 @@ Er hält einen Taschenrechner, daneben Pfeile von Events zu KPIs wie
   Prüfen KPIs gegen optionale Schwellen
   (Qualität, Stabilität, Auffälligkeiten).
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -66,7 +66,7 @@ Er hält einen Taschenrechner, daneben Pfeile von Events zu KPIs wie
 - Zeitbasis und Block-Informationen
 - Konfiguration für Intervalle, Formeln und Schwellen
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -76,7 +76,7 @@ Er hält einen Taschenrechner, daneben Pfeile von Events zu KPIs wie
 4) Alert Hooks prüfen Schwellwerte und melden Auffälligkeiten.  
 5) UI, Reports oder Export-Services konsumieren KPI-Daten read-only.
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
@@ -94,7 +94,6 @@ Er hält einen Taschenrechner, daneben Pfeile von Events zu KPIs wie
   KPIs informieren – sie steuern nichts.
 
 ---
-
 > **Nächster Schritt:**  
 > Kennzahlen sind berechnet und verständlich aufbereitet.
 > Jetzt bleibt noch die kontrollierte Weitergabe nach außen.
