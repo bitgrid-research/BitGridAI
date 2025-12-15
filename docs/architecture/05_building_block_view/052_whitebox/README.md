@@ -34,7 +34,7 @@ Auf dieser Ebene oeffnen wir die wichtigsten Bausteine aus der System-Whitebox u
 
 ---
 
-> **Naechster Schritt:** Jetzt sehen wir, *was* es gibt.  
+> **Nächster Schritt:** Jetzt sehen wir, *was* es gibt.  
 > Im naechsten Kapitel betrachten wir, *wie* diese Bausteine im Betrieb zusammenspielen.
 >
 > 👉 Weiter zu **[06 Laufzeitsicht](../../06_runtime_view/README.md)**
