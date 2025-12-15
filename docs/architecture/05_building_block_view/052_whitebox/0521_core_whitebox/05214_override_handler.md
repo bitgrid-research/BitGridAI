@@ -76,7 +76,7 @@ Er gibt dem Nutzer gezielt Kontrolle – ohne dabei **Safety** und **Autarkie** 
 >
 > 👉 Weiter zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox/README.md)**
 >
-> 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**
+> 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
 
