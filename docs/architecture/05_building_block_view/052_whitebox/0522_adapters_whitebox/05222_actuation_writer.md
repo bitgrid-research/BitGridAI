@@ -74,6 +74,12 @@ und ein Häkchen „Ack received“.)*
   Telemetrie-basierte Quittung wird bevorzugt gegenüber reinem Transport-Ack.
 
 ---
+> **Nächster Schritt:** Befehle sind angekommen.  
+> Jetzt müssen wir überwachen, **ob alles lebt und erreichbar bleibt**.
+>
+> 👉 Weiter zu **[5.2.2.3 Health Monitor](./05223_health_monitor.md)**
+>
 > 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox.md)**
-> 
+>  
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+
