@@ -12,7 +12,7 @@ Nicht für Buzzwords – sondern für Betriebssicherheit.
 Diagramme zeigen Health, Last und Warnsymbole.)*
 ![Hamster Observability](../media/pixel_art_observability_monitoring.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -20,7 +20,7 @@ Diagramme zeigen Health, Last und Warnsymbole.)*
 - Konsolidierte Sicht auf den Systemzustand
 - Auslösen und Weiterleiten von Warnungen
 
----
+&nbsp;
 
 ## Struktur
 
@@ -33,7 +33,7 @@ Diagramme zeigen Health, Last und Warnsymbole.)*
 - **Alert Router**  
   Bewertet Schwellen und leitet Warnungen an UI und Logs weiter.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -46,7 +46,7 @@ Diagramme zeigen Health, Last und Warnsymbole.)*
 - Health- und Metrik-Signale aus allen Bausteinen
 - Optional: Log- oder Export-Senken
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -56,7 +56,6 @@ Diagramme zeigen Health, Last und Warnsymbole.)*
 4) UI und Logs zeigen aktuellen Zustand und Historie
 
 ---
-
 > **Kapitel abgeschlossen:**  
 > Sicherheit, Konfiguration und Beobachtbarkeit sind definiert.
 > BitGridAI ist nun **steuerbar, erklärbar und betreibbar**.
