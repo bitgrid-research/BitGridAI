@@ -14,7 +14,7 @@ Nur Zustand, Zeit und Regeln.
 *(Platzhalter für ein Bild: Der Hamster sitzt im Inneren der Box vor einem ruhigen Taktgeber. Zahnräder drehen langsam, ein Block-Timer tickt.)*  
 ![Hamster im Core-Orchestrator](../../media/pixel_art_hamster_core.png)
 
----
+&nbsp;
 
 ## Scope und Verantwortung
 
@@ -23,7 +23,7 @@ Nur Zustand, Zeit und Regeln.
 - Pflege des `EnergyState` als Single Source of Truth  
 - Durchsetzung von Safety-, Autarkie- und Stabilitaetsgrenzen  
 
----
+&nbsp;
 
 ## Enthaltene Bausteine (Level 3)
 
@@ -34,7 +34,7 @@ Nur Zustand, Zeit und Regeln.
 | **Rule Engine** | Bewertet R1–R5, erzeugt `Decision` und `DecisionEvent`. | Priorisierung: Safety > Autarkie > Stabilitaet > Optimierung. |
 | **Override Handler** | Verarbeitet manuelle Eingriffe mit TTL und Scope. | Konfliktpruefung gegen Safety- und Autarkie-Regeln. |
 
----
+&nbsp;
 
 ## Level-3-Details
 
@@ -43,7 +43,7 @@ Nur Zustand, Zeit und Regeln.
 - **[5.2.1.3 Rule Engine](./05213_rule_engine.md)**  
 - **[5.2.1.4 Override Handler](./05214_override_handler.md)**  
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -61,7 +61,7 @@ Nur Zustand, Zeit und Regeln.
 - User-Overrides (`POST /override`)
 - Konfiguration (`config/*.yaml`)
 
----
+&nbsp;
 
 ## Hauptdatenfluesse
 
@@ -70,7 +70,7 @@ Nur Zustand, Zeit und Regeln.
 3. Decision → Adapter-Kommandos (MQTT/REST) + UI/Explain-Feed  
 4. Decision & State → Data/Research (Logs, KPIs, Exporte)
 
----
+&nbsp;
 
 ## Qualitaets- und Betriebsaspekte
 
