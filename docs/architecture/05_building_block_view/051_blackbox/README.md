@@ -16,7 +16,8 @@ Genug Informationen zum **Andocken** – bewusst keine Details zum Innenleben.
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor einem großen, geschlossenen Kasten. Kabel führen hinein und heraus, beschriftet mit „Input“ und „Output“.)*  
 ![Hamster erklärt die Blackbox](link_zum_blackbox_bild.png)
 
----
+
+&nbsp;
 
 ## Inhalt dieses Kapitels
 
