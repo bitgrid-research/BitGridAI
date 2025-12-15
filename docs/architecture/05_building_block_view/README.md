@@ -8,15 +8,17 @@ Wir nutzen das Prinzip der verschiedenen Abstraktionsebenen: Wir fangen ganz obe
 
 ![Cyborg Hamster zeigt einen Baustein](link_zu_image_7.png)
 
+&nbsp;
+
 ## Inhalt dieses Kapitels
 
 Wir haben die Struktur in zwei Hauptbereiche unterteilt, die du in den entsprechenden Unterordnern findest:
 
-* **[Level 1: Die Blackbox (Gesamtsicht)](./051_blackbox/)**
-    * *Kurzbeschreibung:* Der höchste Fluglevel. Hier betrachten wir das gesamte BitGridAI-System als einen einzigen "schwarzen Kasten" in seiner Umgebung. Diese Sicht ist perfekt, um den groben Scope zu verstehen, bevor man sich in Details verliert.
+* **[5.1 - Level 1: Die Blackbox (Gesamtsicht)](./051_blackbox/)**
+    * Der höchste Fluglevel. Hier betrachten wir das gesamte BitGridAI-System als einen einzigen "schwarzen Kasten" in seiner Umgebung. Diese Sicht ist perfekt, um den groben Scope zu verstehen, bevor man sich in Details verliert.
 
-* **[Level 2: Die Whitebox (Innenleben)](./052_whitebox/)**
-    * *Kurzbeschreibung:* Jetzt öffnen wir den Deckel der Blackbox. Wir zerlegen das System in seine Hauptkomponenten (z.B. Frontend, API-Gateway, Core-Services, Datenbanken) und erklären deren Aufgaben und Schnittstellen untereinander.
+* **[5.2 - Level 2: Die Whitebox (Innenleben)](./052_whitebox/)**
+    * Jetzt öffnen wir den Deckel der Blackbox. Wir zerlegen das System in seine Hauptkomponenten (z.B. Frontend, API-Gateway, Core-Services, Datenbanken) und erklären deren Aufgaben und Schnittstellen untereinander.
  
 ---
 > **Nächster Schritt:** Wir wissen jetzt, aus welchen Teilen das Auto besteht. Jetzt starten wir den Motor. Im nächsten Kapitel schauen wir uns an, wie die Komponenten zur Laufzeit zusammenspielen (Abläufe & Prozesse).
