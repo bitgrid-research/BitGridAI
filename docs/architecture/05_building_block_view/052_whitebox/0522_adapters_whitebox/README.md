@@ -87,4 +87,4 @@ und übersetzt sie in eine Form, die der Core versteht.
 >
 > 👉 Weiter zu **[5.2.3 UI & Explainability](../0523_ui_explain_whitebox/README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)** 
