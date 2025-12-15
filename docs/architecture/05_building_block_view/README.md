@@ -1,28 +1,14 @@
-# 05 Bausteinsicht
+# 05 Bausteinsicht (arc42)
 
-Willkommen im Maschinenraum von **BitGridAI**!
+Hier zerlegen wir **BitGridAI** in seine Bausteine. Locker im Ton, klar in der Aussage – wie in 2.1: kurze Sätze, pragmatisch, ohne Schnickschnack.
 
-Nachdem wir Strategie und Kontext geklärt haben, wird es jetzt konkret. Die Bausteinsicht ist das Herzstück der technischen Dokumentation. Sie zeigt die statische Zerlegung des Systems in seine Bestandteile.
+## Inhalt
 
-Wir nutzen das Prinzip der verschiedenen Abstraktionsebenen: Wir fangen ganz oben an (Level 1) und zoomen dann bei Bedarf tiefer in die einzelnen Container oder Komponenten hinein.
+- **[5.1 Whitebox Gesamtsystem](./051_blackbox/051_blackbox.md)**  
+  Rahmen, Top-Level-Bausteine und externe Schnittstellen von BitGridAI.
+- **[5.2 Level-2-Whiteboxes](./052_whitebox/README.md)**  
+  Details zu Kernbereichen (Core, Adapter, UI/Explain, Data/Research).
 
-![Cyborg Hamster zeigt einen Baustein](link_zu_image_7.png)
-
-&nbsp;
-
-## Inhalt dieses Kapitels
-
-Wir haben die Struktur in zwei Hauptbereiche unterteilt, die du in den entsprechenden Unterordnern findest:
-
-* **[5.1 - Level 1: Die Blackbox (Gesamtsicht)](./051_blackbox/)**
-    * Der höchste Fluglevel. Hier betrachten wir das gesamte BitGridAI-System als einen einzigen "schwarzen Kasten" in seiner Umgebung. Diese Sicht ist perfekt, um den groben Scope zu verstehen, bevor man sich in Details verliert.
-
-* **[5.2 - Level 2: Die Whitebox (Innenleben)](./052_whitebox/)**
-    * Jetzt öffnen wir den Deckel der Blackbox. Wir zerlegen das System in seine Hauptkomponenten (z.B. Frontend, API-Gateway, Core-Services, Datenbanken) und erklären deren Aufgaben und Schnittstellen untereinander.
- 
 ---
-> **Nächster Schritt:** Wir wissen jetzt, aus welchen Teilen das Auto besteht. Jetzt starten wir den Motor. Im nächsten Kapitel schauen wir uns an, wie die Komponenten zur Laufzeit zusammenspielen (Abläufe & Prozesse).
->
-> 👉 Weiter zu **[06 Laufzeitsicht](../06_runtime_view/README.md)**
->
-> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
+> Weiter zu **[06 Laufzeitsicht](../06_runtime_view/README.md)**  
+> Zurueck zur **[Hauptuebersicht](../../README.md)**
