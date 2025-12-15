@@ -11,7 +11,7 @@ und übersetzt sie in eine Form, die der Core versteht.
 *(Platzhalter für ein Bild: Der Hamster steht zwischen Kabeln, Steckern und Funkwellen. Auf der einen Seite Geräte-Symbole (PV, Batterie, Miner), auf der anderen Seite saubere Events, die Richtung Core fließen.)*
 ![Hamster verbindet Feldgeräte](../media/pixel_art_adapter_field_io.png)
 
----
+&nbsp;
 
 ## Scope
 
@@ -20,7 +20,7 @@ und übersetzt sie in eine Form, die der Core versteht.
 - Übersetzung externer Protokolle in **interne Events**
 - Ausführung von Core-Kommandos mit Rückmeldung
 
----
+&nbsp;
 
 ## Enthaltene Bausteine (Level 3)
 
@@ -31,7 +31,7 @@ und übersetzt sie in eine Form, die der Core versteht.
 | **Health Monitor** | Überwacht Heartbeats pro Gerät und Protokoll. | Meldet Status über `health/#`. |
 | **Device Profiles** | Gerätespezifische Eigenheiten (Skalierung, Limits, Features). | Versioniert in `config/*.yaml`. |
 
----
+&nbsp;
 
 ## Level-3-Details
 
@@ -40,7 +40,7 @@ und übersetzt sie in eine Form, die der Core versteht.
 - **[5.2.2.3 Health Monitor](./05223_health_monitor.md)**  
 - **[5.2.2.4 Device Profiles](./05224_device_profiles.md)**
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -55,7 +55,7 @@ und übersetzt sie in eine Form, die der Core versteht.
 - Kommandos aus dem Core (`miner/cmd/set`, REST)
 - Konfigurationsprofile (`config/*.yaml`)
 
----
+&nbsp;
 
 ## Hauptdatenflüsse
 
@@ -68,7 +68,7 @@ und übersetzt sie in eine Form, die der Core versteht.
 3. **Health → Core / UI**  
    Heartbeats und Fehlerzustände sichern den Betrieb ab.
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
