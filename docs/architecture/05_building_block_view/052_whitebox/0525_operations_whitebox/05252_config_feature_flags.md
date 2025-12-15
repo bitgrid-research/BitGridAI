@@ -80,6 +80,6 @@ YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload�
 >
 > 👉 Weiter zu **[5.2.5.3 Observability & Monitoring](./05253_observability.md)**
 >
-> 🔙 Zurück zu **[5.2.5 Operations (Level 3)](./README.md)**
+> 🔙 Zurück zu **[5.2.5 Operations (Security, Config & Observability)](./README.md)**
 >
-> 🔙 Zurück zu **[5.2.5 Whitebox Operations](../0525_operations_whitebox.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
