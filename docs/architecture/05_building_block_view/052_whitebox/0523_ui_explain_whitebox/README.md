@@ -10,7 +10,7 @@ Keine Entscheidungen – aber volle Transparenz.
 Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“.)*
 ![Hamster erklärt Entscheidungen](../media/pixel_art_ui_explain.png)
 
----
+&nbsp;
 
 ## Scope
 
@@ -19,7 +19,7 @@ Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“
 - Explain-Agent zur nachvollziehbaren Begründung von Entscheidungen  
 - Vorschau- und What-if-Funktionen ohne Einfluss auf den Betrieb  
 
----
+&nbsp;
 
 ## Enthaltene Bausteine (Level 3)
 
@@ -30,7 +30,7 @@ Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“
 | **Explain-Agent** | Erzeugt Explain-Sessions (Templates oder lokales LLM). | Read-only; keine Aktor-Kommandos. |
 | **Preview / What-if** | Simulation hypothetischer Zustände. | Sandbox auf Core-Regeln; keine Geräteschreibzugriffe. |
 
----
+&nbsp;
 
 ## Level-3-Details
 
@@ -39,7 +39,7 @@ Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“
 - [5.2.3.3 Explain-Agent](./05233_explain_agent.md)
 - [5.2.3.4 Preview / What-if](./05234_preview.md)
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -53,7 +53,7 @@ Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“
 - Textbausteine (`explain/*.json`)
 - Auth-Token (falls aktiviert)
 
----
+&nbsp;
 
 ## Hauptdatenflüsse
 
@@ -62,7 +62,7 @@ Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“
 3) DecisionEvent -> Explain-Agent -> Explain-Session -> UI.  
 4) Preview-Request -> Preview-Service -> Core-Regeln (Sandbox) -> UI.
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
