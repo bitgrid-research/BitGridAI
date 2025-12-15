@@ -72,6 +72,11 @@ Er gibt dem Nutzer gezielt Kontrolle – ohne dabei **Safety** und **Autarkie** 
   Rate Limits für Override-Requests, optionale Rollen (Operator vs. Observer).
 
 ---
+> **Nächster Schritt:** Der Core ist vollständig beschrieben. Jetzt verlassen wir den Entscheidungskern und schauen nach außen – zu den Geräten.
+>
+> 👉 Weiter zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox.md)**
+>
 > 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**
 > 
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+
