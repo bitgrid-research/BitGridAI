@@ -13,7 +13,7 @@ Alles ist **bewusst gewählt**, **signiert** und **reproduzierbar**.
 in eine beschriftete Box „Export“. Daneben ein Siegel und ein Pfeil zu „Replay“.)*
 ![Hamster erstellt Export-Bundle](../media/pixel_art_export_replay.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -22,7 +22,7 @@ in eine beschriftete Box „Export“. Daneben ein Siegel und ein Pfeil zu „Re
 - Bereitstellung von Manifest und Hash zur Verifikation
 - Lokale Replay-Funktionen zur reproduzierbaren Analyse
 
----
+&nbsp;
 
 ## Struktur
 
@@ -43,7 +43,7 @@ in eine beschriftete Box „Export“. Daneben ein Siegel und ein Pfeil zu „Re
   Ermöglicht lokale Replays gegen Core- oder Preview-Pfade
   (strict read-only, keine Aktorik).
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -58,7 +58,7 @@ in eine beschriftete Box „Export“. Daneben ein Siegel und ein Pfeil zu „Re
 - Opt-in-Status
 - Lokale Speicherpfade
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -69,7 +69,7 @@ in eine beschriftete Box „Export“. Daneben ein Siegel und ein Pfeil zu „Re
 5) UI/API erhält Bundle-Referenz, Hash und Metadaten.  
 6) Optional: Replay Runner nutzt das Bundle für lokale Replays.
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
@@ -88,7 +88,6 @@ in eine beschriftete Box „Export“. Daneben ein Siegel und ein Pfeil zu „Re
   keine Geräte, keine Aktoren, kein Seiteneffekt.
 
 ---
-
 > **Kapitel abgeschlossen:**  
 > Daten können nun gespeichert, erklärt, ausgewertet
 > und kontrolliert weitergegeben werden.
