@@ -12,7 +12,7 @@ Sie ist der **stabile Arbeitsspeicher auf Platte** – lokal, konsistent und ber
 Auf dem Buch steht „SQLite“. Daneben eine Uhr (TTL) und ein Häkchen „ACID“.)*  
 ![Hamster an der Operational DB](../media/pixel_art_operational_db.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -21,7 +21,7 @@ Auf dem Buch steht „SQLite“. Daneben eine Uhr (TTL) und ein Häkchen „ACID
 - Konsistente Reads für Core, UI und Preview
 - Sichere Grundlage für Neustarts und Recovery
 
----
+&nbsp;
 
 ## Struktur
 
@@ -44,7 +44,7 @@ Auf dem Buch steht „SQLite“. Daneben eine Uhr (TTL) und ein Häkchen „ACID
   Ausschließlich lokaler Zugriff, kein Remote-Zugriff.  
   Bevorzugtes Isolationsniveau: `READ_COMMITTED`.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -57,7 +57,7 @@ Auf dem Buch steht „SQLite“. Daneben eine Uhr (TTL) und ein Häkchen „ACID
 - Config- und Policy-Updates
 - Versionsinformationen für Migrationen
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -66,7 +66,7 @@ Auf dem Buch steht „SQLite“. Daneben eine Uhr (TTL) und ein Häkchen „ACID
 3) Leser (UI, Preview) erhalten konsistente Snapshots.  
 4) Migrationen werden versioniert vor oder beim Start ausgeführt.
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
@@ -80,8 +80,8 @@ Auf dem Buch steht „SQLite“. Daneben eine Uhr (TTL) und ein Häkchen „ACID
 - **Recovery-fähig**  
   Regelmäßige Backups empfohlen,
   Restore- und Recovery-Szenarien testbar.
+  
 ---
-
 > **Nächster Schritt:**  
 > Der laufende Betrieb ist abgesichert – Zustände, Konfigurationen und Overrides
 > überleben Neustarts und bleiben konsistent.
