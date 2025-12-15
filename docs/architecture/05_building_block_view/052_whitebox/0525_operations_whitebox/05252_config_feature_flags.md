@@ -13,7 +13,7 @@ sondern ein **kontrollierter Teil der Architektur**.
 YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload“ sind sichtbar.)*
 ![Hamster Configuration](../media/pixel_art_configuration_flags.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -21,7 +21,7 @@ YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload�
 - Zentrale Verwaltung von Feature Flags und Defaults
 - Sichere Reloads während des laufenden Betriebs
 
----
+&nbsp;
 
 ## Struktur
 
@@ -37,7 +37,7 @@ YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload�
 - **Reload Hook**  
   Erkennt Änderungen, führt Reloads durch und versioniert den Konfigurationszustand.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -50,7 +50,7 @@ YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload�
 - Schema-Definitionen
 - Optional: Signaturen oder Checksummen
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -59,7 +59,7 @@ YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload�
 3) **Reload Hook** aktiviert Änderungen und erhöht die Versionsnummer  
 4) Reload wird geloggt und als Event veröffentlicht
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
@@ -73,7 +73,6 @@ YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload�
   Fallback-Profile ermöglichen Minimalbetrieb bei fehlerhaften Konfigurationen.
 
 ---
-
 > **Nächster Schritt:**  
 > Sicherheit und Konfiguration stehen.  
 > Jetzt machen wir den Systemzustand sichtbar.
