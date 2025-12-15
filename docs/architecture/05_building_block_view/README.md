@@ -21,11 +21,10 @@ von außen nach innen, von grob nach detailliert.
 Die Bausteinsicht ist in zwei Ebenen gegliedert:
 
 - **[5.1 Level 1 – Die Blackbox (Gesamtsicht)](./051_blackbox/README.md)**  
-  * BitGridAI als ein einzelner Baustein. (*Fokus auf Systemgrenzen, externe Schnittstellen und Verantwortung nach außen*).
+  * Wie erscheint BitGridAI nach außen als ein einzelner Baustein – mit klaren Systemgrenzen, Verantwortlichkeiten und externen Schnittstellen?
 
 - **[5.2 Level 2 – Die Whitebox (Innenleben)](./052_whitebox/README.md)**  
-  Aufteilung des Systems in seine Hauptbestandteile.  
-  Core, Adapter, Explain/UI sowie Data & Research – mit klaren Zuständigkeiten.
+  * Wie ist die Blackbox intern in Hauptbestandteile zerlegt, und welche klar abgegrenzten Verantwortungen tragen Core, Adapter, Explain/UI sowie Data & Research?
 
 ---
 > **Nächster Schritt:** Die Struktur ist sichtbar.  
