@@ -1,4 +1,4 @@
-# 5.1 Whitebox Gesamtsystem
+# 05.1 Whitebox Gesamtsystem
 
 Level 1 zeigt **BitGridAI** als Gesamtsystem mit seinen Top-Level-Bausteinen und Schnittstellen. Schaltplan-Niveau: genug Infos zum Andocken, keine Innenansicht.
 
