@@ -57,13 +57,12 @@ Diagramme zeigen Health, Last und Warnsymbole.)*
 
 ---
 
-## Qualitäts- und Betriebsaspekte
-
-- **Zentral:** ein Blick statt vieler Einzelchecks  
-- **Konfigurierbar:** Schwellen und Alarmregeln anpassbar  
-- **Local-first:** keine Abhängigkeit von externen APM-Diensten  
-
----
-
-> 🔙 Zurück zu **[5.2.5.x Operations (Level 3)](./README.md)**  
+> **Kapitel abgeschlossen:**  
+> Sicherheit, Konfiguration und Beobachtbarkeit sind definiert.
+> BitGridAI ist nun **steuerbar, erklärbar und betreibbar**.
+>
+> 👉 Weiter zu **[06 Laufzeitsicht](../../06_runtime_view/README.md)**
+>
+> 🔙 Zurück zu **[5.2.5 Operations (Level 3)](./README.md)**
+>
 > 🔙 Zurück zu **[5.2.5 Whitebox Operations](../0525_operations_whitebox.md)**
