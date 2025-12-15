@@ -74,7 +74,7 @@ Der Block-Scheduler erzwingt den **10-Minuten-Rhythmus**, triggert die Regel-Aus
 >
 > 👉 Weiter zu **[5.2.1.2 Energy Context](./05212_energy_context.md)**
 >
-> 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**
+> 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
 
