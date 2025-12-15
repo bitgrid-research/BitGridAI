@@ -71,6 +71,12 @@ Alles **local-first**, ohne externe Abhängigkeiten.
 - **Sichtbar:** ein zentraler Blick auf Systemzustand statt verteilter Checks.
 
 ---
-
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**  
+> **Nächster Schritt:** Die Bausteine stehen, der Betrieb ist abgesichert.  
+> Jetzt betrachten wir, **wie das System im laufenden Betrieb zusammenspielt**.
+>
+> 👉 Weiter zu **[06 Laufzeitsicht](../../06_runtime_view/README.md)**
+>
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+> 
 > 🔙 Zurück zu **[5.1 Whitebox Gesamtsystem](../051_blackbox/051_blackbox.md)**
+
