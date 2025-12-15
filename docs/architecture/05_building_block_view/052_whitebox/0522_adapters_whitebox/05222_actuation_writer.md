@@ -1,32 +1,79 @@
 # 05.2.2.2 Actuation Writer
 
-Verantwortung: nimmt Kommandos aus dem Core entgegen und schreibt sie auf Geraete (REST/MQTT/Modbus). Stellt Idempotenz, Quittungen und Limits sicher.
+Die ausführende Hand.
+
+Der Actuation Writer setzt Entscheidungen des Cores **kontrolliert und sicher**
+in reale Aktionen um.  
+Er spricht mit Geräten, achtet auf Limits – und sorgt dafür, dass ein Kommando
+**genau einmal** wirkt.
+
+*(Platzhalter für ein Bild: Der Hamster hält eine Fernbedienung mit beschrifteten
+Knöpfen „Start“, „Stop“, „Limit“. Über den Knöpfen sitzen kleine Sicherheitssiegel
+und ein Häkchen „Ack received“.)*
+![Hamster sendet Kommandos](../media/pixel_art_actuation_writer.png)
+
+---
+
+## Verantwortung
+
+- Entgegennahme von Kommandos aus dem Core
+- Auswahl des passenden Transportwegs (MQTT / REST / Modbus)
+- Durchsetzung von Leistungs- und Sicherheitslimits
+- Idempotente Ausführung und saubere Quittierung
+
+---
 
 ## Struktur
 
-- **Command Router:** entscheidet Transport (MQTT/REST/Modbus) je Geraet/Profil.
-- **Limiter/Safety Guard:** prueft Leistungs- und Temperatur-Limits vor dem Senden.
-- **Idempotency Layer:** versieht Kommandos mit `command_id`, dedupliziert Wiederholungen.
-- **Ack Tracker:** wartet auf Bestaetigung/Telemetry-Aenderung und korreliert per `command_id`.
+- **Command Router**  
+  Entscheidet anhand von Device Profiles, welcher Transport genutzt wird.
+
+- **Limiter / Safety Guard**  
+  Prüft Leistungs-, Temperatur- und Gerätegrenzen vor dem Senden.
+
+- **Idempotency Layer**  
+  Versehen von Kommandos mit `command_id`, Deduplikation von Wiederholungen.
+
+- **Ack Tracker**  
+  Wartet auf Bestätigung oder Zustandsänderung und korreliert per `command_id`.
+
+---
 
 ## Schnittstellen
 
-- **Provided:** Kommandos an Geraete, Quittungen/Status (z.B. `miner/state/#`), Fehlermeldungen bei Limits/Transportfehlern.
-- **Required:** Core-Decision mit `command_id`, Device Profiles (Limits, Endpoints), Zugang zu Broker/REST/Modbus.
+**Provided**
+- Kommandos an Geräte
+- Quittungen und Status-Updates (z.B. `miner/state/#`)
+- Fehlermeldungen bei Limit- oder Transportverstößen
+
+**Required**
+- Core-Decisions mit `command_id`
+- Device Profiles (Limits, Endpoints)
+- Zugriff auf Broker / REST / Modbus
+
+---
 
 ## Ablauf (vereinfacht)
 
-1) Command Router erhaelt `Decision` -> waehlt Transport.  
-2) Limiter prueft Werte; bei Verstoss Abbruch mit Fehler.  
-3) Idempotency Layer setzt/prueft `command_id`, sendet Kommando.  
-4) Ack Tracker lauscht auf Quittung/State-Aenderung -> meldet an Core/UI/Data.
-
-## Qualitaet und Betrieb
-
-- Idempotent pro `command_id`; Wiederholungen ohne Doppelwirkung.  
-- Timeout und Retry mit Backoff; nach Grenzwertverletzung sofortiger Abort.  
-- Telemetrie-basierte Quittung bevorzugt gegenueber reinem Transport-Ack.
+1. Command Router erhält `Decision` → wählt Transport.
+2. Limiter prüft Zielwerte; bei Verstoß Abbruch mit Fehler.
+3. Idempotency Layer prüft/setzt `command_id` und sendet das Kommando.
+4. Ack Tracker wartet auf Quittung oder Telemetrie-Änderung und meldet zurück an Core, UI und Data.
 
 ---
-> Zurueck zu **[5.2.2.x Adapter und Feld-I/O (Level 3)](./README.md)**  
-> Zurueck zu **[5.2.2 Whitebox Adapter und Feld-I/O](../0522_adapters_whitebox.md)**
+
+## Qualität und Betrieb
+
+- **Idempotenz**  
+  Gleiche `command_id` führt nie zu Doppelwirkungen.
+
+- **Robustheit**  
+  Timeout und Retry mit Backoff; bei Grenzwertverletzung sofortiger Abort.
+
+- **Verlässliche Rückmeldung**  
+  Telemetrie-basierte Quittung wird bevorzugt gegenüber reinem Transport-Ack.
+
+---
+> 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox.md)**
+> 
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
