@@ -13,10 +13,10 @@ Scope: sichere, entkoppelte Anbindung der Feldgeraete (PV, Speicher, Smart Meter
 
 ## Level-3-Details
 
-- [5.2.2.1 Telemetry Ingest](./0522_adapters_whitebox/05221_telemetry_ingest.md)
-- [5.2.2.2 Actuation Writer](./0522_adapters_whitebox/05222_actuation_writer.md)
-- [5.2.2.3 Health Monitor](./0522_adapters_whitebox/05223_health_monitor.md)
-- [5.2.2.4 Device Profiles](./0522_adapters_whitebox/05224_device_profiles.md)
+- [5.2.2.1 Telemetry Ingest](./05221_telemetry_ingest.md)
+- [5.2.2.2 Actuation Writer](./05222_actuation_writer.md)
+- [5.2.2.3 Health Monitor](./05223_health_monitor.md)
+- [5.2.2.4 Device Profiles](./05224_device_profiles.md)
 
 ## Schnittstellen
 
