@@ -83,7 +83,7 @@ Keine Statistik. Kein Raten. Keine Magie.
 >
 > 👉 Weiter zu **[5.2.1.4 Override Handler](./05214_override_handler.md)**
 >
-> 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**
+> 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
 
