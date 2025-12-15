@@ -74,7 +74,7 @@ Er gibt dem Nutzer gezielt Kontrolle – ohne dabei **Safety** und **Autarkie** 
 ---
 > **Nächster Schritt:** Der Core ist vollständig beschrieben. Jetzt verlassen wir den Entscheidungskern und schauen nach außen – zu den Geräten.
 >
-> 👉 Weiter zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox.md)**
+> 👉 Weiter zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox/README.md)**
 >
 > 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**
 > 
