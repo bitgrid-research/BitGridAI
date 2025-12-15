@@ -76,7 +76,5 @@ Alles **local-first**, ohne externe Abhängigkeiten.
 >
 > 👉 Weiter zu **[06 Laufzeitsicht](../../../06_runtime_view/README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
-> 
-> 🔙 Zurück zu **[5.1 Blackbox Gesamtsystem](../../051_blackbox/051_blackbox.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
 
