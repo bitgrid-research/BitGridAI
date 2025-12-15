@@ -9,7 +9,7 @@ Keine Statistik. Kein Raten. Keine Magie.
 *(Platzhalter für ein Bild: Der Hamster steht vor einer großen Tafel mit fünf klar beschrifteten Regeln (R1–R5). Er sortiert Karten nach Priorität: „Safety“ liegt ganz oben, darunter Autarkie, Stabilität und Optimierung.)*
 ![Hamster bewertet Regeln](../media/pixel_art_rule_engine.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -18,7 +18,7 @@ Keine Statistik. Kein Raten. Keine Magie.
 - Auflösung von Konflikten
 - Erzeugung einer konsistenten `Decision` inklusive Erklärung
 
----
+&nbsp;
 
 ## Struktur
 
@@ -37,7 +37,7 @@ Keine Statistik. Kein Raten. Keine Magie.
   - `Decision` (Aktor-Kommandos)
   - `DecisionEvent` (reason, trigger, params, valid_until)
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -52,7 +52,7 @@ Keine Statistik. Kein Raten. Keine Magie.
 - Regelkonfiguration (Schwellen, Deadbands)
 - Aktive Overrides (falls gesetzt)
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -63,7 +63,7 @@ Keine Statistik. Kein Raten. Keine Magie.
    - `Decision` für Adapter
    - `DecisionEvent` für UI, Explain und Logging
 
----
+&nbsp;
 
 ## Qualität und Betrieb
 
