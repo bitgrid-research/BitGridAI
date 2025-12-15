@@ -74,6 +74,6 @@ Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI un
 >
 > 👉 Weiter zu **[5.2.2.4 Device Profiles](./05224_device_profiles.md)**
 >
-> 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox.md)**
+> 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
