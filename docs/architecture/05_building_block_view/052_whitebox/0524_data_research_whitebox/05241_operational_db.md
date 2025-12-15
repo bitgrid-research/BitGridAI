@@ -93,5 +93,5 @@ Auf dem Buch steht „SQLite“. Daneben eine Uhr (TTL) und ein Häkchen „ACID
 >
 > 🔙 Zurück zu **[5.2.4 Data und Research](./README.md)**
 >
-> 🏠 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
 
