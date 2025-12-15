@@ -8,7 +8,7 @@ Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox u
 *(Platzhalter fuer ein Bild: Der Hamster hat die Box geoeffnet. Innen sieht man klar getrennte Module mit Labels wie „Core“, „Adapter“, „UI“, „Data“.)*  
 ![Hamster schaut in die Whitebox](../media/pixel_art_hamster_whitebox_open.png)
 
----
+&nbsp;
 
 ## Inhalt
 
@@ -33,7 +33,6 @@ Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox u
   *(Der Hausmeister im Hintergrund.)*
 
 ---
-
 > **Nächster Schritt:** Jetzt sehen wir, *was* es gibt.  
 > Im nächsten Kapitel betrachten wir, *wie* diese Bausteine im Betrieb zusammenspielen.
 >
