@@ -4,7 +4,7 @@ Hier oeffnen wir die wichtigsten Bausteine aus der System-Whitebox und zeigen Au
 
 ## Inhalt
 
-- **[5.2.1 Core-Orchestrierung](./0521_core_whitebox.md)**  
+- **[5.2.1 Core-Orchestrierung](./052_whitebox/0521_core_whitebox/README.md)**   
   Regel-Engine, Block-Scheduler und EnergyState als deterministischer Kern. (Der Taktgeber mit Sicherheitsnetz.)
 - **[5.2.2 Adapter & Feld-I/O](./0522_adapters_whitebox.md)**  
   Anbindung von PV, Speicher, Smart Meter und Miner ueber MQTT/REST/Modbus. (Uebersetzer zwischen Strom und Bytes.)
