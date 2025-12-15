@@ -77,7 +77,6 @@ Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“
 >
 > 👉 Weiter zu **[5.2.4 Data & Research](../0524_data_research_whitebox/README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
-> 
-> 🔙 Zurück zu **[5.1 Whitebox Gesamtsystem](../051_blackbox/051_blackbox.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+
 
