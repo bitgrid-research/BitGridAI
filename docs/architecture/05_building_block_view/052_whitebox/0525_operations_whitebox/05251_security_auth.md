@@ -2,11 +2,15 @@
 
 Der Türsteher am Systemeingang.
 
-Dieses Modul sorgt dafür, dass **nur berechtigte Akteure schreiben dürfen** –  
-Overrides, Exporte und Konfigurationsänderungen sind geschützt, lokal und kontrolliert.
+Dieses Modul entscheidet nicht, **was** BitGridAI tut –  
+sondern **wer es darf**.
+
+Security & Auth schützt alle **schreibenden Pfade**:
+Overrides, Exporte und Konfigurationsänderungen.
+Alles bleibt lokal, kontrolliert und nachvollziehbar.
 
 Kein Cloud-Login.  
-Keine versteckten Identitäten.  
+Keine impliziten Identitäten.  
 Nur klare Regeln im eigenen Netz.
 
 *(Platzhalter für ein Bild: Der Hamster steht vor einer Tür mit Schloss und Klemmbrett.
@@ -19,27 +23,30 @@ Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
 
 - Lokale Authentifizierung (LAN-first)
 - Durchsetzung von Rollen und Policies
-- Rate Limits für alle schreibenden Pfade
+- Schutz aller schreibenden Endpunkte durch Rate Limits
 
 ---
 
 ## Struktur
 
 - **Auth Gate**  
-  Token- und LAN-basierte Zugriffskontrolle, optional gekoppelt an Home-Assistant-User.
+  Token- und LAN-basierte Zugriffskontrolle,  
+  optional gekoppelt an lokale Home-Assistant-User.
 
 - **Role / Policy Check**  
-  Rollen (Operator / Observer) und Ressourcenscopes (Override, Export, Config).
+  Durchsetzung von Rollen (*Operator*, *Observer*)  
+  und Ressourcenscopes (Override, Export, Config).
 
 - **Rate Limiter**  
-  Schutz kritischer Endpoints vor Missbrauch oder Fehlbedienung.
+  Begrenzt schreibende Aktionen zum Schutz vor
+  Fehlbedienung, Loops oder Missbrauch.
 
 ---
 
 ## Schnittstellen
 
 **Provided**
-- Auth- und Policy-Enforcement für API, WebSocket und Export-Pfade
+- Auth- und Policy-Enforcement für API-, WebSocket- und Export-Pfade
 
 **Required**
 - Lokale User- und Rolleninformationen
@@ -50,19 +57,32 @@ Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
 
 ## Ablauf (vereinfacht)
 
-1) Request trifft ein → **Auth Gate** prüft Token und LAN-Herkunft  
-2) **Role / Policy Check** validiert Rolle und Scope  
+1) Anfrage trifft ein → **Auth Gate** prüft Token und LAN-Herkunft  
+2) **Role / Policy Check** validiert Rolle und Ressourcenscope  
 3) **Rate Limiter** begrenzt schreibende Aktionen  
-4) Anfrage wird freigegeben oder abgelehnt (mit Log-Eintrag)
+4) Anfrage wird freigegeben oder abgelehnt (inkl. Log-Eintrag)
 
 ---
 
 ## Qualitäts- und Betriebsaspekte
 
-- **Local-only:** keine externen Auth-Provider, keine Cloud-Abhängigkeit  
-- **Minimal offen:** nur notwendige Ports und Endpoints  
-- **Nachvollziehbar:** Logs für Auth-Fails, Policy-Drops und Rate-Limit-Treffer  
+- **Local-only**  
+  Keine externen Auth-Provider, keine Cloud-Abhängigkeit.
+
+- **Minimal offen**  
+  Nur notwendige Ports und Endpoints sind erreichbar.
+
+- **Nachvollziehbar**  
+  Logs für Auth-Fails, Policy-Drops und Rate-Limit-Treffer.
 
 ---
-> 🔙 Zurück zu **[5.2.5.x Operations (Level 3)](./README.md)**  
+
+> **Nächster Schritt:**  
+> Zugriffe sind nun kontrolliert.  
+> Als Nächstes kümmern wir uns um Konfiguration und Feature-Steuerung.
+>
+> 👉 Weiter zu **[5.2.5.2 Configuration & Feature Flags](./05252_config_feature_flags.md)**
+>
+> 🔙 Zurück zu **[5.2.5 Operations (Level 3)](./README.md)**
+>
 > 🔙 Zurück zu **[5.2.5 Whitebox Operations](../0525_operations_whitebox.md)**
