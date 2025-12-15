@@ -8,8 +8,7 @@ Er sorgt dafür, dass Regeln, Vorschauen und Replays **auf konsistenten, validie
 *(Platzhalter für ein Bild: Der Hamster sitzt an einem großen Tisch voller Messgeräte. Pfeile führen von PV, Batterie, Stromzähler und Wetterdaten in ein einziges, ordentlich beschriftetes Kästchen: „EnergyState“.)*
 ![Hamster sammelt Messwerte](../media/pixel_art_energy_context.png)
 
-
----
+&nbsp;
 
 ## Verantwortung
 
@@ -18,7 +17,7 @@ Er sorgt dafür, dass Regeln, Vorschauen und Replays **auf konsistenten, validie
 - Erzwingt Mindest-Vollständigkeit pro Block
 - Liefert konsistente Snapshots für Regeln und Previews
 
----
+&nbsp;
 
 ## Struktur
 
@@ -36,7 +35,7 @@ Er sorgt dafür, dass Regeln, Vorschauen und Replays **auf konsistenten, validie
 - **Snapshot Cache**  
   Hält das letzte konsistente `EnergyState` für Rule Engine, Preview und Explain bereit.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -51,7 +50,7 @@ Er sorgt dafür, dass Regeln, Vorschauen und Replays **auf konsistenten, validie
 - Geräte- und Einheitenprofile
 - Zeitquelle
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -63,7 +62,7 @@ Er sorgt dafür, dass Regeln, Vorschauen und Replays **auf konsistenten, validie
 4. Der Snapshot Cache liefert einen konsistenten `EnergyState` an  
    Rule Engine, UI/Explain und Logging.
 
----
+&nbsp;
 
 ## Qualität und Betrieb
 
