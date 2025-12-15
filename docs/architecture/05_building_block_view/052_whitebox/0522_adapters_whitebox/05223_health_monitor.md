@@ -53,4 +53,22 @@ Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI un
 1. Heartbeat Sender publiziert regelmäßig Statusmeldungen.  
 2. Watchdog verfolgt Telemetrie- und Quittungseingänge; bei Timeout → Warnung oder Error.  
 3. Degradation Classifier bewertet den Zustand und bestimmt die Schwere.  
-4. Notifier
+4. Notifier sendet Events an Core und UI; Data persistiert den Health-Log.
+
+---
+
+## Qualität und Betrieb
+
+- **Feingranulare Schwellen**  
+  Pro Gerät und Protokoll konfigurierbar, keine globalen One-size-Fits-all-Werte.
+
+- **Entkopplung**  
+  Ein Adapter-Ausfall blockiert den Core nicht.
+
+- **Resilienz**  
+  Optionale Selbstheilung: automatischer Reconnect oder Restart mit Backoff.
+
+---
+> 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox.md)**
+> 
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
