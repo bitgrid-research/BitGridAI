@@ -8,7 +8,8 @@ Wie es innen aussieht, folgt in Level 2.
 
 ![Hamster vor der System-Blackbox mit klar definierten Ein- und Ausgängen](../media/pixel_art_hamster_blackbox.png)
 
----
+
+&nbsp;
 
 ## Scope und Verantwortung
 
@@ -18,7 +19,8 @@ BitGridAI übernimmt folgende Aufgaben:
 - Erklärbare Entscheidungen mit klaren Triggern und Parametern.
 - Kein Cloud-Zwang: alle relevanten Schnittstellen laufen lokal (MQTT, REST, Datei).
 
----
+
+&nbsp;
 
 ## Top-Level-Bausteine  
 *(Blackboxes innerhalb der System-Blackbox)*
@@ -32,7 +34,8 @@ BitGridAI übernimmt folgende Aufgaben:
 
 > Die detaillierte Innenansicht dieser Bausteine folgt in **Kapitel 5.2**.
 
----
+
+&nbsp;
 
 ## Externe Schnittstellen (stabil)
 
@@ -45,7 +48,8 @@ BitGridAI übernimmt folgende Aufgaben:
   `data/parquet/*.parq`,  
   `explain/*.json` (Textbausteine)
 
----
+
+&nbsp;
 
 ## Ein- und Ausgänge der System-Blackbox
 
@@ -61,7 +65,8 @@ BitGridAI übernimmt folgende Aufgaben:
   State- und Timeline-Feeds,  
   Export-Bundles für Replays.
 
----
+
+&nbsp;
 
 ## Randbedingungen
 
@@ -69,8 +74,9 @@ BitGridAI übernimmt folgende Aufgaben:
 - **Safety-first:** Schutzmechanismen (Temperatur, Autarkie) übersteuern Optimierung.
 - **Datenhoheit:** Alle Daten bleiben lokal; Exporte nur bei explizitem Opt-in.
 
----
+&nbsp;
 
+---
 > **Nächster Schritt:**  
 > Die Anschlüsse sind klar. Jetzt öffnen wir die Bausteine.
 >
