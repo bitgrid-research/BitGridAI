@@ -73,6 +73,12 @@ Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
 - **Kontrolliert:** Speichergrenzen und Retention-Policies konfigurierbar.
 
 ---
-
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**  
+> **Nächster Schritt:** Daten sind gespeichert und erklärbar.  
+> Jetzt sichern wir den Betrieb ab: Zugriff, Konfiguration und Beobachtbarkeit.
+>
+> 👉 Weiter zu **[5.2.5 Operations (Security, Config & Observability)](../0525_operations_whitebox/README.md)**
+>
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+> 
 > 🔙 Zurück zu **[5.1 Whitebox Gesamtsystem](../051_blackbox/051_blackbox.md)**
+
