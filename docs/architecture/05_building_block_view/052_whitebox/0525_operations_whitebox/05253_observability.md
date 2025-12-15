@@ -61,8 +61,8 @@ Diagramme zeigen Health, Last und Warnsymbole.)*
 > Sicherheit, Konfiguration und Beobachtbarkeit sind definiert.
 > BitGridAI ist nun **steuerbar, erklärbar und betreibbar**.
 >
-> 👉 Weiter zu **[06 Laufzeitsicht](../../06_runtime_view/README.md)**
+> 👉 Weiter zu **[06 Laufzeitsicht](../../../06_runtime_view/README.md)**
 >
-> 🔙 Zurück zu **[5.2.5 Operations (Level 3)](./README.md)**
+> 🔙 Zurück zu **[5.2.5 Operations (Security, Config & Observability)](./README.md)**
 >
-> 🔙 Zurück zu **[5.2.5 Whitebox Operations](../0525_operations_whitebox.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
