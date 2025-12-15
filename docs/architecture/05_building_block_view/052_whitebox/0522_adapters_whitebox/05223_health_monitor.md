@@ -9,7 +9,7 @@ Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI un
 Über jedem Gerät leuchtet eine Ampel: grün, gelb oder rot.)*
 ![Hamster überwacht Systemgesundheit](../media/pixel_art_health_monitor.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -18,7 +18,7 @@ Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI un
 - Erkennung von Ausfällen und Degradierungen
 - Transparente Weitergabe von Health-Status an Core, UI und Logging
 
----
+&nbsp;
 
 ## Struktur
 
@@ -34,7 +34,7 @@ Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI un
 - **Notifier**  
   Sendet Health-Events auf `health/#` und an das Logging.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -46,7 +46,7 @@ Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI un
 - Signale über eingehende Telemetrie und Quittungen
 - Konfiguration für Heartbeat-Intervalle und Schwellenwerte
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -55,7 +55,7 @@ Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI un
 3. Degradation Classifier bewertet den Zustand und bestimmt die Schwere.  
 4. Notifier sendet Events an Core und UI; Data persistiert den Health-Log.
 
----
+&nbsp;
 
 ## Qualität und Betrieb
 
