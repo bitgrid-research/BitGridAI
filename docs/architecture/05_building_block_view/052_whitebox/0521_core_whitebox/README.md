@@ -1,4 +1,4 @@
-# 05.2.1 Whitebox Core-Orchestrierung
+# 5.2.1 Whitebox: Core-Orchestrierung
 
 Scope: deterministische Steuerung im 10-Minuten-Takt, Regeln R1-R5, Pflege des `EnergyState` als Single Source of Truth.
 
@@ -13,10 +13,10 @@ Scope: deterministische Steuerung im 10-Minuten-Takt, Regeln R1-R5, Pflege des `
 
 ## Level-3-Details
 
-- [5.2.1.1 Block-Scheduler](./0521_core_whitebox/05211_block_scheduler.md)
-- [5.2.1.2 Energy Context](./0521_core_whitebox/05212_energy_context.md)
-- [5.2.1.3 Rule Engine](./0521_core_whitebox/05213_rule_engine.md)
-- [5.2.1.4 Override Handler](./0521_core_whitebox/05214_override_handler.md)
+- [5.2.1.1 Block-Scheduler](./05211_block_scheduler.md)  
+- [5.2.1.2 Energy Context](./05212_energy_context.md)
+- [5.2.1.3 Rule Engine](./05213_rule_engine.md)
+- [5.2.1.4 Override Handler](./05214_override_handler.md)
 
 ## Schnittstellen
 
