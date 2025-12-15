@@ -34,4 +34,4 @@ Die Bausteinsicht ist in zwei Ebenen gegliedert:
 >
 > 👉 Weiter zu **[06 Laufzeitsicht](../06_runtime_view/README.md)**
 > 
-> 🔙 Zurück zur **[Hauptübersicht](../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
