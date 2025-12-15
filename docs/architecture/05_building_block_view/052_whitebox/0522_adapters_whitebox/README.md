@@ -82,6 +82,11 @@ und übersetzt sie in eine Form, die der Core versteht.
   Harte Grenzwerte für Leistung und Temperatur pro Gerät.
 
 ---
+> **Nächster Schritt:** Die Leitungen sitzen. Jetzt geben wir dem System ein Gesicht und eine Stimme:
+> UI, Erklärungen und kontrollierte Eingriffe.
+>
+> 👉 Weiter zu **[5.2.3 UI & Explainability](../0523_ui_explain_whitebox/README.md)**
+>
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
 > 
 > 🔙 Zurück zu **[5.1 Whitebox Gesamtsystem](../051_blackbox/051_blackbox.md)**
