@@ -10,7 +10,7 @@ So bleibt die Adapter-Logik sauber – und neue Hardware austauschbar.
 Auf jedem Blatt ein anderes Gerät mit Symbolen für Leistung, Temperatur und Limits.)*
 ![Hamster verwaltet Geräteprofile](../media/pixel_art_device_profiles.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -19,7 +19,7 @@ Auf jedem Blatt ein anderes Gerät mit Symbolen für Leistung, Temperatur und Li
 - Bereitstellung konsistenter Capabilities für alle Adapter
 - Änderbarkeit ohne Code-Anpassung
 
----
+&nbsp;
 
 ## Struktur
 
@@ -36,7 +36,7 @@ Auf jedem Blatt ein anderes Gerät mit Symbolen für Leistung, Temperatur und Li
 - **Reload Hook**  
   Ermöglicht Live-Reload der Profile ohne Dienstneustart.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -49,7 +49,7 @@ Auf jedem Blatt ein anderes Gerät mit Symbolen für Leistung, Temperatur und Li
 - Schema-Definition
 - Optional: Signatur oder Checksum zur Integritätsprüfung
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -57,7 +57,7 @@ Auf jedem Blatt ein anderes Gerät mit Symbolen für Leistung, Temperatur und Li
 2. Capability Mapper stellt Capabilities für Ingest und Writer bereit.  
 3. Bei Reload werden Änderungen aktiv, Version wird erhöht; Health meldet das Ereignis.
 
----
+&nbsp;
 
 ## Qualität und Betrieb
 
