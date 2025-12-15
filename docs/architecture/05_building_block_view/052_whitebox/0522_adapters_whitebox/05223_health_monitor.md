@@ -69,6 +69,11 @@ Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI un
   Optionale Selbstheilung: automatischer Reconnect oder Restart mit Backoff.
 
 ---
+> **Nächster Schritt:** Geräte unterscheiden sich.  
+> Jetzt kapseln wir Herstellerlogik, Limits und Fähigkeiten sauber.
+>
+> 👉 Weiter zu **[5.2.2.4 Device Profiles](./05224_device_profiles.md)**
+>
 > 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox.md)**
 > 
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
