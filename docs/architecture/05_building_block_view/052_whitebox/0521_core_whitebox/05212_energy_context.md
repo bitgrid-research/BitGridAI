@@ -1,32 +1,83 @@
 # 05.2.1.2 Energy Context
 
-Verantwortung: konsolidiert Telemetrie und Forecasts zum `EnergyState` (Single Source of Truth), validiert Einheiten und Zeitstempel, stellt Snapshots fuer Regel- und Preview-Pfade bereit.
+Die Quelle der Wahrheit.
+
+Der Energy Context konsolidiert Telemetrie und Forecasts zum **`EnergyState`** – der **Single Source of Truth** im System.  
+Er sorgt dafür, dass Regeln, Vorschauen und Replays **auf konsistenten, validierten Daten** arbeiten.
+
+*(Platzhalter für ein Bild: Der Hamster sitzt an einem großen Tisch voller Messgeräte. Pfeile führen von PV, Batterie, Stromzähler und Wetterdaten in ein einziges, ordentlich beschriftetes Kästchen: „EnergyState“.)*
+![Hamster sammelt Messwerte](../media/pixel_art_energy_context.png)
+
+
+---
+
+## Verantwortung
+
+- Konsolidiert alle Messwerte und Prognosen
+- Normalisiert Einheiten und Zeitstempel
+- Erzwingt Mindest-Vollständigkeit pro Block
+- Liefert konsistente Snapshots für Regeln und Previews
+
+---
 
 ## Struktur
 
-- **Input Normalizer:** wandelt Rohdaten in SI-Einheiten, prueft Plausibilitaet.
-- **State Builder:** fuehrt Werte zusammen (PV, Last, Netz, Speicher, Temperaturen, Preise, Forecasts).
-- **Completeness Guard:** erzwingt Mindest-Signale pro Block (z.B. Grid + PV + Miner-Temp), markiert fehlende Daten.
-- **Snapshot Cache:** stellt letztes konsistentes `EnergyState` fuer Rule Engine und Preview bereit.
+- **Input Normalizer**  
+  Wandelt Rohdaten in SI-Einheiten, prüft Plausibilität und versieht sie mit Zeitstempeln.
+
+- **State Builder**  
+  Führt Werte zusammen (PV, Last, Netz, Speicher, Temperaturen, Preise, Forecasts)  
+  und berechnet abgeleitete Größen (z.B. `surplus_kw`).
+
+- **Completeness Guard**  
+  Erzwingt Pflichtsignale pro Block (z.B. Grid + PV + Miner-Temp).  
+  Markiert fehlende Daten und setzt den Status auf *degraded*.
+
+- **Snapshot Cache**  
+  Hält das letzte konsistente `EnergyState` für Rule Engine, Preview und Explain bereit.
+
+---
 
 ## Schnittstellen
 
-- **Provided:** `EnergyState` Snapshots, Fehler/Warnings bei fehlenden/inkonsistenten Daten, Metadaten (Quelle, Zeitbasis).
-- **Required:** Telemetrie aus Adaptern (PV, Meter, Storage, Miner), Forecast/Preise, Einheiten-Profile (Device Profiles), Zeitquelle.
+**Provided**
+- `EnergyState` Snapshots
+- Warnings und Errors bei fehlenden oder inkonsistenten Daten
+- Metadaten (Quelle, Zeitbasis, Qualität)
+
+**Required**
+- Telemetrie aus Adaptern (PV, Meter, Storage, Miner)
+- Forecasts und Preise
+- Geräte- und Einheitenprofile
+- Zeitquelle
+
+---
 
 ## Ablauf (vereinfacht)
 
-1) Eingangsdaten treffen ein (MQTT/REST/Modbus) -> Input Normalizer wandelt und stempelt.  
-2) State Builder aggregiert Werte, berechnet abgeleitete Groessen (z.B. `surplus_kw`).  
-3) Completeness Guard prueft Pflichtfelder; bei Luecken: Status=degraded, optional Halten des letzten guten Wertes.  
-4) Snapshot Cache liefert konsistenten `EnergyState` an Rule Engine, UI/Explain und Logging.
-
-## Qualitaet und Betrieb
-
-- Einheitensicherheit: alle internen Werte in SI; Ablehnung oder Korrektur mit Flag bei Abweichung.  
-- Zeitkonsistenz: maximaler Drift zwischen Eingaben konfigurierbar; sonst Degradation/Fail-safe.  
-- Nachvollziehbarkeit: jedes Feld traegt Quelle und Timestamp fuer Audits/Replays.
+1. Eingangsdaten treffen ein (MQTT / REST / Modbus).  
+   Der Input Normalizer wandelt, prüft und stempelt.
+2. Der State Builder aggregiert Werte und berechnet abgeleitete Größen.
+3. Der Completeness Guard prüft Pflichtfelder.  
+   Bei Lücken: Status *degraded*, optional Halten des letzten gültigen Werts.
+4. Der Snapshot Cache liefert einen konsistenten `EnergyState` an  
+   Rule Engine, UI/Explain und Logging.
 
 ---
-> Zurueck zu **[5.2.1.x Core-Orchestrierung (Level 3)](./README.md)**  
-> Zurueck zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**
+
+## Qualität und Betrieb
+
+- **Einheitensicherheit**  
+  Alle internen Werte in SI. Abweichungen werden markiert oder verworfen.
+
+- **Zeitkonsistenz**  
+  Maximaler Drift zwischen Eingaben ist konfigurierbar.  
+  Überschreitung führt zu Degradation oder Fail-safe.
+
+- **Nachvollziehbarkeit**  
+  Jedes Feld trägt Quelle und Timestamp – audit- und replayfähig.
+
+---
+
+> 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**  
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
