@@ -24,7 +24,7 @@ Genug Informationen zum **Andocken** – bewusst keine Details zum Innenleben.
 Die Blackbox-Sicht wird in einem zentralen Dokument beschrieben:
 
 - **[5.1.1 System-Blackbox & Schnittstellen](./051_blackbox.md)**  
-  Verantwortlichkeiten des Gesamtsystems, externe Nachbarn sowie die wichtigsten Ein- und Ausgänge von BitGridAI.
+  * Welche Verantwortung trägt BitGridAI als Gesamtsystem, welche externen Nachbarn existieren und welche zentralen Ein- und Ausgänge definieren die Systemgrenze?
 
 ---
 
