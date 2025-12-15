@@ -1,32 +1,78 @@
 # 05.2.2.1 Telemetry Ingest
 
-Verantwortung: nimmt Telemetrie aus Feldgeraeten entgegen (MQTT/REST/Modbus), normalisiert Einheiten, stempelt Zeit und leitet konsistente Werte an den Core weiter.
+Die Sinnesorgane des Systems.
+
+Der Telemetry Ingest nimmt **Messdaten aus der realen Welt** entgegen und macht sie
+für den Core nutzbar.  
+Er übersetzt Rohsignale in **saubere, zeitlich konsistente Werte** – bevor irgendeine
+Regel sie sieht.
+
+*(Platzhalter für ein Bild: Der Hamster trägt eine Schutzbrille und sortiert Messwerte
+durch Trichter. Links kommen chaotische Zahlen aus Kabeln, rechts fallen saubere
+SI-Werte mit Zeitstempel heraus.)*
+![Hamster verarbeitet Telemetrie](../media/pixel_art_telemetry_ingest.png)
+
+---
+
+## Verantwortung
+
+- Entgegennahme von Telemetrie aus Feldgeräten (MQTT / REST / Modbus)
+- Normalisierung aller Werte auf SI-Einheiten
+- Harmonisierung von Zeitstempeln
+- Weiterleitung **konsistenter Messwerte** an den Core
+
+---
 
 ## Struktur
 
-- **MQTT/REST/Modbus Reader:** abonniert bzw. pollt Topics/Endpoints/Registers.
-- **Unit Normalizer:** konvertiert in SI-Einheiten (kW, V, A, C, Wh), markiert Abweichungen.
-- **Timestamp Harmonizer:** gleicht Zeitbasis ab, korrigiert oder verwirft alte/zu neue Werte.
-- **Publisher to Core:** schreibt normalisierte Daten in den Core-State-Kanal.
+- **MQTT / REST / Modbus Reader**  
+  Abonniert Topics, pollt Endpoints oder liest Register.
+
+- **Unit Normalizer**  
+  Konvertiert Rohdaten in SI-Einheiten (kW, V, A, °C, Wh) und markiert Abweichungen.
+
+- **Timestamp Harmonizer**  
+  Gleicht Zeitbasis ab, korrigiert leichte Abweichungen oder verwirft Ausreißer.
+
+- **Publisher to Core**  
+  Schreibt normalisierte Daten in den Core-State-Kanal.
+
+---
 
 ## Schnittstellen
 
-- **Provided:** normalisierte Messwerte (MQTT `sensor/#`, `meter/#`), Status/Warnungen bei Inkonsistenzen.
-- **Required:** Broker/Endpoint-Zugriff, Device Profiles (Mapping/Skalierung), Zeitquelle.
+**Provided**
+- Normalisierte Messwerte (`sensor/#`, `meter/#`)
+- Status- und Warnmeldungen bei Inkonsistenzen
+
+**Required**
+- Broker- oder Endpoint-Zugriff
+- Device Profiles (Mapping, Skalierung)
+- Zeitquelle
+
+---
 
 ## Ablauf (vereinfacht)
 
-1) Reader erfasst Rohwerte -> Unit Normalizer wendet Profile an.  
-2) Timestamp Harmonizer prueft Drift; bei Grenzverletzung Warnung/Drop.  
-3) Publisher sendet normalisierte Payload an Core (`EnergyState` Update).  
-4) Optional: Ack/Health-Flag pro Quelle.
-
-## Qualitaet und Betrieb
-
-- Nur SI-Einheiten nach innen; Fehlmessungen werden markiert statt still korrigiert.  
-- Retained MQTT-Topics fuer schnellen Start; dennoch mit Altersgrenze.  
-- Rate-Limits gegen Fluten; Backpressure bei Broker-Ausfall (Persistenz optional).
+1. Reader erfasst Rohwerte → Unit Normalizer wendet Device Profiles an.  
+2. Timestamp Harmonizer prüft Zeitdrift; bei Grenzverletzung Warnung oder Drop.  
+3. Publisher sendet normalisierte Payloads an den Core (`EnergyState`-Update).  
+4. Optional: Ack- oder Health-Flag pro Quelle.
 
 ---
-> Zurueck zu **[5.2.2.x Adapter und Feld-I/O (Level 3)](./README.md)**  
-> Zurueck zu **[5.2.2 Whitebox Adapter und Feld-I/O](../0522_adapters_whitebox.md)**
+
+## Qualität und Betrieb
+
+- **Einheitensicherheit**  
+  Nach innen ausschließlich SI-Einheiten; Fehlmessungen werden markiert, nicht still korrigiert.
+
+- **Zeitkonsistenz**  
+  Retained MQTT-Topics für schnellen Start, jedoch mit Altersgrenze.
+
+- **Robustheit**  
+  Rate-Limits gegen Datenfluten; Backpressure bei Broker-Ausfall (optionale Persistenz).
+
+---
+> 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox.md)**
+> 
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
