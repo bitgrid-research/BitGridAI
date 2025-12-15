@@ -80,5 +80,5 @@ Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
 >
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
 > 
-> 🔙 Zurück zu **[5.1 Whitebox Gesamtsystem](../051_blackbox/051_blackbox.md)**
+> 🔙 Zurück zu **[5.1 Blackbox Gesamtsystem](../051_blackbox/051_blackbox.md)**
 
