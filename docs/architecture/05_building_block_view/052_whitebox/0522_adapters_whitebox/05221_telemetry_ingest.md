@@ -73,6 +73,11 @@ SI-Werte mit Zeitstempel heraus.)*
   Rate-Limits gegen Datenfluten; Backpressure bei Broker-Ausfall (optionale Persistenz).
 
 ---
+> **Nächster Schritt:** Die Daten sind sauber.  
+> Jetzt müssen Entscheidungen **wirklich** in die Welt geschrieben werden.
+>
+> 👉 Weiter zu **[5.2.2.2 Actuation Writer](./05222_actuation_writer.md)**
+>
 > 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox.md)**
 > 
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
