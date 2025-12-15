@@ -68,5 +68,15 @@ Darin erscheinen alternative Energieflüsse und ein gestrichelter Pfeil zur Ents
 - **Timeboxed:** feste Laufzeitgrenzen, damit die UI reaktionsschnell bleibt.
 
 ---
-> 🔙 Zurück zu **[5.2.3.x UI und Explainability (Level 3)](./README.md)**  
-> 🔙 Zurück zu **[5.2.3 Whitebox UI und Explainability](../0523_ui_explain_whitebox.md)**
+
+> **Nächster Schritt:**  
+> Wir haben gesehen, **was passieren würde**, ohne etwas auszulösen.  
+> Jetzt verlassen wir die Benutzeroberfläche und schauen dahin, wo alles festgehalten wird:  
+> **Daten, KPIs, Replays und Forschung.**
+>
+> 👉 Weiter zu **[5.2.4 Whitebox Data & Research](../0524_data_research_whitebox/README.md)**
+>
+> 🔙 Zurück zu **[5.2.3 Whitebox UI & Explainability](./README.md)**
+>  
+> 🏠 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+
