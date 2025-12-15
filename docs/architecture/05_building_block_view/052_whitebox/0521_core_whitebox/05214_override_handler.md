@@ -8,7 +8,7 @@ Er gibt dem Nutzer gezielt Kontrolle – ohne dabei **Safety** und **Autarkie** 
 *(Platzhalter für ein Bild: Der Hamster greift mit einer Hand an einen großen roten Hebel „Override“. Daneben hängen Schilder „Safety“ und „Autarkie“, die den Hebel notfalls abbremsen.)*
 ![Hamster setzt Override](../media/pixel_art_override_handler.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -17,7 +17,7 @@ Er gibt dem Nutzer gezielt Kontrolle – ohne dabei **Safety** und **Autarkie** 
 - Prüfung auf Konflikte mit Safety- und Autarkie-Regeln
 - Transparente Rückmeldung an Nutzer und Explain-Layer
 
----
+&nbsp;
 
 ## Struktur
 
@@ -34,7 +34,7 @@ Er gibt dem Nutzer gezielt Kontrolle – ohne dabei **Safety** und **Autarkie** 
 - **Feedback Builder**  
   Bestätigt Annahme oder Ablehnung mit `command_id` und `valid_until`.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -49,7 +49,7 @@ Er gibt dem Nutzer gezielt Kontrolle – ohne dabei **Safety** und **Autarkie** 
 - Zeitquelle / Block-ID
 - Policy-Konfiguration (wer darf was)
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -58,7 +58,7 @@ Er gibt dem Nutzer gezielt Kontrolle – ohne dabei **Safety** und **Autarkie** 
 3. TTL Manager trägt Override ein und plant den Ablauf.
 4. Feedback Builder sendet Bestätigung oder Ablehnung an UI, Data und Explain.
 
----
+&nbsp;
 
 ## Qualität und Betrieb
 
