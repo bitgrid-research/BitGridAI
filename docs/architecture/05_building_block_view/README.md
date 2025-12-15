@@ -14,7 +14,7 @@ von außen nach innen, von grob nach detailliert.
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster im Maschinenraum. Vor ihm liegen einzelne Bauklötze mit Labels wie „Core“, „Adapter“, „UI“, „Data“. Er hält einen Schraubenschlüssel und sortiert die Teile.)*  
 ![Cyborg-Hamster zerlegt das System](link_zum_baustein_bild.png)
 
----
+&nbsp;
 
 ## Inhalt dieses Kapitels
 
@@ -28,7 +28,6 @@ Die Bausteinsicht ist in zwei Ebenen gegliedert:
   Core, Adapter, Explain/UI sowie Data & Research – mit klaren Zuständigkeiten.
 
 ---
-
 > **Nächster Schritt:** Die Struktur ist sichtbar.  
 > Jetzt betrachten wir, **wie diese Bausteine im Betrieb zusammenspielen**.
 >
