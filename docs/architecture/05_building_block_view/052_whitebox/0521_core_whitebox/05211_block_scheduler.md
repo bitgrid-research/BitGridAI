@@ -69,6 +69,12 @@ Der Block-Scheduler erzwingt den **10-Minuten-Rhythmus**, triggert die Regel-Aus
   jedoch ohne Mehrfach-Trigger.
 
 ---
+> **Nächster Schritt:** Der Takt steht. Jetzt schauen wir,
+> wie Messwerte und Forecasts zu einem konsistenten Zustand verschmelzen.
+>
+> 👉 Weiter zu **[5.2.1.2 Energy Context](./05212_energy_context.md)**
+>
+> 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**
+> 
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
 
-> 🔙 Zurueck zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**  
-> 🔙 Zurueck zu **[5.2 Level-2-Whiteboxes](./README.md)**
