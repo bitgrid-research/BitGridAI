@@ -71,6 +71,13 @@ Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“
 - **Nachvollziehbarkeit:** Jede User-Aktion trägt `command_id`, TTL und Status.
 
 ---
+> **Nächster Schritt:** Anzeige und Erklärung sind geklärt.  
+> Jetzt kümmern wir uns um Gedächtnis, Nachvollziehbarkeit und Forschung:
+> Speicherung, KPIs und Replays.
+>
+> 👉 Weiter zu **[5.2.4 Data & Research](../0524_data_research_whitebox/README.md)**
+>
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
 > 
 > 🔙 Zurück zu **[5.1 Whitebox Gesamtsystem](../051_blackbox/051_blackbox.md)**
+
