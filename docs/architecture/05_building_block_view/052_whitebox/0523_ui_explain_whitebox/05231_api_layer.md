@@ -1,32 +1,75 @@
 # 05.2.3.1 API-Layer
 
-Verantwortung: stellt lokale REST/WS-Schnittstellen fuer State, Timeline, Overrides, Preview/What-if und Research-Opt-in bereit; sichert Zugriffe (lokal, optional Auth) und rate-limitiert schreibende Operationen.
+Der Empfangsschalter von BitGridAI.
+
+Der API-Layer stellt die **lokalen REST- und WebSocket-Schnittstellen** bereit.
+Er ist der einzige Weg, über den UIs, Tools oder Nutzer mit dem System sprechen.
+Lesen ist günstig. Schreiben ist kontrolliert.
+
+*(Platzhalter für ein Bild: Der Hamster sitzt an einem Tresen.
+Schilder: „State“, „Timeline“, „Preview“, „Override (mit Ausweis)“.)*
+![Hamster am API-Schalter](../media/pixel_art_api_layer.png)
+
+---
+
+## Scope
+
+- Lokale REST- und WebSocket-Endpunkte
+- Zugriffskontrolle (lokal, optional Auth)
+- Rate-Limiting für schreibende Aktionen
+- Stabile, versionierte Payloads für UI und Tools
+
+---
 
 ## Struktur
 
-- **REST Handler:** Endpunkte `GET /state`, `GET /timeline`, `GET /preview`, `POST /override`, `POST /research/export`.
-- **WebSocket Hub:** broadcastet State-, Decision- und Explain-Events; verwaltet Sessions.
-- **Auth & Rate Limits:** optionaler Token-Check, Write-Rate-Limits fuer `/override`/`/export`.
-- **Serializer/DTOs:** stellt stabile Payload-Schemas bereit (z.B. `DecisionEvent`, `EnergyState`).
+- **REST Handler**  
+  Endpunkte `GET /state`, `GET /timeline`, `GET /preview`,  
+  `POST /override`, `POST /research/export`.
+
+- **WebSocket Hub**  
+  Broadcastet State-, Decision- und Explain-Events; verwaltet Sessions.
+
+- **Auth & Rate Limits**  
+  Optionaler Token-Check; verpflichtende Rate-Limits für Writes.
+
+- **Serializer / DTOs**  
+  Stabile Payload-Schemas (`EnergyState`, `DecisionEvent`, `ExplainSession`).
+
+---
 
 ## Schnittstellen
 
-- **Provided:** REST/WS fuer State/Timeline/Preview/Override/Export, Events (Decision/Explain/Health) an UI.
-- **Required:** State/DecisionEvent-Streams aus Core, Preview-Service, Override Handler, Export-Service, optional Auth-Backend.
+**Provided**
+- REST/WS für State, Timeline, Preview, Overrides und Exporte
+- Event-Streams (Decision, Explain, Health) für UI und Tools
+
+**Required**
+- State- und DecisionEvent-Streams aus dem Core
+- Preview-Service (Sandbox)
+- Override Handler
+- Export-/Research-Service
+- Optional: Auth-Backend
+
+---
 
 ## Ablauf (vereinfacht)
 
-1) Client ruft State/Timeline ab -> REST Handler liefert Snapshot.  
-2) Client abonniert WS -> erhaelt laufende State-/Decision-/Explain-Events.  
-3) Client sendet Override -> Auth/Rate Limit -> Weiterleitung an Override Handler -> Bestaetigung zurueck.  
-4) Client sendet Preview -> API ruft Preview-Service -> Antwort mit hypothetischem Outcome.
-
-## Qualitaet und Betrieb
-
-- Nur lokal exposed; Auth optional, aber Rate-Limits fuer Writes Pflicht.  
-- Stabile DTOs/versionierte Payloads; Breaking Changes mit Versionspfad.  
-- Backpressure im WS-Hub, Drop-Policy bei Ueberlast, Health-Events bei Abwurf.
+1) Client ruft `GET /state` oder `GET /timeline` ab → Snapshot.  
+2) Client verbindet sich per WebSocket → Live-Events.  
+3) Client sendet Override → Auth + Rate-Limit → Override Handler → Bestätigung.  
+4) Client sendet Preview → Preview-Service → hypothetisches Ergebnis.
 
 ---
-> Zurueck zu **[5.2.3.x UI und Explainability (Level 3)](./README.md)**  
-> Zurueck zu **[5.2.3 Whitebox UI und Explainability](../0523_ui_explain_whitebox.md)**
+
+## Qualitäts- und Betriebsaspekte
+
+- **Local-only:** keine externe Exposition, keine Cloud-Abhängigkeit.  
+- **Write-Schutz:** Rate-Limits und Validierung für `/override` und `/export`.  
+- **Stabilität:** versionierte DTOs; Breaking Changes nur mit neuer API-Version.  
+- **Robustheit:** Backpressure im WS-Hub, Drop-Policy bei Überlast, Health-Events.
+
+---
+> 🔙 Zurück zu **[5.2.3.x UI und Explainability (Level 3)](./README.md)**
+> 
+> 🔙 Zurück zu **[5.2.3 Whitebox UI und Explainability](../0523_ui_explain_whitebox.md)**
