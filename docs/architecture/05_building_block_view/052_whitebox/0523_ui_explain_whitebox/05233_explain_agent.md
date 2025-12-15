@@ -1,32 +1,73 @@
 # 05.2.3.3 Explain-Agent
 
-Verantwortung: erzeugt Explain-Sessions zu Decisions (Warum? Welcher Trigger? Welche Parameter?) und stellt sie UI/Export bereit. Hat nur Lesezugriff, keine Aktorik.
+Die Stimme des Systems.
+
+Der Explain-Agent beantwortet die entscheidende Frage:
+**„Warum macht BitGridAI das gerade?“**
+
+Er erzeugt verständliche Explain-Sessions zu jeder Entscheidung – rein lesend, ohne Einfluss auf Aktoren oder Regeln.
+
+*(Platzhalter für ein Bild: Der Hamster mit Lupe und Sprechblase.
+Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ und „Params“.)*
+![Hamster erklärt Entscheidungen](../media/pixel_art_explain_agent.png)
+
+---
+
+## Scope
+
+- Erklärungen zu Entscheidungen (Warum? Auslöser? Parameter?)
+- Zuordnung zu `decision_id` / `command_id`
+- Bereitstellung für UI und Research-Exporte
+- **Kein** Eingriff in Steuerung oder Regeln
+
+---
 
 ## Struktur
 
-- **Event Listener:** konsumiert DecisionEvents/State.  
-- **Template/LLM Engine:** generiert Texte aus Templates oder lokalem LLM.  
-- **Session Manager:** ordnet Explain-Sessions zu `command_id`/`decision_id`, versioniert Antworten.  
-- **Export Hook:** stellt Sessions fuer UI/Research bereit.
+- **Event Listener**  
+  Konsumiert `DecisionEvent` und relevante State-Snapshots.
+
+- **Template / LLM Engine**  
+  Erzeugt Texte aus Templates oder optional lokalem LLM.
+
+- **Session Manager**  
+  Versioniert Explain-Sessions und verknüpft sie mit IDs.
+
+- **Export Hook**  
+  Stellt Sessions für UI und Research bereit.
+
+---
 
 ## Schnittstellen
 
-- **Provided:** Explain-Sessions (Text/JSON) fuer UI und Export.  
-- **Required:** DecisionEvents/State, Textbausteine (`explain/*.json`), optional LLM-Backend, Auth (read-only).
+**Provided**
+- Explain-Sessions (Text / JSON)
+- Metadaten zu Regeln, Triggern und Parametern
+
+**Required**
+- `DecisionEvent` und `EnergyState`
+- Textbausteine (`explain/*.json`)
+- Optional lokales LLM-Backend (read-only)
+
+---
 
 ## Ablauf (vereinfacht)
 
-1) Event Listener erhaelt DecisionEvent/State.  
-2) Template/LLM Engine baut Erklaerung (reason/trigger/params, Bezug auf Regeln).  
-3) Session Manager speichert Session und verknuepft sie mit IDs.  
-4) UI/Export ruft Session ab oder erhaelt Push-Event.
-
-## Qualitaet und Betrieb
-
-- Read-only, keine Aktor-Kommandos.  
-- Determinismus bevorzugt: Templates + Daten statt nondeterministische LLMs; falls LLM genutzt, mit Seed/Cache.  
-- Datenschutz: keine externe API-Calls; alles lokal.
+1) DecisionEvent trifft ein.  
+2) Engine erzeugt Erklärung auf Basis von Regeln und Parametern.  
+3) Session Manager speichert und versioniert die Session.  
+4) UI erhält Push oder ruft Session gezielt ab.
 
 ---
-> Zurueck zu **[5.2.3.x UI und Explainability (Level 3)](./README.md)**  
-> Zurueck zu **[5.2.3 Whitebox UI und Explainability](../0523_ui_explain_whitebox.md)**
+
+## Qualitäts- und Betriebsaspekte
+
+- **Read-only:** keinerlei Aktorik oder Rückwirkung auf Entscheidungen.  
+- **Bevorzugt deterministisch:** Templates + Daten vor freiem LLM-Text.  
+- **Reproduzierbar:** bei LLM-Nutzung mit Seed, Cache und Versionierung.  
+- **Datenschutz:** keine externen API-Calls, alles lokal.
+
+---
+> 🔙 Zurück zu **[5.2.3.x UI und Explainability (Level 3)](./README.md)**
+> 
+> 🔙 Zurück zu **[5.2.3 Whitebox UI und Explainability](../0523_ui_explain_whitebox.md)**
