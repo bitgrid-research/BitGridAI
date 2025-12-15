@@ -1,6 +1,7 @@
 # 05.1.1 System-Blackbox und Schnittstellen
 
 Level 1 zeigt **BitGridAI als Gesamtsystem**.  
+
 Wir bleiben bewusst außen, zählen die Anschlüsse und beschreiben kurz,
 **was an jedem Stecker passiert**.  
 Wie es innen aussieht, folgt in Level 2.
