@@ -21,8 +21,7 @@ von außen nach innen, von grob nach detailliert.
 Die Bausteinsicht ist in zwei Ebenen gegliedert:
 
 - **[5.1 Level 1 – Die Blackbox (Gesamtsicht)](./051_blackbox/README.md)**  
-  BitGridAI als ein einzelner Baustein.  
-  Fokus auf Systemgrenzen, externe Schnittstellen und Verantwortung nach außen.
+  * BitGridAI als ein einzelner Baustein. (*Fokus auf Systemgrenzen, externe Schnittstellen und Verantwortung nach außen*).
 
 - **[5.2 Level 2 – Die Whitebox (Innenleben)](./052_whitebox/README.md)**  
   Aufteilung des Systems in seine Hauptbestandteile.  
@@ -33,5 +32,6 @@ Die Bausteinsicht ist in zwei Ebenen gegliedert:
 > **Nächster Schritt:** Die Struktur ist sichtbar.  
 > Jetzt betrachten wir, **wie diese Bausteine im Betrieb zusammenspielen**.
 >
-> 👉 Weiter zu **[06 Laufzeitsicht](../06_runtime_view/README.md)**  
+> 👉 Weiter zu **[06 Laufzeitsicht](../06_runtime_view/README.md)**
+> 
 > 🔙 Zurück zur **[Hauptübersicht](../../README.md)**
