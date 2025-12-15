@@ -83,6 +83,6 @@ Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
 >
 > 👉 Weiter zu **[5.2.5.2 Configuration & Feature Flags](./05252_config_feature_flags.md)**
 >
-> 🔙 Zurück zu **[5.2.5 Operations (Level 3)](./README.md)**
+> 🔙 Zurück zu **[5.2.5 Operations (Security, Config & Observability)](./README.md)**
 >
-> 🔙 Zurück zu **[5.2.5 Whitebox Operations](../0525_operations_whitebox.md)**
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
