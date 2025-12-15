@@ -12,7 +12,7 @@ durch Trichter. Links kommen chaotische Zahlen aus Kabeln, rechts fallen saubere
 SI-Werte mit Zeitstempel heraus.)*
 ![Hamster verarbeitet Telemetrie](../media/pixel_art_telemetry_ingest.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -21,7 +21,7 @@ SI-Werte mit Zeitstempel heraus.)*
 - Harmonisierung von Zeitstempeln
 - Weiterleitung **konsistenter Messwerte** an den Core
 
----
+&nbsp;
 
 ## Struktur
 
@@ -37,7 +37,7 @@ SI-Werte mit Zeitstempel heraus.)*
 - **Publisher to Core**  
   Schreibt normalisierte Daten in den Core-State-Kanal.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -50,7 +50,7 @@ SI-Werte mit Zeitstempel heraus.)*
 - Device Profiles (Mapping, Skalierung)
 - Zeitquelle
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -59,7 +59,7 @@ SI-Werte mit Zeitstempel heraus.)*
 3. Publisher sendet normalisierte Payloads an den Core (`EnergyState`-Update).  
 4. Optional: Ack- oder Health-Flag pro Quelle.
 
----
+&nbsp;
 
 ## Qualität und Betrieb
 
