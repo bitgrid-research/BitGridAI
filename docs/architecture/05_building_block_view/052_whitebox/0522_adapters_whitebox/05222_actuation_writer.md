@@ -12,7 +12,7 @@ Knöpfen „Start“, „Stop“, „Limit“. Über den Knöpfen sitzen kleine 
 und ein Häkchen „Ack received“.)*
 ![Hamster sendet Kommandos](../media/pixel_art_actuation_writer.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -21,7 +21,7 @@ und ein Häkchen „Ack received“.)*
 - Durchsetzung von Leistungs- und Sicherheitslimits
 - Idempotente Ausführung und saubere Quittierung
 
----
+&nbsp;
 
 ## Struktur
 
@@ -37,7 +37,7 @@ und ein Häkchen „Ack received“.)*
 - **Ack Tracker**  
   Wartet auf Bestätigung oder Zustandsänderung und korreliert per `command_id`.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -51,7 +51,7 @@ und ein Häkchen „Ack received“.)*
 - Device Profiles (Limits, Endpoints)
 - Zugriff auf Broker / REST / Modbus
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -60,7 +60,7 @@ und ein Häkchen „Ack received“.)*
 3. Idempotency Layer prüft/setzt `command_id` und sendet das Kommando.
 4. Ack Tracker wartet auf Quittung oder Telemetrie-Änderung und meldet zurück an Core, UI und Data.
 
----
+&nbsp;
 
 ## Qualität und Betrieb
 
