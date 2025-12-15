@@ -17,7 +17,7 @@ Nur klare Regeln im eigenen Netz.
 Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
 ![Hamster Security](../media/pixel_art_security_auth.png)
 
----
+&nbsp;
 
 ## Verantwortung
 
@@ -25,7 +25,7 @@ Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
 - Durchsetzung von Rollen und Policies
 - Schutz aller schreibenden Endpunkte durch Rate Limits
 
----
+&nbsp;
 
 ## Struktur
 
@@ -41,7 +41,7 @@ Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
   Begrenzt schreibende Aktionen zum Schutz vor
   Fehlbedienung, Loops oder Missbrauch.
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -53,7 +53,7 @@ Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
 - Netzkonfiguration (allowed hosts / Subnetze)
 - Policy-Definitionen
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -62,7 +62,7 @@ Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
 3) **Rate Limiter** begrenzt schreibende Aktionen  
 4) Anfrage wird freigegeben oder abgelehnt (inkl. Log-Eintrag)
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
@@ -76,7 +76,6 @@ Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
   Logs für Auth-Fails, Policy-Drops und Rate-Limit-Treffer.
 
 ---
-
 > **Nächster Schritt:**  
 > Zugriffe sind nun kontrolliert.  
 > Als Nächstes kümmern wir uns um Konfiguration und Feature-Steuerung.
