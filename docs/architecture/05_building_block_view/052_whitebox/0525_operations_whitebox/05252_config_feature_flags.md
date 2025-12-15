@@ -2,9 +2,12 @@
 
 Der Werkzeugkasten für Verhalten.
 
-Dieses Modul definiert, **wie sich BitGridAI verhält**, ohne Code anzufassen.
-Profile, Defaults und Feature Flags werden sauber geladen, geprüft und verteilt –  
-Änderungen greifen **ohne Neustart**.
+Dieses Modul legt fest, **wie sich BitGridAI verhält**, ohne dass Code geändert werden muss.
+Profile, Defaults und Feature Flags werden konsistent geladen, geprüft und verteilt –  
+Änderungen greifen **zur Laufzeit**, ohne Neustart.
+
+Konfiguration ist hier kein Nebenschauplatz,  
+sondern ein **kontrollierter Teil der Architektur**.
 
 *(Platzhalter für ein Bild: Der Hamster steht vor einem offenen Werkzeugkasten.
 YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload“ sind sichtbar.)*
@@ -15,8 +18,8 @@ YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload�
 ## Verantwortung
 
 - Laden und Validieren von Konfigurationsprofilen
-- Verteilen von Feature Flags und Defaults
-- Sichere Reloads zur Laufzeit
+- Zentrale Verwaltung von Feature Flags und Defaults
+- Sichere Reloads während des laufenden Betriebs
 
 ---
 
@@ -26,13 +29,13 @@ YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload�
   Lädt `config/*.yaml`, prüft Schemas und setzt explizite Defaults.
 
 - **Integrity Check**  
-  Optionale Signatur- oder Checksum-Prüfung gegen Manipulation.
+  Optionale Signatur- oder Checksum-Prüfung zum Schutz vor Manipulation.
 
 - **Flag Dispatcher**  
-  Verteilt Flags und Profile an Core, Adapter und UI.
+  Verteilt Flags, Profile und Defaults an Core, Adapter und UI.
 
 - **Reload Hook**  
-  Erkennt Änderungen, führt Reloads durch und versioniert den Zustand.
+  Erkennt Änderungen, führt Reloads durch und versioniert den Konfigurationszustand.
 
 ---
 
@@ -45,26 +48,38 @@ YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload�
 **Required**
 - Konfigurationsdateien (`config/*.yaml`)
 - Schema-Definitionen
-- Optional: Signaturen/Checksummen
+- Optional: Signaturen oder Checksummen
 
 ---
 
 ## Ablauf (vereinfacht)
 
-1) **Config Loader** liest Dateien und prüft Schema/Integrität  
-2) **Flag Dispatcher** verteilt Werte an Abnehmer  
-3) **Reload Hook** aktiviert Änderungen und erhöht die Konfigurationsversion  
+1) **Config Loader** liest Dateien und prüft Schema und Integrität  
+2) **Flag Dispatcher** verteilt Konfigurationen an alle Abnehmer  
+3) **Reload Hook** aktiviert Änderungen und erhöht die Versionsnummer  
 4) Reload wird geloggt und als Event veröffentlicht
 
 ---
 
 ## Qualitäts- und Betriebsaspekte
 
-- **Explizit:** keine stillen Defaults, alles ist benannt  
-- **Nachvollziehbar:** Versionierung und Logs bei jedem Reload  
-- **Robust:** Fallback-Profile für Minimalbetrieb bei Fehlern  
+- **Explizit**  
+  Keine stillen Defaults – jede Konfiguration ist benannt und dokumentiert.
+
+- **Nachvollziehbar**  
+  Jede Änderung ist versioniert und im Log sichtbar.
+
+- **Robust**  
+  Fallback-Profile ermöglichen Minimalbetrieb bei fehlerhaften Konfigurationen.
 
 ---
 
-> 🔙 Zurück zu **[5.2.5.x Operations (Level 3)](./README.md)**  
+> **Nächster Schritt:**  
+> Sicherheit und Konfiguration stehen.  
+> Jetzt machen wir den Systemzustand sichtbar.
+>
+> 👉 Weiter zu **[5.2.5.3 Observability & Monitoring](./05253_observability.md)**
+>
+> 🔙 Zurück zu **[5.2.5 Operations (Level 3)](./README.md)**
+>
 > 🔙 Zurück zu **[5.2.5 Whitebox Operations](../0525_operations_whitebox.md)**
