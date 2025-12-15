@@ -2,7 +2,7 @@
 
 Jetzt geht die Klappe auf.
 
-Auf dieser Ebene oeffnen wir die wichtigsten Bausteine aus der System-Whitebox und schauen hinein:  
+Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox und schauen hinein:  
 **Was macht welcher Teil, wofuer ist er verantwortlich und ueber welche Schnittstellen arbeitet er?**
 
 *(Platzhalter fuer ein Bild: Der Hamster hat die Box geoeffnet. Innen sieht man klar getrennte Module mit Labels wie „Core“, „Adapter“, „UI“, „Data“.)*  
@@ -18,7 +18,7 @@ Auf dieser Ebene oeffnen wir die wichtigsten Bausteine aus der System-Whitebox u
 
 - **[5.2.2 Adapter & Feld-I/O](../052_whitebox/0522_adapters_whitebox/README.md)**  
   Anbindung von PV, Speicher, Smart Meter und Miner ueber MQTT, REST und Modbus.  
-  *(Uebersetzer zwischen Strom und Bytes.)*
+  *(Übersetzer zwischen Strom und Bytes.)*
 
 - **[5.2.3 UI & Explainability](../052_whitebox/0523_ui_explain_whitebox/README.md)**  
   Web-UI, API-Layer und Explain-Agent fuer Transparenz, Vorschau und Overrides.  
@@ -35,10 +35,10 @@ Auf dieser Ebene oeffnen wir die wichtigsten Bausteine aus der System-Whitebox u
 ---
 
 > **Nächster Schritt:** Jetzt sehen wir, *was* es gibt.  
-> Im naechsten Kapitel betrachten wir, *wie* diese Bausteine im Betrieb zusammenspielen.
+> Im nächsten Kapitel betrachten wir, *wie* diese Bausteine im Betrieb zusammenspielen.
 >
 > 👉 Weiter zu **[06 Laufzeitsicht](../../06_runtime_view/README.md)**
 > 
-> 🔙 Zurueck zu **[5.1 Blackbox Gesamtsystem](../051_blackbox/051_blackbox.md)**
+> 🔙 Zurück zu **[5.1 Blackbox Gesamtsystem](../051_blackbox/051_blackbox.md)**
 > 
-> 🔙 Zurueck zur **[Kapiteluebersicht](../README.md)**
+> 🔙 Zurück zur **[Kapitelübersicht](../README.md)**
