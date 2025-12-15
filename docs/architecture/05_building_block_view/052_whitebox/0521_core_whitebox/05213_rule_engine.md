@@ -79,6 +79,11 @@ Keine Statistik. Kein Raten. Keine Magie.
   Kein implizites Verhalten, kein „weil halt so“.
 
 ---
+> **Nächster Schritt:** Entscheidungen sind gefällt – jetzt prüfen wir, wann und wie der Mensch eingreifen darf.
+>
+> 👉 Weiter zu **[5.2.1.4 Override Handler](./05214_override_handler.md)**
+>
 > 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](../0521_core_whitebox.md)**
 > 
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+
