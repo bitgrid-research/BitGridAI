@@ -68,6 +68,14 @@ Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ u
 - **Datenschutz:** keine externen API-Calls, alles lokal.
 
 ---
-> 🔙 Zurück zu **[5.2.3.x UI und Explainability (Level 3)](./README.md)**
+
+> **Nächster Schritt:**  
+> Wir wissen jetzt, **warum** Entscheidungen getroffen werden.  
+> Im nächsten Baustein schauen wir uns an, **was passiert wäre**, wenn sich die Rahmenbedingungen geändert hätten – ohne echte Eingriffe.
+>
+> 👉 Weiter zu **[5.2.3.4 Preview / What-if](./05234_preview.md)**
+>
+> 🔙 Zurück zur **[5.2.3 Whitebox UI & Explainability](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2.3 Whitebox UI und Explainability](../0523_ui_explain_whitebox.md)**
+> 🏠 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+
