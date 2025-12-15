@@ -10,7 +10,7 @@ Lesen ist günstig. Schreiben ist kontrolliert.
 Schilder: „State“, „Timeline“, „Preview“, „Override (mit Ausweis)“.)*
 ![Hamster am API-Schalter](../media/pixel_art_api_layer.png)
 
----
+&nbsp;
 
 ## Scope
 
@@ -19,7 +19,7 @@ Schilder: „State“, „Timeline“, „Preview“, „Override (mit Ausweis)�
 - Rate-Limiting für schreibende Aktionen
 - Stabile, versionierte Payloads für UI und Tools
 
----
+&nbsp;
 
 ## Struktur
 
@@ -36,7 +36,7 @@ Schilder: „State“, „Timeline“, „Preview“, „Override (mit Ausweis)�
 - **Serializer / DTOs**  
   Stabile Payload-Schemas (`EnergyState`, `DecisionEvent`, `ExplainSession`).
 
----
+&nbsp;
 
 ## Schnittstellen
 
@@ -51,7 +51,7 @@ Schilder: „State“, „Timeline“, „Preview“, „Override (mit Ausweis)�
 - Export-/Research-Service
 - Optional: Auth-Backend
 
----
+&nbsp;
 
 ## Ablauf (vereinfacht)
 
@@ -60,7 +60,7 @@ Schilder: „State“, „Timeline“, „Preview“, „Override (mit Ausweis)�
 3) Client sendet Override → Auth + Rate-Limit → Override Handler → Bestätigung.  
 4) Client sendet Preview → Preview-Service → hypothetisches Ergebnis.
 
----
+&nbsp;
 
 ## Qualitäts- und Betriebsaspekte
 
