@@ -80,6 +80,11 @@ Nur Zustand, Zeit und Regeln.
 - **Fail-ruhig:** Keine hektischen Reaktionen, kein Flapping  
 
 ---
-
-> 🔙 Zurueck zu **[5.2 Level-2-Whiteboxes](./README.md)**  
-> 🔙 Zurueck zu **[5.1 Whitebox Gesamtsystem](../051_blackbox/051_blackbox.md)**
+> **Nächster Schritt:** Der Core ist aufgeteilt. Jetzt gehen wir ins Detail und schauen,
+> wie der Systemtakt funktioniert und warum er so wichtig ist.
+>
+> 👉 Weiter zu **[5.2.1.1 Block-Scheduler](./05211_block_scheduler.md)**
+>
+> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
+> 
+> 🔙 Zurück zur **[5.1 Whitebox Gesamtsystem](../051_blackbox/051_blackbox.md)**
