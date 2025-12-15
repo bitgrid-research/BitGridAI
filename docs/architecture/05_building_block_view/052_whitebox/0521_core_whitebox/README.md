@@ -87,4 +87,4 @@ Nur Zustand, Zeit und Regeln.
 >
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](./README.md)**
 > 
-> 🔙 Zurück zur **[5.1 Whitebox Gesamtsystem](../051_blackbox/051_blackbox.md)**
+> 🔙 Zurück zur **[5.1 Blackbox Gesamtsystem](../../051_blackbox/051_blackbox.md)**
