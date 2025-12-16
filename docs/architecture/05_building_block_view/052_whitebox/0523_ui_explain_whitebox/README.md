@@ -1,4 +1,4 @@
-# 05.2.3 Whitebox UI und Explainability
+# 05.2.3 - Whitebox: UI und Explainability
 
 Das Gesicht und die Stimme des Systems.
 
