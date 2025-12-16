@@ -1,4 +1,4 @@
-# 05.2.2 Whitebox Adapter & Feld-I/O
+# 05.2.2 - Whitebox: Adapter & Feld-I/O
 
 Die Brücke zur realen Welt.
 
