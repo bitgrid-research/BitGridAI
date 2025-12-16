@@ -1,4 +1,4 @@
-# 8.7 Logging, Events & Monitoring
+# 8.7 - Logging, Events & Monitoring
 
 Was passiert – und woher wissen wir das?
 
@@ -10,7 +10,7 @@ Dieses Kapitel beschreibt die **übergreifenden Prinzipien**, nach denen BitGrid
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt vor einer großen Wand aus Monitoren mit Anzeigen wie „Health“, „Events“, „Safety“. Ein Logbuch liegt offen daneben.)*
 ![Hamster überwacht das System](../../media/pixel_art_hamster_monitoring.png)
 
----
+&nbsp;
 
 ## Ziel der Beobachtbarkeit
 
@@ -28,7 +28,7 @@ Logging und Monitoring verfolgen in BitGridAI vier Hauptziele:
 4. **Transparenz für den Nutzer**  
    Das System zeigt offen, was es tut – und warum.
 
----
+&nbsp;
 
 ## Grundprinzipien
 
@@ -47,7 +47,7 @@ Logging und Monitoring verfolgen in BitGridAI vier Hauptziele:
 - **Local-first**  
   Logs verbleiben standardmäßig lokal; es gibt keine Pflicht-Telemetrie.
 
----
+&nbsp;
 
 ## Event-Kategorien
 
@@ -62,7 +62,7 @@ Typische Inhalte:
 - Reason-Code
 - auslösende Metriken
 
----
+&nbsp;
 
 ### Safety Events
 Dokumentieren Eingriffe der Sicherheitslogik (R3).
@@ -77,7 +77,7 @@ Safety Events haben:
 - klare, knappe Begründung
 - sofortige Sichtbarkeit
 
----
+&nbsp;
 
 ### Health Events
 Beschreiben den Zustand von Komponenten und Abhängigkeiten.
@@ -93,7 +93,7 @@ Health Events sind Grundlage für:
 - Degradationslogik (Kap. 8.6)
 - UI-Statusanzeigen
 
----
+&nbsp;
 
 ### Audit Events
 Dokumentieren sicherheits- und governance-relevante Aktionen.
@@ -105,7 +105,7 @@ Beispiele:
 - Config-Reload erfolgreich / fehlgeschlagen
 - Research-Export erstellt
 
----
+&nbsp;
 
 ## Log-Level
 
@@ -119,7 +119,7 @@ Verwendete Ebenen:
 - **ERROR** – Ausfall von Pflichtkomponenten
 - **CRITICAL** – Safety Stop, akute Gefahrenlage
 
----
+&nbsp;
 
 ## Health-Status (einheitliche Semantik)
 
@@ -139,7 +139,7 @@ Health ist:
 - Trigger für Fail-safe-Logik
 - Grundlage für Alerts
 
----
+&nbsp;
 
 ## Sichtbarkeit im UI
 
@@ -153,7 +153,7 @@ Für Nutzer gilt:
 Der Nutzer soll jederzeit verstehen:
 > *Was passiert – und warum?*
 
----
+&nbsp;
 
 ## Aufbewahrung & Rotation
 
@@ -168,7 +168,7 @@ Bei knappem Speicher:
 - kontrollierte Rotation
 - keine stille Datenkorruption
 
----
+&nbsp;
 
 ## Abgrenzungen
 
@@ -179,7 +179,7 @@ Nicht Bestandteil dieses Kapitels sind:
 
 Diese Themen gehören in Betriebs- oder Entwicklerdokumentation.
 
----
+&nbsp;
 
 ## Zusammenfassung
 
