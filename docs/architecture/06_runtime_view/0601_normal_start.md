@@ -1,4 +1,4 @@
-# 06.1 Szenario: Normaler Start (Regel R1)
+# 06.01 Szenario: Normaler Start (Regel R1)
 
 Der Klassiker: Die Sonne scheint, der Miner läuft.
 
