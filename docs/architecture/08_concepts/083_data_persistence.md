@@ -1,4 +1,4 @@
-# 8.3 Datenhaltung & Datenlebenszyklus
+# 8.3 - Datenhaltung & Datenlebenszyklus
 
 Das Gedächtnis des Systems.
 
@@ -18,7 +18,7 @@ Ziel ist eine Datenhaltung, die:
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster als Bibliothekar, der Bücher in ein Regal („SQLite“) sortiert und große Kisten in ein Archiv („Parquet“) stapelt.)*  
 ![Hamster sortiert Daten](../../media/pixel_art_hamster_librarian.png)
 
----
+&nbsp;
 
 ## Grundprinzipien
 
@@ -39,7 +39,7 @@ Die Datenhaltung von BitGridAI folgt fünf übergreifenden Prinzipien:
 5. **Opt-in für Exporte**  
    Daten verlassen das System ausschließlich bewusst und nachvollziehbar.
 
----
+&nbsp;
 
 ## Die hybride Speicherstrategie
 
@@ -54,7 +54,7 @@ BitGridAI nutzt bewusst einen **hybriden Ansatz**, der unterschiedliche Speicher
 
 Diese Trennung ist Grundlage für Performance, Reproduzierbarkeit und Datensouveränität.
 
----
+&nbsp;
 
 ## Laufzeitdaten (Hot Data)
 
@@ -73,7 +73,7 @@ Laufzeitdaten sind notwendig, um das System **jetzt** zu betreiben.
 
 Diese Daten ermöglichen einen schnellen Neustart, sind aber **nicht die alleinige Wahrheit** für Analyse oder Audit.
 
----
+&nbsp;
 
 ## Entscheidungs- & Ereignisdaten (Append-only)
 
@@ -95,7 +95,7 @@ Sie bilden die Grundlage für:
 - Auditierbarkeit
 - Replays
 
----
+&nbsp;
 
 ## Historische & Forschungsdaten (Cold Data)
 
@@ -114,7 +114,7 @@ Cold Data dient Analyse, Simulation und Forschung.
 
 Diese Daten werden bewusst getrennt vom operativen Betrieb gehalten.
 
----
+&nbsp;
 
 ## Konfigurationsdaten als Teil der Historie
 
@@ -128,7 +128,7 @@ Konfiguration ist Teil der fachlichen Wahrheit.
 So ist bei Replays klar:
 > *Welche Regeln galten zu welchem Zeitpunkt?*
 
----
+&nbsp;
 
 ## Datenlebenszyklus
 
@@ -149,7 +149,7 @@ Der typische Lebenszyklus eines Datums ist:
 5. **Export oder Löschung**  
    Ausschließlich explizit und nutzerkontrolliert.
 
----
+&nbsp;
 
 ## Integrität, Audit & Reproduzierbarkeit
 
@@ -164,7 +164,7 @@ Dies wird erreicht durch:
 - vollständige Entscheidungsprotokolle,
 - Integritätsmechanismen bei Exporten.
 
----
+&nbsp;
 
 ## Aufbewahrung & Löschung
 
@@ -179,7 +179,7 @@ Löschung erfolgt:
 - nachvollziehbar,
 - ohne Einfluss auf den laufenden Betrieb.
 
----
+&nbsp;
 
 ## Abgrenzungen
 
@@ -190,7 +190,7 @@ Nicht Bestandteil dieses Kapitels sind:
 
 Diese Details gehören in Betriebs- oder Entwicklerdokumentation.
 
----
+&nbsp;
 
 ## Zusammenfassung
 
