@@ -13,14 +13,14 @@ Grundsatz:
 
 (Platzhalter für ein Bild: Ein Pixel-Art-Hamster mit Lupe und Klemmbrett steht vor einem Entscheidungsdiagramm. Sprechblase: „Darum habe ich das so gemacht.“)
 
----
+&nbsp;
 
 ## Qualitätsziel
 
 **Jede automatische Entscheidung ist für den Nutzer verständlich erklärbar**,  
 inklusive Auslöser, Regelbasis und relevanter Grenzwerte.
 
----
+&nbsp;
 
 ## Kontext
 
@@ -29,7 +29,7 @@ inklusive Auslöser, Regelbasis und relevanter Grenzwerte.
 - Explainability erfolgt **on-device**, ohne Cloud-Abhängigkeit
 - UI zeigt Zustand, Historie und Prognose an (Kap. 08.3)
 
----
+&nbsp;
 
 ## Szenario E-1: Nutzer fragt „Warum läuft der Miner gerade?“
 
@@ -55,7 +55,7 @@ Mining aktiv (halb- oder vollautomatischer Modus)
 - Bezug auf konkrete Messwerte und Regeln
 - Keine generischen oder ausweichenden Antworten
 
----
+&nbsp;
 
 ## Szenario E-2: Entscheidung wird automatisch geändert
 
@@ -78,7 +78,7 @@ Automatikbetrieb
 - Historische Entscheidungen bleiben abrufbar
 - Ursache ist eindeutig identifizierbar
 
----
+&nbsp;
 
 ## Szenario E-3: Vorschau auf die nächste Entscheidung
 
@@ -101,7 +101,7 @@ Beliebig
 - Vorschau basiert auf aktuellen Daten und aktiver Konfiguration
 - Keine verdeckten Automatismen
 
----
+&nbsp;
 
 ## Messbare Qualitätsmerkmale
 
@@ -112,7 +112,7 @@ Beliebig
 | Cloud-Abhängigkeit | 0 |
 | Verweis auf Regel & Trigger | immer vorhanden |
 
----
+&nbsp;
 
 ## Bezug zur Architektur
 
@@ -121,7 +121,7 @@ Beliebig
 - **Replay & Audit:** Kap. 08.8  
 - **ADRs:** Explainability on-device (Kap. 09)
 
----
+&nbsp;
 
 ## Zusammenfassung
 
