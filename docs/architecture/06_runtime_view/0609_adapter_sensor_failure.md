@@ -1,4 +1,4 @@
-# 06.09 Szenario: Adapter- & Sensor-Ausfall
+# 06.09 - Szenario: Adapter- & Sensor-Ausfall
 
 Blindflug vermeiden.
 
@@ -9,7 +9,7 @@ Dieses Szenario beschreibt, wie BitGridAI mit fehlender oder degradierter Teleme
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster schaut auf ein Kontrollpanel mit ausgegrauten Sensoranzeigen. Ein Warnlicht blinkt, daneben ein Schild „No Data – Safe Mode“.)*
 
----
+&nbsp;
 
 ## Das Ziel: Keine Entscheidung ohne belastbare Daten
 
@@ -22,7 +22,7 @@ BitGridAI unterscheidet klar zwischen:
 
 Fehlen Pflichtsignale, wird nicht „geschätzt“, sondern **konservativ gehandelt**.
 
----
+&nbsp;
 
 ## Der Ablauf bei Telemetrie-Ausfall (vereinfacht)
 
@@ -44,7 +44,7 @@ Fehlen Pflichtsignale, wird nicht „geschätzt“, sondern **konservativ gehand
    - der `degraded`-Status wird entfernt
    - der normale Blockbetrieb wird fortgesetzt
 
----
+&nbsp;
 
 ## Verhalten der Rule Engine
 
@@ -53,7 +53,7 @@ Fehlen Pflichtsignale, wird nicht „geschätzt“, sondern **konservativ gehand
 - Optimierungsregeln (R1, R4, R5) treten vollständig zurück.
 - Sicherheitsregel R3 bleibt führend.
 
----
+&nbsp;
 
 ## Schnittstellen & Signale
 
