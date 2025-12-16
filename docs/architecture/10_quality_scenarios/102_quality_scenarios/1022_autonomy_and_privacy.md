@@ -1,4 +1,4 @@
-# 10.2.2 Autonomie & Privacy
+# 10.2.2 - Autonomie & Privacy
 
 Kontrolle bleibt beim Menschen.
 
@@ -11,7 +11,7 @@ wie Nutzereingriffe priorisiert werden und wie Datenhoheit konsequent gewahrt bl
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster hält eine Fernbedienung in der einen und ein Schloss in der anderen Hand. Auf einem Schild steht: „My System. My Data.“)*
 
----
+&nbsp;
 
 ## Qualitätsziel
 
@@ -23,7 +23,7 @@ Der Nutzer entscheidet:
 - *wann* eingegriffen wird,
 - *welche Daten* das System verlassen dürfen (oder nicht).
 
----
+&nbsp;
 
 ## Kontext
 
@@ -33,7 +33,7 @@ Der Nutzer entscheidet:
 - System läuft local-first ohne Cloud-Zwang (Kap. 07)
 - Exporte und Research sind Opt-in (Kap. 06.11)
 
----
+&nbsp;
 
 ## Szenario A-1: Nutzer wählt Autonomie-Stufe
 
@@ -56,7 +56,7 @@ Normalbetrieb
 - Kein verdeckter Systemmodus
 - Aktive Stufe ist eindeutig erkennbar
 
----
+&nbsp;
 
 ## Szenario A-2: Manueller Override durch den Nutzer
 
@@ -79,7 +79,7 @@ Assistiert, halb- oder vollautomatisch
 - Override ist im UI sichtbar
 - Keine dauerhafte Deaktivierung der Automatik möglich
 
----
+&nbsp;
 
 ## Szenario A-3: Schutz der Privatsphäre (Default-Verhalten)
 
@@ -102,7 +102,7 @@ Local Edge System
 - Netzwerkverkehr ist auditierbar
 - System bleibt funktionsfähig ohne Internet
 
----
+&nbsp;
 
 ## Szenario A-4: Expliziter Research-Export (Opt-in)
 
@@ -126,7 +126,7 @@ Manueller Eingriff
 - Export ist nachvollziehbar und reproduzierbar
 - Replay erfolgt read-only
 
----
+&nbsp;
 
 ## Messbare Qualitätsmerkmale
 
@@ -138,7 +138,7 @@ Manueller Eingriff
 | Opt-in-Abdeckung bei Exporten | 100 % |
 | Privacy-Leaks | 0 |
 
----
+&nbsp;
 
 ## Bezug zur Architektur
 
@@ -148,7 +148,7 @@ Manueller Eingriff
 - **Export & Replay:** Kap. 06.11
 - **Security & Access Control:** Kap. 08.7
 
----
+&nbsp;
 
 ## Zusammenfassung
 
@@ -163,6 +163,6 @@ BitGridAI ist **autonom, aber nicht eigenmächtig**.
 > **Nächster Schritt:**  
 > Autonomie darf nicht zu Instabilität führen.
 >
-> 👉 Weiter zu **[10.2.3 Vorhersagbarkeit & Stabilität](./1023_predictability_and_stability.md)**
+> 👉 Weiter zu **[10.2.3 - Vorhersagbarkeit & Stabilität](./1023_predictability_and_stability.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
