@@ -14,7 +14,7 @@ Der Betrieb ist bewusst:
 
 Home Assistant und weitere Systeme sind **sekundäre Teilnehmer**, keine Betriebsabhängigkeiten.
 
----
+&nbsp;
 
 ## Kurzüberblick
 
@@ -24,12 +24,13 @@ Home Assistant und weitere Systeme sind **sekundäre Teilnehmer**, keine Betrieb
 - **Externe Systeme:** Home Assistant (lesen + begrenztes Schreiben), Research Nodes (Export/Replay)  
 - **Kein WAN-Zwang, keine Cloud**
 
----
+&nbsp;
 
 ## Zielbild: Compose als Basis, Umbrel als Packaging
 
 Das Deployment folgt dem Prinzip:  
 **Ein Stack – ein Ort – klare Schnittstellen.**
+
 +-------------------------------------------------------------+
 
 Heimnetz / LAN (kein WAN)
@@ -48,6 +49,7 @@ Optionale Peers im LAN
 - Home Assistant (MQTT + REST, begrenzt)
 - Research Node (Exports, Replays, read-only)
 - Miner / Inverter / Sensorik (über Adapter)
+  
 +-------------------------------------------------------------+
   
 Ziel ist **ein einziger, klar definierter Deployment-Punkt**, der:
@@ -55,7 +57,7 @@ Ziel ist **ein einziger, klar definierter Deployment-Punkt**, der:
 - leicht gesichert,
 - und gut erklärbar ist.
 
----
+&nbsp;
 
 ## Deployment-Ziele
 
@@ -80,7 +82,7 @@ Das Deployment verfolgt folgende Leitziele:
 - **Fail-safe by Design:**  
   Sicherheitsregel R3 greift unabhängig vom Containerzustand.
 
----
+&nbsp;
 
 ## Artefakt-zu-Knoten-Zuordnung  
 *(Bausteinsicht → Container → Host)*
@@ -97,8 +99,7 @@ Optional (Umbrel):
 - identische Container
 - Volumes unter `/umbrel/app-data/bitgrid/*`
 
----
-
+&nbsp;
 ## Primärer Betrieb: Docker Compose im LAN
 
 ### Kerndienste
@@ -113,7 +114,7 @@ Optional (Umbrel):
 **Startreihenfolge:** MQTT → Core → UI  
 **Ressourcen:** Ziel ≥ 4 vCPU / 4 GB RAM (LLM quantisiert, edge-tauglich)
 
----
+&nbsp;
 
 ## Option: Umbrel-App Packaging
 
@@ -128,7 +129,7 @@ Umbrel ist **reines Packaging**, kein neues Deployment-Modell.
 Build- und Release-Logik bleibt identisch:
 > Compose testen → Replay prüfen → paketieren.
 
----
+&nbsp;
 
 ## Sekundäre Anbindungen
 
@@ -145,7 +146,7 @@ Build- und Release-Logik bleibt identisch:
 - Führt Replays lokal aus
 - Kein permanenter Zugriff auf das Live-System
 
----
+&nbsp;
 
 ## Datenpfade & Backups
 
@@ -159,7 +160,7 @@ Build- und Release-Logik bleibt identisch:
 Backups erfolgen **lokal** (NAS/USB).  
 Keine Cloud-Synchronisation ohne explizites Opt-in.
 
----
+&nbsp;
 
 ## Zusammenfassung
 
@@ -174,7 +175,6 @@ Docker Compose ist die **technische Basis**, Umbrel eine **optionale Verpackung*
 Der Betrieb bleibt transparent, kontrollierbar und sicher.
 
 ---
-
 > **Nächster Schritt:** Das Basis-Deployment ist klar.  
 > Jetzt betrachten wir, **wie sich diese Architektur auf unterschiedliche Infrastruktur- und Betriebsvarianten ausdehnen lässt**.
 >
