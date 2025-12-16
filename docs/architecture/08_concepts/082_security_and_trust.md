@@ -1,4 +1,4 @@
-# 8.2 Sicherheits- & Vertrauenskonzept
+# 8.2 - Sicherheits- & Vertrauenskonzept
 
 Sicherheit vor Optimierung.
 
@@ -11,7 +11,7 @@ Sie gelten unabhängig von Autonomie-Stufe, Betriebsmodus oder Deployment-Varian
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster mit Schutzhelm steht vor einem großen roten Not-Aus-Schalter. Ein Schild: „Safety First“. )*  
 ![Hamster schützt das System](link_zum_safety_hamster.png)
 
----
+&nbsp;
 
 ## Grundprinzipien
 
@@ -29,7 +29,7 @@ Das Sicherheitskonzept von BitGridAI folgt vier übergeordneten Grundsätzen:
 4. **Deterministisches Fehlverhalten**  
    Bei Unsicherheit wird nicht improvisiert, sondern konservativ gehandelt.
 
----
+&nbsp;
 
 ## Sicherheitsregel R3 – Die oberste Instanz
 
@@ -48,7 +48,7 @@ R3 greift immer dann, wenn:
 **Konsequenz:**  
 R3 darf den Betrieb jederzeit stoppen oder in einen sicheren Zustand versetzen.
 
----
+&nbsp;
 
 ## Vertrauenszonen
 
@@ -66,7 +66,7 @@ Diese Komponenten:
 - sind integraler Bestandteil des Systems,
 - gelten als vertrauenswürdig.
 
----
+&nbsp;
 
 ### Geräte- & Adapterzone (Semi-Trusted)
 
@@ -85,7 +85,7 @@ Alle eingehenden Signale werden:
 - plausibilisiert,
 - bei Bedarf verworfen.
 
----
+&nbsp;
 
 ### Nutzer- & Integrationszone (Untrusted)
 
@@ -99,7 +99,7 @@ Diese Zugriffe:
 - unterliegen Autorisierung und Rate-Limits,
 - haben keinen direkten Zugriff auf Hardware.
 
----
+&nbsp;
 
 ## Authentifizierung & Autorisierung
 
@@ -119,7 +119,7 @@ Fehlgeschlagene Authentifizierung:
 - verändert keinen Systemzustand,
 - erzeugt nachvollziehbare Events (siehe Kap. 6.12).
 
----
+&nbsp;
 
 ## Rate-Limiting & Missbrauchsschutz
 
@@ -134,7 +134,7 @@ Ein abgelehnter Request:
 - verändert keine Zustände,
 - hinterlässt einen Audit-Eintrag.
 
----
+&nbsp;
 
 ## Umgang mit Unsicherheit & Ausfällen
 
@@ -147,7 +147,7 @@ Unsicherheit wird in BitGridAI explizit behandelt:
 **Wichtig:**  
 Unsichere Situationen führen niemals zu aggressiver Optimierung.
 
----
+&nbsp;
 
 ## Sicherheit & Autonomie
 
@@ -160,7 +160,7 @@ Unabhängig vom Autonomie-Level gilt:
 
 Das Sicherheitskonzept ist damit **orthogonal** zur Autonomie-Logik.
 
----
+&nbsp;
 
 ## Sichtbarkeit & Nachvollziehbarkeit
 
@@ -172,7 +172,7 @@ Sicherheitsrelevante Ereignisse sind immer sichtbar:
 
 Es gibt keine „stillen“ Sicherheitsaktionen.
 
----
+&nbsp;
 
 ## Abgrenzungen
 
@@ -183,7 +183,7 @@ Nicht Bestandteil dieses Kapitels sind:
 
 Diese Aspekte werden in der Verteilungssicht (Kap. 07) oder im Betriebshandbuch behandelt.
 
----
+&nbsp;
 
 ## Zusammenfassung
 
