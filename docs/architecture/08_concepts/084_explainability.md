@@ -12,7 +12,7 @@ Explainability ist dabei kein UI-Feature, sondern ein **architektonisches Grundp
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster erklärt einem anderen Hamster mit einer kleinen Tafel, warum ein Schalter auf „ON“ steht. Ein Sprechblasen-Symbol mit „Warum?“ schwebt darüber.)*  
 ![Hamster erklärt eine Entscheidung](link_zum_explain_hamster.png)
 
----
+&nbsp;
 
 ## Ziel der Explainability
 
@@ -29,7 +29,7 @@ Explainability in BitGridAI verfolgt drei zentrale Ziele:
 
 Explainability bedeutet nicht, dass das System *immer* tut, was der Nutzer erwartet – sondern dass es **erklärt, warum es anders handelt**.
 
----
+&nbsp;
 
 ## Grundprinzipien
 
@@ -50,7 +50,7 @@ Die Explainability folgt systemweit klaren Leitlinien:
 - **Kontextsensitiv**  
   Erklärungen beziehen sich auf den konkreten Zustand zum Entscheidungszeitpunkt.
 
----
+&nbsp;
 
 ## Explainability im Entscheidungsprozess
 
@@ -68,7 +68,7 @@ Diese Informationen werden systematisch erfasst und stehen für:
 - Research-Auswertungen
 zur Verfügung.
 
----
+&nbsp;
 
 ## Explain Session
 
@@ -86,7 +86,7 @@ Explain Sessions sind:
 
 Sie dienen als Brücke zwischen technischer Logik und menschlichem Verständnis.
 
----
+&nbsp;
 
 ## Ebenen der Erklärung
 
@@ -110,7 +110,7 @@ BitGridAI unterscheidet bewusst mehrere Erklärungsebenen:
 
 Der Nutzer entscheidet, **wie tief** er einsteigen möchte.
 
----
+&nbsp;
 
 ## Explainability & Autonomie
 
@@ -122,7 +122,7 @@ Explainability ist unabhängig vom Autonomie-Level:
 
 Mehr Autonomie erfordert **mehr**, nicht weniger Transparenz.
 
----
+&nbsp;
 
 ## Explainability & Sicherheit
 
@@ -135,7 +135,7 @@ Grundsätze:
 
 Explainability ersetzt keine Sicherheitsmaßnahmen, macht sie aber **verständlich**.
 
----
+&nbsp;
 
 ## Technische Unabhängigkeit
 
@@ -146,7 +146,7 @@ Explainability ist:
 
 Ob Erklärungen durch Templates, Regeln oder Sprachmodelle erzeugt werden, ist eine Implementierungsentscheidung – das Prinzip bleibt gleich.
 
----
+&nbsp;
 
 ## Abgrenzungen
 
@@ -157,7 +157,7 @@ Nicht Bestandteil dieses Kapitels sind:
 
 Diese Details gehören in Entwicklungs- oder UI-Dokumentation.
 
----
+&nbsp;
 
 ## Zusammenfassung
 
