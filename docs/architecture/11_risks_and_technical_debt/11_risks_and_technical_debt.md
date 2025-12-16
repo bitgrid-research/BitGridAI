@@ -7,6 +7,8 @@ Dieses Dokument identifiziert und priorisiert die wichtigsten Risiken und techni
 *(Platzhalter für ein Bild: Ein Hamster mit einem Helm und einem Clipboard, der vor einem großen roten Warnschild steht, auf dem "THERMAL FAILURE" oder "RISK" steht.)*
 ![Hamster überprüft Risiken](../../media/pixel_art_hamster_risk_assessment.png)
 
+&nbsp;
+
 ## 1. Hauptrisiken (Auszug)
 
 Die folgenden Risiken wurden bewertet, ihre Auswirkung als mindestens **Mittel** eingestuft und sind direkt an die Architektur gekoppelt (Local-First, R1–R5, EnergyState).
@@ -23,7 +25,7 @@ Die folgenden Risiken wurden bewertet, ihre Auswirkung als mindestens **Mittel**
 | **Deadband falsch getuned** | Mittel | Mittel | **Replay A/B**, Flapping-KPI, adaptive Empfehlung. |
 | **UI-Missverständnis** | Mittel | Gering | HCI-Tests, Glossar-Tooltips, **„Why?“ Dialog (08.3)**. |
 
----
+&nbsp;
 
 ## 2. Technische Schulden (Technical Debt)
 
@@ -35,7 +37,7 @@ Diese Punkte sind Design-Kompromisse oder Bereiche, die aufgrund von Ressourcenk
 * **A11y-Gaps:** Barrierefreiheit (Keyboard/ARIA/Kontrast) im UI muss nachgezogen werden (A11y-Backlog).
 * **Packaging:** Die Erstellung standardisierter Artefakte (`.deb/.tar.gz` mit Checksums) muss finalisiert und in der CI/CD-Pipeline verankert werden.
 
----
+&nbsp;
 
 ## 3. Maßnahmenplan (Roadmap)
 
