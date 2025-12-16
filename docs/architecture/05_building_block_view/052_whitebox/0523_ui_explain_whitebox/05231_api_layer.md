@@ -1,4 +1,4 @@
-# 05.2.3.1 API-Layer
+# 05.2.3.1 - Baustein: API-Layer
 
 Der Empfangsschalter von BitGridAI.
 
