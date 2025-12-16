@@ -15,7 +15,7 @@ Wir strukturieren unsere Qualitätsanforderungen auf zwei Wegen:
 * **[10.1 Der Qualitätsbaum (Quality Tree)](./101_quality_tree.md)**
     * *Kurzbeschreibung:* Eine strukturierte Übersicht (Mindmap oder Hierarchie) der für uns relevanten Qualitätsmerkmale (z.B. Performance, Zuverlässigkeit, Sicherheit, Wartbarkeit). Dies stellt sicher, dass wir keinen wichtigen Aspekt vergessen.
 
-* **[10.2 Die konkreten Szenarien](./102_quality_scenarios.md)**
+* **[10.2 Die konkreten Szenarien](./102_quality_scenarios)**
     * *Kurzbeschreibung:* Das Herzstück der Qualitätskontrolle. Hier beschreiben wir spezifische Situationen ("Szenarien"), um die Anforderungen zu testen.
     * *Beispiel:* "Wenn ein Energieversorger ein Lastabwurf-Signal sendet, müssen 95% der betroffenen lokalen Geräte innerhalb von 2 Sekunden reagieren."
 
