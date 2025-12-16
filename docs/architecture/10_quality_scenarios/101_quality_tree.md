@@ -1,4 +1,4 @@
-# 10.1 Quality Tree / Qualitätsbaum
+# 10.1 - Quality Tree / Qualitätsbaum
 
 Die relevanten Qualitätsmerkmale für BitGridAI.
 
@@ -6,6 +6,8 @@ Der Qualitätsbaum stellt sicher, dass wir bei der Entwicklung und dem Testen ke
 
 *(Platzhalter für ein Bild: Eine Mindmap-ähnliche Darstellung des Qualitätsbaumes mit "BitGridAI" in der Mitte und den sechs Hauptästen.)*
 ![Mindmap des Qualitätsbaumes](../../media/pixel_art_hamster_quality_tree.png)
+
+&nbsp;
 
 ## Strukturierte Übersicht (Hierarchie)
 
