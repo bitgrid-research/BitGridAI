@@ -1,4 +1,4 @@
-# 06.05 Szenario: Stabilität & Totband (Regel R5)
+# 06.05 - Szenario: Stabilität & Totband (Regel R5)
 
 Die Ruhe bewahren.
 
@@ -8,6 +8,8 @@ Regel **R5 (Deadband/Hysteresis)** sorgt für Trägheit im System. Sie friert ge
 
 *(Platzhalter für ein Bild: Ein Hamster, der entspannt Yoga macht und "Ommm" sagt, während um ihn herum das Chaos tobt und Warnlampen blinken.)*
 ![Hamster macht Yoga](../../media/pixel_art_hamster_yoga.png)
+
+&nbsp;
 
 ## Sequenzdiagramm (Der Stoiker)
 
@@ -37,7 +39,12 @@ sequenceDiagram
         Rules->>Rules: Check: Safety Violation? (No)
         Rules->>Rules: R5 Decision = HOLD STATE (⚓)
     end
+
+    Rules->>Miner: No Command sent (Keep Running)
+    Note right of Rules: Log: "Stop suppressed by Deadband"
 ```
+
+&nbsp;
 
 ## Der Ablauf im Detail
 
@@ -59,6 +66,8 @@ sequenceDiagram
 5.  **Auflösung:**
     Erst wenn die Zeit (`valid_until`) abgelaufen ist *oder* ein echter Notfall eintritt, gibt R5 die Kontrolle wieder frei.
 
+&nbsp;
+
 ## Konfiguration (MVP)
 
 Wie träge soll das System sein?
@@ -76,5 +85,4 @@ Wie träge soll das System sein?
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
 
-    Rules->>Miner: No Command sent (Keep Running)
-    Note right of Rules: Log: "Stop suppressed by Deadband"
+
