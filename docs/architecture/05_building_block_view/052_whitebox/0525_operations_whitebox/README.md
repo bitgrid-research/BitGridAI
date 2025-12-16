@@ -1,4 +1,4 @@
-# 05.2.5 Whitebox Operations (Security / Config / Observability)
+# 05.2.5 - Whitebox: Operations (Security / Config / Observability)
 
 Der Rahmen, der alles zusammenhält.
 
