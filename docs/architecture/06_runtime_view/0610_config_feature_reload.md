@@ -75,6 +75,6 @@ Alle Events sind extern beobachtbar (UI, Monitoring, Logs).
 > **Nächster Schritt:** Konfiguration ist nun zur Laufzeit anpassbar.  
 > Als Nächstes betrachten wir, **wie BitGridAI auf der Zielinfrastruktur verteilt und betrieben wird**.
 >
-> 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view/README.md)**
+> 👉 Weiter zu **[06.11 Export & Replay](./0611_export_replay.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
