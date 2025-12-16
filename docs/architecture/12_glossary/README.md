@@ -1,6 +1,7 @@
 # 12 Glossar
 
-Damit wir nicht aneinander vorbeireden. 
+Damit wir nicht aneinander vorbeireden.  
+Oder schlimmer: dass alle nicken – und trotzdem etwas anderes meinen.
 
 Willkommen im Wörterbuch von **BitGridAI**.
 
@@ -20,12 +21,8 @@ Hier findest du unsere zentrale Begriffsliste:
     * *Kurzbeschreibung:* Die alphabetische Auflistung aller wichtigen Fachbegriffe und Abkürzungen, die im BitGridAI-Projekt verwendet werden, inklusive ihrer genauen Definitionen in unserem Kontext.
 
 ---
-> **🏁 Ziel erreicht! (Level 12 Cleared)**
->
-> Wow, du hast es tatsächlich bis hierher geschafft? Respekt! Das ist weiter, als 90 % aller Entwickler jemals lesen werden. 😉
->
-> **Danke für deine Geduld und dein Interesse!**
->
-> Der Architektur-Hamster klappt jetzt den Laptop zu, gönnt sich eine handvoll Sonnenblumenkerne und legt sich auf den warmen Raspberry Pi zum Schlafen. Bitte nicht wecken, außer der Bitcoin-Kurs explodiert. 🐹💤
->
+> **Endstation.**  
+> Wenn du bis hierher gelesen hast, weißt du jetzt nicht nur *wie* BitGridAI funktioniert,  
+> sondern auch *warum* es so gebaut wurde.
+
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
