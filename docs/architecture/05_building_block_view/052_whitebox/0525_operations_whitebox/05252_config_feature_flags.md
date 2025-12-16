@@ -1,4 +1,4 @@
-# 05.2.5.2 Configuration & Feature Flags
+# 05.2.5.2 - Baustein: Configuration & Feature Flags
 
 Der Werkzeugkasten für Verhalten.
 
