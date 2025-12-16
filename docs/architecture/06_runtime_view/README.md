@@ -33,6 +33,9 @@ Wir haben die wichtigsten Laufzeitszenarien anhand unseres Regelwerks (R1–R5) 
 * **[6.6 Manuelles Überschreiben](./066_manual_override.md)**
     * Der Eingriff durch den Nutzer. Was passiert, wenn ein Operator die Automatik übersteuert ("Boost")?
 
+* **[6.7 Autonomie-Stufen & Kontrollmodi](./067_autonomy_levels.md)**  
+  *Wer entscheidet wann? Wie verteilt BitGridAI Verantwortung zwischen Nutzer und System – von manuell bis vollautomatisch?*
+
 ---
 > **Nächster Schritt:** Wir wissen jetzt, wie die Software arbeitet. Aber auf welcher Hardware landet sie eigentlich und wie kommt sie dorthin? Im nächsten Kapitel schauen wir uns die Infrastruktur an.
 >
