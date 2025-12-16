@@ -1,4 +1,4 @@
-# 06.06 Szenario: Manuelles Überschreiben (User Override)
+# 06.06 - Szenario: Manuelles Überschreiben (User Override)
 
 Chef-Sache.
 
@@ -9,6 +9,8 @@ Dieses Szenario beschreibt, wie BitGridAI reagiert, wenn der Nutzer das Steuer �
 *(Platzhalter für ein Bild: Der Hamster trägt eine Kapitänsmütze und steuert das Schiff manuell mit einem großen hölzernen Steuerrad. Die Autopilot-Lampe ist aus.)*
 ![Hamster steuert manuell](../../media/pixel_art_hamster_captain.png)
 
+&nbsp;
+
 ## Das Konzept: Override mit Verfallsdatum
 
 Ein manueller Eingriff ist in BitGridAI nie "für immer" (um zu verhindern, dass man vergisst, den Miner wieder einzuschalten). Ein Override hat immer eine **TTL (Time To Live)**.
@@ -16,6 +18,8 @@ Ein manueller Eingriff ist in BitGridAI nie "für immer" (um zu verhindern, dass
 * **Der Befehl:** "Erzwinge START für 60 Minuten."
 * **Die Auswirkung:** Die Regeln R1 (Profit), R2 (Autarkie), R4 (Forecast) und R5 (Totband) werden ignoriert.
 * **Die Grenze:** Regel R3 (Safety) bleibt **immer** aktiv. Du kannst den Miner nicht zwingen zu laufen, wenn er brennt.
+
+&nbsp;
 
 ## Sequenzdiagramm
 
@@ -59,6 +63,8 @@ sequenceDiagram
     Rules->>Rules: Return to Auto-Mode (R1-R5)
 ```
 
+&nbsp;
+
 ## Der Ablauf im Detail
 
 1.  **Eingabe (The Command):**
@@ -74,6 +80,8 @@ sequenceDiagram
 
 4.  **Rückkehr zum Normalbetrieb (Back to Auto):**
     Sobald die Zeit (`override_valid_until`) abgelaufen ist, löscht das System das Flag. Im nächsten 10-Minuten-Block entscheiden wieder rein die Regeln R1–R5.
+
+&nbsp;
 
 ## Konfiguration
 
