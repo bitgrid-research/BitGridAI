@@ -1,4 +1,4 @@
-# 05.2.1.2 Energy Context
+# 05.2.1.2 - Baustein: Energy Context
 
 Die Quelle der Wahrheit.
 
