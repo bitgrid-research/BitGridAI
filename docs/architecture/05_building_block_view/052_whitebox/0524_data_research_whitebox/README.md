@@ -1,4 +1,4 @@
-# 05.2.4 Whitebox Data und Research
+# 05.2.4 - Whitebox: Data und Research
 
 Das Gedächtnis des Systems.
 
