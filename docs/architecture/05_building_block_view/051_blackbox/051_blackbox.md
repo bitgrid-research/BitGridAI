@@ -1,4 +1,4 @@
-# 05.1.1 System-Blackbox und Schnittstellen
+# 05.1.1 - Blackbox: System und Schnittstellen
 
 Level 1 zeigt **BitGridAI als Gesamtsystem**.  
 
