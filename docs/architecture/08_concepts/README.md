@@ -1,45 +1,66 @@
-# 08 Querschnittkonzepte
+# 08 Querschnittskonzepte
 
-Willkommen in der "Abteilung für allgemeine Angelegenheiten".
+Die Verfassung des Systems.
 
-Wir haben die Bausteine definiert, wir wissen, wo sie laufen. Aber wie stellen wir sicher, dass alle dieselbe "Sprache" sprechen, wenn es um grundlegende technische Fragen geht?
+Wir haben die Bausteine definiert (Kap. 05), ihr Zusammenspiel beschrieben (Kap. 06) und gezeigt, wo BitGridAI betrieben wird (Kap. 07).  
+Was noch fehlt, sind die **gemeinsamen Regeln**, nach denen *alle* diese Teile arbeiten.
 
-In diesem Kapitel beschreiben wir die übergreifenden Prinzipien und Muster, die in **BitGridAI** angewendet werden. Das sind die technischen Leitplanken, die dafür sorgen, dass das System "aus einem Guss" ist und nicht wie ein zusammengeklebter Flickenteppich wirkt. Es geht um Themen, die **jeden** Entwickler betreffen, egal an welchem Baustein er gerade arbeitet.
+Dieses Kapitel beschreibt die **übergreifenden Konzepte und Leitplanken**, die in **BitGridAI** systemweit gelten.  
+Sie sorgen dafür, dass das System konsistent, verständlich und kontrollierbar bleibt – unabhängig davon, welcher Baustein gerade aktiv ist oder auf welchem Host er läuft.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster, der wie ein Dirigent vor verschiedenen technischen Symbolen steht (Datenbank-Tonne, Log-Datei, UI-Fenster, Warnschild) und sie koordiniert, oder einen großen, dicken Ordner mit der Aufschrift "REGELN" hält.)*
+Es geht hier nicht um konkrete Abläufe oder Implementierungen, sondern um die **Grundsätze**, die jede technische Entscheidung prägen.
+
+*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht wie ein Dirigent vor Symbolen für Datenbank, Log, UI und Warnschild – oder hält einen dicken Ordner mit der Aufschrift „REGELN“.)*  
 ![Hamster mit dem Regelwerk](link_zum_regelwerk_bild.png)
+
+&nbsp;
 
 ## Inhalt dieses Kapitels
 
-Wir haben eine ganze Reihe von wichtigen Themen identifiziert, die zentral geregelt werden müssen. Hier ist die Übersicht unserer technischen Standards:
+Die folgenden Themen sind **querschnittlich**:  
+Sie betreffen mehrere Bausteine gleichzeitig und bilden die technische „Sprache“, die BitGridAI zusammenhält.
 
-* **[8.1 Fachliche Modelle (Domain Models)](./081_domain_models.md)**
-    * *Kurzbeschreibung:* Unsere gemeinsame Sprache. Wie definieren wir zentrale Begriffe wie "Nutzer", "Energiequelle" oder "Messwert" im Code, damit alle dasselbe darunter verstehen?
+* **[8.1 Fachliche Modelle (Domain Models)](./081_domain_models.md)**  
+  *Unsere gemeinsame Sprache.*  
+  Wie definieren wir zentrale Begriffe wie „Nutzer“, „Energiequelle“, „Messwert“ oder „Zustand“, sodass alle Komponenten dasselbe darunter verstehen?
 
-* **[8.2 Persistenz (Datenhaltung)](./082_persistency.md)**
-    * *Kurzbeschreibung:* Wo und wie speichern wir Daten dauerhaft? Welche Datenbanktechnologien nutzen wir für welche Art von Daten?
+* **[8.2 Sicherheits- & Vertrauenskonzept](./082_security_and_trust.md)**  
+  *Sicherheit ist keine Option, sondern Voraussetzung.*  
+  Wie definieren wir Vertrauensgrenzen, Authentifizierung, Autorisierung und das Prinzip, dass Safety (R3) niemals übersteuert werden kann?
 
-* **[8.3 Benutzeroberfläche (UI)](./083_user_interface.md)**
-    * *Kurzbeschreibung:* Wie sieht BitGridAI für den Menschen aus? Übergreifende Prinzipien für Design, Usability und Frontend-Technologie.
+* **[8.3 Datenhaltung & Datenlebenszyklus](./083_data_persistence.md)**  
+  *Was wird wo und wie lange gespeichert?*  
+  Regeln für Persistenz, Hot- vs. Cold-Daten, Append-only-Logs, Exporte und Replays.
 
-* **[8.4 Plausibilitäts- & Validitätsprüfungen](./084_plausibility_and_validity_checks.md)**
-    * *Kurzbeschreibung:* Vertrauen ist gut, Kontrolle ist besser. Wie stellen wir an zentraler Stelle sicher, dass keine unsinnigen Daten ins System gelangen?
+* **[8.4 Explainability & Transparenz](./084_explainability.md)**  
+  *Entscheidungen müssen nachvollziehbar sein.*  
+  Wie stellt BitGridAI sicher, dass jede relevante Aktion erklärbar ist – für Nutzer, Logs und Research?
 
-* **[8.5 Fehler- & Ausnahmebehandlung](./085_error_and_exception_handling.md)**
-    * *Kurzbeschreibung:* Wenn es knallt: Wie fangen wir Fehler einheitlich ab, ohne dass das System abstürzt, und wie informieren wir den Nutzer (oder das Log)?
+* **[8.5 Autonomie, HCI & menschliche Kontrolle](./085_autonomy_and_hci.md)**  
+  *Wer entscheidet was – und wann?*  
+  Übergreifende Leitlinien zu Autonomie-Stufen, manuellen Overrides und der bewussten Balance zwischen Komfort und Selbstbestimmung.
 
-* **[8.6 Logging & Tracing](./086_logging_and_tracing.md)**
-    * *Kurzbeschreibung:* Die Blackbox des Systems. Was schreiben wir wo mit, um im Nachhinein verstehen zu können, was passiert ist (insbesondere bei verteilten Abläufen)?
+* **[8.6 Fehler-, Degradations- & Fail-safe-Prinzipien](./086_fail_safe_and_degradation.md)**  
+  *Kein undefinierter Zustand.*  
+  Wie geht das System mit Fehlern, Ausfällen und fehlenden Daten um – deterministisch, sichtbar und sicher?
 
-* **[8.7 Testbarkeit & Simulation](./087_testability_and_simulation.md)**
-    * *Kurzbeschreibung:* Wie machen wir es uns leicht, das System zu testen – auch wenn die echte Hardware nicht verfügbar ist? (Stichwort: Mocking, Simulatoren).
+* **[8.7 Logging, Events & Monitoring](./087_logging_and_monitoring.md)**  
+  *Was ist passiert – und warum?*  
+  Einheitliche Regeln für Logs, Events, Health-Signale und Audit-Trails über alle Komponenten hinweg.
 
-* **[8.8 Build- & Release-Management](./088_build_managment.md)**
-    * *Kurzbeschreibung:* Von der Codezeile zum laufenden System. Wie sieht unsere CI/CD-Pipeline aus und wie automatisieren wir den Weg in die Produktion?
+* **[8.8 Testbarkeit, Simulation & Replays](./088_testability_and_simulation.md)**  
+  *Verstehen vor Vertrauen.*  
+  Wie ermöglichen Mocks, Simulatoren und Replays eine überprüfbare und reproduzierbare Systemlogik – auch ohne reale Hardware?
+
+* **[8.9 Build-, Update- & Release-Prinzipien](./089_build_and_release.md)**  
+  *Vom Code zum stabilen Betrieb.*  
+  Leitlinien für Updates, Rollbacks und Releases – mit Fokus auf Determinismus, Nachvollziehbarkeit und Sicherheit, nicht auf Tooling.
 
 ---
-> **Nächster Schritt:** Alle Konzepte sind jetzt definiert. Im nächsten Kapitel dokumentieren wir die wichtigsten strategischen Entscheidungen, die zur aktuellen Architektur geführt haben.
+
+> **Nächster Schritt:** Die systemweiten Leitplanken sind nun definiert.  
+> Im nächsten Kapitel dokumentieren wir die **wesentlichen Architektur- und Designentscheidungen**, die BitGridAI geprägt haben.
 >
-> 👉 Weiter zu **[09 Designentscheidungen](../09_design_decisions/)**
+> 👉 Weiter zu **[09 Designentscheidungen](../09_design_decisions/README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
