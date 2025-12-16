@@ -1,4 +1,4 @@
-# 06.2 Szenario: Autarkie-Schutz (Regel R2)
+# 06.02 Szenario: Autarkie-Schutz (Regel R2)
 
 Das Haus hat Vorfahrt.
 
