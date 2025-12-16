@@ -1,4 +1,4 @@
-# 06.4 Szenario: Prognose-Optimierung (Regel R4)
+# 06.04 Szenario: Prognose-Optimierung (Regel R4)
 
 Der Blick in die Glaskugel.
 
