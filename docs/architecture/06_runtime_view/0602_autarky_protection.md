@@ -9,6 +9,8 @@ R2 hat eine **höhere Priorität** als R1. Selbst wenn Mining profitabel wäre (
 *(Platzhalter für ein Bild: Der Hamster stellt sich schützend vor die Hausbatterie und hält dem Miner ein Stoppschild hin.)*
 ![Hamster schützt die Batterie](../../media/pixel_art_hamster_battery_guard.png)
 
+&nbsp;
+
 ## Der Ablauf (Sequenz)
 
 1.  **Sensing:** Der Smart Meter meldet plötzlich hohen Netzbezug (jemand hat den Herd eingeschaltet) ODER der Batteriespeicher meldet einen niedrigen Ladestand (SoC).
@@ -21,6 +23,8 @@ R2 hat eine **höhere Priorität** als R1. Selbst wenn Mining profitabel wäre (
 5.  **Explanation:**
     * `Reason`: "Priority to Household"
     * `Trigger`: "SoC 19% < 20% Limit"
+
+&nbsp;
 
 ## Konfiguration (MVP)
 
