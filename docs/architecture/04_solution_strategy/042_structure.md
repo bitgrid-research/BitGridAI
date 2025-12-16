@@ -22,7 +22,8 @@ Wir beantworten hier bewusst nicht die Frage *„Wie ist etwas implementiert?“
 BitGridAI folgt einer einfachen, aber strengen Ordnung:
 
 * **Ein klarer Kern**, der entscheidet  
-* **Klare Ränder**, die messen, handeln oder erklären  
+* **Klare Ränder**, die messen, handeln oder erklären
+* **Eine Operations-Schicht**, die absichert, konfiguriert und beobachtbar macht   
 * **Keine Querverbindungen**, die Verantwortung verwischen  
 
 Diese Ordnung ist kein Selbstzweck.
@@ -43,6 +44,8 @@ Jede Ebene hat eine eindeutige Rolle – und kennt ihre Grenzen.
 | **Adapter-Schicht (Ports & Adapters)** 🔌 | Übersetzer zwischen System und Außenwelt. | • Lesen externer Messwerte<br>• Übersetzen von Protokollen (Modbus, MQTT, REST)<br>• Umsetzen von Entscheidungen in Befehle | • Keine Fachlogik<br>• Keine Regeln<br>• Keine Entscheidungen |
 | **Interaktionsschicht (Explain & Control)** 🖥️ | Schnittstelle zum Menschen. | • Visualisierung von Zuständen und Flüssen<br>• Erklärung von Entscheidungen<br>• Entgegennahme von Overrides und Previews | • Trifft keine Energieentscheidungen<br>• Verändert den Core nicht direkt |
 | **Gedächtnisschicht (Data & Research)** 💾 | Nachvollziehbarkeit und Forschung. | • Operative Speicherung (Hot Data)<br>• Historische Logs (Cold Data)<br>• Replays und KPI-Berechnung | • Keine Steuerung<br>• Kein Eingriff in den Betrieb |
+| **Operations (Security, Config, Observability)** 🛡️ | Absicherung, Betriebsfähigkeit und Transparenz im Betrieb. | • AuthN/Z und Rollen/Policies<br>• Konfiguration & Feature-Flags<br>• Metriken, Logs, Alerts | • Keine Fachlogik<br>• Keine direkten Energieentscheidungen<br>• Kein Eingriff in den Core-Entscheidungsfluss |
+
 
 &nbsp;
 
@@ -53,7 +56,8 @@ Die Stabilität der Struktur entsteht durch klare Grenzen:
 * Der **Core** kennt keine Hardware.  
 * Adapter kennen keine Regeln.  
 * Die UI erklärt, entscheidet aber nicht.  
-* Forschung liest Daten – sie steuert nichts.  
+* Forschung liest Daten – sie steuert nichts.
+* Operations sorgt für Sicherheit, Konfiguration und Observability, ohne Fachlogik oder Entscheidungswege zu überlagern.    
 
 Diese Trennlinien sind **absichtlich streng**.  
 
