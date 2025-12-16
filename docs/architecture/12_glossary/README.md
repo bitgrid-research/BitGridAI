@@ -10,6 +10,8 @@ In diesem Kapitel definieren wir unsere zentrale Terminologie. Das Ziel ist eine
 
 ![Der schlaue Hamster mit Büchern](link_zu_image_1.png)
 
+&nbsp;
+
 ## Inhalt dieses Kapitels
 
 Hier findest du unsere zentrale Begriffsliste:
