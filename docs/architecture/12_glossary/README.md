@@ -18,7 +18,7 @@ In diesem Kapitel definieren wir unsere zentrale Terminologie. Das Ziel ist eine
 Hier findest du unsere zentrale Begriffsliste:
 
 * **[12.1 Das Begriffsverzeichnis (A-Z)](./12_glossary.md)**
-    * *Kurzbeschreibung:* Die alphabetische Auflistung aller wichtigen Fachbegriffe und Abkürzungen, die im BitGridAI-Projekt verwendet werden, inklusive ihrer genauen Definitionen in unserem Kontext.
+    * Die alphabetische Auflistung aller wichtigen Fachbegriffe und Abkürzungen, die im BitGridAI-Projekt verwendet werden, inklusive ihrer genauen Definitionen in unserem Kontext.
 
 ---
 > **Endstation.**  
