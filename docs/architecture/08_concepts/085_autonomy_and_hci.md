@@ -1,4 +1,4 @@
-# 8.5 Autonomie, HCI & menschliche Kontrolle
+# 8.5 - Autonomie, HCI & menschliche Kontrolle
 
 Kontrolle bewusst gestalten.
 
