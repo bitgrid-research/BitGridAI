@@ -11,7 +11,7 @@ auch wenn sich die Welt draußen schnell ändert.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt entspannt auf einem Felsen, während um ihn herum Wolken, Blitze und Preissymbole vorbeiziehen. Ein Schild: „Stay calm – 10-Min-Block“.)*
 
----
+&nbsp;
 
 ## Qualitätsziel
 
@@ -23,7 +23,7 @@ Das System soll:
 - Entscheidungen nur zu definierten Zeitpunkten treffen,
 - und sein Verhalten im Voraus erklärbar machen.
 
----
+&nbsp;
 
 ## Kontext
 
@@ -33,7 +33,7 @@ Das System soll:
 - Forecasts (R4) sind unterstützend, nicht dominant
 - UI zeigt Timeline und Next-Block-Preview
 
----
+&nbsp;
 
 ## Szenario P-1: Kurzfristige Schwankungen (Wolkenzug)
 
@@ -56,7 +56,7 @@ Laufender Betrieb mit aktivem Mining
 - Entscheidung bleibt im UI konsistent
 - Keine unnötigen Hardware-Schaltzyklen
 
----
+&nbsp;
 
 ## Szenario P-2: Blockwechsel mit Grenzwertnähe
 
@@ -79,7 +79,7 @@ Normalbetrieb
 - Entscheidung ist erklärbar („wegen Durchschnitt X > Limit Y“)
 - Kein zufälliges Verhalten an Grenzwerten
 
----
+&nbsp;
 
 ## Szenario P-3: Forecast-Update zwischen zwei Blocks
 
@@ -102,7 +102,7 @@ Block läuft noch
 - Nutzer kann kommende Entscheidung erkennen
 - System bleibt ruhig trotz neuer Information
 
----
+&nbsp;
 
 ## Szenario P-4: Nutzer fragt „Was passiert als Nächstes?“
 
@@ -125,7 +125,7 @@ Beliebiger Modus
 - Keine Überraschungsaktionen
 - Verhalten ist mental modellierbar
 
----
+&nbsp;
 
 ## Messbare Qualitätsmerkmale
 
@@ -137,7 +137,7 @@ Beliebiger Modus
 | Preview-Abdeckung | 100 % |
 | Nutzer-Überraschungen | 0 |
 
----
+&nbsp;
 
 ## Bezug zur Architektur
 
@@ -147,7 +147,7 @@ Beliebiger Modus
 - **Explainability & UI:** Kap. 08.4
 - **Testbarkeit (Replay):** Kap. 08.9
 
----
+&nbsp;
 
 ## Zusammenfassung
 
@@ -163,6 +163,6 @@ BitGridAI:
 > **Nächster Schritt:**  
 > Stabilität allein reicht nicht – das System muss auch **wirtschaftlich sinnvoll** handeln.
 >
-> 👉 Weiter zu **[10.2.4 Nachhaltigkeit & Wirtschaftlichkeit](./1024_sustainability_and_economics.md)**
+> 👉 Weiter zu **[10.2.4 - Nachhaltigkeit & Wirtschaftlichkeit](./1024_sustainability_and_economics.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
