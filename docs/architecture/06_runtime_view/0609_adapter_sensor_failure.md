@@ -70,6 +70,6 @@ Diese Signale sind extern sichtbar (UI, Monitoring, Logs).
 > **Nächster Schritt:** Wir haben nun alle zentralen Laufzeitszenarien betrachtet – inklusive Fehler- und Ausfallpfade.  
 > Jetzt schauen wir uns an, **wo BitGridAI läuft und wie die Komponenten verteilt sind**.
 >
-> 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view/README.md)**
+> 👉 Weiter zu **[06.10 Config- & Feature-Flag-Reload](./0610_config_feature_reload.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
