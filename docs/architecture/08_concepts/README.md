@@ -61,7 +61,7 @@ Sie betreffen mehrere Bausteine gleichzeitig und bilden die technische „Sprach
 > Entscheidungen sind nun reproduzierbar getestet und überprüfbar.  
 > Im nächsten Abschnitt betrachten wir, **wie BitGridAI gebaut, aktualisiert und sicher ausgerollt wird**.
 >
-> 👉 Weiter zu **[8.9 Build-, Update- & Release-Prinzipien](./089_build_update_release.md)**
+> 👉 Weiter zu **[09 Architektur- & Designentscheidungen](../09_design_decisions/README.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
 
