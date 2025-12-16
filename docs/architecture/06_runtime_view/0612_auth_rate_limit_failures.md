@@ -68,10 +68,9 @@ Fehler werden eindeutig signalisiert, aber niemals „halb“ ausgeführt.
 Diese Informationen stehen für UI, Monitoring und Audit zur Verfügung.
 
 ---
-
-> **Nächster Schritt:** Alle relevanten Laufzeitpfade – inklusive Schutz- und Fehlerszenarien – sind nun beschrieben.  
-> Jetzt betrachten wir, **wie BitGridAI technisch verteilt und betrieben wird**.
+> **Nächster Schritt:** Zugriffe sind nun abgesichert und kontrolliert.  
+> Als Nächstes betrachten wir, **wie neue Prognosen verarbeitet werden, ohne den gesamten Entscheidungszyklus neu zu starten**.
 >
-> 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view/README.md)**
+> 👉 Weiter zu **[06.13 Forecast-Update-Zyklus](./0613_forecast_update_cycle.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
