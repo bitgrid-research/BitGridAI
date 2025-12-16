@@ -31,6 +31,7 @@ BitGridAI übernimmt folgende Aufgaben:
 | **Adapter & Feld-I/O (`modules/`)** | Anbindung von PV, Smart Meter, Speicher und Minern. Übersetzung externer Protokolle. | Messwerte, Health-Events, Aktor-Quittungen. | Hardware-Protokolle (MQTT, Modbus, REST), Core-Kommandos. |
 | **UI & Explainability (`ui/`, `explain/`)** | Lokale Web-UI, API-Layer, Explain-Agent für Begründungen und „Was-wäre-wenn“-Szenarien. | REST-/WS-Endpunkte, Previews, Overrides, Explain-Sessions. | State-Feeds, DecisionEvents, Auth-Informationen, Textbausteine. |
 | **Data & Research (`data/`, `research/`)** | Persistenz (SQLite, Parquet), Audit-Trails, Replay- und Exportfunktionen (Opt-in). | Append-only Logs, KPIs, Export-Bundles, Health-Metriken. | DecisionEvents, Metrik-Streams, Export-Aufträge. |
+| **Operations (`ops/`)** | Absicherung (AuthN/Z, Policies), Konfigurations- und Feature-Management, Telemetrie & Alerts. | Tokens/Session-Infos, Config-Snapshots, Health/Alert-Feeds. | Secrets/Rollen, Config-Files & Feature-Flags, Metrik- und Log-Streams. |
 
 > Die detaillierte Innenansicht dieser Bausteine folgt in **Kapitel 5.2**.
 
