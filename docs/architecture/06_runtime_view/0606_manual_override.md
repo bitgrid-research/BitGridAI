@@ -1,4 +1,4 @@
-# 06.6 Szenario: Manuelles Überschreiben (User Override)
+# 06.06 Szenario: Manuelles Überschreiben (User Override)
 
 Chef-Sache.
 
