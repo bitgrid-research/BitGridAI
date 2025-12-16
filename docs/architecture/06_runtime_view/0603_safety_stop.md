@@ -1,4 +1,4 @@
-# 06.3 Szenario: Sicherheitsstopp (Safety Stop - R3)
+# 06.03 Szenario: Sicherheitsstopp (Safety Stop - R3)
 
 Die Notbremse.
 
