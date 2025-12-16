@@ -124,10 +124,10 @@ stateDiagram-v2
 | `max_autonomy_level` | **3** | Vollautomatik als maximale Autonomie |
 
 ---
-> **Nächster Schritt:** Wir wissen jetzt, wie viel Kontrolle das System übernehmen darf.  
-> Im nächsten Kapitel schauen wir uns an, **auf welcher Hardware BitGridAI läuft und wie es verteilt wird**.
+> **Nächster Schritt:** Die Kontrolllogik ist definiert.  
+> Jetzt schauen wir, **wie BitGridAI sauber startet und sich von Ausfällen erholt**.
 >
-> 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view/README.md)**
+> 👉 Weiter zu **[06.08 Boot & Recovery](./0608_boot_recovery.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
 
