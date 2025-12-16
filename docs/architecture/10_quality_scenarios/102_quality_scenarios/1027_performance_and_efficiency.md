@@ -159,5 +159,6 @@ BitGridAI:
 > **Nächster Schritt:**  
 > Alle Qualitätsmerkmale sind nun vollständig beschrieben und durch Szenarien abgesichert.
 >
-> 👉 Zurück zur **[Übersicht der Qualitätsszenarien](./102_quality_scenarios.md)**  
+> 👉 Zurück zur **[11 - Risiken & Technische Schulden](../../11_risks_and_technical_debt)**
+> 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
