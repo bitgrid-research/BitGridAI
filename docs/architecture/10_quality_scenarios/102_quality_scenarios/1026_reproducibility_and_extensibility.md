@@ -161,5 +161,6 @@ BitGridAI:
 > **Nächster Schritt:**  
 > Alle Qualitätsszenarien sind nun beschrieben.
 >
-> 👉 Zurück zur **[Übersicht der Qualitätsszenarien](./102_quality_scenarios.md)**  
+> 👉 Weiter zu **[10.2.7 Performance & Ressourceneffizienz](./1027_performance_and_efficiency.md)**
+> 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
