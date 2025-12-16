@@ -80,6 +80,6 @@ Jede Phase ist explizit, beobachtbar und über Health-Signale nach außen sichtb
 > **Nächster Schritt:** Wir haben nun alle zentralen Laufzeitszenarien betrachtet.  
 > Jetzt stellt sich die Frage, **wo BitGridAI läuft und wie die Bausteine verteilt werden**.
 >
-> 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view/README.md)**
+> 👉 Weiter zu **[06.09 Adapter- & Sensor-Ausfall](./0609_adapter_sensor_failure.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
