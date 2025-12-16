@@ -11,6 +11,8 @@ Das ist der Ort für Sequenz-, Aktivitäts- oder Zustandsdiagramme, die erkläre
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster in Aktion, der z.B. an einem Schaltpult steht, während im Hintergrund Energieflüsse oder Datenpakete dynamisch visualisiert werden. Er drückt einen großen "START"-Knopf.)*
 ![Hamster dirigiert den Ablauf](link_zum_action_bild.png)
 
+&nbsp;
+
 ## Inhalt dieses Kapitels
 
 Wir haben die wichtigsten Laufzeitszenarien anhand unseres Regelwerks (R1–R5) dokumentiert. Diese Szenarien decken die kritischen Pfade ab:
@@ -34,7 +36,7 @@ Wir haben die wichtigsten Laufzeitszenarien anhand unseres Regelwerks (R1–R5) 
     * Der Eingriff durch den Nutzer. Was passiert, wenn ein Operator die Automatik übersteuert ("Boost")?
 
 * **[6.7 Autonomie-Stufen & Kontrollmodi](./067_autonomy_levels.md)**  
-  *Wer entscheidet wann? Wie verteilt BitGridAI Verantwortung zwischen Nutzer und System – von manuell bis vollautomatisch?*
+    * Die Kontrolllogik. Wie wird die Entscheidungshoheit zwischen Nutzer und System abhängig vom Autonomie-Level verteilt?
 
 ---
 > **Nächster Schritt:** Wir wissen jetzt, wie die Software arbeitet. Aber auf welcher Hardware landet sie eigentlich und wie kommt sie dorthin? Im nächsten Kapitel schauen wir uns die Infrastruktur an.
