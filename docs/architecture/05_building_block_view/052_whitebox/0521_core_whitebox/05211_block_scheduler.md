@@ -1,4 +1,4 @@
-# 05.2.1.1 Block-Scheduler
+# 05.2.1.1 - Baustein: Block-Scheduler
 
 Der Taktgeber des Systems.
 
