@@ -1,4 +1,4 @@
-# 06.7 - Szenario: Autonomie-Stufen & Kontrollmodi
+# 06.07 - Szenario: Autonomie-Stufen & Kontrollmodi
 
 Wer entscheidet eigentlich?
 
