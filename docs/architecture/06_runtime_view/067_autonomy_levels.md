@@ -10,7 +10,7 @@ Ziel ist es, **Selbstbestimmung und Komfort bewusst wählbar** zu machen – ein
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor einem Bedienpult mit vier Hebeln von „Manuell“ bis „Auto“. Über ihm schwebt eine Skala zwischen Mensch und Maschine.)*
 
----
+&nbsp;
 
 ## Das Konzept: Kontrollierbare Autonomie statt Alles-oder-nichts
 
@@ -23,7 +23,7 @@ Unabhängig von der gewählten Stufe gilt:
 > **Mehr Autonomie für das System bedeutet nie weniger Sicherheit.**  
 > Regel R3 (Safety) bleibt in allen Modi jederzeit aktiv.
 
----
+&nbsp;
 
 ## Die vier Autonomie-Stufen
 
@@ -37,7 +37,7 @@ Unabhängig von der gewählten Stufe gilt:
 **Typischer Anwendungsfall:**  
 Tests, Debugging, maximale Kontrolle.
 
----
+&nbsp;
 
 ### Stufe 1 — Assistiert  
 **Das System denkt mit, entscheidet aber nicht.**
@@ -49,7 +49,7 @@ Tests, Debugging, maximale Kontrolle.
 **Typischer Anwendungsfall:**  
 Vertrauensaufbau, Transparenz, lernende Nutzung.
 
----
+&nbsp;
 
 ### Stufe 2 — Halb-automatisch  
 **Das System darf starten, aber nicht stoppen.**
@@ -61,7 +61,7 @@ Vertrauensaufbau, Transparenz, lernende Nutzung.
 **Typischer Anwendungsfall:**  
 Komfort beim Start, volle Kontrolle beim Stoppen.
 
----
+&nbsp;
 
 ### Stufe 3 — Vollautomatisch  
 **Das System kontrolliert Start und Stopp vollständig.**
@@ -73,7 +73,7 @@ Komfort beim Start, volle Kontrolle beim Stoppen.
 **Typischer Anwendungsfall:**  
 Maximaler Komfort, kontinuierlich optimierter Betrieb.
 
----
+&nbsp;
 
 ## Verhalten zur Laufzeit (vereinfacht)
 
@@ -94,7 +94,7 @@ stateDiagram-v2
     HalbAuto --> Safety
     VollAuto --> Safety
 ```
----
+&nbsp;
 
 ## Der Ablauf im Detail
 
@@ -112,7 +112,7 @@ stateDiagram-v2
 4. **Zusammenspiel mit Overrides:**  
    Ein manueller Override (siehe 06.6) hat Vorrang vor der Autonomie-Stufe, ist jedoch immer zeitlich begrenzt.
 
----
+&nbsp;
 
 ## Konfiguration
 
@@ -124,12 +124,10 @@ stateDiagram-v2
 | `max_autonomy_level` | **3** | Vollautomatik als maximale Autonomie |
 
 ---
-
-> **Einordnung:**  
-> Die Autonomie-Stufen sind ein zentrales Gestaltungselement für Usability, Vertrauen und Akzeptanz.  
-> Sie beeinflussen das Laufzeitverhalten von Core, UI und Regelwerk und sind daher bewusst Teil der **Laufzeitsicht**.
+> **Nächster Schritt:** Wir wissen jetzt, wie viel Kontrolle das System übernehmen darf.  
+> Im nächsten Kapitel schauen wir uns an, **auf welcher Hardware BitGridAI läuft und wie es verteilt wird**.
 >
 > 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view/README.md)**
 > 
-> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**  
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
 
