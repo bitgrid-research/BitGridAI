@@ -11,6 +11,8 @@ Das Ziel ist es, die Architektur nachvollziehbar zu machen und "Warum-Fragen" in
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster als Richter mit einem Hammer, der eine Entscheidung fällt, oder vor einem großen Baumdiagramm mit zwei Pfaden, von denen einer gewählt wurde.)*
 ![Hamster trifft eine Entscheidung](link_zum_entscheidungs_bild.png)
 
+&nbsp;
+
 ## Inhalt dieses Kapitels
 
 Wir nutzen ein etabliertes Format, um unsere Entscheidungen zu strukturieren:
