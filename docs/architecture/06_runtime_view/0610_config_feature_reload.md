@@ -73,7 +73,7 @@ Alle Events sind extern beobachtbar (UI, Monitoring, Logs).
 ---
 
 > **Nächster Schritt:** Konfiguration ist nun zur Laufzeit anpassbar.  
-> Als Nächstes betrachten wir, **wie BitGridAI auf der Zielinfrastruktur verteilt und betrieben wird**.
+> Jetzt betrachten wir, **wie Daten kontrolliert exportiert und reproduzierbar analysiert werden können**.
 >
 > 👉 Weiter zu **[06.11 Export & Replay](./0611_export_replay.md)**
 > 
