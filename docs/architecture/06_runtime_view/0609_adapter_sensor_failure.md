@@ -67,8 +67,8 @@ Diese Signale sind extern sichtbar (UI, Monitoring, Logs).
 
 ---
 
-> **Nächster Schritt:** Wir haben nun alle zentralen Laufzeitszenarien betrachtet – inklusive Fehler- und Ausfallpfade.  
-> Jetzt schauen wir uns an, **wo BitGridAI läuft und wie die Komponenten verteilt sind**.
+> **Nächster Schritt:** Die Datenbasis ist abgesichert.  
+> Jetzt betrachten wir, **wie Konfigurationsänderungen zur Laufzeit sicher übernommen werden**.
 >
 > 👉 Weiter zu **[06.10 Config- & Feature-Flag-Reload](./0610_config_feature_reload.md)**
 > 
