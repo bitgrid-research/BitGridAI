@@ -29,6 +29,6 @@ Qualitätsszenarien sind spezifische, nachvollziehbare Tests, die beweisen, dass
 ---
 > **Nächster Schritt:** Wir haben die gewünschte Qualität definiert. Jetzt betrachten wir die Risiken, die diese Architektur mit sich bringt.
 >
-> 👉 Weiter zu **[11 Risiken und Technischer Schuld](../11_risks_and_technical_debt/README.md)**
+> 👉 Weiter zu **[11 Risiken und Technischer Schulden](../11_risks_and_technical_debt/README.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
