@@ -12,7 +12,7 @@ Hier klären wir, **welche Komponente auf welchem Knoten läuft** und wie diese 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster als Systemadministrator, umgeben von Server-Racks und Netzwerk-Switches.)*  
 ![Hamster als Sysadmin im Serverraum](link_zum_deployment_bild.png)
 
----
+&nbsp;
 
 ## Inhalt dieses Kapitels
 
