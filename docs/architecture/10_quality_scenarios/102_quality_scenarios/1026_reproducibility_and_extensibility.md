@@ -9,7 +9,7 @@ Dieses Qualitätsszenario beschreibt, wie BitGridAI **jede Entscheidung nachvoll
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster hält ein altes Logbuch in der einen Pfote und steckt mit der anderen einen neuen Adapter-Baustein an ein System. Auf dem Buch steht „Replay“, auf dem Baustein „New Adapter“.)*
 
----
+&nbsp;
 
 ## Qualitätsziel
 
@@ -21,7 +21,7 @@ Das System soll:
 - Änderungen messbar und vergleichbar machen,
 - neue Komponenten integrieren, ohne bestehende zu destabilisieren.
 
----
+&nbsp;
 
 ## Kontext
 
@@ -30,7 +30,7 @@ Das System soll:
 - Architektur folgt dem Adapter-/Hexagon-Prinzip (Kap. 05)
 - Deployment ist self-contained (Kap. 07)
 
----
+&nbsp;
 
 ## Szenario R-1: Reproduktion einer historischen Entscheidung
 
@@ -53,7 +53,7 @@ Offline oder Research Node
 - Abweichungen werden explizit als Fehler erkannt
 - Replay ist zeitlich beschleunigt oder verlangsamt möglich
 
----
+&nbsp;
 
 ## Szenario R-2: Vergleich zweier Regel- oder Policy-Versionen
 
@@ -76,7 +76,7 @@ Replay- oder Simulationsmodus
 - Vergleich ist deterministisch
 - Ergebnisse sind dokumentierbar
 
----
+&nbsp;
 
 ## Szenario R-3: Anbindung neuer Hardware (Adapter)
 
@@ -99,7 +99,7 @@ Bestehendes Deployment
 - Fehler im Adapter beeinträchtigen nicht den Core
 - Adapter kann isoliert getestet werden
 
----
+&nbsp;
 
 ## Szenario R-4: System-Update mit Rückrollmöglichkeit
 
@@ -122,7 +122,7 @@ Produktivsystem
 - Rollback ohne Migration möglich
 - Verhalten bleibt erklärbar
 
----
+&nbsp;
 
 ## Messbare Qualitätsmerkmale
 
@@ -134,7 +134,7 @@ Produktivsystem
 | Erweiterungsaufwand | lokal begrenzt |
 | Breaking Changes | 0 |
 
----
+&nbsp;
 
 ## Bezug zur Architektur
 
@@ -144,7 +144,7 @@ Produktivsystem
 - **Deployment & Rollback:** Kap. 07
 - **ADRs:** Kap. 09
 
----
+&nbsp;
 
 ## Zusammenfassung
 
@@ -161,6 +161,6 @@ BitGridAI:
 > **Nächster Schritt:**  
 > Alle Qualitätsszenarien sind nun beschrieben.
 >
-> 👉 Weiter zu **[10.2.7 Performance & Ressourceneffizienz](./1027_performance_and_efficiency.md)**
+> 👉 Weiter zu **[10.2.7 - Performance & Ressourceneffizienz](./1027_performance_and_efficiency.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
