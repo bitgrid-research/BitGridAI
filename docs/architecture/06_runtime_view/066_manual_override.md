@@ -86,8 +86,8 @@ Damit der Nutzer sich nicht ins Knie schießt:
 | `allow_unsafe_override` | **FALSE** | (Hardcoded) Es ist nicht möglich, R3 (Safety) zu übersteuern. |
 
 ---
-> **Nächster Schritt:** Wir wissen jetzt, wie die Software arbeitet. Aber auf welcher Hardware landet sie eigentlich und wie kommt sie dorthin?
->
-> 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view/README.md)**
->
+> **Nächster Schritt:** Der Nutzer kann eingreifen – aber wie viel Kontrolle soll das System grundsätzlich übernehmen?
+>  
+> 👉 Weiter zu **[06.7 Autonomie-Stufen & Kontrollmodi](./067_autonomy_levels.md)**
+> 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
