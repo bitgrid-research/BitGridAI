@@ -1,4 +1,4 @@
-# 05.2.3.3 Explain-Agent
+# 05.2.3.3 - Baustein: Explain-Agent
 
 Die Stimme des Systems.
 
