@@ -1,4 +1,4 @@
-# 06.10 Szenario: Config- & Feature-Flag-Reload
+# 06.10 - Szenario: Config- & Feature-Flag-Reload
 
 Umbauen im laufenden Betrieb.
 
