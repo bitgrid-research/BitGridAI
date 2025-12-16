@@ -1,4 +1,4 @@
-# 06.11 Szenario: Export & Replay
+# 06.11 - Szenario: Export & Replay
 
 Wissen mitnehmen – aber kontrolliert.
 
@@ -9,7 +9,7 @@ Der Export ist dabei kein „Dump“, sondern ein **reproduzierbares Forschungsa
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster packt sorgfältig Datenkisten in eine beschriftete Box. Auf dem Deckel stehen „Manifest“, „Hash“, „Read-only“.)*
 
----
+&nbsp;
 
 ## Das Ziel: Reproduzierbarkeit ohne Kontrollverlust
 
@@ -22,7 +22,7 @@ Der Export- und Replay-Mechanismus stellt sicher:
 - technische Nachvollziehbarkeit durch Manifest und Hash,
 - strikt read-only beim Replay.
 
----
+&nbsp;
 
 ## Der Ablauf beim Export (vereinfacht)
 
@@ -46,7 +46,7 @@ Der Export- und Replay-Mechanismus stellt sicher:
    Ein Replay-Runner kann das Bundle nutzen, um Abläufe lokal nachzustellen.  
    Der Zugriff erfolgt **read-only** und hat keinen Einfluss auf das Live-System.
 
----
+&nbsp;
 
 ## Verhalten im Fehlerfall
 
@@ -59,7 +59,7 @@ Der Export- und Replay-Mechanismus stellt sicher:
 
 Ein fehlgeschlagener Export verändert weder den Systemzustand noch laufende Entscheidungen.
 
----
+&nbsp;
 
 ## Schnittstellen & Signale
 
