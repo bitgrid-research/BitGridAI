@@ -1,4 +1,4 @@
-# 06.5 Szenario: Stabilität & Totband (Regel R5)
+# 06.05 Szenario: Stabilität & Totband (Regel R5)
 
 Die Ruhe bewahren.
 
