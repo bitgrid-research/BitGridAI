@@ -7,6 +7,8 @@ Dieses Dokument liefert die **Endgültige Terminologie** des gesamten Projekts. 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster, der vor einem großen Buch oder einer Tafel mit alphabetischen Einträgen steht und eine Lupe hält, wie ein Bibliothekar, der Ordnung schafft.)*
 ![Hamster überprüft Glossar](../../media/pixel_art_hamster_glossary.png)
 
+&nbsp;
+
 ## Überblick / Overview
 
 Das Glossar enthält zentrale Begriffe, Konzepte und Abkürzungen, die in der BitGridAI‑Architektur verwendet werden. Es dient dazu, **Konsistenz, Verständlichkeit und Nachvollziehbarkeit** innerhalb der Dokumentation sicherzustellen.
@@ -59,7 +61,7 @@ Das Glossar enthält zentrale Begriffe, Konzepte und Abkürzungen, die in der Bi
 | **T_MAX / T_RESUME** | Temperatur‑Schwellen für Stop/Resume des Miners (R3). |
 | **Trust‑Score** | Nutzervertrauen (z. B. Likert‑Skala) aus Studien/Feedback. |
 
----
+&nbsp;
 
 ## Abkürzungen / Abbreviations
 
