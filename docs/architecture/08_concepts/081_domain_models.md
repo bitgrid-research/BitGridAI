@@ -1,128 +1,205 @@
-# 08.1 Fachliche Modelle (Domain Models)
+# 8.1 Fachliche Modelle (Domain Models)
 
-Unsere gemeinsame Sprache.
+Eine gemeinsame Sprache.
 
-Damit Code, Dokumentation und Team-Kommunikation synchron bleiben, definieren wir hier die zentralen Datenobjekte ("Domain Models"). Diese Klassen bilden das Rückgrat der Anwendung. Sie werden im gesamten System – vom Sensor-Adapter bis zur UI – einheitlich verwendet.
+BitGridAI ist ein entscheidendes System.  
+Damit Entscheidungen nachvollziehbar, testbar und reproduzierbar bleiben, benötigt das System eine **klar definierte fachliche Sprache**, die von allen Bausteinen identisch verstanden wird.
 
-**Wichtiges Prinzip:** Unsere Modelle sind größtenteils **immutable** (unveränderlich). Ein `EnergyState` wird einmal gemessen und nie wieder verändert. Das garantiert die Reproduzierbarkeit für die Forschung.
+Dieses Kapitel beschreibt die **zentralen Domänenkonzepte** von BitGridAI.  
+Sie bilden das gemeinsame Vokabular für Core, Adapter, Regelwerk, UI, Logging und Replays.
 
-*(Platzhalter für ein Bild: Der Hamster mit Brille steht vor einer Tafel und zeigt mit einem Zeigestock auf ein Klassendiagramm. "A = A" steht an der Tafel.)*
-![Hamster erklärt die Modelle](../../media/pixel_art_hamster_teacher.png)
-
-## Überblick: Das Klassendiagramm
-
-Hier siehst du, wie die wichtigsten Objekte zusammenhängen:
-
-```mermaid
-classDiagram
-    class BlockContext {
-        +int block_id
-        +timestamp start_time
-        +timestamp valid_until
-    }
-
-    class EnergyState {
-        +timestamp ts
-        +float pv_power_kw
-        +float grid_import_kw
-        +float battery_soc_pct
-        +float miner_hashrate_th
-        +bool is_valid()
-    }
-
-    class DecisionEvent {
-        +string rule_id
-        +string action
-        +string reason_code
-        +dict trigger_values
-    }
-
-    class ExplainSession {
-        +string session_id
-        +string user_query
-        +string llm_response
-    }
-
-    BlockContext "1" --* "*" EnergyState : contains
-    BlockContext "1" --> "1" DecisionEvent : produces
-    DecisionEvent --> "1" ExplainSession : explains
-```
-
-## 1. Der `EnergyState` (Single Source of Truth) 🧠
-
-Das wichtigste Objekt im System. Es ist ein Schnappschuss der Realität zu einem genauen Zeitpunkt `t`.
-
-* **Verwendung:** Wird von Adaptern befüllt, von der Rule Engine gelesen und in Parquet gespeichert.
-* **Charakter:** Immutable (Unveränderlich). Einmal gemessen, bleibt der Wert für immer so – wichtig für Replays.
-* **Format:** Flat Dictionary / Pydantic Model.
-
-| Feld | Typ | Einheit | Beschreibung |
-| :--- | :--- | :--- | :--- |
-| `ts` | `datetime` | UTC | Der exakte Zeitstempel der Messung. |
-| `p_pv_kw` | `float` | kW | Aktuelle Erzeugungsleistung der PV-Anlage. |
-| `p_load_kw` | `float` | kW | Hausverbrauch (ohne Miner/Ladung). |
-| `p_grid_kw` | `float` | kW | Positiv = Bezug, Negativ = Einspeisung (Saldo). |
-| `surplus_kw` | `float` | kW | Berechneter Überschuss (`pv - load`). |
-| `soc_pct` | `float` | % | State of Charge der Hausbatterie (0.0 - 100.0). |
-| `miner_power_w` | `int` | Watt | Tatsächlicher Verbrauch des Miners (Telemetrie). |
-| `miner_temp_c` | `float` | °C | Heißester Chip-Sensorwert (für R3 Safety). |
-| `price_ct_kwh` | `float` | ct | Aktueller dynamischer Strompreis (inkl. Gebühren). |
-
-## 2. Der `BlockContext` (Der Takt) ⏱️
-
-BitGridAI "denkt" in 10-Minuten-Blöcken. Der Kontext hält Metadaten zum aktuellen Zeitfenster.
-
-| Feld | Typ | Beschreibung |
-| :--- | :--- | :--- |
-| `block_height` | `int` | Fortlaufende Nummer (ähnlich Bitcoin Block Height). Berechnet als `floor(unix_timestamp / 600)`. |
-| `window_start` | `datetime` | Beginn des Blocks (z.B. 14:10:00). |
-| `window_end` | `datetime` | Ende des Blocks (z.B. 14:20:00). |
-| `avg_surplus` | `float` | Der gleitende Durchschnitt des Überschusses in diesem Block (geglättet, um Wolken zu ignorieren). |
-
-## 3. Das `DecisionEvent` (Die Entscheidung) ⚖️
-
-Wenn die Regel-Engine (R1–R5) feuert, entsteht dieses Objekt. Es ist das Ergebnis der Berechnung und enthält alle "Warum"-Informationen für die Explainability.
-
-```python
-class DecisionEvent(BaseModel):
-    timestamp: datetime
-    rule_applied: str      # z.B. "R1_PROFITABILITY", "R3_SAFETY", "R5_DEADBAND"
-    action: ActionType     # Enum: START, STOP, PAUSE, SET_POWER, HOLD
-    parameters: dict       # z.B. {"target_power_w": 1500}
-    
-    # Explainability Data (für den Nutzer)
-    reason: str            # Human readable: "PV Surplus high enough"
-    trigger_metrics: dict  # Snapshot der Werte, die ausgelöst haben: {"surplus": 4.2, "limit": 1.5}
-    
-    is_override: bool      # True, wenn dies durch manuellen User-Eingriff entstand
-```
-
-## 4. Die `UserConfig` (Die Vorgaben) ⚙️
-
-Die statische Konfiguration, die der Nutzer in der `config.yaml` oder im UI einstellt. Sie definiert die Grenzen, innerhalb derer sich die Automatik bewegen darf.
-
-| Sektion | Feld | Default | Bedeutung |
-| :--- | :--- | :--- | :--- |
-| **Profil** | `strategy_mode` | `eco` | `eco` (Autarkie vor Profit) vs `profit` (Aggressiv mining). |
-| **Limits** | `min_home_soc` | `20` | Unter 20% Akku darf der Miner nicht laufen (Notreserve für die Nacht). |
-| **Hardware** | `max_miner_temp`| `80` | Not-Aus Temperatur für den Chip (R3 Threshold). |
-| **Netz** | `grid_cap_kw` | `10` | Maximale Netzanschlussleistung (Blackout-Schutz/Sicherung). |
-
-## 5. Das `ExplainSession` Objekt (Der Dialog) 💬
-
-Für den On-Device Agenten. Wenn der Nutzer im UI fragt "Warum läuft der Miner gerade?", wird dieses Objekt generiert.
-
-* **Zweck:** Entkoppelt die komplexe technische Entscheidung von der menschenlesbaren Antwort.
-* **Inhalt:**
-    * `session_id`: Eindeutige ID für diesen Dialog.
-    * `context_snapshot`: Referenz auf den `EnergyState` zum exakten Zeitpunkt der Frage.
-    * `decision_ref`: Welches `DecisionEvent` ist gerade aktiv? (Die technische Basis der Antwort).
-    * `generated_text`: Die finale Antwort des LLM oder der Template-Engine (z.B. *"Weil die Sonne scheint und der Akku voll ist."*).
-    * `language`: `de` oder `en` (Spracheinstellung des Nutzers).
+*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor einer Tafel mit klar beschrifteten Begriffen wie „EnergyState“, „Rule“, „Decision“. Er zeigt mit einem Zeigestock darauf.)*  
+![Hamster erklärt die Domänensprache](link_zum_domain_hamster.png)
 
 ---
-> **Nächster Schritt:** Wir wissen jetzt, wie die Daten *im Speicher* aussehen. Aber wie legen wir sie langfristig auf die Festplatte, damit sie einen Stromausfall überleben?
+
+## Ziel des Domänenmodells
+
+Das Domänenmodell verfolgt drei übergeordnete Ziele:
+
+- **Eindeutigkeit:**  
+  Jeder zentrale Begriff hat genau eine fachliche Bedeutung.
+
+- **Konsistenz:**  
+  Dieselben Konzepte werden in allen Komponenten identisch verwendet.
+
+- **Entkopplung:**  
+  Fachliche Begriffe sind unabhängig von Protokollen, UI, Persistenz oder Deployment.
+
+Das Domänenmodell ist damit **keine API-Spezifikation** und **kein Datenbankschema**, sondern die **fachliche Grundlage** aller technischen Entscheidungen.
+
+---
+
+## Zentrale Domänenkonzepte
+
+### Nutzer (User)
+
+Ein *Nutzer* ist die Instanz, die:
+- Präferenzen festlegt,
+- Autonomie-Stufen wählt,
+- manuelle Overrides auslöst.
+
+Der Nutzer ist nicht zwingend eine konkrete Person, sondern die **Quelle intentionaler Entscheidungen**.
+
+**Grundsatz:**  
+Nutzerentscheidungen können Optimierungsregeln übersteuern, jedoch niemals Sicherheitsregeln (R3).
+
+---
+
+### Energiequelle (Energy Source)
+
+Eine *Energiequelle* beschreibt die Herkunft verfügbarer Energie, z.B.:
+- Photovoltaik
+- Netz
+- Speicher (Batterie)
+
+Energiequellen liefern Messwerte, treffen jedoch **keine Entscheidungen**.
+
+---
+
+### Verbraucher / Flexible Last (Consumer)
+
+Ein *Verbraucher* ist eine steuerbare Last, z.B.:
+- Miner
+- Heizstab
+- andere flexible Verbraucher
+
+Verbraucher führen Entscheidungen aus (Start, Stop, Safe), treffen sie aber nicht selbst.
+
+---
+
+### Messwert (Measurement)
+
+Ein *Messwert* beschreibt einen beobachteten Zustand zu einem Zeitpunkt *t*, z.B.:
+- Leistung
+- Temperatur
+- Preis
+- Ladezustand
+
+**Wichtige Eigenschaften:**
+- immer zeitlich gebunden,
+- kann fehlen oder ungültig sein,
+- wird niemals implizit geschätzt.
+
+Fehlende Messwerte sind ein **expliziter Zustand** und beeinflussen Entscheidungen (siehe Kap. 8.6).
+
+---
+
+### Zustand (EnergyState)
+
+Der `EnergyState` ist die **Single Source of Truth** zur Laufzeit.
+
+Er umfasst:
+- aktuelle Messwerte,
+- abgeleitete Kontexte (z.B. Forecasts),
+- Betriebsmodi (Autonomie-Stufe, Overrides),
+- Safety- und Degradationszustände.
+
+**Prinzip:**  
+Der EnergyState ist logisch **unveränderlich**.  
+Ein Zustand beschreibt immer genau einen Zeitpunkt und wird niemals nachträglich modifiziert.
+
+Dieses Prinzip ist Grundlage für:
+- deterministisches Verhalten,
+- Replay-Fähigkeit,
+- nachvollziehbare Entscheidungen.
+
+---
+
+### Regel (Rule)
+
+Eine *Regel* beschreibt **warum** eine Entscheidung getroffen wird.
+
+Beispiele:
+- R1: Profitabilität
+- R2: Autarkie
+- R3: Sicherheit
+- R4: Forecast
+- R5: Stabilität
+
+Regeln:
+- bewerten den aktuellen EnergyState,
+- erzeugen Entscheidungsbeiträge,
+- können priorisiert oder überstimmt werden – mit Ausnahme von R3 (Safety).
+
+---
+
+### Entscheidung (Decision)
+
+Eine *Entscheidung* ist das Ergebnis der Regelbewertung.
+
+Sie besteht aus:
+- einer Aktion (z.B. Start, Stop, Hold),
+- einer oder mehreren Begründungen,
+- dem relevanten Kontext.
+
+Entscheidungen sind:
+- erklärbar,
+- logbar,
+- reproduzierbar.
+
+---
+
+### Explain Session
+
+Eine *Explain Session* verbindet technische Entscheidungen mit menschenlesbaren Erklärungen.
+
+Sie referenziert:
+- den relevanten EnergyState,
+- die zugehörige Entscheidung,
+- eine verständliche Begründung für den Nutzer.
+
+Explain Sessions sind stets **read-only** und verändern niemals den Systemzustand.
+
+---
+
+## Modellgrenzen & Abgrenzungen
+
+Bewusst **nicht Teil** des Domänenmodells sind:
+
+- Protokolle (MQTT, REST)
+- UI-spezifische Konzepte
+- Persistenzformate
+- Hardware- oder Hersteller-IDs
+
+Diese Aspekte binden sich an das Domänenmodell an, definieren es aber nicht.
+
+---
+
+## Auswirkungen auf das Gesamtsystem
+
+Das Domänenmodell wirkt systemweit:
+
+- **Core:**  
+  Regeln operieren ausschließlich auf Domänenkonzepten.
+
+- **Adapter:**  
+  Übersetzen externe Signale in Domänenobjekte.
+
+- **UI:**  
+  Visualisiert Zustände und Entscheidungen in Domänensprache.
+
+- **Logging & Replays:**  
+  Nutzen identische Begriffe für Nachvollziehbarkeit und Analyse.
+
+---
+
+## Zusammenfassung
+
+Die fachlichen Modelle bilden das **semantische Fundament** von BitGridAI.
+
+Sie stellen sicher, dass:
+- alle Komponenten dieselbe Sprache sprechen,
+- Entscheidungen erklärbar bleiben,
+- Verhalten reproduzierbar und überprüfbar ist.
+
+Ohne ein klares Domänenmodell gäbe es Optimierung – aber kein Verständnis.
+
+---
+
+> **Nächster Schritt:** Sicherheit ist die Voraussetzung jeder Entscheidung.  
+> Im nächsten Abschnitt betrachten wir das **Sicherheits- & Vertrauenskonzept**.
 >
-> 👉 Weiter zu **[08.2 Persistenz (Datenhaltung)](./082_persistency.md)**
+> 👉 Weiter zu **[8.2 Sicherheits- & Vertrauenskonzept](./082_security_and_trust.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
