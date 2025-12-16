@@ -1,4 +1,4 @@
-# 8.1 Fachliche Modelle (Domain Models)
+# 8.1 - Fachliche Modelle (Domain Models)
 
 Eine gemeinsame Sprache.
 
@@ -11,7 +11,7 @@ Sie bilden das gemeinsame Vokabular für Core, Adapter, Regelwerk, UI, Logging u
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor einer Tafel mit klar beschrifteten Begriffen wie „EnergyState“, „Rule“, „Decision“. Er zeigt mit einem Zeigestock darauf.)*  
 ![Hamster erklärt die Domänensprache](link_zum_domain_hamster.png)
 
----
+&nbsp;
 
 ## Ziel des Domänenmodells
 
@@ -28,7 +28,7 @@ Das Domänenmodell verfolgt drei übergeordnete Ziele:
 
 Das Domänenmodell ist damit **keine API-Spezifikation** und **kein Datenbankschema**, sondern die **fachliche Grundlage** aller technischen Entscheidungen.
 
----
+&nbsp;
 
 ## Zentrale Domänenkonzepte
 
@@ -44,7 +44,7 @@ Der Nutzer ist nicht zwingend eine konkrete Person, sondern die **Quelle intenti
 **Grundsatz:**  
 Nutzerentscheidungen können Optimierungsregeln übersteuern, jedoch niemals Sicherheitsregeln (R3).
 
----
+&nbsp;
 
 ### Energiequelle (Energy Source)
 
@@ -55,7 +55,7 @@ Eine *Energiequelle* beschreibt die Herkunft verfügbarer Energie, z.B.:
 
 Energiequellen liefern Messwerte, treffen jedoch **keine Entscheidungen**.
 
----
+&nbsp;
 
 ### Verbraucher / Flexible Last (Consumer)
 
@@ -66,7 +66,7 @@ Ein *Verbraucher* ist eine steuerbare Last, z.B.:
 
 Verbraucher führen Entscheidungen aus (Start, Stop, Safe), treffen sie aber nicht selbst.
 
----
+&nbsp;
 
 ### Messwert (Measurement)
 
@@ -83,7 +83,7 @@ Ein *Messwert* beschreibt einen beobachteten Zustand zu einem Zeitpunkt *t*, z.B
 
 Fehlende Messwerte sind ein **expliziter Zustand** und beeinflussen Entscheidungen (siehe Kap. 8.6).
 
----
+&nbsp;
 
 ### Zustand (EnergyState)
 
@@ -104,7 +104,7 @@ Dieses Prinzip ist Grundlage für:
 - Replay-Fähigkeit,
 - nachvollziehbare Entscheidungen.
 
----
+&nbsp;
 
 ### Regel (Rule)
 
@@ -122,7 +122,7 @@ Regeln:
 - erzeugen Entscheidungsbeiträge,
 - können priorisiert oder überstimmt werden – mit Ausnahme von R3 (Safety).
 
----
+&nbsp;
 
 ### Entscheidung (Decision)
 
@@ -138,7 +138,7 @@ Entscheidungen sind:
 - logbar,
 - reproduzierbar.
 
----
+&nbsp;
 
 ### Explain Session
 
@@ -151,7 +151,7 @@ Sie referenziert:
 
 Explain Sessions sind stets **read-only** und verändern niemals den Systemzustand.
 
----
+&nbsp;
 
 ## Modellgrenzen & Abgrenzungen
 
@@ -164,7 +164,7 @@ Bewusst **nicht Teil** des Domänenmodells sind:
 
 Diese Aspekte binden sich an das Domänenmodell an, definieren es aber nicht.
 
----
+&nbsp;
 
 ## Auswirkungen auf das Gesamtsystem
 
@@ -182,7 +182,7 @@ Das Domänenmodell wirkt systemweit:
 - **Logging & Replays:**  
   Nutzen identische Begriffe für Nachvollziehbarkeit und Analyse.
 
----
+&nbsp;
 
 ## Zusammenfassung
 
