@@ -1,4 +1,4 @@
-# 06.9 Szenario: Adapter- & Sensor-Ausfall
+# 06.09 Szenario: Adapter- & Sensor-Ausfall
 
 Blindflug vermeiden.
 
