@@ -1,4 +1,4 @@
-# 05.2.4.2 Event / Log Store
+# 05.2.4.2  - Baustein: Event / Log Store
 
 Die unveränderliche Erinnerung.
 
