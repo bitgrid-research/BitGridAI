@@ -8,6 +8,8 @@ Wir definieren hier die Maßstäbe, an denen sich die Architektur (und später d
 
 ![Cyborg Hamster prüft einen Qualitätsbaustein](link_zu_image_9.png)
 
+&nbsp;
+
 ## Inhalt dieses Kapitels
 
 Wir strukturieren unsere Qualitätsanforderungen auf zwei Wegen:
