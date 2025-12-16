@@ -1,4 +1,4 @@
-# 12 Glossar
+# 12 - Glossar
 
 Damit wir nicht aneinander vorbeireden.  
 Oder schlimmer: dass alle nicken – und trotzdem etwas anderes meinen.
@@ -24,5 +24,5 @@ Hier findest du unsere zentrale Begriffsliste:
 > **Endstation.**  
 > Wenn du bis hierher gelesen hast, weißt du jetzt nicht nur *wie* BitGridAI funktioniert,  
 > sondern auch *warum* es so gebaut wurde.
-
+>
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
