@@ -9,6 +9,8 @@ Die hier gesammelten Entscheidungen legen die Kernprinzipien von BitGridAI fest:
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt vor einem großen Schild, das die wichtigsten ADRs auflistet (z.B. "ADR 007: Deterministische Regeln").)*
 ![Hamster überprüft ADRs](../../media/pixel_art_hamster_adrs.png)
 
+&nbsp;
+
 ## ADR-Übersicht (Auszug)
 
 Diese Tabelle fasst die wichtigsten, das System prägenden strategischen Entscheidungen zusammen:
