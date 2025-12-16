@@ -14,7 +14,7 @@ Möglich wird dies durch:
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster testet ein komplexes System in einer Sandkasten-Simulation, während echte Hardware sicher im Hintergrund bleibt.)*
 ![Hamster führt Simulation durch](../../media/pixel_art_hamster_simulation.png)
 
----
+&nbsp;
 
 ## Ziel: Deterministische Entscheidungen
 
@@ -28,7 +28,7 @@ Testbarkeit in BitGridAI bedeutet:
 
 Determinismus ist kein Test-Feature, sondern ein **Architekturversprechen**.
 
----
+&nbsp;
 
 ## Testarten & Ebenen
 
@@ -43,7 +43,7 @@ Dank der klaren Trennung von Logik und I/O können verschiedene Testebenen syste
 
 Diese Ebenen bauen aufeinander auf und adressieren jeweils unterschiedliche Risiken.
 
----
+&nbsp;
 
 ## Simulation
 
@@ -65,7 +65,7 @@ Sie ermöglichen Tests von:
 - seltenen Fehlerzuständen,
 - neuen Regelparametern – ohne reale Hardware zu gefährden.
 
----
+&nbsp;
 
 ## Replays (Audit & Forschung)
 
@@ -83,7 +83,7 @@ Replays dienen:
 
 Replays sind strikt **read-only** und beeinflussen niemals das Live-System.
 
----
+&nbsp;
 
 ## Fault Injection & Robustheit
 
@@ -100,7 +100,7 @@ Ziel ist nicht das „Durchhalten um jeden Preis“, sondern:
 
 Diese Tests validieren direkt die Prinzipien aus Kapitel 8.6.
 
----
+&nbsp;
 
 ## Bewertung & Erfolgskriterien (KPIs)
 
@@ -117,7 +117,7 @@ Die Wirkung von Tests, Simulationen und Regelanpassungen wird über messbare Ken
 
 KPIs verbinden technische Qualität mit realer Systemwirkung.
 
----
+&nbsp;
 
 ## Testbarkeit & Betrieb
 
@@ -129,7 +129,7 @@ Testbarkeit ist Voraussetzung für sicheren Betrieb:
 
 Damit bildet Testbarkeit die Brücke zwischen Entwicklung und Betrieb.
 
----
+&nbsp;
 
 ## Abgrenzungen
 
@@ -140,7 +140,7 @@ Nicht Bestandteil dieses Kapitels sind:
 
 Diese gehören in Entwickler- oder Betriebsdokumentation.
 
----
+&nbsp;
 
 ## Zusammenfassung
 
