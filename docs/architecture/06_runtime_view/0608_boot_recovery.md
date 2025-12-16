@@ -1,4 +1,4 @@
-# 06.08 Szenario: Boot & Recovery
+# 06.08 - Szenario: Boot & Recovery
 
 Stabil ab Minute null.
 
@@ -10,7 +10,7 @@ Kein undefinierter Zustand, kein stilles Weiterlaufen, kein Aktionismus.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster startet eine Maschine mit einer Checkliste: „Config ✓, DB ✓, MQTT ✓“. Daneben ein Notfallhebel mit der Aufschrift „Safe Mode“.)*
 
----
+&nbsp;
 
 ## Das Ziel: Definierter Start, kontrollierte Degradation
 
@@ -20,7 +20,7 @@ BitGridAI unterscheidet klar zwischen:
 
 Jede Phase ist explizit, beobachtbar und über Health-Signale nach außen sichtbar.
 
----
+&nbsp;
 
 ## Der Ablauf beim Systemstart (vereinfacht)
 
@@ -41,7 +41,7 @@ Jede Phase ist explizit, beobachtbar und über Health-Signale nach außen sichtb
 4. **Regelstart (First Tick):**  
    Mit dem ersten Block-Tick startet der normale Regelzyklus (R1–R5).
 
----
+&nbsp;
 
 ## Recovery-Pfade bei Ausfällen
 
@@ -64,7 +64,7 @@ Jede Phase ist explizit, beobachtbar und über Health-Signale nach außen sichtb
 - Health-Status wechselt zurück auf `ok`.
 - Der normale Blockbetrieb wird ohne Neustart fortgesetzt.
 
----
+&nbsp;
 
 ## Schnittstellen & Signale
 
