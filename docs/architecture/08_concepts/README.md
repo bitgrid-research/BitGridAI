@@ -55,12 +55,13 @@ Sie betreffen mehrere Bausteine gleichzeitig und bilden die technische „Sprach
 * **[8.9 Build-, Update- & Release-Prinzipien](./089_build_and_release.md)**  
   *Vom Code zum stabilen Betrieb.*  
   Leitlinien für Updates, Rollbacks und Releases – mit Fokus auf Determinismus, Nachvollziehbarkeit und Sicherheit, nicht auf Tooling.
-
+  
 ---
+> **Nächster Schritt:**  
+> Entscheidungen sind nun reproduzierbar getestet und überprüfbar.  
+> Im nächsten Abschnitt betrachten wir, **wie BitGridAI gebaut, aktualisiert und sicher ausgerollt wird**.
+>
+> 👉 Weiter zu **[8.9 Build-, Update- & Release-Prinzipien](./089_build_update_release.md)**
+>
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
 
-> **Nächster Schritt:** Die systemweiten Leitplanken sind nun definiert.  
-> Im nächsten Kapitel dokumentieren wir die **wesentlichen Architektur- und Designentscheidungen**, die BitGridAI geprägt haben.
->
-> 👉 Weiter zu **[09 Designentscheidungen](../09_design_decisions/README.md)**
->
-> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
