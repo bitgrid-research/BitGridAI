@@ -9,7 +9,7 @@ Dieses Szenario beschreibt, wie das System auf Änderungen an YAML-Konfiguration
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster tauscht im laufenden Betrieb Zahnräder aus. Ein Schild daneben: „Hot Reload – geprüft & sicher“.)*
 
----
+&nbsp;
 
 ## Das Ziel: Dynamische Anpassung ohne Kontrollverlust
 
@@ -21,7 +21,7 @@ Ein Reload darf:
 - keine stillen Teilupdates verursachen,
 - den laufenden Betrieb nicht unbemerkt destabilisieren.
 
----
+&nbsp;
 
 ## Der Ablauf beim Config-Reload (vereinfacht)
 
@@ -45,7 +45,7 @@ Ein Reload darf:
    Der Reload-Vorgang wird als Event mit Version und Status dokumentiert.  
    Der Health-Status bleibt stabil oder wechselt bei Fehlern auf `warn` bzw. `error`.
 
----
+&nbsp;
 
 ## Verhalten im Fehlerfall
 
@@ -57,7 +57,7 @@ Ein Reload darf:
   - Log- und UI-Hinweis
 - Der laufende Blockbetrieb bleibt unbeeinflusst.
 
----
+&nbsp;
 
 ## Schnittstellen & Signale
 
