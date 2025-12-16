@@ -8,7 +8,7 @@ Dieses Qualitätsszenario beschreibt, wie BitGridAI **ökologisch sinnvoll und w
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt an einer Waage. Auf der einen Seite Sonne, Batterie und Wärme; auf der anderen Seite Münzen und ein Blitzsymbol. Die Waage ist im Gleichgewicht.)*
 
----
+&nbsp;
 
 ## Qualitätsziel
 
@@ -19,7 +19,7 @@ Das System soll:
 - teuren oder schädlichen Energiebezug vermeiden,
 - Entscheidungen wirtschaftlich begründen können.
 
----
+&nbsp;
 
 ## Kontext
 
@@ -28,7 +28,7 @@ Das System soll:
 - Strompreise und Wetterprognosen stehen lokal zur Verfügung (R4)
 - Nutzer kann Prioritäten setzen (Profil, Policies)
 
----
+&nbsp;
 
 ## Szenario E-1: PV-Überschuss vorhanden
 
@@ -51,7 +51,7 @@ Normal- oder Vollautomatikbetrieb
 - Entscheidung ist nachvollziehbar begründet
 - Akku-Grenzen werden eingehalten
 
----
+&nbsp;
 
 ## Szenario E-2: Niedriger Strompreis ohne PV
 
@@ -74,7 +74,7 @@ Profit-orientiertes Profil
 - Kosten/Nutzen-Verhältnis ist sichtbar
 - Keine Verletzung von R2 (Autarkie)
 
----
+&nbsp;
 
 ## Szenario E-3: Konkurrenz um Energie (Haus vs. Miner)
 
@@ -96,8 +96,8 @@ Laufender Mining-Betrieb
 - Kein kritischer SoC-Unterschritt
 - Keine Netzlastspitzen
 - Klare Priorisierung im Explain-Event
-
----
+- 
+&nbsp;
 
 ## Szenario E-4: Nutzer fragt „Lohnt sich das?“
 
@@ -120,7 +120,7 @@ Beliebiger Modus
 - Entscheidungen sind nicht „magisch“
 - Nutzer kann Strategie bewusst anpassen
 
----
+&nbsp;
 
 ## Messbare Qualitätsmerkmale
 
@@ -132,7 +132,7 @@ Beliebiger Modus
 | Erklärte Entscheidungen | 100 % |
 | Nutzer-Strategie-Kohärenz | hoch |
 
----
+&nbsp;
 
 ## Bezug zur Architektur
 
@@ -142,7 +142,7 @@ Beliebiger Modus
 - **Explainability:** Kap. 08.4
 - **Profile & Policies:** Kap. 08.5
 
----
+&nbsp;
 
 ## Zusammenfassung
 
