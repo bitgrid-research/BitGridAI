@@ -42,9 +42,17 @@ Die Qualitätsmerkmale sind in sechs Hauptkategorien unterteilt, die unsere Arch
     * `Fail-Safe bei Fehlern`: Graceful Degradation (08.5).
 
 ### 6. Reproduzierbarkeit & Erweiterbarkeit
-* **Grundprinzip:** Das System muss auditierbar und leicht anpassbar sein.
-    * `Append-only Logs, Replay`: Ermöglicht das Nacherzählen jedes Decision-Events gegen historische Daten (ADR 012).
-    * `Adapter-Architektur`: Einfache Anbindung neuer Hardware durch klar definierte MQTT/REST-Contracts (ADR 002, 016).
+* **Grundprinzip:** Das System muss auditierbar, wartbar und anpassbar sein.
+    * `Append-only Logs, Replay`: …
+    * `Adapter-Architektur`: …
+    * `Self-contained Deploy`: Ein Host, ein Stack, klare Backups (Kap. 07).
+
+ ### 7. Performance & Ressourceneffizienz
+* **Grundprinzip:** Entscheidungen müssen rechtzeitig und Edge-tauglich erfolgen.
+    * `Block-Tick < 300 ms`: Regel-Auswertung innerhalb eines festen Zeitbudgets.
+    * `Edge-tauglich`: CPU-/RAM-Verbrauch geeignet für Raspberry Pi / NUC.
+    * `No Busy Loops`: Ereignis- und blockgetriebene Verarbeitung.
+
 
 ---
 > **Nächster Schritt:** Wir prüfen diese Qualitätsmerkmale anhand konkreter Nutzungsszenarien.
