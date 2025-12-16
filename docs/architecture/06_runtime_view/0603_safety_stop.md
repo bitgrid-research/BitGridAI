@@ -1,4 +1,4 @@
-# 06.03 Szenario: Sicherheitsstopp (Safety Stop - R3)
+# 06.03 - Szenario: Sicherheitsstopp (Safety Stop - R3)
 
 Die Notbremse.
 
@@ -9,6 +9,8 @@ Sie überwacht kritische Systemparameter in Echtzeit. Wenn eine rote Linie über
 *(Platzhalter für ein Bild: Der Hamster in Feuerwehrmontur steht vor einem rauchenden Server-Rack und haut mit einem großen Hammer auf einen roten "NOT-AUS"-Knopf.)*
 ![Hamster drückt Not-Aus](../../media/pixel_art_hamster_emergency.png)
 
+&nbsp;
+
 ## Kurzüberblick
 
 > **Der Ablauf in Kürze:**
@@ -17,7 +19,7 @@ Sie überwacht kritische Systemparameter in Echtzeit. Wenn eine rote Linie über
 > **TL;DR (EN):**
 > Critical threshold breached → Immediate interrupt (bypassing scheduler) → R3 fires → Hard stop → System enters lockout mode.
 
----
+&nbsp;
 
 ## Sequenzdiagramm (Der Notfall)
 
@@ -78,7 +80,7 @@ Nach dem Crash ist vor dem Start – aber nicht sofort.
     2.  UND der Fehlergrund verschwunden ist (Temp < Limit - Hysterese).
     3.  (Optional) Ein Admin den Fehler manuell quittiert.
 
----
+&nbsp;
 
 ## Wichtige Konfigurations-Parameter (MVP)
 
@@ -93,6 +95,6 @@ Sicherheit ist nicht verhandelbar, aber konfigurierbar. Diese Werte schützen di
 ---
 > **Nächster Schritt:** Sicherheit ist gewährleistet. Jetzt machen wir das System schlau. Wir schauen nicht nur auf das "Jetzt", sondern auch in die Zukunft.
 >
-> 👉 Weiter zu **[06.4 Prognose-Optimierung (R4)](./064_forecast_control.md)**
+> 👉 Weiter zu **[06.04 Prognose-Optimierung (R4)](./0604_forecast_control.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
