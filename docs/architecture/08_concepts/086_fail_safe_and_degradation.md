@@ -1,167 +1,169 @@
-# 8.6 Fail-safe, Degradation & Robustheit
+# 8.6 Fail-Safe, Degradation & Robustheit
 
-Im Zweifel: sicher.
+Lieber sicher stehen als falsch laufen.
 
-BitGridAI interagiert mit realer Hardware, Energieflüssen und Kosten.  
-Fehler, Ausfälle oder unvollständige Informationen sind daher kein Ausnahmefall, sondern **Teil der Realität**.
+BitGridAI steuert reale Energieflüsse und Hardware.  
+Fehler, Ausfälle oder unvollständige Informationen sind daher **kein Ausnahmefall**, sondern ein fester Bestandteil der Realität.
 
-Dieses Kapitel beschreibt die **übergreifenden Prinzipien für Fehlertoleranz, Degradation und Fail-safe-Verhalten**.  
-Ziel ist es, dass BitGridAI **niemals unkontrolliert weiterläuft**, sondern jederzeit nachvollziehbar, konservativ und sicher reagiert.
+Dieses Kapitel beschreibt, wie BitGridAI mit **Unsicherheit, Teil- und Totalausfällen** umgeht – und warum das System im Zweifel **immer konservativ und sicher** handelt.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht neben einem großen roten Not-Aus-Knopf. Daneben Zahnräder, von denen einige bewusst angehalten sind.)*
+*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster zieht im Maschinenraum einen großen roten Hebel mit der Aufschrift „SAFE MODE“. Einige Anzeigen sind grau, aber alles ist ruhig.)*
+![Hamster im Safe Mode](../../media/pixel_art_hamster_safe_mode.png)
 
 ---
 
-## Ziel: Sicherheit vor Optimierung
+## Ziel: Definiertes Verhalten statt Chaos
 
 Grundprinzip:
-> **Wenn etwas unklar ist, wird nicht optimiert, sondern abgesichert.**
+> **Ein System ohne Daten oder Kontrolle darf keine riskanten Entscheidungen treffen.**
 
-Fail-safe bedeutet in BitGridAI nicht „System aus“, sondern:
-- definierte Zustände,
-- erklärbares Verhalten,
-- minimale, sichere Funktionalität.
-
----
-
-## Zentrale Leitprinzipien
-
-### 1. Safety schlägt alles (R3)
-
-Die Sicherheitsregel (R3) ist **nicht verhandelbar**:
-- sie gilt unabhängig von Autonomie-Level,
-- sie kann nicht übersteuert werden,
-- sie greift auch bei manuellen Overrides.
-
-Beispiele:
-- Übertemperatur → sofortiger Stop
-- Hardware-Fehler → Stop
-- kritischer Kommunikationsverlust → Stop oder Safe Mode
+Fail-Safe bedeutet bei BitGridAI nicht „Absturz“, sondern:
+- klar definierte Zustände,
+- beobachtbare Degradation,
+- vorhersehbares Verhalten.
 
 ---
 
-### 2. Keine stillen Fehler
+## Sicherheits-Hierarchie
 
-BitGridAI kennt **keine stillen Fehlermodi**.
+BitGridAI folgt einer festen Prioritätenordnung:
 
-Jeder relevante Fehler führt zu:
-- einem expliziten Health-Status (`warn` / `error`),
-- einem Event (Log, Explain-Stream),
-- einer sichtbaren Rückmeldung im UI.
+1. **R3 – Safety (immer führend)**  
+   Schutz von Hardware, Netz und Infrastruktur.
 
----
+2. **Systemintegrität**  
+   Konsistenter Zustand, keine Seiteneffekte bei Fehlern.
 
-### 3. Degradation statt Chaos
+3. **Autarkie & Stabilität**  
+   Akku- und Netzschutz (R2, R5).
 
-Nicht jeder Fehler erfordert einen Komplettstopp.
+4. **Optimierung**  
+   Profitabilität und Forecasts (R1, R4).
 
-Das System unterscheidet zwischen:
-- **voll betriebsfähig**
-- **degradiert**
-- **nicht betriebsfähig**
-
-Degradation ist ein **bewusster Zustand**, kein Nebenprodukt.
+Optimierung ist jederzeit verzichtbar – Sicherheit nicht.
 
 ---
 
-## Typische Degradationsauslöser
+## Fail-Safe-Auslöser (Beispiele)
 
-BitGridAI schaltet in einen degradierten Modus bei:
+Ein Fail-Safe-Zustand wird ausgelöst bei:
 
-- fehlender oder unvollständiger Telemetrie
-- Ausfall von Adaptern oder Sensoren
-- temporärem DB- oder Broker-Ausfall
-- inkonsistenter oder nicht validierbarer Konfiguration
+- Übertemperatur oder Hardware-Grenzwerten
+- fehlenden Pflichtsignalen (Sensoren, Telemetrie)
+- Adapter- oder Kommunikationsausfällen
+- inkonsistenter oder ungültiger Konfiguration
+- internen Fehlern im Core
+- expliziten Shutdown-Signalen (z.B. USV)
 
-Diese Zustände sind im `EnergyState` explizit markiert.
-
----
-
-## Verhalten im degradierten Modus
-
-Im degradierten Zustand gelten folgende Regeln:
-
-- Optimierungsregeln (R1, R4, R5) treten zurück
-- Entscheidungen werden konservativ getroffen
-- sicherheitsrelevante Informationen haben Vorrang
-- falls Pflichtsignale fehlen → Safe oder Stop
-
-Es wird **nicht geschätzt**, extrapoliert oder geraten.
+Diese Auslöser sind **explizit modelliert**, nicht implizit.
 
 ---
 
-## Fail-safe-Strategien
+## Degradation statt Blackout
 
-BitGridAI nutzt mehrere Fail-safe-Mechanismen:
+BitGridAI unterscheidet zwischen:
 
-### Safe Mode
-- kontrolliertes Herunterfahren von Lasten
-- System bleibt ansprechbar
-- Recovery möglich ohne Neustart
+### Normalbetrieb
+- alle Pflichtsignale verfügbar
+- alle Regeln aktiv
+- Optimierung erlaubt
 
-### Stop
-- sofortiges Abschalten steuerbarer Verbraucher
-- Nutzung bei akuten Gefahrenlagen
+### Degradierter Betrieb
+- einzelne Signale oder Komponenten fehlen
+- `EnergyState.degraded = true`
+- Optimierungsregeln treten zurück
+- konservative Entscheidungen
 
-### Minimalbetrieb
-- eingeschränkter Betrieb ohne Persistenz oder externe Abhängigkeiten
-- klar als Fehlerzustand gekennzeichnet
-
----
-
-## Recovery-Prinzipien
-
-Fehlerzustände sind **reversibel**, sobald die Ursache behoben ist.
-
-Grundsätze:
-- automatischer Reconnect (DB, MQTT, Adapter)
-- kein manuelles „Freiklicken“ erforderlich
-- Rückkehr in den Normalbetrieb erst bei validem Zustand
-
-Ein Recovery ist immer:
-- sichtbar,
-- nachvollziehbar,
-- dokumentiert.
+### Fail-Safe / Safe Mode
+- Sicherheitsgrenzen verletzt oder unklar
+- Mining / flexible Last **aus**
+- Zustand bleibt stabil, keine Eskalation
 
 ---
 
-## Zusammenspiel mit Explainability
+## Verhalten im Degradationsfall
 
-Fail-safe- und Degradationsentscheidungen sind besonders erklärungsbedürftig.
+Bei Degradation gilt:
 
-Daher gilt:
-- jeder Safe/Stop hat einen klaren Reason-Code,
-- Erklärungen sind auch rückwirkend abrufbar,
-- Nutzer sehen nicht nur *dass*, sondern *warum* etwas passiert ist.
+- **keine Schätzung fehlender Daten**
+- **keine stillen Annahmen**
+- **keine Optimierung auf unsicherer Basis**
+
+Konkret:
+- R1 (Profit) und R4 (Forecast) werden ausgesetzt
+- R5 (Stabilität) wird defensiv angewendet
+- R3 (Safety) bleibt aktiv
 
 ---
 
-## Abgrenzungen
+## Determinismus im Fehlerfall
+
+Auch im Fehlerfall bleibt BitGridAI deterministisch:
+
+- gleiche Eingangslage → gleiche Entscheidung
+- keine zufälligen Fallbacks
+- kein „Best Guess“-Verhalten
+
+Das ist entscheidend für:
+- Replays
+- Audits
+- Vertrauen in das System
+
+---
+
+## Sichtbarkeit & Transparenz
+
+Fail-Safe und Degradation sind **nie unsichtbar**:
+
+- Health-Status wechselt (`warn` / `error`)
+- Safety- oder Degradation-Events werden erzeugt
+- UI zeigt den Zustand klar an
+- Explainability liefert den Grund („missing telemetry“, „over temperature“)
+
+Der Nutzer soll jederzeit wissen:
+> *Warum das System gerade nichts tut.*
+
+---
+
+## Rückkehr zum Normalbetrieb
+
+Die Rückkehr erfolgt **automatisch**, aber kontrolliert:
+
+- fehlende Signale sind wieder valide
+- Grenzwerte wieder im sicheren Bereich
+- Health-Status wechselt auf `ok`
+- nächster Block-Tick entscheidet regulär
+
+Kein Neustart, kein manueller Reset erforderlich.
+
+---
+
+## Abgrenzung
 
 Nicht Bestandteil dieses Kapitels sind:
-- konkrete Hardware-Grenzwerte
-- Implementierungsdetails einzelner Adapter
-- UI-Fehlermeldungstexte
+- konkrete Hardware-Grenzwerte (siehe Konfiguration)
+- Alarmierungsregeln
+- Betriebshandbücher / Runbooks
 
-Diese gehören in die jeweiligen Detaildokumentationen.
+Diese Themen gehören in Betriebs- oder Sicherheitsdokumentation.
 
 ---
 
 ## Zusammenfassung
 
-Die Fail-safe- und Degradationsprinzipien stellen sicher, dass BitGridAI:
+Fail-Safe und Degradation sind kein „Notfallmechanismus“,  
+sondern ein **zentrales Architekturprinzip** von BitGridAI.
 
-- auch bei Fehlern kontrollierbar bleibt,
-- niemals unbemerkt unsichere Entscheidungen trifft,
-- Sicherheit immer über Komfort und Profit stellt.
-
-BitGridAI darf Fehler machen – aber **keine gefährlichen**.
+Das System:
+- bleibt ruhig unter Stress,
+- handelt konservativ bei Unsicherheit,
+- und bevorzugt Stillstand gegenüber Risiko.
 
 ---
 
-> **Nächster Schritt:** Sicherheit endet nicht beim Laufzeitverhalten.  
-> Im nächsten Abschnitt betrachten wir **Security, Authentifizierung & Zugriffskontrolle**.
+> **Nächster Schritt:** Ein robustes System muss nicht nur sicher reagieren, sondern auch beobachtbar sein.  
+> Im nächsten Kapitel betrachten wir **Logging, Events & Monitoring**.
 >
-> 👉 Weiter zu **[8.7 Security & Zugriffskontrolle](./087_security_and_access_control.md)**
+> 👉 Weiter zu **[8.7 Logging, Events & Monitoring](./087_logging_and_monitoring.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
