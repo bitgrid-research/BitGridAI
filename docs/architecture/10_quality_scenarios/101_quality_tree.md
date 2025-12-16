@@ -24,16 +24,16 @@ Die Qualitätsmerkmale sind in sechs Hauptkategorien unterteilt, die unsere Arch
     * `Local-first`: 100% on-prem-Betrieb (ADR 001).
     * `keine Telemetrie`: Null Cloud-Backhaul (ADR 014).
     * `minimale Ports, lokale Auth`: Reduzierte Angriffsfläche, Authentifizierung erfolgt lokal.
-
-### 3. Nachhaltigkeit (Sustainability / Economic Viability)
-* **Grundprinzip:** Optimierung der Energiepfade und des wirtschaftlichen Nutzens.
-    * `Surplus/Preis-Steuerung (R1/R4)`: Priorisierung der Miner-Aktivität nach PV-Überschuss und idealen Preis-Zyklen.
-    * `Hodl/Heat/Export-Policies`: Transparente Entscheidung über Opportunitätskosten (ADR 018).
-
-### 4. Vorhersagbarkeit & Stabilität
+ 
+### 3. Vorhersagbarkeit & Stabilität
 * **Grundprinzip:** Das System muss verlässlich und frei von Flapping sein.
     * `10-Min-BlockScheduler, Deadband (R5)`: Fester Takt und Halteschwellen verhindern unnötige Schaltzyklen (ADR 006, 009).
     * `deterministische R1–R5`: Regeln sind Code, nicht ML-Black-Box, daher immer testbar und vorhersehbar (ADR 007).
+
+### 4. Nachhaltigkeit (Sustainability / Economic Viability)
+* **Grundprinzip:** Optimierung der Energiepfade und des wirtschaftlichen Nutzens.
+    * `Surplus/Preis-Steuerung (R1/R4)`: Priorisierung der Miner-Aktivität nach PV-Überschuss und idealen Preis-Zyklen.
+    * `Hodl/Heat/Export-Policies`: Transparente Entscheidung über Opportunitätskosten (ADR 018).
 
 ### 5. Sicherheit (Safety & Resilience)
 * **Grundprinzip:** Schutz der Hardware und des Hauses.
