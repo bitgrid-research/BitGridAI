@@ -1,4 +1,4 @@
-# 8.9 Build-, Update- & Release-Prinzipien
+# 8.9 - Build-, Update- & Release-Prinzipien
 
 Keine Überraschungen im Betrieb.
 
@@ -10,7 +10,7 @@ Ziel ist ein Betriebsmodell, das **vorhersehbar, rückrollbar und überprüfbar*
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht an einem Förderband. Jede Kiste trägt ein Etikett: „Build“, „Test“, „Replay OK“, „Release“. Ein roter Stempel: „Approved“.)*
 
----
+&nbsp;
 
 ## Ziel: Kontrollierte Veränderung
 
@@ -22,7 +22,7 @@ Build- und Release-Prozesse müssen sicherstellen, dass:
 - ihr Verhalten geprüft wurde,
 - ein Rückweg jederzeit möglich ist.
 
----
+&nbsp;
 
 ## Leitprinzipien
 
@@ -31,28 +31,28 @@ Build- und Release-Prozesse müssen sicherstellen, dass:
 - Abhängigkeiten sind fixiert und reproduzierbar.
 - Das gleiche Commit erzeugt das gleiche Artefakt.
 
----
+&nbsp;
 
 ### 2. Trennung von Code & Daten
 - Container-Images enthalten **keine** Nutzerdaten.
 - Konfiguration, Logs und Zustände liegen in Volumes.
 - Updates dürfen keine Daten migrieren oder verändern, ohne explizite Schritte.
 
----
+&nbsp;
 
 ### 3. Replay vor Release
 - Jede neue Version wird gegen bekannte Zustände geprüft.
 - Replays dienen als Gate vor Freigabe.
 - Abweichendes Entscheidungsverhalten muss bewusst akzeptiert oder korrigiert werden.
 
----
+&nbsp;
 
 ### 4. Rückrollbarkeit
 - Alte Versionen bleiben verfügbar.
 - Datenformate sind abwärtskompatibel oder versioniert.
 - Ein Rollback darf keinen manuellen Daten-Eingriff erfordern.
 
----
+&nbsp;
 
 ## Build-Prozess (konzeptionell)
 
@@ -75,7 +75,7 @@ Ein Build durchläuft logisch folgende Schritte:
 
 Erst danach gilt ein Build als **releasefähig**.
 
----
+&nbsp;
 
 ## Release-Prinzipien
 
@@ -91,7 +91,7 @@ Ein Release umfasst:
 - Hinweise zu Konfigurationsänderungen
 - Replay-Ergebnisse (implizit oder dokumentiert)
 
----
+&nbsp;
 
 ## Update im Betrieb
 
@@ -108,7 +108,7 @@ Der Update-Prozess:
 4. Neustart
 5. Health- und Statusprüfung
 
----
+&nbsp;
 
 ## Umgang mit Konfigurationsänderungen
 
@@ -118,7 +118,7 @@ Der Update-Prozess:
 
 Konfigurations-Replays sind vor Produktivübernahme empfohlen.
 
----
+&nbsp;
 
 ## Umbrel & Docker-Compose
 
@@ -132,7 +132,7 @@ Die Release-Prinzipien gelten unabhängig vom Packaging:
 
 Umbrel ist ein **Vertriebsmechanismus**, kein eigenes Release-Modell.
 
----
+&nbsp;
 
 ## Fehlerfälle & Schutzmechanismen
 
@@ -142,7 +142,7 @@ Umbrel ist ein **Vertriebsmechanismus**, kein eigenes Release-Modell.
 - es gibt keine halb angewendeten Updates
 - im Zweifel bleibt die vorherige Version aktiv
 
----
+&nbsp;
 
 ## Abgrenzungen
 
@@ -153,7 +153,7 @@ Nicht Bestandteil dieses Kapitels sind:
 
 Diese gehören in Entwickler- oder Betriebsdokumentation.
 
----
+&nbsp;
 
 ## Zusammenfassung
 
