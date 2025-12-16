@@ -1,4 +1,4 @@
-# 06.04 Szenario: Prognose-Optimierung (Regel R4)
+# 06.04 - Szenario: Prognose-Optimierung (Regel R4)
 
 Der Blick in die Glaskugel.
 
@@ -11,6 +11,8 @@ R4 fungiert als **Modifikator** oder "Veto-Instanz" für R1. Sie kann einen Star
 
 *(Platzhalter für ein Bild: Der Hamster schaut durch ein Fernglas in die Ferne, wo dunkle Wolken oder steile Preiskurven zu sehen sind.)*
 ![Hamster mit Fernglas](../../media/pixel_art_hamster_forecast.png)
+
+&nbsp;
 
 ## Sequenzdiagramm (Das Veto)
 
@@ -46,6 +48,8 @@ sequenceDiagram
     Rules->>Rules: Final Action: IDLE (Start suppressed)
 ```
 
+&nbsp;
+
 ## Der Ablauf im Detail
 
 1.  **Input (Der Weitblick):**
@@ -67,6 +71,8 @@ sequenceDiagram
 
 5.  **Benefit:**
     Wir vermeiden "Short Cycling" (Miner fährt mühsam hoch, wird warm, und muss 10 Minuten später wieder hart abschalten). Das verlängert die Lebensdauer der Hardware massiv.
+
+&nbsp;
 
 ## Konfiguration (MVP)
 
