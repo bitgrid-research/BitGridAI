@@ -1,4 +1,4 @@
-# 05.2.4.3 KPI / Reporting
+# 05.2.4.3 - Baustein: KPI / Reporting
 
 Vom Ereignis zur Erkenntnis.
 
