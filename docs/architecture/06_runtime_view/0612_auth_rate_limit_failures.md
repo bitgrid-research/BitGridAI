@@ -1,4 +1,4 @@
-# 06.12 Szenario: Authentifizierung & Rate-Limit (Fehlpfade)
+# 06.12 - Szenario: Authentifizierung & Rate-Limit (Fehlpfade)
 
 Kein Zugriff, keine Wirkung.
 
@@ -7,7 +7,7 @@ BitGridAI schützt schreibende Endpunkte konsequent vor unautorisierten Zugriffe
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor einer Schranke mit Schloss und Stoppuhr. Ein Schild: „Access denied“.)*
 
----
+&nbsp;
 
 ## Das Ziel: Schutz ohne Nebenwirkungen
 
@@ -17,7 +17,7 @@ Grundprinzip:
 Auth- und Rate-Limit-Prüfungen liegen **vor** jeder fachlichen Verarbeitung.  
 Fehler werden eindeutig signalisiert, aber niemals „halb“ ausgeführt.
 
----
+&nbsp;
 
 ## Der Ablauf bei Auth- und Rate-Limit-Fehlern (vereinfacht)
 
@@ -43,7 +43,7 @@ Fehler werden eindeutig signalisiert, aber niemals „halb“ ausgeführt.
 
    Das UI zeigt eine verständliche Fehlermeldung inkl. Retry-Hinweis.
 
----
+&nbsp;
 
 ## Verhalten des Systems
 
@@ -52,7 +52,7 @@ Fehler werden eindeutig signalisiert, aber niemals „halb“ ausgeführt.
 - Der laufende Blockbetrieb bleibt unbeeinflusst.
 - Fehler sind explizit sichtbar, aber nicht eskalierend.
 
----
+&nbsp;
 
 ## Schnittstellen & Signale
 
