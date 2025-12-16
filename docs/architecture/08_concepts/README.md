@@ -1,4 +1,4 @@
-# 08 Querschnittskonzepte
+# 08 - Querschnittskonzepte
 
 Die Verfassung des Systems.
 
