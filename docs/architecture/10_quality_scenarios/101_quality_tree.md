@@ -57,6 +57,6 @@ Die Qualitätsmerkmale sind in sechs Hauptkategorien unterteilt, die unsere Arch
 ---
 > **Nächster Schritt:** Wir prüfen diese Qualitätsmerkmale anhand konkreter Nutzungsszenarien.
 >
-> 👉 Weiter zu **[102 Qualitätsszenarien](./102_quality_scenarios.md)**
+> 👉 Weiter zu **[102 Qualitätsszenarien](../10_quality_scenarios/102_quality_scenarios)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
