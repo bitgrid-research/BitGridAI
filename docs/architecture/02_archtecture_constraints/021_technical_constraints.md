@@ -19,6 +19,10 @@ Diese Einschraenkungen kommen aus Kellerrealitaet, Local-First-Vision oder exter
 | **TC-7** | **Lokale Sicherheit & Auth** | Auth lokal (z.B. via Home-Assistant-User), minimale offene Ports, keine Abhaengigkeit von externen Providern. |
 
 ---
-> Naechster Schritt: Technik ist das eine, aber wer zahlt und wann muss es fertig sein? Im naechsten Abschnitt kommen die organisatorischen Leitplanken.  
-> Weiter zu **[02.2 Organisatorische Randbedingungen](./022_organizational_constraints.md)**  
-> Zurueck zur **[Kapiteluebersicht](./README.md)**
+> Nächster Schritt: Technik ist das eine, aber wer zahlt und wann muss es fertig sein?
+> 
+> Im nächsten Abschnitt kommen die organisatorischen Leitplanken.
+> 
+> 👉 Weiter zu **[02.2 Organisatorische Randbedingungen](./022_organizational_constraints.md)**
+> 
+> 🔙 Zurück zur **[Kapiteluebersicht](./README.md)**
