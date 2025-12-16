@@ -7,7 +7,10 @@ Diese Varianten verändern **nicht** die Kernarchitektur, sondern lediglich die 
 
 Ziel ist es, BitGridAI an verschiedene Hardware-Profile und Betriebsanforderungen anzupassen, ohne neue Abhängigkeiten oder Komplexität einzuführen.
 
----
+*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor drei kleinen Mini-Landschaften: „Standalone“, „Distributed“, „Hybrid“. Er verschiebt kleine Server-Blöcke zwischen den Landschaften wie in einem Diorama.)*  
+![Hamster plant Betriebsvarianten](link_zum_varianten_bild.png)
+
+&nbsp;
 
 ## Zielarchitektur (logische Pipeline)
 
@@ -22,7 +25,7 @@ Der MQTT-Bus fungiert dabei als zentrales Rückgrat für:
 
 Diese Pipeline bleibt in allen Varianten identisch.
 
----
+&nbsp;
 
 ## Hardware-Profile
 
@@ -37,7 +40,7 @@ BitGridAI unterscheidet mehrere typische Rollen im lokalen Netzwerk:
 
 Nicht jede Betriebsvariante nutzt alle Rollen.
 
----
+&nbsp;
 
 ## Betriebsvarianten
 
@@ -54,7 +57,7 @@ Die empfohlene und einfachste Betriebsform.
 - einfache Sicherung und Wiederherstellung
 - ideal für Privathaushalte und Einzelstandorte
 
----
+&nbsp;
 
 ### Distributed (Erweitert)
 
@@ -71,7 +74,7 @@ Die Architektur wird physisch aufgeteilt, die Logik bleibt gleich.
 
 Diese Variante eignet sich für größere Installationen oder komplexe Gerätestrukturen.
 
----
+&nbsp;
 
 ### Hybrid (Optional)
 
@@ -90,7 +93,7 @@ Eine bewusst begrenzte Erweiterung des Standalone-Betriebs.
 
 Der Hybrid-Modus dient ausschließlich Analyse- und Forschungszwecken.
 
----
+&nbsp;
 
 ## Netzwerktopologie & Annahmen
 
@@ -106,7 +109,7 @@ Allen Varianten gemeinsam sind folgende Annahmen:
 
 Diese Annahmen sind Grundlage für die Sicherheits- und Fail-safe-Mechanismen aus Kapitel 6.
 
----
+&nbsp;
 
 ## Auswirkungen auf Betrieb und Wartung
 
@@ -124,7 +127,7 @@ Die gewählte Betriebsvariante beeinflusst:
 Die Architektur bleibt bewusst **nicht horizontal skalierend**.  
 BitGridAI ist ein Steuerungs- und Optimierungssystem, kein Cloud-Service.
 
----
+&nbsp;
 
 ## Abgrenzungen
 
