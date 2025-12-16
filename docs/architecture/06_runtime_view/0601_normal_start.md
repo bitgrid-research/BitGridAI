@@ -9,6 +9,8 @@ Hier greifen alle Zahnräder ineinander: Sensoren, State, Scheduler, Regeln und 
 *(Platzhalter für ein Bild: Die Sonne scheint auf das Haus, die Batterien sind grün, und der Hamster legt gut gelaunt den großen Hebel auf "ON".)*
 ![Hamster startet das Mining](../../media/pixel_art_hamster_mining_start.png)
 
+&nbsp;
+
 ## Sequenzdiagramm (Der Ablauf)
 
 Wie wird aus Sonnenstrahlen Hashrate?
@@ -45,6 +47,8 @@ sequenceDiagram
     Note right of UI: Preview: "Valid for next 10 mins"
 ````
 
+&nbsp;
+
 ## Wichtige Konfigurations-Parameter (MVP)
 
 Damit dieser Ablauf funktioniert, sind folgende Schwellenwerte im System hinterlegt:
@@ -55,6 +59,8 @@ Damit dieser Ablauf funktioniert, sind folgende Schwellenwerte im System hinterl
 | `price_max_ct_kwh` | **18 ct/kWh** | Die "Schmerzgrenze" beim Strompreis. Darüber bleibt der Miner aus. |
 | `min_runtime_blocks` | **2 Blöcke** | (20 Min) Mindestlaufzeit nach Start, um die Hardware zu schonen (Short-Cycling-Schutz). |
 | `deadband_hold_blocks` | **2 Blöcke** | (20 Min) Nach dem Einschalten wird dieser Zustand "festgehalten" (siehe Regel R5), um Flapping zu verhindern. |
+
+&nbsp;
 
 ---
 > **Nächster Schritt:** Das war der Idealfall bei schönem Wetter. Aber was passiert, wenn plötzlich eine kritische Grenze überschritten wird?
