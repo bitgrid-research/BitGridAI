@@ -1,4 +1,4 @@
-# 09 Designentscheidungen
+# 09 - Designentscheidungen
 
 Warum haben wir das eigentlich *so* gemacht?
 
@@ -17,12 +17,12 @@ Das Ziel ist es, die Architektur nachvollziehbar zu machen und "Warum-Fragen" in
 
 Wir nutzen ein etabliertes Format, um unsere Entscheidungen zu strukturieren:
 
-* **[9.1 Architektur-Entscheidungen (ADRs)](./091_adr_de.md)**
+* **[9.1 - Architektur-Entscheidungen (ADRs)](./091_adr_de.md)**
     * *Kurzbeschreibung:* Das Herzstück dieses Kapitels. Wir nutzen **Architecture Decision Records (ADRs)**, um wichtige, strukturprägende Entscheidungen nachvollziehbar zu dokumentieren. Dieses Dokument enthält entweder die Sammlung unserer ADRs oder das Template, das wir dafür verwenden.
 
 ---
 > **Nächster Schritt:** Die Entscheidungen sind gefallen. Aber halten sie auch der Realität stand? Im nächsten Kapitel testen wir die Architektur gegen konkrete Szenarien, um die Qualität zu prüfen.
 >
-> 👉 Weiter zu **[10 Qualitätsszenarien](../10_quality_scenarios/README.md)**
+> 👉 Weiter zu **[10 - Qualitätsszenarien](../10_quality_scenarios/README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
