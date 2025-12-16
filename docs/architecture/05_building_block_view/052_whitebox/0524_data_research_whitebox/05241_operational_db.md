@@ -1,4 +1,4 @@
-# 05.2.4.1 Operational DB
+# 05.2.4.1 - Baustein: Operational DB
 
 Der aktuelle Zustand – zuverlässig festgehalten.
 
