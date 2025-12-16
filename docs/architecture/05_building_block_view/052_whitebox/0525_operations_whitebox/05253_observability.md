@@ -1,4 +1,4 @@
-# 05.2.5.3 Observability & Monitoring
+# 05.2.5.3 - Baustein: Observability & Monitoring
 
 Sehen, was wirklich los ist.
 
