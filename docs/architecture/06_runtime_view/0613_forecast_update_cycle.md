@@ -1,4 +1,4 @@
-# 06.13 Szenario: Forecast-Update-Zyklus
+# 06.13 - Szenario: Forecast-Update-Zyklus
 
 Vorausschau, ohne Hektik.
 
@@ -9,7 +9,7 @@ Dieses Szenario beschreibt, wie Forecast-Updates in das System einfließen, wie 
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster betrachtet eine Wetter- und Preistafel, während daneben ein Timer ruhig weiterläuft. Ein Schild: „Preview, not Panic“.)*
 
----
+&nbsp;
 
 ## Das Ziel: Reaktionsfähig, aber stabil
 
@@ -23,7 +23,7 @@ Forecasts werden:
 
 So bleibt das System ruhig, nachvollziehbar und performant.
 
----
+&nbsp;
 
 ## Der Ablauf bei Forecast-Updates (vereinfacht)
 
@@ -45,7 +45,7 @@ So bleibt das System ruhig, nachvollziehbar und performant.
    Bei einem signifikanten Delta (z.B. Preissturz, Wetterumschwung) kann ein **vorgezogener Re-Eval** ausgelöst werden.  
    Dieses Verhalten ist explizit konfigurierbar.
 
----
+&nbsp;
 
 ## Verhalten der Rule Engine
 
@@ -55,7 +55,7 @@ So bleibt das System ruhig, nachvollziehbar und performant.
   - expliziten Re-Eval-Trigger.
 - Sicherheits- und Stabilitätsregeln behalten Vorrang.
 
----
+&nbsp;
 
 ## Schnittstellen & Signale
 
