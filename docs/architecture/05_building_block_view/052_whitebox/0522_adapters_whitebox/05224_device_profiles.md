@@ -1,4 +1,4 @@
-# 05.2.2.4 Device Profiles
+# 05.2.2.4 - Baustein: Device Profiles
 
 Die Steckbriefe der Geräte.
 
