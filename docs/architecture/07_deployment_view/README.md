@@ -19,13 +19,10 @@ Hier klären wir, **welche Komponente auf welchem Knoten läuft** und wie diese 
 Dieses Kapitel beschreibt das konkrete Deployment von BitGridAI im lokalen Netzwerk – vom Basis-Setup bis zu möglichen Betriebsvarianten:
 
 * **[7.1 Deployment (Docker-first, Umbrel-ready)](./071_deployment.md)**  
-  *Hauptkapitel.*  
-  Basis-Deployment als Docker-Compose-Stack im LAN; optionales Packaging als Umbrel-App.  
-  Home Assistant greift sekundär über MQTT/REST zu. Keine Cloud, nur LAN.
+  * *Hauptkapitel:* Basis-Deployment als Docker-Compose-Stack im LAN; optionales Packaging als Umbrel-App. Home Assistant greift sekundär über MQTT/REST zu. Keine Cloud, nur LAN.
 
 * **[7.2 Infrastruktur & Umgebungen](./072_infrastructure_variants.md)**  
-  *Erweiterte Sicht.*  
-  Hardware-Profile, Netzwerk-Topologien und Betriebsvarianten (Standalone, Distributed, Hybrid).
+  * *Erweiterte Sicht:* Hardware-Profile, Netzwerk-Topologien und Betriebsvarianten (Standalone, Distributed, Hybrid).
 
 ---
 
