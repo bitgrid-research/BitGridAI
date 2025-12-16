@@ -1,4 +1,4 @@
-# 10.1 - Quality Tree / Qualitätsbaum
+# 10.1 - Qualitätsbaum
 
 Die relevanten Qualitätsmerkmale für BitGridAI.
 
