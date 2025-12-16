@@ -10,7 +10,7 @@ Dieses Qualitätsszenario beschreibt, wie BitGridAI **reaktionsfähig bleibt, oh
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt vor einer Stoppuhr und einem kleinen Einplatinencomputer. Auf der Uhr steht „< 300 ms“, auf dem Rechner „Edge“. Der Hamster wirkt entspannt.)*
 
----
+&nbsp;
 
 ## Qualitätsziel
 
@@ -21,7 +21,7 @@ Das System soll:
 - auch auf schwacher Hardware stabil laufen,
 - und Nebenfunktionen (UI, Explainability, Logging) strikt vom Entscheidungsweg entkoppeln.
 
----
+&nbsp;
 
 ## Kontext
 
@@ -30,7 +30,7 @@ Das System soll:
 - Deterministische Regeln R1–R5
 - Explainability und UI laufen parallel zum Core
 
----
+&nbsp;
 
 ## Szenario P-1: Regulärer Block-Tick unter Normal-Last
 
@@ -53,7 +53,7 @@ Normalbetrieb mit aktiver Sensorik und UI
 - Keine Blockierung durch UI oder Logging
 - CPU-Spike bleibt kurzzeitig
 
----
+&nbsp;
 
 ## Szenario P-2: Explainability-Anfrage während Entscheidungsphase
 
@@ -76,7 +76,7 @@ Parallel zum Block-Tick
 - Explain-Latenz < **2 s**
 - Keine Locks auf dem EnergyState
 
----
+&nbsp;
 
 ## Szenario P-3: Hohe Ereignisdichte (Sensor-Rauschen)
 
@@ -99,7 +99,7 @@ Instabile Umweltbedingungen
 - Kein CPU-Dauerlastzustand
 - Entscheidung bleibt blockbasiert
 
----
+&nbsp;
 
 ## Szenario P-4: Ressourcenknappheit auf dem Host
 
@@ -122,7 +122,7 @@ Nebenprozesse aktiv (Backups, UI, Research)
 - Keine Entscheidung wird ausgelassen
 - System degradiert kontrolliert
 
----
+&nbsp;
 
 ## Messbare Qualitätsmerkmale
 
@@ -134,7 +134,7 @@ Nebenprozesse aktiv (Backups, UI, Research)
 | Busy-Loops | 0 |
 | Core-Blockierung durch UI | 0 |
 
----
+&nbsp;
 
 ## Bezug zur Architektur
 
@@ -144,7 +144,7 @@ Nebenprozesse aktiv (Backups, UI, Research)
 - **Logging & Monitoring:** Kap. 08.7
 - **Deployment (Edge):** Kap. 07
 
----
+&nbsp;
 
 ## Zusammenfassung
 
