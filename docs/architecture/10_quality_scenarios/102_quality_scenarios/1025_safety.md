@@ -10,14 +10,14 @@ Dieses Qualitätsszenario beschreibt, wie BitGridAI in sicherheitsrelevanten Sit
 Grundsatz:
 > **Safety (R3) ist nicht verhandelbar.**
 
----
+&nbsp;
 
 ## Qualitätsziel
 
 **Vermeidung von Hardware-Schäden und gefährlichen Betriebszuständen**  
 durch schnelle, deterministische und nicht übersteuerbare Schutzmechanismen.
 
----
+&nbsp;
 
 ## Kontext
 
@@ -26,7 +26,7 @@ durch schnelle, deterministische und nicht übersteuerbare Schutzmechanismen.
 - Sicherheitsregel **R3** ist jederzeit aktiv
 - Sensorik und Adapter können verzögert, fehlerhaft oder nicht verfügbar sein
 
----
+&nbsp;
 
 ## Szenario S-1: Übertemperatur an der Mining-Hardware
 
@@ -50,7 +50,7 @@ Mining aktiv (halb- oder vollautomatischer Modus)
 - Kein erneuter Start, solange der Grenzwert überschritten ist
 - Safety-Ereignis ist im UI sichtbar und persistent geloggt
 
----
+&nbsp;
 
 ## Szenario S-2: Fehlende oder ungültige Pflicht-Telemetrie
 
@@ -74,7 +74,7 @@ Normalbetrieb oder Optimierungsmodus
 - Keine Start- oder Leistungssteigerungsentscheidung
 - Klarer Hinweis im UI („Safe Mode aktiv – Telemetrie fehlt“)
 
----
+&nbsp;
 
 ## Szenario S-3: Kritischer interner Systemfehler
 
@@ -98,7 +98,7 @@ Beliebiger Autonomie- oder Betriebsmodus
 - Kein Weiterbetrieb mit veralteten Zuständen
 - Fehlerursache ist nachvollziehbar dokumentiert
 
----
+&nbsp;
 
 ## Szenario S-4: Manueller Override im Konflikt mit Safety
 
@@ -120,7 +120,7 @@ Manueller oder assistierter Modus
 - Safety ist technisch nicht übersteuerbar
 - Ablehnung ist transparent, erklärbar und geloggt
 
----
+&nbsp;
 
 ## Messbare Qualitätsmerkmale
 
@@ -131,7 +131,7 @@ Manueller oder assistierter Modus
 | Hardware-Schäden durch Software | 0 |
 | Sichtbarkeit von Safety-Events | 100 % |
 
----
+&nbsp;
 
 ## Bezug zur Architektur
 
@@ -140,7 +140,7 @@ Manueller oder assistierter Modus
 - **Autonomie-Stufen:** Kap. 06.7
 - **Logging & Monitoring:** Kap. 08.7
 
----
+&nbsp;
 
 ## Zusammenfassung
 
