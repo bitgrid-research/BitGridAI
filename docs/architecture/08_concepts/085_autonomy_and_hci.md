@@ -11,7 +11,7 @@ Sie legen fest, **wer wann entscheidet**, wie Kontrolle sichtbar bleibt und wie 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster und ein Roboter-Hamster halten gemeinsam ein Steuerrad. Daneben eine Skala von „Manuell“ bis „Auto“.)*  
 ![Hamster teilt sich die Kontrolle](link_zum_autonomy_hamster.png)
 
----
+&nbsp;
 
 ## Ziel der Autonomiegestaltung
 
@@ -29,7 +29,7 @@ Die Autonomiegestaltung von BitGridAI verfolgt vier Hauptziele:
 4. **Sicherheit garantieren**  
    Autonomie darf niemals Sicherheitsprinzipien unterlaufen.
 
----
+&nbsp;
 
 ## Grundprinzipien
 
@@ -47,7 +47,7 @@ Die Mensch-Maschine-Interaktion in BitGridAI folgt klaren Regeln:
 - **Sicherheit ist orthogonal**  
   Sicherheitsregeln gelten unabhängig vom Autonomie-Level.
 
----
+&nbsp;
 
 ## Autonomie-Stufen
 
@@ -71,7 +71,7 @@ Der Nutzer definiert nur noch Rahmenbedingungen.
 
 Diese Stufen sind fachliche Konzepte; konkrete Abläufe sind in Kapitel 6 beschrieben.
 
----
+&nbsp;
 
 ## Manuelle Eingriffe (Overrides)
 
@@ -84,7 +84,7 @@ Manuelle Eingriffe sind ein zentrales HCI-Element.
 
 Overrides sind **bewusste Entscheidungen**, keine versteckten Schalter.
 
----
+&nbsp;
 
 ## Rückmeldungen & Transparenz
 
@@ -98,7 +98,7 @@ Gute Autonomie erfordert klare Rückmeldungen:
 Der Nutzer soll jederzeit wissen:
 > *Was passiert gerade – und warum?*
 
----
+&nbsp;
 
 ## Fehlervermeidung durch HCI
 
@@ -110,7 +110,7 @@ BitGridAI reduziert Fehlbedienung durch:
 - konservative Defaults
 - erklärende Hinweise statt stiller Ablehnung
 
----
+&nbsp;
 
 ## Autonomie & Lernen
 
@@ -122,7 +122,7 @@ BitGridAI lernt **nicht eigenmächtig** aus Nutzerverhalten.
 
 Das System bleibt vorhersehbar und kontrollierbar.
 
----
+&nbsp;
 
 ## Abgrenzungen
 
@@ -133,7 +133,7 @@ Nicht Bestandteil dieses Kapitels sind:
 
 Diese werden in der UI-Dokumentation behandelt.
 
----
+&nbsp;
 
 ## Zusammenfassung
 
