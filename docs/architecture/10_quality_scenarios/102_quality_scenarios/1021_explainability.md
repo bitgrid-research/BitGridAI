@@ -1,4 +1,4 @@
-# 10.2.1 Transparenz & Erklärbarkeit (Explainability)
+# 10.2.1 - Transparenz & Erklärbarkeit (Explainability)
 
 Keine Entscheidung ohne Warum.
 
@@ -138,6 +138,6 @@ BitGridAI:
 > Transparenz schafft Vertrauen – echte Kontrolle entsteht jedoch erst,
 > wenn der Nutzer entscheiden darf, **wer die Kontrolle hat**.
 >
-> 👉 Weiter zu **[10.2.2 Autonomie & Privacy](./1022_autonomy_and_privacy.md)**
+> 👉 Weiter zu **[10.2.2 - Autonomie & Privacy](./1022_autonomy_and_privacy.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
