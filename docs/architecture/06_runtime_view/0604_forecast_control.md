@@ -87,6 +87,6 @@ Damit R4 nicht zu übervorsichtig agiert, müssen wir den Horizont definieren:
 ---
 > **Nächster Schritt:** Wir haben viele Regeln, die sich widersprechen könnten. Damit das System nicht nervös hin und her schaltet, brauchen wir einen Dämpfer.
 >
-> 👉 Weiter zu **[06.5 Stabilität & Totband (R5)](./065_deadband_stability.md)**
+> 👉 Weiter zu **[06.05 Stabilität & Totband (R5)](./0605_deadband_stability.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
