@@ -1,58 +1,214 @@
-# 08.2 Persistenz (Datenhaltung)
+# 8.3 Datenhaltung & Datenlebenszyklus
 
-Das Gedächtnis des Hamsters.
+Das Gedächtnis des Systems.
 
-Da BitGridAI "Local-First" arbeitet, gibt es keine Cloud-Datenbank, die unsere Daten magisch sichert. Wir sind selbst dafür verantwortlich, dass Konfigurationen und historische Entscheidungen einen Neustart überleben und **auditierbar** bleiben.
+BitGridAI arbeitet **local-first**.  
+Es gibt keine Cloud-Datenbank, die Zustände oder Entscheidungen automatisch sichert.  
+Persistenz ist daher kein technisches Detail, sondern ein **zentrales Architekturthema**.
 
-Wir nutzen einen **hybriden Ansatz**, der die Stärken von relationalen Datenbanken mit modernen Big-Data-Formaten kombiniert.
+Dieses Kapitel beschreibt, **wie BitGridAI Daten systemweit behandelt**:
+von der Entstehung über die Nutzung bis hin zu Archivierung, Export oder Löschung.
 
-*(Platzhalter für ein Bild: Ein Hamster als Bibliothekar, der Bücher in ein Regal sortiert (SQLite) und gleichzeitig große Kisten in ein Archiv stapelt (Parquet).)*
+Ziel ist eine Datenhaltung, die:
+- deterministisch,
+- auditierbar,
+- ressourcenschonend
+- und nutzerkontrolliert ist.
+
+*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster als Bibliothekar, der Bücher in ein Regal („SQLite“) sortiert und große Kisten in ein Archiv („Parquet“) stapelt.)*  
 ![Hamster sortiert Daten](../../media/pixel_art_hamster_librarian.png)
 
-## Die Hybrid-Speicherstrategie
+---
 
-Wir trennen strikt nach Zweck und Charakteristik der Daten. Ein wichtiger Grundsatz ist **Append-only** für alle Log-Daten, um **Reproduzierbarkeit** und **Auditierbarkeit** zu gewährleisten.
+## Grundprinzipien
 
-| Datentyp | Technologie | Charakteristik | Zweck |
-| :--- | :--- | :--- | :--- |
-| **Operational State** 🔥 | **SQLite** | Schnell, transaktionssicher (ACID), Lese-/Schreibzugriff. | Aktueller Zustand (`EnergyState`), UI-Timeline-Daten, Session-Tokens, KPIs. |
-| **Analytical Logs** ❄️ | **Apache Parquet / JSON** | Komprimiert, spaltenbasiert, **Append-only**. | Langzeit-Logs (`SensorLog`, `DecisionHistory`), Research-Export-Bundles. |
-| **Configuration** ⚙️ | **YAML** | Menschenlesbar, versioniert, Checksums. | `config.yaml` (Regel-Parameter, Limits), Adapter-Einstellungen. |
-| **Erklärungen** 💬 | **JSON** | Versionierte Prompt-/Result-Texte. | Gespeicherte `ExplainSessions` in DE/EN. |
+Die Datenhaltung von BitGridAI folgt fünf übergreifenden Prinzipien:
+
+1. **Local-first & Privacy-by-Default**  
+   Alle Daten verbleiben standardmäßig auf dem lokalen Host.
+
+2. **Zweckgetrennte Speicherung**  
+   Laufzeitdaten, Entscheidungsprotokolle und Forschungsdaten werden unterschiedlich behandelt.
+
+3. **Append-only für relevante Historie**  
+   Entscheidungen und Logs werden nicht überschrieben, sondern fortgeschrieben.
+
+4. **Expliziter Lebenszyklus**  
+   Jede Datenart hat eine klar definierte Rolle und Haltedauer.
+
+5. **Opt-in für Exporte**  
+   Daten verlassen das System ausschließlich bewusst und nachvollziehbar.
 
 ---
 
-## 1. SQLite (Das operative Gedächtnis)
+## Die hybride Speicherstrategie
 
-Für alles, was die App *jetzt gerade* braucht, nutzen wir **SQLite**. Dies ist die Laufzeit-Datenbank (Runtime-DB).
-* **Datei:** `data/bitgrid.db`
-* **Modus:** Wir nutzen den **WAL-Mode (Write-Ahead Logging)**, da er robuster gegen Abstürze ist und die Performance auf Edge-Hardware verbessert.
-* **Funktion:** Speichert den aktuellen `EnergyState`, um nach einem Neustart schnell wieder betriebsbereit zu sein.
+BitGridAI nutzt bewusst einen **hybriden Ansatz**, der unterschiedliche Speichertechnologien nach ihrem Zweck einsetzt.
 
-## 2. Apache Parquet (Das Langzeit-Archiv)
+| Datenkategorie | Charakter | Rolle im System |
+| --- | --- | --- |
+| **Operative Laufzeitdaten (Hot Data)** | flüchtig, schnell | aktueller Zustand, UI, Betrieb |
+| **Entscheidungs- & Ereignisdaten** | append-only, erklärend | Audit, Explainability |
+| **Historische & Forschungsdaten (Cold Data)** | langfristig, komprimiert | Analyse, Replay |
+| **Konfigurationsdaten** | versioniert, nachvollziehbar | Rahmenbedingungen |
 
-Für alle historischen Sensordaten und getroffenen Entscheidungen nutzen wir das Big-Data-Format Parquet.
-* **Pfad:** `data/parquet/YYYY/MM/day_DD.parquet`
-* **Prinzip:** Die Dateien werden nur hinzugefügt, nicht mehr verändert.
-* **Vorteile:**
-    * **Auditierbarkeit:** Da Logs unveränderlich sind, können wir jederzeit prüfen, ob eine Entscheidung deterministisch (bei gleichem Input) korrekt war.
-    * **Forschung/Replay:** Die spaltenbasierte Speicherung ermöglicht es dem **Research Node**, nur benötigte Daten (z.B. nur die SoC-Werte) extrem schnell und effizient zu laden, um Szenarien zu simulieren.
-
-## 3. Konfigurations-Management
-
-Die Konfiguration ist die DNA des Systems. Sie muss sicher und nachvollziehbar sein.
-* **Format:** YAML (`config.yaml`).
-* **Versionierung:** Jede Änderung an der Konfiguration muss mit einer Checksum versehen werden, die im Log gespeichert wird. Das stellt sicher, dass wir bei einem Replay wissen, welche Regeln galten ("Configuration-as-Data").
-
-## 4. Prinzipien der Datensicherheit und Governance
-
-* **Offline-fähig:** Alle Daten bleiben **on-prem** (on-premise). Es gibt keine Telemetrie oder Daten-Übertragung an externe Dienste (Privacy-by-Default).
-* **Retention/Rotation:** Das System verwaltet die Daten selbst. Wir definieren Regeln für die Archivierung und Rotation von Parquet-Dateien (z.B. Löschung nach 5 Jahren). Ein Low-Disk-Alert (aus dem Risikokapitel) warnt den Nutzer rechtzeitig.
-* **Checksums:** Export-Bundles für die Forschung erhalten einen Hash, um die Integrität beim Transfer zu sichern (Opt-in).
+Diese Trennung ist Grundlage für Performance, Reproduzierbarkeit und Datensouveränität.
 
 ---
-> **Nächster Schritt:** Die Daten sind sicher. Aber wie sieht das System für den Nutzer aus? Im nächsten Abschnitt klären wir die Prinzipien der Benutzeroberfläche.
+
+## Laufzeitdaten (Hot Data)
+
+Laufzeitdaten sind notwendig, um das System **jetzt** zu betreiben.
+
+**Beispiele:**
+- aktueller `EnergyState`
+- aktive Overrides
+- UI-Zustände
+- kurzfristige KPIs
+
+**Eigenschaften:**
+- häufige Lese-/Schreibzugriffe
+- begrenzter Umfang
+- ersetzbar durch neuere Zustände
+
+Diese Daten ermöglichen einen schnellen Neustart, sind aber **nicht die alleinige Wahrheit** für Analyse oder Audit.
+
+---
+
+## Entscheidungs- & Ereignisdaten (Append-only)
+
+Diese Daten dokumentieren, **was entschieden wurde – und warum**.
+
+**Beispiele:**
+- Decision Events
+- Safety Events
+- Health Events
+- Konfigurationsänderungen (als Ereignis)
+
+**Eigenschaften:**
+- strikt append-only
+- zeitlich geordnet
+- nicht nachträglich veränderbar
+
+Sie bilden die Grundlage für:
+- Explainability
+- Auditierbarkeit
+- Replays
+
+---
+
+## Historische & Forschungsdaten (Cold Data)
+
+Cold Data dient Analyse, Simulation und Forschung.
+
+**Beispiele:**
+- historische Zustandsverläufe
+- Entscheidungs-Historien
+- Explain-Sessions
+
+**Eigenschaften:**
+- schreibarm
+- leselastig
+- langfristig haltbar
+- effizient verdichtbar
+
+Diese Daten werden bewusst getrennt vom operativen Betrieb gehalten.
+
+---
+
+## Konfigurationsdaten als Teil der Historie
+
+Konfiguration ist Teil der fachlichen Wahrheit.
+
+**Grundsätze:**
+- Konfiguration ist versioniert
+- Änderungen sind nachvollziehbar
+- relevante Änderungen werden als Ereignisse erfasst
+
+So ist bei Replays klar:
+> *Welche Regeln galten zu welchem Zeitpunkt?*
+
+---
+
+## Datenlebenszyklus
+
+Der typische Lebenszyklus eines Datums ist:
+
+1. **Entstehung**  
+   Messung, Ableitung oder Entscheidung.
+
+2. **Operative Nutzung**  
+   Regelbewertung, UI, Explain.
+
+3. **Persistenz**  
+   Speicherung gemäß Datenkategorie.
+
+4. **Verdichtung / Archivierung**  
+   Reduktion oder Zusammenfassung älterer Daten.
+
+5. **Export oder Löschung**  
+   Ausschließlich explizit und nutzerkontrolliert.
+
+---
+
+## Integrität, Audit & Reproduzierbarkeit
+
+Das Datenkonzept von BitGridAI unterstützt gezielt:
+
+- deterministisches Verhalten
+- Replay-Fähigkeit
+- nachträgliche Prüfung von Entscheidungen
+
+Dies wird erreicht durch:
+- unveränderliche Zustände (siehe 8.1),
+- vollständige Entscheidungsprotokolle,
+- Integritätsmechanismen bei Exporten.
+
+---
+
+## Aufbewahrung & Löschung
+
+BitGridAI erzwingt keine festen Aufbewahrungsfristen, stellt jedoch Leitlinien bereit:
+
+- Laufzeitdaten: kurzlebig
+- Logs & Events: begrenzt, rotierend
+- Forschungsdaten: nutzerkontrolliert
+
+Löschung erfolgt:
+- bewusst,
+- nachvollziehbar,
+- ohne Einfluss auf den laufenden Betrieb.
+
+---
+
+## Abgrenzungen
+
+Nicht Bestandteil dieses Kapitels sind:
+- konkrete Dateipfade oder Tabellen
+- Backup-Tools
+- UI-Dialoge für Exporte
+
+Diese Details gehören in Betriebs- oder Entwicklerdokumentation.
+
+---
+
+## Zusammenfassung
+
+Die Datenhaltung von BitGridAI ist kein Nebenprodukt, sondern Teil der Architektur.
+
+Sie stellt sicher, dass:
+- Entscheidungen nachvollziehbar bleiben,
+- der Betrieb robust ist,
+- Analyse und Forschung möglich sind,
+- der Nutzer die Kontrolle behält.
+
+Daten sind Gedächtnis – und Verantwortung.
+
+---
+
+> **Nächster Schritt:** Entscheidungen sollen nicht nur korrekt, sondern auch verständlich sein.  
+> Im nächsten Abschnitt betrachten wir **Explainability & Transparenz**.
 >
-> 👉 Weiter zu **[08.3 Benutzeroberfläche (UI)](./083_user_interface.md)**
+> 👉 Weiter zu **[8.4 Explainability & Transparenz](./084_explainability.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
