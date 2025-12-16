@@ -1,4 +1,4 @@
-# 10.2 Qualitätsszenarien (Auszug)
+# 10.2 - Qualitätsszenarien (Auszug)
 
 Das Herzstück der Qualitätskontrolle.
 
@@ -6,6 +6,8 @@ Qualitätsszenarien sind spezifische, nachvollziehbare Tests, die beweisen, dass
 
 *(Platzhalter für ein Bild: Eine Tabelle oder ein Flussdiagramm, das die Szenarien S6 (Safety Stop) und S8 (Deadband) als kritische Prüfpunkte hervorhebt.)*
 ![Übersicht der Qualitätsszenarien](../../media/pixel_art_hamster_scenario_test.png)
+
+&nbsp;
 
 ## Szenarien-Tabelle
 
