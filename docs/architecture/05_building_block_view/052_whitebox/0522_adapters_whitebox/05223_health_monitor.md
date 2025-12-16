@@ -1,4 +1,4 @@
-# 05.2.2.3 Health Monitor
+# 05.2.2.3 - Baustein: Health Monitor
 
 Der Pulsmesser des Systems.
 
