@@ -1,4 +1,4 @@
-# 06.8 Szenario: Boot & Recovery
+# 06.08 Szenario: Boot & Recovery
 
 Stabil ab Minute null.
 
