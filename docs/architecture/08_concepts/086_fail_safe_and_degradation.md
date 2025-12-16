@@ -1,4 +1,4 @@
-# 8.6 Fail-Safe, Degradation & Robustheit
+# 8.6 - Fail-Safe, Degradation & Robustheit
 
 Lieber sicher stehen als falsch laufen.
 
@@ -10,7 +10,7 @@ Dieses Kapitel beschreibt, wie BitGridAI mit **Unsicherheit, Teil- und Totalausf
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster zieht im Maschinenraum einen großen roten Hebel mit der Aufschrift „SAFE MODE“. Einige Anzeigen sind grau, aber alles ist ruhig.)*
 ![Hamster im Safe Mode](../../media/pixel_art_hamster_safe_mode.png)
 
----
+&nbsp;
 
 ## Ziel: Definiertes Verhalten statt Chaos
 
@@ -22,7 +22,7 @@ Fail-Safe bedeutet bei BitGridAI nicht „Absturz“, sondern:
 - beobachtbare Degradation,
 - vorhersehbares Verhalten.
 
----
+&nbsp;
 
 ## Sicherheits-Hierarchie
 
@@ -42,7 +42,7 @@ BitGridAI folgt einer festen Prioritätenordnung:
 
 Optimierung ist jederzeit verzichtbar – Sicherheit nicht.
 
----
+&nbsp;
 
 ## Fail-Safe-Auslöser (Beispiele)
 
@@ -57,7 +57,7 @@ Ein Fail-Safe-Zustand wird ausgelöst bei:
 
 Diese Auslöser sind **explizit modelliert**, nicht implizit.
 
----
+&nbsp;
 
 ## Degradation statt Blackout
 
@@ -79,7 +79,7 @@ BitGridAI unterscheidet zwischen:
 - Mining / flexible Last **aus**
 - Zustand bleibt stabil, keine Eskalation
 
----
+&nbsp;
 
 ## Verhalten im Degradationsfall
 
@@ -94,7 +94,7 @@ Konkret:
 - R5 (Stabilität) wird defensiv angewendet
 - R3 (Safety) bleibt aktiv
 
----
+&nbsp;
 
 ## Determinismus im Fehlerfall
 
@@ -109,7 +109,7 @@ Das ist entscheidend für:
 - Audits
 - Vertrauen in das System
 
----
+&nbsp;
 
 ## Sichtbarkeit & Transparenz
 
@@ -123,7 +123,7 @@ Fail-Safe und Degradation sind **nie unsichtbar**:
 Der Nutzer soll jederzeit wissen:
 > *Warum das System gerade nichts tut.*
 
----
+&nbsp;
 
 ## Rückkehr zum Normalbetrieb
 
@@ -136,7 +136,7 @@ Die Rückkehr erfolgt **automatisch**, aber kontrolliert:
 
 Kein Neustart, kein manueller Reset erforderlich.
 
----
+&nbsp;
 
 ## Abgrenzung
 
@@ -147,7 +147,7 @@ Nicht Bestandteil dieses Kapitels sind:
 
 Diese Themen gehören in Betriebs- oder Sicherheitsdokumentation.
 
----
+&nbsp;
 
 ## Zusammenfassung
 
