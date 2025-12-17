@@ -15,9 +15,9 @@ Hier klären wir, welche Komponente auf welchem Server läuft und wie die Maschi
 
 Hier findest du den Bauplan unserer Infrastruktur:
 
-* **[7.01 - Deployment (Docker-first, Umbrel-ready)](../0701_deployment_view.md)**
+* **[7.01 - Deployment (Docker-first, Umbrel-ready)](../071_deployment.md)**
     * Hauptkapitel. Basis-Deployment als Docker-Compose im LAN; optionales Packaging als Umbrel App.
-* **[7.02 - Infrastruktur & Umgebungen](./0702_deployment_view.md)**
+* **[7.02 - Infrastruktur & Umgebungen](./072_infrastructure_variants.md)**
     * Detailblick auf Pipeline, Hardware und Betriebsvarianten (Standalone, Distributed, Hybrid).
 
 ---
