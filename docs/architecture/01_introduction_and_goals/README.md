@@ -1,4 +1,4 @@
-# 01 Einführung & Ziele
+# 01 - Einführung & Ziele
 
 So fängt alles an. 🌱
 
