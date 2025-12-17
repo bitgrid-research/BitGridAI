@@ -33,6 +33,8 @@ Das Projekt fokussiert sich auf lokale Energie-Automatisierung, transparente Ent
 - **Steuerung:** Miner starten, stoppen, pausieren; Sperrzeiten berücksichtigen
 - **Protokoll:** Entscheidungen dokumentiert, ergänzt um einfache Kennzahlen
 
+&nbsp;
+
 ## Kontext
 
 BitGridAI ist ein offenes Forschungs- und Lernprojekt zur lokalen Energie-Automatisierung. Es geht darum, Entscheidungen in Energiesystemen verständlich zu machen und Steuerlogik so aufzubauen, dass sie nachvollziehbar bleibt.
@@ -41,7 +43,7 @@ Der Fokus liegt auf Konzepten und Architektur – nicht auf Produktbetrieb oder 
 
 Die Software wird als Open Source im aktuellen Forschungsstand bereitgestellt.
 
-&nbsp;
+![NoCloud](./docs/media/nocloud.png)
 
 <details>
 <summary><strong>⚡ Transparenz & Unterstützung (optional)</strong></summary>
@@ -91,8 +93,6 @@ Sie erscheinen zunächst im Mempool, bevor sie dauerhaft in die Blockchain über
 </details>
 
 ---
-
-![NoCloud](./docs/media/nocloud.png)
 
 * [📚 Doku ?](./docs/README.md)
 
