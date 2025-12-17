@@ -80,8 +80,8 @@ Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
 > Zugriffe sind nun kontrolliert.  
 > Als Nächstes kümmern wir uns um Konfiguration und Feature-Steuerung.
 >
-> 👉 Weiter zu **[5.2.5.2 Configuration & Feature Flags](./05252_config_feature_flags.md)**
+> 👉 Weiter zu **[5.2.5.2 - Baustein: Configuration & Feature Flags](./05252_config_feature_flags.md)**
 >
-> 🔙 Zurück zu **[5.2.5 Operations (Security, Config & Observability)](./README.md)**
+> 🔙 Zurück zu **[5.2.5 - Whitebox: Operations (Security, Config & Observability)](./README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**

@@ -75,6 +75,6 @@ Alle Events sind extern beobachtbar (UI, Monitoring, Logs).
 > **Nächster Schritt:** Konfiguration ist nun zur Laufzeit anpassbar.  
 > Jetzt betrachten wir, **wie Daten kontrolliert exportiert und reproduzierbar analysiert werden können**.
 >
-> 👉 Weiter zu **[06.11 Export & Replay](./0611_export_replay.md)**
+> 👉 Weiter zu **[06.11 - Export & Replay](./0611_export_replay.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

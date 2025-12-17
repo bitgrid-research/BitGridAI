@@ -1,4 +1,4 @@
-# 04.2 Grobe Systemstruktur (Form)
+# 04.2 - Grobe Systemstruktur (Form)
 
 Vom Plan zur Form.
 
@@ -68,6 +68,6 @@ Sie verhindern implizite Abhängigkeiten und sorgen dafür, dass BitGridAI wartb
 > **Nächster Schritt:** Die Form ist klar. Als Nächstes halten wir fest, 
 > **welche zentralen Weichenstellungen diese Struktur möglich gemacht haben – und warum wir sie genau so getroffen haben.**
 >
-> 👉 Weiter zu **[4.3 Zentrale Architekturentscheidungen (Weichenstellungen)](./043_decisions.md)**
+> 👉 Weiter zu **[4.3 - Zentrale Architekturentscheidungen (Weichenstellungen)](./043_decisions.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

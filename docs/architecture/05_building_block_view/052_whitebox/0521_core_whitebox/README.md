@@ -83,6 +83,6 @@ Nur Zustand, Zeit und Regeln.
 > **Nächster Schritt:** Der Core ist aufgeteilt. Jetzt gehen wir ins Detail und schauen,
 > wie der Systemtakt funktioniert und warum er so wichtig ist.
 >
-> 👉 Weiter zu **[5.2.2 Adapter & Feld-I/O](../0522_adapters_whitebox/README.md)** 
+> 👉 Weiter zu **[5.2.2 - Whitebox: Adapter & Feld-I/O](../0522_adapters_whitebox/README.md)** 
 >
 > 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**

@@ -12,13 +12,13 @@ Ohne ein klares Ziel verläuft man sich schnell – daher definieren wir hier de
 
 Wir haben die Grundlagen in drei kompakte Bereiche aufgeteilt, damit du schnell findest, was du suchst:
 
-* **[1.1 Anforderungen](./011_requirements_overview.md)**
+* **[1.1 - Anforderungen](./011_requirements_overview.md)**
     * Was genau bauen wir hier? Ein Überblick über die wesentlichen Features und Use-Cases.
 
-* **[1.2 Qualitätsziele](./012_quality_goals.md)**
+* **[1.2 - Qualitätsziele](./012_quality_goals.md)**
     * Worauf legen wir besonderen Wert? (z.B. Transparenz, Autonomie, Nachhaltigkeit).
 
-* **[1.3 Stakeholder](./013_steakholder.md)**
+* **[1.3 - Stakeholder](./013_steakholder.md)**
     * Wer sind die Menschen (und Systeme), die BitGridAI nutzen oder beeinflussen?
  
 ---
@@ -28,6 +28,6 @@ Wir haben die Grundlagen in drei kompakte Bereiche aufgeteilt, damit du schnell 
 ---
 > **Nächster Schritt:** Wir kennen jetzt das Ziel. Im nächsten Kapitel schauen wir uns die Leitplanken an, die uns die Realität (Technik & Organisation) vorgibt.
 >
-> 👉 Weiter zu **[02 Randbedingungen](../02_archtecture_constraints)**
+> 👉 Weiter zu **[02 - Randbedingungen](../02_archtecture_constraints)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

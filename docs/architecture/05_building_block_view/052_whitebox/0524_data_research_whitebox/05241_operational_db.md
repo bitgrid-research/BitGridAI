@@ -89,9 +89,9 @@ Auf dem Buch steht „SQLite“. Daneben eine Uhr (TTL) und ein Häkchen „ACID
 > Im nächsten Baustein wechseln wir von „aktueller Zustand“ zu **historischer Wahrheit**:
 > ein unveränderlicher Event- und Log-Store, der Replays, Audits und Analysen ermöglicht.
 >
-> 👉 Weiter zu **[5.2.4.2 Event / Log Store](./05242_event_log_store.md)**
+> 👉 Weiter zu **[5.2.4.2 - Baustein: Event / Log Store](./05242_event_log_store.md)**
 >
-> 🔙 Zurück zu **[5.2.4 Data und Research](./README.md)**
+> 🔙 Zurück zu **[5.2.4 - Whitebox: Data und Research](./README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**
 

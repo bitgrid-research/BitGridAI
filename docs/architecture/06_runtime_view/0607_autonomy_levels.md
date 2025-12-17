@@ -127,7 +127,7 @@ stateDiagram-v2
 > **Nächster Schritt:** Die Kontrolllogik ist definiert.  
 > Jetzt schauen wir, **wie BitGridAI sauber startet und sich von Ausfällen erholt**.
 >
-> 👉 Weiter zu **[06.08 Boot & Recovery](./0608_boot_recovery.md)**
+> 👉 Weiter zu **[06.08 - Boot & Recovery](./0608_boot_recovery.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
 

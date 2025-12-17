@@ -1,4 +1,4 @@
-# 8.4 Explainability & Transparenz
+# 8.4 - Explainability & Transparenz
 
 Verstehen ist Vertrauen.
 
@@ -175,6 +175,6 @@ BitGridAI entscheidet nicht im Verborgenen – es erklärt sich.
 > **Nächster Schritt:** Entscheidungen brauchen nicht nur Transparenz, sondern auch klare Grenzen menschlicher Kontrolle.  
 > Im nächsten Abschnitt betrachten wir **Autonomie, HCI & menschliche Kontrolle**.
 >
-> 👉 Weiter zu **[8.5 Autonomie, HCI & menschliche Kontrolle](./085_autonomy_and_hci.md)**
+> 👉 Weiter zu **[8.5 - Autonomie, HCI & menschliche Kontrolle](./085_autonomy_and_hci.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

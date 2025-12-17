@@ -209,6 +209,6 @@ Daten sind Gedächtnis – und Verantwortung.
 > **Nächster Schritt:** Entscheidungen sollen nicht nur korrekt, sondern auch verständlich sein.  
 > Im nächsten Abschnitt betrachten wir **Explainability & Transparenz**.
 >
-> 👉 Weiter zu **[8.4 Explainability & Transparenz](./084_explainability.md)**
+> 👉 Weiter zu **[8.4 - Explainability & Transparenz](./084_explainability.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

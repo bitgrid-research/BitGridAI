@@ -200,6 +200,6 @@ Sicherheit ist kein Sonderfall – sie ist der Normalzustand.
 > **Nächster Schritt:** Sicherheit schafft Vertrauen – aber Verständnis schafft Akzeptanz.  
 > Im nächsten Abschnitt betrachten wir **Explainability & Transparenz**.
 >
-> 👉 Weiter zu  **[8.3 Datenhaltung & Datenlebenszyklus](./083_data_persistence.md)**  
+> 👉 Weiter zu  **[8.3 - Datenhaltung & Datenlebenszyklus](./083_data_persistence.md)**  
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

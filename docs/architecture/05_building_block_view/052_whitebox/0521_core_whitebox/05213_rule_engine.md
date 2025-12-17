@@ -81,9 +81,9 @@ Keine Statistik. Kein Raten. Keine Magie.
 ---
 > **Nächster Schritt:** Entscheidungen sind gefällt – jetzt prüfen wir, wann und wie der Mensch eingreifen darf.
 >
-> 👉 Weiter zu **[5.2.1.4 Override Handler](./05214_override_handler.md)**
+> 👉 Weiter zu **[5.2.1.4 - Baustein: Override Handler](./05214_override_handler.md)**
 >
-> 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](./README.md)**
+> 🔙 Zurück zu **[5.2.1 - Whitebox: Core-Orchestrierung](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
 

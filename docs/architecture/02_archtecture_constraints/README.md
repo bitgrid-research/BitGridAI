@@ -1,4 +1,4 @@
-# 02 Randbedingungen
+# 02 - Randbedingungen
 
 Willkommen im Kapitel der "Spielregeln". Nicht alles auf der grünen Wiese ist möglich.🍀
 
@@ -12,13 +12,13 @@ Diese Vorgaben sind in der Regel nicht verhandelbar und haben direkten Einfluss 
 
 Wir unterteilen die Einschränkungen in drei Bereiche, um die Übersicht zu behalten:
 
-* **[2.1 Technische Randbedingungen](./021_technical_constraints.md)**
+* **[2.1 - Technische Randbedingungen](./021_technical_constraints.md)**
     * Harte Fakten zur Technik. Welche Hardware ist vorgegeben? Welche Betriebssysteme oder externen APIs müssen wir zwingend nutzen?
 
-* **[2.2 Organisatorische Randbedingungen](./022_organizational_constraints.md)**
+* **[2.2 - Organisatorische Randbedingungen](./022_organizational_constraints.md)**
     * Der Rahmen um das Projekt herum. Hier geht es um Budget, Zeitpläne, Teamstruktur und rechtliche Vorgaben.
 
-* **[2.3 Konventionen](./023_conventions.md)**
+* **[2.3 - Konventionen](./023_conventions.md)**
     * Unsere internen Gesetze. Wie schreiben wir Code? Wie benennen wir Dinge? An welche Standards halten wir uns, damit alle im Team effizient zusammenarbeiten?
 
 ---
@@ -29,6 +29,6 @@ Wir unterteilen die Einschränkungen in drei Bereiche, um die Übersicht zu beha
 
 > **Nächster Schritt:** Wir kennen jetzt den Spielraum. Im nächsten Kapitel schauen wir uns an, wie BitGridAI in seine Umwelt eingebettet ist und mit wem es interagiert.
 >
-> 👉 Weiter zu **[03 Kontextabgrenzung](../03_context)**
+> 👉 Weiter zu **[03 - Kontextabgrenzung](../03_context)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

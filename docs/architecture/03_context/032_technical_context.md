@@ -1,4 +1,4 @@
-# 03.2 Technischer Kontext (Technical Context)
+# 03.2 - Technischer Kontext (Technical Context)
 
 Die Sicht unter der Haube.
 
@@ -110,6 +110,6 @@ Diese spiegeln die technische Realität in einer stabilen, verständlichen Sprac
 > Als Nächstes betrachten wir die **Lösungsstrategie** – also warum diese Architektur
 > gewählt wurde und weshalb „Local First“ dabei eine zentrale Rolle spielt.
 >
-> 👉 Weiter zu **[04 Lösungsstrategie](../04_solution_strategy/README.md)**
+> 👉 Weiter zu **[04 - Lösungsstrategie](../04_solution_strategy/README.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

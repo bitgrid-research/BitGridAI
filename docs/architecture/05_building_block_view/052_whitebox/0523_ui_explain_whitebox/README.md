@@ -75,8 +75,8 @@ Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“
 > Jetzt kümmern wir uns um Gedächtnis, Nachvollziehbarkeit und Forschung:
 > Speicherung, KPIs und Replays.
 >
-> 👉 Weiter zu **[5.2.4 Data & Research](../0524_data_research_whitebox/README.md)**
+> 👉 Weiter zu **[5.2.4 - Whitebox: Data & Research](../0524_data_research_whitebox/README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**
 
 

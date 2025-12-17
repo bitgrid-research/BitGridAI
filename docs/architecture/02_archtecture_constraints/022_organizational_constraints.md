@@ -1,4 +1,4 @@
-# 02.2 Organisatorische Randbedingungen (Organizational Constraints)
+# 02.2 - Organisatorische Randbedingungen (Organizational Constraints)
 
 Geld, Zeit und Paragrafen. Willkommen in der Realität der Projektplanung.
 
@@ -26,6 +26,6 @@ Wir müssen unsere Lösung innerhalb folgender nicht-technischer Grenzen entwick
 ---
 > **Nächster Schritt:** Damit haben wir das Spielfeld definiert. Jetzt legen wir die Spielregeln fest. Im nächsten Abschnitt definieren wir die architektonischen Konventionen, die für alle gelten.
 >
-> 👉 Weiter zu **[02.3 Konventionen](./023_conventions.md)**
+> 👉 Weiter zu **[02.3 - Konventionen](./023_conventions.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

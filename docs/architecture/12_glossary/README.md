@@ -17,12 +17,18 @@ In diesem Kapitel definieren wir unsere zentrale Terminologie. Das Ziel ist eine
 
 Hier findest du unsere zentrale Begriffsliste:
 
-* **[12.1 Das Begriffsverzeichnis (A-Z)](./12_glossary.md)**
+* **[12.1 - Das Begriffsverzeichnis (A-Z)](./12_glossary.md)**
     * Die alphabetische Auflistung aller wichtigen Fachbegriffe und Abkürzungen, die im BitGridAI-Projekt verwendet werden, inklusive ihrer genauen Definitionen in unserem Kontext.
 
 ---
-> **Endstation.**  
-> Wenn du bis hierher gelesen hast, weißt du jetzt nicht nur *wie* BitGridAI funktioniert,  
-> sondern auch *warum* es so gebaut wurde.
+> **Endstation.**
+>
+> Software ist immer eine Entscheidung.  
+> Diese hier ist für Verständlichkeit statt Magie,  
+> Kontrolle statt Automatismus  
+> und Ruhe statt Dauerfeuer.
+>
+> Danke, dass du dir die Zeit genommen hast,  
+> das System wirklich kennenzulernen. ❤️
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

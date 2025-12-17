@@ -150,6 +150,6 @@ BitGridAI automatisiert nicht *anstelle* des Menschen, sondern *mit* ihm.
 > **Nächster Schritt:** Autonomie braucht klare Grenzen für Fehlerfälle.  
 > Im nächsten Abschnitt betrachten wir die **Fehler-, Degradations- & Fail-safe-Prinzipien**.
 >
-> 👉 Weiter zu **[8.6 Fehler-, Degradations- & Fail-safe-Prinzipien](./086_fail_safe_and_degradation.md)**
+> 👉 Weiter zu **[8.6 - Fehler-, Degradations- & Fail-safe-Prinzipien](./086_fail_safe_and_degradation.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

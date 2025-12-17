@@ -74,8 +74,8 @@ Auf jedem Blatt ein anderes Gerät mit Symbolen für Leistung, Temperatur und Li
 > **Nächster Schritt:** Jetzt kommt der Mensch ins Spiel.  
 > Anzeige, Erklärungen und bewusste Eingriffe.
 >
-> 👉 Weiter zu **[5.2.3 Whitebox UI und Explainability](../0523_ui_explain_whitebox/README.md)**
+> 👉 Weiter zu **[5.2.3 - Baustein: Whitebox UI und Explainability](../0523_ui_explain_whitebox/README.md)**
 >
-> 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](./README.md)**
+> 🔙 Zurück zu **[5.2.2 - Whitebox: Adapter & Feld-I/O](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](..//../052_whitebox/README.md)** 

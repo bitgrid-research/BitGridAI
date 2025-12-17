@@ -74,10 +74,10 @@ Schilder: „State“, „Timeline“, „Preview“, „Override (mit Ausweis)�
 > Der Empfang ist geklärt. Im nächsten Baustein schauen wir uns an,  
 > **wie diese Schnittstellen visuell genutzt werden** – das eigentliche Cockpit für den Nutzer.
 >
-> 👉 Weiter zu **[5.2.3.2 Web-UI](./05232_web_ui.md)**
+> 👉 Weiter zu **[5.2.3.2 - Baustein: Web-UI](./05232_web_ui.md)**
 >
-> 🔙 Zurück zur **[5.2.3 Whitebox UI & Explainability](./README.md)**
+> 🔙 Zurück zu **[5.2.3 - Whitebox: Whitebox UI & Explainability](./README.md)**
 > 
-> 🏠 Zurück zur **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**
 
 

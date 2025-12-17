@@ -96,6 +96,6 @@ Damit der Nutzer sich nicht ins Knie schießt:
 ---
 > **Nächster Schritt:** Der Nutzer kann eingreifen – aber wie viel Kontrolle soll das System grundsätzlich übernehmen?
 >  
-> 👉 Weiter zu **[06.07 Autonomie-Stufen & Kontrollmodi](./0607_autonomy_levels.md)**
+> 👉 Weiter zu **[06.07 - Autonomie-Stufen & Kontrollmodi](./0607_autonomy_levels.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

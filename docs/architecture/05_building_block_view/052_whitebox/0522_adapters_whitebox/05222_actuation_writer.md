@@ -77,9 +77,9 @@ und ein Häkchen „Ack received“.)*
 > **Nächster Schritt:** Befehle sind angekommen.  
 > Jetzt müssen wir überwachen, **ob alles lebt und erreichbar bleibt**.
 >
-> 👉 Weiter zu **[5.2.2.3 Health Monitor](./05223_health_monitor.md)**
+> 👉 Weiter zu **[5.2.2.3 - Baustein: Health Monitor](./05223_health_monitor.md)**
 >
-> 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](./README.md)**
+> 🔙 Zurück zu **[5.2.2 - Whitebox: Adapter & Feld-I/O](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
 

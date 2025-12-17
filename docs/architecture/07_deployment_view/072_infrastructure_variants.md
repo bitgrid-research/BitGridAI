@@ -1,4 +1,4 @@
-# 7.2 Infrastruktur & Betriebsvarianten
+# 7.2 - Infrastruktur & Betriebsvarianten
 
 Ein System, mehrere Einsatzformen.
 
@@ -145,6 +145,6 @@ Bewusst **nicht Teil** dieser Sicht:
 > **Nächster Schritt:** Die Verteilung ist vollständig beschrieben.  
 > Nun betrachten wir die Konzepte, die **quer über alle Bausteine und Betriebsformen wirken**.
 >
-> 👉 Weiter zu **[08 Querschnittliche Konzepte](../08_concepts/README.md)**
+> 👉 Weiter zu **[08 - Querschnittliche Konzepte](../08_concepts/README.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

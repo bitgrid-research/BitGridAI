@@ -1,35 +1,28 @@
-# 07 Verteilungssicht
+# 07 - Verteilungssicht
 
-Genug der Theorie, jetzt wird’s handfest.
+Genug der Theorie, jetzt wird's handfest. 
 
-Wo „wohnt“ **BitGridAI** eigentlich?
+Wo "wohnt" **BitGridAI** eigentlich?
 
-In der Verteilungssicht bringen wir die Software-Bausteine aus Kapitel 5 in die reale Welt.  
-Wir beschreiben die technische Infrastruktur, auf der das System betrieben wird: Hardware, Netzwerke und Laufzeitumgebungen – alles, was man anfassen (oder zumindest pingen) kann.
+In der Verteilungssicht bringen wir die Software-Bausteine aus Kapitel 5 auf die Straße – oder besser gesagt: auf die Server. Wir beschreiben die technische Infrastruktur, auf der das System läuft. Das umfasst Hardware, Netzwerke und alles, was man anfassen (oder zumindest pingen) kann.
 
-Hier klären wir, **welche Komponente auf welchem Knoten läuft** und wie diese Knoten miteinander verbunden sind.
+Hier klären wir, welche Komponente auf welchem Server läuft und wie die Maschinen miteinander vernetzt sind.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster als Systemadministrator, umgeben von Server-Racks und Netzwerk-Switches.)*  
+*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster als Systemadministrator, umgeben von blinkenden Server-Racks, Netzwerk-Switches.)*
 ![Hamster als Sysadmin im Serverraum](link_zum_deployment_bild.png)
-
-&nbsp;
 
 ## Inhalt dieses Kapitels
 
-Dieses Kapitel beschreibt das konkrete Deployment von BitGridAI im lokalen Netzwerk – vom Basis-Setup bis zu möglichen Betriebsvarianten:
+Hier findest du den Bauplan unserer Infrastruktur:
 
-* **[7.1 Deployment (Docker-first, Umbrel-ready)](./071_deployment.md)**  
-  * *Hauptkapitel:* Basis-Deployment als Docker-Compose-Stack im LAN; optionales Packaging als Umbrel-App. Home Assistant greift sekundär über MQTT/REST zu. Keine Cloud, nur LAN.
-
-* **[7.2 Infrastruktur & Umgebungen](./072_infrastructure_variants.md)**  
-  * *Erweiterte Sicht:* Hardware-Profile, Netzwerk-Topologien und Betriebsvarianten (Standalone, Distributed, Hybrid).
+* **[7.01 - Deployment (Docker-first, Umbrel-ready)](../0701_deployment_view.md)**
+    * *Kurzbeschreibung:* Hauptkapitel. Basis-Deployment als Docker-Compose im LAN; optionales Packaging als Umbrel App.
+* **[7.02 - Infrastruktur & Umgebungen](./0702_deployment_view.md)**
+    * *Kurzbeschreibung:* Detailblick auf Pipeline, Hardware und Betriebsvarianten (Standalone, Distributed, Hybrid).
 
 ---
-
-> **Nächster Schritt:** Die Hardware steht, die Container laufen.  
-> Aber was hält das System im Innersten zusammen?  
-> Im nächsten Kapitel widmen wir uns den Themen, die **alle Bausteine betreffen**: Sicherheit, Logging, Datenmodelle und Explainability.
+> **Nächster Schritt:** Die Hardware steht, die Container laufen. Aber was hält alles im Innersten zusammen? Im nächsten Kapitel widmen wir uns den Themen, die *alle* Bausteine betreffen: Sicherheit, Logging und Datenmodelle.
 >
-> 👉 Weiter zu **[08 Querschnittliche Konzepte](../08_concepts/README.md)**
+> 👉 Weiter zu **[08 - Querschnittliche Konzepte](../08_concepts)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

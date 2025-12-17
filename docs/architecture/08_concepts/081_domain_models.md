@@ -200,6 +200,6 @@ Ohne ein klares Domänenmodell gäbe es Optimierung – aber kein Verständnis.
 > **Nächster Schritt:** Sicherheit ist die Voraussetzung jeder Entscheidung.  
 > Im nächsten Abschnitt betrachten wir das **Sicherheits- & Vertrauenskonzept**.
 >
-> 👉 Weiter zu **[8.2 Sicherheits- & Vertrauenskonzept](./082_security_and_trust.md)**
+> 👉 Weiter zu **[8.2 - Sicherheits- & Vertrauenskonzept](./082_security_and_trust.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

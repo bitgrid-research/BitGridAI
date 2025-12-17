@@ -198,6 +198,6 @@ es macht sein Verhalten sichtbar.
 > **Nächster Schritt:** Beobachtbarkeit ist die Basis für Vertrauen – aber erst durch Tests wird Verhalten beweisbar.  
 > Im nächsten Kapitel betrachten wir **Testbarkeit, Simulation & Replays**.
 >
-> 👉 Weiter zu **[8.8 Testbarkeit, Simulation & Replays](./088_testability_and_simulation.md)**
+> 👉 Weiter zu **[8.8 - Testbarkeit, Simulation & Replays](./088_testability_and_simulation.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

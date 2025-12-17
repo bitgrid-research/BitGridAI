@@ -1,4 +1,4 @@
-# 10.2.5 Safety – Schutz von Hardware & Infrastruktur
+# 10.2.5 - Safety: Schutz von Hardware & Infrastruktur
 
 Sicherheit schlägt alles.
 
@@ -157,6 +157,6 @@ BitGridAI:
 > Sicherheit schützt vor Schaden – aber ein gutes System muss auch langfristig
 > **nachvollziehbar und reproduzierbar** bleiben.
 >
-> 👉 Weiter zu **[10.2.6 Reproduzierbarkeit & Erweiterbarkeit](./1026_reproducibility_and_extensibility.md)**
+> 👉 Weiter zu **[10.2.6 - Reproduzierbarkeit & Erweiterbarkeit](./1026_reproducibility_and_extensibility.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

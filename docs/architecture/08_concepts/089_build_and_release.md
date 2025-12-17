@@ -172,6 +172,6 @@ jede Änderung ist **bewusst, geprüft und erklärbar**.
 > Architektur lebt von Entscheidungen.  
 > Im nächsten Kapitel dokumentieren wir die **zentralen Architektur- und Designentscheidungen**.
 >
-> 👉 Weiter zu **[09 Architektur- & Designentscheidungen](../09_design_decisions/README.md)**
+> 👉 Weiter zu **[09 - Architektur- & Designentscheidungen](../09_design_decisions/README.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

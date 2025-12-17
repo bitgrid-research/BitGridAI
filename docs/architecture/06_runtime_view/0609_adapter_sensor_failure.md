@@ -70,6 +70,6 @@ Diese Signale sind extern sichtbar (UI, Monitoring, Logs).
 > **Nächster Schritt:** Die Datenbasis ist abgesichert.  
 > Jetzt betrachten wir, **wie Konfigurationsänderungen zur Laufzeit sicher übernommen werden**.
 >
-> 👉 Weiter zu **[06.10 Config- & Feature-Flag-Reload](./0610_config_feature_reload.md)**
+> 👉 Weiter zu **[06.10 - Config- & Feature-Flag-Reload](./0610_config_feature_reload.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

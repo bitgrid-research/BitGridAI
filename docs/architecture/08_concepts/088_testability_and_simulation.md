@@ -158,6 +158,6 @@ es wird **bewiesen**.
 > Wenn Qualität geprüft ist, stellt sich die Frage nach kontrollierter Auslieferung.  
 > Im nächsten Kapitel betrachten wir die **Build-, Update- & Release-Prinzipien**.
 >
-> 👉 Weiter zu **[8.9 Build-, Update- & Release-Prinzipien](./089_build_and_release.md)**
+> 👉 Weiter zu **[8.9 - Build-, Update- & Release-Prinzipien](./089_build_and_release.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

@@ -77,8 +77,8 @@ YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload�
 > Sicherheit und Konfiguration stehen.  
 > Jetzt machen wir den Systemzustand sichtbar.
 >
-> 👉 Weiter zu **[5.2.5.3 Observability & Monitoring](./05253_observability.md)**
+> 👉 Weiter zu **[5.2.5.3 - Baustein: Observability & Monitoring](./05253_observability.md)**
 >
-> 🔙 Zurück zu **[5.2.5 Operations (Security, Config & Observability)](./README.md)**
+> 🔙 Zurück zu **[5.2.5 - Whitebox: Operations (Security, Config & Observability)](./README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**

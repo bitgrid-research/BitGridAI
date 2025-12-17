@@ -1,4 +1,4 @@
-# 02.1 Technische Randbedingungen (Technical Constraints)
+# 02.1 - Technische Randbedingungen (Technical Constraints)
 
 Willkommen auf dem Boden der Tatsachen. Hier steht, was nicht verhandelbar ist – der Rahmen, in den wir BitGridAI hineinschrauben muessen.
 
@@ -23,6 +23,6 @@ Diese Einschraenkungen kommen aus Kellerrealitaet, Local-First-Vision oder exter
 > 
 > Im nächsten Abschnitt kommen die organisatorischen Leitplanken.
 > 
-> 👉 Weiter zu **[02.2 Organisatorische Randbedingungen](./022_organizational_constraints.md)**
+> 👉 Weiter zu **[02.2 - Organisatorische Randbedingungen](./022_organizational_constraints.md)**
 > 
 > 🔙 Zurück zur **[Kapiteluebersicht](./README.md)**

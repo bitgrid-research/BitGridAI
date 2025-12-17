@@ -97,8 +97,8 @@ und ein Prüfsummen-Stempel.)*
 > Im nächsten Baustein verdichten wir diese Historie zu **Kennzahlen**:
 > Auswertung, Aggregation und Reporting für Transparenz und Forschung.
 >
-> 👉 Weiter zu **[5.2.4.3 KPI / Reporting](./05243_kpi_reporting.md)**
+> 👉 Weiter zu **[5.2.4.3 - Baustein: KPI / Reporting](./05243_kpi_reporting.md)**
 >
-> 🔙 Zurück zu **[5.2.4 Data und Research](./README.md)**
+> 🔙 Zurück zu **[5.2.4 - Whitebox: Data und Research](./README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**

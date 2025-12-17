@@ -158,6 +158,6 @@ BitGridAI:
 > **Nächster Schritt:**  
 > Wirtschaftlichkeit braucht eine solide technische Basis – besonders in kritischen Situationen.
 >
-> 👉 Weiter zu **[10.2.5 Safety – Schutz von Hardware & Infrastruktur](./1025_safety.md)** 
+> 👉 Weiter zu **[10.2.5 - Safety: Schutz von Hardware & Infrastruktur](./1025_safety.md)** 
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

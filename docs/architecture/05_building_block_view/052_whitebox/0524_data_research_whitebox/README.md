@@ -76,7 +76,7 @@ Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
 > **Nächster Schritt:** Daten sind gespeichert und erklärbar.  
 > Jetzt sichern wir den Betrieb ab: Zugriff, Konfiguration und Beobachtbarkeit.
 >
-> 👉 Weiter zu **[5.2.5 Operations (Security, Config & Observability)](../0525_operations_whitebox/README.md)**
+> 👉 Weiter zu **[5.2.5 - Whitebox: Operations (Security, Config & Observability)](../0525_operations_whitebox/README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**
 

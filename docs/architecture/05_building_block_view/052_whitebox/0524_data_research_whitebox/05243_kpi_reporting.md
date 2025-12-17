@@ -98,8 +98,8 @@ Er hält einen Taschenrechner, daneben Pfeile von Events zu KPIs wie
 > Kennzahlen sind berechnet und verständlich aufbereitet.
 > Jetzt bleibt noch die kontrollierte Weitergabe nach außen.
 >
-> 👉 Weiter zu **[5.2.4.4 Export / Replay Service](./05244_export_replay.md)**
+> 👉 Weiter zu **[5.2.4.4 - Baustein: Export / Replay Service](./05244_export_replay.md)**
 >
-> 🔙 Zurück zu **[5.2.4 Data und Research](./README.md)**
+> 🔙 Zurück zu **[5.2.4 - Whitebox: Data und Research](./README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**

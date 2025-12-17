@@ -1,4 +1,4 @@
-# 04.4 Abgrenzungen & bewusste Nicht-Ziele (Fokus)
+# 04.4 - Abgrenzungen & bewusste Nicht-Ziele (Fokus)
 
 Fokus durch Weglassen.
 
@@ -29,6 +29,6 @@ Wir beantworten hier die Frage:
 ---
 > **Nächster Schritt:** Die Strategie ist vollständig. Jetzt wird es konkret: Wir zerlegen BitGridAI in seine **konkreten Bausteine**.
 >
-> 👉 Weiter zu **[05 Bausteinsicht](../05_building_block_view/README.md)**
+> 👉 Weiter zu **[05 - Bausteinsicht](../05_building_block_view/README.md)**
 >
-> 🧭 Zurück zur **[Kapitelübersicht](./README.md)**
+> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

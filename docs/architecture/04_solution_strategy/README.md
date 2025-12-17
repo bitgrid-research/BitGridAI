@@ -1,4 +1,4 @@
-# 04 Lösungsstrategie
+# 04 - Lösungsstrategie
 
 Jetzt wird es konkret. 
 
@@ -16,22 +16,22 @@ dass wir uns nicht in Details verlieren, sondern eine kohärente Lösung bauen. 
 
 In diesem Ordner bündeln wir die zentralen Gedanken und Entscheidungen zur Lösungsstrategie von BitGridAI:
 
-* **[4.1 Leitende Architekturprinzipien (Haltung)](./041_principles.md)**
+* **[4.1 - Leitende Architekturprinzipien (Haltung)](./041_principles.md)**
   * *Welche grundlegenden Überzeugungen und Qualitätsziele prägen jede Architekturentscheidung?*
 
-* **[4.2 Grobe Systemstruktur (Form)](./042_structure.md)**
+* **[4.2 - Grobe Systemstruktur (Form)](./042_structure.md)**
   * *Wie ist BitGridAI auf hoher Ebene in Kern, Ränder und Schichten gegliedert – unabhängig von Implementierungsdetails?*
 
-* **[4.3 Zentrale Architekturentscheidungen (Weichenstellungen)](./043_decisions.md)**
+* **[4.3 - Zentrale Architekturentscheidungen (Weichenstellungen)](./043_decisions.md)**
   * *Welche konkreten Richtungsentscheidungen wurden getroffen – und warum gerade diese?*
 
-* **[4.4 Abgrenzungen & bewusste Nicht-Ziele (Fokus)](./044_non_goals.md)**
+* **[4.4 - Abgrenzungen & bewusste Nicht-Ziele (Fokus)](./044_non_goals.md)**
   * *Was BitGridAI bewusst nicht sein will, nicht leisten soll oder nicht optimiert – um Klarheit, Stabilität und Fokus zu bewahren.*
 
 ---
 
 > **Nächster Schritt:** Der strategische Plan steht. Jetzt wird es Zeit, die Ärmel hochzukrempeln. Im nächsten Kapitel zerlegen wir das System in seine konkreten Software-Komponenten und schauen uns an, was wo läuft.
 >
-> 👉 Weiter zu **[05 Bausteinsicht](../05_building_block_view/README.md)**
+> 👉 Weiter zu **[05 - Bausteinsicht](../05_building_block_view/README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

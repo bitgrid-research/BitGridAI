@@ -72,8 +72,8 @@ Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI un
 > **Nächster Schritt:** Geräte unterscheiden sich.  
 > Jetzt kapseln wir Herstellerlogik, Limits und Fähigkeiten sauber.
 >
-> 👉 Weiter zu **[5.2.2.4 Device Profiles](./05224_device_profiles.md)**
+> 👉 Weiter zu **[5.2.2.4 - Baustein: Device Profiles](./05224_device_profiles.md)**
 >
-> 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](./README.md)**
+> 🔙 Zurück zu **[5.2.2 - Whitebox: Adapter & Feld-I/O](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](..//../052_whitebox/README.md)** 

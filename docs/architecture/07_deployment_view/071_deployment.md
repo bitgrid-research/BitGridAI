@@ -1,4 +1,4 @@
-# 7.1 Deployment (Docker-first, Umbrel-ready)
+# 7.1 - Deployment (Docker-first, Umbrel-ready)
 
 Ein klarer Startpunkt.
 
@@ -181,6 +181,6 @@ Der Betrieb bleibt transparent, kontrollierbar und sicher.
 > **Nächster Schritt:** Das Basis-Deployment ist klar.  
 > Jetzt betrachten wir, **wie sich diese Architektur auf unterschiedliche Infrastruktur- und Betriebsvarianten ausdehnen lässt**.
 >
-> 👉 Weiter zu **[7.2 Infrastruktur & Umgebungen](./072_infrastructure_variants.md)**
+> 👉 Weiter zu **[7.2 - Infrastruktur & Umgebungen](./072_infrastructure_variants.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

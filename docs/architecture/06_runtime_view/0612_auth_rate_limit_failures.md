@@ -71,6 +71,6 @@ Diese Informationen stehen für UI, Monitoring und Audit zur Verfügung.
 > **Nächster Schritt:** Zugriffe sind nun abgesichert und kontrolliert.  
 > Als Nächstes betrachten wir, **wie neue Prognosen verarbeitet werden, ohne den gesamten Entscheidungszyklus neu zu starten**.
 >
-> 👉 Weiter zu **[06.13 Forecast-Update-Zyklus](./0613_forecast_update_cycle.md)**
+> 👉 Weiter zu **[06.13 - Forecast-Update-Zyklus](./0613_forecast_update_cycle.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

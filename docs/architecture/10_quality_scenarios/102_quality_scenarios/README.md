@@ -74,5 +74,5 @@ Sie bilden die Grundlage für:
 > Wir kennen jetzt die Zielqualität und ihre Prüfungen.  
 > Als Nächstes betrachten wir die **Risiken und technischen Schulden**, die sich aus dieser Architektur ergeben.
 >
-> 👉 Weiter zu **[11 Risiken & Technische Schulden](../11_risks_and_technical_debt/README.md)**  
+> 👉 Weiter zu **[11 - Risiken & Technische Schulden](../11_risks_and_technical_debt/README.md)**  
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

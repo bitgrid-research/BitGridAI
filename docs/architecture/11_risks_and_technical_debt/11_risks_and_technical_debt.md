@@ -1,4 +1,4 @@
-# 11.1 Risiken & Technische Schulden (Kurzfassung)
+# 11.1 - Risiken & Technische Schulden (Kurzfassung)
 
 Das Auge des Hamsters auf der Straße.
 
@@ -53,6 +53,6 @@ Diese Maßnahmen werden priorisiert, um die größten Risiken zu mindern und die
 ---
 > **Nächster Schritt:** Wir haben die Risiken und Gegenmaßnahmen dokumentiert. Jetzt definieren wir das Glossar für eine einheitliche Terminologie.
 >
-> 👉 Weiter zu **[12 Glossar](../12_glossary/README.md)**
+> 👉 Weiter zu **[12 - Glossar](../12_glossary/README.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

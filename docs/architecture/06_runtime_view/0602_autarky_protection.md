@@ -36,6 +36,6 @@ R2 hat eine **höhere Priorität** als R1. Selbst wenn Mining profitabel wäre (
 ---
 > **Nächster Schritt:** Was ist, wenn nicht der Strom fehlt, sondern die Hardware glüht? Dann greift die höchste Instanz.
 >
-> 👉 Weiter zu **[06.03 Sicherheitsstopp (R3)](./0603_safety_stop.md)**
+> 👉 Weiter zu **[06.03 - Sicherheitsstopp (R3)](./0603_safety_stop.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

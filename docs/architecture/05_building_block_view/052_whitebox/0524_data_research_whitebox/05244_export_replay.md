@@ -92,8 +92,8 @@ in eine beschriftete Box „Export“. Daneben ein Siegel und ein Pfeil zu „Re
 > Daten können nun gespeichert, erklärt, ausgewertet
 > und kontrolliert weitergegeben werden.
 >
-> 👉 Weiter zu **[5.2.5 Operations (Security, Config & Observability)](../0525_operations_whitebox/README.md)**
+> 👉 Weiter zu **[5.2.5 - Baustein: Operations (Security, Config & Observability)](../0525_operations_whitebox/README.md)**
 >
-> 🔙 Zurück zu **[5.2.4 Data und Research](./README.md)**
+> 🔙 Zurück zu **[5.2.4 - Whitebox: Data und Research](./README.md)**
 >
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**

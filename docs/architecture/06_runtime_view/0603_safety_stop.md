@@ -95,6 +95,6 @@ Sicherheit ist nicht verhandelbar, aber konfigurierbar. Diese Werte schützen di
 ---
 > **Nächster Schritt:** Sicherheit ist gewährleistet. Jetzt machen wir das System schlau. Wir schauen nicht nur auf das "Jetzt", sondern auch in die Zukunft.
 >
-> 👉 Weiter zu **[06.04 Prognose-Optimierung (R4)](./0604_forecast_control.md)**
+> 👉 Weiter zu **[06.04 - Prognose-Optimierung (R4)](./0604_forecast_control.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

@@ -76,6 +76,6 @@ Alle Exporte sind nachvollziehbar und auditierbar.
 > **Nächster Schritt:** Daten lassen sich nun kontrolliert exportieren und reproduzieren.  
 > Als Nächstes betrachten wir, **wie BitGridAI mit fehlender Authentifizierung und Rate-Limits umgeht**.
 >
-> 👉 Weiter zu **[06.12 Authentifizierung & Rate-Limit (Fehlpfade)](./0612_auth_rate_limit_failures.md)**
+> 👉 Weiter zu **[06.12 - Authentifizierung & Rate-Limit (Fehlpfade)](./0612_auth_rate_limit_failures.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

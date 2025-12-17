@@ -76,8 +76,8 @@ SI-Werte mit Zeitstempel heraus.)*
 > **Nächster Schritt:** Die Daten sind sauber.  
 > Jetzt müssen Entscheidungen **wirklich** in die Welt geschrieben werden.
 >
-> 👉 Weiter zu **[5.2.2.2 Actuation Writer](./05222_actuation_writer.md)**
+> 👉 Weiter zu **[5.2.2.2 - Baustein: Actuation Writer](./05222_actuation_writer.md)**
 >
-> 🔙 Zurück zu **[5.2.2 Adapter & Feld-I/O](./README.md)**
+> 🔙 Zurück zu **[5.2.2 - Whitebox: Adapter & Feld-I/O](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](..//../052_whitebox/README.md)** 

@@ -164,6 +164,6 @@ Das System:
 > **Nächster Schritt:** Ein robustes System muss nicht nur sicher reagieren, sondern auch beobachtbar sein.  
 > Im nächsten Kapitel betrachten wir **Logging, Events & Monitoring**.
 >
-> 👉 Weiter zu **[8.7 Logging, Events & Monitoring](./087_logging_and_monitoring.md)**
+> 👉 Weiter zu **[8.7 - Logging, Events & Monitoring](./087_logging_and_monitoring.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

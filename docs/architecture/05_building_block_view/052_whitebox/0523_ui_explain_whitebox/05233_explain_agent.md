@@ -72,9 +72,9 @@ Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ u
 > Wir wissen jetzt, **warum** Entscheidungen getroffen werden.  
 > Im nächsten Baustein schauen wir uns an, **was passiert wäre**, wenn sich die Rahmenbedingungen geändert hätten – ohne echte Eingriffe.
 >
-> 👉 Weiter zu **[5.2.3.4 Preview / What-if](./05234_preview.md)**
+> 👉 Weiter zu **[5.2.3.4 - Baustein: Preview / What-if](./05234_preview.md)**
 >
-> 🔙 Zurück zur **[5.2.3 Whitebox UI & Explainability](./README.md)**
+> 🔙 Zurück zu **[5.2.3 - Whitebox: UI & Explainability](./README.md)**
 > 
-> 🏠 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**
 

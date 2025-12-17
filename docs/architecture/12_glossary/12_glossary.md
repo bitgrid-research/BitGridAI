@@ -1,4 +1,4 @@
-# 12 – Glossar / Glossary
+# 12 – Glossar
 
 Die gemeinsame Sprache von BitGridAI.
 
@@ -9,13 +9,13 @@ Dieses Dokument liefert die **Endgültige Terminologie** des gesamten Projekts. 
 
 &nbsp;
 
-## Überblick / Overview
+## Überblick
 
 Das Glossar enthält zentrale Begriffe, Konzepte und Abkürzungen, die in der BitGridAI‑Architektur verwendet werden. Es dient dazu, **Konsistenz, Verständlichkeit und Nachvollziehbarkeit** innerhalb der Dokumentation sicherzustellen.
 
 ---
 
-## Fachbegriffe / Technical Terms
+## Fachbegriffe
 
 | Begriff | Definition |
 | :--- | :--- |
@@ -63,7 +63,7 @@ Das Glossar enthält zentrale Begriffe, Konzepte und Abkürzungen, die in der Bi
 
 &nbsp;
 
-## Abkürzungen / Abbreviations
+## Abkürzungen
 
 | Kürzel | Bedeutung |
 | :--- | :--- |
@@ -96,8 +96,12 @@ Das Glossar enthält zentrale Begriffe, Konzepte und Abkürzungen, die in der Bi
 >
 > Wow, du hast es tatsächlich bis hierher geschafft? Respekt! Das ist weiter, als 90 % aller Entwickler jemals lesen werden. 😉
 >
-> **Danke für deine Geduld und dein Interesse!**
+> **Danke für deine Geduld und dein Interesse!** ❤️
 >
-> Der Architektur-Hamster klappt jetzt den Laptop zu, gönnt sich eine handvoll Sonnenblumenkerne und legt sich auf den warmen Raspberry Pi zum Schlafen. Bitte nicht wecken, außer der Bitcoin-Kurs explodiert. 🐹💤
+> Der Architektur-Hamster klappt jetzt den Laptop zu, gönnt sich eine handvoll Sonnenblumenkerne und legt sich auf den warmen Raspberry Pi zum Schlafen. 
+>
+>Bitte nicht wecken, außer der Bitcoin-Kurs explodiert. 🐹💤
 
 🔙 Zurück zur **[Kapitelübersicht](../12_glossary/)**
+
+🏠 Zurück zur **[Hauptübersicht](../../README.md)**

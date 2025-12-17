@@ -81,6 +81,6 @@ BitGridAI übernimmt folgende Aufgaben:
 > **Nächster Schritt:**  
 > Die Anschlüsse sind klar. Jetzt öffnen wir die Bausteine.
 >
-> 👉 Weiter zu **[5.2 Level 2 – Die Whitebox (Innenleben)](../052_whitebox/README.md)**
+> 👉 Weiter zu **[5.2 - Level 2: Die Whitebox (Innenleben)](../052_whitebox/README.md)**
 >  
 > 🔙 Zurück zur **[Kapitelübersicht](../README.md)**

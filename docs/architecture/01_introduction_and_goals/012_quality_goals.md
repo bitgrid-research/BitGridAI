@@ -1,4 +1,4 @@
-# 01.2 Qualitätsziele
+# 01.2 - Qualitätsziele
 
 Qualität ist kein Zufall.
 
@@ -45,6 +45,6 @@ Wie messen wir objektiv, ob wir unsere Ziele erreichen? Wir haben harte Zahlen (
 ---
 > **Nächster Schritt:** Nachdem wir geklärt haben, was "gut" für BitGridAI bedeutet, schauen wir uns an, für wen wir das alles eigentlich machen.
 >
-> 👉 Weiter zu **[01.3 Stakeholder](./013_steakholder.md)**
+> 👉 Weiter zu **[01.3 - Stakeholder](./013_steakholder.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

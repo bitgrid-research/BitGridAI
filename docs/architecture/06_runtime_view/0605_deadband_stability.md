@@ -81,7 +81,7 @@ Wie träge soll das System sein?
 ---
 > **Nächster Schritt:** Damit haben wir den Automatik-Betrieb (R1-R5) komplett abgedeckt. Aber manchmal weiß der Mensch es besser und will eingreifen.
 >
-> 👉 Weiter zu **[06.06 Manuelles Überschreiben](./0606_manual_override.md)**
+> 👉 Weiter zu **[06.06 - Manuelles Überschreiben](./0606_manual_override.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
 

@@ -79,9 +79,9 @@ Er sorgt dafür, dass Regeln, Vorschauen und Replays **auf konsistenten, validie
 ---
 > **Nächster Schritt:** Die Daten stehen. Jetzt wird entschieden.
 >
-> 👉 Weiter zu **[5.2.1.3 Rule Engine](./05213_rule_engine.md)**
+> 👉 Weiter zu **[5.2.1.3 - Baustein: Rule Engine](./05213_rule_engine.md)**
 >
-> 🔙 Zurück zu **[5.2.1 Core-Orchestrierung](./README.md)**
+> 🔙 Zurück zu **[5.2.1 - Whitebox: Core-Orchestrierung](./README.md)**
 > 
-> 🔙 Zurück zu **[5.2 Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](..//../052_whitebox/README.md)** 
 

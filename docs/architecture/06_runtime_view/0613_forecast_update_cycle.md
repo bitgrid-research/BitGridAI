@@ -73,6 +73,6 @@ Alle Updates sind transparent und für UI sowie Monitoring sichtbar.
 > **Nächster Schritt:** Prognosen sind nun integriert, ohne das System unruhig zu machen.  
 > Im nächsten Kapitel wechseln wir die Perspektive und betrachten, **wie BitGridAI verteilt und betrieben wird**.
 >
-> 👉 Weiter zu **[07 Verteilungssicht](../07_deployment_view/README.md)**
+> 👉 Weiter zu **[07 - Verteilungssicht](../07_deployment_view/README.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

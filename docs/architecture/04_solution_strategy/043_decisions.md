@@ -1,4 +1,4 @@
-# 04.3 Zentrale Architekturentscheidungen (Weichenstellungen)
+# 04.3 - Zentrale Architekturentscheidungen (Weichenstellungen)
 
 Bewusste Weichenstellungen. Architektur entsteht nicht zufällig. 
 
@@ -31,6 +31,6 @@ Wir beantworten hier die Frage:
 
 > **Nächster Schritt:** Nicht alles, was denkbar ist, gehört ins System. Im nächsten Kapitel halten wir fest, **was BitGridAI bewusst nicht sein will**.
 >
-> 👉 Weiter zu **[4.4 Abgrenzungen & bewusste Nicht-Ziele (Fokus)](./044_non_goals.md)**
+> 👉 Weiter zu **[4.4 - Abgrenzungen & bewusste Nicht-Ziele (Fokus)](./044_non_goals.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

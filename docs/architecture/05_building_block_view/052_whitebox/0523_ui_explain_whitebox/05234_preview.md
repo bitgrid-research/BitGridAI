@@ -73,9 +73,9 @@ Darin erscheinen alternative Energieflüsse und ein gestrichelter Pfeil zur Ents
 > Jetzt verlassen wir die Benutzeroberfläche und schauen dahin, wo alles festgehalten wird:  
 > **Daten, KPIs, Replays und Forschung.**
 >
-> 👉 Weiter zu **[5.2.4 Whitebox Data & Research](../0524_data_research_whitebox/README.md)**
+> 👉 Weiter zu **[5.2.4 - Baustein: Whitebox Data & Research](../0524_data_research_whitebox/README.md)**
 >
-> 🔙 Zurück zu **[5.2.3 Whitebox UI & Explainability](./README.md)**
+> 🔙 Zurück zu **[5.2.3 - Whitebox UI & Explainability](./README.md)**
 >  
-> 🏠 Zurück zu **[5.2 Level-2-Whiteboxes](../README.md)**
+> 🔙 Zurück zu **[5.2 - Level-2-Whiteboxes](../README.md)**
 

@@ -1,4 +1,4 @@
-# 05.1 Level 1 – Die System-Blackbox
+# 05.1 - Level 1: Die System-Blackbox
 
 Was sieht man von außen?
 
@@ -23,7 +23,7 @@ Genug Informationen zum **Andocken** – bewusst keine Details zum Innenleben.
 
 Die Blackbox-Sicht wird in einem zentralen Dokument beschrieben:
 
-- **[5.1.1 System-Blackbox & Schnittstellen](./051_blackbox.md)**  
+- **[5.1.1 - Blackbox: System und Schnittstellen](./051_blackbox.md)**  
   * Welche Verantwortung trägt BitGridAI als Gesamtsystem, welche externen Nachbarn existieren und welche zentralen Ein- und Ausgänge definieren die Systemgrenze?
 
 ---
@@ -31,6 +31,6 @@ Die Blackbox-Sicht wird in einem zentralen Dokument beschrieben:
 > **Nächster Schritt:** Die Außenansicht ist klar.  
 > Jetzt öffnen wir den Kasten und schauen hinein.
 >
-> 👉 Weiter zu **[5.2 Level 2 – Die Whitebox (Innenleben)](../052_whitebox/README.md)**
+> 👉 Weiter zu **[5.2 - Level 2: Die Whitebox (Innenleben)](../052_whitebox/README.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](../README.md)**

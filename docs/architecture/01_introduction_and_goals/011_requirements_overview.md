@@ -1,4 +1,4 @@
-# 01.1 Anforderungen & Überblick
+# 01.1 - Anforderungen & Überblick
 
 Willkommen im Herzstück des Projekts. ♥️
 
@@ -71,6 +71,6 @@ Genauso wichtig wie das, was wir tun, ist das, was wir bewusst *nicht* tun:
 ---
 > **Nächster Schritt:** Nachdem wir geklärt haben, *was* wir bauen, schauen wir uns an, nach welchen Maßstäben wir die Qualität messen.
 >
-> 👉 Weiter zu **[01.2 Qualitätsziele](./012_quality_goals.md)**
+> 👉 Weiter zu **[01.2 - Qualitätsziele](./012_quality_goals.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

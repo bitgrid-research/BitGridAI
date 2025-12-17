@@ -1,4 +1,4 @@
-# 02.3 Leitplanken & Konventionen (Conventions)
+# 02.3 - Leitplanken & Konventionen (Conventions)
 
 Damit aus Software kein Chaos wird.
 
@@ -27,6 +27,6 @@ Diese Standards gelten für jeden, der Code oder Dokumentation zu BitGridAI beit
 ---
 > **Nächster Schritt:** Puh, das waren viele Regeln. Aber jetzt, wo das Fundament steht, können wir den Blick heben. Im nächsten Kapitel malen wir das große Bild und schauen uns an, wie BitGridAI in seine Umwelt eingebettet ist.
 >
-> 👉 Weiter zu **[03 Kontextabgrenzung](../03_context)**
+> 👉 Weiter zu **[03 - Kontextabgrenzung](../03_context)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

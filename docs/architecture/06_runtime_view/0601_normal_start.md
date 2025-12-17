@@ -47,6 +47,7 @@ sequenceDiagram
     Note right of UI: Preview: "Valid for next 10 mins"
 ````
 
+
 &nbsp;
 
 ## Wichtige Konfigurations-Parameter (MVP)
@@ -65,6 +66,6 @@ Damit dieser Ablauf funktioniert, sind folgende Schwellenwerte im System hinterl
 ---
 > **Nächster Schritt:** Das war der Idealfall bei schönem Wetter. Aber was passiert, wenn plötzlich eine kritische Grenze überschritten wird?
 >
-> 👉 Weiter zu **[06.02 Autarkie-Schutz (R2)](./0602_autarky_protection.md)**
+> 👉 Weiter zu **[06.02 - Autarkie-Schutz (R2)](./0602_autarky_protection.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
