@@ -2,7 +2,7 @@
 
 Für wen machen wir das alles eigentlich?
 
-Willkommen am runden Tisch von **BitGridAI**. Software wird nicht für Computer geschrieben, sondern für Menschen. In diesem Kapitel schauen wir uns an, wer ein Interesse an unserem Projekt hat, wer es nutzen wird und wer vielleicht sogar skeptisch ist.
+Willkommen am runden Tisch (oder am eckigen?) von **BitGridAI**. Software wird nicht für Computer geschrieben, sondern für Menschen. In diesem Kapitel schauen wir uns an, wer ein Interesse an unserem Projekt hat, wer es nutzen wird und wer vielleicht sogar skeptisch ist.
 
 Wir müssen ihre Brille aufsetzen, um zu verstehen, was das System leisten muss, damit es ein Erfolg wird.
 
