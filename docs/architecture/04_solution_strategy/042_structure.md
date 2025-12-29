@@ -5,9 +5,7 @@ Vom Plan zur Form.
 Nachdem wir die **architektonischen Grundpfeiler** festgelegt haben, stellt sich die nächste logische Frage:  
 Wie übersetzen wir diese Haltung in eine **tragfähige Struktur**, die langfristig stabil bleibt?
 
-Dieses Kapitel beschreibt die **grobe Systemstruktur** von **BitGridAI**.  
-
-Noch ohne Klassen, noch ohne Implementierungsdetails – aber klar genug, um zu verstehen, **welche großen Teile es gibt**, **welche Verantwortung sie tragen** und **wie sie zusammenwirken**.
+Dieses Kapitel beschreibt die **grobe Systemstruktur** von **BitGridAI**. Noch ohne Klassen, noch ohne Implementierungsdetails – aber klar genug, um zu verstehen, **welche großen Teile es gibt**, **welche Verantwortung sie tragen** und **wie sie zusammenwirken**.
 
 
 <img src="../../media/bithamster_042.png" alt="Hamster tech" width="1000" />
