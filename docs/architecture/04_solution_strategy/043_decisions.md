@@ -10,7 +10,8 @@ Wir beantworten hier die Frage:
 
 > **Warum haben wir uns genau so entschieden – und nicht anders?**
 
-*(Platzhalter für ein Bild: Der Hamster steht an einer Weggabelung. Schilder zeigen verschiedene Optionen, einer ist klar markiert.)*
+<img src="../../media/bithamster_043.png" alt="Hamster tech" width="1000" />
+
 
 &nbsp;
 
