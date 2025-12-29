@@ -29,9 +29,10 @@ Local First, Transparenz, Determinismus und Forschungsfähigkeit erzwingen eine 
 
 &nbsp;
 
-## Die fünf strukturellen Ebenen – Überblick
+## Die fünf strukturellen Ebenen
 
 Auf hoher Ebene lässt sich BitGridAI in vier klar abgegrenzte Ebenen gliedern.  
+
 Jede Ebene hat eine eindeutige Rolle – und kennt ihre Grenzen.
 
 | Ebene | Rolle im System | Verantwortlichkeiten | Bewusste Abgrenzung |
