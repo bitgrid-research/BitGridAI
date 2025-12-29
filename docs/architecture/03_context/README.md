@@ -8,6 +8,8 @@ Dabei betrachten wir sowohl die fachliche Sicht von außen als auch die technisc
 
 <img src="../../media/context.png" alt="Hamster tech" width="1000" />
 
+&nbsp;
+
 ## Inhalt dieses Kapitels
 
 Um die Übersicht zu behalten, trennen wir die fachliche "Brille" von der technischen:
