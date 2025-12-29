@@ -6,10 +6,6 @@ Sie ist das Ergebnis von Entscheidungen – und von dem Mut, **eine Richtung ein
 
 In diesem Kapitel halten wir die **zentralen Architekturentscheidungen** von **BitGridAI** fest. Nicht im Sinne eines vollständigen Entscheidungsarchivs, sondern als nachvollziehbare Sammlung derjenigen Weichenstellungen, die den Charakter des Systems maßgeblich prägen.
 
-Wir beantworten hier die Frage:
-
-> **Warum haben wir uns genau so entschieden – und nicht anders?**
-
 <img src="../../media/bithamster_043.png" alt="Hamster tech" width="1000" />
 
 
