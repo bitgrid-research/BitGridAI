@@ -13,7 +13,8 @@ Wir beantworten hier bewusst nicht die Frage *„Wie ist etwas implementiert?“
 
 > **Wo gehört etwas grundsätzlich hin – und wo ganz bewusst nicht?**
 
-*(Platzhalter für ein Bild: Der Hamster steht vor einem Bauplan. Große Blöcke sind eingezeichnet, verbunden durch dicke Pfeile. Keine Schrauben, keine Kabel – nur Struktur.)*
+<img src="../../media/bithamster_04.png" alt="Hamster tech" width="1000" />
+
 
 &nbsp;
 
