@@ -11,7 +11,7 @@ In diesem Kapitel halten wir die **zentralen Architekturentscheidungen** von **B
 
 &nbsp;
 
-## Zentrale Architekturentscheidungen – Überblick
+## Zentrale Architekturentscheidungen
 
 | Entscheidung | Festlegung | Begründung | Konsequenzen |
 | :--- | :--- | :--- | :--- |
