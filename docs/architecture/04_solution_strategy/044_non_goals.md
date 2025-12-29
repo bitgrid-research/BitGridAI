@@ -12,7 +12,7 @@ In diesem Kapitel halten wir fest, welche Ziele **BitGridAI ausdrücklich nicht 
 
 &nbsp;
 
-## Bewusste Nicht-Ziele – Überblick 🚫
+## Bewusste Nicht-Ziele
 
 | Nr. | Nicht-Ziel | Abgrenzung | Warum bewusst nicht | Stattdessen |
 | :-- | :-- | :-- | :-- | :-- |
