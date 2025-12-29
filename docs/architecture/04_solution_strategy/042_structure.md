@@ -10,7 +10,7 @@ Dieses Kapitel beschreibt die **grobe Systemstruktur** von **BitGridAI**.
 Noch ohne Klassen, noch ohne Implementierungsdetails – aber klar genug, um zu verstehen, **welche großen Teile es gibt**, **welche Verantwortung sie tragen** und **wie sie zusammenwirken**.
 
 
-<img src="../../media/bithamster_04.png" alt="Hamster tech" width="1000" />
+<img src="../../media/bithamster_042.png" alt="Hamster tech" width="1000" />
 
 
 &nbsp;
