@@ -6,7 +6,9 @@ In diesem Kapitel geht es nicht um Klassen, Protokolle oder Datenformate – son
 
 Wenn Kapitel 2 die äußeren Leitplanken beschreibt, dann definieren diese Prinzipien die **innere Logik** des Systems.
 
-*(Platzhalter für ein Bild: Der Hamster steht vor einem Regelwerk an der Wand – ein paar klare Symbole, keine tausend Bulletpoints.)*
+<img src="../../media/bithamster_041.png" alt="Hamster tech" width="1000" />
+
+&nbsp;
 
 &nbsp;
 
