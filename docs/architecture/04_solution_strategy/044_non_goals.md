@@ -6,11 +6,9 @@ Eine gute Architektur erkennt man nicht nur daran, **was sie kann**, sondern vor
 
 In diesem Kapitel halten wir fest, welche Ziele **BitGridAI ausdrücklich nicht verfolgt**. Diese Abgrenzungen sind keine Schwächen, sondern notwendige Leitplanken, um Komplexität zu begrenzen, Qualität zu sichern und den Charakter des Systems zu bewahren.
 
-Wir beantworten hier die Frage:
 
-> **Was wird BitGridAI nicht sein – und warum ist das eine gute Entscheidung?**
+<img src="../../media/bithamster_044.png" alt="Hamster tech" width="1000" />
 
-*(Platzhalter für ein Bild: Der Hamster streicht auf einer Liste mehrere Optionen durch und zeigt zufrieden auf eine kurze, klare Auswahl.)*
 
 &nbsp;
 
