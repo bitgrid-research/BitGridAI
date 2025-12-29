@@ -9,9 +9,6 @@ Dieses Kapitel beschreibt die **grobe Systemstruktur** von **BitGridAI**.
 
 Noch ohne Klassen, noch ohne Implementierungsdetails – aber klar genug, um zu verstehen, **welche großen Teile es gibt**, **welche Verantwortung sie tragen** und **wie sie zusammenwirken**.
 
-Wir beantworten hier bewusst nicht die Frage *„Wie ist etwas implementiert?“*, sondern:
-
-> **Wo gehört etwas grundsätzlich hin – und wo ganz bewusst nicht?**
 
 <img src="../../media/bithamster_04.png" alt="Hamster tech" width="1000" />
 
