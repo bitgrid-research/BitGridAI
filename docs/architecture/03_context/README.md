@@ -6,8 +6,6 @@ Um zu verstehen, was BitGridAI tut, müssen wir wissen, wo die Grenzen verlaufen
 
 Dabei betrachten wir sowohl die fachliche Sicht von außen als auch die technische Verdrahtung unter der Haube.
 
-<img src="../../media/context.png" alt="Hamster tech" width="1000" />
-
 &nbsp;
 
 ## Inhalt dieses Kapitels
@@ -19,6 +17,10 @@ Um die Übersicht zu behalten, trennen wir die fachliche "Brille" von der techni
 
 * **[3.2 - Technischer Kontext](./032_technical_context.md)**
     * Die Sicht unter der Haube. Mit welchen konkreten APIs, Protokollen, Datenbanken oder Hardware-Komponenten kommuniziert BitGridAI auf technischer Ebene?
+
+---
+
+<img src="../../media/context.png" alt="Hamster tech" width="1000" />
 
 ---
  
