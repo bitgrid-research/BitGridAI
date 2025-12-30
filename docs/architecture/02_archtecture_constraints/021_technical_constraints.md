@@ -8,6 +8,9 @@ Die Architektur muss **innerhalb dieser Grenzen** die bestmögliche Lösung lief
 
 <img src="../../media/bithamster_technical.png" alt="Hamster tech" width="1000" />
 
+&nbsp;
+
+
 ## Die Liste der harten Fakten
 
 | ID | Randbedingung | Beschreibung & Motivation |

@@ -27,9 +27,9 @@ Das Projekt fokussiert sich auf lokale Energie-Automatisierung, transparente Ent
 
 
 ## Was umfasst das MVP?
-- **Regeln (R1–R5):** Start/Stop, SoC-Schutz, Temperaturschutz, Prognose, Deadband
+- **Regeln (R1–R5):** Start-/Stopp-Logik, Energiespeicher-Schutz, Temperaturschutz, Energieprognose, Schaltpuffer
 - **Erklärungen:** Verständliche Begründung zu jeder Entscheidung
-- **Home Assistant/Docker:** Integration lokaler Sensoren und Aktoren zur Entscheidungs- und Steuerlogik
+- **Lokale Systemintegration:** Anbindung von Sensoren und Aktoren an die Entscheidungs- und Steuerlogik
 - **Steuerung:** Miner starten, stoppen, pausieren; Sperrzeiten berücksichtigen
 - **Protokoll:** Entscheidungen dokumentiert, ergänzt um einfache Kennzahlen
 
