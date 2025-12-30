@@ -5,9 +5,6 @@ Jetzt geht die Klappe auf.
 Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox und schauen hinein:  
 **Was macht welcher Teil, wofuer ist er verantwortlich und ueber welche Schnittstellen arbeitet er?**
 
-*(Platzhalter fuer ein Bild: Der Hamster hat die Box geoeffnet. Innen sieht man klar getrennte Module mit Labels wie „Core“, „Adapter“, „UI“, „Data“, „Ops“.)*  
-![Hamster schaut in die Whitebox](../media/pixel_art_hamster_whitebox_open.png)
-
 &nbsp;
 
 ## Inhalt
@@ -31,6 +28,10 @@ Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox u
 - **[5.2.5 - Operations (Security, Config, Observability)](../052_whitebox/0525_operations_whitebox/README.md)**  
   Authentifizierung, Policies, Konfiguration und Monitoring.  
   *(Der Hausmeister im Hintergrund.)*
+
+---
+
+<img src="../../media/bithamster_052.png" alt="Hamster whitebox" width="1000" />
 
 ---
 > **Nächster Schritt:** Jetzt sehen wir, *was* es gibt.  
