@@ -26,5 +26,6 @@ Die Architektur muss **innerhalb dieser Grenzen** die bestmögliche Lösung lief
 >
 > Im nächsten Abschnitt folgen die organisatorischen Leitplanken.
 >
-> 👉 Weiter zu **[02.2 – Organisatorische Randbedingungen](./022_organizational_constraints.md)**  
+> 👉 Weiter zu **[02.2 – Organisatorische Randbedingungen](./022_organizational_constraints.md)**
+> 
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
