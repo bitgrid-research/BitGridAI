@@ -25,7 +25,7 @@ Die Blackbox-Sicht wird in einem zentralen Dokument beschrieben:
 
 ---
 
-<img src="../../media/bithamster_0511.png" alt="Hamster blackbox" width="1000" />
+<img src="../../../media/bithamster_0511.png" alt="Hamster blackbox" width="1000" />
 
 ---
 
