@@ -1,4 +1,4 @@
-# 05.1 - Level 1: Die System-Blackbox
+# 05.1 - Level 1: Die Blackbox
 
 Was sieht man von außen?
 
@@ -13,10 +13,6 @@ Der Fokus liegt auf den **Systemgrenzen**:
 Schaltplan-Niveau.  
 Genug Informationen zum **Andocken** – bewusst keine Details zum Innenleben.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor einem großen, geschlossenen Kasten. Kabel führen hinein und heraus, beschriftet mit „Input“ und „Output“.)*  
-![Hamster erklärt die Blackbox](link_zum_blackbox_bild.png)
-
-
 &nbsp;
 
 ## Inhalt dieses Kapitels
@@ -25,6 +21,11 @@ Die Blackbox-Sicht wird in einem zentralen Dokument beschrieben:
 
 - **[5.1.1 - Blackbox: System und Schnittstellen](./051_blackbox.md)**  
   * Welche Verantwortung trägt BitGridAI als Gesamtsystem, welche externen Nachbarn existieren und welche zentralen Ein- und Ausgänge definieren die Systemgrenze?
+
+
+---
+
+<img src="../../media/bithamster_04.png" alt="Hamster blackbox" width="1000" />
 
 ---
 
