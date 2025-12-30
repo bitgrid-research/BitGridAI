@@ -14,43 +14,12 @@ und trifft erklärbare Entscheidungen für Nutzer und Forschung.
 
 <img src="../../media/bithamster_technicalcontext.png" alt="Hamster tech" width="1000" />
 
+&nbsp;
+
 ## Externe Systeme & Schnittstellen
 
 BitGridAI kommuniziert mit folgenden Nachbarsystemen.
 Die Kommunikation erfolgt primär über **MQTT**, **REST** und **Modbus**.
-
-```mermaid
-flowchart TB
-
-    BitGridAI["BitGridAI (Local Orchestrator) SSoT: EnergyState"]
-
-    %% Externe Systeme
-    PV["PV / Wechselrichter"]
-    Meter["Smart Meter / Sensorik"]
-    Storage["Energiespeicher"]
-    Miner["Mining-Controller"]
-    HA["Home Assistant"]
-    Forecast["Preis- und Forecast-Dienst"]
-    UI["Explain- und User-Interface"]
-    Research["Research / Replay Node"]
-
-    %% Eingehende Daten
-    PV -->|Modbus / API Erzeugungsdaten| BitGridAI
-    Meter -->|MQTT / SML -> Messwerte| BitGridAI
-    Storage -->|API / MQTT -> SoC| BitGridAI
-    Forecast -->|Datei / HTTP -> Tarife, Prognosen| BitGridAI
-
-    %% Steuerung und Ausgaben
-    BitGridAI -->|LAN / API / SSH -> Start, Stop, Power| Miner
-    BitGridAI -->|WebSocket / REST -> States, Erklaerungen| UI
-    UI -->|Overrides| BitGridAI
-
-    %% Integration
-    BitGridAI <-->|MQTT / REST -> State, Commands| HA
-
-    %% Forschung
-    BitGridAI -->|Datei / CLI -> Logs, Replays| Research
-```
 
 | System | Schnittstelle | Datenrichtung | Zweck & Beschreibung |
 | :--- | :--- | :--- | :--- |
@@ -62,6 +31,8 @@ flowchart TB
 | **Preis-/Forecast-Dienst** 🔮 | Datei / lokaler Dienst | In | Liefert Tarife und Prognosen (u.a. für Regel R1/R4). Läuft typischerweise als lokaler Sidecar. |
 | **Erklär-UI** 🖥️ | WebSocket / REST | Out | Frontend für den Nutzer. Echtzeit-Visualisierung von Energieflüssen und Entscheidungsgründen. |
 | **Research / Replay Node** 🎓 | Datei / CLI | Out | Bereitstellung anonymisierter Logs, KPI-Berechnung und Durchführen von „Was-wäre-wenn“-Replays (nur Opt-in). |
+
+&nbsp;
 
 ## Grenzen & Datenflüsse (Boundaries & Flows)
 
@@ -93,6 +64,8 @@ Wir unterscheiden strikt zwischen dem, was **im** System passiert
 
 4. **Feedback (User & Research):**  
    Overrides oder Research-Toggles → Rule Engine → Rückmeldung an UI und Logging.
+
+&nbsp;
 
 ## Domain-Events (Interne Sprache)
 
