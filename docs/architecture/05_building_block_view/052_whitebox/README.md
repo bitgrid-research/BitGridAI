@@ -1,4 +1,4 @@
-# 5.2 - Level-2-Whiteboxes
+# 5.2 - Level 2: Die Whitebox (Innenleben)
 
 Jetzt geht die Klappe auf.
 
