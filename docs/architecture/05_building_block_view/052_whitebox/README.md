@@ -3,7 +3,7 @@
 Jetzt geht die Klappe auf.
 
 Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox und schauen hinein:  
-**Was macht welcher Teil, wofuer ist er verantwortlich und ueber welche Schnittstellen arbeitet er?**
+**Was macht welcher Teil, wofür ist er verantwortlich und über welche Schnittstellen arbeitet er?**
 
 &nbsp;
 
@@ -14,7 +14,7 @@ Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox u
   *(Der Taktgeber mit Sicherheitsnetz.)*
 
 - **[5.2.2 - Adapter & Feld-I/O](../052_whitebox/0522_adapters_whitebox/README.md)**  
-  Anbindung von PV, Speicher, Smart Meter und Miner ueber MQTT, REST und Modbus.  
+  Anbindung von PV, Speicher, Smart Meter und Miner über MQTT, REST und Modbus.  
   *(Übersetzer zwischen Strom und Bytes.)*
 
 - **[5.2.3 - UI & Explainability](../052_whitebox/0523_ui_explain_whitebox/README.md)**  
@@ -22,7 +22,7 @@ Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox u
   *(Das Gesicht und die Stimme des Systems.)*
 
 - **[5.2.4 - Data & Research](../052_whitebox/0524_data_research_whitebox/README.md)**  
-  Persistenz, Exporte und Governance fuer Analyse und Replays.  
+  Persistenz, Exporte und Governance für Analyse und Replays.  
   *(Das Gedaechtnis mit Notizzettel.)*
 
 - **[5.2.5 - Operations (Security, Config, Observability)](../052_whitebox/0525_operations_whitebox/README.md)**  
