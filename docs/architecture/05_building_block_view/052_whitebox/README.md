@@ -39,6 +39,6 @@ Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox u
 >
 > 👉 Weiter zu **[06 - Laufzeitsicht](../../06_runtime_view/README.md)**
 > 
-> 🔙 Zurück zu **[5.1 - Blackbox Gesamtsystem](../051_blackbox.md)**
+> 🔙 Zurück zu **[5.1 - Blackbox Gesamtsystem](../051_blackbox/README.md)**
 > 
 > 🔙 Zurück zur **[Kapitelübersicht](../README.md)**
