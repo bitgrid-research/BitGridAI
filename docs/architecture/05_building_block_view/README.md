@@ -25,7 +25,7 @@ Die Bausteinsicht ist in zwei Ebenen gegliedert:
     
 ---
 
-<img src="../../media/bithamster_04.png" alt="Hamster tech" width="1000" />
+<img src="../../media/bithamster_05.png" alt="Hamster tech" width="1000" />
 
 ---
 > **Nächster Schritt:** Die Struktur ist sichtbar.  
