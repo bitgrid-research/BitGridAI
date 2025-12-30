@@ -7,8 +7,6 @@ Wir kennen die Ziele und die Einschränkungen – hier ist unser Masterplan, um 
 In diesem Kapitel beschreiben wir die fundamentalen Entscheidungen, die die Architektur von **BitGridAI** prägen. Das ist der "rote Faden", der sicherstellt, 
 dass wir uns nicht in Details verlieren, sondern eine kohärente Lösung bauen. Es geht um die großen technologischen Weichenstellungen und die grobe Strukturierung des Systems.
 
-<img src="../../media/bithamster_04.png" alt="Hamster tech" width="1000" />
-
 &nbsp;
 
 ## Inhalt dieses Kapitels
@@ -27,9 +25,9 @@ In diesem Ordner bündeln wir die zentralen Gedanken und Entscheidungen zur Lös
 * **[4.4 - Abgrenzungen & bewusste Nicht-Ziele (Fokus)](./044_non_goals.md)**
   * *Was BitGridAI bewusst nicht sein will, nicht leisten soll oder nicht optimiert – um Klarheit, Stabilität und Fokus zu bewahren.*
 
+---
 
-
-
+<img src="../../media/bithamster_04.png" alt="Hamster tech" width="1000" />
 
 ---
 
