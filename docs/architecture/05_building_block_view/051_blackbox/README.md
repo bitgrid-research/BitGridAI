@@ -1,4 +1,4 @@
-# 05.1 - Level 1: Die Blackbox
+# 05.1 - Level 1: Die Blackbox (Gesamtsicht)
 
 Was sieht man von außen?
 
