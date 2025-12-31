@@ -94,7 +94,8 @@ Sie erscheinen zunächst im Mempool, bevor sie dauerhaft in die Blockchain über
 
 ---
 
-* [📚 Doku ?](./docs/README.md)
+* 📚 Schon reingeschaut? Die **[Doku](./docs/README.md)** erklärt, was hier wirklich passiert.
+
 
 ### Lizenz / Kontakt
 AGPL-3.0 — **bitgrid.research@proton.me**
