@@ -43,17 +43,22 @@ Der Fokus liegt auf Konzepten und Architektur – nicht auf Produktbetrieb oder 
 
 Die Software wird als Open Source im aktuellen Forschungsstand bereitgestellt.
 
+> 📚 Zur Nachvollziehbarkeit im Detail: Die **[Doku](./docs/README.md)** erklärt, warum der Hamster läuft, pausiert oder stehen bleibt.
+
 ![NoCloud](./docs/media/nocloud.png)
 
+&nbsp;
+
 <details>
-<summary><strong>⚡ Transparenz & Unterstützung (optional)</strong></summary>
+<summary><strong> ⚡ Transparenz & Unterstützung (optional)</strong></summary>
 
 &nbsp;
 
 Ein offenes Wort zur Entstehung: Da ich dieses Projekt noch alleine erforsche, setze ich bewusst auf KI-Unterstützung und generierte Grafiken, um meine Fähigkeiten am Projektzweck zu schulen und das Ergebnis mit viel Liebe zum Detail umzusetzen.
 
 Ich freue mich, wenn dir meine Inhalte weiterhelfen. Falls du mein Projekt rund um Energie, Bitcoin und Selbstverwahrung unterstützen möchtest, findest du hier eine optionale Adresse und einen QR-Code. Alles selbstverständlich transparent und nachvollziehbar.
-&nbsp;
+
+
 <table border="0">
   <tr>
     <td>
@@ -92,10 +97,8 @@ Sie erscheinen zunächst im Mempool, bevor sie dauerhaft in die Blockchain über
  > Custodial-Produkte („Paper Bitcoin“) ermöglichen oft keine echten On-Chain-Transaktionen. BitGridAI nutzt On-Chain-Transparenz bewusst, um Selbstverwahrung und Dezentralität im Forschungsumfeld sichtbar und nachvollziehbar zu machen.  
 </details>
 
+
+
 ---
-
-* 📚 Schon reingeschaut? Die **[Doku](./docs/README.md)** erklärt, was hier wirklich passiert.
-
-
 ### Lizenz / Kontakt
 AGPL-3.0 — **bitgrid.research@proton.me**
