@@ -6,8 +6,7 @@ Wir bleiben bewusst außen, zählen die Anschlüsse und beschreiben kurz,
 **was an jedem Stecker passiert**.  
 Wie es innen aussieht, folgt in Level 2.
 
-![Hamster vor der System-Blackbox mit klar definierten Ein- und Ausgängen](../media/pixel_art_hamster_blackbox.png)
-
+<img src="../../../media/bithamster_05111.png" alt="Hamster blackbox111" width="1000" />
 
 &nbsp;
 
@@ -18,7 +17,6 @@ BitGridAI übernimmt folgende Aufgaben:
 - Lokale, deterministische Steuerung von Energieflüssen (PV, Speicher, Netz, Miner).
 - Erklärbare Entscheidungen mit klaren Triggern und Parametern.
 - Kein Cloud-Zwang: alle relevanten Schnittstellen laufen lokal (MQTT, REST, Datei).
-
 
 &nbsp;
 
