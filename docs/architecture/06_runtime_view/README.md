@@ -8,9 +8,6 @@ Die Laufzeitsicht ergänzt die statische Bausteinsicht um die dynamische Perspek
 
 Das ist der Ort für Sequenz-, Aktivitäts- oder Zustandsdiagramme, die erklären, *wann* *wer* *was* tut.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster in Aktion, der z.B. an einem Schaltpult steht, während im Hintergrund Energieflüsse oder Datenpakete dynamisch visualisiert werden. Er drückt einen großen "START"-Knopf.)*
-![Hamster dirigiert den Ablauf](link_zum_action_bild.png)
-
 &nbsp;
 
 ## Inhalt dieses Kapitels
@@ -56,6 +53,10 @@ Wir haben die wichtigsten Laufzeitszenarien anhand unseres Regelwerks (R1–R5) 
 * **[6.13 - Forecast-Update-Zyklus](./0613_forecast_update_cycle.md)**  
     * Vorausschau ohne Hektik. Wie werden neue Prognosen verarbeitet, ohne den gesamten Entscheidungsblock neu auszuführen?
 
+
+---
+
+<img src="../../media/bithamster_06.png" alt="Hamster tech" width="1000" />
 
 ---
 > **Nächster Schritt:** Wir wissen jetzt, wie die Software arbeitet. Aber auf welcher Hardware landet sie eigentlich und wie kommt sie dorthin? Im nächsten Kapitel schauen wir uns die Infrastruktur an.
