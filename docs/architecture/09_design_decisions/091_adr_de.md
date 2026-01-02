@@ -6,8 +6,7 @@ Dieses Dokument dient als zentrale Ankerstelle für alle **Architecture Decision
 
 Die hier gesammelten Entscheidungen legen die Kernprinzipien von BitGridAI fest: **Lokalität, Determinismus, Erklärbarkeit** und **Nachhaltigkeit**.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt vor einem großen Schild, das die wichtigsten ADRs auflistet (z.B. "ADR 007: Deterministische Regeln").)*
-![Hamster überprüft ADRs](../../media/pixel_art_hamster_adrs.png)
+<img src="../../media/bithamster_09.png" alt="Hamster tech" width="1000" />
 
 &nbsp;
 
