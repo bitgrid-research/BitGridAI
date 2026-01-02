@@ -9,8 +9,6 @@ In einem Projekt, das komplexe Energietechnik mit moderner Softwareentwicklung v
 
 In diesem Kapitel definieren wir unsere zentrale Terminologie. Das Ziel ist eine gemeinsame Sprache für alle Beteiligten – vom Stakeholder bis zum Coder –, damit teure Missverständnisse gar nicht erst entstehen.
 
-![Der schlaue Hamster mit Büchern](link_zu_image_1.png)
-
 &nbsp;
 
 ## Inhalt dieses Kapitels
