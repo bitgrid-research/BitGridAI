@@ -4,8 +4,7 @@ Die gemeinsame Sprache von BitGridAI.
 
 Dieses Dokument liefert die **Endgültige Terminologie** des gesamten Projekts. Die alphabetische Auflistung aller wichtigen Fachbegriffe stellt sicher, dass Entwickler, Forscher und Anwender dasselbe unter Konzepten wie **EnergyState**, **BlockInterval** oder **Deadband** verstehen.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster, der vor einem großen Buch oder einer Tafel mit alphabetischen Einträgen steht und eine Lupe hält, wie ein Bibliothekar, der Ordnung schafft.)*
-![Hamster überprüft Glossar](../../media/pixel_art_hamster_glossary.png)
+<img src="../../media/bithamster_12.png" alt="Hamster tech12" width="1000" />
 
 &nbsp;
 
