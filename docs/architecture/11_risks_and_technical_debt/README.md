@@ -9,8 +9,6 @@ In diesem Kapitel dokumentieren wir die bekannten Unzulänglichkeiten und potenz
 
 Das Ziel ist Transparenz. Nur was wir kennen, können wir auch managen oder beheben.
 
-![Cyborg Hamster mit einem 'Problem-Baustein'](link_zu_image_14.png)
-
 &nbsp;
 
 ## Inhalt dieses Kapitels
