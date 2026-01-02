@@ -10,9 +10,6 @@ Sie sorgen dafür, dass das System konsistent, verständlich und kontrollierbar 
 
 Es geht hier nicht um konkrete Abläufe oder Implementierungen, sondern um die **Grundsätze**, die jede technische Entscheidung prägen.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht wie ein Dirigent vor Symbolen für Datenbank, Log, UI und Warnschild – oder hält einen dicken Ordner mit der Aufschrift „REGELN“.)*  
-![Hamster mit dem Regelwerk](link_zum_regelwerk_bild.png)
-
 &nbsp;
 
 ## Inhalt dieses Kapitels
@@ -56,6 +53,10 @@ Sie betreffen mehrere Bausteine gleichzeitig und bilden die technische „Sprach
   *Vom Code zum stabilen Betrieb.*  
   Leitlinien für Updates, Rollbacks und Releases – mit Fokus auf Determinismus, Nachvollziehbarkeit und Sicherheit, nicht auf Tooling.
   
+---
+
+<img src="../../media/bithamster_08.png" alt="Hamster tech" width="1000" />
+
 ---
 > **Nächster Schritt:**  
 > Entscheidungen sind nun reproduzierbar getestet und überprüfbar.  

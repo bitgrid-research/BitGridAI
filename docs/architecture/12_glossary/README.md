@@ -21,6 +21,10 @@ Hier findest du unsere zentrale Begriffsliste:
     * Die alphabetische Auflistung aller wichtigen Fachbegriffe und Abkürzungen, die im BitGridAI-Projekt verwendet werden, inklusive ihrer genauen Definitionen in unserem Kontext.
 
 ---
+
+<img src="../../media/bithamster_12.png" alt="Hamster tech12" width="1000" />
+
+---
 > **Endstation.**
 >
 > Software ist immer eine Entscheidung.  
