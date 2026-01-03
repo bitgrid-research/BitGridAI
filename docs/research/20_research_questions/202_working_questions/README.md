@@ -54,7 +54,7 @@ und kognitiver Nachvollziehbarkeit.
 Die Arbeitsfragen werden in zwei klar getrennten,
 aber auf derselben Systemlogik basierenden Kontexten betrachtet:
 
-- **[Smart-Home-Kontext](./2021_smart_home_context/README.md):**  
+- **[Smart-Home-User-Interface-Kontext](./2021_smart_home_context/README.md):**  
   Untersuchung erklärbarer, regelbasierter Energieentscheidungen
   im häuslichen Umfeld (z. B. App oder Web-Dashboard),
   mit Fokus auf Transparenz, Kontrolle und langfristiges Systemverständnis.
