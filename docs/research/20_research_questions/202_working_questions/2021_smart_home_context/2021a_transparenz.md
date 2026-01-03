@@ -47,7 +47,18 @@ Ziel: Der Nutzer versteht in einfachen Worten, warum der Miner läuft, pausiert 
 
 ## Abgeleitete Forschungsfrage
 
-Wie müssen Grund und Datenbasis einer Entscheidung im Smart-Home-Dashboard dargestellt werden, damit Nutzer ein mentales Modell der Energieflüsse bilden und die Begründung schnell verstehen?
+Wie kann das Smart-Home-Dashboard Entscheidungsgrund, Datenbasis und Startprognose in Alltagssprache so darstellen, dass Nutzer die Entscheidung schnell verstehen, ein mentales Modell der Energieflüsse aufbauen und seltener eingreifen?
+
+&nbsp;
+
+## Teilfragen
+
+| ID  | Fokus | Teilfrage | Bezug (Annahmen) |
+|-----|-------|-----------|------------------|
+| SH-TRAN-01 | Kurzgrund + Startzeit | Welche Kombination aus Grund und Startprognose reicht, damit Nutzer die Entscheidung ohne Nachfragen verstehen? | Kurzer Grund + Startprognose reduziert Eingriffe |
+| SH-TRAN-02 | Datenbasis | Welche Datenpunkte müssen sichtbar sein, damit ein mentales Modell der Energieflüsse entsteht? | Datenbasis sichtbar -> mentales Modell |
+| SH-TRAN-03 | Sprache | Welche Formulierungen in Alltagssprache vermeiden Fachbegriffe und bleiben verständlich? | Alltagssprache, Fachbegriffe verwirren |
+| SH-TRAN-04 | Aktualität | Wie aktuell und verlässlich muss die Anzeige sein, damit Erklärungen glaubwürdig bleiben? | Echtzeit und Verlässlichkeit |
 
 &nbsp;
 

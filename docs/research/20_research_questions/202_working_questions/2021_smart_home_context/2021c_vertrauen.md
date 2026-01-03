@@ -47,7 +47,18 @@ Ziel: Nutzer sieht klar, dass genug Energie für das Haus bleibt.
 
 ## Abgeleitete Forschungsfrage
 
-Wie muss die Haus-Reserve im Smart-Home-UI dargestellt werden, damit Nutzer sie nachvollziehen und Vertrauen in die Automatik haben?
+Wie muss die Haus-Reserve im Smart-Home-UI visualisiert und formuliert werden, damit Nutzer die Versorgungssicherheit sofort erkennen, Vertrauen aufbauen und die Automatik laufen lassen?
+
+&nbsp;
+
+## Teilfragen
+
+| ID  | Fokus | Teilfrage | Bezug (Annahmen) |
+|-----|-------|-----------|------------------|
+| SH-TRUST-01 | Kernbotschaft | Reicht "Haus gesichert: Ja/Nein" als primäre Aussage oder braucht es Prozentwerte? | Ja/Nein klarer als Detailwerte |
+| SH-TRUST-02 | Visualisierung | Welche Darstellungsform (Balken, Batterie, Text) reduziert Unsicherheit am stärksten? | Einfache Visualisierung statt Diagramme |
+| SH-TRUST-03 | Einstellbarkeit | Wie viel Kontrolle über die Reserve wird tatsächlich genutzt? | Puffer einstellbar, Details selten genutzt |
+| SH-TRUST-04 | Verhalten | Wie beeinflusst Reserve-Transparenz die Bereitschaft, Mining laufen zu lassen? | Unklare Reserve -> Mining stoppen |
 
 &nbsp;
 

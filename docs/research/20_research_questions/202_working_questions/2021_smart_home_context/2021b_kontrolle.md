@@ -47,7 +47,18 @@ Ziel: Nutzer kann mit einem einfachen Schritt eingreifen, ohne die Automatik zu 
 
 ## Abgeleitete Forschungsfrage
 
-Welche minimale Kontrolle im Smart-Home-UI reicht aus, damit Nutzer sich handlungsfähig fühlen und die Automatik als kontrollierbar wahrnehmen?
+Welche minimale Override-Interaktion (Sichtbarkeit, Aktion, Rückmeldung, Dauer) ermöglicht schnelle Kontrolle, ohne dass Nutzer die Automatik deaktivieren?
+
+&nbsp;
+
+## Teilfragen
+
+| ID  | Fokus | Teilfrage | Bezug (Annahmen) |
+|-----|-------|-----------|------------------|
+| SH-CTRL-01 | Sichtbarkeit | Wie sichtbar und erreichbar muss der Override sein, damit Nutzer ihn sofort finden? | Versteckter Override führt zum Abschalten |
+| SH-CTRL-02 | Aktion | Reicht ein einzelner großer Button oder braucht es zusätzliche Schritte? | Großer Button, keine Menüs |
+| SH-CTRL-03 | Rückmeldung | Welche Bestätigung und Daueranzeige geben genug Sicherheit? | Bestätigung + Timer geben Sicherheit |
+| SH-CTRL-04 | Folgenhinweis | Welche Hinweise zu Folgen (z. B. weniger Ertrag) sind nötig, um den Eingriff zu akzeptieren? | Weniger Ertrag wird akzeptiert, wenn Kontrolle da ist |
 
 &nbsp;
 

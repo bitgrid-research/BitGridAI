@@ -47,7 +47,18 @@ Ziel: Fahrer kann mit 1-2 Aktionen eingreifen, ohne Ablenkung.
 
 ## Abgeleitete Forschungsfrage
 
-Welche minimale Interaktion im Auto-UI reicht aus, damit Fahrer sich in Kontrolle fühlen und die Automatik als kontrollierbar wahrnehmen?
+Welche minimalen Eingriffe (One-Tap-Override, kurze Bestätigung, optionale Pendlerfrage/Voice) erlauben schnelle Kontrolle im Fahrzeug ohne Ablenkung?
+
+&nbsp;
+
+## Teilfragen
+
+| ID  | Fokus | Teilfrage | Bezug (Annahmen) |
+|-----|-------|-----------|------------------|
+| AUTO-CTRL-01 | One-Tap | Reicht ein einzelner "Jetzt laden"-Button ohne Menüs? | Ein-Klick-Aktion |
+| AUTO-CTRL-02 | Rückmeldung | Welche Bestätigung macht den Start sofort sichtbar? | Bestätigungen müssen kurz sein |
+| AUTO-CTRL-03 | Pendlerfrage | Wie lässt sich die Pendlerfrage in einem Tap beantworten, ohne zu stören? | 1 Tap, nicht störend |
+| AUTO-CTRL-04 | Voice | Wann ist Sprachaktion hilfreicher als Tippen? | Sprachaktion reduziert Ablenkung |
 
 &nbsp;
 

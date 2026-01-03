@@ -47,7 +47,18 @@ Ziel: Fahrer sieht klar, dass genug Reichweite für morgen bleibt.
 
 ## Abgeleitete Forschungsfrage
 
-Wie muss das Auto-UI den Pendler-Puffer zeigen, damit Fahrer ihn nachvollziehen, Reichweitenangst sinkt und Vertrauen entsteht?
+Wie muss der Pendler-Puffer im Auto-UI angezeigt werden (Ja/Nein, Prozent, Batterie), damit Fahrer Reichweitenangst verlieren, den Puffer verstehen und der V2H-Logik vertrauen?
+
+&nbsp;
+
+## Teilfragen
+
+| ID  | Fokus | Teilfrage | Bezug (Annahmen) |
+|-----|-------|-----------|------------------|
+| AUTO-TRUST-01 | Kernbotschaft | Ist "Bereit für morgen: Ja/Nein" schneller verständlich als Prozentwerte? | Ja/Nein schneller erfassbar |
+| AUTO-TRUST-02 | Visualisierung | Welche Darstellung (Batterie vs Text) erzeugt das höchste Sicherheitsgefühl? | Batterievisualisierung verständlicher |
+| AUTO-TRUST-03 | Puffer-Regel | Wie muss kommuniziert werden, dass der Pendlerpuffer nie unterschritten wird? | Erwartung: nie unterschreiten |
+| AUTO-TRUST-04 | Verhalten | Wie beeinflusst die Pufferanzeige die Bereitschaft, die Automatik aktiviert zu lassen? | Unklarer Puffer -> Automatik aus |
 
 &nbsp;
 

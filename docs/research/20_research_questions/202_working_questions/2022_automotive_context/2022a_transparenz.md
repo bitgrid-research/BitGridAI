@@ -47,7 +47,18 @@ Ziel: Fahrer versteht in 2 Sekunden, warum das Auto lädt oder nicht.
 
 ## Abgeleitete Forschungsfrage
 
-Wie kurz und wie formuliert müssen Gründe im Auto-UI sein, damit Fahrer sie im Vorbeigehen verstehen und die Entscheidung nachvollziehen können?
+Wie kann das Auto-UI Gründe und Startzeit so kurz und klar kommunizieren (Text, Icon, optional Voice), dass Fahrer die Entscheidung in unter 2 Sekunden verstehen und nicht als Fehler interpretieren?
+
+&nbsp;
+
+## Teilfragen
+
+| ID  | Fokus | Teilfrage | Bezug (Annahmen) |
+|-----|-------|-----------|------------------|
+| AUTO-TRAN-01 | Textlänge | Welche maximale Textlänge ist im 2-Sekunden-Blick verständlich? | Aufmerksamkeit < 2 Sekunden |
+| AUTO-TRAN-02 | Inhalt | Reicht Grund + Startzeit oder braucht es zusätzliche Information? | Grund + Startzeit reicht |
+| AUTO-TRAN-03 | Darstellung | Was ist schneller: Icon + kurzer Text oder nur Text? | Icons plus Text sind schneller |
+| AUTO-TRAN-04 | Voice | Wann verbessert eine kurze Voice-Ansage das Verständnis, ohne zu stören? | Optionale Voice kann bestätigen |
 
 &nbsp;
 
