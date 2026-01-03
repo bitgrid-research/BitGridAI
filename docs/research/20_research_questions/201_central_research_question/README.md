@@ -17,9 +17,9 @@ und in alltägliche Routinen eingreifen.
 
 ## Zentrale Forschungsfrage
 
-**Wie können lokale, regelbasierte Energiemanagementsysteme gestaltet werden,
+***Wie können lokale, regelbasierte Energiemanagementsysteme gestaltet werden,
 sodass Nutzer Entscheidungen zur Nutzung von PV-Überschuss nachvollziehen
-und dem System vertrauen können?**
+und dem System vertrauen können?***
 
 Diese Frage bildet den Kern von BitGridAI
 und dient als Bezugspunkt für alle weiteren Gestaltungs-,
