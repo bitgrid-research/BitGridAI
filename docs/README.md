@@ -37,9 +37,10 @@ Hier beschäftigen wir uns mit den Hintergründen:
 
 Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar und welche ethischen Fragen spielen dabei eine Rolle?
 
-* [20 - Evaluationsrahmen](./research/evaluation_framework.md)
+* [20 - Forschungsfragen](./research/research_question.md)
 * [21 - BitGrid Prinzipien](./research/bitgrid_principles.md)
-* [22 - Literaturübersicht](./research/literature_review.md)
+* [22 - Evaluationsrahmen](./research/evaluation_framework.md)
+* [29 - Literaturübersicht](./research/literature_review.md)
 
 <img src="./media/research.png" alt="Status" width="1000" />
 
