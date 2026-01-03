@@ -56,10 +56,10 @@ aber auf derselben Systemlogik basierenden Kontexten betrachtet:
 
 - **Smart-Home-Kontext:**  
   Untersuchung erklärbarer, regelbasierter Energieentscheidungen
-  im häuslichen Umfeld (z. B. App oder Dashboard),
+  im häuslichen Umfeld (z. B. App oder Web-Dashboard),
   mit Fokus auf Transparenz, Kontrolle und langfristiges Systemverständnis.
 
-- **Automotive User Interface:**  
+- **Automotive-User-Interface-Kontext:**  
   Übertragung derselben Entscheidungslogik
   auf ein Automotive-Interface.
   Hier wird untersucht, wie Ladeentscheidungen
@@ -92,8 +92,8 @@ und Nutzerwahrnehmung zusammenhängen.
 > Im nächsten Kapitel werden weiterführende Aspekte gesammelt,
 > die der Einordnung und Reflexion der Ergebnisse dienen.
 >
-> 👉 Weiter zu **[20.3 – Kontext- und Diskussionsfragen](./203_discussion_questions.md)**
+> 👉 Weiter zu **[20.3 – Kontext- und Diskussionsfragen](../203_discussion_questions/README.md)**
 >
-> 🏠 Zurück zu **[20 – Forschungsfragen](./README.md)**
+> 🏠 Zurück zu **[20 – Forschungsfragen](../README.md)**
 >  
-> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

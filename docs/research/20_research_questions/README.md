@@ -21,13 +21,13 @@ Diese dienen als Leitplanke für Architektur, Implementierung und Analyse.
 
 Die Forschungsfragen sind in drei Ebenen gegliedert:
 
-* **[20.1 – Zentrale Forschungsfrage](./201_central_research_question.md)**
+* **[20.1 – Zentrale Forschungsfrage](./201_central_research_question/README.md)**
     * Die übergeordnete Fragestellung, die den thematischen Rahmen festlegt.
 
-* **[20.2 – Zentrale Arbeitsfragen](./202_working_questions.md)**
+* **[20.2 – Zentrale Arbeitsfragen](./202_working_questions/README.md)**
     * Konkrete Fragen, die direkt in System- und Interface-Entscheidungen einfließen.
 
-* **[20.3 – Kontext- und Diskussionsfragen](./203_discussion_questions.md)**
+* **[20.3 – Kontext- und Diskussionsfragen](./203_discussion_questions/README.md)**
     * Weiterführende Fragen zur Einordnung und Abgrenzung des Ansatzes.
 
 ---
@@ -40,6 +40,6 @@ Die Forschungsfragen sind in drei Ebenen gegliedert:
 > Im nächsten Kapitel werden daraus Gestaltungsprinzipien abgeleitet,
 > die Architektur und Interface-Design leiten.
 >
-> 👉 Weiter zu **[21 – BitGrid-Prinzipien](./bitgrid_principles.md)**
+> 👉 Weiter zu **[21 – BitGrid-Prinzipien](../21_bitgrid_principles/README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
