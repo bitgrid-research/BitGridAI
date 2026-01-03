@@ -34,6 +34,6 @@ Zusätzlich werden weiterführende Aspekte bewusst als Diskussionsraum behandelt
 
 > **Nächster Schritt:** Die Forschungsfragen sind geklärt. Aber nach welchen Prinzipien leiten wir daraus konkrete Design- und Architekturentscheidungen ab?
 >
-> 👉 Weiter zu **[21 – BitGrid-Prinzipien](../bitgrid_principles.md)**
+> 👉 Weiter zu **[21 – BitGrid-Prinzipien](./bitgrid_principles.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
