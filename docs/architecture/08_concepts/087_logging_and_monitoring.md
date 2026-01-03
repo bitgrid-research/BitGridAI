@@ -8,7 +8,7 @@ Damit Entscheidungen nachvollziehbar, Fehler analysierbar und der Betrieb sicher
 Dieses Kapitel beschreibt die **übergreifenden Prinzipien**, nach denen BitGridAI Beobachtbarkeit herstellt – nicht als Zusatz, sondern als festen Bestandteil der Architektur.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt vor einer großen Wand aus Monitoren mit Anzeigen wie „Health“, „Events“, „Safety“. Ein Logbuch liegt offen daneben.)*
-![Hamster überwacht das System](../../media/pixel_art_hamster_monitoring.png)
+![Hamster überwacht das System](../../media/bithamster_08.png)
 
 &nbsp;
 

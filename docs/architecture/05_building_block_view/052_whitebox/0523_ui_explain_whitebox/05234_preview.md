@@ -9,7 +9,7 @@ Es simuliert Regelentscheidungen mit hypothetischen Eingaben – **ohne** Aktori
 
 *(Platzhalter für ein Bild: Der Hamster schaut in eine Glaskugel.
 Darin erscheinen alternative Energieflüsse und ein gestrichelter Pfeil zur Entscheidung.)*
-![Hamster mit Glaskugel](../media/pixel_art_preview.png)
+![Hamster mit Glaskugel](../../../../media/bithamster_052.png)
 
 &nbsp;
 

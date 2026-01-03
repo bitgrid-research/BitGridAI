@@ -9,7 +9,7 @@ Dieses Kapitel beschreibt die **systemweiten Leitlinien zur Autonomie und Mensch
 Sie legen fest, **wer wann entscheidet**, wie Kontrolle sichtbar bleibt und wie Selbstbestimmung und Komfort in Balance gehalten werden.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster und ein Roboter-Hamster halten gemeinsam ein Steuerrad. Daneben eine Skala von „Manuell“ bis „Auto“.)*  
-![Hamster teilt sich die Kontrolle](link_zum_autonomy_hamster.png)
+![Hamster teilt sich die Kontrolle](../../media/bithamster_08.png)
 
 &nbsp;
 

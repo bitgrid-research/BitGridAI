@@ -8,7 +8,7 @@ Diese Varianten verändern **nicht** die Kernarchitektur, sondern lediglich die 
 Ziel ist es, BitGridAI an verschiedene Hardware-Profile und Betriebsanforderungen anzupassen, ohne neue Abhängigkeiten oder Komplexität einzuführen.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor drei kleinen Mini-Landschaften: „Standalone“, „Distributed“, „Hybrid“. Er verschiebt kleine Server-Blöcke zwischen den Landschaften wie in einem Diorama.)*  
-![Hamster plant Betriebsvarianten](link_zum_varianten_bild.png)
+![Hamster plant Betriebsvarianten](../../media/bithamster_07.png)
 
 &nbsp;
 

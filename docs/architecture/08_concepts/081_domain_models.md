@@ -9,7 +9,7 @@ Dieses Kapitel beschreibt die **zentralen Domänenkonzepte** von BitGridAI.
 Sie bilden das gemeinsame Vokabular für Core, Adapter, Regelwerk, UI, Logging und Replays.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor einer Tafel mit klar beschrifteten Begriffen wie „EnergyState“, „Rule“, „Decision“. Er zeigt mit einem Zeigestock darauf.)*  
-![Hamster erklärt die Domänensprache](link_zum_domain_hamster.png)
+![Hamster erklärt die Domänensprache](../../media/bithamster_08.png)
 
 &nbsp;
 

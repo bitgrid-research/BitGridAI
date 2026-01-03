@@ -8,7 +8,7 @@ Lesen ist günstig. Schreiben ist kontrolliert.
 
 *(Platzhalter für ein Bild: Der Hamster sitzt an einem Tresen.
 Schilder: „State“, „Timeline“, „Preview“, „Override (mit Ausweis)“.)*
-![Hamster am API-Schalter](../media/pixel_art_api_layer.png)
+![Hamster am API-Schalter](../../../../media/bithamster_052.png)
 
 &nbsp;
 

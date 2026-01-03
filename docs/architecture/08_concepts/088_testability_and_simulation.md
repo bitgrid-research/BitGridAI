@@ -12,7 +12,7 @@ Möglich wird dies durch:
 - immutable Zustände und blockbasierten Takt.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster testet ein komplexes System in einer Sandkasten-Simulation, während echte Hardware sicher im Hintergrund bleibt.)*
-![Hamster führt Simulation durch](../../media/pixel_art_hamster_simulation.png)
+![Hamster führt Simulation durch](../../media/bithamster_08.png)
 
 &nbsp;
 

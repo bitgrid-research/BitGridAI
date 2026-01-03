@@ -15,7 +15,7 @@ Nur gelesen, geprüft und nachvollzogen.
 *(Platzhalter für ein Bild: Der Hamster schreibt Einträge in ein großes, gebundenes Logbuch.
 Jede Seite trägt einen Zeitstempel und ein kleines Schloss. Daneben liegen Parquet-Dateien
 und ein Prüfsummen-Stempel.)*
-![Hamster im Event-Archiv](../media/pixel_art_event_log_store.png)
+![Hamster im Event-Archiv](../../../../media/bithamster_052.png)
 
 &nbsp;
 

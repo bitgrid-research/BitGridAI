@@ -8,7 +8,7 @@ So bleibt die Adapter-Logik sauber – und neue Hardware austauschbar.
 
 *(Platzhalter für ein Bild: Der Hamster steht vor einer Wand mit Steckbriefen.
 Auf jedem Blatt ein anderes Gerät mit Symbolen für Leistung, Temperatur und Limits.)*
-![Hamster verwaltet Geräteprofile](../media/pixel_art_device_profiles.png)
+![Hamster verwaltet Geräteprofile](../../../../media/bithamster_052.png)
 
 &nbsp;
 

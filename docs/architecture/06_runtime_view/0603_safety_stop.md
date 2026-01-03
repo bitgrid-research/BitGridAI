@@ -7,7 +7,7 @@ Während sich BitGridAI normalerweise gemütlich im 10-Minuten-Takt bewegt, gibt
 Sie überwacht kritische Systemparameter in Echtzeit. Wenn eine rote Linie überschritten wird, wartet das System nicht auf den nächsten Block, sondern zieht sofort den Stecker.
 
 *(Platzhalter für ein Bild: Der Hamster in Feuerwehrmontur steht vor einem rauchenden Server-Rack und haut mit einem großen Hammer auf einen roten "NOT-AUS"-Knopf.)*
-![Hamster drückt Not-Aus](../../media/pixel_art_hamster_emergency.png)
+![Hamster drückt Not-Aus](../../media/bithamster_06.png)
 
 &nbsp;
 

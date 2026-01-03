@@ -10,7 +10,7 @@ Regel sie sieht.
 *(Platzhalter für ein Bild: Der Hamster trägt eine Schutzbrille und sortiert Messwerte
 durch Trichter. Links kommen chaotische Zahlen aus Kabeln, rechts fallen saubere
 SI-Werte mit Zeitstempel heraus.)*
-![Hamster verarbeitet Telemetrie](../media/pixel_art_telemetry_ingest.png)
+![Hamster verarbeitet Telemetrie](../../../../media/bithamster_052.png)
 
 &nbsp;
 

@@ -101,6 +101,6 @@ Das Glossar enthält zentrale Begriffe, Konzepte und Abkürzungen, die in der Bi
 >
 >Bitte nicht wecken, außer der Bitcoin-Kurs explodiert. 🐹💤
 
-🔙 Zurück zur **[Kapitelübersicht](../12_glossary/)**
+🔙 Zurück zur **[Kapitelübersicht](../12_glossary/README.md)**
 
 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

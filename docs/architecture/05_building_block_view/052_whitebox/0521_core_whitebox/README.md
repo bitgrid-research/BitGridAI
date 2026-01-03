@@ -12,7 +12,7 @@ Keine UI.
 Nur Zustand, Zeit und Regeln.
 
 *(Platzhalter für ein Bild: Der Hamster sitzt im Inneren der Box vor einem ruhigen Taktgeber. Zahnräder drehen langsam, ein Block-Timer tickt.)*  
-![Hamster im Core-Orchestrator](../../media/pixel_art_hamster_core.png)
+![Hamster im Core-Orchestrator](../../../../media/bithamster_052.png)
 
 &nbsp;
 

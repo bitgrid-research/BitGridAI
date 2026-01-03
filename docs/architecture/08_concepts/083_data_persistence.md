@@ -16,7 +16,7 @@ Ziel ist eine Datenhaltung, die:
 - und nutzerkontrolliert ist.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster als Bibliothekar, der Bücher in ein Regal („SQLite“) sortiert und große Kisten in ein Archiv („Parquet“) stapelt.)*  
-![Hamster sortiert Daten](../../media/pixel_art_hamster_librarian.png)
+![Hamster sortiert Daten](../../media/bithamster_08.png)
 
 &nbsp;
 

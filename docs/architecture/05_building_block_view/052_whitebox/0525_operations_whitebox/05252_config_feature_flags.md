@@ -11,7 +11,7 @@ sondern ein **kontrollierter Teil der Architektur**.
 
 *(Platzhalter für ein Bild: Der Hamster steht vor einem offenen Werkzeugkasten.
 YAML-Rollen, Schalter und Etiketten wie „Defaults“, „Flags“, „Reload“ sind sichtbar.)*
-![Hamster Configuration](../media/pixel_art_configuration_flags.png)
+![Hamster Configuration](../../../../media/bithamster_052.png)
 
 &nbsp;
 

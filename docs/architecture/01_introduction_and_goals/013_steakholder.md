@@ -25,6 +25,6 @@ Wir haben vier Hauptgruppen identifiziert, deren Bedürfnisse unsere Architektur
 ---
 > **Nächster Schritt:** Damit wissen wir, für wen wir BitGridAI bauen. Jetzt wird es ernst: Wir verlassen die Zielebene und schauen uns die harten Leitplanken an, die unsere Architektur einschränken.
 >
-> 👉 Weiter zu **[02 - Randbedingungen](../02_archtecture_constraints)**
+> 👉 Weiter zu **[02 - Randbedingungen](../02_archtecture_constraints/README.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

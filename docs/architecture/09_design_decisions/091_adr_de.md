@@ -39,6 +39,6 @@ Diese Tabelle fasst die wichtigsten, das System prägenden strategischen Entsche
 ---
 > **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die wichtigsten Qualitätsanforderungen im Detail.
 >
-> 👉 Weiter zu **[10 - Qualitätsszenarien](../10_quality_scenarios/)**
+> 👉 Weiter zu **[10 - Qualitätsszenarien](../10_quality_scenarios/README.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

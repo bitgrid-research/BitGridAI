@@ -6,7 +6,7 @@ Der Override Handler verarbeitet **manuelle Eingriffe** wie *Boost*, *Stop* oder
 Er gibt dem Nutzer gezielt Kontrolle – ohne dabei **Safety** und **Autarkie** zu kompromittieren.
 
 *(Platzhalter für ein Bild: Der Hamster greift mit einer Hand an einen großen roten Hebel „Override“. Daneben hängen Schilder „Safety“ und „Autarkie“, die den Hebel notfalls abbremsen.)*
-![Hamster setzt Override](../media/pixel_art_override_handler.png)
+![Hamster setzt Override](../../../../media/bithamster_052.png)
 
 &nbsp;
 

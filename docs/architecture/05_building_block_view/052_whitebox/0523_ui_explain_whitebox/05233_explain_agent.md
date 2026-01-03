@@ -9,7 +9,7 @@ Er erzeugt verständliche Explain-Sessions zu jeder Entscheidung – rein lesend
 
 *(Platzhalter für ein Bild: Der Hamster mit Lupe und Sprechblase.
 Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ und „Params“.)*
-![Hamster erklärt Entscheidungen](../media/pixel_art_explain_agent.png)
+![Hamster erklärt Entscheidungen](../../../../media/bithamster_052.png)
 
 &nbsp;
 

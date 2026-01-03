@@ -15,7 +15,7 @@ Nur klare Regeln im eigenen Netz.
 
 *(Platzhalter für ein Bild: Der Hamster steht vor einer Tür mit Schloss und Klemmbrett.
 Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
-![Hamster Security](../media/pixel_art_security_auth.png)
+![Hamster Security](../../../../media/bithamster_052.png)
 
 &nbsp;
 

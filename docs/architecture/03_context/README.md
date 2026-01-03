@@ -26,6 +26,6 @@ Um die Übersicht zu behalten, trennen wir die fachliche "Brille" von der techni
  
  > **Nächster Schritt:** Kontext geklärt. Jetzt widmen wir uns der großen Strategie, wie wir das System innerlich aufbauen.
 >
-> 👉 Weiter zu **[04 - Lösungsstrategie](../04_solution_strategy)**
+> 👉 Weiter zu **[04 - Lösungsstrategie](../04_solution_strategy/README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

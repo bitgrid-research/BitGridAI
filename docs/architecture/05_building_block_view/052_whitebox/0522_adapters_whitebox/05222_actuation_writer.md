@@ -10,7 +10,7 @@ Er spricht mit Geräten, achtet auf Limits – und sorgt dafür, dass ein Komman
 *(Platzhalter für ein Bild: Der Hamster hält eine Fernbedienung mit beschrifteten
 Knöpfen „Start“, „Stop“, „Limit“. Über den Knöpfen sitzen kleine Sicherheitssiegel
 und ein Häkchen „Ack received“.)*
-![Hamster sendet Kommandos](../media/pixel_art_actuation_writer.png)
+![Hamster sendet Kommandos](../../../../media/bithamster_052.png)
 
 &nbsp;
 

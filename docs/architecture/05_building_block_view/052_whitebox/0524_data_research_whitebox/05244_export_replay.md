@@ -11,7 +11,7 @@ Alles ist **bewusst gewählt**, **signiert** und **reproduzierbar**.
 
 *(Platzhalter für ein Bild: Der Hamster packt sorgfältig Ordner und Diagramme
 in eine beschriftete Box „Export“. Daneben ein Siegel und ein Pfeil zu „Replay“.)*
-![Hamster erstellt Export-Bundle](../media/pixel_art_export_replay.png)
+![Hamster erstellt Export-Bundle](../../../../media/bithamster_052.png)
 
 &nbsp;
 

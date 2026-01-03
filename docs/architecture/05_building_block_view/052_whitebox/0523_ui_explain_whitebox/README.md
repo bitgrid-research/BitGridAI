@@ -8,7 +8,7 @@ Keine Entscheidungen – aber volle Transparenz.
 
 *(Platzhalter für ein Bild: Der Hamster steht vor einem Dashboard.
 Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“.)*
-![Hamster erklärt Entscheidungen](../media/pixel_art_ui_explain.png)
+![Hamster erklärt Entscheidungen](../../../../media/bithamster_052.png)
 
 &nbsp;
 

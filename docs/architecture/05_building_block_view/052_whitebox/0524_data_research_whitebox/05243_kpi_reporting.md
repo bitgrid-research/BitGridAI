@@ -18,7 +18,7 @@ Nur reproduzierbare Fakten.
 *(Platzhalter für ein Bild: Der Hamster steht vor Diagrammen und Balken.
 Er hält einen Taschenrechner, daneben Pfeile von Events zu KPIs wie
 „kWh → Sats“, „Uptime“, „Deadband-Hit-Rate“.)*
-![Hamster berechnet Kennzahlen](../media/pixel_art_kpi_reporting.png)
+![Hamster berechnet Kennzahlen](../../../../media/bithamster_052.png)
 
 &nbsp;
 

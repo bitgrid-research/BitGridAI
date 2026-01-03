@@ -10,7 +10,7 @@ Sie ist der **stabile Arbeitsspeicher auf Platte** – lokal, konsistent und ber
 
 *(Platzhalter für ein Bild: Der Hamster sitzt an einem Schreibtisch mit einem dicken Buch.
 Auf dem Buch steht „SQLite“. Daneben eine Uhr (TTL) und ein Häkchen „ACID“.)*  
-![Hamster an der Operational DB](../media/pixel_art_operational_db.png)
+![Hamster an der Operational DB](../../../../media/bithamster_052.png)
 
 &nbsp;
 

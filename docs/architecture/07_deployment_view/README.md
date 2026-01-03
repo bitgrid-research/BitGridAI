@@ -25,6 +25,6 @@ Hier findest du den Bauplan unserer Infrastruktur:
 ---
 > **Nächster Schritt:** Die Hardware steht, die Container laufen. Aber was hält alles im Innersten zusammen? Im nächsten Kapitel widmen wir uns den Themen, die *alle* Bausteine betreffen: Sicherheit, Logging und Datenmodelle.
 >
-> 👉 Weiter zu **[08 - Querschnittliche Konzepte](../08_concepts)**
+> 👉 Weiter zu **[08 - Querschnittliche Konzepte](../08_concepts/README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

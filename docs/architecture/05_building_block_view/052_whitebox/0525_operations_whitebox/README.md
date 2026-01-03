@@ -10,7 +10,7 @@ Aber sie sorgt dafür, dass **alles andere verlässlich, kontrollierbar und sich
 
 *(Platzhalter für ein Bild: Der Hamster trägt Helm und Klemmbrett.
 Neben ihm ein Schloss, ein Zahnrad und ein Fernglas – Security, Config, Observability.)*
-![Hamster Operations](../media/pixel_art_operations.png)
+![Hamster Operations](../../../../media/bithamster_052.png)
 
 &nbsp;
 

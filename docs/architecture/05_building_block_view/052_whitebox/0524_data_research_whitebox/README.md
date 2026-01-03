@@ -10,7 +10,7 @@ Alles folgt einem Prinzip: **Was entschieden wurde, muss später erklärbar und 
 
 *(Platzhalter für ein Bild: Der Hamster sitzt in einem Archiv.
 Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
-![Hamster im Datenarchiv](../media/pixel_art_data_research.png)
+![Hamster im Datenarchiv](../../../../media/bithamster_052.png)
 
 &nbsp;
 

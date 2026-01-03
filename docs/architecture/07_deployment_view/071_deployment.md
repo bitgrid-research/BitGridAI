@@ -15,7 +15,7 @@ Der Betrieb ist bewusst:
 Home Assistant und weitere Systeme sind **sekundäre Teilnehmer**, keine Betriebsabhängigkeiten.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor einem kleinen Server mit Docker-Logo. Daneben liegen beschriftete Kisten „Core“, „MQTT“, „UI“. Ein Aufkleber: „Runs locally“.)*  
-![Hamster beim lokalen Deployment](link_zum_deployment_hamster.png)
+![Hamster beim lokalen Deployment](../../media/bithamster_07.png)
 
 &nbsp;
 

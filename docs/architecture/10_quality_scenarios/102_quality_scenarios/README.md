@@ -9,7 +9,7 @@ Dieses Kapitel ist bewusst **szenariengetrieben** aufgebaut:
 Jede Seite beschreibt **ein Qualitätsmerkmal**, abgeleitet aus dem Qualitätsbaum (Kap. 10.1) und den Architekturentscheidungen (Kap. 09).
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster prüft eine Checkliste mit Häkchen bei „Safety“, „Stability“, „Explainability“.)*
-![Übersicht der Qualitätsszenarien](../../media/pixel_art_hamster_scenario_test.png)
+![Übersicht der Qualitätsszenarien](../../../media/bithamster_10.png)
 
 &nbsp;
 
@@ -74,5 +74,5 @@ Sie bilden die Grundlage für:
 > Wir kennen jetzt die Zielqualität und ihre Prüfungen.  
 > Als Nächstes betrachten wir die **Risiken und technischen Schulden**, die sich aus dieser Architektur ergeben.
 >
-> 👉 Weiter zu **[11 - Risiken & Technische Schulden](../11_risks_and_technical_debt/README.md)**  
+> 👉 Weiter zu **[11 - Risiken & Technische Schulden](../../11_risks_and_technical_debt/README.md)**  
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

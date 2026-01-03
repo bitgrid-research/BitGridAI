@@ -27,6 +27,6 @@ Dies ist unser zentrales Register für alles, was noch nicht optimal ist:
 >
 > Wir kennen die Risiken und Probleme. Damit es am Ende keine Missverständnisse gibt, klären wir im allerletzten Kapitel die wichtigsten Begrifflichkeiten.
 >
-> 👉 Weiter zu **[12 - Glossar](../12_glossary/)**
+> 👉 Weiter zu **[12 - Glossar](../12_glossary/README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

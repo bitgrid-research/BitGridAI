@@ -9,7 +9,7 @@ Dieses Kapitel beschreibt die **systemweiten Sicherheits- und Vertrauensprinzipi
 Sie gelten unabhängig von Autonomie-Stufe, Betriebsmodus oder Deployment-Variante.
 
 *(Platzhalter für ein Bild: Ein Pixel-Art-Hamster mit Schutzhelm steht vor einem großen roten Not-Aus-Schalter. Ein Schild: „Safety First“. )*  
-![Hamster schützt das System](link_zum_safety_hamster.png)
+![Hamster schützt das System](../../media/bithamster_08.png)
 
 &nbsp;
 
