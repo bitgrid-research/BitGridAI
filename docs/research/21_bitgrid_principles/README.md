@@ -45,9 +45,7 @@ und bilden den konzeptionellen Kern des Projekts.
 > und im Systemverhalten widerspiegeln.
 >
 > 👉 Weiter zu **[22 – Interface Design](../22_interface_design/README.md)**
->
-> 🔙 Zurück zu **[20 – Forschungsfragen](../20_research_questions/)**
 > 
-> 🔙 Zurück zur **[Forschungsübersicht](../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
