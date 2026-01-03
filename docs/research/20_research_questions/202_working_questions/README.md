@@ -54,18 +54,26 @@ und kognitiver Nachvollziehbarkeit.
 Die Arbeitsfragen werden in zwei klar getrennten,
 aber auf derselben Systemlogik basierenden Kontexten betrachtet:
 
-- **Smart-Home-Kontext:**  
+- **[Smart-Home-Kontext](./2021_smart_home_context/README.md):**  
   Untersuchung erklärbarer, regelbasierter Energieentscheidungen
   im häuslichen Umfeld (z. B. App oder Web-Dashboard),
   mit Fokus auf Transparenz, Kontrolle und langfristiges Systemverständnis.
+  - [20.2.1a - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)
+  - [20.2.1b - Kontrolle und Override](./2021_smart_home_context/2021b_kontrolle.md)
+  - [20.2.1c - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)
 
-- **Automotive-User-Interface-Kontext:**  
+
+- **[Automotive-User-Interface-Kontext](./2022_automotive_context/README.md):**  
   Übertragung derselben Entscheidungslogik
   auf ein Automotive-Interface.
   Hier wird untersucht, wie Ladeentscheidungen
   (z. B. *„Warum lädt das Auto gerade nicht?“*)
   im Fahrzeugkontext verständlich kommuniziert werden können,
   etwa über reduzierte Visualisierungen oder Sprachinteraktion.
+  - [20.2.2a - Verstehen der Ladeentscheidung](./2022_automotive_context/2022a_transparenz.md)
+  - [20.2.2b - Kontrolle im Auto](./2022_automotive_context/2022b_kontrolle.md)
+  - [20.2.2c - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)
+
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
 Unterschiedlich sind ausschließlich
