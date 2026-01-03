@@ -95,7 +95,7 @@ Gestaltungsimpulse für transparente, lokal ausgeführte Energiesysteme.
 > **Nächster Schritt:** Der Evaluationsrahmen steht.
 > Im nächsten Kapitel folgt die Literaturübersicht.
 >
-> 👉 Weiter zu **[29 - Literaturübersicht](../literature_review.md)**
+> 👉 Weiter zu **[29 - Literaturübersicht](../29_literature_review/README.md)**
 >
 > 🔙 Zurück zu **[22 - Interface Design](../22_interface_design/README.md)**
 >
