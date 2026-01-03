@@ -55,4 +55,6 @@ als eigenständige Gestaltungsziele zu betrachten.
 >
 > 🔙 Zurück zu **[20 – Forschungsfragen](../README.md)**
 > 
+> 🔙 Zurück zur **[Forschungsübersicht](../../README.md)**
+>
 > 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

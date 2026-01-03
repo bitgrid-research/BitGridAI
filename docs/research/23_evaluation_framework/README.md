@@ -99,4 +99,6 @@ Gestaltungsimpulse für transparente, lokal ausgeführte Energiesysteme.
 >
 > 🔙 Zurück zu **[22 - Interface Design](../22_interface_design/README.md)**
 >
+> 🔙 Zurück zur **[Forschungsübersicht](../README.md)**
+>
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

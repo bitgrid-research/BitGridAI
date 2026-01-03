@@ -76,4 +76,6 @@ und Nutzerwahrnehmung zusammenhängen.
 >
 > 🔙 Zurück zu **[20 – Forschungsfragen](../README.md)**
 >  
+> 🔙 Zurück zur **[Forschungsübersicht](../../README.md)**
+>
 > 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

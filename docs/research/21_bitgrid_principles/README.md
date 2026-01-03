@@ -48,4 +48,6 @@ und bilden den konzeptionellen Kern des Projekts.
 >
 > 🔙 Zurück zu **[20 – Forschungsfragen](../20_research_questions/)**
 > 
+> 🔙 Zurück zur **[Forschungsübersicht](../README.md)**
+>
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

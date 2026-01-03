@@ -14,4 +14,6 @@ und **Mensch-Computer-Interaktion (HCI)** im Kontext von BitGridAI enthalten.
 >
 > 🔙 Zurück zu **[23 - Evaluationsrahmen](../23_evaluation_framework/README.md)**
 >
-> 🏠 Zurück zur **[Hauptübersicht](../README.md)**
+> 🔙 Zurück zur **[Forschungsübersicht](../README.md)**
+>
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

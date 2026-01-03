@@ -151,4 +151,6 @@ Beide Varianten folgen derselben Logik (R1-R5), unterscheiden sich aber in Konte
 >
 > 🔙 Zurück zu **[21 - BitGrid Prinzipien](../21_bitgrid_principles/README.md)**
 >
+> 🔙 Zurück zur **[Forschungsübersicht](../README.md)**
+>
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
