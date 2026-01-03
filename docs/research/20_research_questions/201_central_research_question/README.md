@@ -17,8 +17,6 @@ und in alltägliche Routinen eingreifen.
 
 ## Zentrale Forschungsfrage
 
-## Zentrale Forschungsfrage (Übersicht)
-
 | ID | Fokus | Forschungsfrage | Zweck |
 |----|-------|------------------|-------|
 | FQ | Erklärbare Energieentscheidungen | Wie können lokale, regelbasierte Energiemanagementsysteme gestaltet werden, sodass Nutzer Entscheidungen zur Nutzung von PV-Überschuss nachvollziehen und dem System vertrauen können? | Definition des thematischen Rahmens und Leitplanke für alle Gestaltungs-, Architektur- und Analyseentscheidungen |
