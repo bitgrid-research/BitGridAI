@@ -1,4 +1,4 @@
-# 20.2.1c - Vertrauen und Sicherheit (Haus-Reserve)
+# SH-WQ3 - Vertrauen und Sicherheit (Haus-Reserve)
 
 Ziel: Nutzer sieht klar, dass genug Energie für das Haus bleibt.
 
@@ -37,11 +37,13 @@ Ziel: Nutzer sieht klar, dass genug Energie für das Haus bleibt.
 
 ## Annahmen
 
-- Eine sichtbare Haus-Reserve ist der zentrale Vertrauensanker.
-- "Haus gesichert: Ja/Nein" ist für Laien klarer als Detailwerte.
-- Nutzer wollen einen einstellbaren Puffer, greifen aber selten in Details ein.
-- Eine einfache Visualisierung reduziert Unsicherheit schneller als Diagramme.
-- Wenn die Reserve unklar ist, stoppen Nutzer Mining langfristig.
+| ID | Annahme |
+|----|---------|
+| SH-ASSUM-TRUST-01 | Eine sichtbare Haus-Reserve ist der zentrale Vertrauensanker. |
+| SH-ASSUM-TRUST-02 | "Haus gesichert: Ja/Nein" ist für Laien klarer als Detailwerte. |
+| SH-ASSUM-TRUST-03 | Nutzer wollen einen einstellbaren Puffer, greifen aber selten in Details ein. |
+| SH-ASSUM-TRUST-04 | Eine einfache Visualisierung reduziert Unsicherheit schneller als Diagramme. |
+| SH-ASSUM-TRUST-05 | Wenn die Reserve unklar ist, stoppen Nutzer Mining langfristig. |
 
 &nbsp;
 
@@ -53,24 +55,27 @@ Wie muss die Haus-Reserve im Smart-Home-UI visualisiert und formuliert werden, d
 
 ## Teilfragen
 
-| ID  | Fokus | Teilfrage | Bezug (Annahmen) |
-|-----|-------|-----------|------------------|
-| SH-TRUST-01 | Kernbotschaft | Reicht "Haus gesichert: Ja/Nein" als primäre Aussage oder braucht es Prozentwerte? | Ja/Nein klarer als Detailwerte |
-| SH-TRUST-02 | Visualisierung | Welche Darstellungsform (Balken, Batterie, Text) reduziert Unsicherheit am stärksten? | Einfache Visualisierung statt Diagramme |
-| SH-TRUST-03 | Einstellbarkeit | Wie viel Kontrolle über die Reserve wird tatsächlich genutzt? | Puffer einstellbar, Details selten genutzt |
-| SH-TRUST-04 | Verhalten | Wie beeinflusst Reserve-Transparenz die Bereitschaft, Mining laufen zu lassen? | Unklare Reserve -> Mining stoppen |
+| ID | Fokus | Teilfrage | Bezug (Annahmen) | ASSUM IDs |
+|-----|-----|-----|-----|-----|
+| SH-TRUST-01 | Kernbotschaft | Reicht "Haus gesichert: Ja/Nein" als primäre Aussage oder braucht es Prozentwerte? | Ja/Nein klarer als Detailwerte | SH-ASSUM-TRUST-02, SH-ASSUM-TRUST-01 |
+| SH-TRUST-02 | Visualisierung | Welche Darstellungsform (Balken, Batterie, Text) reduziert Unsicherheit am stärksten? | Einfache Visualisierung statt Diagramme | SH-ASSUM-TRUST-04 |
+| SH-TRUST-03 | Einstellbarkeit | Wie viel Kontrolle über die Reserve wird tatsächlich genutzt? | Puffer einstellbar, Details selten genutzt | SH-ASSUM-TRUST-03 |
+| SH-TRUST-04 | Verhalten | Wie beeinflusst Reserve-Transparenz die Bereitschaft, Mining laufen zu lassen? | Unklare Reserve -> Mining stoppen | SH-ASSUM-TRUST-05 |
 
 &nbsp;
 
 ## Erhebungsmethode (einfach)
 
-- A/B-Test zweier Puffer-Darstellungen (Balken vs. Text).
-- Verständnis-Check: "Was ist gesichert?"
-- Kurzes Interview zu Vertrauen.
+| ID | Beschreibung |
+|-----|--------------|
+| EXP-SH-TRUST-01 | A/B-Test zweier Puffer-Darstellungen (Balken vs. Text). |
+| EXP-SH-TRUST-02 | Verständnis-Check: "Was ist gesichert?" |
+| EXP-SH-TRUST-03 | Kurzes Interview zu Vertrauen. |
 
 &nbsp;
 
-## Leitfaden
+
+## Leitfaden (8-10 Fragen)
 
 1) Siehst du auf den ersten Blick, ob das Haus sicher ist?
 2) Was bedeutet der markierte Bereich?
@@ -87,16 +92,19 @@ Wie muss die Haus-Reserve im Smart-Home-UI visualisiert und formuliert werden, d
 
 ## UI für Dummies (Kindergartenfassung)
 
-- Batterie mit zwei Farben: "Reserve" und "Frei für Miner".
-- Grosser Text: "Haus gesichert: Ja/Nein".
-- Ein Satz: "Haus-Reserve = 30%".
-- Ein Knopf: "Reserve ändern".
-- Kein Detail-Graph.
+| ID | Element |
+|-----|---------|
+| UI-SH-TRUST-01 | Batterie mit zwei Farben: "Reserve" und "Frei für Miner". |
+| UI-SH-TRUST-02 | Grosser Text: "Haus gesichert: Ja/Nein". |
+| UI-SH-TRUST-03 | Ein Satz: "Haus-Reserve = 30%". |
+| UI-SH-TRUST-04 | Ein Knopf: "Reserve ändern". |
+| UI-SH-TRUST-05 | Kein Detail-Graph. |
+
 
 ---
 
 > **Nächster Schritt:** Danach geht es weiter mit dem Automotive-Kontext.
 >
-> 👉 Weiter zu **[20.2.2 - Automotive-Kontext](../2022_automotive_context/README.md)**
+> 👉 Weiter zu **[AUTO-CONTEXT - Automotive-Kontext](../2022_automotive_context/README.md)**
 >
-> 🔙 Zurück zu **[20.2.1 - Smart-Home-Kontext](./README.md)**
+> 🔙 Zurück zu **[SH-CONTEXT - Smart-Home-Kontext](./README.md)**

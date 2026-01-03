@@ -1,4 +1,4 @@
-# 20.2 – Zentrale Arbeitsfragen
+# WQ – Zentrale Arbeitsfragen
 
 Die zentrale Forschungsfrage beschreibt den thematischen Rahmen des Projekts.
 Um sie konkret bearbeiten zu können,
@@ -15,9 +15,9 @@ Sie legen fest, welche Aspekte untersucht werden
 
 | ID  | Fokus                         | Arbeitsfrage                                                                 | Betrachtete Aspekte |
 |-----|-------------------------------|--------------------------------------------------------------------------------|---------------------|
-| AQ1 | Nachvollziehbarkeit von Entscheidungen | Welche systeminternen Informationen müssen sichtbar gemacht werden, damit Nutzer ein belastbares mentales Modell der Energieflüsse und der Entscheidungslogik entwickeln können? | Regeln, Systemzustände, Schwellenwerte, zeitliche Abhängigkeiten, mentale Modelle |
-| AQ2 | Kontrolle und Handlungsfreiheit | Welche minimale Kontrolle und Override-Optionen müssen vorhanden sein, damit Nutzer die Automatik als kontrollierbar wahrnehmen und situativ eingreifen können? | Override, Handlungsfreiheit, Rückgängig, Aufwand, Kostenhinweis |
-| AQ3 | Vertrauen und Sicherheit | Wie beeinflussen Erklärungen und sichtbare Sicherheitsreserven das Vertrauen und die angemessene Nutzung automatisierter Energieentscheidungen? | Vertrauen, wahrgenommene Sicherheit, angemessene Nutzung, Risikömpfinden |
+| WQ1 | Nachvollziehbarkeit von Entscheidungen | Welche systeminternen Informationen müssen sichtbar gemacht werden, damit Nutzer ein belastbares mentales Modell der Energieflüsse und der Entscheidungslogik entwickeln können? | Regeln, Systemzustände, Schwellenwerte, zeitliche Abhängigkeiten, mentale Modelle |
+| WQ2 | Kontrolle und Handlungsfreiheit | Welche minimale Kontrolle und Override-Optionen müssen vorhanden sein, damit Nutzer die Automatik als kontrollierbar wahrnehmen und situativ eingreifen können? | Override, Handlungsfreiheit, Rückgängig, Aufwand, Kostenhinweis |
+| WQ3 | Vertrauen und Sicherheit | Wie beeinflussen Erklärungen und sichtbare Sicherheitsreserven das Vertrauen und die angemessene Nutzung automatisierter Energieentscheidungen? | Vertrauen, wahrgenommene Sicherheit, angemessene Nutzung, Risikoempfinden |
 
 &nbsp;
 
@@ -30,9 +30,9 @@ aber auf derselben Systemlogik basierenden Kontexten betrachtet:
   Untersuchung erklärbarer, regelbasierter Energieentscheidungen
   im häuslichen Umfeld (z. B. App oder Web-Dashboard),
   mit Fokus auf Transparenz, Kontrolle und langfristiges Systemverständnis.
-  - [20.2.1 - AQ1 - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)
-  - [20.2.1 - AQ2 - Kontrolle und Override](./2021_smart_home_context/2021b_kontrolle.md)
-  - [20.2.1 - AQ3 - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)
+  - [SH-WQ1 - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)
+  - [SH-WQ2 - Kontrolle und Override](./2021_smart_home_context/2021b_kontrolle.md)
+  - [SH-WQ3 - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)
 
 
 - **[Automotive-User-Interface-Kontext](./2022_automotive_context/README.md):**  
@@ -42,9 +42,9 @@ aber auf derselben Systemlogik basierenden Kontexten betrachtet:
   (z. B. *„Warum lädt das Auto gerade nicht?“*)
   im Fahrzeugkontext verständlich kommuniziert werden können,
   etwa über reduzierte Visualisierungen oder Sprachinteraktion.
-  - [20.2.2 - AQ1 - Verstehen der Ladeentscheidung](./2022_automotive_context/2022a_transparenz.md)
-  - [20.2.2 - AQ2 - Kontrolle im Auto](./2022_automotive_context/2022b_kontrolle.md)
-  - [20.2.2 - AQ3 - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)
+  - [AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022_automotive_context/2022a_transparenz.md)
+  - [AUTO-WQ2 - Kontrolle im Auto](./2022_automotive_context/2022b_kontrolle.md)
+  - [AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)
 
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
@@ -72,8 +72,8 @@ und Nutzerwahrnehmung zusammenhängen.
 > Im nächsten Kapitel werden weiterführende Aspekte gesammelt,
 > die der Einordnung und Reflexion der Ergebnisse dienen.
 >
-> 👉 Weiter zu **[20.3 – Kontext- und Diskussionsfragen](../203_discussion_questions/README.md)**
+> 👉 Weiter zu **[DQ - Kontext- und Diskussionsfragen](../203_discussion_questions/README.md)**
 >
-> 🔙 Zurück zu **[20 – Forschungsfragen](../README.md)**
+> 🔙 Zurück zu **[20 - Forschungsfragen](../README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

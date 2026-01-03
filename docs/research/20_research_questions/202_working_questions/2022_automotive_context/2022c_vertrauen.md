@@ -1,4 +1,4 @@
-# 20.2.2c - Vertrauen und Reichweitenangst
+# AUTO-WQ3 - Vertrauen und Reichweitenangst
 
 Ziel: Fahrer sieht klar, dass genug Reichweite für morgen bleibt.
 
@@ -37,11 +37,13 @@ Ziel: Fahrer sieht klar, dass genug Reichweite für morgen bleibt.
 
 ## Annahmen
 
-- Reichweitenangst sinkt, wenn ein sicherer Puffer klar ausgewiesen ist.
-- "Bereit für morgen: Ja/Nein" ist schneller erfassbar als Prozentwerte.
-- Nutzer erwarten, dass V2H den Pendlerpuffer nie unterschreitet.
-- Eine einfache Batterievisualisierung ist verständlicher als Diagramme.
-- Wenn der Puffer unklar ist, deaktivieren Nutzer die Automatik.
+| ID | Annahme |
+|----|---------|
+| AUTO-ASSUM-TRUST-01 | Reichweitenangst sinkt, wenn ein sicherer Puffer klar ausgewiesen ist. |
+| AUTO-ASSUM-TRUST-02 | "Bereit für morgen: Ja/Nein" ist schneller erfassbar als Prozentwerte. |
+| AUTO-ASSUM-TRUST-03 | Nutzer erwarten, dass V2H den Pendlerpuffer nie unterschreitet. |
+| AUTO-ASSUM-TRUST-04 | Eine einfache Batterievisualisierung ist verständlicher als Diagramme. |
+| AUTO-ASSUM-TRUST-05 | Wenn der Puffer unklar ist, deaktivieren Nutzer die Automatik. |
 
 &nbsp;
 
@@ -53,24 +55,27 @@ Wie muss der Pendler-Puffer im Auto-UI angezeigt werden (Ja/Nein, Prozent, Batte
 
 ## Teilfragen
 
-| ID  | Fokus | Teilfrage | Bezug (Annahmen) |
-|-----|-------|-----------|------------------|
-| AUTO-TRUST-01 | Kernbotschaft | Ist "Bereit für morgen: Ja/Nein" schneller verständlich als Prozentwerte? | Ja/Nein schneller erfassbar |
-| AUTO-TRUST-02 | Visualisierung | Welche Darstellung (Batterie vs Text) erzeugt das höchste Sicherheitsgefühl? | Batterievisualisierung verständlicher |
-| AUTO-TRUST-03 | Puffer-Regel | Wie muss kommuniziert werden, dass der Pendlerpuffer nie unterschritten wird? | Erwartung: nie unterschreiten |
-| AUTO-TRUST-04 | Verhalten | Wie beeinflusst die Pufferanzeige die Bereitschaft, die Automatik aktiviert zu lassen? | Unklarer Puffer -> Automatik aus |
+| ID | Fokus | Teilfrage | Bezug (Annahmen) | ASSUM IDs |
+|-----|-----|-----|-----|-----|
+| AUTO-TRUST-01 | Kernbotschaft | Ist "Bereit für morgen: Ja/Nein" schneller verständlich als Prozentwerte? | Ja/Nein schneller erfassbar | AUTO-ASSUM-TRUST-02, AUTO-ASSUM-TRUST-01 |
+| AUTO-TRUST-02 | Visualisierung | Welche Darstellung (Batterie vs Text) erzeugt das höchste Sicherheitsgefühl? | Batterievisualisierung verständlicher | AUTO-ASSUM-TRUST-04 |
+| AUTO-TRUST-03 | Puffer-Regel | Wie muss kommuniziert werden, dass der Pendlerpuffer nie unterschritten wird? | Erwartung: nie unterschreiten | AUTO-ASSUM-TRUST-03 |
+| AUTO-TRUST-04 | Verhalten | Wie beeinflusst die Pufferanzeige die Bereitschaft, die Automatik aktiviert zu lassen? | Unklarer Puffer -> Automatik aus | AUTO-ASSUM-TRUST-05 |
 
 &nbsp;
 
 ## Erhebungsmethode (einfach)
 
-- Szenario-Interview mit zwei UI-Varianten (Text vs. Batterie).
-- Verständnis-Check: "Wie viel ist sicher?"
-- Kurze Skala: "Wie sicher fühlst du dich?"
+| ID | Beschreibung |
+|-----|--------------|
+| EXP-AUTO-TRUST-01 | Szenario-Interview mit zwei UI-Varianten (Text vs. Batterie). |
+| EXP-AUTO-TRUST-02 | Verständnis-Check: "Wie viel ist sicher?" |
+| EXP-AUTO-TRUST-03 | Kurze Skala: "Wie sicher fühlst du dich?" |
 
 &nbsp;
 
-## Leitfaden
+
+## Leitfaden (8-10 Fragen)
 
 1) Siehst du sofort, ob du morgen fahren kannst?
 2) Was bedeutet "Puffer gesichert" für dich?
@@ -87,15 +92,18 @@ Wie muss der Pendler-Puffer im Auto-UI angezeigt werden (Ja/Nein, Prozent, Batte
 
 ## UI für Dummies (Kindergartenfassung)
 
-- Batterie mit zwei Farben: "Sicher" und "Frei".
-- Grosser Text: "Bereit für morgen: Ja/Nein".
-- Ein Satz: "Sicherer Puffer = 30%".
-- Ein Knopf: "Arbeitsweg ändern".
+| ID | Element |
+|-----|---------|
+| UI-AUTO-TRUST-01 | Batterie mit zwei Farben: "Sicher" und "Frei". |
+| UI-AUTO-TRUST-02 | Grosser Text: "Bereit für morgen: Ja/Nein". |
+| UI-AUTO-TRUST-03 | Ein Satz: "Sicherer Puffer = 30%". |
+| UI-AUTO-TRUST-04 | Ein Knopf: "Arbeitsweg ändern". |
+
 
 ---
 
 > **Nächster Schritt:** Danach folgen die Kontext- und Diskussionsfragen.
 >
-> 👉 Weiter zu **[20.3 - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
+> 👉 Weiter zu **[DQ - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
 >
-> 🔙 Zurück zu **[20.2.2 - Automotive-Kontext](./README.md)**
+> 🔙 Zurück zu **[AUTO-CONTEXT - Automotive-Kontext](./README.md)**

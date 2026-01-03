@@ -1,4 +1,4 @@
-# 20.2.2a - Verstehen der Ladeentscheidung
+# AUTO-WQ1 - Verstehen der Ladeentscheidung
 
 Ziel: Fahrer versteht in 2 Sekunden, warum das Auto lädt oder nicht.
 
@@ -37,11 +37,13 @@ Ziel: Fahrer versteht in 2 Sekunden, warum das Auto lädt oder nicht.
 
 ## Annahmen
 
-- Fahrer haben maximal 2 Sekunden Aufmerksamkeit; Texte müssen extrem kurz sein.
-- Ein Grund plus Startzeit reicht, um die Entscheidung zu akzeptieren.
-- Ohne Erklärung wird "Nicht laden" als Fehler interpretiert.
-- Icons plus kurzer Text sind schneller als nur Text.
-- Eine optionale Voice-Ansage kann die visuelle Info bestätigen.
+| ID | Annahme |
+|----|---------|
+| AUTO-ASSUM-TRAN-01 | Fahrer haben maximal 2 Sekunden Aufmerksamkeit; Texte müssen extrem kurz sein. |
+| AUTO-ASSUM-TRAN-02 | Ein Grund plus Startzeit reicht, um die Entscheidung zu akzeptieren. |
+| AUTO-ASSUM-TRAN-03 | Ohne Erklärung wird "Nicht laden" als Fehler interpretiert. |
+| AUTO-ASSUM-TRAN-04 | Icons plus kurzer Text sind schneller als nur Text. |
+| AUTO-ASSUM-TRAN-05 | Eine optionale Voice-Ansage kann die visuelle Info bestätigen. |
 
 &nbsp;
 
@@ -53,24 +55,27 @@ Wie kann das Auto-UI Gründe und Startzeit so kurz und klar kommunizieren (Text,
 
 ## Teilfragen
 
-| ID  | Fokus | Teilfrage | Bezug (Annahmen) |
-|-----|-------|-----------|------------------|
-| AUTO-TRAN-01 | Textlänge | Welche maximale Textlänge ist im 2-Sekunden-Blick verständlich? | Aufmerksamkeit < 2 Sekunden |
-| AUTO-TRAN-02 | Inhalt | Reicht Grund + Startzeit oder braucht es zusätzliche Information? | Grund + Startzeit reicht |
-| AUTO-TRAN-03 | Darstellung | Was ist schneller: Icon + kurzer Text oder nur Text? | Icons plus Text sind schneller |
-| AUTO-TRAN-04 | Voice | Wann verbessert eine kurze Voice-Ansage das Verständnis, ohne zu stören? | Optionale Voice kann bestätigen |
+| ID | Fokus | Teilfrage | Bezug (Annahmen) | ASSUM IDs |
+|-----|-----|-----|-----|-----|
+| AUTO-TRAN-01 | Textlänge | Welche maximale Textlänge ist im 2-Sekunden-Blick verständlich? | Aufmerksamkeit < 2 Sekunden | AUTO-ASSUM-TRAN-01 |
+| AUTO-TRAN-02 | Inhalt | Reicht Grund + Startzeit oder braucht es zusätzliche Information? | Grund + Startzeit reicht | AUTO-ASSUM-TRAN-02, AUTO-ASSUM-TRAN-03 |
+| AUTO-TRAN-03 | Darstellung | Was ist schneller: Icon + kurzer Text oder nur Text? | Icons plus Text sind schneller | AUTO-ASSUM-TRAN-04 |
+| AUTO-TRAN-04 | Voice | Wann verbessert eine kurze Voice-Ansage das Verständnis, ohne zu stören? | Optionale Voice kann bestätigen | AUTO-ASSUM-TRAN-05 |
 
 &nbsp;
 
 ## Erhebungsmethode (einfach)
 
-- Blick-Test mit 2-Sekunden-Regel.
-- A/B-Vergleich kurzer Texte und Icons.
-- Kurze Nachfrage: "Was passiert und warum?"
+| ID | Beschreibung |
+|-----|--------------|
+| EXP-AUTO-TRAN-01 | Blick-Test mit 2-Sekunden-Regel. |
+| EXP-AUTO-TRAN-02 | A/B-Vergleich kurzer Texte und Icons. |
+| EXP-AUTO-TRAN-03 | Kurze Nachfrage: "Was passiert und warum?" |
 
 &nbsp;
 
-## Leitfaden
+
+## Leitfaden (8-10 Fragen)
 
 1) Was ist dein erster Eindruck?
 2) Warum lädt das Auto gerade nicht?
@@ -87,16 +92,19 @@ Wie kann das Auto-UI Gründe und Startzeit so kurz und klar kommunizieren (Text,
 
 ## UI für Dummies (Kindergartenfassung)
 
-- Grosses Symbol (Stecker + Haus).
-- Eine Zeile Grund.
-- Eine Zeile "Start in X Min".
-- Ein Knopf "Jetzt laden".
-- Optional: 1 Satz Voice.
+| ID | Element |
+|-----|---------|
+| UI-AUTO-TRAN-01 | Grosses Symbol (Stecker + Haus). |
+| UI-AUTO-TRAN-02 | Eine Zeile Grund. |
+| UI-AUTO-TRAN-03 | Eine Zeile "Start in X Min". |
+| UI-AUTO-TRAN-04 | Ein Knopf "Jetzt laden". |
+| UI-AUTO-TRAN-05 | Optional: 1 Satz Voice. |
+
 
 ---
 
 > **Nächster Schritt:** Als Nächstes geht es um Kontrolle im Auto.
 >
-> 👉 Weiter zu **[20.2.2b - Kontrolle im Auto](./2022b_kontrolle.md)**
+> 👉 Weiter zu **[AUTO-WQ2 - Kontrolle im Auto](./2022b_kontrolle.md)**
 >
-> 🔙 Zurück zu **[20.2.2 - Automotive-Kontext](./README.md)**
+> 🔙 Zurück zu **[AUTO-CONTEXT - Automotive-Kontext](./README.md)**

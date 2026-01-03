@@ -1,4 +1,4 @@
-# 20.2.1b - Kontrolle und Override (Handlungsfreiheit)
+# SH-WQ2 - Kontrolle und Override (Handlungsfreiheit)
 
 Ziel: Nutzer kann mit einem einfachen Schritt eingreifen, ohne die Automatik zu verlieren.
 
@@ -37,11 +37,13 @@ Ziel: Nutzer kann mit einem einfachen Schritt eingreifen, ohne die Automatik zu 
 
 ## Annahmen
 
-- Nutzer wollen in Ausnahmesituationen einen sofortigen Override, ohne die Automatik dauerhaft zu verlieren.
-- Ein großer, klarer Button reicht; mehrstufige Menüs werden vermieden.
-- Eine kurze Bestätigung und ein sichtbarer Timer geben Sicherheit.
-- Nutzer akzeptieren kurzfristig weniger Ertrag, wenn sie Kontrolle haben.
-- Wenn der Override versteckt ist, schalten Nutzer die Automatik komplett aus.
+| ID | Annahme |
+|----|---------|
+| SH-ASSUM-CTRL-01 | Nutzer wollen in Ausnahmesituationen einen sofortigen Override, ohne die Automatik dauerhaft zu verlieren. |
+| SH-ASSUM-CTRL-02 | Ein großer, klarer Button reicht; mehrstufige Menüs werden vermieden. |
+| SH-ASSUM-CTRL-03 | Eine kurze Bestätigung und ein sichtbarer Timer geben Sicherheit. |
+| SH-ASSUM-CTRL-04 | Nutzer akzeptieren kurzfristig weniger Ertrag, wenn sie Kontrolle haben. |
+| SH-ASSUM-CTRL-05 | Wenn der Override versteckt ist, schalten Nutzer die Automatik komplett aus. |
 
 &nbsp;
 
@@ -53,24 +55,27 @@ Welche minimale Override-Interaktion (Sichtbarkeit, Aktion, Rückmeldung, Dauer)
 
 ## Teilfragen
 
-| ID  | Fokus | Teilfrage | Bezug (Annahmen) |
-|-----|-------|-----------|------------------|
-| SH-CTRL-01 | Sichtbarkeit | Wie sichtbar und erreichbar muss der Override sein, damit Nutzer ihn sofort finden? | Versteckter Override führt zum Abschalten |
-| SH-CTRL-02 | Aktion | Reicht ein einzelner großer Button oder braucht es zusätzliche Schritte? | Großer Button, keine Menüs |
-| SH-CTRL-03 | Rückmeldung | Welche Bestätigung und Daueranzeige geben genug Sicherheit? | Bestätigung + Timer geben Sicherheit |
-| SH-CTRL-04 | Folgenhinweis | Welche Hinweise zu Folgen (z. B. weniger Ertrag) sind nötig, um den Eingriff zu akzeptieren? | Weniger Ertrag wird akzeptiert, wenn Kontrolle da ist |
+| ID | Fokus | Teilfrage | Bezug (Annahmen) | ASSUM IDs |
+|-----|-----|-----|-----|-----|
+| SH-CTRL-01 | Sichtbarkeit | Wie sichtbar und erreichbar muss der Override sein, damit Nutzer ihn sofort finden? | Versteckter Override führt zum Abschalten | SH-ASSUM-CTRL-01, SH-ASSUM-CTRL-05 |
+| SH-CTRL-02 | Aktion | Reicht ein einzelner großer Button oder braucht es zusätzliche Schritte? | Großer Button, keine Menüs | SH-ASSUM-CTRL-02 |
+| SH-CTRL-03 | Rückmeldung | Welche Bestätigung und Daueranzeige geben genug Sicherheit? | Bestätigung + Timer geben Sicherheit | SH-ASSUM-CTRL-03 |
+| SH-CTRL-04 | Folgenhinweis | Welche Hinweise zu Folgen (z. B. weniger Ertrag) sind nötig, um den Eingriff zu akzeptieren? | Weniger Ertrag wird akzeptiert, wenn Kontrolle da ist | SH-ASSUM-CTRL-04 |
 
 &nbsp;
 
 ## Erhebungsmethode (einfach)
 
-- Szenario-Test: "Du fährst in 30 Min weg".
-- Beobachtung: Wie schnell findet der Nutzer den Override?
-- Kurzes Interview danach.
+| ID | Beschreibung |
+|-----|--------------|
+| EXP-SH-CTRL-01 | Szenario-Test: "Du fährst in 30 Min weg". |
+| EXP-SH-CTRL-02 | Beobachtung: Wie schnell findet der Nutzer den Override? |
+| EXP-SH-CTRL-03 | Kurzes Interview danach. |
 
 &nbsp;
 
-## Leitfaden
+
+## Leitfaden (8-10 Fragen)
 
 1) Was würdest du in dieser Situation tun?
 2) Wo würdest du eine Sofort-Aktion erwarten?
@@ -87,16 +92,19 @@ Welche minimale Override-Interaktion (Sichtbarkeit, Aktion, Rückmeldung, Dauer)
 
 ## UI für Dummies (Kindergartenfassung)
 
-- Grosser Knopf "Miner stoppen".
-- Kleiner Hinweis: "Weniger Ertrag ca. X".
-- Timer: "Gilt für 60 Min".
-- Knopf "Rückgängig".
-- Einfache Statuszeile: "Automatik aktiv".
+| ID | Element |
+|-----|---------|
+| UI-SH-CTRL-01 | Grosser Knopf "Miner stoppen". |
+| UI-SH-CTRL-02 | Kleiner Hinweis: "Weniger Ertrag ca. X". |
+| UI-SH-CTRL-03 | Timer: "Gilt für 60 Min". |
+| UI-SH-CTRL-04 | Knopf "Rückgängig". |
+| UI-SH-CTRL-05 | Einfache Statuszeile: "Automatik aktiv". |
+
 
 ---
 
 > **Nächster Schritt:** Als Nächstes geht es um Vertrauen und Sicherheit.
 >
-> 👉 Weiter zu **[20.2.1c - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
+> 👉 Weiter zu **[SH-WQ3 - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
 >
-> 🔙 Zurück zu **[20.2.1 - Smart-Home-Kontext](./README.md)**
+> 🔙 Zurück zu **[SH-CONTEXT - Smart-Home-Kontext](./README.md)**

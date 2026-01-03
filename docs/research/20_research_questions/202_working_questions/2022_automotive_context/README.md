@@ -1,4 +1,4 @@
-# 20.2.2 - Automotive-Kontext
+# AUTO-CONTEXT - Automotive-Kontext
 
 Der Automotive-Kontext fokussiert die Frage:
 "Warum lädt mein Auto gerade - oder warum nicht - und wie erklärt mir das System die Entscheidung?"
@@ -17,11 +17,11 @@ und eine saubere, alltagstaugliche Erklärung im Fahrzeug.
 
 ## Unterseiten (Template)
 
-- **[20.2.2a - Verstehen der Ladeentscheidung](./2022a_transparenz.md)**
+- **[AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022a_transparenz.md)**
   - Warum lädt das Auto gerade oder warum nicht?
-- **[20.2.2b - Kontrolle im Auto](./2022b_kontrolle.md)**
+- **[AUTO-WQ2 - Kontrolle im Auto](./2022b_kontrolle.md)**
   - Kann der Fahrer einfach eingreifen?
-- **[20.2.2c - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
+- **[AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
   - Fühlt sich die Entscheidung im Auto sicher an?
 
 &nbsp;
@@ -106,13 +106,14 @@ Beispiel Topics:
 
 ## Annahmen und Risiken
 
-- Annahme: Nutzer wollen verstehen, nicht optimieren.
-- Annahme: Lokales LLM ist verfügbar (Privacy).
-- Risiko: Zu viele Meldungen nerven.
-- Risiko: Falsches Timing wirkt bevormundend.
+| ID | Typ | Annahme/Risiko |
+|----|-----|----------------|
+| AUTO-ASSUM-01 | Annahme | Nutzer wollen verstehen, nicht optimieren. |
+| AUTO-ASSUM-02 | Annahme | Lokales LLM ist verfügbar (Privacy). |
+| AUTO-RISK-01 | Risiko | Zu viele Meldungen nerven. |
+| AUTO-RISK-02 | Risiko | Falsches Timing wirkt bevormundend. |
 
 &nbsp;
-
 ## Offene Fragen
 
 - Welche Erklärungslänge ist im Auto noch verständlich?
@@ -124,9 +125,9 @@ Beispiel Topics:
 > **Nächster Schritt:** Danach folgen die Kontext- und Diskussionsfragen,
 > die den Ansatz reflektieren und abgrenzen.
 >
-> 👉 Weiter zu **[20.3 - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
+> 👉 Weiter zu **[DQ - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
 >
-> 🔙 Zurück zu **[20.2 - Zentrale Arbeitsfragen](../README.md)**
+> 🔙 Zurück zu **[WQ - Zentrale Arbeitsfragen](../README.md)**
 >
 > 🔙 Zurück zur **[Forschungsübersicht](../../../README.md)**
 >

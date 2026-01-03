@@ -1,4 +1,4 @@
-# 20.2.1 - Smart-Home-Kontext
+# SH-CONTEXT - Smart-Home-Kontext
 
 Der Smart-Home-Kontext beschreibt den Kern von BitGridAI:
 PV-Überschuss steuert Mining als flexible Last.
@@ -18,11 +18,11 @@ alltagstaugliche Erklärung der Entscheidungen im lokalen Dashboard.
 
 ## Unterseiten
 
-- **[20.2.1a - Verstehen der Entscheidung](./2021a_transparenz.md)**
+- **[SH-WQ1 - Verstehen der Entscheidung](./2021a_transparenz.md)**
   - Warum läuft, pausiert oder stoppt der Miner?
-- **[20.2.1b - Kontrolle und Override](./2021b_kontrolle.md)**
+- **[SH-WQ2 - Kontrolle und Override](./2021b_kontrolle.md)**
   - Kann der Nutzer Mining schnell stoppen/starten?
-- **[20.2.1c - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
+- **[SH-WQ3 - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
   - Ist die Haus-Reserve sichtbar und vertrauenswürdig?
 
 &nbsp;
@@ -153,13 +153,14 @@ Beispiel Topics:
 
 ## Annahmen und Risiken
 
-- Nutzer wollen verstehen, nicht optimieren.
-- Lokales LLM und lokale Datenhaltung sind verfügbar (Privacy).
-- Zu viele Meldungen können nerven.
-- Falsches Timing der Meldung kann bevormundend wirken.
+| ID | Typ | Annahme/Risiko |
+|----|-----|----------------|
+| SH-ASSUM-01 | Annahme | Nutzer wollen verstehen, nicht optimieren. |
+| SH-ASSUM-02 | Annahme | Lokales LLM und lokale Datenhaltung sind verfügbar (Privacy). |
+| SH-RISK-01 | Risiko | Zu viele Meldungen können nerven. |
+| SH-RISK-02 | Risiko | Falsches Timing der Meldung kann bevormundend wirken. |
 
 &nbsp;
-
 ## Offene Fragen
 
 - Welche Visualisierung erklärt Mining am schnellsten?
@@ -170,7 +171,7 @@ Beispiel Topics:
 
 > **Nächster Schritt:** Starte mit den Unterseiten des Smart-Home-Kontexts.
 >
-> 👉 Weiter zu **[20.2.1a - Verstehen der Entscheidung](./2021a_transparenz.md)**
+> 👉 Weiter zu **[SH-WQ1 - Verstehen der Entscheidung](./2021a_transparenz.md)**
 >
 > 🔙 Zurück zur **[2 - Forschung](../../../README.md)** 
 >

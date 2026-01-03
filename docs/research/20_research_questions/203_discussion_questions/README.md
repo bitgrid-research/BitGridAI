@@ -1,4 +1,4 @@
-# 20.3 – Kontext- und Diskussionsfragen
+# DQ – Kontext- und Diskussionsfragen
 
 Nicht alle relevanten Aspekte dieses Projekts lassen sich
 im Rahmen der Systemgestaltung und Analyse vollständig untersuchen.
@@ -39,8 +39,8 @@ und mögliche Anschlussarbeiten zu skizzieren.
 > Im nächsten Kapitel werden daraus Gestaltungsprinzipien abgeleitet,
 > die als Grundlage für Architektur und Systemdesign dienen.
 >
-> 👉 Weiter zu **[21 – BitGrid-Prinzipien](../../21_bitgrid_principles/README.md)**
+> 👉 Weiter zu **[21 - BitGrid-Prinzipien](../../21_bitgrid_principles/README.md)**
 >
-> 🔙 Zurück zu **[20 – Forschungsfragen](../README.md)**  
+> 🔙 Zurück zu **[20 - Forschungsfragen](../README.md)**  
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

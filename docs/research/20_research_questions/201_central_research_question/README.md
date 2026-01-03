@@ -1,4 +1,4 @@
-# 20.1 – Zentrale Forschungsfrage
+# CRQ – Zentrale Forschungsfrage
 
 Automatisierung beginnt mit einer klaren Fragestellung.
 
@@ -22,7 +22,7 @@ und in alltägliche Routinen eingreifen.
 
 | ID | Fokus | Forschungsfrage | Zweck |
 |----|-------|------------------|-------|
-| FQ | Erklärbare Energieentscheidungen | Wie können lokale, regelbasierte Energiemanagementsysteme mit einem erklärenden KI-Layer gestaltet werden, sodass Nutzer die Steuerung flexibler Lasten nachvollziehen, kontrollieren und dem System vertrauen können? | Definition des thematischen Rahmens und Leitplanke für alle Gestaltungs-, Architektur- und Analyseentscheidungen |
+| CRQ | Erklärbare Energieentscheidungen | Wie können lokale, regelbasierte Energiemanagementsysteme mit einem erklärenden KI-Layer gestaltet werden, sodass Nutzer die Steuerung flexibler Lasten nachvollziehen, kontrollieren und dem System vertrauen können? | Definition des thematischen Rahmens und Leitplanke für alle Gestaltungs-, Architektur- und Analyseentscheidungen |
 
 &nbsp;
 
@@ -51,8 +51,8 @@ als eigenständige Gestaltungsziele zu betrachten.
 > Im nächsten Kapitel wird sie in konkrete Arbeitsfragen übersetzt,
 > die direkt in die Systemgestaltung und Analyse einfließen.
 >
-> 👉 Weiter zu **[20.2 – Zentrale Arbeitsfragen](../202_working_questions/README.md)**
+> 👉 Weiter zu **[WQ - Zentrale Arbeitsfragen](../202_working_questions/README.md)**
 >
-> 🔙 Zurück zu **[20 – Forschungsfragen](../README.md)**
+> 🔙 Zurück zu **[20 - Forschungsfragen](../README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**
