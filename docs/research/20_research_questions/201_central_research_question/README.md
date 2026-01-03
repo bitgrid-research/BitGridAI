@@ -17,9 +17,12 @@ und in alltägliche Routinen eingreifen.
 
 ## Zentrale Forschungsfrage
 
-***Wie können lokale, regelbasierte Energiemanagementsysteme gestaltet werden,
-sodass Nutzer Entscheidungen zur Nutzung von PV-Überschuss nachvollziehen
-und dem System vertrauen können?***
+## Zentrale Forschungsfrage (Übersicht)
+
+| ID | Fokus | Forschungsfrage | Zweck |
+|----|-------|------------------|-------|
+| FQ | Erklärbare Energieentscheidungen | Wie können lokale, regelbasierte Energiemanagementsysteme gestaltet werden, sodass Nutzer Entscheidungen zur Nutzung von PV-Überschuss nachvollziehen und dem System vertrauen können? | Definition des thematischen Rahmens und Leitplanke für alle Gestaltungs-, Architektur- und Analyseentscheidungen |
+
 
 Diese Frage bildet den Kern von BitGridAI
 und dient als Bezugspunkt für alle weiteren Gestaltungs-,
