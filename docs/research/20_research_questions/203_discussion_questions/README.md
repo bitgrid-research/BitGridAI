@@ -69,6 +69,6 @@ und mögliche Anschlussarbeiten zu skizzieren.
 >
 > 👉 Weiter zu **[21 – BitGrid-Prinzipien](../../21_bitgrid_principles/README.md)**
 >
-> 🏠 Zurück zu **[20 – Forschungsfragen](../README.md)**  
+> 🔙 Zurück zu **[20 – Forschungsfragen](../README.md)**  
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**
