@@ -1,13 +1,13 @@
 # 20.2 – Zentrale Arbeitsfragen
 
 Die zentrale Forschungsfrage beschreibt den thematischen Rahmen des Projekts.
-Um sie bearbeitbar zu machen, wird sie in konkrete Arbeitsfragen übersetzt.
+Um sie konkret bearbeiten zu können,
+wird sie in wenige, gezielt formulierte Arbeitsfragen übersetzt.
 
-Diese Arbeitsfragen leiten die Gestaltung, Implementierung
+Diese Fragen leiten Gestaltung, Implementierung
 und Analyse des Systems unmittelbar.
-Sie sind bewusst begrenzt formuliert und definieren,
-welche Aspekte im Projekt aktiv untersucht werden
-– und welche nicht.
+Sie legen fest, welche Aspekte untersucht werden
+– und welche bewusst ausgeklammert bleiben.
 
 &nbsp;
 
@@ -19,7 +19,7 @@ Welche systeminternen Informationen müssen sichtbar gemacht werden,
 damit Entscheidungen eines lokalen Energiemanagementsystems
 für Nutzer nachvollziehbar sind?
 
-Diese Frage richtet den Fokus auf Regeln, Systemzustände,
+Im Fokus stehen Regeln, Systemzustände,
 Schwellenwerte und zeitliche Abhängigkeiten,
 die zur Begründung einer Entscheidung herangezogen werden.
 
@@ -31,9 +31,9 @@ Wie beeinflusst die Sichtbarkeit von Entscheidungslogiken
 und Systemzuständen das Verständnis und das Vertrauen
 in automatisierte Energieentscheidungen?
 
-Untersucht wird, inwieweit Transparenz
-zu einem erhöhten Gefühl von Kontrolle führt
-oder bestehende Unsicherheiten reduziert.
+Untersucht wird,
+ob Transparenz das Gefühl von Kontrolle stärkt
+und Unsicherheiten im Umgang mit Automatisierung reduziert.
 
 ---
 
@@ -44,31 +44,56 @@ und ab welchem Punkt führt zusätzliche Komplexität
 zu Überforderung oder zum Verlust wahrgenommener Kontrolle?
 
 Diese Frage adressiert den Zielkonflikt
-zwischen funktionalem Anspruch des Systems
-und kognitiver Nachvollziehbarkeit für Nutzer.
+zwischen funktionalem Anspruch
+und kognitiver Nachvollziehbarkeit.
+
+&nbsp;
+
+## Nutzungskontexte der Arbeitsfragen
+
+Die Arbeitsfragen werden in zwei klar getrennten,
+aber auf derselben Systemlogik basierenden Kontexten betrachtet:
+
+- **Smart-Home-Kontext:**  
+  Untersuchung erklärbarer, regelbasierter Energieentscheidungen
+  im häuslichen Umfeld (z. B. App oder Dashboard),
+  mit Fokus auf Transparenz, Kontrolle und langfristiges Systemverständnis.
+
+- **Automotive User Interface:**  
+  Übertragung derselben Entscheidungslogik
+  auf ein Automotive-Interface.
+  Hier wird untersucht, wie Ladeentscheidungen
+  (z. B. *„Warum lädt das Auto gerade nicht?“*)
+  im Fahrzeugkontext verständlich kommuniziert werden können,
+  etwa über reduzierte Visualisierungen oder Sprachinteraktion.
+
+Das zugrunde liegende Energiemanagementsystem bleibt identisch.
+Unterschiedlich sind ausschließlich
+Interaktionskontext, Aufmerksamkeitssituation
+und Anforderungen an Darstellung und Tonalität.
 
 &nbsp;
 
 ## Rolle der Arbeitsfragen
 
-Die Arbeitsfragen sind nicht als Checkliste zu verstehen.
-Sie dienen als analytisches Raster,
+Die Arbeitsfragen sind kein Abarbeitungskatalog.
+Sie dienen als analytische Leitlinie,
 um Entwurfsentscheidungen, Systemverhalten
-und beobachtete Nutzungserfahrungen einzuordnen.
+und Nutzungserfahrungen einzuordnen.
 
 Nicht jede Frage wird isoliert beantwortet.
-Stattdessen werden sie im Zusammenspiel betrachtet,
-um Zusammenhänge zwischen Erklärbarkeit,
-Systemkomplexität und Nutzerwahrnehmung sichtbar zu machen.
+Erst ihr Zusammenspiel macht sichtbar,
+wie Erklärbarkeit, Systemkomplexität
+und Nutzerwahrnehmung zusammenhängen.
 
 ---
 
-> **Nächster Schritt:** Die Arbeitsfragen sind definiert.
+> **Nächster Schritt:** Die Arbeitsfragen sind festgelegt.
 > Im nächsten Kapitel werden weiterführende Aspekte gesammelt,
-> die zur Einordnung und Reflexion der Ergebnisse dienen,
-> jedoch nicht im Zentrum der Systementwicklung stehen.
+> die der Einordnung und Reflexion der Ergebnisse dienen.
 >
 > 👉 Weiter zu **[20.3 – Kontext- und Diskussionsfragen](./203_discussion_questions.md)**
 >
-> 🏠 Zurück zu **[20 – Forschungsfragen](./README.md)**  
+> 🏠 Zurück zu **[20 – Forschungsfragen](./README.md)**
+>  
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
