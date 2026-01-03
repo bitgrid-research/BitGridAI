@@ -1,8 +1,5 @@
 # 20 – Forschungsfragen
 
-
-## Worum geht es hier?
-
 Dieses Kapitel bündelt die Forschungsfragen,
 die den inhaltlichen Rahmen von BitGridAI festlegen.
 
