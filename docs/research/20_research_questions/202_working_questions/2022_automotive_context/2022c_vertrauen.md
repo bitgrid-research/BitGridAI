@@ -70,7 +70,7 @@ Wie muss der Pendler-Puffer im Auto-UI angezeigt werden (Ja/Nein, Prozent, Batte
 
 &nbsp;
 
-## Leitfaden (8-10 Fragen)
+## Leitfaden
 
 1) Siehst du sofort, ob du morgen fahren kannst?
 2) Was bedeutet "Puffer gesichert" für dich?

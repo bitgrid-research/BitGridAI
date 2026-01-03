@@ -70,7 +70,7 @@ Welche minimale Override-Interaktion (Sichtbarkeit, Aktion, Rückmeldung, Dauer)
 
 &nbsp;
 
-## Leitfaden (8-10 Fragen)
+## Leitfaden
 
 1) Was würdest du in dieser Situation tun?
 2) Wo würdest du eine Sofort-Aktion erwarten?

@@ -70,7 +70,7 @@ Wie kann das Smart-Home-Dashboard Entscheidungsgrund, Datenbasis und Startprogno
 
 &nbsp;
 
-## Leitfaden (8-10 Fragen)
+## Leitfaden
 
 1) Was glaubst du, passiert gerade?
 2) Warum läuft der Miner jetzt nicht?

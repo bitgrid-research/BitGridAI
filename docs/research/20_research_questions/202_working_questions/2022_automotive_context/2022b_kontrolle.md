@@ -70,7 +70,7 @@ Welche minimalen Eingriffe (One-Tap-Override, kurze Bestätigung, optionale Pend
 
 &nbsp;
 
-## Leitfaden (8-10 Fragen)
+## Leitfaden
 
 1) Was würdest du hier als Erstes tun?
 2) Findest du "Jetzt laden" sofort?

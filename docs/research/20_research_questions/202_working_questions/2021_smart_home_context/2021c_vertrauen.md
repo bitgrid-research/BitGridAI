@@ -70,7 +70,7 @@ Wie muss die Haus-Reserve im Smart-Home-UI visualisiert und formuliert werden, d
 
 &nbsp;
 
-## Leitfaden (8-10 Fragen)
+## Leitfaden
 
 1) Siehst du auf den ersten Blick, ob das Haus sicher ist?
 2) Was bedeutet der markierte Bereich?

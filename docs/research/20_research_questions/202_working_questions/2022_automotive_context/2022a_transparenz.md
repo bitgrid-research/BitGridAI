@@ -70,7 +70,7 @@ Wie kann das Auto-UI Gründe und Startzeit so kurz und klar kommunizieren (Text,
 
 &nbsp;
 
-## Leitfaden (8-10 Fragen)
+## Leitfaden
 
 1) Was ist dein erster Eindruck?
 2) Warum lädt das Auto gerade nicht?
