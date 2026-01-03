@@ -54,7 +54,5 @@ als eigenständige Gestaltungsziele zu betrachten.
 > 👉 Weiter zu **[20.2 – Zentrale Arbeitsfragen](../202_working_questions/README.md)**
 >
 > 🔙 Zurück zu **[20 – Forschungsfragen](../README.md)**
-> 
-> 🔙 Zurück zur **[Forschungsübersicht](../../README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**
