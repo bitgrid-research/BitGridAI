@@ -15,9 +15,9 @@ Sie legen fest, welche Aspekte untersucht werden
 
 | ID  | Fokus                         | Arbeitsfrage                                                                 | Betrachtete Aspekte |
 |-----|-------------------------------|--------------------------------------------------------------------------------|---------------------|
-| AQ1 | Nachvollziehbarkeit von Entscheidungen | Welche systeminternen Informationen müssen sichtbar gemacht werden, damit Entscheidungen eines lokalen Energiemanagementsystems für Nutzer nachvollziehbar sind? | Regeln, Systemzustände, Schwellenwerte, zeitliche Abhängigkeiten |
-| AQ2 | Sichtbarkeit und Vertrauen     | Wie beeinflusst die Sichtbarkeit von Entscheidungslogiken und Systemzuständen das Verständnis und das Vertrauen in automatisierte Energieentscheidungen? | Transparenz, Kontrollgefühl, Unsicherheiten im Umgang mit Automatisierung |
-| AQ3 | Komplexität und Verständlichkeit | Welche Formen von Regelkomplexität bleiben für Nutzer verständlich, und ab welchem Punkt führt zusätzliche Komplexität zu Überforderung oder zum Verlust wahrgenommener Kontrolle? | Regelkomplexität, kognitive Belastung, Zielkonflikt zwischen Funktion und Verständlichkeit |
+| AQ1 | Nachvollziehbarkeit von Entscheidungen | Welche systeminternen Informationen muessen sichtbar gemacht werden, damit Nutzer ein belastbares mentales Modell der Energiefluesse und der Entscheidungslogik entwickeln koennen? | Regeln, Systemzustaende, Schwellenwerte, zeitliche Abhaengigkeiten, mentale Modelle |
+| AQ2 | Kontrolle und Handlungsfreiheit | Welche minimale Kontrolle und Override-Optionen muessen vorhanden sein, damit Nutzer die Automatik als kontrollierbar wahrnehmen und situativ eingreifen koennen? | Override, Handlungsfreiheit, Rueckgaengig, Aufwand, Kostenhinweis |
+| AQ3 | Vertrauen und Sicherheit | Wie beeinflussen Erklaerungen und sichtbare Sicherheitsreserven das Vertrauen und die angemessene Nutzung automatisierter Energieentscheidungen? | Vertrauen, wahrgenommene Sicherheit, angemessene Nutzung, Risikoempfinden |
 
 &nbsp;
 

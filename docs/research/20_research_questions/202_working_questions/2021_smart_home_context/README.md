@@ -105,6 +105,7 @@ Der Nutzer sieht klar, warum und wann der Miner wieder startet.
 
 - BitGridAI trifft regelbasierte Entscheidungen (R1-R5).
 - Entscheidungen werden als Gruende und Prognosen ausgegeben.
+- Ein lokales Sprachmodell kann die Begruendungen in Alltagssprache uebersetzen.
 - Kommunikation ins UI via MQTT oder lokale API.
 
 Beispiel Topics:
@@ -169,14 +170,8 @@ Beispiel Topics:
 
 > **Naechster Schritt:** Starte mit den Unterseiten des Smart-Home-Kontexts.
 >
-> -> Weiter zu **[20.2.1a - Verstehen der Entscheidung](./2021a_transparenz.md)**
+> ?? Weiter zu **[20.2.1a - Verstehen der Entscheidung](./2021a_transparenz.md)**
 >
-> -> Weiter zu **[20.2.1b - Kontrolle und Override](./2021b_kontrolle.md)**
+> ?? Zurueck zu **[20.2 - Zentrale Arbeitsfragen](../README.md)**
 >
-> -> Weiter zu **[20.2.1c - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
->
-> -> Weiter zu **[20.2.2 - Automotive-Kontext](../2022_automotive_context/README.md)**
->
-> <- Zurueck zu **[20.2 - Zentrale Arbeitsfragen](../README.md)**
->
-> <- Zurueck zur **[Hauptuebersicht](../../../../README.md)**
+> ?? Zurueck zur **[Hauptuebersicht](../../../../README.md)**

@@ -1,105 +1,102 @@
 # Evaluation Framework / Evaluationsrahmen
 
-## Überblick / Overview
+## Ueberblick
 
-Das **Evaluation Framework** definiert die methodische Grundlage zur Bewertung von BitGridAI im Hinblick auf **Erklärbarkeit, Nutzbarkeit und Energieeffizienz**.
-Es kombiniert empirische HCI-Methoden mit technischer Leistungsanalyse und schafft damit eine Brücke zwischen Nutzerverhalten und Systemleistung.
-
-> The **Evaluation Framework** defines the methodological foundation for evaluating BitGridAI regarding **explainability, usability, and energy efficiency**.
-> It integrates empirical HCI methods with technical performance assessment, bridging user behavior and system functionality.
-
----
-
-## Evaluationsziele / Evaluation Goals
-
-1. **Erklärbarkeit messen** – Wie gut versteht der Nutzer Systementscheidungen in Echtzeit?
-2. **Energieeffizienz analysieren** – Wie viel Energie wird durch intelligente Laststeuerung eingespart?
-3. **Vertrauen bewerten** – Wie beeinflusst erklärbares Verhalten das Vertrauen in automatisierte Entscheidungen?
-4. **Interaktion untersuchen** – Wie intuitiv ist die Benutzeroberfläche im Zusammenspiel mit Smart‑Energy‑Systemen?
-5. **Transparenzvalidierung** – Wie konsistent und überprüfbar sind Systemlogs und Entscheidungsbegründungen?
-
-> 1) **Measure explainability** – How well do users understand system decisions in real time?
-> 2) **Analyze energy efficiency** – How much energy is saved through intelligent load management?
-> 3) **Assess trust** – How does explainable automation affect user trust?
-> 4) **Evaluate interaction** – How intuitive is the user interface in Smart Energy contexts?
-> 5) **Validate transparency** – How consistent and auditable are logs and decision explanations?
+Das Evaluation Framework beschreibt, wie BitGridAI im Rahmen einer
+Between-Subjects-Studie (Baseline vs. Explainability-Layer) bewertet wird.
+Im Fokus stehen Verstaendnis der Entscheidungslogik, Vertrauen,
+wahrgenommene Kontrolle, kognitive Belastung und Energieeffizienz.
 
 ---
 
-## Methodik / Methodology
+## Evaluationsziele
 
-| Ebene                    | Methode                                | Ziel                                                                    |
-| ------------------------ | -------------------------------------- | ----------------------------------------------------------------------- |
-| **Systemebene**          | Logging & Energiemessung               | Bewertung von Laststeuerung, Reaktionszeiten und Energieeffizienz       |
-| **Nutzerebene**          | Think‑Aloud & Interviews               | Untersuchung der mentalen Modelle und Akzeptanz erklärbarer Systeme     |
-| **Interaktionsebene**    | Task‑basierte Szenarien                | Messung von Verständlichkeit, Interaktionszeit und Fehlerraten          |
-| **Qualitative Analyse**  | Inhaltsanalyse                         | Ableitung von Mustern in Nutzerfeedback und Wahrnehmung von Transparenz |
-| **Quantitative Analyse** | Metriken (Energie, Nutzung, Vertrauen) | Objektive Vergleichswerte zur Leistungsbewertung                        |
-
-> | Level                     | Method                         | Objective                                                   |
-> | ------------------------- | ------------------------------ | ----------------------------------------------------------- |
-> | **System level**          | Logging & energy monitoring    | Evaluate load control, response times, and efficiency       |
-> | **User level**            | Think‑aloud & interviews       | Explore mental models and acceptance of explainable systems |
-> | **Interaction level**     | Task‑based scenarios           | Measure clarity, task time, and error rate                  |
-> | **Qualitative analysis**  | Content analysis               | Derive user perception and transparency patterns            |
-> | **Quantitative analysis** | Metrics (energy, usage, trust) | Provide comparable benchmarks for evaluation                |
+1. **Erklaerbarkeit messen** - Verstehen Nutzer die Gruende fuer Start/Stop?
+2. **Vertrauen und Kontrolle bewerten** - Fuehlen sich Nutzer handlungsfaehig?
+3. **Kognitive Belastung erfassen** - Fuehren Erklaerungen zu Mehrbelastung?
+4. **Energieeffizienz analysieren** - Welche Unterschiede zeigen sich zwischen den Varianten?
+5. **Transparenzvalidierung** - Sind Logs und UI-Begruendungen konsistent?
 
 ---
 
-## Evaluationsumgebung / Evaluation Environment
+## Studiendesign
 
-* **Hardware:** Lokale Workstation oder Edge‑System (z. B. Mini‑PC mit BitGrid Core Umgebung)
-* **Sensorik:** Virtuelle oder reale Smart‑Energy‑Datenquellen (PV, Speicher, Lasten)
-* **UI‑Plattform:** Browserbasiertes Dashboard / integrierte lokale Schnittstelle
-* **Datenerfassung:** JSON‑basierte Logfiles & strukturierte Nutzerstudien
-* **Teilnehmende:** 10–15 Proband:innen mit unterschiedlichem technischem Hintergrund
-
-> - **Hardware:** Local workstation or edge system (e.g., mini‑PC running BitGrid Core environment)
-> - **Sensors:** Real or simulated Smart Energy data sources (PV, storage, flexible loads)
-> - **UI platform:** Web‑based dashboard / integrated local interface
-> - **Data collection:** JSON logs & structured user studies
-> - **Participants:** 10–15 users with varied technical backgrounds
+- **Design:** Between-Subjects (Baseline-UI vs. Explainability-Layer).
+- **Stichprobe:** N=10, heterogener technischer Hintergrund.
+- **Dauer:** 10 Tage, taeglich 10-15 Min (Daily Diary Method).
+- **Aufgaben:** Speicher/PV-Status pruefen, Laststeuerung validieren, Override testen.
+- **Setting:** Smart-Home-Labor mit simulierten PV- und Batterieprofilen.
 
 ---
 
-## Bewertungsmetriken / Evaluation Metrics
+## Methodik
 
-| Kategorie             | Metrik                    | Beschreibung                                                             |
-| --------------------- | ------------------------- | ------------------------------------------------------------------------ |
-| **Explainability**    | Verständlichkeitsrate (%) | Anteil der erklärten Systementscheidungen, die korrekt verstanden werden |
-| **Energy Efficiency** | kWh‑Einsparung            | Differenz zwischen optimiertem und unoptimiertem Betrieb                 |
-| **Transparency**      | Log‑Integrität            | Vergleich zwischen interner Entscheidung und UI‑Darstellung              |
-| **User Trust**        | Vertrauen (Likert‑Skala)  | Subjektive Bewertung nach Szenario‑Interaktion                           |
-| **Usability**         | Task Completion Time      | Zeit bis zur erfolgreichen Benutzerreaktion                              |
-
-> | Category              | Metric                 | Description                                           |
-> | --------------------- | ---------------------- | ----------------------------------------------------- |
-> | **Explainability**    | Comprehension rate (%) | Share of system explanations correctly understood     |
-> | **Energy efficiency** | Energy savings (kWh)   | Difference between optimized and baseline operation   |
-> | **Transparency**      | Log consistency        | Comparison between internal and UI‑reported decisions |
-> | **User trust**        | Trust (Likert scale)   | Subjective user evaluation after interaction          |
-> | **Usability**         | Task completion time   | Time to successful user action                        |
+| Ebene                    | Methode                                               | Ziel                                                                  |
+| ------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------- |
+| **Systemebene**          | Logging, Energiemessung, Baseline/XAI-Vergleich        | Bewertung von Laststeuerung, Reaktionszeiten und Effizienz           |
+| **Nutzerebene**          | Daily Diary, Leitfaden-Interviews                     | Untersuchung mentaler Modelle, Verstaendnis, Vertrauen                |
+| **Interaktionsebene**    | Task-basierte Szenarien, Override-Tests               | Messung von Klarheit, Task-Zeit, Fehlerraten                           |
+| **Qualitative Analyse**  | Inhaltsanalyse (Diary + Interviews)                   | Muster in Wahrnehmung, Vertrauen, Kontrollgefuehl                      |
+| **Quantitative Analyse** | Metriken (SUS, NASA-TLX, Energie, Vertrauen, Logs)    | Vergleichbare Kennzahlen zwischen beiden Bedingungen                  |
 
 ---
 
-## Auswertung & Dokumentation / Evaluation & Reporting
+## Evaluationsumgebung
 
-* Ergebnisse werden in **Jupyter Notebooks** oder internen Analyse‑Dashboards visualisiert (z. B. Energieprofile, Nutzerfeedback, Vertrauensindizes).
-* Qualitative Daten (z. B. Interviewantworten) werden thematisch codiert und mit quantitativen Metriken korreliert.
-* Jede Evaluationsrunde endet mit einem **iterativen Verbesserungszyklus** (Design → Test → Analyse → Anpassung).
-
-> - Results are visualized using **Jupyter Notebooks** or internal analytics dashboards (e.g., energy profiles, feedback, trust indices).
-> - Qualitative data is thematically coded and correlated with quantitative metrics.
-> - Each evaluation cycle follows an **iterative improvement loop** (design → test → analyze → adapt).
+* **Hardware:** x86 Mini-PC mit UmbrelOS, UmbrelHome (4TB), Tablet fuer Dashboard,
+  ASIC-Lasten (Bitaxe Gamma, NerdQaxe++), Shelly Plug S Gen3.
+* **KI/Erklaerung:** lokales LLM via Ollama, quantisierte Modelle (Phi-3 Mini, Mistral 7B).
+* **Sensorik:** simulierte PV- und Batterieprofile, reale ASIC-Telemetrie.
+* **UI-Plattform:** lokales Dashboard in zwei Varianten (Baseline/XAI).
+* **Datenerfassung:** JSON-Logs, Erklaertexte, Nutzeraktionen.
 
 ---
 
-## Zusammenfassung / Summary
+## Erhebungsinstrumente
 
-Das Evaluationsrahmen dient als methodisches Rückgrat für die **Validierung von BitGridAI**.
-Es verknüpft **technische Messdaten mit menschlicher Wahrnehmung**, um sowohl Effizienz als auch Akzeptanz erklärbarer, lokal gesteuerter Energiesysteme zu messen.
+- **Daily Diary Eintraege** (kurze taegliche Interaktion, 10 Tage).
+- **Leitfaden-Interviews** zum Verstaendnis und Vertrauen.
+- **Frageboegen:** SUS (Usability) und NASA-TLX (Belastung).
+- **System-Logs:** Entscheidungen, Gruende, Overrides, Energiefluesse.
 
-> The evaluation framework provides the methodological backbone for **validating BitGridAI**.
-> It links **technical metrics with human perception** to assess both efficiency and acceptance of explainable, locally managed energy systems.
+---
 
+## Bewertungsmetriken
 
+| Kategorie              | Metrik                               | Beschreibung                                                         |
+| ---------------------- | ------------------------------------ | -------------------------------------------------------------------- |
+| **Explainability**     | Verstaendnisrate (%)                 | Anteil korrekt erklaerter Entscheidungen (Diary + Interview)         |
+| **Trust & Control**    | Vertrauen (Likert) / Override-Rate   | Subjektives Vertrauen und Eingriffsverhalten                         |
+| **Cognitive Load**     | NASA-TLX Score                       | Mentale Belastung pro Sitzung                                        |
+| **Usability**          | SUS / Task-Zeit                      | Subjektive Usability und objektive Task-Dauer                         |
+| **Energy Efficiency**  | kWh-Einsparung                       | Differenz zwischen Baseline und Explainability-Variante              |
+| **Transparency**       | Log-Konsistenz                       | Vergleich interner Entscheidung und UI-Begruendung                   |
+
+---
+
+## Auswertung & Dokumentation
+
+* Vergleich der beiden UI-Varianten (Baseline vs. Explainability) auf allen Metriken.
+* Triangulation aus Logs, Diarys, Interviews und Frageboegen.
+* Ergebnisdokumentation in Notebooks oder internen Dashboards
+  mit Fokus auf Erklaerqualitaet, Vertrauen und Nutzbarkeit.
+
+---
+
+## Zusammenfassung
+
+Der Evaluationsrahmen verbindet technische Messdaten mit Nutzerwahrnehmung,
+um die Wirkung eines erklaerenden KI-Layers auf Verstaendnis, Vertrauen,
+Kontrolle und Belastung zu pruefen. Die Studie liefert damit belastbare
+Gestaltungsimpulse fuer transparente, lokal ausgefuehrte Energiesysteme.
+
+---
+
+> **Naechster Schritt:** Der Evaluationsrahmen steht.
+> Im naechsten Kapitel folgt die Literaturuebersicht.
+>
+> 👉 Weiter zu **[29 - Literaturuebersicht](./literature_review.md)**
+>
+> 🔙 Zurueck zu **[22 - Interface Design](./22_interface_design/README.md)**
+>
+> 🏠 Zurueck zur **[Hauptuebersicht](../README.md)**

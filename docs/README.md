@@ -39,8 +39,9 @@ Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar un
 
 * [20 - Forschungsfragen](./research/20_research_questions/README.md)
 * [21 - BitGrid Prinzipien](./research/21_bitgrid_principles/README.md)
-* [22 - Evaluationsrahmen](./research/evaluation_framework.md)
-* [29 - Literaturübersicht](./research/literature_review.md)
+* [22 - Interface Design](./research/22_interface_design/README.md)
+* [23 - Evaluationsrahmen](./research/evaluation_framework.md)
+* [29 - Literatur?bersicht](./research/literature_review.md)
 
 <img src="./media/research.png" alt="Status" width="1000" />
 

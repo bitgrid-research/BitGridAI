@@ -124,8 +124,8 @@ Beispiel Topics:
 > **Naechster Schritt:** Danach folgen die Kontext- und Diskussionsfragen,
 > die den Ansatz reflektieren und abgrenzen.
 >
-> -> Weiter zu **[20.3 - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
+> ?? Weiter zu **[20.3 - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
 >
-> <- Zurueck zu **[20.2 - Zentrale Arbeitsfragen](../README.md)**
+> ?? Zurueck zu **[20.2 - Zentrale Arbeitsfragen](../README.md)**
 >
-> <- Zurueck zur **[Hauptuebersicht](../../../../README.md)**
+> ?? Zurueck zur **[Hauptuebersicht](../../../../README.md)**

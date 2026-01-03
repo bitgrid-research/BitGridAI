@@ -37,7 +37,7 @@ Ziel: Der Nutzer versteht in einfachen Worten, warum der Miner laeuft, pausiert 
 
 ## Abgeleitete Forschungsfrage
 
-Wie muss das Smart-Home-Dashboard den Grund einer Entscheidung zeigen, damit Nicht-Experten ihn in weniger als 30 Sekunden verstehen?
+Wie muessen Grund und Datenbasis einer Entscheidung im Smart-Home-Dashboard dargestellt werden, damit Nutzer ein mentales Modell der Energiefluesse bilden und die Begruendung schnell verstehen?
 
 &nbsp;
 
@@ -76,6 +76,6 @@ Wie muss das Smart-Home-Dashboard den Grund einer Entscheidung zeigen, damit Nic
 
 > **Naechster Schritt:** Als Naechstes geht es um Kontrolle und Override.
 >
-> -> Weiter zu **[20.2.1b - Kontrolle und Override](./2021b_kontrolle.md)**
+> ?? Weiter zu **[20.2.1b - Kontrolle und Override](./2021b_kontrolle.md)**
 >
-> <- Zurueck zu **[20.2.1 - Smart-Home-Kontext](./README.md)**
+> ?? Zurueck zu **[20.2.1 - Smart-Home-Kontext](./README.md)**

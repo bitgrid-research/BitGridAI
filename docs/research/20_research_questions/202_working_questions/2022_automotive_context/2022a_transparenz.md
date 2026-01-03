@@ -37,7 +37,7 @@ Ziel: Fahrer versteht in 2 Sekunden, warum das Auto laedt oder nicht.
 
 ## Abgeleitete Forschungsfrage
 
-Wie kurz und wie formuliert muessen Gruende im Auto-UI sein, damit sie im Vorbeigehen verstanden werden?
+Wie kurz und wie formuliert muessen Gruende im Auto-UI sein, damit Fahrer sie im Vorbeigehen verstehen und die Entscheidung nachvollziehen koennen?
 
 &nbsp;
 
@@ -76,6 +76,6 @@ Wie kurz und wie formuliert muessen Gruende im Auto-UI sein, damit sie im Vorbei
 
 > **Naechster Schritt:** Als Naechstes geht es um Kontrolle im Auto.
 >
-> -> Weiter zu **[20.2.2b - Kontrolle im Auto](./2022b_kontrolle.md)**
+> ?? Weiter zu **[20.2.2b - Kontrolle im Auto](./2022b_kontrolle.md)**
 >
-> <- Zurueck zu **[20.2.2 - Automotive-Kontext](./README.md)**
+> ?? Zurueck zu **[20.2.2 - Automotive-Kontext](./README.md)**

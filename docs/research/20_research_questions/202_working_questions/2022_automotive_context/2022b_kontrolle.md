@@ -37,7 +37,7 @@ Ziel: Fahrer kann mit 1-2 Aktionen eingreifen, ohne Ablenkung.
 
 ## Abgeleitete Forschungsfrage
 
-Welche minimale Interaktion im Auto-UI reicht aus, damit Fahrer sich in Kontrolle fuehlen?
+Welche minimale Interaktion im Auto-UI reicht aus, damit Fahrer sich in Kontrolle fuehlen und die Automatik als kontrollierbar wahrnehmen?
 
 &nbsp;
 
@@ -75,6 +75,6 @@ Welche minimale Interaktion im Auto-UI reicht aus, damit Fahrer sich in Kontroll
 
 > **Naechster Schritt:** Als Naechstes geht es um Vertrauen und Reichweitenangst.
 >
-> -> Weiter zu **[20.2.2c - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
+> ?? Weiter zu **[20.2.2c - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
 >
-> <- Zurueck zu **[20.2.2 - Automotive-Kontext](./README.md)**
+> ?? Zurueck zu **[20.2.2 - Automotive-Kontext](./README.md)**

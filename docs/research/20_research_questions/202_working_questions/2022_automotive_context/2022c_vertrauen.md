@@ -37,7 +37,7 @@ Ziel: Fahrer sieht klar, dass genug Reichweite fuer morgen bleibt.
 
 ## Abgeleitete Forschungsfrage
 
-Wie muss das Auto-UI den Pendler-Puffer zeigen, damit Reichweitenangst sinkt und Vertrauen entsteht?
+Wie muss das Auto-UI den Pendler-Puffer zeigen, damit Fahrer ihn nachvollziehen, Reichweitenangst sinkt und Vertrauen entsteht?
 
 &nbsp;
 
@@ -75,6 +75,6 @@ Wie muss das Auto-UI den Pendler-Puffer zeigen, damit Reichweitenangst sinkt und
 
 > **Naechster Schritt:** Danach folgen die Kontext- und Diskussionsfragen.
 >
-> -> Weiter zu **[20.3 - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
+> ?? Weiter zu **[20.3 - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
 >
-> <- Zurueck zu **[20.2.2 - Automotive-Kontext](./README.md)**
+> ?? Zurueck zu **[20.2.2 - Automotive-Kontext](./README.md)**

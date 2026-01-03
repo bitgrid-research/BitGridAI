@@ -12,3 +12,11 @@ und **Mensch-Computer-Interaktion (HCI)** im Kontext von BitGridAI enthalten.
 
 **Status:** in Planung / under construction  
 **Ziel:** Aufbau einer theoretischen Grundlage für BitGridAI
+
+---
+
+> **Endstation.**
+>
+> 🔙 Zurueck zu **[23 - Evaluationsrahmen](./evaluation_framework.md)**
+>
+> 🏠 Zurueck zur **[Hauptuebersicht](../README.md)**

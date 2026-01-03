@@ -37,7 +37,7 @@ Ziel: Nutzer sieht klar, dass genug Energie fuer das Haus bleibt.
 
 ## Abgeleitete Forschungsfrage
 
-Wie muss die Haus-Reserve im Smart-Home-UI dargestellt werden, damit Nutzer Vertrauen in die Automatik haben?
+Wie muss die Haus-Reserve im Smart-Home-UI dargestellt werden, damit Nutzer sie nachvollziehen und Vertrauen in die Automatik haben?
 
 &nbsp;
 
@@ -76,6 +76,6 @@ Wie muss die Haus-Reserve im Smart-Home-UI dargestellt werden, damit Nutzer Vert
 
 > **Naechster Schritt:** Danach geht es weiter mit dem Automotive-Kontext.
 >
-> -> Weiter zu **[20.2.2 - Automotive-Kontext](../2022_automotive_context/README.md)**
+> ?? Weiter zu **[20.2.2 - Automotive-Kontext](../2022_automotive_context/README.md)**
 >
-> <- Zurueck zu **[20.2.1 - Smart-Home-Kontext](./README.md)**
+> ?? Zurueck zu **[20.2.1 - Smart-Home-Kontext](./README.md)**

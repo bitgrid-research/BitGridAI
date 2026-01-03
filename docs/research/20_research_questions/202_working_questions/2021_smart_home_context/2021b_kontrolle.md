@@ -37,7 +37,7 @@ Ziel: Nutzer kann mit einem einfachen Schritt eingreifen, ohne die Automatik zu 
 
 ## Abgeleitete Forschungsfrage
 
-Welche minimale Kontrolle im Smart-Home-UI reicht aus, damit Nutzer sich handlungsfaehig fuehlen?
+Welche minimale Kontrolle im Smart-Home-UI reicht aus, damit Nutzer sich handlungsfaehig fuehlen und die Automatik als kontrollierbar wahrnehmen?
 
 &nbsp;
 
@@ -76,6 +76,6 @@ Welche minimale Kontrolle im Smart-Home-UI reicht aus, damit Nutzer sich handlun
 
 > **Naechster Schritt:** Als Naechstes geht es um Vertrauen und Sicherheit.
 >
-> -> Weiter zu **[20.2.1c - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
+> ?? Weiter zu **[20.2.1c - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
 >
-> <- Zurueck zu **[20.2.1 - Smart-Home-Kontext](./README.md)**
+> ?? Zurueck zu **[20.2.1 - Smart-Home-Kontext](./README.md)**

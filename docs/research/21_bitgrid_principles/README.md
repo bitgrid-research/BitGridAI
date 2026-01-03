@@ -41,10 +41,10 @@ und bilden den konzeptionellen Kern des Projekts.
 
 > **Nächster Schritt:** Die Prinzipien sind definiert.
 > Im nächsten Kapitel wird gezeigt,
-> wie sie sich konkret in Architektur, Regeln
-> und Systemverhalten widerspiegeln.
+> wie sie sich konkret im Interface-Design, in Regeln
+> und im Systemverhalten widerspiegeln.
 >
-> 👉 Weiter zu **[22 – Architektur & Systemmodell](../22_architecture/)**
+> 👉 Weiter zu **[22 – Interface Design](../22_interface_design/README.md)**
 >
 > 🔙 Zurück zu **[20 – Forschungsfragen](../20_research_questions/)**
 > 
