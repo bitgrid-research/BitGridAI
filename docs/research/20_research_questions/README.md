@@ -1,19 +1,19 @@
 # 20 – Forschungsfragen
 
-Worum geht es hier eigentlich?
 
-Dieses Projekt ist kein Technik-Demo und kein Optimierungswettbewerb.  
-Im Mittelpunkt steht eine einfache Frage:  
-Wie müssen automatisierte Energiesysteme gestaltet sein, damit Menschen ihre Entscheidungen verstehen und ihnen vertrauen können?
+## Worum geht es hier?
 
-Untersucht wird dies am Beispiel eines lokalen, regelbasierten Energiemanagementsystems,
-das Entscheidungen zur Nutzung von PV-Überschuss trifft
-und diese über unterschiedliche Schnittstellen kommuniziert
-(z. B. im Smart-Home- und Automotive-Kontext).
+Dieses Kapitel bündelt die Forschungsfragen,
+die den inhaltlichen Rahmen von BitGridAI festlegen.
 
-Statt möglichst viele Aspekte abzudecken,
-konzentriert sich das Projekt bewusst auf wenige, zentrale Fragen.
-Diese dienen als Leitplanke für Architektur, Implementierung und Analyse.
+Untersucht wird,
+wie ein lokales, regelbasiertes Energiemanagementsystem
+seine Entscheidungen zur Nutzung von PV-Überschuss
+für Menschen nachvollziehbar machen kann.
+
+Die Fragen dienen als Leitplanke
+für Architektur, Interface-Design und Analyse.
+
 
 &nbsp;
 
