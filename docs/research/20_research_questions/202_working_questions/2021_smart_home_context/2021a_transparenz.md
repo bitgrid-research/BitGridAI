@@ -35,6 +35,16 @@ Ziel: Der Nutzer versteht in einfachen Worten, warum der Miner läuft, pausiert 
 
 &nbsp;
 
+## Annahmen
+
+- Nutzer entscheiden anhand kurzer Gründe, ob sie warten oder manuell starten.
+- Ein Satz "Warum" plus eine klare Startprognose reduziert Nachfragen und Eingriffe.
+- Nutzer bauen ein mentales Modell, wenn Grund und Datenbasis sichtbar sind.
+- Erklärungen müssen in Alltagssprache sein; Fachbegriffe erzeugen Verwirrung.
+- Die Datenbasis ist verlässlich genug, um Entscheidungen in Echtzeit zu erklären.
+
+&nbsp;
+
 ## Abgeleitete Forschungsfrage
 
 Wie müssen Grund und Datenbasis einer Entscheidung im Smart-Home-Dashboard dargestellt werden, damit Nutzer ein mentales Modell der Energieflüsse bilden und die Begründung schnell verstehen?

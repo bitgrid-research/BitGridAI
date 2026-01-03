@@ -35,6 +35,16 @@ Ziel: Nutzer sieht klar, dass genug Energie für das Haus bleibt.
 
 &nbsp;
 
+## Annahmen
+
+- Eine sichtbare Haus-Reserve ist der zentrale Vertrauensanker.
+- "Haus gesichert: Ja/Nein" ist für Laien klarer als Detailwerte.
+- Nutzer wollen einen einstellbaren Puffer, greifen aber selten in Details ein.
+- Eine einfache Visualisierung reduziert Unsicherheit schneller als Diagramme.
+- Wenn die Reserve unklar ist, stoppen Nutzer Mining langfristig.
+
+&nbsp;
+
 ## Abgeleitete Forschungsfrage
 
 Wie muss die Haus-Reserve im Smart-Home-UI dargestellt werden, damit Nutzer sie nachvollziehen und Vertrauen in die Automatik haben?

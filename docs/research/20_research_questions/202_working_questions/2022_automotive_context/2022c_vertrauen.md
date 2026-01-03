@@ -35,6 +35,16 @@ Ziel: Fahrer sieht klar, dass genug Reichweite für morgen bleibt.
 
 &nbsp;
 
+## Annahmen
+
+- Reichweitenangst sinkt, wenn ein sicherer Puffer klar ausgewiesen ist.
+- "Bereit für morgen: Ja/Nein" ist schneller erfassbar als Prozentwerte.
+- Nutzer erwarten, dass V2H den Pendlerpuffer nie unterschreitet.
+- Eine einfache Batterievisualisierung ist verständlicher als Diagramme.
+- Wenn der Puffer unklar ist, deaktivieren Nutzer die Automatik.
+
+&nbsp;
+
 ## Abgeleitete Forschungsfrage
 
 Wie muss das Auto-UI den Pendler-Puffer zeigen, damit Fahrer ihn nachvollziehen, Reichweitenangst sinkt und Vertrauen entsteht?

@@ -35,6 +35,16 @@ Ziel: Fahrer versteht in 2 Sekunden, warum das Auto lädt oder nicht.
 
 &nbsp;
 
+## Annahmen
+
+- Fahrer haben maximal 2 Sekunden Aufmerksamkeit; Texte müssen extrem kurz sein.
+- Ein Grund plus Startzeit reicht, um die Entscheidung zu akzeptieren.
+- Ohne Erklärung wird "Nicht laden" als Fehler interpretiert.
+- Icons plus kurzer Text sind schneller als nur Text.
+- Eine optionale Voice-Ansage kann die visuelle Info bestätigen.
+
+&nbsp;
+
 ## Abgeleitete Forschungsfrage
 
 Wie kurz und wie formuliert müssen Gründe im Auto-UI sein, damit Fahrer sie im Vorbeigehen verstehen und die Entscheidung nachvollziehen können?

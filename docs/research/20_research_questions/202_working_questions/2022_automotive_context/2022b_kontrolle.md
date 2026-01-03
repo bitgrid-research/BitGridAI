@@ -35,6 +35,16 @@ Ziel: Fahrer kann mit 1-2 Aktionen eingreifen, ohne Ablenkung.
 
 &nbsp;
 
+## Annahmen
+
+- Fahrer brauchen eine Ein-Klick-Aktion ("Jetzt laden") ohne Menüs.
+- Bestätigungen müssen kurz sein und die Aktion sofort sichtbar machen.
+- Override ist selten, aber in Stresssituationen entscheidend.
+- Eine optionale Pendlerfrage darf nicht stören und muss in 1 Tap beantwortet sein.
+- Sprachaktion kann sinnvoll sein, wenn Tippen ablenkt.
+
+&nbsp;
+
 ## Abgeleitete Forschungsfrage
 
 Welche minimale Interaktion im Auto-UI reicht aus, damit Fahrer sich in Kontrolle fühlen und die Automatik als kontrollierbar wahrnehmen?

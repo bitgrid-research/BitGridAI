@@ -35,6 +35,16 @@ Ziel: Nutzer kann mit einem einfachen Schritt eingreifen, ohne die Automatik zu 
 
 &nbsp;
 
+## Annahmen
+
+- Nutzer wollen in Ausnahmesituationen einen sofortigen Override, ohne die Automatik dauerhaft zu verlieren.
+- Ein großer, klarer Button reicht; mehrstufige Menüs werden vermieden.
+- Eine kurze Bestätigung und ein sichtbarer Timer geben Sicherheit.
+- Nutzer akzeptieren kurzfristig weniger Ertrag, wenn sie Kontrolle haben.
+- Wenn der Override versteckt ist, schalten Nutzer die Automatik komplett aus.
+
+&nbsp;
+
 ## Abgeleitete Forschungsfrage
 
 Welche minimale Kontrolle im Smart-Home-UI reicht aus, damit Nutzer sich handlungsfähig fühlen und die Automatik als kontrollierbar wahrnehmen?
