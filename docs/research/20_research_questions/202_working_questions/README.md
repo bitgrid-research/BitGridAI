@@ -13,39 +13,11 @@ Sie legen fest, welche Aspekte untersucht werden
 
 ## Zentrale Arbeitsfragen
 
-### AQ1 – Nachvollziehbarkeit von Entscheidungen
-
-Welche systeminternen Informationen müssen sichtbar gemacht werden,
-damit Entscheidungen eines lokalen Energiemanagementsystems
-für Nutzer nachvollziehbar sind?
-
-Im Fokus stehen Regeln, Systemzustände,
-Schwellenwerte und zeitliche Abhängigkeiten,
-die zur Begründung einer Entscheidung herangezogen werden.
-
----
-
-### AQ2 – Sichtbarkeit und Vertrauen
-
-Wie beeinflusst die Sichtbarkeit von Entscheidungslogiken
-und Systemzuständen das Verständnis und das Vertrauen
-in automatisierte Energieentscheidungen?
-
-Untersucht wird,
-ob Transparenz das Gefühl von Kontrolle stärkt
-und Unsicherheiten im Umgang mit Automatisierung reduziert.
-
----
-
-### AQ3 – Komplexität und Verständlichkeit
-
-Welche Formen von Regelkomplexität bleiben für Nutzer verständlich,
-und ab welchem Punkt führt zusätzliche Komplexität
-zu Überforderung oder zum Verlust wahrgenommener Kontrolle?
-
-Diese Frage adressiert den Zielkonflikt
-zwischen funktionalem Anspruch
-und kognitiver Nachvollziehbarkeit.
+| ID  | Fokus                         | Arbeitsfrage                                                                 | Betrachtete Aspekte |
+|-----|-------------------------------|--------------------------------------------------------------------------------|---------------------|
+| AQ1 | Nachvollziehbarkeit von Entscheidungen | Welche systeminternen Informationen müssen sichtbar gemacht werden, damit Entscheidungen eines lokalen Energiemanagementsystems für Nutzer nachvollziehbar sind? | Regeln, Systemzustände, Schwellenwerte, zeitliche Abhängigkeiten |
+| AQ2 | Sichtbarkeit und Vertrauen     | Wie beeinflusst die Sichtbarkeit von Entscheidungslogiken und Systemzuständen das Verständnis und das Vertrauen in automatisierte Energieentscheidungen? | Transparenz, Kontrollgefühl, Unsicherheiten im Umgang mit Automatisierung |
+| AQ3 | Komplexität und Verständlichkeit | Welche Formen von Regelkomplexität bleiben für Nutzer verständlich, und ab welchem Punkt führt zusätzliche Komplexität zu Überforderung oder zum Verlust wahrgenommener Kontrolle? | Regelkomplexität, kognitive Belastung, Zielkonflikt zwischen Funktion und Verständlichkeit |
 
 &nbsp;
 
