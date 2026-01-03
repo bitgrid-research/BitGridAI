@@ -75,7 +75,5 @@ und Nutzerwahrnehmung zusammenhängen.
 > 👉 Weiter zu **[20.3 – Kontext- und Diskussionsfragen](../203_discussion_questions/README.md)**
 >
 > 🔙 Zurück zu **[20 – Forschungsfragen](../README.md)**
->  
-> 🔙 Zurück zur **[Forschungsübersicht](../../README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**
