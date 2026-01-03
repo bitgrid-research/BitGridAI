@@ -76,7 +76,7 @@ Welche minimale Override-Interaktion (Sichtbarkeit, Aktion, Rückmeldung, Dauer)
 2) Wo würdest du eine Sofort-Aktion erwarten?
 3) Ist der Knopf klar genug?
 4) Was würdest du als Bestätigung sehen wollen?
-5) Wie lange darf die Aktion gelten (z. B. 60 Min)Ö
+5) Wie lange darf die Aktion gelten (z. B. 60 Min)
 6) Würdest du eine Rückgängig-Taste nutzen?
 7) Wann würdest du die Automatik komplett ausschalten?
 8) Welche Info brauchst du vor dem Override (z. B. weniger Ertrag)Ö
