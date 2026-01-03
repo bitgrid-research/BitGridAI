@@ -16,39 +16,11 @@ ohne deren Fokus zu verwässern.
 
 ## Kontext- und Diskussionsfragen
 
-### DQ1 – Effizienz versus Erklärbarkeit
-
-Welche Zielkonflikte entstehen zwischen
-energetischer Effizienz, Systemkomplexität
-und der Nachvollziehbarkeit automatisierter Entscheidungen?
-
-Diese Frage dient dazu,
-Beobachtungen aus der Systemnutzung
-in Beziehung zu klassischen Optimierungszielen zu setzen.
-
----
-
-### DQ2 – Verzicht auf lernende Verfahren
-
-Welche Einschränkungen ergeben sich
-durch den bewussten Verzicht auf lernende
-oder datengetriebene Optimierungsverfahren?
-
-Hier steht nicht der direkte Vergleich im Vordergrund,
-sondern die Reflexion darüber,
-welche Eigenschaften erklärbarer Systeme
-durch diese Abgrenzung gewonnen oder verloren gehen.
-
----
-
-### DQ3 – Grenzen erklärbarer Automatisierung
-
-Welche Aspekte automatisierter Energieentscheidungen
-lassen sich nur eingeschränkt oder gar nicht erklären?
-
-Diese Frage adressiert prinzipielle Grenzen
-regelbasierter und erklärbarer Systeme
-und dient der kritischen Einordnung des Ansatzes.
+| ID  | Fokus                           | Diskussionsfrage                                                                 | Zweck der Einordnung |
+|-----|---------------------------------|-----------------------------------------------------------------------------------|----------------------|
+| DQ1 | Effizienz versus Erklärbarkeit  | Welche Zielkonflikte entstehen zwischen energetischer Effizienz, Systemkomplexität und der Nachvollziehbarkeit automatisierter Entscheidungen? | Einordnung von Beobachtungen im Spannungsfeld zwischen Optimierung und Verständlichkeit |
+| DQ2 | Verzicht auf lernende Verfahren | Welche Einschränkungen ergeben sich durch den bewussten Verzicht auf lernende oder datengetriebene Optimierungsverfahren? | Reflexion darüber, welche Eigenschaften erklärbarer Systeme gewonnen oder verloren gehen |
+| DQ3 | Grenzen erklärbarer Automatisierung | Welche Aspekte automatisierter Energieentscheidungen lassen sich nur eingeschränkt oder gar nicht erklären? | Kritische Einordnung prinzipieller Grenzen regelbasierter und erklärbarer Systeme |
 
 &nbsp;
 
