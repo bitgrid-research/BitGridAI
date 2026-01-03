@@ -21,11 +21,6 @@ und in alltägliche Routinen eingreifen.
 |----|-------|------------------|-------|
 | FQ | Erklärbare Energieentscheidungen | Wie können lokale, regelbasierte Energiemanagementsysteme gestaltet werden, sodass Nutzer Entscheidungen zur Nutzung von PV-Überschuss nachvollziehen und dem System vertrauen können? | Definition des thematischen Rahmens und Leitplanke für alle Gestaltungs-, Architektur- und Analyseentscheidungen |
 
-
-Diese Frage bildet den Kern von BitGridAI
-und dient als Bezugspunkt für alle weiteren Gestaltungs-,
-Architektur- und Analyseentscheidungen.
-
 &nbsp;
 
 ## Abgrenzung
