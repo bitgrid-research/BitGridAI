@@ -3,10 +3,10 @@
 Automatisierung beginnt mit einer klaren Fragestellung.
 
 Dieses Projekt untersucht lokale, regelbasierte Energiesysteme
-mit KI-gestuetzter Erklaerung (XAI) im Kontext der Nutzung von PV-Ueberschuss.
+mit KI-gestützter Erklärung (XAI) im Kontext der Nutzung von PV-Überschuss.
 Im Mittelpunkt steht nicht maximale energetische oder wirtschaftliche Optimierung,
-sondern die Frage, wie automatisierte Entscheidungen und ihre Begruendungen
-fuer Menschen transparent, nachvollziehbar und kontrollierbar werden.
+sondern die Frage, wie automatisierte Entscheidungen und ihre Begründungen
+für Menschen transparent, nachvollziehbar und kontrollierbar werden.
 
 Ausgangspunkt ist die Annahme,
 dass Transparenz und Verständlichkeit
@@ -14,7 +14,7 @@ zentrale Voraussetzungen für Vertrauen in automatisierte Systeme sind –
 insbesondere dann, wenn diese eigenständig handeln
 und in alltägliche Routinen eingreifen.
 
-*Verstaendnis entsteht, wenn Nutzer ein mentales Modell der Energiefluesse und der Entscheidungslogik aufbauen koennen.*
+*Verständnis entsteht, wenn Nutzer ein mentales Modell der Energieflüsse und der Entscheidungslogik aufbauen können.*
 
 &nbsp;
 
@@ -22,7 +22,7 @@ und in alltägliche Routinen eingreifen.
 
 | ID | Fokus | Forschungsfrage | Zweck |
 |----|-------|------------------|-------|
-| FQ | Erklaerbare Energieentscheidungen | Wie koennen lokale, regelbasierte Energiemanagementsysteme mit einem erklaerenden KI-Layer gestaltet werden, sodass Nutzer die Steuerung flexibler Lasten nachvollziehen, kontrollieren und dem System vertrauen koennen? | Definition des thematischen Rahmens und Leitplanke fuer alle Gestaltungs-, Architektur- und Analyseentscheidungen |
+| FQ | Erklärbare Energieentscheidungen | Wie können lokale, regelbasierte Energiemanagementsysteme mit einem erklärenden KI-Layer gestaltet werden, sodass Nutzer die Steuerung flexibler Lasten nachvollziehen, kontrollieren und dem System vertrauen können? | Definition des thematischen Rahmens und Leitplanke für alle Gestaltungs-, Architektur- und Analyseentscheidungen |
 
 &nbsp;
 
@@ -34,10 +34,10 @@ im Sinne maximaler Effizienz oder minimaler Kosten.
 Auch der direkte Vergleich mit lernenden oder datengetriebenen Verfahren
 steht nicht im Fokus.
 Die Steuerung bleibt regelbasiert; KI wird ausschliesslich genutzt,
-um Entscheidungsgruende in Alltagssprache zu erklaeren.
+um Entscheidungsgründe in Alltagssprache zu erklären.
 
 Stattdessen konzentriert sich das Projekt auf:
-- erklaerbare Entscheidungslogiken und Begruendungen,
+- erklärbare Entscheidungslogiken und Begründungen,
 - lokale Ausführung ohne Cloud-Abhängigkeit,
 - deterministische Regeln als gestaltbares Mittel der Automatisierung.
 

@@ -1,6 +1,6 @@
 # 20.2.2a - Verstehen der Ladeentscheidung
 
-Ziel: Fahrer versteht in 2 Sekunden, warum das Auto laedt oder nicht.
+Ziel: Fahrer versteht in 2 Sekunden, warum das Auto lädt oder nicht.
 
 &nbsp;
 
@@ -19,7 +19,7 @@ Ziel: Fahrer versteht in 2 Sekunden, warum das Auto laedt oder nicht.
 - ROLLE: Fahrerin, sieht die Kurzinfo im Auto-UI
 - Ausbildung/Hintergrund: nicht technisch, will einfache Sprache
 - Kontext: kommt abends nach Hause, wenig Zeit
-- Typische Aufgaben: kurzer Blick aufs Display, ggf. Voice bestaetigen
+- Typische Aufgaben: kurzer Blick aufs Display, ggf. Voice bestätigen
 - Ziele: schnell verstehen, dann einfach loslassen
 - Frust/Probleme: "Nicht laden" ohne Grund
 - Erwartungen an UI: 1 Satz Grund + Startzeit, optional Voice
@@ -37,7 +37,7 @@ Ziel: Fahrer versteht in 2 Sekunden, warum das Auto laedt oder nicht.
 
 ## Abgeleitete Forschungsfrage
 
-Wie kurz und wie formuliert muessen Gruende im Auto-UI sein, damit Fahrer sie im Vorbeigehen verstehen und die Entscheidung nachvollziehen koennen?
+Wie kurz und wie formuliert müssen Gründe im Auto-UI sein, damit Fahrer sie im Vorbeigehen verstehen und die Entscheidung nachvollziehen können?
 
 &nbsp;
 
@@ -52,19 +52,19 @@ Wie kurz und wie formuliert muessen Gruende im Auto-UI sein, damit Fahrer sie im
 ## Leitfaden (8-10 Fragen)
 
 1) Was ist dein erster Eindruck?
-2) Warum laedt das Auto gerade nicht?
+2) Warum lädt das Auto gerade nicht?
 3) Welche Worte waren zu lang?
 4) Welche Info hat dir gefehlt?
 5) Erinnerst du dich an die Startzeit?
-6) Wuerdest du eine Voice-Ansage wollen?
+6) Würdest du eine Voice-Ansage wollen?
 7) Wenn ja, wie kurz soll sie sein?
 8) Welche Darstellung ist am klarsten: Icon, Text, beides?
-9) Wann wuerdest du eine Meldung wegdruecken?
-10) Was wuerde dich beruhigen?
+9) Wann würdest du eine Meldung wegdrücken?
+10) Was würde dich beruhigen?
 
 &nbsp;
 
-## UI fuer Dummies (Kindergartenfassung)
+## UI für Dummies (Kindergartenfassung)
 
 - Grosses Symbol (Stecker + Haus).
 - Eine Zeile Grund.
@@ -74,8 +74,8 @@ Wie kurz und wie formuliert muessen Gruende im Auto-UI sein, damit Fahrer sie im
 
 ---
 
-> **Naechster Schritt:** Als Naechstes geht es um Kontrolle im Auto.
+> **Nächster Schritt:** Als Nächstes geht es um Kontrolle im Auto.
 >
-> ?? Weiter zu **[20.2.2b - Kontrolle im Auto](./2022b_kontrolle.md)**
+> 👉 Weiter zu **[20.2.2b - Kontrolle im Auto](./2022b_kontrolle.md)**
 >
-> ?? Zurueck zu **[20.2.2 - Automotive-Kontext](./README.md)**
+> 🔙 Zurück zu **[20.2.2 - Automotive-Kontext](./README.md)**

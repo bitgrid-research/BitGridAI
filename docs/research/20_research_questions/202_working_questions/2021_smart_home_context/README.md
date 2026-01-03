@@ -1,66 +1,66 @@
 # 20.2.1 - Smart-Home-Kontext
 
 Der Smart-Home-Kontext beschreibt den Kern von BitGridAI:
-PV-Ueberschuss steuert Mining als flexible Last.
-Ziel ist nicht nur Optimierung, sondern eine verstaendliche,
-alltagstaugliche Erklaerung der Entscheidungen im lokalen Dashboard.
+PV-Überschuss steuert Mining als flexible Last.
+Ziel ist nicht nur Optimierung, sondern eine verständliche,
+alltagstaugliche Erklärung der Entscheidungen im lokalen Dashboard.
 
 &nbsp;
 
 ## Zielbild
 
 - Das Haus ist das Kontrollzentrum: Nutzer sehen, was passiert und warum.
-- Entscheidungen werden als klare Gruende, Trigger und Parameter erklaert.
+- Entscheidungen werden als klare Gründe, Trigger und Parameter erklärt.
 - Die Haus-Reserve (R2) ist sichtbar und nachvollziehbar.
-- Automatisierung fuehlt sich wie Unterstuetzung an, nicht wie Kontrollverlust.
+- Automatisierung fühlt sich wie Unterstützung an, nicht wie Kontrollverlust.
 
 &nbsp;
 
 ## Unterseiten
 
 - **[20.2.1a - Verstehen der Entscheidung](./2021a_transparenz.md)**
-  - Warum laeuft, pausiert oder stoppt der Miner?
+  - Warum läuft, pausiert oder stoppt der Miner?
 - **[20.2.1b - Kontrolle und Override](./2021b_kontrolle.md)**
   - Kann der Nutzer Mining schnell stoppen/starten?
 - **[20.2.1c - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
-  - Ist die Haus-Reserve sichtbar und vertrauenswuerdig?
+  - Ist die Haus-Reserve sichtbar und vertrauenswürdig?
 
 &nbsp;
 
 ## Kernproblem (Smart Home)
 
-- PV-Ueberschuss schwankt staendig, Mining ist flexibel.
-- Ohne Erklaerung wirkt das Verhalten des Systems willkuerlich.
-- Nutzer sehen nur Status ("Miner an/aus"), aber keine Begruendung.
+- PV-Überschuss schwankt ständig, Mining ist flexibel.
+- Ohne Erklärung wirkt das Verhalten des Systems willkürlich.
+- Nutzer sehen nur Status ("Miner an/aus"), aber keine Begründung.
 
-Design-Opportunity: Ein Dashboard, das Energiefluesse visualisiert
-und Entscheidungen transparent erklaert.
+Design-Opportunity: Ein Dashboard, das Energieflüsse visualisiert
+und Entscheidungen transparent erklärt.
 
 &nbsp;
 
 ## System-Logik und Datenbasis (Gehirn)
 
 Eingangsdaten:
-- PV-Leistung, Prognose, erwarteter Ueberschuss.
+- PV-Leistung, Prognose, erwarteter Überschuss.
 - Hausverbrauch, Grundlast, Speicher-SoC.
 - Netzpreis und Einspeisetarif (optional).
 - Miner-Telemetrie: Temperatur, Leistung, Heartbeat.
-- Nutzerpraeferenzen: Ruhezeiten, max Netzbezug, Override-Timeout.
+- Nutzerpräferenzen: Ruhezeiten, max Netzbezug, Override-Timeout.
 
 Regel-Logik (R1-R5):
-1) R1: Start Mining bei PV-Ueberschuss und guenstigen Bedingungen.
-2) R2: Haus-Reserve schuetzt die Grundversorgung (Veto gegen Mining).
+1) R1: Start Mining bei PV-Überschuss und günstigen Bedingungen.
+2) R2: Haus-Reserve schützt die Grundversorgung (Veto gegen Mining).
 3) R3: Safety Stop bei Temperatur oder Fehlern.
-4) R4: Forecast-Logik vermeidet unnoetige Starts.
-5) R5: Stabilitaet verhindert Flapping (Start/Stop im Minutenrhythmus).
+4) R4: Forecast-Logik vermeidet unnötige Starts.
+5) R5: Stabilität verhindert Flapping (Start/Stop im Minutenrhythmus).
 
 &nbsp;
 
 ## User Story (Wochenend-Szenario)
 
-Mittag: PV-Ueberschuss steigt, der Miner startet automatisch.
-Eine Wolke zieht durch: R5 haelt den Miner stabil statt hart zu stoppen.
-Abends sinkt der Ueberschuss: R2 greift, der Miner pausiert.
+Mittag: PV-Überschuss steigt, der Miner startet automatisch.
+Eine Wolke zieht durch: R5 hält den Miner stabil statt hart zu stoppen.
+Abends sinkt der Überschuss: R2 greift, der Miner pausiert.
 Der Nutzer sieht klar, warum und wann der Miner wieder startet.
 
 &nbsp;
@@ -73,12 +73,12 @@ Der Nutzer sieht klar, warum und wann der Miner wieder startet.
 - Status-Karten:
   - Miner: Status, Leistung, Temperatur.
   - Haus: Grundlast, Haus-Reserve "gesichert: Ja/Nein".
-  - Preis: aktueller kWh-Preis (gruen, wenn guenstig).
+  - Preis: aktueller kWh-Preis (grün, wenn günstig).
   - Aktion: "Miner starten" oder "Miner pausieren".
 
 ### Automatik und Grenzen (Einstellungen)
 
-- Haus-Reserve: gesperrter Bereich fuer die Grundversorgung.
+- Haus-Reserve: gesperrter Bereich für die Grundversorgung.
 - Ruhezeiten: Zeitfenster ohne Mining (z. B. nachts).
 - Modi:
   - Eco-Optimiert (Standard)
@@ -92,25 +92,25 @@ Der Nutzer sieht klar, warum und wann der Miner wieder startet.
 
 &nbsp;
 
-## Beispiel-Erklaerungen im Dashboard
+## Beispiel-Erklärungen im Dashboard
 
-- "Miner startet: PV-Ueberschuss > 3 kW."
+- "Miner startet: PV-Überschuss > 3 kW."
 - "Miner pausiert: Haus-Reserve erreicht."
 - "Miner stoppt: Temperatur zu hoch."
-- "Miner bleibt aktiv bis 10:30 (Stabilitaetsfenster)."
+- "Miner bleibt aktiv bis 10:30 (Stabilitätsfenster)."
 
 &nbsp;
 
 ## Technischer Rahmen (Skizze)
 
 - BitGridAI trifft regelbasierte Entscheidungen (R1-R5).
-- Entscheidungen werden als Gruende und Prognosen ausgegeben.
-- Ein lokales Sprachmodell kann die Begruendungen in Alltagssprache uebersetzen.
+- Entscheidungen werden als Gründe und Prognosen ausgegeben.
+- Ein lokales Sprachmodell kann die Begründungen in Alltagssprache übersetzen.
 - Kommunikation ins UI via MQTT oder lokale API.
 
 Beispiel Topics:
-- `bitgrid/decision/reason` -> "Start Mining: PV-Ueberschuss > 3 kW"
-- `bitgrid/prediction` -> "Naechster Check in 10 Min"
+- `bitgrid/decision/reason` -> "Start Mining: PV-Überschuss > 3 kW"
+- `bitgrid/prediction` -> "Nächster Check in 10 Min"
 
 &nbsp;
 
@@ -154,24 +154,24 @@ Beispiel Topics:
 ## Annahmen und Risiken
 
 - Nutzer wollen verstehen, nicht optimieren.
-- Lokales LLM und lokale Datenhaltung sind verfuegbar (Privacy).
-- Zu viele Meldungen koennen nerven.
+- Lokales LLM und lokale Datenhaltung sind verfügbar (Privacy).
+- Zu viele Meldungen können nerven.
 - Falsches Timing der Meldung kann bevormundend wirken.
 
 &nbsp;
 
 ## Offene Fragen
 
-- Welche Visualisierung erklaert Mining am schnellsten?
-- Welche Begruendung ist kurz und trotzdem hilfreich?
+- Welche Visualisierung erklärt Mining am schnellsten?
+- Welche Begründung ist kurz und trotzdem hilfreich?
 - Wie viel Kontrolle braucht der Nutzer im Alltag wirklich?
 
 ---
 
-> **Naechster Schritt:** Starte mit den Unterseiten des Smart-Home-Kontexts.
+> **Nächster Schritt:** Starte mit den Unterseiten des Smart-Home-Kontexts.
 >
-> ?? Weiter zu **[20.2.1a - Verstehen der Entscheidung](./2021a_transparenz.md)**
+> 👉 Weiter zu **[20.2.1a - Verstehen der Entscheidung](./2021a_transparenz.md)**
 >
-> ?? Zurueck zu **[20.2 - Zentrale Arbeitsfragen](../README.md)**
+> 🔙 Zurück zu **[20.2 - Zentrale Arbeitsfragen](../README.md)**
 >
-> ?? Zurueck zur **[Hauptuebersicht](../../../../README.md)**
+> 🔙 Zurück zur **[Hauptübersicht](../../../../README.md)**

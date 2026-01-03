@@ -15,9 +15,9 @@ Sie legen fest, welche Aspekte untersucht werden
 
 | ID  | Fokus                         | Arbeitsfrage                                                                 | Betrachtete Aspekte |
 |-----|-------------------------------|--------------------------------------------------------------------------------|---------------------|
-| AQ1 | Nachvollziehbarkeit von Entscheidungen | Welche systeminternen Informationen muessen sichtbar gemacht werden, damit Nutzer ein belastbares mentales Modell der Energiefluesse und der Entscheidungslogik entwickeln koennen? | Regeln, Systemzustaende, Schwellenwerte, zeitliche Abhaengigkeiten, mentale Modelle |
-| AQ2 | Kontrolle und Handlungsfreiheit | Welche minimale Kontrolle und Override-Optionen muessen vorhanden sein, damit Nutzer die Automatik als kontrollierbar wahrnehmen und situativ eingreifen koennen? | Override, Handlungsfreiheit, Rueckgaengig, Aufwand, Kostenhinweis |
-| AQ3 | Vertrauen und Sicherheit | Wie beeinflussen Erklaerungen und sichtbare Sicherheitsreserven das Vertrauen und die angemessene Nutzung automatisierter Energieentscheidungen? | Vertrauen, wahrgenommene Sicherheit, angemessene Nutzung, Risikoempfinden |
+| AQ1 | Nachvollziehbarkeit von Entscheidungen | Welche systeminternen Informationen müssen sichtbar gemacht werden, damit Nutzer ein belastbares mentales Modell der Energieflüsse und der Entscheidungslogik entwickeln können? | Regeln, Systemzustände, Schwellenwerte, zeitliche Abhängigkeiten, mentale Modelle |
+| AQ2 | Kontrolle und Handlungsfreiheit | Welche minimale Kontrolle und Override-Optionen müssen vorhanden sein, damit Nutzer die Automatik als kontrollierbar wahrnehmen und situativ eingreifen können? | Override, Handlungsfreiheit, Rückgängig, Aufwand, Kostenhinweis |
+| AQ3 | Vertrauen und Sicherheit | Wie beeinflussen Erklärungen und sichtbare Sicherheitsreserven das Vertrauen und die angemessene Nutzung automatisierter Energieentscheidungen? | Vertrauen, wahrgenommene Sicherheit, angemessene Nutzung, Risikömpfinden |
 
 &nbsp;
 

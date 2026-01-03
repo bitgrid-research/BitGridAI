@@ -5,9 +5,9 @@ die den inhaltlichen Rahmen von BitGridAI festlegen.
 
 Untersucht wird,
 wie ein lokales, regelbasiertes Energiemanagementsystem
-mit einem KI-gestuetzten Erklaerungs-Layer
-seine Entscheidungen zur Nutzung von PV-Ueberschuss
-fuer Menschen transparent, nachvollziehbar
+mit einem KI-gestützten Erklärungs-Layer
+seine Entscheidungen zur Nutzung von PV-Überschuss
+für Menschen transparent, nachvollziehbar
 und kontrollierbar machen kann.
 
 Die Fragen dienen als Leitplanke

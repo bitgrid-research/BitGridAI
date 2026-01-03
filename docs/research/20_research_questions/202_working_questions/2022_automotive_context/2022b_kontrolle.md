@@ -6,7 +6,7 @@ Ziel: Fahrer kann mit 1-2 Aktionen eingreifen, ohne Ablenkung.
 
 ## Proto-Problem-Statement
 
-- Das System wartet auf PV oder guenstigen Preis.
+- Das System wartet auf PV oder günstigen Preis.
 - Der Fahrer braucht aber manchmal sofortige Reichweite.
 - Wenn der Override nicht sichtbar ist, entsteht Stress.
 
@@ -19,10 +19,10 @@ Ziel: Fahrer kann mit 1-2 Aktionen eingreifen, ohne Ablenkung.
 - ROLLE: Fahrer, braucht schnellen Override im Fahrzeug
 - Ausbildung/Hintergrund: technikaffin, ungeduldig
 - Kontext: spontane Fahrt am Abend, Auto ist angesteckt
-- Typische Aufgaben: "Jetzt laden" tippen, Bestaetigung lesen
-- Ziele: schnell Reichweite, kein Menue
+- Typische Aufgaben: "Jetzt laden" tippen, Bestätigung lesen
+- Ziele: schnell Reichweite, kein Menü
 - Frust/Probleme: zu viele Schritte, kleine Buttons
-- Erwartungen an UI: grosser Button, kurze Bestaetigung, 1-2 Aktionen
+- Erwartungen an UI: grosser Button, kurze Bestätigung, 1-2 Aktionen
 
 &nbsp;
 
@@ -30,14 +30,14 @@ Ziel: Fahrer kann mit 1-2 Aktionen eingreifen, ohne Ablenkung.
 
 1) Felix sieht "Wartet auf PV".
 2) Er tippt "Jetzt laden".
-3) Das System bestaetigt und startet.
+3) Das System bestätigt und startet.
 4) Optional: Er beantwortet "Morgen zur Arbeit? Ja/Nein".
 
 &nbsp;
 
 ## Abgeleitete Forschungsfrage
 
-Welche minimale Interaktion im Auto-UI reicht aus, damit Fahrer sich in Kontrolle fuehlen und die Automatik als kontrollierbar wahrnehmen?
+Welche minimale Interaktion im Auto-UI reicht aus, damit Fahrer sich in Kontrolle fühlen und die Automatik als kontrollierbar wahrnehmen?
 
 &nbsp;
 
@@ -51,30 +51,30 @@ Welche minimale Interaktion im Auto-UI reicht aus, damit Fahrer sich in Kontroll
 
 ## Leitfaden (8-10 Fragen)
 
-1) Was wuerdest du hier als Erstes tun?
+1) Was würdest du hier als Erstes tun?
 2) Findest du "Jetzt laden" sofort?
 3) Ist der Knopf gross genug?
-4) Brauchst du eine Bestaetigung?
-5) Welche Info brauchst du vor dem Start (Preis, Zeit)?
-6) Ist die Frage "Morgen zur Arbeit?" hilfreich oder stoerend?
-7) Wuerdest du lieber eine Sprachaktion nutzen?
+4) Brauchst du eine Bestätigung?
+5) Welche Info brauchst du vor dem Start (Preis, Zeit)Ö
+6) Ist die Frage "Morgen zur Arbeit?" hilfreich oder störend?
+7) Würdest du lieber eine Sprachaktion nutzen?
 8) Wie lange darf der Override gelten?
-9) Wann wuerdest du die Automatik deaktivieren?
+9) Wann würdest du die Automatik deaktivieren?
 10) Was sollte noch einfacher werden?
 
 &nbsp;
 
-## UI fuer Dummies (Kindergartenfassung)
+## UI für Dummies (Kindergartenfassung)
 
 - Grosser Knopf "Jetzt laden".
-- Eine kurze Bestaetigung: "OK, startet jetzt".
+- Eine kurze Bestätigung: "OK, startet jetzt".
 - Eine Ja/Nein-Frage zur Pendlerfahrt.
-- Kein Untermenue, kein Scrollen.
+- Kein Untermenü, kein Scrollen.
 
 ---
 
-> **Naechster Schritt:** Als Naechstes geht es um Vertrauen und Reichweitenangst.
+> **Nächster Schritt:** Als Nächstes geht es um Vertrauen und Reichweitenangst.
 >
-> ?? Weiter zu **[20.2.2c - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
+> 👉 Weiter zu **[20.2.2c - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
 >
-> ?? Zurueck zu **[20.2.2 - Automotive-Kontext](./README.md)**
+> 🔙 Zurück zu **[20.2.2 - Automotive-Kontext](./README.md)**

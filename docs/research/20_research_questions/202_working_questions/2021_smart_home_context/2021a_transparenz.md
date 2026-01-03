@@ -1,14 +1,14 @@
 # 20.2.1a - Verstehen der Entscheidung (Transparenz)
 
-Ziel: Der Nutzer versteht in einfachen Worten, warum der Miner laeuft, pausiert oder stoppt.
+Ziel: Der Nutzer versteht in einfachen Worten, warum der Miner läuft, pausiert oder stoppt.
 
 &nbsp;
 
 ## Proto-Problem-Statement
 
-- Das Dashboard zeigt nur "Miner laeuft" oder "pausiert".
+- Das Dashboard zeigt nur "Miner läuft" oder "pausiert".
 - Der Nutzer weiss nicht, ob das Absicht oder ein Fehler ist.
-- Folge: Weniger Vertrauen und haeufigere Eingriffe.
+- Folge: Weniger Vertrauen und häufigere Eingriffe.
 
 &nbsp;
 
@@ -17,11 +17,11 @@ Ziel: Der Nutzer versteht in einfachen Worten, warum der Miner laeuft, pausiert 
 - Name: Nina NUTZER, 33
 - NUTZER: Prosumer (Privathaushalt mit PV + Miner)
 - ROLLE: Haushaltsbetreiberin, nutzt das Smart-Home-Dashboard
-- Ausbildung/Hintergrund: kaufmaennisch, technikoffen
-- Kontext: tagsueber zu Hause, prueft PV- und Miner-Status
-- Typische Aufgaben: Status lesen, Grund pruefen, Start/Stop verstehen
-- Ziele: PV-Ueberschuss nutzen, keine Netzlast erzeugen
-- Frust/Probleme: Miner steht trotz Sonne; Begruendung zu technisch
+- Ausbildung/Hintergrund: kaufmännisch, technikoffen
+- Kontext: tagsüber zu Hause, prüft PV- und Miner-Status
+- Typische Aufgaben: Status lesen, Grund prüfen, Start/Stop verstehen
+- Ziele: PV-Überschuss nutzen, keine Netzlast erzeugen
+- Frust/Probleme: Miner steht trotz Sonne; Begründung zu technisch
 - Erwartungen an UI: ein Satz "Warum", ein Satz "Wann", klare Vorhersage
 
 &nbsp;
@@ -29,7 +29,7 @@ Ziel: Der Nutzer versteht in einfachen Worten, warum der Miner laeuft, pausiert 
 ## Proto-Journey (Kurz)
 
 1) Nina sieht: Sonne da, Miner steht.
-2) Die App zeigt "Wartet auf stabilen Ueberschuss".
+2) Die App zeigt "Wartet auf stabilen Überschuss".
 3) Sie tippt auf den Status und sieht den Grund.
 4) Sie entscheidet: warten oder "Jetzt starten".
 
@@ -37,7 +37,7 @@ Ziel: Der Nutzer versteht in einfachen Worten, warum der Miner laeuft, pausiert 
 
 ## Abgeleitete Forschungsfrage
 
-Wie muessen Grund und Datenbasis einer Entscheidung im Smart-Home-Dashboard dargestellt werden, damit Nutzer ein mentales Modell der Energiefluesse bilden und die Begruendung schnell verstehen?
+Wie müssen Grund und Datenbasis einer Entscheidung im Smart-Home-Dashboard dargestellt werden, damit Nutzer ein mentales Modell der Energieflüsse bilden und die Begründung schnell verstehen?
 
 &nbsp;
 
@@ -52,21 +52,21 @@ Wie muessen Grund und Datenbasis einer Entscheidung im Smart-Home-Dashboard darg
 ## Leitfaden (8-10 Fragen)
 
 1) Was glaubst du, passiert gerade?
-2) Warum laeuft der Miner jetzt nicht?
+2) Warum läuft der Miner jetzt nicht?
 3) Welche Info fehlt dir, um sicher zu sein?
-4) Ist der Grund in einem Satz fuer dich klar?
-5) Was wuerdest du jetzt tun: warten oder starten?
+4) Ist der Grund in einem Satz für dich klar?
+5) Was würdest du jetzt tun: warten oder starten?
 6) Welche Stelle im UI hat dir am meisten geholfen?
 7) Was ist dir wichtiger: Energie sparen oder sofort starten?
-8) Wie wuerdest du den Grund einem Freund erklaeren?
+8) Wie würdest du den Grund einem Freund erklären?
 9) Welche Worte sind zu technisch?
-10) Was wuerdest du am Text aendern, damit es einfacher ist?
+10) Was würdest du am Text ändern, damit es einfacher ist?
 
 &nbsp;
 
-## UI fuer Dummies (Kindergartenfassung)
+## UI für Dummies (Kindergartenfassung)
 
-- Grosse Ampel: "Miner laeuft" / "Pausiert" / "Stoppt".
+- Grosse Ampel: "Miner läuft" / "Pausiert" / "Stoppt".
 - Ein Satz "Warum".
 - Ein Satz "Wann geht es weiter".
 - Ein Knopf "Mehr Info".
@@ -74,8 +74,8 @@ Wie muessen Grund und Datenbasis einer Entscheidung im Smart-Home-Dashboard darg
 
 ---
 
-> **Naechster Schritt:** Als Naechstes geht es um Kontrolle und Override.
+> **Nächster Schritt:** Als Nächstes geht es um Kontrolle und Override.
 >
-> ?? Weiter zu **[20.2.1b - Kontrolle und Override](./2021b_kontrolle.md)**
+> 👉 Weiter zu **[20.2.1b - Kontrolle und Override](./2021b_kontrolle.md)**
 >
-> ?? Zurueck zu **[20.2.1 - Smart-Home-Kontext](./README.md)**
+> 🔙 Zurück zu **[20.2.1 - Smart-Home-Kontext](./README.md)**

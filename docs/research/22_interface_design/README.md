@@ -1,7 +1,7 @@
 # 22 - Interface Design
 
-Dieses Kapitel uebersetzt die Forschungsfragen und Prinzipien in konkrete UI-Entscheidungen.
-Es gibt zwei Auspraegungen: Smart-Home-Dashboard und Automotive-In-Car-UI.
+Dieses Kapitel übersetzt die Forschungsfragen und Prinzipien in konkrete UI-Entscheidungen.
+Es gibt zwei Ausprägungen: Smart-Home-Dashboard und Automotive-In-Car-UI.
 Beide Varianten folgen derselben Logik (R1-R5), unterscheiden sich aber in Kontext, Aufmerksamkeit und Interaktion.
 
 &nbsp;
@@ -18,24 +18,24 @@ Beide Varianten folgen derselben Logik (R1-R5), unterscheiden sich aber in Konte
 ### Zielbild
 
 - Das Haus ist das Kontrollzentrum: Nutzer sehen Energiefluss und Entscheidung in einem Blick.
-- Entscheidungen sind begruendet, nicht nur angezeigt ("Warum" vor "Was").
-- Manuelle Kontrolle ist jederzeit moeglich, ohne die Automatik zu zerstoeren.
+- Entscheidungen sind begründet, nicht nur angezeigt ("Warum" vor "Was").
+- Manuelle Kontrolle ist jederzeit möglich, ohne die Automatik zu zerstören.
 
 &nbsp;
 
 ### Designprinzipien
 
-- **Erklaeren statt optimieren:** Primar geht es um Verstaendnis.
-- **Ursache vor Aktion:** Grund + Ausloeser vor Statuswechsel.
-- **Stabilitaet zeigen:** R5-Stabilitaetsfenster sichtbar machen.
-- **Haus-Reserve schuetzen:** R2 wird als klare Grenze visualisiert.
+- **Erklären statt optimieren:** Primar geht es um Verständnis.
+- **Ursache vor Aktion:** Grund + Auslöser vor Statuswechsel.
+- **Stabilität zeigen:** R5-Stabilitätsfenster sichtbar machen.
+- **Haus-Reserve schützen:** R2 wird als klare Grenze visualisiert.
 
 &nbsp;
 
 ### Informationsarchitektur (Kernbereiche)
 
 1) **Jetzt**: Live-Energiefluss (PV, Haus, Speicher, Miner, Netz).
-2) **Entscheidung**: Aktuelle Aktion + begruendeter Grund.
+2) **Entscheidung**: Aktuelle Aktion + begründeter Grund.
 3) **Kontrolle**: Override, Modi, Limits, Ruhezeiten.
 
 &nbsp;
@@ -51,22 +51,22 @@ Beide Varianten folgen derselben Logik (R1-R5), unterscheiden sich aber in Konte
 
 ### Interaktionen und Regeln
 
-- **Warum?** Link oeffnet Regel-Details (R1-R5) mit Datenbasis.
+- **Warum?** Link öffnet Regel-Details (R1-R5) mit Datenbasis.
 - **Override:** Einmaliges "Sofort starten/pausieren" mit Timeout.
-- **Stabilitaet:** Beim Start/Stop wird das Stabilitaetsfenster angezeigt.
+- **Stabilität:** Beim Start/Stop wird das Stabilitätsfenster angezeigt.
 
 &nbsp;
 
 ### Beispiel-Texts (Microcopy)
 
-- "Miner startet: PV-Ueberschuss > 3 kW."
+- "Miner startet: PV-Überschuss > 3 kW."
 - "Miner pausiert: Haus-Reserve erreicht."
-- "Miner bleibt aktiv bis 10:30 (Stabilitaetsfenster)."
+- "Miner bleibt aktiv bis 10:30 (Stabilitätsfenster)."
 - "Miner stoppt: Temperatur zu hoch."
 
 &nbsp;
 
-### Benoetigte Datenpunkte (UI-Sicht)
+### Benötigte Datenpunkte (UI-Sicht)
 
 - PV-Leistung, Hauslast, Speicher-SoC, Netzbezug.
 - Preisfenster und Forecast.
@@ -77,9 +77,9 @@ Beide Varianten folgen derselben Logik (R1-R5), unterscheiden sich aber in Konte
 
 ### Offene Fragen
 
-- Welche Visualisierung erklaert den Energiefluss am schnellsten?
+- Welche Visualisierung erklärt den Energiefluss am schnellsten?
 - Welche Detailtiefe ist im Alltag noch akzeptabel?
-- Wie wird "zu viele Meldungen" vermieden, ohne Erklaerung zu verlieren?
+- Wie wird "zu viele Meldungen" vermieden, ohne Erklärung zu verlieren?
 
 &nbsp;
 
@@ -87,9 +87,9 @@ Beide Varianten folgen derselben Logik (R1-R5), unterscheiden sich aber in Konte
 
 ### Zielbild
 
-- Das Auto erklaert Ladeentscheidungen in 1-2 Sekunden Blickdauer.
+- Das Auto erklärt Ladeentscheidungen in 1-2 Sekunden Blickdauer.
 - Proaktive, ruhige Kommunikation beim Anstecken.
-- Eine klare Override-Aktion ohne lange Menues.
+- Eine klare Override-Aktion ohne lange Menüs.
 
 &nbsp;
 
@@ -98,23 +98,23 @@ Beide Varianten folgen derselben Logik (R1-R5), unterscheiden sich aber in Konte
 - **Glanceable:** Kurz, gross, eindeutig.
 - **Warum + Wann:** Grund und Startzeitpunkt zuerst.
 - **Minimaler Eingriff:** Ein Button, keine komplexen Settings.
-- **Sicherheit:** Keine langen Interaktionen waehrend der Fahrt.
+- **Sicherheit:** Keine langen Interaktionen während der Fahrt.
 
 &nbsp;
 
 ### UI-Bausteine (Kernscreen)
 
 - **Statuszeile:** "Verbunden mit Home Grid".
-- **Grundsatzinfo:** "Warte auf PV-Ueberschuss" oder "Strompreis zu hoch".
+- **Grundsatzinfo:** "Warte auf PV-Überschuss" oder "Strompreis zu hoch".
 - **Prognose:** "Start in ca. 20 Min".
 - **Aktion:** "Sofort laden".
-- **Optionaler Check:** "Faehst du morgen zur Arbeit?"
+- **Optionaler Check:** "Fähst du morgen zur Arbeit?"
 
 &nbsp;
 
 ### Interaktionen und Regeln
 
-- **Beim Anstecken:** Sofortige Erklaerung + erwarteter Start.
+- **Beim Anstecken:** Sofortige Erklärung + erwarteter Start.
 - **Override:** Einmaliger Sofort-Start mit Kostenhinweis.
 - **Pendler-Puffer:** Abfrage bei niedriger Reichweite oder Zeitdruck.
 
@@ -123,12 +123,12 @@ Beide Varianten folgen derselben Logik (R1-R5), unterscheiden sich aber in Konte
 ### Beispielmeldungen (Persona)
 
 - "Ich warte mit dem Laden, bis mehr Sonne da ist. Start voraussichtlich um 14:10."
-- "Strom ist gerade teuer. Ich lade in 20 Minuten guenstiger."
+- "Strom ist gerade teuer. Ich lade in 20 Minuten günstiger."
 - "Okay, ich lade jetzt mit Netzstrom. Das kostet heute etwa 2 Euro mehr."
 
 &nbsp;
 
-### Benoetigte Datenpunkte (UI-Sicht)
+### Benötigte Datenpunkte (UI-Sicht)
 
 - Ladezustand, Ziel-SoC, Abfahrtszeit (optional).
 - PV-Prognose, Preisfenster, Haus-Reserve-Status.
@@ -138,17 +138,17 @@ Beide Varianten folgen derselben Logik (R1-R5), unterscheiden sich aber in Konte
 
 ### Offene Fragen
 
-- Welche Erklaerungslaenge ist im Auto noch akzeptabel?
-- Welche Trigger sind "proaktiv genug" ohne zu stoeren?
+- Welche Erklärungslänge ist im Auto noch akzeptabel?
+- Welche Trigger sind "proaktiv genug" ohne zu stören?
 - Wie werden Konflikte zwischen Fahrerwunsch und Haus-Reserve vermittelt?
 
 ---
 
-> **Naechster Schritt:** Das Interface-Design ist definiert.
-> Im naechsten Kapitel wird der Evaluationsrahmen beschrieben.
+> **Nächster Schritt:** Das Interface-Design ist definiert.
+> Im nächsten Kapitel wird der Evaluationsrahmen beschrieben.
 >
-> 👉 Weiter zu **[23 - Evaluationsrahmen](../evaluation_framework.md)**
+> 👉 Weiter zu **[23 - Evaluationsrahmen](../23_evaluation_framework/README.md)**
 >
-> 🔙 Zurueck zu **[21 - BitGrid Prinzipien](../21_bitgrid_principles/README.md)**
+> 🔙 Zurück zu **[21 - BitGrid Prinzipien](../21_bitgrid_principles/README.md)**
 >
-> 🏠 Zurueck zur **[Hauptuebersicht](../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
