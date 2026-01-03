@@ -149,6 +149,6 @@ Beide Varianten folgen derselben Logik (R1-R5), unterscheiden sich aber in Konte
 >
 > 👉 Weiter zu **[23 - Evaluationsrahmen](../23_evaluation_framework/README.md)**
 >
-> 🔙 Zurück zur **[Forschungsübersicht](../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../README.md)**
