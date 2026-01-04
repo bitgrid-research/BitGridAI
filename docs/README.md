@@ -57,10 +57,12 @@ Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar un
 
 &nbsp;
 
-### 3. Setup
+## 3. Entwicklung
 
-Damit du direkt loslegen kannst: Hier findest du alles zur Einrichtung deiner Entwicklungsumgebung und den ersten Schritten.
+Hier fuehren wir die Bausteine aus **1. Architektur** und **2. Forschung** zusammen und leiten daraus die Umsetzung der Software ab. Zum Start helfen dir die folgenden Einstiege:
 
+* [Architektur-Bausteine](./architecture/README.md)
+* [Forschungs-Bausteine](./research/README.md)
 * [30.1 - SSH unter Windows/Linux](./setup/ssh_windows_setup.md)
 * [30.2 - Entwicklungsumgebung](./setup/dev_environment.md)
 
