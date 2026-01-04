@@ -40,11 +40,10 @@ und bilden den konzeptionellen Kern des Projekts.
 ---
 
 > **Nächster Schritt:** Die Prinzipien sind definiert.
-> Im nächsten Kapitel wird gezeigt,
-> wie sie sich konkret im Interface-Design, in Regeln
-> und im Systemverhalten widerspiegeln.
+> Im nächsten Kapitel werden Annahmen und Grenzen festgehalten,
+> damit der Forschungsrahmen klar abgegrenzt ist.
 >
-> 👉 Weiter zu **[22 – Interface Design](../22_interface_design/README.md)**
+> 👉 Weiter zu **[22 - Annahmen & Grenzen](../22_assumptions_and_limits/README.md)**
 > 
 > 🔙 Zurück zu **[2 - Forschung](../README.md)**
 >

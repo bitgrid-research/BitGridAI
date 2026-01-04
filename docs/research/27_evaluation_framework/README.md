@@ -1,4 +1,4 @@
-# Evaluation Framework / Evaluationsrahmen
+# 27 - Evaluation Framework / Evaluationsrahmen
 
 ## Überblick
 
@@ -93,9 +93,9 @@ Gestaltungsimpulse für transparente, lokal ausgeführte Energiesysteme.
 ---
 
 > **Nächster Schritt:** Der Evaluationsrahmen steht.
-> Im nächsten Kapitel folgt die Literaturübersicht.
+> Im nächsten Kapitel folgen Reflexion & Transfer.
 >
-> 👉 Weiter zu **[29 - Literaturübersicht](../29_literature_review/README.md)**
+> 👉 Weiter zu **[28 - Reflexion & Transfer](../28_reflection_and_transfer/README.md)**
 >
 > 🔙 Zurück zu **[2 - Forschung](../README.md)**
 >

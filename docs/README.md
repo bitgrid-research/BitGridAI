@@ -42,8 +42,13 @@ Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar un
 
 * [20 - Forschungsfragen](./research/20_research_questions/README.md)
 * [21 - BitGrid Prinzipien](./research/21_bitgrid_principles/README.md)
-* [22 - Interface Design](./research/22_interface_design/README.md)
-* [23 - Evaluationsrahmen](./research/23_evaluation_framework/README.md)
+* [22 - Annahmen & Grenzen](./research/22_assumptions_and_limits/README.md)
+* [23 - Systemmodell & Entscheidungslogik](./research/23_system_model_and_decision_logic/README.md)
+* [24 - Erklärungsmodell](./research/24_explanation_model/README.md)
+* [25 - Interface Design](./research/25_interface_design/README.md)
+* [26 - Szenarien & Use Cases](./research/26_scenarios_and_use_cases/README.md)
+* [27 - Evaluationsrahmen](./research/27_evaluation_framework/README.md)
+* [28 - Reflexion & Transfer](./research/28_reflection_and_transfer/README.md)
 * [29 - Literaturübersicht](./research/29_literature_review/README.md)
 
 > Die vollständige *Kapitelübersicht der Forschung* inklusive Unterkapitel findest du in der [Kapitelübersicht](./research/README.md).
