@@ -26,6 +26,9 @@ So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.or
 * [10 - Qualitätsszenarien](./architecture/10_quality_scenarios/README.md)
 * [11 - Risiken & Technische Schulden](./architecture/11_risks_and_technical_debt/README.md)
 * [12 - Glossar](./architecture/12_glossary/README.md)
+
+Die vollständige Kapitelübersicht der Architektur inklusive Unterkapitel findest du in der [Kapitelübersicht](./architecture/README.md).
+
   
 <img src="./media/architectur.png" alt="Status" width="1000" />
 
@@ -42,6 +45,8 @@ Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar un
 * [22 - Interface Design](./research/22_interface_design/README.md)
 * [23 - Evaluationsrahmen](./research/23_evaluation_framework/README.md)
 * [29 - Literaturübersicht](./research/29_literature_review/README.md)
+
+Die vollständige Kapitelübersicht der Architektur inklusive Unterkapitel findest du in der [Kapitelübersicht](./research/README.md).
 
 <img src="./media/research.png" alt="Status" width="1000" />
 
