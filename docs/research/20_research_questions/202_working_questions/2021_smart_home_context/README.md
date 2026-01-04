@@ -175,4 +175,4 @@ Beispiel Topics:
 >
 > 🔙 Zurück zur **[2 - Forschung](../../../README.md)** 
 >
-> 🔙 Zurück zur **[Hauptübersicht](../../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../../README.md)**

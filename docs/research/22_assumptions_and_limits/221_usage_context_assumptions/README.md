@@ -14,8 +14,8 @@ Dieses Unterkapitel sammelt die Annahmen zum Nutzungskontext der Forschung.
 >
 > 👉 Weiter zu **[22.2 - Annahmen zur Systemumgebung & Datenlage](../222_system_environment_assumptions/README.md)**
 >
-> 👉 Zurück zu **[22 - Annahmen & Grenzen](../README.md)**
+> 🔙 Zurück zu **[22 - Annahmen & Grenzen](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

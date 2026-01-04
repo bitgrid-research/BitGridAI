@@ -5,11 +5,27 @@ und grenzt den Untersuchungsrahmen klar ab.
 
 &nbsp;
 
-## Kernpunkte
+## Annahmen zum Nutzungskontext
 
-- Nutzungskontext (Smart-Home, Automotive)
-- Systemumgebung & Datenlage (lokal, verfügbare Messwerte)
-- Grenzen & Nicht-Ziele
+- Zwei Kontexte: Smart-Home-Dashboard und Automotive-In-Car-UI.
+- Zielgruppe ohne Energie-Expertise; Erklärbarkeit vor Optimierung.
+- Kurze, wiederkehrende Interaktionen statt Dauerbeobachtung.
+
+&nbsp;
+
+## Annahmen zur Systemumgebung & Datenlage
+
+- Lokale Ausführung ohne Cloud-Backend.
+- Verfügbare Messwerte: PV-Leistung, Hauslast, Speicher-SoC, Netzbezug; optional Preis/Prognose.
+- Regeln, Zustände und Logs sind intern verfügbar.
+
+&nbsp;
+
+## Grenzen & Nicht-Ziele
+
+- Keine Aussage zur maximalen Wirtschaftlichkeit oder Netzoptimierung.
+- Keine vollumfängliche Produkt-UX; es geht um prototypische Leitlinien.
+- Keine Abdeckung aller Geräteklassen und Lastprofile.
 
 ---
 
@@ -18,6 +34,6 @@ und grenzt den Untersuchungsrahmen klar ab.
 >
 > 👉 Weiter zu **[23 - Systemmodell & Entscheidungslogik](../23_system_model_and_decision_logic/README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

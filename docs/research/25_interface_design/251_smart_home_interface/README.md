@@ -73,8 +73,8 @@
 >
 > 👉 Weiter zu **[25.2 - Automotive-Interface (In-Car-UI)](../252_automotive_interface/README.md)**
 >
-> 👉 Zurück zu **[25 - Interface Design](../README.md)**
+> 🔙 Zurück zu **[25 - Interface Design](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

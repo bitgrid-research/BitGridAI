@@ -14,8 +14,8 @@ Dieses Unterkapitel beschreibt, welche Teile des Ansatzes übertragbar sind.
 >
 > 👉 Weiter zu **[28.3 - Offene Fragen & Ausblick](../283_open_questions_and_outlook/README.md)**
 >
-> 👉 Zurück zu **[28 - Reflexion & Transfer](../README.md)**
+> 🔙 Zurück zu **[28 - Reflexion & Transfer](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

@@ -131,4 +131,4 @@ Beispiel Topics:
 >
 > 🔙 Zurück zur **[Forschungsübersicht](../../../README.md)**
 >
-> 🔙 Zurück zur **[Hauptübersicht](../../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../../README.md)**

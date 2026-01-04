@@ -14,8 +14,8 @@ Dieses Unterkapitel listet Use Cases, die in der Evaluation systematisch geprüf
 >
 > 👉 Weiter zu **[27 - Evaluationsrahmen](../../27_evaluation_framework/README.md)**
 >
-> 👉 Zurück zu **[26 - Szenarien & Use Cases](../README.md)**
+> 🔙 Zurück zu **[26 - Szenarien & Use Cases](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

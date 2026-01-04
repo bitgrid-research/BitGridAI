@@ -14,8 +14,8 @@ Dieses Unterkapitel fasst die Annahmen zur Systemumgebung und zur Datenlage zusa
 >
 > 👉 Weiter zu **[22.3 - Grenzen & Nicht-Ziele](../223_limits_and_non_goals/README.md)**
 >
-> 👉 Zurück zu **[22 - Annahmen & Grenzen](../README.md)**
+> 🔙 Zurück zu **[22 - Annahmen & Grenzen](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

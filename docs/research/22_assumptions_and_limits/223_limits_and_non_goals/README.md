@@ -14,8 +14,8 @@ Dieses Unterkapitel benennt, was ausdrücklich nicht untersucht wird und wo die 
 >
 > 👉 Weiter zu **[23 - Systemmodell & Entscheidungslogik](../../23_system_model_and_decision_logic/README.md)**
 >
-> 👉 Zurück zu **[22 - Annahmen & Grenzen](../README.md)**
+> 🔙 Zurück zu **[22 - Annahmen & Grenzen](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

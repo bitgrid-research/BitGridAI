@@ -15,8 +15,8 @@ Dieses Unterkapitel beschreibt, wie Regel- und Systemzustände in verständliche
 >
 > 👉 Weiter zu **[24.3 - Konsistenz zwischen Logs und UI-Begründung](../243_log_ui_consistency/README.md)**
 >
-> 👉 Zurück zu **[24 - Erklärungsmodell](../README.md)**
+> 🔙 Zurück zu **[24 - Erklärungsmodell](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

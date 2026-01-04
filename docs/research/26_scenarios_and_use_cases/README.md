@@ -17,6 +17,6 @@ adressiert. Sie dienen als Grundlage für Interface-Validierung und Evaluation.
 >
 > 👉 Weiter zu **[27 - Evaluationsrahmen](../27_evaluation_framework/README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

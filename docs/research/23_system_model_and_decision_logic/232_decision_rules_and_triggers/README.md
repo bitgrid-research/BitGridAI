@@ -14,8 +14,8 @@ Dieses Unterkapitel sammelt die Regeln und Auslöser, die das Systemverhalten be
 >
 > 👉 Weiter zu **[23.3 - Abgrenzung zur Architektur](../233_architecture_boundary/README.md)**
 >
-> 👉 Zurück zu **[23 - Systemmodell & Entscheidungslogik](../README.md)**
+> 🔙 Zurück zu **[23 - Systemmodell & Entscheidungslogik](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

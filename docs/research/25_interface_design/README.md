@@ -22,6 +22,6 @@ Die detaillierten UI-Varianten sind in den Unterkapiteln beschrieben.
 >
 > 👉 Weiter zu **[26 - Szenarien & Use Cases](../26_scenarios_and_use_cases/README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

@@ -21,6 +21,6 @@ dokumentiert.
 >
 > 👉 Weiter zu **[24 - Erklärungsmodell](../24_explanation_model/README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

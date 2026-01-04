@@ -14,8 +14,8 @@ Dieses Unterkapitel beschreibt die konzeptionellen Komponenten und ihre Datenfl�
 >
 > 👉 Weiter zu **[23.2 - Entscheidungsregeln & Auslöser](../232_decision_rules_and_triggers/README.md)**
 >
-> 👉 Zurück zu **[23 - Systemmodell & Entscheidungslogik](../README.md)**
+> 🔙 Zurück zu **[23 - Systemmodell & Entscheidungslogik](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

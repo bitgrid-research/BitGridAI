@@ -15,8 +15,8 @@ damit Entscheidungen nachvollziehbar bleiben.
 >
 > 👉 Weiter zu **[25 - Interface Design](../../25_interface_design/README.md)**
 >
-> 👉 Zurück zu **[24 - Erklärungsmodell](../README.md)**
+> 🔙 Zurück zu **[24 - Erklärungsmodell](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

@@ -14,8 +14,8 @@ Dieses Unterkapitel beschreibt typische In-Car-Situationen für Ladeentscheidung
 >
 > 👉 Weiter zu **[26.3 - Use Cases für Tests & Evaluation](../263_evaluation_use_cases/README.md)**
 >
-> 👉 Zurück zu **[26 - Szenarien & Use Cases](../README.md)**
+> 🔙 Zurück zu **[26 - Szenarien & Use Cases](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**

@@ -18,6 +18,6 @@ Ansatzes auf andere Kontexte übertragbar sind.
 >
 > 👉 Weiter zu **[29 - Literaturübersicht](../29_literature_review/README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

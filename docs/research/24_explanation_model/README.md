@@ -18,6 +18,6 @@ eine Erklärung hat und wie sie aus der Entscheidungslogik abgeleitet wird.
 >
 > 👉 Weiter zu **[25 - Interface Design](../25_interface_design/README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../README.md)**

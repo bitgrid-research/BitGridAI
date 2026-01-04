@@ -15,8 +15,8 @@ relevant sind.
 >
 > 👉 Weiter zu **[26.2 - Szenarien im Automotive-Kontext](../262_automotive_scenarios/README.md)**
 >
-> 👉 Zurück zu **[26 - Szenarien & Use Cases](../README.md)**
+> 🔙 Zurück zu **[26 - Szenarien & Use Cases](../README.md)**
 >
-> 👉 Zurück zu **[2 - Forschung](../../README.md)**
+> 🔙 Zurück zu **[2 - Forschung](../../README.md)**
 >
-> 👉 Zurück zur **[Hauptübersicht](../../../README.md)**
+> 🏠 Zurück zur **[Hauptübersicht](../../../README.md)**
