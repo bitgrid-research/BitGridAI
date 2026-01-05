@@ -1,4 +1,4 @@
-# AUTO-WQ3 - Vertrauen und Reichweitenangst
+# 20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst
 
 Ziel: Fahrer sieht klar, dass genug Reichweite für morgen bleibt.
 
@@ -104,6 +104,6 @@ Wie muss der Pendler-Puffer im Auto-UI angezeigt werden (Ja/Nein, Prozent, Batte
 
 > **Nächster Schritt:** Danach folgen die Kontext- und Diskussionsfragen.
 >
-> 👉 Weiter zu **[DQ - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
+> 👉 Weiter zu **[20.3 - DQ - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
 >
-> 🔙 Zurück zu **[AUTO-CONTEXT - Automotive-Kontext](./README.md)**
+> 🔙 Zurück zu **[20.2.2 - AUTO-CONTEXT - Automotive-Kontext](./README.md)**

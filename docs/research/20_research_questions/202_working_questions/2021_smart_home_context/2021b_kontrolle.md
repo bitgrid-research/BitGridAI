@@ -1,4 +1,4 @@
-# SH-WQ2 - Kontrolle und Override (Handlungsfreiheit)
+# 20.2.1.2 - SH-WQ2 - Kontrolle und Override (Handlungsfreiheit)
 
 Ziel: Nutzer kann mit einem einfachen Schritt eingreifen, ohne die Automatik zu verlieren.
 
@@ -105,6 +105,6 @@ Welche minimale Override-Interaktion (Sichtbarkeit, Aktion, Rückmeldung, Dauer)
 
 > **Nächster Schritt:** Als Nächstes geht es um Vertrauen und Sicherheit.
 >
-> 👉 Weiter zu **[SH-WQ3 - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
+> 👉 Weiter zu **[20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
 >
-> 🔙 Zurück zu **[SH-CONTEXT - Smart-Home-Kontext](./README.md)**
+> 🔙 Zurück zu **[20.2.1 - SH-CONTEXT - Smart-Home-Kontext](./README.md)**

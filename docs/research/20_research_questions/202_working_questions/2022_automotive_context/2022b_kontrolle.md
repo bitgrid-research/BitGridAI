@@ -1,4 +1,4 @@
-# AUTO-WQ2 - Kontrolle im Auto
+# 20.2.2.2 - AUTO-WQ2 - Kontrolle im Auto
 
 Ziel: Fahrer kann mit 1-2 Aktionen eingreifen, ohne Ablenkung.
 
@@ -104,6 +104,6 @@ Welche minimalen Eingriffe (One-Tap-Override, kurze Bestätigung, optionale Pend
 
 > **Nächster Schritt:** Als Nächstes geht es um Vertrauen und Reichweitenangst.
 >
-> 👉 Weiter zu **[AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
+> 👉 Weiter zu **[20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
 >
-> 🔙 Zurück zu **[AUTO-CONTEXT - Automotive-Kontext](./README.md)**
+> 🔙 Zurück zu **[20.2.2 - AUTO-CONTEXT - Automotive-Kontext](./README.md)**

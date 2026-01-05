@@ -1,4 +1,4 @@
-# AUTO-CONTEXT - Automotive-Kontext
+# 20.2.2 - AUTO-CONTEXT - Automotive-Kontext
 
 Der Automotive-Kontext fokussiert die Frage:
 "Warum lädt mein Auto gerade - oder warum nicht - und wie erklärt mir das System die Entscheidung?"
@@ -17,11 +17,11 @@ und eine saubere, alltagstaugliche Erklärung im Fahrzeug.
 
 ## Unterseiten (Template)
 
-- **[AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022a_transparenz.md)**
+- **[20.2.2.1 - AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022a_transparenz.md)**
   - Warum lädt das Auto gerade oder warum nicht?
-- **[AUTO-WQ2 - Kontrolle im Auto](./2022b_kontrolle.md)**
+- **[20.2.2.2 - AUTO-WQ2 - Kontrolle im Auto](./2022b_kontrolle.md)**
   - Kann der Fahrer einfach eingreifen?
-- **[AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
+- **[20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
   - Fühlt sich die Entscheidung im Auto sicher an?
 
 &nbsp;
@@ -125,9 +125,9 @@ Beispiel Topics:
 > **Nächster Schritt:** Danach folgen die Kontext- und Diskussionsfragen,
 > die den Ansatz reflektieren und abgrenzen.
 >
-> 👉 Weiter zu **[DQ - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
+> 👉 Weiter zu **[20.3 - DQ - Kontext- und Diskussionsfragen](../../203_discussion_questions/README.md)**
 >
-> 🔙 Zurück zu **[WQ - Zentrale Arbeitsfragen](../README.md)**
+> 🔙 Zurück zu **[20.2 - WQ - Zentrale Arbeitsfragen](../README.md)**
 >
 > 🔙 Zurück zur **[Forschungsübersicht](../../../README.md)**
 >

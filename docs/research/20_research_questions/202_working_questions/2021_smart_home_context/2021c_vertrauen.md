@@ -1,4 +1,4 @@
-# SH-WQ3 - Vertrauen und Sicherheit (Haus-Reserve)
+# 20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit (Haus-Reserve)
 
 Ziel: Nutzer sieht klar, dass genug Energie für das Haus bleibt.
 
@@ -105,6 +105,6 @@ Wie muss die Haus-Reserve im Smart-Home-UI visualisiert und formuliert werden, d
 
 > **Nächster Schritt:** Danach geht es weiter mit dem Automotive-Kontext.
 >
-> 👉 Weiter zu **[AUTO-CONTEXT - Automotive-Kontext](../2022_automotive_context/README.md)**
+> 👉 Weiter zu **[20.2.2 - AUTO-CONTEXT - Automotive-Kontext](../2022_automotive_context/README.md)**
 >
-> 🔙 Zurück zu **[SH-CONTEXT - Smart-Home-Kontext](./README.md)**
+> 🔙 Zurück zu **[20.2.1 - SH-CONTEXT - Smart-Home-Kontext](./README.md)**

@@ -20,13 +20,13 @@ für Architektur, Interface-Design und Analyse.
 
 Die Forschungsfragen sind in drei Ebenen gegliedert:
 
-* **[CRQ – Zentrale Forschungsfrage](./201_central_research_question/README.md)**
+* **[20.1 - CRQ – Zentrale Forschungsfrage](./201_central_research_question/README.md)**
     * Die übergeordnete Fragestellung, die den thematischen Rahmen festlegt.
 
-* **[WQ – Zentrale Arbeitsfragen](./202_working_questions/README.md)**
+* **[20.2 - WQ – Zentrale Arbeitsfragen](./202_working_questions/README.md)**
     * Konkrete Fragen, die direkt in System- und Interface-Entscheidungen einfließen.
 
-* **[DQ – Kontext- und Diskussionsfragen](./203_discussion_questions/README.md)**
+* **[20.3 - DQ – Kontext- und Diskussionsfragen](./203_discussion_questions/README.md)**
     * Weiterführende Fragen zur Einordnung und Abgrenzung des Ansatzes.
 
 ---

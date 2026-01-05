@@ -1,4 +1,4 @@
-# SH-CONTEXT - Smart-Home-Kontext
+# 20.2.1 - SH-CONTEXT - Smart-Home-Kontext
 
 Der Smart-Home-Kontext beschreibt den Kern von BitGridAI:
 PV-Überschuss steuert Mining als flexible Last.
@@ -18,11 +18,11 @@ alltagstaugliche Erklärung der Entscheidungen im lokalen Dashboard.
 
 ## Unterseiten
 
-- **[SH-WQ1 - Verstehen der Entscheidung](./2021a_transparenz.md)**
+- **[20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung](./2021a_transparenz.md)**
   - Warum läuft, pausiert oder stoppt der Miner?
-- **[SH-WQ2 - Kontrolle und Override](./2021b_kontrolle.md)**
+- **[20.2.1.2 - SH-WQ2 - Kontrolle und Override](./2021b_kontrolle.md)**
   - Kann der Nutzer Mining schnell stoppen/starten?
-- **[SH-WQ3 - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
+- **[20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
   - Ist die Haus-Reserve sichtbar und vertrauenswürdig?
 
 &nbsp;
@@ -171,7 +171,7 @@ Beispiel Topics:
 
 > **Nächster Schritt:** Starte mit den Unterseiten des Smart-Home-Kontexts.
 >
-> 👉 Weiter zu **[SH-WQ1 - Verstehen der Entscheidung](./2021a_transparenz.md)**
+> 👉 Weiter zu **[20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung](./2021a_transparenz.md)**
 >
 > 🔙 Zurück zur **[2 - Forschung](../../../README.md)** 
 >

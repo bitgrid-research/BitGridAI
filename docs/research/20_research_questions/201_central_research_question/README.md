@@ -1,4 +1,4 @@
-# CRQ – Zentrale Forschungsfrage
+# 20.1 - CRQ – Zentrale Forschungsfrage
 
 Automatisierung beginnt mit einer klaren Fragestellung.
 
@@ -51,7 +51,7 @@ als eigenständige Gestaltungsziele zu betrachten.
 > Im nächsten Kapitel wird sie in konkrete Arbeitsfragen übersetzt,
 > die direkt in die Systemgestaltung und Analyse einfließen.
 >
-> 👉 Weiter zu **[WQ - Zentrale Arbeitsfragen](../202_working_questions/README.md)**
+> 👉 Weiter zu **[20.2 - WQ - Zentrale Arbeitsfragen](../202_working_questions/README.md)**
 >
 > 🔙 Zurück zu **[20 - Forschungsfragen](../README.md)**
 >

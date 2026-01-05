@@ -1,4 +1,4 @@
-# SH-WQ1 - Verstehen der Entscheidung (Transparenz)
+# 20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung (Transparenz)
 
 Ziel: Der Nutzer versteht in einfachen Worten, warum der Miner läuft, pausiert oder stoppt.
 
@@ -105,6 +105,6 @@ Wie kann das Smart-Home-Dashboard Entscheidungsgrund, Datenbasis und Startprogno
 
 > **Nächster Schritt:** Als Nächstes geht es um Kontrolle und Override.
 >
-> 👉 Weiter zu **[SH-WQ2 - Kontrolle und Override](./2021b_kontrolle.md)**
+> 👉 Weiter zu **[20.2.1.2 - SH-WQ2 - Kontrolle und Override](./2021b_kontrolle.md)**
 >
-> 🔙 Zurück zu **[SH-CONTEXT - Smart-Home-Kontext](./README.md)**
+> 🔙 Zurück zu **[20.2.1 - SH-CONTEXT - Smart-Home-Kontext](./README.md)**

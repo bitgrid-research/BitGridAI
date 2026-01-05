@@ -1,4 +1,4 @@
-# WQ – Zentrale Arbeitsfragen
+# 20.2 - WQ – Zentrale Arbeitsfragen
 
 Die zentrale Forschungsfrage beschreibt den thematischen Rahmen des Projekts.
 Um sie konkret bearbeiten zu können,
@@ -26,25 +26,25 @@ Sie legen fest, welche Aspekte untersucht werden
 Die Arbeitsfragen werden in zwei klar getrennten,
 aber auf derselben Systemlogik basierenden Kontexten betrachtet:
 
-- **[Smart-Home-User-Interface-Kontext](./2021_smart_home_context/README.md):**  
+- **[20.2.1 - SH-CONTEXT - Smart-Home-Kontext](./2021_smart_home_context/README.md):**  
   Untersuchung erklärbarer, regelbasierter Energieentscheidungen
   im häuslichen Umfeld (z. B. App oder Web-Dashboard),
   mit Fokus auf Transparenz, Kontrolle und langfristiges Systemverständnis.
-  - [SH-WQ1 - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)
-  - [SH-WQ2 - Kontrolle und Override](./2021_smart_home_context/2021b_kontrolle.md)
-  - [SH-WQ3 - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)
+  - [20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)
+  - [20.2.1.2 - SH-WQ2 - Kontrolle und Override](./2021_smart_home_context/2021b_kontrolle.md)
+  - [20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)
 
 
-- **[Automotive-User-Interface-Kontext](./2022_automotive_context/README.md):**  
+- **[20.2.2 - AUTO-CONTEXT - Automotive-Kontext](./2022_automotive_context/README.md):**  
   Übertragung derselben Entscheidungslogik
   auf ein Automotive-Interface.
   Hier wird untersucht, wie Ladeentscheidungen
   (z. B. *„Warum lädt das Auto gerade nicht?“*)
   im Fahrzeugkontext verständlich kommuniziert werden können,
   etwa über reduzierte Visualisierungen oder Sprachinteraktion.
-  - [AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022_automotive_context/2022a_transparenz.md)
-  - [AUTO-WQ2 - Kontrolle im Auto](./2022_automotive_context/2022b_kontrolle.md)
-  - [AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)
+  - [20.2.2.1 - AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022_automotive_context/2022a_transparenz.md)
+  - [20.2.2.2 - AUTO-WQ2 - Kontrolle im Auto](./2022_automotive_context/2022b_kontrolle.md)
+  - [20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)
 
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
@@ -72,7 +72,7 @@ und Nutzerwahrnehmung zusammenhängen.
 > Im nächsten Kapitel werden weiterführende Aspekte gesammelt,
 > die der Einordnung und Reflexion der Ergebnisse dienen.
 >
-> 👉 Weiter zu **[DQ - Kontext- und Diskussionsfragen](../203_discussion_questions/README.md)**
+> 👉 Weiter zu **[20.3 - DQ - Kontext- und Diskussionsfragen](../203_discussion_questions/README.md)**
 >
 > 🔙 Zurück zu **[20 - Forschungsfragen](../README.md)**
 >

@@ -1,4 +1,4 @@
-# AUTO-WQ1 - Verstehen der Ladeentscheidung
+# 20.2.2.1 - AUTO-WQ1 - Verstehen der Ladeentscheidung
 
 Ziel: Fahrer versteht in 2 Sekunden, warum das Auto lädt oder nicht.
 
@@ -105,6 +105,6 @@ Wie kann das Auto-UI Gründe und Startzeit so kurz und klar kommunizieren (Text,
 
 > **Nächster Schritt:** Als Nächstes geht es um Kontrolle im Auto.
 >
-> 👉 Weiter zu **[AUTO-WQ2 - Kontrolle im Auto](./2022b_kontrolle.md)**
+> 👉 Weiter zu **[20.2.2.2 - AUTO-WQ2 - Kontrolle im Auto](./2022b_kontrolle.md)**
 >
-> 🔙 Zurück zu **[AUTO-CONTEXT - Automotive-Kontext](./README.md)**
+> 🔙 Zurück zu **[20.2.2 - AUTO-CONTEXT - Automotive-Kontext](./README.md)**
