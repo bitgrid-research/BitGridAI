@@ -44,7 +44,7 @@ Eingangsdaten:
 - PV-Leistung, Prognose, erwarteter Überschuss.
 - Hausverbrauch, Grundlast, Speicher-SoC.
 - Netzpreis und Einspeisetarif (optional).
-- Miner-Telemetrie: Temperatur, Leistung, Heartbeat.
+- Miner-Telemetrie: Temperatur, Leistung, Taktzyklus.
 - Nutzerpräferenzen: Ruhezeiten, max Netzbezug, Override-Timeout.
 
 Regel-Logik (R1-R5):
