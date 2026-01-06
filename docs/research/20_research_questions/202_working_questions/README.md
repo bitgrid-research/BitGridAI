@@ -1,6 +1,6 @@
 # 20.2 - WQ – Zentrale Arbeitsfragen
 
-Die zentrale Forschungsfrage beschreibt den thematischen Rahmen des Projekts.
+Die zentrale Forschungsfragen beschreibt den thematischen Rahmen des Projekts.
 Um sie konkret bearbeiten zu können,
 wird sie in wenige, gezielt formulierte Arbeitsfragen übersetzt.
 

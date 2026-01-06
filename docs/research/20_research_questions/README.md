@@ -31,7 +31,7 @@ Die Forschungsfragen sind in drei Ebenen gegliedert:
 
 ---
 
-<img src="../../media/bithamster_20.png" alt="Hamster denkt nach" width="1000" />
+<img src="../../media/research.png" alt="Research" width="1000" />
 
 ---
 

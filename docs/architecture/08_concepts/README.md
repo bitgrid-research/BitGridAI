@@ -64,5 +64,5 @@ Sie betreffen mehrere Bausteine gleichzeitig und bilden die technische „Sprach
 >
 > 👉 Weiter zu **[09 - Architektur- & Designentscheidungen](../09_design_decisions/README.md)**
 >
-> 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
+> 🔙 Zurück zur **[Hauptübersicht](../../README.md)**
 
