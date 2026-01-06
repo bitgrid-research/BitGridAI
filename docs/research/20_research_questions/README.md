@@ -25,6 +25,8 @@ Die Forschungsfragen sind in drei Ebenen gegliedert:
 
 * **[20.2 - WQ – Zentrale Arbeitsfragen](./202_working_questions/README.md)**
     * Konkrete Fragen, die direkt in System- und Interface-Entscheidungen einfließen.
+      
+&nbsp;
 
 * **[20.3 - DQ – Kontext- und Diskussionsfragen](./203_discussion_questions/README.md)**
     * Weiterführende Fragen zur Einordnung und Abgrenzung des Ansatzes.
