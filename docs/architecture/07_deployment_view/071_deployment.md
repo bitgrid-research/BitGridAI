@@ -44,8 +44,6 @@ Edge Host (Docker / Compose)
 - bitgrid-ui (Explain- & Control-UI)
 
 
-
-
 --> MQTT Topics (state/#, cmd/#, explain/#)
 
 Optionale Peers im LAN
