@@ -6,7 +6,6 @@ BitGridAI ist ein "Good Citizen" im Hausnetz. Das bedeutet: Wir klauen dem Haush
 
 R2 hat eine **höhere Priorität** als R1. Selbst wenn Mining profitabel wäre (R1=True), kann R2 ein Veto einlegen ("Ja, aber wir haben keinen Strom übrig").
 
-*(Platzhalter für ein Bild: Der Hamster stellt sich schützend vor die Hausbatterie und hält dem Miner ein Stoppschild hin.)*
 ![Hamster schützt die Batterie](../../media/bithamster_06.png)
 
 &nbsp;
