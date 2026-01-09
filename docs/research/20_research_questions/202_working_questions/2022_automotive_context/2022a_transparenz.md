@@ -1,106 +1,129 @@
-# 20.2.2.1 - AUTO-WQ1 - Verstehen der Ladeentscheidung
+# 20.2.2.1 – AUTO-WQ1 – Transparenz der Ladeentscheidung
 
-Ziel: Fahrer versteht in 2 Sekunden, warum das Auto lädt oder nicht.
+## Ziel
+Fahrende verstehen innerhalb von **2 Sekunden**, warum das Fahrzeug lädt oder nicht lädt.
 
-&nbsp;
+---
 
-## Proto-Problem-Statement
+## Relevante Persona (HCI-Modell)
 
-- Das Auto zeigt nur "Nicht laden".
-- Der Fahrer weiss nicht, ob das Absicht oder ein Fehler ist.
-- Folge: Frust und Misstrauen.
+**Persona:** Fiona Fokus  
+**Rolle:** Fahrerin im Smart-Home- und HEMS-Kontext  
+**Nutzungstyp:** Routine-Nutzung  
+**Technische Affinität:** gering bis mittel  
+**Primärer Nutzungskontext:** Ankunft zu Hause, geringe Aufmerksamkeit  
+**Mentales Modell:**  
+- Das System regelt Ladeentscheidungen autonom im Hintergrund  
+- Statusanzeigen dienen als kurze Bestätigung, nicht als Analysewerkzeug
 
-&nbsp;
+**Ziel der Persona:**  
+Die Ladeentscheidung kurz einordnen können, ohne weitere Interaktion oder Nachdenken.
 
-## Proto-Persona
+**Relevante Einschränkungen:**  
+- Sehr begrenzte kognitive Kapazität im Nutzungsmoment  
+- Keine Bereitschaft zur Interpretation technischer Begriffe  
+- Fahrzeug-UI ist der primäre (und oft einzige) Informationskanal
 
-- Name: Fiona FAHRER, 42
-- NUTZER: Prosumer (E-Auto-Fahrerin im HEMS)
-- ROLLE: Fahrerin, sieht die Kurzinfo im Auto-UI
-- Ausbildung/Hintergrund: nicht technisch, will einfache Sprache
-- Kontext: kommt abends nach Hause, wenig Zeit
-- Typische Aufgaben: kurzer Blick aufs Display, ggf. Voice bestätigen
-- Ziele: schnell verstehen, dann einfach loslassen
-- Frust/Probleme: "Nicht laden" ohne Grund
-- Erwartungen an UI: 1 Satz Grund + Startzeit, optional Voice
+---
 
-&nbsp;
+## Proto-Problem-Statement (aus Persona-Sicht)
 
-## Proto-Journey (Kurz)
+- Das Fahrzeug zeigt Ladezustände wie „Nicht laden“ oder „Wartet“, ohne Begründung.
+- Fiona kann nicht erkennen, ob es sich um eine bewusste Entscheidung oder einen Fehler handelt.
+- Fehlende Erklärung erzeugt Unsicherheit und mentale Nacharbeit.
+- Das System wird als intransparent wahrgenommen.
 
-1) Fiona steckt das Auto an.
-2) Das Display zeigt Grund und Startzeit.
-3) Eine Voice-Ansage sagt einen Satz.
-4) Fiona versteht und geht rein.
+---
 
-&nbsp;
+## Nutzungskontext (WQ1-relevant)
 
-## Annahmen
+- Nutzung erfolgt beiläufig (Abstellen, Einstecken, kurzer Blick).
+- Blickdauer auf das Display beträgt maximal wenige Sekunden.
+- Es besteht kein Wunsch nach technischer Detailtiefe.
+- Informationen müssen ohne aktive Interaktion verständlich sein.
+
+---
+
+## Proto-Journey (Kurzfassung)
+
+1. Fiona stellt das Fahrzeug ab und steckt es an.  
+2. Das System entscheidet, den Ladevorgang zu verzögern oder zu pausieren.  
+3. Das Fahrzeug-UI zeigt einen Lade-Status.  
+4. Fiona versucht, die Situation kurz einzuordnen.  
+5. Ohne Erklärung bleibt Unsicherheit bestehen.
+
+**Ziel der Journey:**  
+Den Ladezustand **sofort verstehen** und den mentalen Übergang in den Feierabend ermöglichen.
+
+---
+
+## Zentrale Annahmen (WQ1 – Transparenz)
 
 | ID | Annahme |
-|----|---------|
-| AUTO-ASSUM-TRAN-01 | Fahrer haben maximal 2 Sekunden Aufmerksamkeit; Texte müssen extrem kurz sein. |
-| AUTO-ASSUM-TRAN-02 | Ein Grund plus Startzeit reicht, um die Entscheidung zu akzeptieren. |
-| AUTO-ASSUM-TRAN-03 | Ohne Erklärung wird "Nicht laden" als Fehler interpretiert. |
-| AUTO-ASSUM-TRAN-04 | Icons plus kurzer Text sind schneller als nur Text. |
-| AUTO-ASSUM-TRAN-05 | Eine optionale Voice-Ansage kann die visuelle Info bestätigen. |
+|----|--------|
+| AUTO-ASSUM-TRAN-01 | Fiona hat maximal 2 Sekunden Aufmerksamkeit für Ladeinformationen. |
+| AUTO-ASSUM-TRAN-02 | Ein klar formulierter Grund plus eine Startzeit reichen aus, um die Entscheidung zu akzeptieren. |
+| AUTO-ASSUM-TRAN-03 | Ohne Erklärung interpretiert Fiona „Nicht laden“ als Fehler. |
+| AUTO-ASSUM-TRAN-04 | Icons in Kombination mit sehr kurzem Text werden schneller verstanden als Text allein. |
+| AUTO-ASSUM-TRAN-05 | Eine optionale Voice-Bestätigung kann visuelle Informationen unterstützen, ohne zusätzliche Interaktion zu erfordern. |
 
-&nbsp;
+---
 
 ## Abgeleitete Forschungsfrage
 
-Wie kann das Auto-UI Gründe und Startzeit so kurz und klar kommunizieren (Text, Icon, optional Voice), dass Fahrer die Entscheidung in unter 2 Sekunden verstehen und nicht als Fehler interpretieren?
+**Wie kann das Fahrzeug-UI Ladeentscheidungen für eine Routine-Nutzerin mit geringer Aufmerksamkeit so erklären (Text, Icon, optional Voice),  
+dass sie die Entscheidung in unter 2 Sekunden versteht und nicht als Fehler interpretiert?**
 
-&nbsp;
+---
 
 ## Teilfragen
 
-| ID | Fokus | Teilfrage | Bezug (Annahmen) | ASSUM IDs |
-|-----|-----|-----|-----|-----|
-| AUTO-TRAN-01 | Textlänge | Welche maximale Textlänge ist im 2-Sekunden-Blick verständlich? | Aufmerksamkeit < 2 Sekunden | AUTO-ASSUM-TRAN-01 |
-| AUTO-TRAN-02 | Inhalt | Reicht Grund + Startzeit oder braucht es zusätzliche Information? | Grund + Startzeit reicht | AUTO-ASSUM-TRAN-02, AUTO-ASSUM-TRAN-03 |
-| AUTO-TRAN-03 | Darstellung | Was ist schneller: Icon + kurzer Text oder nur Text? | Icons plus Text sind schneller | AUTO-ASSUM-TRAN-04 |
-| AUTO-TRAN-04 | Voice | Wann verbessert eine kurze Voice-Ansage das Verständnis, ohne zu stören? | Optionale Voice kann bestätigen | AUTO-ASSUM-TRAN-05 |
+| ID | Fokus | Teilfrage | Bezug |
+|----|------|----------|------|
+| AUTO-TRAN-01 | Aufmerksamkeit | Welche Textlänge ist innerhalb von 2 Sekunden erfassbar? | ASSUM-01 |
+| AUTO-TRAN-02 | Informationsgehalt | Reichen Grund + Startzeit für Akzeptanz aus? | ASSUM-02, 03 |
+| AUTO-TRAN-03 | Darstellung | Was ist schneller verständlich: Icon + Text oder nur Text? | ASSUM-04 |
+| AUTO-TRAN-04 | Modalität | Wann unterstützt eine kurze Voice-Ansage das Verständnis, ohne zu stören? | ASSUM-05 |
 
-&nbsp;
+---
 
-## Erhebungsmethode (einfach)
+## Erhebungsmethoden
 
-| ID | Beschreibung |
-|-----|--------------|
-| EXP-AUTO-TRAN-01 | Blick-Test mit 2-Sekunden-Regel. |
-| EXP-AUTO-TRAN-02 | A/B-Vergleich kurzer Texte und Icons. |
-| EXP-AUTO-TRAN-03 | Kurze Nachfrage: "Was passiert und warum?" |
+| ID | Methode | Zweck |
+|----|--------|------|
+| EXP-AUTO-TRAN-01 | 2-Sekunden-Blicktest | Erfassbarkeit prüfen |
+| EXP-AUTO-TRAN-02 | A/B-Vergleich | Text vs. Icon + Text |
+| EXP-AUTO-TRAN-03 | Kurzinterview | Interpretation und Sicherheit |
 
-&nbsp;
+---
 
+## UI-Prinzipien (abgeleitet aus Persona & WQ1)
 
-## Leitfaden (8-10 Fragen)
+- **Warum + Wann**, nicht nur Status
+- Maximal **ein Satz**
+- Keine Fachbegriffe
+- Sofort visuell erfassbar
+- Keine zusätzliche Interaktion erforderlich
 
-1) Was ist dein erster Eindruck?
-2) Warum lädt das Auto gerade nicht?
-3) Welche Worte waren zu lang?
-4) Welche Info hat dir gefehlt?
-5) Erinnerst du dich an die Startzeit?
-6) Würdest du eine Voice-Ansage wollen?
-7) Wenn ja, wie kurz soll sie sein?
-8) Welche Darstellung ist am klarsten: Icon, Text, beides?
-9) Wann würdest du eine Meldung wegdrücken?
-10) Was würde dich beruhigen?
+---
 
-&nbsp;
-
-## UI für Dummies (Kindergartenfassung)
+## Minimale UI-Elemente
 
 | ID | Element |
-|-----|---------|
-| UI-AUTO-TRAN-01 | Grosses Symbol (Stecker + Haus). |
-| UI-AUTO-TRAN-02 | Eine Zeile Grund. |
-| UI-AUTO-TRAN-03 | Eine Zeile "Start in X Min". |
-| UI-AUTO-TRAN-04 | Ein Knopf "Jetzt laden". |
-| UI-AUTO-TRAN-05 | Optional: 1 Satz Voice. |
+|----|--------|
+| UI-AUTO-TRAN-01 | Status-Icon (z. B. Stecker + Uhr) |
+| UI-AUTO-TRAN-02 | Eine Zeile mit Ladegrund |
+| UI-AUTO-TRAN-03 | Eine Zeile mit prognostizierter Startzeit |
+| UI-AUTO-TRAN-04 | Optional: ein kurzer Voice-Satz |
 
+---
 
+## Zusammenfassung
+
+Die Persona dient hier nicht der Illustration, sondern der **Operationalisierung von Aufmerksamkeit, Nutzungskontext und mentalem Modell**.  
+Transparenz wird dadurch mess- und gestaltbar.
+
+---
 ---
 
 > **Nächster Schritt:** Als Nächstes geht es um Kontrolle im Auto.
