@@ -69,10 +69,6 @@ und Nutzerwahrnehmung zusammenhängen.
 
 ---
 
-
-
----
-
 > **Nächster Schritt:** Die Arbeitsfragen sind festgelegt.
 > Im nächsten Kapitel werden weiterführende Aspekte gesammelt,
 > die der Einordnung und Reflexion der Ergebnisse dienen.
