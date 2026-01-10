@@ -16,6 +16,7 @@ und in alltägliche Routinen eingreifen.
 
 *Verständnis entsteht, wenn Nutzer ein mentales Modell der Energieflüsse und der Entscheidungslogik aufbauen können.*
 
+<img src="../../../media/bithamster_201.png" alt="Hamster tech" width="1000" />
 &nbsp;
 
 ## Zentrale Forschungsfrage
