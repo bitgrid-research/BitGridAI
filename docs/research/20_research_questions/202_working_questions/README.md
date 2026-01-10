@@ -68,6 +68,10 @@ und Nutzerwahrnehmung zusammenhängen.
 
 ---
 
+<img src="../../media/bithamster_202.png" alt="Hamster tech" width="1000" />
+
+---
+
 > **Nächster Schritt:** Die Arbeitsfragen sind festgelegt.
 > Im nächsten Kapitel werden weiterführende Aspekte gesammelt,
 > die der Einordnung und Reflexion der Ergebnisse dienen.
