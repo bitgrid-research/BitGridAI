@@ -5,6 +5,13 @@ Fahrende erkennen in unter **2 Sekunden**,
 dass es sich um eine **absichtsvolle, regelbasierte Entscheidung** des Systems handelt  
 – und nicht um einen Fehler oder Verbindungsabbruch.
 
+## Nutzungskontext (WQ1-relevant)
+
+- Nutzung erfolgt beiläufig (Ankommen, Aussteigen, Einstecken).  
+- Blickdauer auf das Display: maximal 1–2 Sekunden.  
+- Kein Wunsch nach technischer Tiefe oder Interaktion.  
+- Information muss ohne Nachdenken und ohne Kontextwissen verständlich sein.
+
 ---
 
 ## Relevante Persona (HCI-Modell)
@@ -28,42 +35,50 @@ Die Ladeentscheidung sofort einordnen können, um das Thema „Auto“ mental ab
 
 ---
 
-## Proto-Problem-Statement (WQ1 – Transparenz)
+## Proto-Problem-Statement (WQ1 – Transparenz - Fehlinterpretation)
 
-- Statusanzeigen wie „Wartet“ oder „Pausiert“ sind nicht selbsterklärend.  
-- Ohne expliziten Grund wird der Zustand als **Fehler** statt als **bewusste Systementscheidung** interpretiert.  
-- Fehlende Prognose („Wann geht es weiter?“) erzeugt mentale Restunsicherheit.  
-- Technische Begriffe oder mehrzeilige Texte überfordern im Ankunftskontext.  
-- Das mentale Modell bleibt: *„Das System macht irgendetwas im Hintergrund, ich weiß nicht was.“*
+- Das Fahrzeug zeigt Zustände wie „Wartet“ oder „Pausiert“, ohne Ursache zu erklären.
+- Für Fiona ist nicht erkennbar, ob dies eine **bewusste Systementscheidung** oder ein **Fehler** ist.
+- Ohne Grund und Prognose bleibt ein Gefühl von Unsicherheit: *„Stimmt hier etwas nicht?“*
+- Technische Formulierungen (z. B. Tariflogik, Netztrigger, Regelzustände) sind im Feierabendkontext kognitiv nicht zugänglich.
+- Fehlende Erklärung verhindert den Aufbau eines belastbaren mentalen Modells der Ladeentscheidung.
 
-**Zentrale Einsicht:**  
-Fehlende Erklärung wird kognitiv als Störung interpretiert – nicht als Optimierung.
-
----
-
-## Nutzungskontext (WQ1-relevant)
-
-- Nutzung erfolgt beiläufig (Ankommen, Aussteigen, Einstecken).  
-- Blickdauer auf das Display: maximal 1–2 Sekunden.  
-- Kein Wunsch nach technischer Tiefe oder Interaktion.  
-- Information muss ohne Nachdenken und ohne Kontextwissen verständlich sein.
+**Kernaussage:**  
+Wird der Entscheidungsgrund nicht sichtbar gemacht, wird der Systemzustand als Störung interpretiert – nicht als Optimierung.
 
 ---
 
-## Proto-Journey (Kurzfassung)
+## Proto-Journey (WQ1 – Fiona Fokus)
 
-1. Fiona kommt nach Hause und parkt.  
-2. Sie steckt das Ladekabel an.  
-3. Das System verzögert oder pausiert den Ladevorgang.  
-4. Das Fahrzeug-UI zeigt einen Status.  
-5. Fiona wirft einen kurzen Blick und will die Situation einordnen.
+1. Fiona kommt gegen 18:30 Uhr von der Arbeit nach Hause und parkt in der Garage.  
+2. Sie steigt aus, steckt das Ladekabel an und rechnet mit einem automatischen Ablauf.  
+3. Das System startet den Ladevorgang nicht sofort (Optimierung durch HEMS).  
+4. Das Display zeigt lediglich einen Status wie „Wartet“ oder „Pausiert“.  
+5. Fiona wirft einen kurzen Blick darauf.  
+6. Sie kann nicht erkennen, ob alles korrekt funktioniert oder ob ein Problem vorliegt.  
+7. Sie verlässt die Garage mit einem Restzweifel und dem Gedanken:  
+   *„Ich hoffe, das passt später – ich schau nochmal nach.“*
 
 **Ziel der Journey:**  
-Den Ladezustand sofort als **absichtsvoll und korrekt** verstehen und den mentalen Übergang in den Feierabend ermöglichen.
+Der Ladezustand soll in einem einzigen Blick als **absichtsvolle, regelbasierte Entscheidung** erkennbar sein,  
+sodass Fiona das Thema mental abschließen und in den Feierabend wechseln kann.
+
 
 ---
 
-## Zentrale Annahmen (WQ1 – Transparenz)
+## Abgeleitete Annahmen (WQ1 – Transparenz)
+
+- Unklare Statusanzeigen werden von Routine-Nutzenden primär als **Systemfehler** interpretiert, nicht als Optimierungsentscheidung.
+- Fehlende Erklärung erzeugt eine **mentale Restunsicherheit**, die über den Nutzungsmoment hinaus bestehen bleibt.
+- Ein **einziger kurzer Satz** mit *Grund und Startzeit* reicht aus, um die Entscheidung kognitiv zu akzeptieren.
+- Die Information **„Wann geht es weiter?“** ist für die mentale Entlastung ebenso wichtig wie der Grund selbst.
+- **Alltagssprache** ist im Ankunfts- und Feierabendkontext verständlicher als technische Systembegriffe.
+- **Icon + sehr kurzer Text** werden schneller erfasst als Text allein.
+- Die verfügbare Aufmerksamkeit liegt bei **unter 2 Sekunden**; längere Texte werden nicht verarbeitet.
+- Erklärung muss **ohne Interaktion** funktionieren; ein Blick auf das Display muss genügen.
+- Bereits minimale Transparenz lässt die Entscheidung als **absichtsvoll und korrekt** erscheinen und reduziert Fehlinterpretationen.
+
+Diese Annahmen bilden die Grundlage für die Operationalisierung von Transparenz im Fahrzeug-UI.
 
 | ID | Annahme |
 |----|--------|
@@ -73,6 +88,20 @@ Den Ladezustand sofort als **absichtsvoll und korrekt** verstehen und den mental
 | AUTO-ASSUM-TRAN-04 | Icon + sehr kurzer Text werden schneller verstanden als Text allein. |
 | AUTO-ASSUM-TRAN-05 | Eine optionale Voice-Ansage kann visuelle Information bestätigen, nicht ersetzen. |
 | AUTO-ASSUM-TRAN-06 | Alltagssprache reduziert kognitive Last gegenüber technischen Begriffen. |
+
+
+---
+
+## Kritische Annahme (WQ1 – Transparenz)
+
+- Ein einzelner, sehr kurzer erklärender Satz mit **Grund + Startzeit** reicht aus,  
+  um die Ladeentscheidung in unter 2 Sekunden als **absichtsvolle Systementscheidung**  
+  und nicht als Fehler zu interpretieren.
+- Diese minimale Form von Transparenz reduziert mentale Unsicherheit  
+  und verhindert die Fehlzuschreibung eines Systemproblems.
+
+
+
 
 ---
 
