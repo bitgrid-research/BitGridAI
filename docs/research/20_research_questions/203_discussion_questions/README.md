@@ -12,6 +12,8 @@ und Raum für Reflexion bieten.
 Sie ergänzen die zentralen Arbeitsfragen,
 ohne deren Fokus zu verwässern.
 
+<img src="../../../media/bithamster_203.png" alt="Hamster tech" width="1000" />
+
 &nbsp;
 
 ## Kontext- und Diskussionsfragen
