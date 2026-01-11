@@ -4,7 +4,7 @@
 Fahrende können mit **1–2 Aktionen** in den automatisierten Ladevorgang eingreifen  
 und eine sofortige Reaktion des Systems auslösen, ohne kognitive oder visuelle Ablenkung.
 
----
+&nbsp;
 
 ## Nutzungskontext (WQ2-relevant)
 
@@ -13,7 +13,7 @@ und eine sofortige Reaktion des Systems auslösen, ohne kognitive oder visuelle 
 - Erwartet wird eine unmittelbare Systemreaktion ohne Wartezeiten oder Menünavigation.  
 - Interaktion findet im Fahrzeug statt, oft im Sitzen, teilweise mit laufendem Motor.
 
----
+&nbsp;
 
 ## Relevante Persona (HCI-Modell)
 
@@ -34,7 +34,7 @@ Den Ladevorgang sofort starten können, wenn Reichweite jetzt benötigt wird.
 - Keine Akzeptanz für mehrstufige Interaktion  
 - Erwartung unmittelbarer Rückmeldung (visuell/haptisch)
 
----
+&nbsp;
 
 ## Proto-Problem-Statement (WQ2 – Kontrolle)
 
@@ -48,7 +48,7 @@ Den Ladevorgang sofort starten können, wenn Reichweite jetzt benötigt wird.
 **Kernaussage:**  
 Ohne sofort verfügbaren Override wird Automatik als Einschränkung statt als Unterstützung erlebt.
 
----
+&nbsp;
 
 ## Proto-Journey (WQ2 – Dirk Direkt)
 
@@ -63,7 +63,7 @@ Ohne sofort verfügbaren Override wird Automatik als Einschränkung statt als Un
 **Ziel der Journey:**  
 Mit minimalem Aufwand handlungsfähig sein und das System unmittelbar überstimmen können.
 
----
+&nbsp;
 
 ## Abgeleitete Annahmen (WQ2 – Kontrolle)
 
@@ -76,7 +76,7 @@ Mit minimalem Aufwand handlungsfähig sein und das System unmittelbar überstimm
 
 Diese Annahmen operationalisieren wahrgenommene Kontrolle im Fahrzeug-UI.
 
----
+&nbsp;
 
 ## Kritische Annahme (WQ2 – Kontrolle)
 
@@ -84,7 +84,7 @@ Diese Annahmen operationalisieren wahrgenommene Kontrolle im Fahrzeug-UI.
   reicht aus, damit Nutzende die Automatik als kontrollierbar wahrnehmen  
   und situativ eingreifen können, ohne die Automatik grundsätzlich abzulehnen.
 
----
+&nbsp;
 
 ## Zentrale Annahmen (WQ2 – Kontrolle)
 
@@ -96,7 +96,7 @@ Diese Annahmen operationalisieren wahrgenommene Kontrolle im Fahrzeug-UI.
 | AUTO-ASSUM-CTRL-04 | Rückfragen müssen in maximal einem Tap beantwortbar sein. |
 | AUTO-ASSUM-CTRL-05 | Sprachinteraktion kann Ablenkung reduzieren. |
 
----
+&nbsp;
 
 ## Abgeleitete Forschungsfrage (WQ2)
 
@@ -104,7 +104,7 @@ Diese Annahmen operationalisieren wahrgenommene Kontrolle im Fahrzeug-UI.
 ermöglichen es Fahrenden, automatisierte Ladeentscheidungen im Fahrzeug  
 als kontrollierbar wahrzunehmen und situativ ohne Ablenkung einzugreifen?**
 
----
+&nbsp;
 
 ## Teilfragen
 
@@ -115,7 +115,7 @@ als kontrollierbar wahrzunehmen und situativ ohne Ablenkung einzugreifen?**
 | AUTO-CTRL-03 | Rückfragen | Wie kurz dürfen Sicherheitsabfragen sein, ohne zu stören? | ASSUM-04 |
 | AUTO-CTRL-04 | Modalität | Wann ist Sprachinteraktion schneller als Touch? | ASSUM-05 |
 
----
+&nbsp;
 
 ## Erhebungsmethoden
 
@@ -125,7 +125,7 @@ als kontrollierbar wahrzunehmen und situativ ohne Ablenkung einzugreifen?**
 | EXP-AUTO-CTRL-02 | Time-on-Task-Messung | One-Tap-Effektivität |
 | EXP-AUTO-CTRL-03 | Kurzinterview | Wahrgenommene Kontrolle |
 
----
+&nbsp;
 
 ## UI-Prinzipien (abgeleitet aus Persona & WQ2)
 
@@ -135,7 +135,7 @@ als kontrollierbar wahrzunehmen und situativ ohne Ablenkung einzugreifen?**
 - Keine Blockade durch Dialoge
 - Optional: Sprachbefehl als Alternative
 
----
+&nbsp;
 
 ## Minimale UI-Elemente
 
@@ -146,7 +146,7 @@ als kontrollierbar wahrzunehmen und situativ ohne Ablenkung einzugreifen?**
 | UI-AUTO-CTRL-03 | Optionale Ja/Nein-Rückfrage (z. B. Pendlerfahrt) |
 | UI-AUTO-CTRL-04 | Optional: Sprachbefehl „Laden starten“ |
 
----
+&nbsp;
 
 ## Zusammenfassung
 
