@@ -5,7 +5,7 @@ Fahrende erkennen eindeutig,
 dass **genügend garantierte Reichweite für den nächsten Tag** verbleibt  
 und dass die V2H-Nutzung diese Reserve nicht gefährdet.
 
----
+&nbsp;
 
 ## Nutzungskontext (WQ3-relevant)
 
@@ -14,7 +14,7 @@ und dass die V2H-Nutzung diese Reserve nicht gefährdet.
 - Hoher Wunsch nach Sicherheit und Planbarkeit für den nächsten Morgen.  
 - Das Fahrzeug-UI dient als letzter „Sicherheitsblick“ vor dem Abschalten.
 
----
+&nbsp;
 
 ## Relevante Persona (HCI-Modell)
 
@@ -35,7 +35,7 @@ Sicher sein, dass der Arbeitsweg am nächsten Morgen ohne Einschränkung möglic
 - Keine Bereitschaft, mit Prozentwerten oder Prognosen zu rechnen  
 - Wunsch nach klarer Zusage statt technischer Detailanzeige  
 
----
+&nbsp;
 
 ## Proto-Problem-Statement (WQ3 – Vertrauen)
 
@@ -49,7 +49,7 @@ Sicher sein, dass der Arbeitsweg am nächsten Morgen ohne Einschränkung möglic
 **Kernaussage:**  
 Ohne sichtbaren, garantierten Pendler-Puffer wird V2H als Risiko wahrgenommen, nicht als Unterstützung.
 
----
+&nbsp;
 
 ## Proto-Journey (WQ3 – Petra Plan)
 
@@ -65,7 +65,7 @@ Ohne sichtbaren, garantierten Pendler-Puffer wird V2H als Risiko wahrgenommen, n
 Mit einem Blick erkennen, dass der **Arbeitsweg garantiert abgesichert** ist  
 und die Automatik vertrauensvoll laufen lassen zu können.
 
----
+&nbsp;
 
 ## Abgeleitete Annahmen (WQ3 – Vertrauen)
 
@@ -78,7 +78,7 @@ und die Automatik vertrauensvoll laufen lassen zu können.
 
 Diese Annahmen operationalisieren Vertrauen als wahrgenommene Sicherheit des Arbeitswegs.
 
----
+&nbsp;
 
 ## Kritische Annahme (WQ3 – Vertrauen)
 
@@ -86,7 +86,7 @@ Diese Annahmen operationalisieren Vertrauen als wahrgenommene Sicherheit des Arb
   ist ausreichend, um Reichweitenangst zu reduzieren  
   und die V2H-Automatik langfristig akzeptabel zu machen.
 
----
+&nbsp;
 
 ## Zentrale Annahmen (WQ3 – Vertrauen)
 
@@ -98,7 +98,7 @@ Diese Annahmen operationalisieren Vertrauen als wahrgenommene Sicherheit des Arb
 | AUTO-ASSUM-TRUST-04 | Einfache Batterie-Visualisierungen sind verständlicher als Diagramme. |
 | AUTO-ASSUM-TRUST-05 | Unklare Reserven führen zur Deaktivierung der Automatik. |
 
----
+&nbsp;
 
 ## Abgeleitete Forschungsfrage (WQ3)
 
@@ -107,7 +107,7 @@ Diese Annahmen operationalisieren Vertrauen als wahrgenommene Sicherheit des Arb
 damit Fahrende Reichweitenangst verlieren  
 und der automatisierten V2H-Nutzung vertrauen?**
 
----
+&nbsp;
 
 ## Teilfragen
 
@@ -118,7 +118,7 @@ und der automatisierten V2H-Nutzung vertrauen?**
 | AUTO-TRUST-03 | Regeltransparenz | Wie muss kommuniziert werden, dass der Puffer nie unterschritten wird? | ASSUM-03 |
 | AUTO-TRUST-04 | Vertrauen | Wann bleibt die Automatik aktiviert? | ASSUM-05 |
 
----
+&nbsp;
 
 ## Erhebungsmethoden
 
@@ -128,7 +128,7 @@ und der automatisierten V2H-Nutzung vertrauen?**
 | EXP-AUTO-TRUST-02 | Verständnisabfrage | Puffer-Interpretation |
 | EXP-AUTO-TRUST-03 | Vertrauensskala | Reichweitenangst |
 
----
+&nbsp;
 
 ## UI-Prinzipien (abgeleitet aus Persona & WQ3)
 
@@ -138,7 +138,7 @@ und der automatisierten V2H-Nutzung vertrauen?**
 - Keine alarmistischen Farben  
 - Garantie statt Prognose
 
----
+&nbsp;
 
 ## Minimale UI-Elemente
 
@@ -149,7 +149,7 @@ und der automatisierten V2H-Nutzung vertrauen?**
 | UI-AUTO-TRUST-03 | Text: „Diese Reserve bleibt unberührt.“ |
 | UI-AUTO-TRUST-04 | Optional: Arbeitsweg anpassen |
 
----
+&nbsp;
 
 ## Zusammenfassung
 
