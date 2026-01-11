@@ -12,7 +12,7 @@ dass es sich um eine **absichtsvolle, regelbasierte Entscheidung** des Systems h
 - Kein Wunsch nach technischer Tiefe oder Interaktion.  
 - Information muss ohne Nachdenken und ohne Kontextwissen verständlich sein.
 
----
+&nbsp;
 
 ## Relevante Persona (HCI-Modell)
 
@@ -33,7 +33,7 @@ Die Ladeentscheidung sofort einordnen können, um das Thema „Auto“ mental ab
 - Keine Bereitschaft zur Interpretation technischer Begriffe  
 - Fahrzeug-UI ist der primäre (und oft einzige) Informationskanal  
 
----
+&nbsp;
 
 ## Proto-Problem-Statement (WQ1 – Transparenz - Fehlinterpretation)
 
@@ -46,7 +46,7 @@ Die Ladeentscheidung sofort einordnen können, um das Thema „Auto“ mental ab
 **Kernaussage:**  
 Wird der Entscheidungsgrund nicht sichtbar gemacht, wird der Systemzustand als Störung interpretiert – nicht als Optimierung.
 
----
+&nbsp;
 
 ## Proto-Journey (WQ1 – Fiona Fokus)
 
@@ -64,7 +64,7 @@ Der Ladezustand soll in einem einzigen Blick als **absichtsvolle, regelbasierte 
 sodass Fiona das Thema mental abschließen und in den Feierabend wechseln kann.
 
 
----
+&nbsp;
 
 ## Abgeleitete Annahmen (WQ1 – Transparenz)
 
@@ -90,7 +90,7 @@ Diese Annahmen bilden die Grundlage für die Operationalisierung von Transparenz
 | AUTO-ASSUM-TRAN-06 | Alltagssprache reduziert kognitive Last gegenüber technischen Begriffen. |
 
 
----
+&nbsp;
 
 ## Kritische Annahme (WQ1 – Transparenz)
 
@@ -101,9 +101,7 @@ Diese Annahmen bilden die Grundlage für die Operationalisierung von Transparenz
   und verhindert die Fehlzuschreibung eines Systemproblems.
 
 
-
-
----
+&nbsp;
 
 ## Abgeleitete Forschungsfrage (WQ1)
 
@@ -111,7 +109,7 @@ Diese Annahmen bilden die Grundlage für die Operationalisierung von Transparenz
 dass Routine-Fahrende die Ladeentscheidung in unter 2 Sekunden  
 als absichtsvolle, regelbasierte Systementscheidung verstehen und nicht als Fehler interpretieren?**
 
----
+&nbsp;
 
 ## Teilfragen
 
@@ -122,7 +120,7 @@ als absichtsvolle, regelbasierte Systementscheidung verstehen und nicht als Fehl
 | AUTO-TRAN-03 | Darstellung | Was ist schneller verständlich: Icon + Text oder nur Text? | ASSUM-04 |
 | AUTO-TRAN-04 | Modalität | Wann unterstützt eine kurze Voice-Ansage das Verständnis, ohne zu stören? | ASSUM-05 |
 
----
+&nbsp;
 
 ## Erhebungsmethoden
 
@@ -132,7 +130,7 @@ als absichtsvolle, regelbasierte Systementscheidung verstehen und nicht als Fehl
 | EXP-AUTO-TRAN-02 | A/B-Vergleich | Text vs. Icon + Text |
 | EXP-AUTO-TRAN-03 | Kurzinterview | Interpretation und mentale Sicherheit |
 
----
+&nbsp;
 
 ## UI-Prinzipien (abgeleitet aus Persona & WQ1)
 
@@ -143,7 +141,7 @@ als absichtsvolle, regelbasierte Systementscheidung verstehen und nicht als Fehl
 - Sofort visuell erfassbar  
 - Keine zusätzliche Interaktion erforderlich  
 
----
+&nbsp;
 
 ## Minimale UI-Elemente
 
@@ -154,7 +152,7 @@ als absichtsvolle, regelbasierte Systementscheidung verstehen und nicht als Fehl
 | UI-AUTO-TRAN-03 | Eine Zeile mit prognostizierter Startzeit |
 | UI-AUTO-TRAN-04 | Optional: ein kurzer Voice-Satz |
 
----
+&nbsp;
 
 ## Zusammenfassung
 
