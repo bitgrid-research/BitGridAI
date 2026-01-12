@@ -1,4 +1,4 @@
-# 20.2.2.1 – AUTO-WQ1 – Transparenz der Ladeentscheidung
+# 20.2.2.1 – AUTO-WQ1 – Verstehen der Ladeentscheidung
 
 ## Ziel
 Fahrende erkennen in unter **2 Sekunden**,  
