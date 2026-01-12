@@ -24,28 +24,29 @@ Sie legen fest, welche Aspekte untersucht werden
 
 ## Nutzungskontexte der Arbeitsfragen
 
-Die Arbeitsfragen werden in zwei klar getrennten,
-aber auf derselben Systemlogik basierenden Kontexten betrachtet:
+Die Arbeitsfragen werden in klar getrennten,  
+aber auf einer gemeinsamen Systemlogik basierenden Kontexten betrachtet:
 
-- **[20.2.1 - SH-CONTEXT - Smart-Home-Kontext](./2021_smart_home_context/README.md):**  
-  Untersuchung erklärbarer, regelbasierter Energieentscheidungen
-  im häuslichen Umfeld (z. B. App oder Web-Dashboard),
-  mit Fokus auf Transparenz, Kontrolle und langfristiges Systemverständnis.
-  - [20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)
-  - [20.2.1.2 - SH-WQ2 - Kontrolle und Override](./2021_smart_home_context/2021b_kontrolle.md)
-  - [20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)
+- **[20.2.1 - SH-CONTEXT - *Smart-Home*-Kontext](./2021_smart_home_context/README.md)**  
+  Wenn Energieentscheidungen zwischen Kaffeemaschine, Waschmaschine und Miner fallen: Erklärbare, regelbasierte Automatik im häuslichen Umfeld (App / Web-Dashboard) mit Fokus auf Transparenz, Kontrolle und ein mentales Modell, das auch nach drei Wochen noch Sinn ergibt.  
+  - [20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)  
+  - [20.2.1.2 - SH-WQ2 - Kontrolle und Override](./2021_smart_home_context/2021b_kontrolle.md)  
+  - [20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)  
+
+- **[20.2.2 - AUTO-CONTEXT - *Automotive*-Kontext](./2022_automotive_context/README.md)**  
+  Wenn Reichweite, Ladeleistung und Nervosität zusammenkommen: Verständliche Erklärungen für automatisierte Ladeentscheidungen im aufmerksamkeitssensitiven Fahrzeugkontext (z. B. *„Warum lädt er jetzt nicht – und soll ich panisch werden?“*), reduziert, vertrauenswürdig und ohne den  Fahrer in den Infomodus zu schicken.  
+  - [20.2.2.1 - AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022_automotive_context/2022a_transparenz.md)  
+  - [20.2.2.2 - AUTO-WQ2 - Kontrolle im Auto](./2022_automotive_context/2022b_kontrolle.md)  
+  - [20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)  
+
+- **[20.2.3 - SIM-CONTEXT - *Simulations*-Kontext](./2023_simulation_context/README.md)**  
+  Wenn Regeln hörbar klicken und Miner sichtbar anspringen: Physische Tischsimulation im HCI-Labor, in der Schwellen, Prioritäten und Sicherheitslogiken nicht nur erklärt, sondern provoziert, beobachtet und begriffen werden können.  
+  - [20.2.3.1 - SIM-WQ1 - Sichtbarkeit der Entscheidungslogik](./2023_simulation_context/2023a_transparenz.md)  
+  - [20.2.3.2 - SIM-WQ2 - Eingriff und Override im Labor](./2023_simulation_context/2023b_kontrolle.md)  
+  - [20.2.3.3 - SIM-WQ3 - Vertrauen durch physische Rückmeldung](./2023_simulation_context/2023c_vertrauen.md)  
 
 
-- **[20.2.2 - AUTO-CONTEXT - Automotive-Kontext](./2022_automotive_context/README.md):**  
-  Übertragung derselben Entscheidungslogik
-  auf ein Automotive-Interface.
-  Hier wird untersucht, wie Ladeentscheidungen
-  (z. B. *„Warum lädt das Auto gerade nicht?“*)
-  im Fahrzeugkontext verständlich kommuniziert werden können,
-  etwa über reduzierte Visualisierungen oder Sprachinteraktion.
-  - [20.2.2.1 - AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022_automotive_context/2022a_transparenz.md)
-  - [20.2.2.2 - AUTO-WQ2 - Kontrolle im Auto](./2022_automotive_context/2022b_kontrolle.md)
-  - [20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)
+
 
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
