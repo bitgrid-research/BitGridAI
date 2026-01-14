@@ -24,8 +24,6 @@ Teilnehmende koennen die Entscheidungslogik provozieren, beobachten und erklaere
   - Wie koennen Teilnehmende eingreifen, ohne das System instabil zu machen?
 - **[20.2.3.3 - SIM-WQ3 - Vertrauen durch physische Rueckmeldung](./2023c_vertrauen.md)**
   - Wie baut sicht- und hoerbare Sicherheit Vertrauen in die Automatik auf?
-- **[Template fuer neue SIM-WQs](./2023_template.md)**
-  - Struktur und Platzhalter, um weitere Fragen konsistent zu dokumentieren.
 
 &nbsp;
 
