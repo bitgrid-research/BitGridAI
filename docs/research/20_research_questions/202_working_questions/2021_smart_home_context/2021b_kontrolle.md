@@ -1,37 +1,35 @@
-# 20.2.1.2 - SH-WQ2 - Kontrolle und Override (Handlungsfreiheit)
+﻿# 20.2.1.2 - SH-WQ2 - Kontrolle und Override (Handlungsfreiheit)
 
-Ziel: Nutzer kann mit einem einfachen Schritt eingreifen, ohne die Automatik zu verlieren.
+Ziel: Nutzer koennen mit einem Schritt eingreifen, verstehen Grenzen und behalten die Automatik als Standardmodus.
 
 &nbsp;
 
-## Proto-Problem-Statement
+## Nutzungskontext (Smart Home)
 
-- Die Automatik entscheidet, aber der Nutzer braucht manchmal sofortige Kontrolle.
-- Wenn der Override versteckt ist, fühlt sich der Nutzer ausgeliefert.
-- Folge: Nutzer schaltet die Automatik ganz aus.
+- Dashboard/App zu Hause; Nutzung oft situativ (Ruhebedarf, Besuch, Lautstaerke, Strompreis).
+- Schnellreaktion erwartet: ein Tap/Klick, klare Dauer, Rueckgaengig moeglich.
+- Eingriffe sollen das System nicht destabilisieren (Stabilisierung/Reserve bleibt aktiv).
 
 &nbsp;
 
 ## Proto-Persona
 
-- Name: Ben BETREIBER, 38
-- NUTZER: Prosumer (Familienhaushalt mit PV + Miner)
-- ROLLE: Haushaltsbetreiber, braucht schnellen Override
-- Ausbildung/Hintergrund: handwerklich, pragmatisch
-- Kontext: abends zu Hause, Miner läuft und stört
-- Typische Aufgaben: Miner stoppen, Dauer festlegen, Rückgängig
-- Ziele: schnell stoppen können und trotzdem Automatik behalten
-- Frust/Probleme: Knopf nicht finden; zu viele Schritte
-- Erwartungen an UI: grosser Button, klare Dauer, einfacher Hinweis
+**Persona:** Tom Direkt, 38  
+**Rolle:** Haushaltsbetreiber, entscheidet situativ (Ruhe, Besuch, Preis)  
+**Nutzungstyp:** Ad-hoc-Eingriffe, seltene Einstellungen  
+**Technische Affinitaet:** pragmatisch, wenig Geduld fuer Menues  
+**Primärer Nutzungskontext:** Abends/bei Stoerung; will in < 3 Sekunden eingreifen  
+**Mentales Modell:** Automatik laeuft im Hintergrund, Override ist oberste Prioritaet; Reserve und Stabilisierung duerfen ihn nicht ausbremsen ohne Grund  
+**Ziel der Persona:** Sofortiger Stop/Start mit klarer Dauer und Folgen, ohne die Automatik abzuschalten  
+**Relevante Einschraenkungen:** Keine Zeit fuer Erklaerungen; hasst Button-Mashing; akzeptiert Verlust, wenn klar benannt
 
 &nbsp;
 
-## Proto-Journey (Kurz)
+## Proto-Problem-Statement
 
-1) Ben sieht: Miner läuft.
-2) Er braucht Ruhe im Haus.
-3) Er drückt "Miner stoppen".
-4) Das System bestätigt Dauer und Hinweis.
+- Override-Knopf versteckt oder erfordert mehrere Schritte; Wirkung unklar.
+- Reserve-Veto oder Stabilisierung blockiert Override ohne Erklaerung.
+- Folge: Gefuehl von Kontrollverlust, mehrfaches Druecken, Abschalten der Automatik.
 
 &nbsp;
 
@@ -39,72 +37,102 @@ Ziel: Nutzer kann mit einem einfachen Schritt eingreifen, ohne die Automatik zu 
 
 | ID | Annahme |
 |----|---------|
-| SH-ASSUM-CTRL-01 | Nutzer wollen in Ausnahmesituationen einen sofortigen Override, ohne die Automatik dauerhaft zu verlieren. |
-| SH-ASSUM-CTRL-02 | Ein großer, klarer Button reicht; mehrstufige Menüs werden vermieden. |
-| SH-ASSUM-CTRL-03 | Eine kurze Bestätigung und ein sichtbarer Timer geben Sicherheit. |
-| SH-ASSUM-CTRL-04 | Nutzer akzeptieren kurzfristig weniger Ertrag, wenn sie Kontrolle haben. |
-| SH-ASSUM-CTRL-05 | Wenn der Override versteckt ist, schalten Nutzer die Automatik komplett aus. |
+| SH-ASSUM-CTRL-01 | Ein grosser, sichtbarer Override reicht, wenn Dauer und Wirkung sofort bestaetigt werden. |
+| SH-ASSUM-CTRL-02 | Blockaden (Reserve/Stabilisierung/Safety) werden akzeptiert, wenn Grund + Restzeit angezeigt werden. |
+| SH-ASSUM-CTRL-03 | Nutzer akzeptieren Ertragsverlust, wenn er als Folge kurz genannt wird. |
+| SH-ASSUM-CTRL-04 | Haptische/visuelle Rueckmeldung direkt auf dem Button senkt erneutes Druecken. |
+| SH-ASSUM-CTRL-05 | Automatik bleibt aktiv, wenn ein Rueckgaengig/TIMER sichtbar ist. |
+
+&nbsp;
+
+## Kritische Annahme
+
+- Ein sofort sichtbarer Override mit Rueckmeldung + Timer reduziert Kontrollverlust und verhindert, dass Nutzer die Automatik komplett deaktivieren.
 
 &nbsp;
 
 ## Abgeleitete Forschungsfrage
 
-Welche minimale Override-Interaktion (Sichtbarkeit, Aktion, Rückmeldung, Dauer) ermöglicht schnelle Kontrolle, ohne dass Nutzer die Automatik deaktivieren?
+**Wie muss Override (Sichtbarkeit, Rueckmeldung, Dauer, Folgenhinweis) gestaltet sein, damit Smart-Home-Nutzer Kontrolle erleben, ohne die Automatik zu deaktivieren?**
 
 &nbsp;
 
 ## Teilfragen
 
-| ID | Fokus | Teilfrage | Bezug (Annahmen) | ASSUM IDs |
-|-----|-----|-----|-----|-----|
-| SH-CTRL-01 | Sichtbarkeit | Wie sichtbar und erreichbar muss der Override sein, damit Nutzer ihn sofort finden? | Versteckter Override führt zum Abschalten | SH-ASSUM-CTRL-01, SH-ASSUM-CTRL-05 |
-| SH-CTRL-02 | Aktion | Reicht ein einzelner großer Button oder braucht es zusätzliche Schritte? | Großer Button, keine Menüs | SH-ASSUM-CTRL-02 |
-| SH-CTRL-03 | Rückmeldung | Welche Bestätigung und Daueranzeige geben genug Sicherheit? | Bestätigung + Timer geben Sicherheit | SH-ASSUM-CTRL-03 |
-| SH-CTRL-04 | Folgenhinweis | Welche Hinweise zu Folgen (z. B. weniger Ertrag) sind nötig, um den Eingriff zu akzeptieren? | Weniger Ertrag wird akzeptiert, wenn Kontrolle da ist | SH-ASSUM-CTRL-04 |
+| ID | Fokus | Teilfrage | Bezug |
+|----|-------|-----------|-------|
+| SH-CTRL-01 | Sichtbarkeit | Wie gross/platziert muss der Override-Button sein, damit er in < 3 Sekunden gefunden wird? | ASSUM-01 |
+| SH-CTRL-02 | Rueckmeldung | Welche Kombination aus Button-Feedback + Text bestaetigt Eingriffe am schnellsten? | ASSUM-04 |
+| SH-CTRL-03 | Sperren erklaeren | Wie erklaeren wir Blockaden (Reserve/Stabilisierung/Safety), damit kein Button-Mashing entsteht? | ASSUM-02 |
+| SH-CTRL-04 | Folgenhinweis | Welcher kurze Hinweis zu Ertragsverlust reicht, ohne zu nerven? | ASSUM-03 |
+| SH-CTRL-05 | Dauer | Welche vordefinierten Zeitraeume (z. B. 30/60/120 Min) werden akzeptiert? | ASSUM-05 |
 
 &nbsp;
 
-## Erhebungsmethode (einfach)
+## Erhebungsmethoden
 
-| ID | Beschreibung |
-|-----|--------------|
-| EXP-SH-CTRL-01 | Szenario-Test: "Du fährst in 30 Min weg". |
-| EXP-SH-CTRL-02 | Beobachtung: Wie schnell findet der Nutzer den Override? |
-| EXP-SH-CTRL-03 | Kurzes Interview danach. |
-
-&nbsp;
-
-
-## Leitfaden (8-10 Fragen)
-
-1) Was würdest du in dieser Situation tun?
-2) Wo würdest du eine Sofort-Aktion erwarten?
-3) Ist der Knopf klar genug?
-4) Was würdest du als Bestätigung sehen wollen?
-5) Wie lange darf die Aktion gelten (z. B. 60 Min)
-6) Würdest du eine Rückgängig-Taste nutzen?
-7) Wann würdest du die Automatik komplett ausschalten?
-8) Welche Info brauchst du vor dem Override (z. B. weniger Ertrag)Ö
-9) Ist die Sprache zu streng oder zu locker?
-10) Was würdest du vereinfachen?
+| ID | Methode | Zweck |
+|----|---------|-------|
+| EXP-SH-CTRL-01 | Zeitmessung: Override finden und druecken. | Sichtbarkeit |
+| EXP-SH-CTRL-02 | Blockade-Szenario: Reserve aktiv; beobachte Button-Mashing. | Sperren-Verstaendnis |
+| EXP-SH-CTRL-03 | Kurzinterview: Ertragsverlust-Hinweis verstanden? | Folgenakzeptanz |
 
 &nbsp;
 
-## UI für Dummies (Kindergartenfassung)
+## UI-Prinzipien (abgeleitet aus Persona & WQ2)
+
+- Override first: grosser Primarbutton (Start/Stop/Override) auf der Status-Karte.
+- Sofortige Rueckmeldung: Button-Zustand + Text "Eingriff angenommen" + Dauer/Timer.
+- Blockaden erklaeren: Grund + Restzeit; nie still ignorieren.
+- Alternativen anbieten: "Last senken" oder "Automatik prueft in XX:XX neu" statt nur Verbot.
+- Automatik sichtbar lassen: Anzeige "Automatik aktiv" + Rueckgaengig in Reichweite.
+
+&nbsp;
+
+## Beobachtungspunkte
+
+- Zeit bis zum Finden/Druecken des Override.
+- Anzahl erneuter Klicks bis Blockade verstanden ist.
+- Akzeptanz von Restzeit/Timer bei blockiertem Override.
+
+&nbsp;
+
+## Artefakte / UI
+
+- Primarbutton: "Miner stoppen" / "Jetzt starten" mit Zustand (aktiviert/gesperrt).
+- Timer/Badge: "Gilt fuer 60 Min" + Countdown.
+- Blockade-Banner: "Reserve aktiv, naechster Versuch in 03:00".
+- Hinweis: "Ertrag -X%, Automatik bleibt aktiv".
+
+&nbsp;
+
+## Minimale UI-Elemente
 
 | ID | Element |
-|-----|---------|
-| UI-SH-CTRL-01 | Grosser Knopf "Miner stoppen". |
-| UI-SH-CTRL-02 | Kleiner Hinweis: "Weniger Ertrag ca. X". |
-| UI-SH-CTRL-03 | Timer: "Gilt für 60 Min". |
-| UI-SH-CTRL-04 | Knopf "Rückgängig". |
-| UI-SH-CTRL-05 | Einfache Statuszeile: "Automatik aktiv". |
+|----|---------|
+| UI-SH-CTRL-01 | Primarbutton "Miner stoppen/Starten" mit aktiv/gesperrt-Zustand. |
+| UI-SH-CTRL-02 | Timer-Badge "Gilt fuer XX Min" + Countdown. |
+| UI-SH-CTRL-03 | Blockade-Banner mit Grund + Restzeit. |
+| UI-SH-CTRL-04 | Rueckgaengig/Automatik-weiter-Schalter. |
 
+&nbsp;
+
+## Messkriterien (einfach)
+
+- < 3 Sekunden bis zum Finden des Overrides.
+- < 2 erneute Klicks bei blockiertem Override.
+- 80% akzeptieren Standard-Dauer (z. B. 60 Min) ohne Anpassung.
+
+&nbsp;
+
+## Zusammenfassung
+
+Sichtbarer Primarbutton, sofortige Rueckmeldung und erklaerte Sperren halten das Kontrollgefuehl hoch; ein Timer und Rueckgaengig-Option sichern, dass die Automatik als Standard erhalten bleibt.
 
 ---
 
-> **Nächster Schritt:** Als Nächstes geht es um Vertrauen und Sicherheit.
+> **Naechster Schritt:** Danach geht es um Vertrauen und Haus-Reserve.
 >
-> 👉 Weiter zu **[20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
+> Weiter zu **[20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
 >
-> 🔙 Zurück zu **[20.2.1 - SH-CONTEXT - Smart-Home-Kontext](./README.md)**
+> Zurueck zu **[20.2.1 - SH-CONTEXT - Smart-Home-Kontext](./README.md)**

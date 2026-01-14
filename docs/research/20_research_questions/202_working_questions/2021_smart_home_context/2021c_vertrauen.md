@@ -1,37 +1,35 @@
-# 20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit (Haus-Reserve)
+﻿# 20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit (Haus-Reserve)
 
-Ziel: Nutzer sieht klar, dass genug Energie für das Haus bleibt.
+Ziel: Nutzer sehen in einem Blick, dass die Haus-Reserve garantiert bleibt und Mining die Grundversorgung nicht gefaehrdet.
 
 &nbsp;
 
-## Proto-Problem-Statement
+## Nutzungskontext (Smart Home)
 
-- Nutzer hat Angst, dass Mining die Hausversorgung gefährdet.
-- Die Haus-Reserve ist unsichtbar oder zu technisch.
-- Folge: Nutzer stoppt Mining dauerhaft.
+- Morgen-/Abend-Check im Dashboard: Reicht Energie fuer Haushalt heute/nacht?
+- Geringe Bereitschaft zu rechnen; erwartet wird eine Ja/Nein-Aussage und klarer Puffer.
+- Sensibel fuer Risiko: Reserve darf nicht durch Automatik angekratzt werden.
 
 &nbsp;
 
 ## Proto-Persona
 
-- Name: Hanna HAUSHALT, 41
-- NUTZER: Prosumer (PV + Speicher + Miner)
-- ROLLE: Haushaltsverantwortliche, prüft die Haus-Reserve
-- Ausbildung/Hintergrund: bürotauglich, wenig Zeit
-- Kontext: morgens und abends, will Hausreserve sicher sehen
-- Typische Aufgaben: Reserve pflegen, Puffer prüfen, Hausstatus checken
-- Ziele: Grundversorgung sichern, keine Überraschung
-- Frust/Probleme: Reserve unklar; keine Sicherheit sichtbar
-- Erwartungen an UI: klare Reserveanzeige, "Haus gesichert: Ja/Nein"
+**Persona:** Clara Reserve, 41  
+**Rolle:** Haushaltsverantwortliche, Prioritaet Versorgungssicherheit  
+**Nutzungstyp:** Kurzer Morgen-/Abend-Check, seltene Einstellungen  
+**Technische Affinitaet:** gering bis mittel, keine Lust auf Prozentrechnen  
+**Primärer Nutzungskontext:** Blick auf Reserve vor/nach Tageslauf; will Ja/Nein-Aussage  
+**Mentales Modell:** Reserve ist unantastbar; Mining darf nur oberhalb des Puffers laufen  
+**Ziel der Persona:** In einem Blick sehen, dass Haus gesichert ist und Automatik vertrauenswuerdig bleibt  
+**Relevante Einschraenkungen:** Keine Zeit fuer Diagramme; reagiert sensibel auf Risiko; will einfache Zusage
 
 &nbsp;
 
-## Proto-Journey (Kurz)
+## Proto-Problem-Statement
 
-1) Hanna legt eine Haus-Reserve fest.
-2) Das UI zeigt den gesperrten Bereich.
-3) Sie sieht "Haus gesichert: Ja".
-4) Sie lässt die Automatik laufen.
+- Haus-Reserve unsichtbar oder technisch; Nutzer sieht nicht, was gesichert ist.
+- Mining-Entscheidungen werden als Risiko fuer Haushalt interpretiert.
+- Folge: Mining wird dauerhaft gestoppt oder Automatik deaktiviert.
 
 &nbsp;
 
@@ -39,72 +37,101 @@ Ziel: Nutzer sieht klar, dass genug Energie für das Haus bleibt.
 
 | ID | Annahme |
 |----|---------|
-| SH-ASSUM-TRUST-01 | Eine sichtbare Haus-Reserve ist der zentrale Vertrauensanker. |
-| SH-ASSUM-TRUST-02 | "Haus gesichert: Ja/Nein" ist für Laien klarer als Detailwerte. |
-| SH-ASSUM-TRUST-03 | Nutzer wollen einen einstellbaren Puffer, greifen aber selten in Details ein. |
-| SH-ASSUM-TRUST-04 | Eine einfache Visualisierung reduziert Unsicherheit schneller als Diagramme. |
-| SH-ASSUM-TRUST-05 | Wenn die Reserve unklar ist, stoppen Nutzer Mining langfristig. |
+| SH-ASSUM-TRUST-01 | Eine klar markierte Haus-Reserve ist der zentrale Vertrauensanker. |
+| SH-ASSUM-TRUST-02 | "Haus gesichert: Ja/Nein" ist schneller erfassbar als Prozentwerte oder Diagramme. |
+| SH-ASSUM-TRUST-03 | Nutzer wollen Puffer einstellen koennen, nutzen aber selten Feinjustierung. |
+| SH-ASSUM-TRUST-04 | Einfache Visualisierung (Balken/Batterie) reduziert Unsicherheit schneller als Charts. |
+| SH-ASSUM-TRUST-05 | Transparente Zusage "Reserve wird nicht unterschritten" haelt Automatik aktiv. |
+
+&nbsp;
+
+## Kritische Annahme
+
+- Eine klare Aussage "Haus gesichert: Ja/Nein" mit sichtbar gesperrter Reserve reicht aus, um Vertrauen zu halten und Mining nicht vorsorglich zu stoppen.
 
 &nbsp;
 
 ## Abgeleitete Forschungsfrage
 
-Wie muss die Haus-Reserve im Smart-Home-UI visualisiert und formuliert werden, damit Nutzer die Versorgungssicherheit sofort erkennen, Vertrauen aufbauen und die Automatik laufen lassen?
+**Wie muessen Haus-Reserve und Sicherheitszusagen im Smart-Home-UI dargestellt werden (Text, Visualisierung, Zusage), damit Nutzer Vertrauen in die Automatik behalten und Mining nicht vorsorglich stoppen?**
 
 &nbsp;
 
 ## Teilfragen
 
-| ID | Fokus | Teilfrage | Bezug (Annahmen) | ASSUM IDs |
-|-----|-----|-----|-----|-----|
-| SH-TRUST-01 | Kernbotschaft | Reicht "Haus gesichert: Ja/Nein" als primäre Aussage oder braucht es Prozentwerte? | Ja/Nein klarer als Detailwerte | SH-ASSUM-TRUST-02, SH-ASSUM-TRUST-01 |
-| SH-TRUST-02 | Visualisierung | Welche Darstellungsform (Balken, Batterie, Text) reduziert Unsicherheit am stärksten? | Einfache Visualisierung statt Diagramme | SH-ASSUM-TRUST-04 |
-| SH-TRUST-03 | Einstellbarkeit | Wie viel Kontrolle über die Reserve wird tatsächlich genutzt? | Puffer einstellbar, Details selten genutzt | SH-ASSUM-TRUST-03 |
-| SH-TRUST-04 | Verhalten | Wie beeinflusst Reserve-Transparenz die Bereitschaft, Mining laufen zu lassen? | Unklare Reserve -> Mining stoppen | SH-ASSUM-TRUST-05 |
+| ID | Fokus | Teilfrage | Bezug |
+|----|-------|-----------|-------|
+| SH-TRUST-01 | Kernbotschaft | Reicht "Haus gesichert: Ja/Nein" als Primaraussage? | ASSUM-02 |
+| SH-TRUST-02 | Visualisierung | Welche Darstellung (Balken/Batterie/Text) senkt Unsicherheit am staerksten? | ASSUM-04 |
+| SH-TRUST-03 | Einstellbarkeit | Welche minimale Puffer-Einstellung wird genutzt/verstanden? | ASSUM-03 |
+| SH-TRUST-04 | Regeltransparenz | Wie kommunizieren wir, dass Reserve nie unterschritten wird? | ASSUM-05 |
 
 &nbsp;
 
-## Erhebungsmethode (einfach)
+## Erhebungsmethoden
 
-| ID | Beschreibung |
-|-----|--------------|
-| EXP-SH-TRUST-01 | A/B-Test zweier Puffer-Darstellungen (Balken vs. Text). |
-| EXP-SH-TRUST-02 | Verständnis-Check: "Was ist gesichert?" |
-| EXP-SH-TRUST-03 | Kurzes Interview zu Vertrauen. |
-
-&nbsp;
-
-
-## Leitfaden (8-10 Fragen)
-
-1) Siehst du auf den ersten Blick, ob das Haus sicher ist?
-2) Was bedeutet der markierte Bereich?
-3) Wieviel Prozent bleiben dem Haus sicher?
-4) Fühlst du dich mit dieser Reserve sicher?
-5) Was würde dich noch beruhigen?
-6) Würdest du die Reserve selber einstellen?
-7) Wann würdest du die Reserve ignorieren?
-8) Vertraust du dem System, wenn der Miner läuft?
-9) Welche Anzeige ist für dich klarer: Balken oder Text?
-10) Was fehlt dir, damit du der Automatik traust?
+| ID | Methode | Zweck |
+|----|---------|-------|
+| EXP-SH-TRUST-01 | A/B: Ja/Nein vs. Prozent/Balken. | Botschaftsklarheit |
+| EXP-SH-TRUST-02 | Puffer-Set-Test: Wird Standard-Puffer akzeptiert? | Einstellbarkeit |
+| EXP-SH-TRUST-03 | Vertrauenscheck nach Mining-Start. | Vertrauen/Sicherheit |
 
 &nbsp;
 
-## UI für Dummies (Kindergartenfassung)
+## UI-Prinzipien (abgeleitet aus Persona & WQ3)
+
+- Sicherheitszusage vor Detail: Primar "Haus gesichert: Ja/Nein" + kurzer Grund.
+- Puffer sichtbar und gesperrt: Markierter Reserve-Bereich (Balken/Batterie) mit Wert.
+- Regelklarheit: Satz "Reserve wird nicht unterschritten"; Mining-Entscheidungen referenzieren R2.
+- Wenig Zahlen: Prozent nur optional; Fokus auf Klartext und Farbcodierung.
+- Einstellbar, aber simpel: Standard-Puffer, Schieberegler optional, keine komplizierten Dialoge.
+
+&nbsp;
+
+## Beobachtungspunkte
+
+- Wird "Haus gesichert" in < 5 Sekunden erkannt?
+- Wird die Reserve als unantastbar verstanden?
+- Fuehrt eine klare Zusage zu weniger manuellen Stopps?
+
+&nbsp;
+
+## Artefakte / UI
+
+- Reserve-Karte: Balken/Batterie mit Bereich "Haus-Reserve" vs. "frei fuer Miner".
+- Text: "Haus gesichert: Ja/Nein" + "Reserve = X kWh / X%" (optional).
+- Hinweis: "Mining stoppt, falls Reserve unterschritten wuerde".
+- Button: "Reserve aendern" (einfacher Slider, Standardwert markiert).
+
+&nbsp;
+
+## Minimale UI-Elemente
 
 | ID | Element |
-|-----|---------|
-| UI-SH-TRUST-01 | Batterie mit zwei Farben: "Reserve" und "Frei für Miner". |
-| UI-SH-TRUST-02 | Grosser Text: "Haus gesichert: Ja/Nein". |
-| UI-SH-TRUST-03 | Ein Satz: "Haus-Reserve = 30%". |
-| UI-SH-TRUST-04 | Ein Knopf: "Reserve ändern". |
-| UI-SH-TRUST-05 | Kein Detail-Graph. |
+|----|---------|
+| UI-SH-TRUST-01 | Reserve-Karte mit Balken/Batterie, Bereich "Haus-Reserve" klar markiert. |
+| UI-SH-TRUST-02 | Textzeile "Haus gesichert: Ja/Nein" + Reserve-Wert (optional). |
+| UI-SH-TRUST-03 | Hinweis "Reserve wird nicht unterschritten; Mining stoppt falls noetig". |
+| UI-SH-TRUST-04 | Einfacher Slider/Presets zur Puffer-Anpassung. |
 
+&nbsp;
+
+## Messkriterien (einfach)
+
+- 80% koennen Reserve-Bedeutung in eigenen Worten erklaeren.
+- < 1 manueller Stopp pro Woche wegen Sicherheitszweifel.
+- Standard-Puffer wird von > 70% unveraendert gelassen.
+
+&nbsp;
+
+## Zusammenfassung
+
+Eine Ja/Nein-Sicherheitsaussage, ein klar markierter Reserve-Bereich und eine einfache Anpassung halten das Vertrauen hoch und verhindern vorsorgliche Stopps der Automatik.
 
 ---
 
-> **Nächster Schritt:** Danach geht es weiter mit dem Automotive-Kontext.
+> **Naechster Schritt:** Danach geht es weiter mit dem Automotive-Kontext.
 >
-> 👉 Weiter zu **[20.2.2 - AUTO-CONTEXT - Automotive-Kontext](../2022_automotive_context/README.md)**
+> Weiter zu **[20.2.2 - AUTO-CONTEXT - Automotive-Kontext](../2022_automotive_context/README.md)**
 >
-> 🔙 Zurück zu **[20.2.1 - SH-CONTEXT - Smart-Home-Kontext](./README.md)**
+> Zurueck zu **[20.2.1 - SH-CONTEXT - Smart-Home-Kontext](./README.md)**
