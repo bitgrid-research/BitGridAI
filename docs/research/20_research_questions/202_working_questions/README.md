@@ -43,7 +43,6 @@ Systemlogik basierenden Kontexten betrachtet:
   - [20.2.3.1 - SIM-WQ1 - Sichtbarkeit der Entscheidungslogik](./2023_simulation_context/2023a_transparenz.md)  
   - [20.2.3.2 - SIM-WQ2 - Eingriff und Override im Labor](./2023_simulation_context/2023b_kontrolle.md)  
   - [20.2.3.3 - SIM-WQ3 - Vertrauen durch physische Rueckmeldung](./2023_simulation_context/2023c_vertrauen.md)  
-  - [Template fuer neue SIM-WQs](./2023_simulation_context/2023_template.md)  
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
 Unterschiedlich sind ausschliesslich Interaktionskontext, Aufmerksamkeitssituation
