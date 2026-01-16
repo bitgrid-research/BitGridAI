@@ -1,4 +1,4 @@
-﻿# 20.2.3.3 - SIM-WQ3 - Vertrauen durch physische Rueckmeldung (Trust)
+﻿# 20.2.3.3 - SIM-WQ3 - Vertrauen durch physische Rückmeldung (Trust)
 
 Ziel: Physische Signale lassen das Lab als sicher, absichtsvoll und beherrschbar wirken.
 
@@ -6,30 +6,30 @@ Ziel: Physische Signale lassen das Lab als sicher, absichtsvoll und beherrschbar
 
 ## Nutzungskontext (Lab)
 
-- Tisch-Setup mit Fokus auf Rueckmeldung bei kritischen Ereignissen (Safety-Stop, Reserve-Veto, Hitze, Netz-Ausfall).
-- Dauer: 6-8 Minuten mit 2-3 provozierten Stoerungen.
-- Beobachtung: Fuehlt sich das System wie ein gesteuertes Labor an oder wie ein unberechenbares Bastelsetup?
+- Tisch-Setup mit Fokus auf Rückmeldung bei kritischen Ereignissen (Safety-Stop, Reserve-Veto, Hitze, Netz-Ausfall).
+- Dauer: 6-8 Minuten mit 2-3 provozierten Störungen.
+- Beobachtung: Fühlt sich das System wie ein gesteuertes Labor an oder wie ein unberechenbares Bastelsetup?
 
 &nbsp;
 
 ## Proto-Persona
 
 **Persona:** Vera Vertrauen, 45  
-**Rolle:** Sicherheitsbewusste Teilnehmerin, skeptisch gegenueber Automatik  
+**Rolle:** Sicherheitsbewusste Teilnehmerin, skeptisch gegenüber Automatik  
 **Nutzungstyp:** Kurzer Test mit provozierten Safety-Events (6-8 Min)  
-**Technische Affinitaet:** gering bis mittel; braucht klare Signale, keine Fachsprache  
-**Primärer Nutzungskontext:** Beobachtet Safety-Stop, Reserve-Veto, Hitze-Event; hoert/fühlt Signale  
+**Technische Affinität:** gering bis mittel; braucht klare Signale, keine Fachsprache  
+**Primärer Nutzungskontext:** Beobachtet Safety-Stop, Reserve-Veto, Hitze-Event; hört/fühlt Signale  
 **Mentales Modell:** Safety muss als kontrollierte Sequenz erlebbar sein; System darf nach Stop nicht "tot" wirken  
 **Ziel der Persona:** Erkennen, dass Schutzlogik aktiv ist und Neustart planbar erfolgt  
-**Relevante Einschraenkungen:** Alarmmuede bei schrillen Tönen; vertraut nur physischen Signalen + klarer Textzusage
+**Relevante Einschränkungen:** Alarmmüde bei schrillen Tönen; vertraut nur physischen Signalen + klarer Textzusage
 
 &nbsp;
 
 ## Proto-Problem-Statement
 
-- Safety-Stop loest aus, aber Teilnehmende wissen nicht, ob das System noch unter Kontrolle ist.
+- Safety-Stop löst aus, aber Teilnehmende wissen nicht, ob das System noch unter Kontrolle ist.
 - Akustische Warnungen wirken wie Fehlalarme, wenn sie nicht mit einer klaren Info gekoppelt sind.
-- Folge: Unsicherheit, ob man eingreifen oder warten soll; Zweifel an der Zuverlaessigkeit.
+- Folge: Unsicherheit, ob man eingreifen oder warten soll; Zweifel an der Zuverlässigkeit.
 
 &nbsp;
 
@@ -38,9 +38,9 @@ Ziel: Physische Signale lassen das Lab als sicher, absichtsvoll und beherrschbar
 | ID | Annahme |
 |----|---------|
 | SIM-ASSUM-VER-01 | Eine klare Reihenfolge der Signale (Sound -> LED -> Text) vermittelt Kontrolle besser als gleichzeitige Reize. |
-| SIM-ASSUM-VER-02 | Ein kurzer "System steht sicher"-Heartbeat nach einem Stop reduziert Angst vor Haenger/Crash. |
-| SIM-ASSUM-VER-03 | Physische Rueckmeldung (Vibration/LED Puls) direkt am betroffenen Modul steigert Vertrauen mehr als nur Display-Text. |
-| SIM-ASSUM-VER-04 | Transparente Wiederanlauf-Information ("Pruefe in 02:00 neu") verhindert panisches Eingreifen. |
+| SIM-ASSUM-VER-02 | Ein kurzer "System steht sicher"-Heartbeat nach einem Stop reduziert Angst vor Hänger/Crash. |
+| SIM-ASSUM-VER-03 | Physische Rückmeldung (Vibration/LED Puls) direkt am betroffenen Modul steigert Vertrauen mehr als nur Display-Text. |
+| SIM-ASSUM-VER-04 | Transparente Wiederanlauf-Information ("Prüfe in 02:00 neu") verhindert panisches Eingreifen. |
 
 &nbsp;
 
@@ -62,7 +62,7 @@ Ziel: Physische Signale lassen das Lab als sicher, absichtsvoll und beherrschbar
 |----|-------|-----------|-------|
 | SIM-VER-01 | Signal-Abfolge | Welche Sequenz (Sound -> LED -> Text) wird als ruhig und kontrolliert wahrgenommen? | ASSUM-01 |
 | SIM-VER-02 | Heartbeat | Braucht es einen kurzen Heartbeat nach Stop, um Vertrauen in den sicheren Zustand zu halten? | ASSUM-02 |
-| SIM-VER-03 | Lokal vs. zentral | Wirkt lokale Rueckmeldung am Modul staerker als Anzeige nur am zentralen Display? | ASSUM-03 |
+| SIM-VER-03 | Lokal vs. zentral | Wirkt lokale Rückmeldung am Modul stärker als Anzeige nur am zentralen Display? | ASSUM-03 |
 | SIM-VER-04 | Wiederanlauf | Wie klar muss der Neustart-Prozess kommuniziert werden, um panische Eingriffe zu vermeiden? | ASSUM-04 |
 
 &nbsp;
@@ -80,10 +80,10 @@ Ziel: Physische Signale lassen das Lab als sicher, absichtsvoll und beherrschbar
 ## UI-Prinzipien (abgeleitet aus Persona & WQ3)
 
 - Signal-Abfolge entlastet: kurzer, tiefer Ton -> LED -> Text, keine gleichzeitige Reizuhr.
-- Nach dem Stop lebt das System: Heartbeat (leises Klick/LED-Puls) bis zur naechsten Pruefung.
-- Lokal vor zentral: Rueckmeldung direkt am ausgeloesten Modul, Display nur als Erklaerung.
-- Wiederanlauf planbar machen: Timer/Uhrzeit fuer naechste Pruefung oder Neustart immer zeigen.
-- Warnfarben und Lautstaerke sparsam: tief/kurz statt schrill, um Vertrauen statt Alarm zu erzeugen.
+- Nach dem Stop lebt das System: Heartbeat (leises Klick/LED-Puls) bis zur nächsten Prüfung.
+- Lokal vor zentral: Rückmeldung direkt am ausgelösten Modul, Display nur als Erklärung.
+- Wiederanlauf planbar machen: Timer/Uhrzeit für nächste Prüfung oder Neustart immer zeigen.
+- Warnfarben und Lautstärke sparsam: tief/kurz statt schrill, um Vertrauen statt Alarm zu erzeugen.
 
 &nbsp;
 
@@ -91,15 +91,15 @@ Ziel: Physische Signale lassen das Lab als sicher, absichtsvoll und beherrschbar
 
 - Wird der Stop als Schutzmassnahme oder als Defekt eingeordnet?
 - Reicht ein Heartbeat, um "System lebt noch" zu signalisieren?
-- Fuehrt ein klarer Wiederanlauf-Timer zu weniger Eingriffen?
+- Führt ein klarer Wiederanlauf-Timer zu weniger Eingriffen?
 
 &nbsp;
 
 ## Artefakte / UI
 
-- Signal-Sequenz: kurzer, tiefer Ton -> LED pulsierend rot -> Text: "Safety-Stop, pruefe neu in 02:00".
-- Heartbeat nach Stop: leises Klick/Puls alle 10s, LED pulsiert gruen, kein Buzzer.
-- Modul-Feedback: Vibrationsmotor oder lokale LED an der ausgeloesten Komponente.
+- Signal-Sequenz: kurzer, tiefer Ton -> LED pulsierend rot -> Text: "Safety-Stop, prüfe neu in 02:00".
+- Heartbeat nach Stop: leises Klick/Puls alle 10s, LED pulsiert grün, kein Buzzer.
+- Modul-Feedback: Vibrationsmotor oder lokale LED an der ausgelösten Komponente.
 
 &nbsp;
 
@@ -109,27 +109,27 @@ Ziel: Physische Signale lassen das Lab als sicher, absichtsvoll und beherrschbar
 |----|---------|
 | UI-SIM-VER-01 | Signal-Sequenz: kurzer Ton -> LED rot pulsierend -> Text. |
 | UI-SIM-VER-02 | Heartbeat-Anzeige nach Stop (leiser Klick/LED-Puls). |
-| UI-SIM-VER-03 | Restart-Timer/naechste Pruefzeit sichtbar. |
+| UI-SIM-VER-03 | Restart-Timer/nächste Prüfzeit sichtbar. |
 
 &nbsp;
 
 ## Messkriterien (einfach)
 
 - 80% ordnen den Stop als "kontrollierte Safety" ein (nicht als Defekt).
-- < 1 unnoetiger Eingriff (Reset/Knopf) pro Person nach Safety-Stop.
+- < 1 unnötiger Eingriff (Reset/Knopf) pro Person nach Safety-Stop.
 - Heartbeat wird in < 5 Sekunden bemerkt und als beruhigend bewertet.
 
 &nbsp;
 
 ## Zusammenfassung
 
-Sequenzierte Signale, ein sichtbarer Heartbeat und ein klarer Wiederanlauf-Timer lassen Safety-Stopps kontrolliert wirken und reduzieren unnoetige Eingriffe.
+Sequenzierte Signale, ein sichtbarer Heartbeat und ein klarer Wiederanlauf-Timer lassen Safety-Stopps kontrolliert wirken und reduzieren unnötige Eingriffe.
 
 ---
 
-> **Naechster Schritt:** Zurueck zum Ueberblick des Simulation-Lab-Kontexts.
+> **Nächster Schritt:** Zurück zum Überblick des Simulation-Lab-Kontexts.
 >
-> Zurueck zu **[20.2.3 - SIM-CONTEXT - Simulation-Lab-Kontext](./README.md)**
+> 🔙 Zurück zu **[20.2.3 - SIM-CONTEXT - Simulation-Lab-Kontext](./README.md)**
 >
-> Zurueck zu **[20.2 - WQ - Zentrale Arbeitsfragen](../README.md)**
+> 🏠 Zurück zu **[20.2 - WQ - Zentrale Arbeitsfragen](../README.md)**
 

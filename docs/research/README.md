@@ -29,6 +29,10 @@ gezielt dort einsteigen, wo du gerade Klarheit brauchst.
       * [20.2.2.1 - AUTO-WQ1 - Verstehen der Ladeentscheidung](./20_research_questions/202_working_questions/2022_automotive_context/2022a_transparenz.md)
       * [20.2.2.2 - AUTO-WQ2 - Kontrolle im Auto](./20_research_questions/202_working_questions/2022_automotive_context/2022b_kontrolle.md)
       * [20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst](./20_research_questions/202_working_questions/2022_automotive_context/2022c_vertrauen.md)
+    * [20.2.3 - SIM-CONTEXT - Simulations-Kontext](./20_research_questions/202_working_questions/2023_simulation_context/README.md)
+      * [20.2.3.1 - SIM-WQ1 - Sichtbarkeit der Entscheidungslogik](./20_research_questions/202_working_questions/2023_simulation_context/2023a_transparenz.md)
+      * [20.2.3.2 - SIM-WQ2 - Eingriff und Override im Labor](./20_research_questions/2023_simulation_context/2023b_kontrolle.md)
+      * [20.2.3.3 - SIM-WQ3 - Vertrauen durch physische Rückmeldung](./20_research_questions/2023_simulation_context/2023c_vertrauen.md)
   * [20.3 - DQ - Kontext- und Diskussionsfragen](./20_research_questions/203_discussion_questions/README.md)
 &nbsp;
 

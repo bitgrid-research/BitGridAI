@@ -60,7 +60,7 @@ den nächsten Schritt nennt und optional Kontrolle anbietet.
 - Blickdauer < 2 Sekunden.
 - Proaktive Meldung beim Anstecken zu Hause.
 - Einfache Override-Aktion ("Jetzt laden").
-- Optionaler Pendler-Check: "Fähst du morgen zur Arbeit?"
+- Optionaler Pendler-Check: "Fährst du morgen zur Arbeit?"
 
 &nbsp;
 
@@ -78,7 +78,7 @@ den nächsten Schritt nennt und optional Kontrolle anbietet.
 - Status: "Verbunden mit Home Grid".
 - Grundsatzinfo: "Warte auf PV-Überschuss" oder "Strompreis zu hoch".
 - Prognose: "Start in ca. 20 Min".
-- Frage: "Fähst du morgen zur Arbeit?" (Ja/Nein).
+- Frage: "Fährst du morgen zur Arbeit?" (Ja/Nein).
 - Override: "Sofort laden".
 
 &nbsp;

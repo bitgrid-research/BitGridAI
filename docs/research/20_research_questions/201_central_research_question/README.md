@@ -34,7 +34,7 @@ Untersucht wird nicht die optimale Nutzung von PV-Überschuss
 im Sinne maximaler Effizienz oder minimaler Kosten.
 Auch der direkte Vergleich mit lernenden oder datengetriebenen Verfahren
 steht nicht im Fokus.
-Die Steuerung bleibt regelbasiert; KI wird ausschliesslich genutzt,
+Die Steuerung bleibt regelbasiert; KI wird ausschließlich genutzt,
 um Entscheidungsgründe in Alltagssprache zu erklären.
 
 Stattdessen konzentriert sich das Projekt auf:

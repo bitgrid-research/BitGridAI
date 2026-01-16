@@ -145,7 +145,7 @@ Beispiel Topics:
   },
   "decision": {
     "action": "START_MINING",
-    "reason": "PV_Ueberschuss",
+    "reason": "PV_Überschuss",
     "valid_until": "2023-10-29T14:10:00"
   }
 }
@@ -175,6 +175,6 @@ Beispiel Topics:
 >
 > 👉 Weiter zu **[20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung](./2021a_transparenz.md)**
 >
-> 🔙 Zurück zur **[2 - Forschung](../../../README.md)** 
+> 🔙 Zurück zu **[20.2 - WQ - Zentrale Arbeitsfragen](../README.md)**
 >
 > 🏠 Zurück zur **[Hauptübersicht](../../../../README.md)**
