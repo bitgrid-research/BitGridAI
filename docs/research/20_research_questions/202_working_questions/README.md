@@ -26,19 +26,27 @@ bewusst ausgeklammert bleiben.
 Die Arbeitsfragen werden in klar getrennten, aber auf einer gemeinsamen
 Systemlogik basierenden Kontexten betrachtet:
 
-<img src="../../../media/context_sh.png" alt="Hamster tech" width="400" height="250">
+<img src="../../../media/context_sh.png" alt="context_sh" width="400" height="250">
 
 - **[20.2.1 - SH-CONTEXT - *Smart-Home*-Kontext](./2021_smart_home_context/README.md)**  
   Wenn Energieentscheidungen zwischen Kaffeemaschine, Waschmaschine und Miner fallen: erklaerbare, regelbasierte Automatik im haeuslichen Umfeld (App / Web-Dashboard) mit Fokus auf Transparenz, Kontrolle und ein mentales Modell, das auch nach drei Wochen noch Sinn ergibt.  
   - [20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)  
   - [20.2.1.2 - SH-WQ2 - Kontrolle und Override](./2021_smart_home_context/2021b_kontrolle.md)  
-  - [20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)  
+  - [20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)
+    
+ &nbsp;
+
+<img src="../../../media/context_auto.png" alt="context_auto" width="400" height="250">
 
 - **[20.2.2 - AUTO-CONTEXT - *Automotive*-Kontext](./2022_automotive_context/README.md)**  
   Wenn Reichweite, Ladeleistung und Nervositaet zusammenkommen: verstaendliche Erklaerungen fuer automatisierte Ladeentscheidungen im aufmerksamkeitssensitiven Fahrzeugkontext (z. B. *Warum laedt er jetzt nicht und soll ich panisch werden?*), reduziert, vertrauenswuerdig und ohne den Fahrer in den Infomodus zu schicken.  
   - [20.2.2.1 - AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022_automotive_context/2022a_transparenz.md)  
   - [20.2.2.2 - AUTO-WQ2 - Kontrolle im Auto](./2022_automotive_context/2022b_kontrolle.md)  
-  - [20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)  
+  - [20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)
+    
+ &nbsp;
+
+<img src="../../../media/context_sim.png" alt="context_sim" width="400" height="250">
 
 - **[20.2.3 - SIM-CONTEXT - *Simulations*-Kontext](./2023_simulation_context/README.md)**  
   Wenn Regeln hoerbar klicken und Miner sichtbar anspringen: physische Tischsimulation, in der Schwellen, Prioritaeten und Sicherheitslogiken nicht nur erklaert, sondern provoziert, beobachtet und begriffen werden koennen.  
