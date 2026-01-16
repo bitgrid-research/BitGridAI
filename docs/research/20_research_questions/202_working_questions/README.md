@@ -26,6 +26,8 @@ bewusst ausgeklammert bleiben.
 Die Arbeitsfragen werden in klar getrennten, aber auf einer gemeinsamen
 Systemlogik basierenden Kontexten betrachtet:
 
+<img src="../../../media/context_sh.png" alt="Hamster tech" width="400" height="250">
+
 - **[20.2.1 - SH-CONTEXT - *Smart-Home*-Kontext](./2021_smart_home_context/README.md)**  
   Wenn Energieentscheidungen zwischen Kaffeemaschine, Waschmaschine und Miner fallen: erklaerbare, regelbasierte Automatik im haeuslichen Umfeld (App / Web-Dashboard) mit Fokus auf Transparenz, Kontrolle und ein mentales Modell, das auch nach drei Wochen noch Sinn ergibt.  
   - [20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)  
