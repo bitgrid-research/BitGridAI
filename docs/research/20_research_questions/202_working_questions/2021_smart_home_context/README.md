@@ -5,6 +5,8 @@ PV-Überschuss steuert Mining als flexible Last.
 Ziel ist nicht nur Optimierung, sondern eine verständliche,
 alltagstaugliche Erklärung der Entscheidungen im lokalen Dashboard.
 
+<img src="../../../../media/context_sh.png" alt="Hamster tech" width="1000">
+
 &nbsp;
 
 ## Zielbild
