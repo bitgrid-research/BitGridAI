@@ -5,6 +5,8 @@ Der Automotive-Kontext fokussiert die Frage:
 Hier steht nicht die Optimierung im Vordergrund, sondern Verständnis, Vertrauen
 und eine saubere, alltagstaugliche Erklärung im Fahrzeug.
 
+<img src="../../../../media/context_auto.png" alt="Hamster tech" width="1000">
+
 &nbsp;
 
 ## Zielbild
