@@ -20,10 +20,15 @@ alltagstaugliche Erklärung der Entscheidungen im lokalen Dashboard.
 
 ## Unterseiten
 
+### WQ1 – Transparenz
 - **[20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung](./2021a_transparenz.md)**
   - Warum läuft, pausiert oder stoppt der Miner?
+
+### WQ2 – Kontrolle
 - **[20.2.1.2 - SH-WQ2 - Kontrolle und Override](./2021b_kontrolle.md)**
   - Kann der Nutzer Mining schnell stoppen/starten?
+
+### WQ3 – Vertrauen
 - **[20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021c_vertrauen.md)**
   - Ist die Haus-Reserve sichtbar und vertrauenswürdig?
 
