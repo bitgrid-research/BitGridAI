@@ -82,12 +82,11 @@ Abgeleitet aus Blickdauer, Nutzungskontext und den Annahmen der Deep Dives:
 > Kurz, alltagssprachlich und „glanceable“, keine Fachbegriffe ohne Nachfrage.
 
 
-
 &nbsp;
 
 ## Konzept
 
-Stand: 19.01.2026: https://slate-bronze-73147930.figma.site/ 
+Stand ~ Skizzenhafte Vorstellung: 19.01.2026: https://slate-bronze-73147930.figma.site/ 
 
 
 &nbsp;
