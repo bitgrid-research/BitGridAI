@@ -41,7 +41,7 @@ Sicher sein, dass der Arbeitsweg am nächsten Morgen ohne Einschränkung möglic
 
 ## Proto-Problem-Statement (WQ3 – Vertrauen)
 
-<img src="../../../../media/research/wq1_auto/auto_wq1_problem.png" alt="wq1_auto_problem" width="1000">
+<img src="../../../../media/research/wq3_auto/auto_wq3_problem.png" alt="wq3_auto_problem" width="1000">
 
 - Das HEMS nutzt die Fahrzeugbatterie für das Haus (V2H).  
 - Der Akkustand sinkt sichtbar, ohne dass klar wird, welcher Teil „sicher“ reserviert ist.  
