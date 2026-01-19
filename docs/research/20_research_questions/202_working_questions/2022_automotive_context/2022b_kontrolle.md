@@ -17,6 +17,8 @@ und eine sofortige Reaktion des Systems auslösen, ohne kognitive oder visuelle 
 
 ## Relevante Persona (HCI-Modell)
 
+<img src="../../../../media/research/wq2_auto/auto_wq2_persona.png" alt="wq1_auto_problem" width="1000">
+
 **Persona:** Dirk Direkt  
 **Rolle:** Fahrer im Smart-Home- und HEMS-Kontext  
 **Nutzungstyp:** Spontane Nutzung, Early Adopter  
@@ -38,6 +40,8 @@ Den Ladevorgang sofort starten können, wenn Reichweite jetzt benötigt wird.
 
 ## Proto-Problem-Statement (WQ2 – Kontrolle)
 
+<img src="../../../../media/research/wq2_auto/auto_wq2_problem.png" alt="wq2_auto_problem" width="1000">
+
 - Das HEMS verzögert den Ladevorgang aus Optimierungsgründen (PV, Tarif, Prognose).
 - In spontanen Situationen benötigt Dirk jedoch **sofortige Reichweite**.
 - Ist der Override nicht direkt sichtbar oder erfordert mehrere Schritte,  
@@ -51,6 +55,8 @@ Ohne sofort verfügbaren Override wird Automatik als Einschränkung statt als Un
 &nbsp;
 
 ## Proto-Journey (WQ2 – Dirk Direkt)
+
+<img src="../../../../media/research/wq2_auto/auto_wq2_journey.png" alt="wq2_auto_problem" width="1000">
 
 1. Dirk kommt gegen 20:00 Uhr nach Hause und parkt das Auto.  
 2. Das Fahrzeug ist angesteckt und wartet im Eco-Modus auf günstige Bedingungen.  
@@ -67,6 +73,8 @@ Mit minimalem Aufwand handlungsfähig sein und das System unmittelbar überstimm
 
 ## Abgeleitete Annahmen (WQ2 – Kontrolle)
 
+<img src="../../../../media/research/wq2_auto/auto_wq2_annahme.png" alt="wq2_auto_annahme" width="1000">
+
 - Nutzer erwarten eine **direkt sichtbare One-Tap-Aktion** („Jetzt laden“) ohne Menüebenen.
 - Jede Verzögerung oder Rückfrage wird als Blockade wahrgenommen.
 - **Sofortiges visuelles und haptisches Feedback** reduziert Stress und bestätigt Kontrolle.
@@ -80,21 +88,12 @@ Diese Annahmen operationalisieren wahrgenommene Kontrolle im Fahrzeug-UI.
 
 ## Kritische Annahme (WQ2 – Kontrolle)
 
+<img src="../../../../media/research/wq2_auto/auto_wq2_synthese.png" alt="wq2_auto_synthese" width="500">
+
 - Ein einzelner, unmittelbar erreichbarer **Override („Jetzt laden“)**
   reicht aus, damit Nutzende die Automatik als kontrollierbar wahrnehmen  
   und situativ eingreifen können, ohne die Automatik grundsätzlich abzulehnen.
 
-&nbsp;
-
-## Zentrale Annahmen (WQ2 – Kontrolle)
-
-| ID | Annahme |
-|----|--------|
-| AUTO-ASSUM-CTRL-01 | Ein One-Tap-Override ohne Menüs ist erforderlich. |
-| AUTO-ASSUM-CTRL-02 | Rückmeldung muss den Start sofort sichtbar machen. |
-| AUTO-ASSUM-CTRL-03 | Override ist selten, aber in Stresssituationen entscheidend. |
-| AUTO-ASSUM-CTRL-04 | Rückfragen müssen in maximal einem Tap beantwortbar sein. |
-| AUTO-ASSUM-CTRL-05 | Sprachinteraktion kann Ablenkung reduzieren. |
 
 &nbsp;
 
@@ -115,15 +114,6 @@ als kontrollierbar wahrzunehmen und situativ ohne Ablenkung einzugreifen?**
 | AUTO-CTRL-03 | Rückfragen | Wie kurz dürfen Sicherheitsabfragen sein, ohne zu stören? | ASSUM-04 |
 | AUTO-CTRL-04 | Modalität | Wann ist Sprachinteraktion schneller als Touch? | ASSUM-05 |
 
-&nbsp;
-
-## Erhebungsmethoden
-
-| ID | Methode | Zweck |
-|----|--------|------|
-| EXP-AUTO-CTRL-01 | Szenario-Test im Stand | Auffindbarkeit und Reaktionszeit |
-| EXP-AUTO-CTRL-02 | Time-on-Task-Messung | One-Tap-Effektivität |
-| EXP-AUTO-CTRL-03 | Kurzinterview | Wahrgenommene Kontrolle |
 
 &nbsp;
 
@@ -135,16 +125,7 @@ als kontrollierbar wahrzunehmen und situativ ohne Ablenkung einzugreifen?**
 - Keine Blockade durch Dialoge
 - Optional: Sprachbefehl als Alternative
 
-&nbsp;
 
-## Minimale UI-Elemente
-
-| ID | Element |
-|----|--------|
-| UI-AUTO-CTRL-01 | Großer Button „Jetzt laden“ |
-| UI-AUTO-CTRL-02 | Unmittelbare visuelle/haptische Bestätigung |
-| UI-AUTO-CTRL-03 | Optionale Ja/Nein-Rückfrage (z. B. Pendlerfahrt) |
-| UI-AUTO-CTRL-04 | Optional: Sprachbefehl „Laden starten“ |
 
 &nbsp;
 

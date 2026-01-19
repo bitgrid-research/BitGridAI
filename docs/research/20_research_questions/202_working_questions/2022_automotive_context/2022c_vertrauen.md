@@ -18,6 +18,8 @@ und dass die V2H-Nutzung diese Reserve nicht gefährdet.
 
 ## Relevante Persona (HCI-Modell)
 
+<img src="../../../../media/research/wq3_auto/auto_wq3_persona.png" alt="wq3_auto_problem" width="1000">
+
 **Persona:** Petra Plan  
 **Rolle:** Pendlerin im Smart-Home- und HEMS-Kontext  
 **Nutzungstyp:** Regelmäßige Routine-Nutzung  
@@ -39,6 +41,8 @@ Sicher sein, dass der Arbeitsweg am nächsten Morgen ohne Einschränkung möglic
 
 ## Proto-Problem-Statement (WQ3 – Vertrauen)
 
+<img src="../../../../media/research/wq1_auto/auto_wq1_problem.png" alt="wq1_auto_problem" width="1000">
+
 - Das HEMS nutzt die Fahrzeugbatterie für das Haus (V2H).  
 - Der Akkustand sinkt sichtbar, ohne dass klar wird, welcher Teil „sicher“ reserviert ist.  
 - Prozentwerte und Ladezustände lassen nicht erkennen,  
@@ -52,6 +56,9 @@ Ohne sichtbaren, garantierten Pendler-Puffer wird V2H als Risiko wahrgenommen, n
 &nbsp;
 
 ## Proto-Journey (WQ3 – Petra Plan)
+
+<img src="../../../../media/research/wq3_auto/auto_wq3_journey.png" alt="wq3_auto_problem" width="1000">
+
 
 1. Petra kommt abends nach Hause und steckt das Auto an.  
 2. Das System beginnt, Energie für das Haus zu nutzen (V2H).  
@@ -69,6 +76,8 @@ und die Automatik vertrauensvoll laufen lassen zu können.
 
 ## Abgeleitete Annahmen (WQ3 – Vertrauen)
 
+<img src="../../../../media/research/wq3_auto/auto_wq3_annahme.png" alt="wq3_auto_annahme" width="1000">
+
 - Prozentwerte allein erzeugen Unsicherheit, keine Sicherheit.
 - Ein klar ausgewiesener **garantierter Puffer** reduziert Reichweitenangst.
 - Eine Ja/Nein-Aussage („Bereit für morgen“) ist schneller verständlich als Zahlen.
@@ -82,21 +91,13 @@ Diese Annahmen operationalisieren Vertrauen als wahrgenommene Sicherheit des Arb
 
 ## Kritische Annahme (WQ3 – Vertrauen)
 
+<img src="../../../../media/research/wq3_auto/auto_wq3_synthese.png" alt="wq3_auto_synthese" width="500">
+
 - Ein explizites **Puffer-Versprechen** („Arbeitsweg garantiert gesichert“)  
   ist ausreichend, um Reichweitenangst zu reduzieren  
   und die V2H-Automatik langfristig akzeptabel zu machen.
 
-&nbsp;
 
-## Zentrale Annahmen (WQ3 – Vertrauen)
-
-| ID | Annahme |
-|----|--------|
-| AUTO-ASSUM-TRUST-01 | Ein klar sichtbarer Pendler-Puffer reduziert Reichweitenangst. |
-| AUTO-ASSUM-TRUST-02 | „Bereit für morgen: Ja/Nein“ ist schneller erfassbar als Prozentwerte. |
-| AUTO-ASSUM-TRUST-03 | Der Pendler-Puffer darf systemseitig nie unterschritten werden. |
-| AUTO-ASSUM-TRUST-04 | Einfache Batterie-Visualisierungen sind verständlicher als Diagramme. |
-| AUTO-ASSUM-TRUST-05 | Unklare Reserven führen zur Deaktivierung der Automatik. |
 
 &nbsp;
 
@@ -118,15 +119,6 @@ und der automatisierten V2H-Nutzung vertrauen?**
 | AUTO-TRUST-03 | Regeltransparenz | Wie muss kommuniziert werden, dass der Puffer nie unterschritten wird? | ASSUM-03 |
 | AUTO-TRUST-04 | Vertrauen | Wann bleibt die Automatik aktiviert? | ASSUM-05 |
 
-&nbsp;
-
-## Erhebungsmethoden
-
-| ID | Methode | Zweck |
-|----|--------|------|
-| EXP-AUTO-TRUST-01 | Szenario-Interview | Sicherheitswahrnehmung |
-| EXP-AUTO-TRUST-02 | Verständnisabfrage | Puffer-Interpretation |
-| EXP-AUTO-TRUST-03 | Vertrauensskala | Reichweitenangst |
 
 &nbsp;
 
@@ -138,16 +130,6 @@ und der automatisierten V2H-Nutzung vertrauen?**
 - Keine alarmistischen Farben  
 - Garantie statt Prognose
 
-&nbsp;
-
-## Minimale UI-Elemente
-
-| ID | Element |
-|----|--------|
-| UI-AUTO-TRUST-01 | Anzeige: „Bereit für morgen: Ja/Nein“ |
-| UI-AUTO-TRUST-02 | Visualisierter Pendler-Puffer (z. B. untere Batteriezone) |
-| UI-AUTO-TRUST-03 | Text: „Diese Reserve bleibt unberührt.“ |
-| UI-AUTO-TRUST-04 | Optional: Arbeitsweg anpassen |
 
 &nbsp;
 

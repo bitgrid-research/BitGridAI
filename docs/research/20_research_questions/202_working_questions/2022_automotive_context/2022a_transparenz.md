@@ -76,7 +76,7 @@ sodass Fiona das Thema mental abschließen und in den Feierabend wechseln kann.
 
 ## Abgeleitete Annahmen (WQ1 – Transparenz)
 
-<img src="../../../../media/research/wq1_auto/auto_wq1_annahme.png" alt="wq1_auto_problem" width="1000">
+<img src="../../../../media/research/wq1_auto/auto_wq1_annahme.png" alt="wq1_auto_annahme" width="1000">
 
 - Unklare Statusanzeigen werden von Routine-Nutzenden primär als **Systemfehler** interpretiert, nicht als Optimierungsentscheidung.
 - Fehlende Erklärung erzeugt eine **mentale Restunsicherheit**, die über den Nutzungsmoment hinaus bestehen bleibt.
@@ -150,8 +150,6 @@ als absichtsvolle, regelbasierte Systementscheidung verstehen und nicht als Fehl
 &nbsp;
 
 ## Zusammenfassung
-
-
 
 Die Persona dient hier der **Operationalisierung von Aufmerksamkeit, Nutzungskontext und mentalem Modell**.  
 Transparenz bedeutet nicht Detailtiefe, sondern die sofortige Wahrnehmung von **Absicht statt Fehler**.
