@@ -2,6 +2,7 @@
 
 Der Automotive-Kontext fokussiert die Frage:
 "Warum lädt mein Auto gerade - oder warum nicht - und wie erklärt mir das System die Entscheidung?"
+
 Hier steht nicht die Optimierung im Vordergrund, sondern Verständnis, Vertrauen
 und eine saubere, alltagstaugliche Erklärung im Fahrzeug.
 
@@ -11,58 +12,48 @@ und eine saubere, alltagstaugliche Erklärung im Fahrzeug.
 
 ## Zielbild
 
-- Das Auto wird zum erklärenden Akteur im Smart-Grid-Kontext.
-- Entscheidungen aus dem HEMS werden transparent, kurz und proaktiv kommuniziert.
-- Eine "Transparent Energy Persona" übersetzt Regeln (R1-R5) in klare Alltagssprache.
+1. Das E-Auto als erklärender, steuerbarer Akteur im Smart-Grid / HEMS.  
+2. Ladeentscheidungen werden nicht nur angezeigt, sondern kausal begründet.  
+3. Eine lokale Explainable-Layer („Transparent Energy Persona“) übersetzt
+   - Regeln (R1–R5),
+   - Systemzustände,
+   - Prognosen,
+   
+   in verständliche Alltagssprache und überträgt sie ins Fahrzeug-UI.
+
 
 &nbsp;
 
-## Unterseiten (Template)
+## Bezug zu den zentralen Arbeitsfragen
 
+Der Automotive-Kontext operationalisiert die drei Dimensionen:
+### WQ1 – Transparenz
 - **[20.2.2.1 - AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022a_transparenz.md)**
-  - Warum lädt das Auto gerade oder warum nicht?
+  - *Welche systeminternen Informationen müssen sichtbar werden, damit der Fahrer in <2 Sekunden versteht, warum geladen wird oder nicht?*
+
+### WQ2 – Kontrolle
 - **[20.2.2.2 - AUTO-WQ2 - Kontrolle im Auto](./2022b_kontrolle.md)**
-  - Kann der Fahrer einfach eingreifen?
+  - *Welche minimalen Override-Optionen sind notwendig, damit die Automatik als kontrollierbar wahrgenommen wird?*
+
+### WQ3 – Vertrauen
 - **[20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022c_vertrauen.md)**
-  - Fühlt sich die Entscheidung im Auto sicher an?
+  - *Wie können Sicherheitsreserven (Pendlerpuffer, Reichweitenzusagen) so visualisiert werden, dass Reichweitenangst reduziert und Vertrauen stabilisiert wird?*
+
 
 &nbsp;
 
-## Arbeitstitel (Auswahl)
+## Interaktionsprinzipien im Fahrzeug
 
-- Designing Explainable Automotive Charging UIs
-- Explainable Smart Charging im Automotive UI
-- Gestaltung erklärbarer Lade-Interfaces im Automobil
-- Designing Explainable V2H Interfaces
-- Reducing Range Anxiety through Interface Design
+Abgeleitet aus Blickdauer, Nutzungskontext und den Annahmen der Deep Dives:
 
-&nbsp;
+- Erfassbarkeit in maximal 2 Sekunden (Glanceability).
+- Reihenfolge der Information:  
+  **Warum → Wann → Was kann ich tun?**
+- Alltagssprache statt technischer Regelbezeichnungen.
+- Ein-Tap-Override („Jetzt laden“).
+- Sichtbare Sicherheitsreserve („Bereit für morgen: Ja/Nein“).
+- Keine tiefen Menüs, keine komplexen Diagramme.
 
-## Kernproblem (kompakt)
-
-- Auto ist angesteckt, lädt aber nicht.
-- UI zeigt Status, aber keine Begründung.
-- Folge: Frust, Misstrauen, Reichweitenangst.
-
-Design-Opportunity: Erklärende Rückmeldung im Auto-UI, die den Grund klar macht,
-den nächsten Schritt nennt und optional Kontrolle anbietet.
-
-&nbsp;
-
-## Konzeptbausteine
-
-### Transparent Energy Persona
-
-- Tonalität: ruhig, hilfreich, vorausschauend.
-- Prinzip: erst warum, dann was, dann wann.
-- Keine Fachsprache ohne Nachfrage; kurz und "glanceable".
-
-### Interaktionsprinzipien im Auto
-
-- Blickdauer < 2 Sekunden.
-- Proaktive Meldung beim Anstecken zu Hause.
-- Einfache Override-Aktion ("Jetzt laden").
-- Optionaler Pendler-Check: "Fährst du morgen zur Arbeit?"
 
 &nbsp;
 
@@ -75,47 +66,32 @@ den nächsten Schritt nennt und optional Kontrolle anbietet.
 
 &nbsp;
 
-## UI-Kernscreen (Auto)
+## Beispielmeldungen
 
-- Status: "Verbunden mit Home Grid".
-- Grundsatzinfo: "Warte auf PV-Überschuss" oder "Strompreis zu hoch".
-- Prognose: "Start in ca. 20 Min".
-- Frage: "Fährst du morgen zur Arbeit?" (Ja/Nein).
-- Override: "Sofort laden".
+- „Ich pausiere kurz, der Strom ist gerade teuer. In 20 Minuten wird er günstiger.“
+- „Ich warte auf mehr Sonne. Start voraussichtlich um 14:10.“
+- „Dein Pendler-Puffer ist gesichert. Das Haus nutzt nur den Rest.“
+- „Okay, ich lade jetzt mit Netzstrom. Das kostet heute etwa 2 € mehr.“
 
-&nbsp;
+> **Transparent Energy Persona (Explainable Layer)**
+>
+> Tonalität: ruhig, hilfreich, vorausschauend.
+> 
+> Prinzip: erst warum, dann was, dann wann.
+> 
+> Kurz, alltagssprachlich und „glanceable“, keine Fachbegriffe ohne Nachfrage.
 
-## Beispielmeldungen (Persona)
 
-- "Ich pausiere das Laden kurz, der Strom ist gerade teuer. In 20 Minuten wird er günstiger."
-- "Ich warte mit dem Laden, bis mehr Sonne da ist. Start voraussichtlich um 14:10."
-- "Der Pendler-Puffer ist gesichert. Ich lade nur bis 40%, den Rest später mit PV."
-- "Okay, ich lade jetzt mit Netzstrom. Das kostet heute etwa 2 Euro mehr."
-
-&nbsp;
-
-## Technischer Rahmen (Skizze)
-
-- Das Auto ist eine steuerbare Last im BitGridAI-Controller.
-- Entscheidungen kommen regelbasiert (R1-R5) und werden erklärt.
-- Übertragung ins Auto-UI via MQTT, lokale LLM-Logik für Sprache.
-
-Beispiel Topics:
-- `bitgrid/decision/reason` -> "Warte auf PV-Überschuss > 3 kW"
-- `bitgrid/prediction` -> "Ladestart voraussichtlich in 10 Min"
 
 &nbsp;
 
-## Annahmen und Risiken
+## Konzept
 
-| ID | Typ | Annahme/Risiko |
-|----|-----|----------------|
-| AUTO-ASSUM-01 | Annahme | Nutzer wollen verstehen, nicht optimieren. |
-| AUTO-ASSUM-02 | Annahme | Lokales LLM ist verfügbar (Privacy). |
-| AUTO-RISK-01 | Risiko | Zu viele Meldungen nerven. |
-| AUTO-RISK-02 | Risiko | Falsches Timing wirkt bevormundend. |
+Stand: 19.01.2026: https://slate-bronze-73147930.figma.site/ 
+
 
 &nbsp;
+
 ## Offene Fragen
 
 - Welche Erklärungslänge ist im Auto noch verständlich?
