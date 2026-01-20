@@ -8,7 +8,6 @@ PV-Wechselrichter, Speicher, Smart Meter und Miner.
 Sie spricht die Sprache der Hardware –  
 und übersetzt sie in eine Form, die der Core versteht.
 
-*(Platzhalter für ein Bild: Der Hamster steht zwischen Kabeln, Steckern und Funkwellen. Auf der einen Seite Geräte-Symbole (PV, Batterie, Miner), auf der anderen Seite saubere Events, die Richtung Core fließen.)*
 ![Hamster verbindet Feldgeräte](../../../../media/bithamster_052.png)
 
 &nbsp;
