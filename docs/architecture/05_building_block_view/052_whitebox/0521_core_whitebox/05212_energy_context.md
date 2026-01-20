@@ -5,7 +5,6 @@ Die Quelle der Wahrheit.
 Der Energy Context konsolidiert Telemetrie und Forecasts zum **`EnergyState`** – der **Single Source of Truth** im System.  
 Er sorgt dafür, dass Regeln, Vorschauen und Replays **auf konsistenten, validierten Daten** arbeiten.
 
-*(Platzhalter für ein Bild: Der Hamster sitzt an einem großen Tisch voller Messgeräte. Pfeile führen von PV, Batterie, Stromzähler und Wetterdaten in ein einziges, ordentlich beschriftetes Kästchen: „EnergyState“.)*
 ![Hamster sammelt Messwerte](../../../../media/bithamster_052.png)
 
 &nbsp;
