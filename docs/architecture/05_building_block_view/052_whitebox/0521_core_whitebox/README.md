@@ -11,7 +11,6 @@ Keine UI.
 
 Nur Zustand, Zeit und Regeln.
 
-*(Platzhalter für ein Bild: Der Hamster sitzt im Inneren der Box vor einem ruhigen Taktgeber. Zahnräder drehen langsam, ein Block-Timer tickt.)*  
 ![Hamster im Core-Orchestrator](../../../../media/bithamster_052.png)
 
 &nbsp;
@@ -21,7 +20,7 @@ Nur Zustand, Zeit und Regeln.
 - Deterministische Steuerung im 10-Minuten-Takt  
 - Bewertung der Regeln R1–R5  
 - Pflege des `EnergyState` als Single Source of Truth  
-- Durchsetzung von Safety-, Autarkie- und Stabilitaetsgrenzen  
+- Durchsetzung von Safety-, Autarkie- und Stabilitätsgrenzen  
 
 &nbsp;
 
@@ -30,9 +29,9 @@ Nur Zustand, Zeit und Regeln.
 | Baustein | Verantwortung | Hinweise |
 | --- | --- | --- |
 | **Block-Scheduler** | Erzwingt 10-Minuten-Blockfenster, vergibt `valid_until` (Deadbands). | Entkoppelt Flapping, gibt den Systemtakt vor. |
-| **Energy Context** | Konsolidiert Messwerte und Forecasts zum `EnergyState`. | Validiert Einheiten, Zeitstempel und Vollstaendigkeit. |
-| **Rule Engine** | Bewertet R1–R5, erzeugt `Decision` und `DecisionEvent`. | Priorisierung: Safety > Autarkie > Stabilitaet > Optimierung. |
-| **Override Handler** | Verarbeitet manuelle Eingriffe mit TTL und Scope. | Konfliktpruefung gegen Safety- und Autarkie-Regeln. |
+| **Energy Context** | Konsolidiert Messwerte und Forecasts zum `EnergyState`. | Validiert Einheiten, Zeitstempel und Vollständigkeit. |
+| **Rule Engine** | Bewertet R1–R5, erzeugt `Decision` und `DecisionEvent`. | Priorisierung: Safety > Autarkie > Stabilität > Optimierung. |
+| **Override Handler** | Verarbeitet manuelle Eingriffe mit TTL und Scope. | Konfliktprüfung gegen Safety- und Autarkie-Regeln. |
 
 &nbsp;
 
@@ -63,7 +62,7 @@ Nur Zustand, Zeit und Regeln.
 
 &nbsp;
 
-## Hauptdatenfluesse
+## Hauptdatenflüsse
 
 1. Telemetrie & Forecasts → Energy Context → konsolidierter `EnergyState`  
 2. Block-Scheduler → Rule Engine → `Decision` / `DecisionEvent`  
@@ -72,10 +71,10 @@ Nur Zustand, Zeit und Regeln.
 
 &nbsp;
 
-## Qualitaets- und Betriebsaspekte
+## Qualitäts- und Betriebsaspekte
 
-- **Deterministisch:** Gleicher Input → gleicher Output (Replay-faehig)  
-- **Safety-first:** Temperatur- und Autarkie-Regeln ueberstimmen Optimierungen  
+- **Deterministisch:** Gleicher Input → gleicher Output (Replay-fähig)  
+- **Safety-first:** Temperatur- und Autarkie-Regeln überstimmen Optimierungen  
 - **Timeboxing:** Jede Auswertung bleibt innerhalb eines Blockfensters  
 - **Fail-ruhig:** Keine hektischen Reaktionen, kein Flapping  
 
