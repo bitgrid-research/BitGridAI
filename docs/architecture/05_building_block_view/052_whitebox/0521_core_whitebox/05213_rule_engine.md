@@ -4,9 +4,9 @@ Der Entscheider.
 
 Die Rule Engine bewertet die Regeln **R1–R5** deterministisch gegen den aktuellen
 `EnergyState` und erzeugt daraus eine **konkrete Entscheidung**.
+
 Keine Statistik. Kein Raten. Keine Magie.
 
-*(Platzhalter für ein Bild: Der Hamster steht vor einer großen Tafel mit fünf klar beschrifteten Regeln (R1–R5). Er sortiert Karten nach Priorität: „Safety“ liegt ganz oben, darunter Autarkie, Stabilität und Optimierung.)*
 ![Hamster bewertet Regeln](../../../../media/bithamster_052.png)
 
 &nbsp;
