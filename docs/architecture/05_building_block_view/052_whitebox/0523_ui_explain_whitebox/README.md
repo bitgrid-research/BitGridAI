@@ -6,8 +6,6 @@ Diese Whitebox beschreibt alles, womit **Menschen** mit BitGridAI interagieren:
 Anzeige, Erklärung, Simulation und bewusste Eingriffe.
 Keine Entscheidungen – aber volle Transparenz.
 
-*(Platzhalter für ein Bild: Der Hamster steht vor einem Dashboard.
-Sprechblasen zeigen „Warum?“, „Was wäre wenn?“ und „Override aktiv“.)*
 ![Hamster erklärt Entscheidungen](../../../../media/bithamster_052.png)
 
 &nbsp;
