@@ -18,12 +18,12 @@ Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox u
   *(Übersetzer zwischen Strom und Bytes.)*
 
 - **[5.2.3 - UI & Explainability](../052_whitebox/0523_ui_explain_whitebox/README.md)**  
-  Web-UI, API-Layer und Explain-Agent fuer Transparenz, Vorschau und Overrides.  
+  Web-UI, API-Layer und Explain-Agent für Transparenz, Vorschau und Overrides.  
   *(Das Gesicht und die Stimme des Systems.)*
 
 - **[5.2.4 - Data & Research](../052_whitebox/0524_data_research_whitebox/README.md)**  
   Persistenz, Exporte und Governance für Analyse und Replays.  
-  *(Das Gedaechtnis mit Notizzettel.)*
+  *(Das Gedächtnis mit Notizzettel.)*
 
 - **[5.2.5 - Operations (Security, Config, Observability)](../052_whitebox/0525_operations_whitebox/README.md)**  
   Authentifizierung, Policies, Konfiguration und Monitoring.  
