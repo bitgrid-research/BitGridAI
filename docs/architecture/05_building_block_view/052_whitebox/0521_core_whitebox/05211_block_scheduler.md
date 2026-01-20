@@ -41,7 +41,7 @@ Der Block-Scheduler erzwingt den **10-Minuten-Rhythmus**, triggert die Regel-Aus
 **Required**
 - Aktuelle Zeitquelle
 - Konfiguration (Blockdauer, Grace Period)
-- Rueckmeldung ueber Regel-Laufzeit (Timeboxing)
+- Rückmeldung über Regel-Laufzeit (Timeboxing)
 
 &nbsp;
 
@@ -49,20 +49,20 @@ Der Block-Scheduler erzwingt den **10-Minuten-Rhythmus**, triggert die Regel-Aus
 
 1. Alle `block_duration` erzeugt der Tick Manager ein neues Blockfenster  
    (`block_id`, `window_start`, `window_end`).
-2. Der Trigger Dispatcher startet die Rule Engine und ueberwacht die Laufzeit.
+2. Der Trigger Dispatcher startet die Rule Engine und überwacht die Laufzeit.
 3. Der Deadband Manager berechnet `valid_until` aus Entscheidungstyp und Hysterese-Regeln.
 4. Tick- und Health-Events werden an Core, UI und Data publiziert.
 
 &nbsp;
 
-## Qualitaet und Betrieb
+## Qualität und Betrieb
 
 - **Timeboxing**  
-  Regel-Auswertungen duerfen das Blockfenster nicht ueberschreiten.  
-  Bei Ueberschreitung: Warnung und Fallback auf Safe Decision.
+  Regel-Auswertungen dürfen das Blockfenster nicht überschreiten.  
+  Bei Überschreitung: Warnung und Fallback auf Safe Decision.
 
 - **Flapping-Vermeidung**  
-  Hysterese pro Aktionstyp, Mindesthaltezeiten ueber `valid_until`.
+  Hysterese pro Aktionstyp, Mindesthaltezeiten über `valid_until`.
 
 - **Resilienz**  
   Verpasste Ticks werden sofort nachgeholt (kein Drift),  
