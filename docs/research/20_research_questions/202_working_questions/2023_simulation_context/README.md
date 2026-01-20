@@ -5,7 +5,7 @@ Ziel ist es, Regeln, Schwellen und Sicherheitslogiken haptisch und auditiv erleb
 machen: Relais klicken, LEDs zeigen Reserven, Schalter provozieren Lastsprünge.
 Teilnehmende können die Entscheidungslogik provozieren, beobachten und erklären.
 
-<img src="../../../../media/context_sim.png" alt="Hamster tech" width="1000">
+<img src="../../../../media/context_sim.png" alt="Hamster tech" width="500">
 
 &nbsp;
 
