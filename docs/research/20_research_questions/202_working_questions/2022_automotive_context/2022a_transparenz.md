@@ -14,6 +14,7 @@ dass es sich um eine **absichtsvolle, regelbasierte Entscheidung** des Systems h
 
 &nbsp;
 
+
 ## Relevante Persona (HCI-Modell)
 
 <img src="../../../../media/research/wq1_auto/auto_wq1_persona.png" alt="wq1_auto_problem" width="1000">
