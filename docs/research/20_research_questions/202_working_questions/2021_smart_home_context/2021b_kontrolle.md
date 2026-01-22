@@ -25,6 +25,100 @@ Ziel: Nutzer können mit einem Schritt eingreifen, verstehen Grenzen und behalte
 
 &nbsp;
 
+## Synthetisches Interview (Tom Direkt)
+
+**Setting:** 20-min Remote-Interview, Kontext Smart-Home-Dashboard, situativer Eingriff.  
+**Ziel:** Pain Points, Kontrolle, Erwartung an Override.
+
+**Interviewer:** Wann greifst du in die Automatik ein?  
+**Tom:** Meist abends, wenn es laut wird, Besuch da ist oder wenn der Preis hochgeht. Dann will ich sofort reagieren.
+
+**Interviewer:** Was ist dann das Wichtigste im Interface?  
+**Tom:** Ein klarer, großer Button. Ich will nicht suchen.
+
+**Interviewer:** Was nervt dich aktuell am meisten?  
+**Tom:** Wenn ich drücke und nichts passiert. Dann klicke ich nochmal und nochmal.
+
+**Interviewer:** Was erwartest du nach einem Klick?  
+**Tom:** Eine klare Bestätigung: "Stopp aktiv" und wie lange das gilt.
+
+**Interviewer:** Was passiert, wenn der Override blockiert wird?  
+**Tom:** Dann fühle ich mich ausgebremst. Ich will wissen warum und wie lange.
+
+**Interviewer:** Welche Gründe sind für dich akzeptabel?  
+**Tom:** Reserve okay, aber dann bitte klar sagen: "Reserve aktiv, in 5 Minuten wieder möglich."
+
+**Interviewer:** Wie wichtig ist dir die Dauer?  
+**Tom:** Sehr wichtig. Ich will nicht, dass es ewig so bleibt. 30 oder 60 Minuten reicht mir.
+
+**Interviewer:** Was ist für dich zu viel Information?  
+**Tom:** Lange Texte oder versteckte Menüs. Ich will eine Entscheidung, keine Recherche.
+
+**Interviewer:** Wie gehst du mit Ertragsverlust um?  
+**Tom:** Ist mir egal, wenn ich weiß, was es kostet. Ein kurzer Hinweis reicht.
+
+**Interviewer:** Was wäre der schlimmste Moment für einen Umweg?  
+**Tom:** Wenn ich gerade in der Küche stehe oder Besuch da ist. Dann zählt jede Sekunde.
+
+**Interviewer:** Wann würdest du die Automatik komplett abschalten?  
+**Tom:** Wenn ich das Gefühl habe, ich habe keine Kontrolle und es ignoriert mich.
+
+**Interviewer:** Was würde dein Vertrauen erhöhen?  
+**Tom:** Wenn jeder Eingriff sofort sichtbar bestätigt wird und ich ihn schnell rückgängig machen kann.
+
+&nbsp;
+
+## Synthetische Persona (v0.1): Tom Direkt
+
+**Name / Archetyp:** Tom Direkt - Schnell-Override  
+**Job-to-be-done:** In einer Störungssituation den Miner sofort stoppen/starten, mit klarer Dauer und ohne die Automatik abzuschalten.  
+**Kontext (wo/wann/womit):** Zuhause, meist abends; kurzer Blick am Handy; wenige Sekunden Zeit.
+
+**Ziele**
+- In < 3 Sekunden eingreifen (Start/Stop) mit sichtbarer Bestätigung.
+- Kontrolle behalten, Automatik nur temporär übersteuern.
+- Dauer und Folgen des Overrides sofort sehen.
+
+**Ängste / Risiken**
+- Override wirkt blockiert oder ohne Feedback.
+- Mehrfaches Klicken ohne klare Wirkung.
+- Keine Angabe zu Grund und Restzeit bei Sperre.
+
+**Heuristiken / Regeln**
+- "Wenn ich drücke, muss sofort etwas passieren."
+- "Wenn blockiert, will ich Grund + Restzeit."
+- "Wenn ich mich ignoriert fühle, schalte ich die Automatik aus."
+
+**Trigger & Breaking Points**
+- Trigger: Ruhebedarf (Abend, Besuch), Preis-Spitzen, unerwartete Last.
+- Breaking Points: kein Feedback nach Klick, Sperre ohne Erklärung, zu viele Schritte.
+
+**Needs an Erklärung**
+- Kurz und direkt am Button: Status + Timer.
+- Blockaden: Grund + Restzeit.
+- Ertragsverlust: ein kurzer Hinweis reicht.
+
+**Evidenz (Interview)**
+- "Dann will ich sofort reagieren."
+- "Ein klarer, großer Button. Ich will nicht suchen."
+- "Wenn ich drücke und nichts passiert. Dann klicke ich nochmal und nochmal."
+- "Eine klare Bestätigung: 'Stopp aktiv' und wie lange das gilt."
+- "Reserve okay, aber dann bitte klar sagen: 'Reserve aktiv, in 5 Minuten wieder möglich.'"
+- "Ist mir egal, wenn ich weiß, was es kostet. Ein kurzer Hinweis reicht."
+- "Wenn ich das Gefühl habe, ich habe keine Kontrolle und es ignoriert mich."
+- "Wenn jeder Eingriff sofort sichtbar bestätigt wird und ich ihn schnell rückgängig machen kann."
+
+**Annahmen (zu prüfen)**
+- Nutzt ein sekundäres Gerät (z. B. Wand-Tablet) für schnelle Eingriffe.
+- Bevorzugt vordefinierte Dauern statt freier Eingabe.
+
+**Design-Implikationen**
+- Primarbutton auf der Status-Karte, groß und eindeutig.
+- Bestätigungstext + Timer direkt am Button.
+- Blockade-Banner mit Grund und Restzeit.
+
+&nbsp;
+
 ## Proto-Problem-Statement
 
 - Override-Knopf versteckt oder erfordert mehrere Schritte; Wirkung unklar.

@@ -25,6 +25,96 @@ Ziel: Nutzer sehen in einem Blick, dass die Haus-Reserve garantiert bleibt und M
 
 &nbsp;
 
+## Synthetisches Interview (Clara Reserve)
+
+**Setting:** 20-min Remote-Interview, Kontext Smart-Home-Dashboard, Reserve-Check.  
+**Ziel:** Pain Points, Vertrauen, Sicherheitsgefühl.
+
+**Interviewer:** Wann schaust du typischerweise auf die Reserve?  
+**Clara:** Morgens vor der Arbeit und abends vor dem Schlafen, kurzer Blick.
+
+**Interviewer:** Was willst du als erstes sehen?  
+**Clara:** Ob das Haus gesichert ist. Ein klares Ja/Nein.
+
+**Interviewer:** Was macht dich unsicher?  
+**Clara:** Prozentwerte ohne Kontext; ich weiß nicht, ob das genug ist.
+
+**Interviewer:** Wie wirkt Mining auf dich, wenn die Reserve knapp aussieht?  
+**Clara:** Dann denke ich, dass es riskant ist, und ich stoppe lieber.
+
+**Interviewer:** Was brauchst du, um dich sicher zu fühlen?  
+**Clara:** Einen sichtbaren Puffer und die Zusage, dass er nicht angerührt wird.
+
+**Interviewer:** Welche Begriffe sind für dich schwierig?  
+**Clara:** kWh oder Regelcodes; damit kann ich nichts anfangen.
+
+**Interviewer:** Würdest du den Puffer anpassen?  
+**Clara:** Eher selten. Wenn der Standard klar ist, fasse ich ihn nicht an.
+
+**Interviewer:** Welche Darstellung verstehst du am schnellsten?  
+**Clara:** Eine Batterie oder ein Balken mit markierter Reserve.
+
+**Interviewer:** Was wäre dir zu viel?  
+**Clara:** Zu viele Zahlen oder Diagramme.
+
+**Interviewer:** Was wäre für dich ein "gutes" Dashboard?  
+**Clara:** "Haus gesichert: Ja/Nein" plus kurzer Hinweis, warum.
+
+**Interviewer:** Was würde dein Vertrauen erhöhen?  
+**Clara:** Wenn die Zusage immer sichtbar bleibt: Reserve wird nicht unterschritten.
+
+&nbsp;
+
+## Synthetische Persona (v0.1): Clara Reserve
+
+**Name / Archetyp:** Clara Reserve - Sicherheitsanker  
+**Job-to-be-done:** In einem Blick sehen, dass die Haus-Reserve geschützt ist und Mining die Grundversorgung nicht gefährdet.  
+**Kontext (wo/wann/womit):** Zuhause, Morgen-/Abend-Check, kurzer Blick am Handy oder Tablet.
+
+**Ziele**
+- Haus gesichert in einem Blick bestätigen.
+- Vertrauen in die Automatik ohne ständiges Nachrechnen.
+- Puffer bei Bedarf einfach anpassen.
+
+**Ängste / Risiken**
+- Reserve wird unbemerkt angekratzt.
+- Prozentwerte ohne Kontext verunsichern.
+- Mining läuft, obwohl der Puffer knapp wirkt.
+
+**Heuristiken / Regeln**
+- "Wenn 'Haus gesichert: Ja', ist alles okay."
+- "Wenn Reserve unklar wirkt, stoppe ich lieber."
+- "Lieber mehr Puffer als maximaler Ertrag."
+
+**Trigger & Breaking Points**
+- Trigger: Morgen-/Abend-Check, Sorge um den Tagesbedarf.
+- Breaking Points: keine klare Zusage, Reserve nicht sichtbar, Mining läuft trotz knapper Reserve.
+
+**Needs an Erklärung**
+- Klare Ja/Nein-Aussage zur Versorgungssicherheit.
+- Sichtbarer Pufferbereich + Satz "Reserve wird nicht unterschritten".
+- Einfache Visualisierung statt Zahlenflut.
+
+**Evidenz (Interview)**
+- "Ob das Haus gesichert ist. Ein klares Ja/Nein."
+- "Prozentwerte ohne Kontext; ich weiß nicht, ob das genug ist."
+- "Dann denke ich, dass es riskant ist, und ich stoppe lieber."
+- "Einen sichtbaren Puffer und die Zusage, dass er nicht angerührt wird."
+- "Eher selten. Wenn der Standard klar ist, fasse ich ihn nicht an."
+- "Eine Batterie oder ein Balken mit markierter Reserve."
+- "Wenn die Zusage immer sichtbar bleibt: Reserve wird nicht unterschritten."
+
+**Annahmen (zu prüfen)**
+- Standard-Puffer wird selten geändert.
+- Balken/Batterie wird schneller verstanden als Prozentwerte.
+
+**Design-Implikationen**
+- Primärzeile: "Haus gesichert: Ja/Nein" + kurzer Grund.
+- Reserve-Karte mit klar markiertem Pufferbereich.
+- Zusage "Reserve wird nicht unterschritten" sichtbar halten.
+
+&nbsp;
+
 ## Proto-Problem-Statement
 
 - Haus-Reserve unsichtbar oder technisch; Nutzer sieht nicht, was gesichert ist.

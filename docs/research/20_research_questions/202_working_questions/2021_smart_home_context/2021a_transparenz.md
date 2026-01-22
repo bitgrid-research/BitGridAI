@@ -25,6 +25,108 @@ Ziel: Nutzer erkennen in unter 30 Sekunden, warum der Miner läuft, pausiert ode
 
 &nbsp;
 
+## Synthetisches Interview (Lea Klar)
+
+**Setting:** 20-min Remote-Interview, Kontext Smart-Home-Dashboard, kurzer Blick zwischendurch.  
+**Ziel:** Pain Points, Verständnis, Sprache, Vertrauen.
+
+**Interviewer:** Wann schaust du typischerweise ins Dashboard?  
+**Lea:** Mittags, wenn die Sonne da ist, und abends, wenn wir kochen. Meist nur kurz aufs Handy, 30-60 Sekunden.
+
+**Interviewer:** Was willst du in diesem kurzen Blick als erstes sehen?  
+**Lea:** Warum der Miner läuft oder nicht. Ein Satz reicht. Und wann sich das ändert.
+
+**Interviewer:** Was nervt dich aktuell am meisten?  
+**Lea:** Der Grund fehlt oder ist so technisch, dass ich ihn nicht verstehe.
+
+**Interviewer:** Was passiert, wenn du den Grund nicht sofort verstehst?  
+**Lea:** Dann denke ich, etwas stimmt nicht, und ich schalte lieber manuell aus.
+
+**Interviewer:** Welche Situationen wirken wie "Fehler", sind aber eigentlich normal?  
+**Lea:** Wenn er kurz stoppt oder ständig an und aus geht. Das sieht für mich aus wie ein Problem.
+
+**Interviewer:** Was fehlt dir in solchen Momenten?  
+**Lea:** Ein klarer Hinweis, dass es Absicht ist, und wann wieder geprüft oder gestartet wird.
+
+**Interviewer:** Welche Begriffe sind für dich schwierig?  
+**Lea:** Alles, was nach Technik klingt. "Reserve-Veto", "Stabilisierung" - damit kann ich nichts anfangen.
+
+**Interviewer:** Was wäre eine verständliche Formulierung?  
+**Lea:** Alltagssprache. So wie: "Wartet auf stabilen Überschuss" oder "Reserve schützen".
+
+**Interviewer:** Was heißt "Reserve schützen" für dich?  
+**Lea:** Dass das Haus genug Strom behält. Ich will nicht, dass der Miner die Batterie leer zieht.
+
+**Interviewer:** Wie erkennst du, dass die Reserve blockiert?  
+**Lea:** Gar nicht. Wenn da nur "Pause" steht, weiß ich nicht, ob es gut oder schlecht ist.
+
+**Interviewer:** Wie reagierst du auf Schwankungen, z. B. Wolken?  
+**Lea:** Wenn es kurz stoppt, denke ich schnell an Fehler. Ein Hinweis "nächster Check in 3 Minuten" wäre gut.
+
+**Interviewer:** Was ist der größte Schmerzpunkt beim Status "Pause"?  
+**Lea:** Ich weiß nicht, ob es gleich weitergeht oder ob ich eingreifen muss.
+
+**Interviewer:** Was würde dein Vertrauen erhöhen?  
+**Lea:** Wenn die Erklärung immer gleich aufgebaut ist: warum und wann.
+
+**Interviewer:** Was wäre für dich ein "gutes" Dashboard?  
+**Lea:** Ein Satz warum, ein Satz wann. Ein kleines Symbol dazu. Mehr nicht.
+
+**Interviewer:** Wann würdest du manuell eingreifen?  
+**Lea:** Wenn ich das Gefühl habe, die Automatik versteht die Situation nicht.
+
+&nbsp;
+
+## Synthetische Persona (v0.1): Lea Klar
+
+**Name / Archetyp:** Lea Klar - Kurzblick-Transparenz  
+**Job-to-be-done:** In unter 30 Sekunden verstehen, warum der Miner läuft/pausiert/stoppt und wann sich der Status ändert.  
+**Kontext (wo/wann/womit):** Zuhause, kurzer Blick am Handy, meist mittags/abends; 30-60 Sekunden.
+
+**Ziele**
+- Warum + wann in einem Blick verstehen.
+- Vertrauen in die Automatik ohne manuelles Nachschauen.
+- Haus-Reserve schützen, keine Fehlentscheidungen.
+
+**Ängste / Risiken**
+- Technische Begründungen wirken wie Fehlercodes.
+- "Pause" ohne Grund löst Unsicherheit aus.
+- Reserve könnte unbemerkt angegriffen werden.
+
+**Heuristiken / Regeln**
+- "Wenn ich es nicht verstehe, schalte ich lieber aus."
+- "Wenn Reserve aktiv, muss es sichtbar sein."
+- "Ein Satz warum + ein Satz wann reicht."
+
+**Trigger & Breaking Points**
+- Trigger: PV-Überschuss mittags, Abendbedarf, Leistungsschwankungen.
+- Breaking Points: Status ohne Grund, kein nächster Check, technische Begriffe.
+
+**Needs an Erklärung**
+- Alltagssprache, ein Satz "Warum", ein Satz "Wann".
+- Sichtbares Reserve-Badge mit Schwelle.
+- Countdown oder nächster Check, damit Stopps nicht wie Fehler wirken.
+
+**Evidenz (Interview)**
+- "Warum der Miner läuft oder nicht. Ein Satz reicht. Und wann sich das ändert."
+- "Der Grund fehlt oder ist so technisch, dass ich ihn nicht verstehe."
+- "Dann denke ich, etwas stimmt nicht, und ich schalte lieber manuell aus."
+- "Wenn er kurz stoppt oder ständig an und aus geht. Das sieht für mich aus wie ein Problem."
+- "Gar nicht. Wenn da nur 'Pause' steht, weiß ich nicht, ob es gut oder schlecht ist."
+- "Ein Hinweis 'nächster Check in 3 Minuten' wäre gut."
+- "Ein Satz warum, ein Satz wann. Ein kleines Symbol dazu. Mehr nicht."
+
+**Annahmen (zu prüfen)**
+- Ein Icon + Kurztext wird schneller erfasst als Text allein.
+- Details hinter "Mehr" reichen; die Startkarte bleibt minimal.
+
+**Design-Implikationen**
+- Statuskarte: Icon + Kurzgrund + Countdown/Startzeit in einer Zeile.
+- Reserve-Badge sichtbar, wenn aktiv, mit Schwellenwert.
+- Nächster Check/Uhrzeit immer anzeigen.
+
+&nbsp;
+
 ## Proto-Problem-Statement
 
 - Dashboard zeigt nur Status (läuft/pausiert), Grund und Prognose fehlen oder sind technisch.
