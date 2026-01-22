@@ -1,7 +1,9 @@
 # 20.2.1 - SH-CONTEXT - Smart-Home-Kontext
 
 Der Smart-Home-Kontext beschreibt den Kern von BitGridAI:
+
 PV-Überschuss steuert Mining als flexible Last.
+
 Ziel ist nicht nur Optimierung, sondern eine verständliche,
 alltagstaugliche Erklärung der Entscheidungen im lokalen Dashboard.
 
