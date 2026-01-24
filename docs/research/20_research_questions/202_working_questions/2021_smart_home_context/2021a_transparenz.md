@@ -2,7 +2,6 @@
 
 Ziel: Nutzer erkennen in unter 30 Sekunden, warum der Miner läuft, pausiert oder stoppt, ohne nach Daten suchen zu müssen.
 
-
 &nbsp;
 
 ## Nutzungskontext (Smart Home)
