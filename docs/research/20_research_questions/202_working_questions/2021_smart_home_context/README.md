@@ -9,6 +9,7 @@ alltagstaugliche Erklärung der Entscheidungen im lokalen Dashboard.
 
 <img src="../../../../media/context_sh.png" alt="Hamster tech" width="500">
 
+
 &nbsp;
 
 ## Zielbild
