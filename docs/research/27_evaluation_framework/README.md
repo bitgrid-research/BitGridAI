@@ -1,94 +1,142 @@
-# 27 - Evaluation Framework / Evaluationsrahmen
+# 27 – Evaluationsrahmen
+
+Dieses Kapitel beschreibt den **Evaluationsrahmen**, mit dem BitGridAI im Rahmen einer empirischen Studie untersucht wird.
+Ziel ist es, die Wirkung eines **Explainability-Layers** im Vergleich zu einer **Baseline-UI** systematisch zu bewerten.
+
+Der Fokus liegt auf dem **Verständnis der Entscheidungslogik**, dem **Vertrauen der Nutzer:innen**, der **wahrgenommenen Kontrolle**, der **kognitiven Belastung** sowie auf **energiebezogenen Effekten**.
+
+&nbsp;
 
 ## Überblick
 
-Das Evaluation Framework beschreibt, wie BitGridAI im Rahmen einer
-Between-Subjects-Studie (Baseline vs. Explainability-Layer) bewertet wird.
-Im Fokus stehen Verständnis der Entscheidungslogik, Vertrauen,
-wahrgenommene Kontrolle, kognitive Belastung und Energieeffizienz.
+Die Evaluation ist als **Between-Subjects-Studie** angelegt, in der zwei Systemvarianten verglichen werden:
 
----
+* **Baseline-Variante**: Anzeige von Zuständen und Aktionen ohne erklärenden Layer
+* **Explainability-Variante**: Anzeige von Zuständen inklusive erklärender Begründungen gemäß Kapitel 24
+
+Die Studie kombiniert **technische Messungen** mit **nutzerzentrierten Erhebungsmethoden**.
+
+&nbsp;
 
 ## Evaluationsziele
 
-1. **Erklärbarkeit messen** - Verstehen Nutzer die Gründe für Start/Stop?
-2. **Vertrauen und Kontrolle bewerten** - Fühlen sich Nutzer handlungsfähig?
-3. **Kognitive Belastung erfassen** - Führen Erklärungen zu Mehrbelastung?
-4. **Energieeffizienz analysieren** - Welche Unterschiede zeigen sich zwischen den Varianten?
-5. **Transparenzvalidierung** - Sind Logs und UI-Begründungen konsistent?
+Die Evaluation verfolgt fünf zentrale Ziele:
 
----
+1. **Erklärbarkeit messen**
+   Verstehen Nutzer:innen die Gründe für Start-, Stop- und NOOP-Entscheidungen?
+2. **Vertrauen und Kontrolle bewerten**
+   Fühlen sich Nutzer:innen informiert und handlungsfähig?
+3. **Kognitive Belastung erfassen**
+   Erhöhen erklärende Informationen die mentale Belastung?
+4. **Energiebezogene Effekte analysieren**
+   Unterscheiden sich Energieverbrauch und Schaltverhalten zwischen den Varianten?
+5. **Transparenz validieren**
+   Sind UI-Begründungen und Systemlogs konsistent?
+
+&nbsp;
 
 ## Studiendesign
 
-- **Design:** Between-Subjects (Baseline-UI vs. Explainability-Layer).
-- **Stichprobe:** N=10, heterogener technischer Hintergrund.
-- **Dauer:** 10 Tage, täglich 10-15 Min (Daily Diary Method).
-- **Aufgaben:** Speicher/PV-Status prüfen, Laststeuerung validieren, Override testen.
-- **Setting:** Smart-Home-Labor mit simulierten PV- und Batterieprofilen.
+* **Design:** Between-Subjects (Baseline vs. Explainability)
+* **Stichprobe:** N = 10, heterogener technischer Hintergrund
+* **Dauer:** 10 Tage
+* **Täglicher Aufwand:** ca. 10–15 Minuten
+* **Methodischer Ansatz:** Daily Diary Method kombiniert mit Abschlussinterviews
 
----
+### Aufgaben
+
+Die Teilnehmenden bearbeiten wiederkehrende Aufgaben, u. a.:
+
+* Prüfung von PV- und Speicherzuständen
+* Einordnung von Start- und Stop-Entscheidungen
+* Bewertung von NOOP-Situationen
+* Test manueller Overrides
+
+### Setting
+
+* Smart-Home-Laborumgebung
+* Simulierte PV- und Batterieprofile
+* Reale, steuerbare Lasten
+
+&nbsp;
 
 ## Methodik
 
-| Ebene                    | Methode                                               | Ziel                                                                  |
-| ------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------- |
-| **Systemebene**          | Logging, Energiemessung, Baseline/XAI-Vergleich        | Bewertung von Laststeuerung, Reaktionszeiten und Effizienz           |
-| **Nutzerebene**          | Daily Diary, Leitfaden-Interviews                     | Untersuchung mentaler Modelle, Verständnis, Vertrauen                |
-| **Interaktionsebene**    | Task-basierte Szenarien, Override-Tests               | Messung von Klarheit, Task-Zeit, Fehlerraten                           |
-| **Qualitative Analyse**  | Inhaltsanalyse (Diary + Interviews)                   | Muster in Wahrnehmung, Vertrauen, Kontrollgefühl                      |
-| **Quantitative Analyse** | Metriken (SUS, NASA-TLX, Energie, Vertrauen, Logs)    | Vergleichbare Kennzahlen zwischen beiden Bedingungen                  |
+| Ebene                    | Methode                                     | Ziel                                            |
+| ------------------------ | ------------------------------------------- | ----------------------------------------------- |
+| **Systemebene**          | Logging, Energiemessung, Variantenvergleich | Analyse von Schaltverhalten und Energieeffekten |
+| **Nutzerebene**          | Daily Diary, Leitfaden-Interviews           | Verständnis, Vertrauen, mentale Modelle         |
+| **Interaktionsebene**    | Task-basierte Tests, Override-Szenarien     | Klarheit, Task-Zeit, Fehlannahmen               |
+| **Qualitative Analyse**  | Inhaltsanalyse                              | Muster in Wahrnehmung und Vertrauen             |
+| **Quantitative Analyse** | Standardisierte Skalen und Metriken         | Vergleichbarkeit der Bedingungen                |
 
----
+&nbsp;
 
 ## Evaluationsumgebung
 
-* **Hardware:** x86 Mini-PC mit UmbrelOS, UmbrelHome (4TB), Tablet für Dashboard,
-  ASIC-Lasten (Bitaxe Gamma, NerdQaxe++), Shelly Plug S Gen3.
-* **KI/Erklärung:** lokales LLM via Ollama, quantisierte Modelle (Phi-3 Mini, Mistral 7B).
-* **Sensorik:** simulierte PV- und Batterieprofile, reale ASIC-Telemetrie.
-* **UI-Plattform:** lokales Dashboard in zwei Varianten (Baseline/XAI).
-* **Datenerfassung:** JSON-Logs, Erklärtexte, Nutzeraktionen.
+### Hardware
 
----
+* x86 Mini-PC mit lokalem System (z. B. UmbrelOS)
+* Tablet als Smart-Home-Dashboard
+* Steuerbare ASIC-Lasten (z. B. Bitaxe Gamma, NerdQaxe++)
+* Messsteckdosen (z. B. Shelly Plug S Gen3)
+
+### Software & KI
+
+* Lokales Dashboard in zwei UI-Varianten
+* Lokales LLM via Ollama
+* Quantisierte Modelle (z. B. Phi-3 Mini, Mistral 7B)
+
+### Datenbasis
+
+* Simulierte PV- und Batterieprofile
+* Reale Telemetriedaten der Lasten
+* Strukturierte JSON-Logs (Entscheidungen, Gründe, Overrides)
+
+&nbsp;
 
 ## Erhebungsinstrumente
 
-- **Daily Diary Einträge** (kurze tägliche Interaktion, 10 Tage).
-- **Leitfaden-Interviews** zum Verständnis und Vertrauen.
-- **Fragebögen:** SUS (Usability) und NASA-TLX (Belastung).
-- **System-Logs:** Entscheidungen, Gründe, Overrides, Energieflüsse.
+* **Daily Diary**: kurze tägliche Einträge über Wahrnehmung und Verständnis
+* **Leitfaden-Interviews**: Vertiefung von Vertrauen und mentalen Modellen
+* **Fragebögen**:
 
----
+  * SUS (Usability)
+  * NASA-TLX (kognitive Belastung)
+* **Systemlogs**: Entscheidungen, Regelzustände, Energieflüsse
+
+&nbsp;
 
 ## Bewertungsmetriken
 
-| Kategorie              | Metrik                               | Beschreibung                                                         |
-| ---------------------- | ------------------------------------ | -------------------------------------------------------------------- |
-| **Explainability**     | Verständnisrate (%)                 | Anteil korrekt erklärter Entscheidungen (Diary + Interview)         |
-| **Trust & Control**    | Vertrauen (Likert) / Override-Rate   | Subjektives Vertrauen und Eingriffsverhalten                         |
-| **Cognitive Load**     | NASA-TLX Score                       | Mentale Belastung pro Sitzung                                        |
-| **Usability**          | SUS / Task-Zeit                      | Subjektive Usability und objektive Task-Dauer                         |
-| **Energy Efficiency**  | kWh-Einsparung                       | Differenz zwischen Baseline und Explainability-Variante              |
-| **Transparency**       | Log-Konsistenz                       | Vergleich interner Entscheidung und UI-Begründung                   |
+| Kategorie            | Metrik                            | Beschreibung                                 |
+| -------------------- | --------------------------------- | -------------------------------------------- |
+| **Explainability**   | Verständnisrate (%)               | Anteil korrekt erklärter Entscheidungen      |
+| **Trust & Control**  | Vertrauen (Likert), Override-Rate | Subjektives Vertrauen und Eingriffsverhalten |
+| **Cognitive Load**   | NASA-TLX Score                    | Mentale Belastung pro Sitzung                |
+| **Usability**        | SUS, Task-Zeit                    | Subjektive Usability und objektive Dauer     |
+| **Energy Behaviour** | Schaltungen/Tag, Laufzeiten       | Systemruhe und Steuerungsverhalten           |
+| **Transparency**     | Log-Konsistenz                    | Übereinstimmung Log ↔ UI                     |
 
----
+&nbsp;
 
 ## Auswertung & Dokumentation
 
-* Vergleich der beiden UI-Varianten (Baseline vs. Explainability) auf allen Metriken.
-* Triangulation aus Logs, Diarys, Interviews und Fragebögen.
-* Ergebnisdokumentation in Notebooks oder internen Dashboards
-  mit Fokus auf Erklärqualität, Vertrauen und Nutzbarkeit.
+* Vergleich der beiden UI-Varianten über alle Metriken
+* Triangulation aus Logs, Diaries, Interviews und Fragebögen
+* Dokumentation der Ergebnisse in internen Dashboards oder Notebooks
 
----
+Der Schwerpunkt liegt auf der **Erklärqualität** und deren Einfluss auf Vertrauen, Verständnis und Nutzung.
+
+&nbsp;
 
 ## Zusammenfassung
 
-Der Evaluationsrahmen verbindet technische Messdaten mit Nutzerwahrnehmung,
-um die Wirkung eines erklärenden KI-Layers auf Verständnis, Vertrauen,
-Kontrolle und Belastung zu prüfen. Die Studie liefert damit belastbare
-Gestaltungsimpulse für transparente, lokal ausgeführte Energiesysteme.
+Der Evaluationsrahmen verbindet **technische Systemdaten** mit **nutzerzentrierter Evaluation**, um die Wirkung eines erklärenden KI-Layers empirisch zu untersuchen.
+
+Er liefert damit eine fundierte Grundlage für die Bewertung transparenter, lokal ausgeführter Energiemanagementsysteme.
+
+
 
 ---
 
