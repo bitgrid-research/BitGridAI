@@ -1,10 +1,3 @@
-# 24 - Erklärungsmodell
-
-Dieses Kapitel definiert, wie Entscheidungen erklärt werden: welche Bestandteile
-eine Erklärung hat und wie sie aus der Entscheidungslogik abgeleitet wird.
-
-&nbsp;
-
 # 24 – Erklärungsmodell
 
 Dieses Kapitel beschreibt das **Erklärungsmodell** des Systems. Es definiert, **wie Entscheidungen erklärt werden**, aus welchen **Bestandteilen** sich eine Erklärung zusammensetzt und wie diese **systematisch aus der Entscheidungslogik** (Kapitel 23) abgeleitet wird.
