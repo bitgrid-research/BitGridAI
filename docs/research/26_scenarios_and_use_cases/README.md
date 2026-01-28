@@ -1,10 +1,3 @@
-# 26 - Szenarien & Use Cases
-
-Dieses Kapitel beschreibt typische Nutzungsszenarien und Use Cases, die das System
-adressiert. Sie dienen als Grundlage für Interface-Validierung und Evaluation.
-
-&nbsp;
-
 # 26 – Szenarien & Use Cases
 
 Dieses Kapitel beschreibt **typische Nutzungsszenarien und Use Cases**, die das entwickelte System adressiert.
