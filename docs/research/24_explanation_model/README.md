@@ -16,7 +16,7 @@ Der Fokus liegt nicht auf der Darstellung einzelner UI-Elemente, sondern auf ein
 Das Erklärungsmodell verfolgt drei zentrale Ziele:
 
 1. **Transparenz von Entscheidungen**
-   Nutzer:innen sollen verstehen können, *warum* das System gehandelt oder bewusst nicht gehandelt hat.
+   Nutzer sollen verstehen können, *warum* das System gehandelt oder bewusst nicht gehandelt hat.
 2. **Konsistenz über Systemgrenzen hinweg**
    Dieselbe Entscheidung soll in Logs, UI und Analyse gleich begründet werden.
 3. **Reduktion kognitiver Belastung**
