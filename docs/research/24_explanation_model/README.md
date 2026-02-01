@@ -8,6 +8,7 @@ Der Fokus liegt nicht auf der Darstellung einzelner UI-Elemente, sondern auf ein
 * nachvollziehbar,
 * und über verschiedene Interfaces hinweg wiederverwendbar sind.
 
+
 &nbsp;
 
 ## Ziel des Erklärungsmodells
