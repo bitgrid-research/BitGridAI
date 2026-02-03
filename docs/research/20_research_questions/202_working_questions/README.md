@@ -9,6 +9,7 @@ unmittelbar. Sie legen fest, welche Aspekte untersucht werden und welche
 bewusst ausgeklammert bleiben.
 
 <img src="../../../media/bithamster_202.png" alt="Hamster tech" width="1000" />
+
 &nbsp;
 
 ## Zentrale Arbeitsfragen
