@@ -10,7 +10,6 @@ Der Fokus liegt nicht auf der Darstellung einzelner UI-Elemente, sondern auf ein
 
 &nbsp;
 
-
 ## Ziel des Erklärungsmodells
 
 Das Erklärungsmodell verfolgt drei zentrale Ziele:
