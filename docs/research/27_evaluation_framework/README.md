@@ -3,7 +3,7 @@
 Dieses Kapitel beschreibt den **Evaluationsrahmen**, mit dem BitGridAI im Rahmen einer empirischen Studie untersucht wird.
 Ziel ist es, die Wirkung eines **Explainability-Layers** im Vergleich zu einer **Baseline-UI** systematisch zu bewerten.
 
-Der Fokus liegt auf dem **Verständnis der Entscheidungslogik**, dem **Vertrauen der Nutzer:innen**, der **wahrgenommenen Kontrolle**, der **kognitiven Belastung** sowie auf **energiebezogenen Effekten**.
+Der Fokus liegt auf dem **Verständnis der Entscheidungslogik**, dem **Vertrauen der Nutzer**, der **wahrgenommenen Kontrolle**, der **kognitiven Belastung** sowie auf **energiebezogenen Effekten**.
 
 &nbsp;
 
@@ -23,9 +23,9 @@ Die Studie kombiniert **technische Messungen** mit **nutzerzentrierten Erhebungs
 Die Evaluation verfolgt fünf zentrale Ziele:
 
 1. **Erklärbarkeit messen**
-   Verstehen Nutzer:innen die Gründe für Start-, Stop- und NOOP-Entscheidungen?
+   Verstehen Nutzer die Gründe für Start-, Stop- und NOOP-Entscheidungen?
 2. **Vertrauen und Kontrolle bewerten**
-   Fühlen sich Nutzer:innen informiert und handlungsfähig?
+   Fühlen sich Nutzer informiert und handlungsfähig?
 3. **Kognitive Belastung erfassen**
    Erhöhen erklärende Informationen die mentale Belastung?
 4. **Energiebezogene Effekte analysieren**
