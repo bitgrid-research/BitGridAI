@@ -30,7 +30,7 @@ Das Modell versteht Erklärungen als **systematische Ableitung aus Regeln und Zu
 
 Jede Erklärung wird als Kombination klar definierter **Bausteine** verstanden. Diese Bausteine sind unabhängig vom Interface und können je nach Kontext unterschiedlich dargestellt werden.
 
-### Baustein 1 – Auslöser
+## Baustein 1 – Auslöser
 
 Der Auslöser beschreibt, **welche Bedingung oder Regelkonstellation** zu einer Entscheidung geführt hat.
 
@@ -46,7 +46,7 @@ Der Auslöser beantwortet die Frage:
 
 &nbsp;
 
-### Baustein 2 – Datenbasis
+## Baustein 2 – Datenbasis
 
 Die Datenbasis benennt die **relevanten Zustandsdaten**, auf die sich die Entscheidung stützt.
 
@@ -63,7 +63,7 @@ Die Datenbasis beantwortet die Frage:
 
 &nbsp;
 
-### Baustein 3 – Wirkung
+## Baustein 3 – Wirkung
 
 Die Wirkung beschreibt, **was das System entschieden hat**.
 
@@ -80,7 +80,7 @@ Dieser Baustein beantwortet die Frage:
 
 &nbsp;
 
-### Baustein 4 – Optionen (implizit oder explizit)
+## Baustein 4 – Optionen (implizit oder explizit)
 
 Der Options-Baustein beschreibt, **welche Alternativen prinzipiell möglich gewesen wären**, auch wenn sie nicht gewählt wurden.
 
