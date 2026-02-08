@@ -8,6 +8,7 @@
 
 &nbsp;
 
+
 ### Designprinzipien
 
 - **Erklären statt optimieren:** Primar geht es um Verständnis.
