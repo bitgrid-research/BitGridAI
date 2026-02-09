@@ -11,7 +11,7 @@ Ziel ist es, sicherzustellen, dass jede Erklärung:
 
 &nbsp;
 
-## Auslöser und Regelbezug
+## 1. Auslöser und Regelbezug
 
 Der erste Baustein einer Erklärung ist der **Auslöser** in Verbindung mit dem **Regelbezug**.
 
@@ -32,7 +32,7 @@ Durch den expliziten Regelbezug bleibt die Erklärung überprüfbar und nicht in
 
 &nbsp;
 
-## Relevante Datenbasis
+## 2. Relevante Datenbasis
 
 Der zweite Baustein benennt die **konkreten Zustands- und Messdaten**, auf die sich die Entscheidung stützt.
 
@@ -53,7 +53,7 @@ Eine begrenzte, selektive Datenbasis reduziert kognitive Belastung und verhinder
 
 &nbsp;
 
-## Wirkung
+## 3. Wirkung
 
 Der Wirkungs-Baustein beschreibt, **was das System entschieden hat**.
 
@@ -72,7 +72,7 @@ Sie beantwortet die Frage:
 
 &nbsp;
 
-## Mögliche Alternativen
+## 4. Mögliche Alternativen
 
 Der Alternativen-Baustein beschreibt, **welche Handlungsoptionen prinzipiell bestanden hätten**, auch wenn sie nicht gewählt wurden.
 
