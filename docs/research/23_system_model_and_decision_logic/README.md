@@ -8,6 +8,7 @@ Technische Details (z. B. Module, Schnittstellen, Deployment) sind bewusst ausge
 
 &nbsp;
 
+
 ## Ziel des Systemmodells
 
 Das Systemmodell verfolgt drei zentrale Ziele:
