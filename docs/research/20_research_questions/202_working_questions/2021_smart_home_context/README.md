@@ -176,6 +176,12 @@ Beispiel Topics:
 - Welche Begründung ist kurz und trotzdem hilfreich?
 - Wie viel Kontrolle braucht der Nutzer im Alltag wirklich?
 
+# Konzept
+Stand ~ Skizzenhafte Vorstellung: 10.02.2026: [https://evil-markup-99217954.figma.site](https://evil-markup-99217954.figma.site)
+
+
+ 
+
 ---
 
 > **Nächster Schritt:** Starte mit den Unterseiten des Smart-Home-Kontexts.
