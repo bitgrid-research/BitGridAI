@@ -170,17 +170,17 @@ Beispiel Topics:
 | SH-RISK-02 | Risiko | Falsches Timing der Meldung kann bevormundend wirken. |
 
 &nbsp;
+
+## Konzept
+Stand ~ Skizzenhafte Vorstellung (Interaktionsdesign): 10.02.2026: [https://evil-markup-99217954.figma.site](https://evil-markup-99217954.figma.site)
+
+&nbsp;
+
 ## Offene Fragen
 
 - Welche Visualisierung erklärt Mining am schnellsten?
 - Welche Begründung ist kurz und trotzdem hilfreich?
 - Wie viel Kontrolle braucht der Nutzer im Alltag wirklich?
-
-# Konzept
-Stand ~ Skizzenhafte Vorstellung: 10.02.2026: [https://evil-markup-99217954.figma.site](https://evil-markup-99217954.figma.site)
-
-
- 
 
 ---
 
