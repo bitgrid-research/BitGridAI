@@ -1,5 +1,7 @@
 # 20.2.3 - SIM-CONTEXT - Simulation-Lab-Kontext
 
+[TO DO: Neues Konzept ausdenken]
+
 Der Simulation-Lab-Kontext modelliert das Energiemanagement als physisches Tisch-Setup.
 Ziel ist es, Regeln, Schwellen und Sicherheitslogiken haptisch und auditiv erlebbar zu
 machen: Relais klicken, LEDs zeigen Reserven, Schalter provozieren Lastsprünge.
