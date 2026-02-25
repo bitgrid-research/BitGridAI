@@ -4,7 +4,6 @@ Ziel: Teilnehmende erkennen im Lab-Setup in unter 60 Sekunden, warum das System 
 
 &nbsp;
 
-
 ## Nutzungskontext (Lab)
 
 - Tischsimulation mit PV-Simulator, Haus-Reserve, Miner-Attrappe und Last-Schaltern.
