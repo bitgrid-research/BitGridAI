@@ -51,9 +51,8 @@ Systemlogik basierenden Kontexten betrachtet:
 
 - **[20.2.3 - SIM-CONTEXT - *Simulations*-Kontext](./2023_simulation_context/README.md)**  
   Wenn Regeln hörbar klicken und Miner sichtbar anspringen: physische Tischsimulation, in der Schwellen, Prioritäten und Sicherheitslogiken nicht nur erklärt, sondern provoziert, beobachtet und begriffen werden können.  
-  - [20.2.3.1 - SIM-WQ1 - Sichtbarkeit der Entscheidungslogik](./2023_simulation_context/2023a_transparenz.md)  
-  - [20.2.3.2 - SIM-WQ2 - Eingriff und Override im Labor](./2023_simulation_context/2023b_kontrolle.md)  
-  - [20.2.3.3 - SIM-WQ3 - Vertrauen durch physische Rückmeldung](./2023_simulation_context/2023c_vertrauen.md)  
+
+  [TODO: Neues Ausrichtung als Smartphone App]
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
 Unterschiedlich sind ausschließlich Interaktionskontext, Aufmerksamkeitssituation
