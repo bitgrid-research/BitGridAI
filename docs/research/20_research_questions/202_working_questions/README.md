@@ -53,6 +53,7 @@ Systemlogik basierenden Kontexten betrachtet:
   Wenn Regeln hörbar klicken und Miner sichtbar anspringen: physische Tischsimulation, in der Schwellen, Prioritäten und Sicherheitslogiken nicht nur erklärt, sondern provoziert, beobachtet und begriffen werden können.  
 
   [TODO: Smartphone App - Design Konzept in Figma (Konzeption und prototypische Ausarbeitung einer Smartphone-App in Figma zur Visualisierung, Erklärung und Interaktion mit dem regelbasierten Energiemanagementsystem.)]
+  
   [TODO: Home-Assistant - UI Exploration, Forschung an Relais, Simulationsrahmen (Technische Exploration und prototypische Umsetzung des Systems in Home Assistant inklusive UI-Design, Relais-Integration und Aufbau eines physischen Simulationsrahmens)]
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
