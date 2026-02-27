@@ -55,7 +55,7 @@ Systemlogik basierenden Kontexten betrachtet:
   [TODO: Smartphone App - Design Konzept in Figma (Konzeption und prototypische Ausarbeitung einer Smartphone-App in Figma zur Visualisierung, Erklärung und Interaktion mit dem regelbasierten Energiemanagementsystem.)]
 
 
-  [TODO: Home-Assistant - UI Exploration, Forschung an Relais, Simulationsrahmen (Technische Exploration und prototypische Umsetzung des Systems in Home Assistant inklusive UI-Design, Relais-Integration und Aufbau eines physischen Simulationsrahmens)]
+  [TODO: Home-Assistant - UI Exploration, Regelableitungen,Forschung an Relais, Simulationsrahmen (Technische Exploration und prototypische Umsetzung des Systems in Home Assistant inklusive UI-Design, Relais-Integration und Aufbau eines physischen Simulationsrahmens)]
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
 Unterschiedlich sind ausschließlich Interaktionskontext, Aufmerksamkeitssituation
