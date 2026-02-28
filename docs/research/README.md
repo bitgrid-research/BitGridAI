@@ -10,7 +10,7 @@ Die Kapitel bauen bewusst aufeinander auf und führen dich Schritt für Schritt
 vom "Warum" bis zur empirischen Überprüfung. Du kannst sie linear lesen oder
 gezielt dort einsteigen, wo du gerade Klarheit brauchst.
 
-<img src="../media/research.png" alt="Status" width="1000" />
+<img src="../media/research/research.png" alt="Status" width="1000" />
 
 &nbsp;
 

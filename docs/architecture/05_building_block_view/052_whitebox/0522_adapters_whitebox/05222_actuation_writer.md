@@ -7,9 +7,6 @@ in reale Aktionen um.
 Er spricht mit Geräten, achtet auf Limits – und sorgt dafür, dass ein Kommando
 **genau einmal** wirkt.
 
-*(Platzhalter für ein Bild: Der Hamster hält eine Fernbedienung mit beschrifteten
-Knöpfen „Start“, „Stop“, „Limit“. Über den Knöpfen sitzen kleine Sicherheitssiegel
-und ein Häkchen „Ack received“.)*
 ![Hamster sendet Kommandos](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;

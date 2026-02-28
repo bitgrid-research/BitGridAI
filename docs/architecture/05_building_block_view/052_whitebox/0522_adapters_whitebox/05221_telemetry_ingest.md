@@ -7,9 +7,6 @@ für den Core nutzbar.
 Er übersetzt Rohsignale in **saubere, zeitlich konsistente Werte** – bevor irgendeine
 Regel sie sieht.
 
-*(Platzhalter für ein Bild: Der Hamster trägt eine Schutzbrille und sortiert Messwerte
-durch Trichter. Links kommen chaotische Zahlen aus Kabeln, rechts fallen saubere
-SI-Werte mit Zeitstempel heraus.)*
 ![Hamster verarbeitet Telemetrie](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
