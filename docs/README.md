@@ -30,7 +30,7 @@ So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.or
 > Die vollständige *Kapitelübersicht der Architektur* inklusive Unterkapitel findest du in der [Kapitelübersicht](./architecture/README.md).
 
   
-<img src="./media/architectur.png" alt="Status" width="1000" />
+<img src="./media/architecture/architectur.png" alt="Status" width="1000" />
 
 &nbsp;
 
@@ -53,7 +53,7 @@ Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar un
 
 > Die vollständige *Kapitelübersicht der Forschung* inklusive Unterkapitel findest du in der [Kapitelübersicht](./research/README.md).
 
-<img src="./media/research.png" alt="Status" width="1000" />
+<img src="./media/research/research.png" alt="Status" width="1000" />
 
 &nbsp;
 
@@ -64,7 +64,7 @@ Hier führen wir die Bausteine aus **1. Architektur** und **2. Forschung** zusam
 * [30.1 - SSH unter Windows/Linux](./setup/ssh_windows_setup.md)
 * [30.2 - Entwicklungsumgebung](./setup/dev_environment.md)
 
-<img src="./media/setup.png" alt="Status" width="1000" />
+<img src="./media/setup/setup.png" alt="Status" width="1000" />
 
 ---
 > 🏠 Zurück zur **[Hauptübersicht](../README.md)**
