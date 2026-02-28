@@ -7,7 +7,7 @@ Fallen diese Signale ganz oder teilweise aus, muss das System **sofort erkennbar
 
 Dieses Szenario beschreibt, wie BitGridAI mit fehlender oder degradierter Telemetrie umgeht – unabhängig davon, ob die Ursache ein Adapter, ein Sensor oder ein Kommunikationsprotokoll ist.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster schaut auf ein Kontrollpanel mit ausgegrauten Sensoranzeigen. Ein Warnlicht blinkt, daneben ein Schild „No Data – Safe Mode“.)*
+![Hamster steuert manuell](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

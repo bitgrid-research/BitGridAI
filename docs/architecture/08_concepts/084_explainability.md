@@ -9,8 +9,8 @@ Damit diese Entscheidungen akzeptiert und kontrolliert werden können, müssen s
 Dieses Kapitel beschreibt die **systemweiten Prinzipien der Explainability und Transparenz** in BitGridAI.  
 Explainability ist dabei kein UI-Feature, sondern ein **architektonisches Grundprinzip**, das alle Bausteine betrifft.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster erklärt einem anderen Hamster mit einer kleinen Tafel, warum ein Schalter auf „ON“ steht. Ein Sprechblasen-Symbol mit „Warum?“ schwebt darüber.)*  
-![Hamster erklärt eine Entscheidung](../../media/bithamster_08.png)
+
+![Hamster erklärt eine Entscheidung](../../media/architecture/08_concepts/bithamster_08.png)
 
 &nbsp;
 

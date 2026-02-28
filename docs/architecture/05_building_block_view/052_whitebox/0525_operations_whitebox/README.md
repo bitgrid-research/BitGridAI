@@ -8,9 +8,7 @@ Sicherheit, Konfiguration und Beobachtbarkeit.
 Sie entscheidet nicht über Energieflüsse.  
 Aber sie sorgt dafür, dass **alles andere verlässlich, kontrollierbar und sichtbar bleibt**.
 
-*(Platzhalter für ein Bild: Der Hamster trägt Helm und Klemmbrett.
-Neben ihm ein Schloss, ein Zahnrad und ein Fernglas – Security, Config, Observability.)*
-![Hamster Operations](../../../../media/bithamster_052.png)
+![Hamster Operations](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

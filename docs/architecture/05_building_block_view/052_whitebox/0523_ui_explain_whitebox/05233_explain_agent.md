@@ -7,9 +7,7 @@ Der Explain-Agent beantwortet die entscheidende Frage:
 
 Er erzeugt verständliche Explain-Sessions zu jeder Entscheidung – rein lesend, ohne Einfluss auf Aktoren oder Regeln.
 
-*(Platzhalter für ein Bild: Der Hamster mit Lupe und Sprechblase.
-Neben ihm schwebt ein DecisionEvent mit Pfeilen zu „Reason“, „Trigger“ und „Params“.)*
-![Hamster erklärt Entscheidungen](../../../../media/bithamster_052.png)
+![Hamster erklärt Entscheidungen](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

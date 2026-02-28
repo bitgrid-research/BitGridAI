@@ -8,8 +8,7 @@ Deshalb ist Sicherheit kein optionales Feature, sondern eine **zentrale Systemei
 Dieses Kapitel beschreibt die **systemweiten Sicherheits- und Vertrauensprinzipien** von BitGridAI.  
 Sie gelten unabhängig von Autonomie-Stufe, Betriebsmodus oder Deployment-Variante.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster mit Schutzhelm steht vor einem großen roten Not-Aus-Schalter. Ein Schild: „Safety First“. )*  
-![Hamster schützt das System](../../media/bithamster_08.png)
+![Hamster schützt das System]![Hamster erklärt die Domänensprache](../../media/architecture/08_concepts/bithamster_08.png)
 
 &nbsp;
 

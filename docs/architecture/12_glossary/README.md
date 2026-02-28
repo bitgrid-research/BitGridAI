@@ -20,7 +20,7 @@ Hier findest du unsere zentrale Begriffsliste:
 
 ---
 
-<img src="../../media/bithamster_12.png" alt="Hamster tech12" width="1000" />
+<img src="../../media/architecture/12_glossary/bithamster_12.png" alt="Hamster tech12" width="1000" />
 
 ---
 > **Endstation.**

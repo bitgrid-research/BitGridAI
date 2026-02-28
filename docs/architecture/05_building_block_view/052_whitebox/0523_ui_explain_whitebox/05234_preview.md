@@ -7,9 +7,7 @@ Das Preview-Modul beantwortet die Frage:
 
 Es simuliert Regelentscheidungen mit hypothetischen Eingaben – **ohne** Aktorik, **ohne** Seiteneffekte, **ohne** Risiko.
 
-*(Platzhalter für ein Bild: Der Hamster schaut in eine Glaskugel.
-Darin erscheinen alternative Energieflüsse und ein gestrichelter Pfeil zur Entscheidung.)*
-![Hamster mit Glaskugel](../../../../media/bithamster_052.png)
+![Hamster mit Glaskugel](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

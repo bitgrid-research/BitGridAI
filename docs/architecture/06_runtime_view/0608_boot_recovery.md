@@ -8,7 +8,7 @@ Dieses Szenario beschreibt, wie das System beim Hochfahren seine Abhängigkeiten
 Ziel ist ein **deterministisches Verhalten**:  
 Kein undefinierter Zustand, kein stilles Weiterlaufen, kein Aktionismus.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster startet eine Maschine mit einer Checkliste: „Config ✓, DB ✓, MQTT ✓“. Daneben ein Notfallhebel mit der Aufschrift „Safe Mode“.)*
+![Hamster steuert manuell](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

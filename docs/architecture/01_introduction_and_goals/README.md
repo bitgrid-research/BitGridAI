@@ -23,7 +23,7 @@ Wir haben die Grundlagen in drei kompakte Bereiche aufgeteilt, damit du schnell 
  
 ---
  
-  <img src="../../media/bithamster_plan.png" alt="Hamster Plan" width="1000" />
+  <img src="../../media/architecture/01_introduction_and_goals/bithamster_plan.png" alt="Hamster Plan" width="1000" />
 
 ---
 > **Nächster Schritt:** Wir kennen jetzt das Ziel. Im nächsten Kapitel schauen wir uns die Leitplanken an, die uns die Realität (Technik & Organisation) vorgibt.

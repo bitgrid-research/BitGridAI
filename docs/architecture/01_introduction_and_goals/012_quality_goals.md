@@ -6,7 +6,7 @@ Hier definieren wir schwarz auf weiß, was "gut" für **BitGridAI** bedeutet. Es
 
 Wir bauen kein System, das nur "funktioniert", sondern eines, das man versteht und dem man gerne die Kontrolle über sein Hausnetz überlässt.
 
-<img src="../../media/qualityplan.png" alt="Qualitaet" width="1000" />
+<img src="../../media/architecture/01_introduction_and_goals/qualityplan.png" alt="Qualitaet" width="1000" />
 
 &nbsp;
 
@@ -24,7 +24,7 @@ Diese sechs Säulen tragen unsere Architektur. An ihnen messen wir jede Designen
 | **Reproduzierbarkeit🔄** | Für die Wissenschaft. Alle Daten, Modelle und Logs sind standardisiert. Das ermöglicht es, Szenarien exakt "abzuspielen" (Replays) und Ergebnisse objektiv zu vergleichen – egal ob für deine eigene Analyse oder für Forschungsprojekte. |
 
 
-<img src="../../media/quality_pillar.png" alt="Qualitaet" width="1000" />
+<img src="../../media/architecture/01_introduction_and_goals/quality_pillar.png" alt="Qualitaet" width="1000" />
 
 &nbsp;
 

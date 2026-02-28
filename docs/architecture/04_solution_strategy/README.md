@@ -27,7 +27,7 @@ In diesem Ordner bündeln wir die zentralen Gedanken und Entscheidungen zur Lös
 
 ---
 
-<img src="../../media/bithamster_04.png" alt="Hamster tech" width="1000" />
+<img src="../../media/architecture/04_soultion_strategy/bithamster_04.png" alt="Hamster tech" width="1000" />
 
 ---
 

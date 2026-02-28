@@ -9,7 +9,7 @@ Autonomie dient dem **Komfort**, nicht der Entmündigung. Privacy ist **Grundann
 Dieses Qualitätsszenario beschreibt, wie BitGridAI Entscheidungshoheit verteilt,  
 wie Nutzereingriffe priorisiert werden und wie Datenhoheit konsequent gewahrt bleibt.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster hält eine Fernbedienung in der einen und ein Schloss in der anderen Hand. Auf einem Schild steht: „My System. My Data.“)*
+![Mindmap des Qualitätsbaumes](../../../media/architecture/10_quality_scenarios/bithamster_10.png)
 
 &nbsp;
 

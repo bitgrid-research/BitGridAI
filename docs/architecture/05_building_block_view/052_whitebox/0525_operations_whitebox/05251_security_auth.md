@@ -13,9 +13,8 @@ Kein Cloud-Login.
 Keine impliziten Identitäten.  
 Nur klare Regeln im eigenen Netz.
 
-*(Platzhalter für ein Bild: Der Hamster steht vor einer Tür mit Schloss und Klemmbrett.
-Auf dem Schild: „LAN only“. Er prüft Ausweise.)*
-![Hamster Security](../../../../media/bithamster_052.png)
+
+![Hamster Security](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

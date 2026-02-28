@@ -8,7 +8,7 @@ PV-Wechselrichter, Speicher, Smart Meter und Miner.
 Sie spricht die Sprache der Hardware –  
 und übersetzt sie in eine Form, die der Core versteht.
 
-![Hamster verbindet Feldgeräte](../../../../media/bithamster_052.png)
+![Hamster verbindet Feldgeräte](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

@@ -8,8 +8,7 @@ Es ist ein **kooperatives System**, in dem Mensch und Software gemeinsam Entsche
 Dieses Kapitel beschreibt die **systemweiten Leitlinien zur Autonomie und Mensch-Maschine-Interaktion (HCI)**.  
 Sie legen fest, **wer wann entscheidet**, wie Kontrolle sichtbar bleibt und wie Selbstbestimmung und Komfort in Balance gehalten werden.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster und ein Roboter-Hamster halten gemeinsam ein Steuerrad. Daneben eine Skala von „Manuell“ bis „Auto“.)*  
-![Hamster teilt sich die Kontrolle](../../media/bithamster_08.png)
+![Hamster teilt sich die Kontrolle](../../media/architecture/08_concepts/bithamster_08.png)
 
 &nbsp;
 

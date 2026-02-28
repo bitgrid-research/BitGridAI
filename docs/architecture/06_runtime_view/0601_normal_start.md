@@ -6,7 +6,7 @@ Dies ist der "Happy Path" von BitGridAI. Wir beschreiben hier den Standard-Ablau
 
 Hier greifen alle Zahnräder ineinander: Sensoren, State, Scheduler, Regeln und Aktoren.
 
-![Hamster startet das Mining](../../media/bithamster_06.png)
+![Hamster startet das Mining](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

@@ -7,7 +7,7 @@ BitGridAI verarbeitet neue Wetter- und Preis-Forecasts gezielt, ohne bei jedem U
 
 Dieses Szenario beschreibt, wie Forecast-Updates in das System einfließen, wie Regel R4 (Forecast) bewertet wird und wann ein vorgezogener Re-Eval sinnvoll und erlaubt ist.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster betrachtet eine Wetter- und Preistafel, während daneben ein Timer ruhig weiterläuft. Ein Schild: „Preview, not Panic“.)*
+![Hamster steuert manuell](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

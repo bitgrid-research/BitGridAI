@@ -4,7 +4,7 @@ Das Auge des Hamsters auf der Straße.
 
 Dieses Dokument identifiziert und priorisiert die wichtigsten Risiken und technischen Schulden von BitGridAI. Da unser System direkt in die physische Umgebung (Stromflüsse, Hardware) eingreift, liegt der Fokus der Risikominderung klar auf **Betriebssicherheit (Stop → Safe)** und **Datenkonsistenz**.
 
-![Hamster überprüft Risiken](../../media/bithamster_11.png)
+![Hamster überprüft Risiken](../../media/architecture/11_risks_and_technical_debt/bithamster_11.png)
 
 &nbsp;
 

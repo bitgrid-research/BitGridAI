@@ -55,7 +55,7 @@ Sie betreffen mehrere Bausteine gleichzeitig und bilden die technische „Sprach
   
 ---
 
-<img src="../../media/bithamster_08.png" alt="Hamster tech" width="1000" />
+<img src="../../media/architecture/08_concepts/bithamster_08.png" alt="Hamster tech" width="1000" />
 
 ---
 > **Nächster Schritt:**  

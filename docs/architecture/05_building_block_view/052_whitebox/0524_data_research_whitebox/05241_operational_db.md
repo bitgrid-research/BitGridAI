@@ -8,9 +8,7 @@ aktuelle Zustände, aktive Overrides, Konfigurationen und Zeitgrenzen (TTLs).
 Sie ist **kein Langzeitarchiv** und kein Analyse-Store.  
 Sie ist der **stabile Arbeitsspeicher auf Platte** – lokal, konsistent und berechenbar.
 
-*(Platzhalter für ein Bild: Der Hamster sitzt an einem Schreibtisch mit einem dicken Buch.
-Auf dem Buch steht „SQLite“. Daneben eine Uhr (TTL) und ein Häkchen „ACID“.)*  
-![Hamster an der Operational DB](../../../../media/bithamster_052.png)
+![Hamster an der Operational DB](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

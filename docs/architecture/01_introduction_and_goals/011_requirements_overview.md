@@ -16,8 +16,8 @@ Bevor wir uns in die technischen Details stürzen, müssen wir die Gretchenfrage
 
 **Das Ziel 🎯:** Mehr von deinem eigenen Strom selbst nutzen, weniger teuren Netzstrom beziehen und das lokale Netz entlasten, automatisch und zuverlässig mit voller Datenhoheit bei dir zu Hause.
 
-<img src="../../media/bithamster_conductor.png" alt="Hamster Dirigent" width="1000" />
-<img src="../../media/bithamster_dream.png" width="120" />
+<img src="../../media/architecture/01_introduction_and_goals/bithamster_conductor.png" alt="Hamster Dirigent" width="1000" />
+<img src="../../media/architecture/01_introduction_and_goals/bithamster_dream.png" width="120" />
 
 ## Wesentliche Features (Was das System draufhaben muss)
 

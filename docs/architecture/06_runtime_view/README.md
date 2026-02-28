@@ -56,7 +56,7 @@ Wir haben die wichtigsten Laufzeitszenarien anhand unseres Regelwerks (R1–R5) 
 
 ---
 
-<img src="../../media/bithamster_06.png" alt="Hamster tech" width="1000" />
+<img src="../../media/architecture/06_runtime_view/bithamster_06.png" alt="Hamster tech" width="1000" />
 
 ---
 > **Nächster Schritt:** Wir wissen jetzt, wie die Software arbeitet. Aber auf welcher Hardware landet sie eigentlich und wie kommt sie dorthin? Im nächsten Kapitel schauen wir uns die Infrastruktur an.

@@ -8,7 +8,7 @@ Stattdessen unterstützt das System explizite **Autonomie-Stufen**, die festlege
 Dieses Szenario beschreibt die verschiedenen Kontrollmodi und zeigt, wie BitGridAI je nach Stufe Verantwortung verteilt.  
 Ziel ist es, **Selbstbestimmung und Komfort bewusst wählbar** zu machen – ein zentrales HCI-Prinzip des Systems.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor einem Bedienpult mit vier Hebeln von „Manuell“ bis „Auto“. Über ihm schwebt eine Skala zwischen Mensch und Maschine.)*
+![Hamster steuert manuell](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

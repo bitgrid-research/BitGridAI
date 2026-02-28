@@ -19,7 +19,7 @@ Wir nutzen ein etabliertes Format, um unsere Entscheidungen zu strukturieren:
 
 ---
 
-<img src="../../media/bithamster_09.png" alt="Hamster tech" width="1000" />
+<img src="../../media/architecture/09_design_decisions/bithamster_09.png" alt="Hamster tech" width="1000" />
 
 ---
 > **Nächster Schritt:** Die Entscheidungen sind gefallen. Aber halten sie auch der Realität stand? Im nächsten Kapitel testen wir die Architektur gegen konkrete Szenarien, um die Qualität zu prüfen.

@@ -8,7 +8,7 @@ Entscheidungen müssen **rechtzeitig, vorhersagbar und ressourcenschonend** erfo
 
 Dieses Qualitätsszenario beschreibt, wie BitGridAI **reaktionsfähig bleibt, ohne die Hardware zu überfordern oder Stabilität zu opfern**.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt vor einer Stoppuhr und einem kleinen Einplatinencomputer. Auf der Uhr steht „< 300 ms“, auf dem Rechner „Edge“. Der Hamster wirkt entspannt.)*
+![Mindmap des Qualitätsbaumes](../../../media/architecture/10_quality_scenarios/bithamster_10.png)
 
 &nbsp;
 

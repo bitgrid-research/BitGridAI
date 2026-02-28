@@ -4,7 +4,7 @@ Der Taktgeber des Systems.
 
 Der Block-Scheduler erzwingt den **10-Minuten-Rhythmus**, triggert die Regel-Auswertung und sorgt mit `valid_until` dafür, dass Entscheidungen **ruhig bleiben** und nicht flappen.
 
-![Hamster sammelt Messwerte](../../../../media/bithamster_052.png)
+![Hamster sammelt Messwerte](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

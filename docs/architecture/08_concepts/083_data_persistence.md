@@ -14,9 +14,8 @@ Ziel ist eine Datenhaltung, die:
 - auditierbar,
 - ressourcenschonend
 - und nutzerkontrolliert ist.
-
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster als Bibliothekar, der Bücher in ein Regal („SQLite“) sortiert und große Kisten in ein Archiv („Parquet“) stapelt.)*  
-![Hamster sortiert Daten](../../media/bithamster_08.png)
+ 
+![Hamster sortiert Daten](../../media/architecture/08_concepts/bithamster_08.png)
 
 &nbsp;
 

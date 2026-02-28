@@ -7,7 +7,7 @@ Damit diese Entscheidungen **vertrauenswürdig, überprüfbar und langfristig wa
 
 Dieses Qualitätsszenario beschreibt, wie BitGridAI **jede Entscheidung nachvollziehbar wiederholbar** macht und gleichzeitig **offen für neue Hardware, Regeln und Anwendungsfälle** bleibt.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster hält ein altes Logbuch in der einen Pfote und steckt mit der anderen einen neuen Adapter-Baustein an ein System. Auf dem Buch steht „Replay“, auf dem Baustein „New Adapter“.)*
+![Mindmap des Qualitätsbaumes](../../../media/architecture/10_quality_scenarios/bithamster_10.png)
 
 &nbsp;
 

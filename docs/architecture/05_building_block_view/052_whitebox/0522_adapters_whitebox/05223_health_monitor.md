@@ -7,7 +7,7 @@ Er erkennt Ausfälle früh, stuft sie ein und macht den Zustand für Core, UI un
 
 *(Platzhalter für ein Bild: Der Hamster trägt ein Stethoskop und prüft mehrere Geräte.
 Über jedem Gerät leuchtet eine Ampel: grün, gelb oder rot.)*
-![Hamster überwacht Systemgesundheit](../../../../media/bithamster_052.png)
+![Hamster überwacht Systemgesundheit](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

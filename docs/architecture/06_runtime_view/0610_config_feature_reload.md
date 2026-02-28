@@ -7,7 +7,7 @@ Konfigurationsänderungen und Feature-Flags müssen **kontrolliert, nachvollzieh
 
 Dieses Szenario beschreibt, wie das System auf Änderungen an YAML-Konfigurationen oder Profilen reagiert und wie ein konsistenter Zustand erhalten bleibt.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster tauscht im laufenden Betrieb Zahnräder aus. Ein Schild daneben: „Hot Reload – geprüft & sicher“.)*
+![Hamster steuert manuell](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

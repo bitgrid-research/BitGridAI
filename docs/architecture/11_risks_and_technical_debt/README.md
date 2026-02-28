@@ -20,7 +20,7 @@ Dies ist unser zentrales Register für alles, was noch nicht optimal ist:
       
 ---
 
-<img src="../../media/bithamster_11.png" alt="Hamster tech11" width="1000" />
+<img src="../../media/architecture/11_risks_and_technical_debt/bithamster_11.png" alt="Hamster tech11" width="1000" />
 
 ---
 > **Nächster Schritt:** Fast geschafft!

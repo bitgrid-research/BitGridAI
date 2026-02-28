@@ -5,7 +5,7 @@ Kein Zugriff, keine Wirkung.
 Nicht jeder Request darf Wirkung entfalten.  
 BitGridAI schützt schreibende Endpunkte konsequent vor unautorisierten Zugriffen und Überlastung. Dieses Szenario beschreibt, wie das System auf fehlende Authentifizierung oder überschrittene Rate-Limits reagiert – **klar, sichtbar und ohne Seiteneffekte**.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht vor einer Schranke mit Schloss und Stoppuhr. Ein Schild: „Access denied“.)*
+![Hamster steuert manuell](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

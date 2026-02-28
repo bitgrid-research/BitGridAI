@@ -8,9 +8,7 @@ Persistenz, Audit-Trail, KPIs und Exporte für Forschung und Replays.
 Nichts davon ist Selbstzweck.  
 Alles folgt einem Prinzip: **Was entschieden wurde, muss später erklärbar und reproduzierbar sein.**
 
-*(Platzhalter für ein Bild: Der Hamster sitzt in einem Archiv.
-Um ihn herum Ordner, Parquet-Dateien und ein Notizblock mit Diagrammen.)*
-![Hamster im Datenarchiv](../../../../media/bithamster_052.png)
+![Hamster im Datenarchiv](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

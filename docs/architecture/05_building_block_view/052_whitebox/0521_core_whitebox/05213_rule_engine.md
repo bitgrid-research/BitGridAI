@@ -7,7 +7,7 @@ Die Rule Engine bewertet die Regeln **R1–R5** deterministisch gegen den aktuel
 
 Keine Statistik. Kein Raten. Keine Magie.
 
-![Hamster bewertet Regeln](../../../../media/bithamster_052.png)
+![Hamster bewertet Regeln](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

@@ -23,7 +23,7 @@ Wir unterteilen die Einschränkungen in drei Bereiche, um die Übersicht zu beha
 
 ---
 
-  <img src="../../media/bithamster_conventions.png" alt="Hamster konventionen" width="1000" />
+  <img src="../../media/architecture/02_archtecture_constraints/bithamster_conventions.png" alt="Hamster konventionen" width="1000" />
 
 ---
 

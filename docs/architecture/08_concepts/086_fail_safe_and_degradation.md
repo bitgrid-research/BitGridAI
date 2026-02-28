@@ -7,8 +7,8 @@ Fehler, Ausfälle oder unvollständige Informationen sind daher **kein Ausnahmef
 
 Dieses Kapitel beschreibt, wie BitGridAI mit **Unsicherheit, Teil- und Totalausfällen** umgeht – und warum das System im Zweifel **immer konservativ und sicher** handelt.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster zieht im Maschinenraum einen großen roten Hebel mit der Aufschrift „SAFE MODE“. Einige Anzeigen sind grau, aber alles ist ruhig.)*
-![Hamster im Safe Mode](../../media/bithamster_08.png)
+
+![Hamster im Safe Mode](../../media/architecture/08_concepts/bithamster_08.png)
 
 &nbsp;
 

@@ -6,7 +6,7 @@ Während die technischen Randbedingungen definieren, was physikalisch möglich i
 
 Unsere Architektur kann noch so brillant sein – wenn sie das Budget sprengt oder gegen Gesetze verstößt, wird sie nie Realität.
 
- <img src="../../media/bithamster_orga.png" alt="Hamster orga" width="1000" />
+ <img src="../../media/architecture/02_archtecture_constraints/bithamster_orga.png" alt="Hamster orga" width="1000" />
 
 &nbsp;
 

@@ -11,8 +11,7 @@ Möglich wird dies durch:
 - deterministische Regeln (R1–R5),
 - immutable Zustände und blockbasierten Takt.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster testet ein komplexes System in einer Sandkasten-Simulation, während echte Hardware sicher im Hintergrund bleibt.)*
-![Hamster führt Simulation durch](../../media/bithamster_08.png)
+![Hamster führt Simulation durch](../../media/architecture/08_concepts/bithamster_08.png)
 
 &nbsp;
 

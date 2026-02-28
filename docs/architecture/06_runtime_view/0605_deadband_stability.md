@@ -6,8 +6,7 @@ Nichts ist schlimmer für Hardware und Effizienz als "Flapping" (An... Aus... An
 
 Regel **R5 (Deadband/Hysteresis)** sorgt für Trägheit im System. Sie friert getroffene Entscheidungen für eine definierte Zeit ("Haltezeit") ein, es sei denn, ein Notfall (R2/R3) tritt ein.
 
-*(Platzhalter für ein Bild: Ein Hamster, der entspannt Yoga macht und "Ommm" sagt, während um ihn herum das Chaos tobt und Warnlampen blinken.)*
-![Hamster macht Yoga](../../media/bithamster_06.png)
+![Hamster macht Yoga](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

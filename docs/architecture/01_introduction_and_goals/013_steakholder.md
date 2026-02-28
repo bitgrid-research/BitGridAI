@@ -6,7 +6,7 @@ Willkommen am runden Tisch (oder am eckigen?) von **BitGridAI**. Software wird n
 
 Wir müssen ihre Brille aufsetzen, um zu verstehen, was das System leisten muss, damit es ein Erfolg wird.
 
-<img src="../../media/stakeholder.png" alt="Qualitaet" width="1000" />
+<img src="../../media/architecture/01_introduction_and_goals/stakeholder.png" alt="Qualitaet" width="1000" />
 
 &nbsp;
 

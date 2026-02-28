@@ -6,7 +6,7 @@ Hier wird das System einmal komplett auseinander- und wieder zusammengedacht: vo
 
 Die Kapitel bauen bewusst aufeinander auf und führen dich Schritt für Schritt durchs System. Du kannst sie linear lesen – oder gezielt dort einsteigen, wo du gerade Klarheit brauchst.
 
-<img src="../media/architectur.png" alt="Status" width="1000" />
+<img src="../media/architecture/architectur.png" alt="Status" width="1000" />
 
 &nbsp;
 

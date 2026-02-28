@@ -12,7 +12,7 @@ Es koppelt Energieerzeugung, -messung, -speicherung und Mining-Hardware über et
 Protokolle, hält einen konsistenten `EnergyState` als **Single Source of Truth (SSoT)**
 und trifft erklärbare Entscheidungen für Nutzer und Forschung.
 
-<img src="../../media/bithamster_technicalcontext.png" alt="Hamster tech" width="1000" />
+<img src="../../media/architecture/03_context/bithamster_technicalcontext.png" alt="Hamster tech" width="1000" />
 
 &nbsp;
 

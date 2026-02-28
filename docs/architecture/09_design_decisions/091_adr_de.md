@@ -6,7 +6,7 @@ Dieses Dokument dient als zentrale Ankerstelle für alle **Architecture Decision
 
 Die hier gesammelten Entscheidungen legen die Kernprinzipien von BitGridAI fest: **Lokalität, Determinismus, Erklärbarkeit** und **Nachhaltigkeit**.
 
-<img src="../../media/bithamster_09.png" alt="Hamster tech" width="1000" />
+<img src="../../media/architecture/09_design_decisions/bithamster_09.png" alt="Hamster tech" width="1000" />
 
 &nbsp;
 

@@ -11,7 +11,7 @@ Dieses Qualitätsszenario beschreibt, wie BitGridAI Transparenz sicherstellt –
 Grundsatz:
 > **Was nicht erklärt werden kann, darf nicht automatisch entscheiden.**
 
-(Platzhalter für ein Bild: Ein Pixel-Art-Hamster mit Lupe und Klemmbrett steht vor einem Entscheidungsdiagramm. Sprechblase: „Darum habe ich das so gemacht.“)
+![Mindmap des Qualitätsbaumes](../../../media/architecture/10_quality_scenarios/bithamster_10.png)
 
 &nbsp;
 

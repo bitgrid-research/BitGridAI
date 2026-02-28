@@ -6,8 +6,8 @@ So gut die Automatik auch ist – manchmal weiß der Mensch es besser. Vielleich
 
 Dieses Szenario beschreibt, wie BitGridAI reagiert, wenn der Nutzer das Steuer übernimmt. Dabei gilt eine goldene Regel: **Der Nutzer sticht die Optimierung, aber die Sicherheit sticht den Nutzer.**
 
-*(Platzhalter für ein Bild: Der Hamster trägt eine Kapitänsmütze und steuert das Schiff manuell mit einem großen hölzernen Steuerrad. Die Autopilot-Lampe ist aus.)*
-![Hamster steuert manuell](../../media/bithamster_06.png)
+
+![Hamster steuert manuell](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

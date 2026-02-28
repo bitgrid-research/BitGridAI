@@ -9,8 +9,7 @@ Regel **R4 (Forecast)** macht BitGridAI intelligent. Statt nur auf den aktuellen
 
 R4 fungiert als **Modifikator** oder "Veto-Instanz" für R1. Sie kann einen Start verhindern ("Start Prevention") oder einen Stopp erzwingen ("Pre-emptive Stop"), um Ineffizienz zu vermeiden.
 
-*(Platzhalter für ein Bild: Der Hamster schaut durch ein Fernglas in die Ferne, wo dunkle Wolken oder steile Preiskurven zu sehen sind.)*
-![Hamster mit Fernglas](../../media/bithamster_06.png)
+![Hamster mit Fernglas](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

@@ -9,7 +9,7 @@ Trotzdem darf sich das System **nicht hektisch verhalten**.
 Dieses Qualitätsszenario beschreibt, wie BitGridAI **vorhersagbar, stabil und ruhig** bleibt –  
 auch wenn sich die Welt draußen schnell ändert.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt entspannt auf einem Felsen, während um ihn herum Wolken, Blitze und Preissymbole vorbeiziehen. Ein Schild: „Stay calm – 10-Min-Block“.)*
+![Mindmap des Qualitätsbaumes](../../../media/architecture/10_quality_scenarios/bithamster_10.png)
 
 &nbsp;
 

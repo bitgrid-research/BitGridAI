@@ -14,7 +14,7 @@ Der Betrieb ist bewusst:
 
 Home Assistant und weitere Systeme sind **sekundäre Teilnehmer**, keine Betriebsabhängigkeiten.
 
-![Hamster beim lokalen Deployment](../../media/bithamster_07.png)
+![Hamster beim lokalen Deployment](../../media/architecture/07_deployment_view/bithamster_07.png)
 
 &nbsp;
 

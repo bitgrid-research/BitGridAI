@@ -31,7 +31,7 @@ Auf dieser Ebene öffnen wir die wichtigsten Bausteine aus der System-Whitebox u
 
 ---
 
-<img src="../../../media/bithamster_052.png" alt="Hamster whitebox" width="1000" />
+<img src="../../../media/architecture/05_building_block_view/bithamster_052.png" alt="Hamster whitebox" width="1000" />
 
 ---
 > **Nächster Schritt:** Jetzt sehen wir, *was* es gibt.  

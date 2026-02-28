@@ -6,7 +6,7 @@ Wir haben ein gemeinsames Ziel und nutzen die gleiche Technik. Aber wie arbeiten
 
 Sie existieren nicht, um uns zu gängeln, sondern damit wir uns im Code des anderen zurechtfinden, Fehler vermeiden und effizient vorankommen. Kurz gesagt: Damit das Ganze wie aus einem Guss wirkt und nicht wie ein Flickenteppich.
 
- <img src="../../media/bithamster_convention.png" alt="Hamster orga" width="1000" />
+ <img src="../../media/architecture/02_archtecture_constraints/bithamster_convention.png" alt="Hamster orga" width="1000" />
 
 &nbsp;
 

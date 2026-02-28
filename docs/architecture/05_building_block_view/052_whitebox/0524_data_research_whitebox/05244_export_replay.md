@@ -9,9 +9,7 @@ ohne die Kontrolle über Daten oder Betrieb zu verlieren.
 Nichts verlässt das System zufällig.  
 Alles ist **bewusst gewählt**, **signiert** und **reproduzierbar**.
 
-*(Platzhalter für ein Bild: Der Hamster packt sorgfältig Ordner und Diagramme
-in eine beschriftete Box „Export“. Daneben ein Siegel und ein Pfeil zu „Replay“.)*
-![Hamster erstellt Export-Bundle](../../../../media/bithamster_052.png)
+![Hamster erstellt Export-Bundle](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

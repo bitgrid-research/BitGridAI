@@ -20,7 +20,7 @@ Wir strukturieren unsere Qualitätsanforderungen auf zwei Wegen:
 
 ---
 
-<img src="../../media/bithamster_10.png" alt="Hamster tech" width="1000" />
+<img src="../../media/architecture/10_quality_scenarios/bithamster_10.png" alt="Hamster tech" width="1000" />
 
 ---
 > **Nächster Schritt:** Qualität ist definiert. Aber was, wenn Dinge schiefgehen oder wir bewusst Abkürzungen genommen haben? Im nächsten Kapitel listen wir die Risiken und technischen Schulden auf, die uns auf die Füße fallen könnten.

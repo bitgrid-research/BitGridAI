@@ -8,7 +8,7 @@ Sie übersetzen abstrakte Ziele (z.B. Sicherheit, Transparenz, Stabilität) in *
 Dieses Kapitel ist bewusst **szenariengetrieben** aufgebaut:  
 Jede Seite beschreibt **ein Qualitätsmerkmal**, abgeleitet aus dem Qualitätsbaum (Kap. 10.1) und den Architekturentscheidungen (Kap. 09).
 
-![Übersicht der Qualitätsszenarien](../../../media/bithamster_10.png)
+![Übersicht der Qualitätsszenarien](../../../media/architecture/10_quality_scenarios/bithamster_10.png)
 
 &nbsp;
 

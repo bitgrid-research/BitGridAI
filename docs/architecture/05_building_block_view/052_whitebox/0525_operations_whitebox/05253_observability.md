@@ -8,9 +8,7 @@ zusammengeführt und verständlich sichtbar gemacht.
 
 Nicht für Buzzwords – sondern für Betriebssicherheit.
 
-*(Platzhalter für ein Bild: Der Hamster steht mit Fernglas und Klemmbrett vor mehreren Anzeigen.
-Diagramme zeigen Health, Last und Warnsymbole.)*
-![Hamster Observability](../../../../media/bithamster_052.png)
+![Hamster Observability](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

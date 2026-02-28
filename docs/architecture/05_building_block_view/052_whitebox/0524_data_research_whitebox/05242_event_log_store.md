@@ -12,10 +12,7 @@ Replays, Audits, Analysen und Forschung.
 Was hier liegt, wird **nicht überschrieben**.  
 Nur gelesen, geprüft und nachvollzogen.
 
-*(Platzhalter für ein Bild: Der Hamster schreibt Einträge in ein großes, gebundenes Logbuch.
-Jede Seite trägt einen Zeitstempel und ein kleines Schloss. Daneben liegen Parquet-Dateien
-und ein Prüfsummen-Stempel.)*
-![Hamster im Event-Archiv](../../../../media/bithamster_052.png)
+![Hamster im Event-Archiv](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

@@ -4,8 +4,7 @@ Die relevanten Qualitätsmerkmale für BitGridAI.
 
 Der Qualitätsbaum stellt sicher, dass wir bei der Entwicklung und dem Testen keinen wichtigen Aspekt vergessen. Er spiegelt die Hauptziele wider: **Sicherheit, Transparenz und nachhaltige Autonomie.**
 
-*(Platzhalter für ein Bild: Eine Mindmap-ähnliche Darstellung des Qualitätsbaumes mit "BitGridAI" in der Mitte und den sechs Hauptästen.)*
-![Mindmap des Qualitätsbaumes](../../media/bithamster_10.png)
+![Mindmap des Qualitätsbaumes](../../media/architecture/10_quality_scenarios/bithamster_10.png)
 
 &nbsp;
 

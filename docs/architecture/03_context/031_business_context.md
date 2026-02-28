@@ -8,7 +8,7 @@ In diesem Kapitel betrachten wir **BitGridAI als Blackbox**, eingebettet in sein
 
 Kurz gesagt: **Wer klopft an die Tür von BitGridAI – und wen ruft das System an, wenn es etwas zu melden hat?**
 
-<img src="../../media/bithamster_businesscontext.png" alt="Hamster tech" width="1000" />
+<img src="../../media/architecture/03_context/bithamster_businesscontext.png" alt="Hamster tech" width="1000" />
 
 
 &nbsp;

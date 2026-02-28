@@ -20,7 +20,7 @@ Um die Übersicht zu behalten, trennen wir die fachliche "Brille" von der techni
 
 ---
 
-<img src="../../media/context.png" alt="Hamster tech" width="1000" />
+<img src="../../media/architecture/03_context/context.png" alt="Hamster tech" width="1000" />
 
 ---
  

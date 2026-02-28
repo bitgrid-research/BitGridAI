@@ -8,7 +8,7 @@ Updates, Builds und Releases dürfen deshalb **niemals implizit oder unkontrolli
 Dieses Kapitel beschreibt die **übergreifenden Prinzipien für Build, Update und Release** von BitGridAI.  
 Ziel ist ein Betriebsmodell, das **vorhersehbar, rückrollbar und überprüfbar** ist – auch auf Edge-Hardware im Heimnetz.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster steht an einem Förderband. Jede Kiste trägt ein Etikett: „Build“, „Test“, „Replay OK“, „Release“. Ein roter Stempel: „Approved“.)*
+![Hamster führt Simulation durch](../../media/architecture/08_concepts/bithamster_08.png)
 
 &nbsp;
 

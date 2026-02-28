@@ -7,7 +7,7 @@ Dieses Szenario beschreibt, wie diese Informationen **gezielt, nachvollziehbar u
 
 Der Export ist dabei kein „Dump“, sondern ein **reproduzierbares Forschungsartefakt**.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster packt sorgfältig Datenkisten in eine beschriftete Box. Auf dem Deckel stehen „Manifest“, „Hash“, „Read-only“.)*
+![Hamster steuert manuell](../../media/architecture/06_runtime_view/bithamster_06.png)
 
 &nbsp;
 

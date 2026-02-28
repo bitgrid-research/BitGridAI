@@ -10,6 +10,8 @@ Dieses Qualitätsszenario beschreibt, wie BitGridAI in sicherheitsrelevanten Sit
 Grundsatz:
 > **Safety (R3) ist nicht verhandelbar.**
 
+![Mindmap des Qualitätsbaumes](../../../media/architecture/10_quality_scenarios/bithamster_10.png)
+
 &nbsp;
 
 ## Qualitätsziel

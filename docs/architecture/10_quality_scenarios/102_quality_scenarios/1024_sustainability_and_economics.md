@@ -6,7 +6,7 @@ BitGridAI steuert flexible Lasten nicht zum Selbstzweck.
 Jede Aktivität verbraucht Energie, erzeugt Kosten oder schafft Wert.  
 Dieses Qualitätsszenario beschreibt, wie BitGridAI **ökologisch sinnvoll und wirtschaftlich rational** handelt – transparent, nachvollziehbar und ohne versteckte Externalitäten.
 
-*(Platzhalter für ein Bild: Ein Pixel-Art-Hamster sitzt an einer Waage. Auf der einen Seite Sonne, Batterie und Wärme; auf der anderen Seite Münzen und ein Blitzsymbol. Die Waage ist im Gleichgewicht.)*
+![Mindmap des Qualitätsbaumes](../../../media/architecture/10_quality_scenarios/bithamster_10.png)
 
 &nbsp;
 

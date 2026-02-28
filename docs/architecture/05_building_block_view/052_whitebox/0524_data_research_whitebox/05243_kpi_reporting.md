@@ -15,10 +15,8 @@ Hier entstehen Zahlen wie:
 Ohne Interpretation, ohne Schönfärbung.  
 Nur reproduzierbare Fakten.
 
-*(Platzhalter für ein Bild: Der Hamster steht vor Diagrammen und Balken.
-Er hält einen Taschenrechner, daneben Pfeile von Events zu KPIs wie
-„kWh → Sats“, „Uptime“, „Deadband-Hit-Rate“.)*
-![Hamster berechnet Kennzahlen](../../../../media/bithamster_052.png)
+
+![Hamster berechnet Kennzahlen](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

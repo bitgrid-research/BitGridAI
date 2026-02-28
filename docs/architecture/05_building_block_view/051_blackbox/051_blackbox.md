@@ -6,7 +6,7 @@ Wir bleiben bewusst außen, zählen die Anschlüsse und beschreiben kurz,
 **was an jedem Stecker passiert**.  
 Wie es innen aussieht, folgt in Level 2.
 
-<img src="../../../media/bithamster_05111.png" alt="Hamster blackbox111" width="1000" />
+<img src="../../../media/architecture/05_building_block_view/bithamster_05111.png" alt="Hamster blackbox111" width="1000" />
 
 &nbsp;
 

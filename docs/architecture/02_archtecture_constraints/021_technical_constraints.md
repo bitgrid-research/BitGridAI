@@ -6,7 +6,7 @@ Hier steht, was **nicht verhandelbar** ist – der Rahmen, in den BitGridAI hine
 Diese Einschränkungen ergeben sich aus Kellerrealität, Local-First-Vision und externen Vorgaben.  
 Die Architektur muss **innerhalb dieser Grenzen** die bestmögliche Lösung liefern. Punkt.
 
-<img src="../../media/bithamster_technical.png" alt="Hamster tech" width="1000" />
+<img src="../../media/architecture/02_archtecture_constraints/bithamster_technical.png" alt="Hamster tech" width="1000" />
 
 &nbsp;
 

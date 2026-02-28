@@ -6,9 +6,7 @@ Der API-Layer stellt die **lokalen REST- und WebSocket-Schnittstellen** bereit.
 Er ist der einzige Weg, über den UIs, Tools oder Nutzer mit dem System sprechen.
 Lesen ist günstig. Schreiben ist kontrolliert.
 
-*(Platzhalter für ein Bild: Der Hamster sitzt an einem Tresen.
-Schilder: „State“, „Timeline“, „Preview“, „Override (mit Ausweis)“.)*
-![Hamster am API-Schalter](../../../../media/bithamster_052.png)
+![Hamster am API-Schalter](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

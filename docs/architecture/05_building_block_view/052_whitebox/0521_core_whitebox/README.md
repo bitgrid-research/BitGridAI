@@ -11,7 +11,7 @@ Keine UI.
 
 Nur Zustand, Zeit und Regeln.
 
-![Hamster im Core-Orchestrator](../../../../media/bithamster_052.png)
+![Hamster im Core-Orchestrator](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 

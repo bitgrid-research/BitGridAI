@@ -6,9 +6,7 @@ Device Profiles kapseln alles, was **geräte- und herstellerspezifisch** ist:
 Skalierungen, Limits, unterstützte Features und Endpoints.  
 So bleibt die Adapter-Logik sauber – und neue Hardware austauschbar.
 
-*(Platzhalter für ein Bild: Der Hamster steht vor einer Wand mit Steckbriefen.
-Auf jedem Blatt ein anderes Gerät mit Symbolen für Leistung, Temperatur und Limits.)*
-![Hamster verwaltet Geräteprofile](../../../../media/bithamster_052.png)
+![Hamster verwaltet Geräteprofile](../../../../media/architecture/05_building_block_view/bithamster_052.png)
 
 &nbsp;
 
