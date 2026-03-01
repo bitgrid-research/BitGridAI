@@ -50,12 +50,14 @@ Systemlogik basierenden Kontexten betrachtet:
 <img src="../../../media/context_sim.png" alt="context_sim" width="400" height="250">
 
 - **[20.2.3 - SIM-CONTEXT - *Simulations*-Kontext](./2023_simulation_context/README.md)**  
-  Wenn Regeln hörbar klicken und Miner sichtbar anspringen: physische Tischsimulation, in der Schwellen, Prioritäten und Sicherheitslogiken nicht nur erklärt, sondern provoziert, beobachtet und begriffen werden können.  
+  Wenn Regeln hörbar klicken und Miner sichtbar anspringen: physische Tischsimulation, in der Schwellen, Prioritäten und Sicherheitslogiken nicht nur erklärt, sondern provoziert, beobachtet und begriffen werden können.
 
-  [TODO: Smartphone App - Design Konzept in Figma (Konzeption und prototypische Ausarbeitung einer Smartphone-App in Figma zur Visualisierung, Erklärung und Interaktion mit dem regelbasierten Energiemanagementsystem.)]
+  [1. TODO: Home-Assistant - UI Exploration, Regelableitungen,Forschung an Relais, Simulationsrahmen (Technische Exploration und prototypische Umsetzung des Systems in Home Assistant inklusive UI-Design, Relais-Integration und Aufbau eines physischen Simulationsrahmens)]
+
+  [2. TODO: Smartphone App - Design Konzept in Figma (Konzeption und prototypische Ausarbeitung einer Smartphone-App in Figma zur Visualisierung, Erklärung und Interaktion mit dem regelbasierten Energiemanagementsystem.)]
 
 
-  [TODO: Home-Assistant - UI Exploration, Regelableitungen,Forschung an Relais, Simulationsrahmen (Technische Exploration und prototypische Umsetzung des Systems in Home Assistant inklusive UI-Design, Relais-Integration und Aufbau eines physischen Simulationsrahmens)]
+
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
 Unterschiedlich sind ausschließlich Interaktionskontext, Aufmerksamkeitssituation
