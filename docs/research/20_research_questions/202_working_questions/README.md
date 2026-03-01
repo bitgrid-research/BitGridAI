@@ -54,7 +54,10 @@ Systemlogik basierenden Kontexten betrachtet:
 
   [1. TODO: Home-Assistant - UI Exploration, Regelableitungen,Forschung an Relais, Simulationsrahmen (Technische Exploration und prototypische Umsetzung des Systems in Home Assistant inklusive UI-Design, Relais-Integration und Aufbau eines physischen Simulationsrahmens)]
 
-  [2. TODO: Smartphone App - Design Konzept in Figma (Konzeption und prototypische Ausarbeitung einer Smartphone-App in Figma zur Visualisierung, Erklärung und Interaktion mit dem regelbasierten Energiemanagementsystem.)]
+  [2. TODO: Smartphone App - Design Konzept in Figma (Konzeption und prototypische Ausarbeitung einer Smartphone-App in Figma zur Visualisierung, Erklärung und Interaktion mit dem regelbasierten Energiemanagementsystem.)]+
+
+  [3. TODO: Vertrauensdimensionen – Theoretische Fundierung und Operationalisierung  
+(Systematische Analyse und konzeptionelle Ausarbeitung zentraler Vertrauensdimensionen – Benevolenz & Reziprozität, Integrität, Ähnlichkeit, Kontrolle & Transparenz sowie Prozess-Fairness und Expertise – zur Einbettung und Bewertung des regelbasierten Energiemanagementsystems.)]
 
 
 
