@@ -52,14 +52,26 @@ Systemlogik basierenden Kontexten betrachtet:
 - **[20.2.3 - SIM-CONTEXT - *Simulations*-Kontext](./2023_simulation_context/README.md)**  
   Wenn Regeln hörbar klicken und Miner sichtbar anspringen: physische Tischsimulation, in der Schwellen, Prioritäten und Sicherheitslogiken nicht nur erklärt, sondern provoziert, beobachtet und begriffen werden können.
 
-  [1. TODO: Home-Assistant - UI Exploration, Regelableitungen,Forschung an Relais, Simulationsrahmen (Technische Exploration und prototypische Umsetzung des Systems in Home Assistant inklusive UI-Design, Relais-Integration und Aufbau eines physischen Simulationsrahmens)]
+  - [20.2.3.1 - Home Assistant: Regelwerk, UI und Relais](./2023_simulation_context/2023a_home_assistant_exploration.md)  
+  - [20.2.3.2 - Smartphone-App: Interaktions- und Figma-Konzept](./2023_simulation_context/2023b_smartphone_app_figma_concept.md)  
+  - [20.2.3.3 - Vertrauensdimensionen: Fundierung und Operationalisierung](./2023_simulation_context/2023c_trust_dimensions_operationalization.md)
 
-  [2. TODO: Smartphone App - Design Konzept in Figma (Konzeption und prototypische Ausarbeitung einer Smartphone-App in Figma zur Visualisierung, Erklärung und Interaktion mit dem regelbasierten Energiemanagementsystem.)]+
+- **[20.2.4 - SD-CONTEXT - *Studiendesign*-Kontext](./2024_study_design_context/README.md)**  
 
-  [3. TODO: Vertrauensdimensionen – Theoretische Fundierung und Operationalisierung  
-(Systematische Analyse und konzeptionelle Ausarbeitung zentraler Vertrauensdimensionen – Benevolenz & Reziprozität, Integrität, Ähnlichkeit, Kontrolle & Transparenz sowie Prozess-Fairness und Expertise – zur Einbettung und Bewertung des regelbasierten Energiemanagementsystems.)]
+  Wenn aus Prototypen ein belastbares Forschungsdesign werden muss: methodische Planung der Masterarbeit mit Sampling, Aufgaben, Instrumenten, Ethik und Auswertungslogik als Grundlage für die Feldstudie.
 
-- **[20.2.4 - STUDY-CONTEXT - *Feldstudie*-Kontext](./2024_study_context/README.md)**  
+  - [20.2.4.1 - SD-WQ1 - Studiendesign und Stichprobe](./2024_study_design_context/2024a_study_design_sampling.md)  
+  - [20.2.4.2 - SD-WQ2 - Aufgaben, Instrumente und Messlogik](./2024_study_design_context/2024b_tasks_instruments_metrics.md)  
+  - [20.2.4.3 - SD-WQ3 - Ethik, Datenschutz und Analyseplan](./2024_study_design_context/2024c_ethics_privacy_analysis.md)
+
+- **[20.2.5 - FIELD-CONTEXT - *Feldstudie*-Kontext](./2025_field_study_context/README.md)**  
+
+  Wenn Automatiken im echten Leben auf Routinen, Zeitdruck und Unsicherheit treffen: Feldstudie im Realbetrieb, um zu prüfen, ob Erklärungen, Override-Optionen und sichtbare Sicherheitsreserven auch außerhalb des Labors tragfähig sind.
+
+  - [20.2.5.1 - FIELD-WQ1 - Verstehen der Entscheidungen im Alltag](./2025_field_study_context/2025a_understanding_in_the_wild.md)  
+  - [20.2.5.2 - FIELD-WQ2 - Kontrolle, Override und Recovery im Realbetrieb](./2025_field_study_context/2025b_control_override_recovery.md)  
+  - [20.2.5.3 - FIELD-WQ3 - Vertrauen, Sicherheit und Nutzung über Zeit](./2025_field_study_context/2025c_trust_safety_over_time.md)
+
 
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
