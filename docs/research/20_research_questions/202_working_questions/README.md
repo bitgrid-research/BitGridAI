@@ -58,7 +58,7 @@ Systemlogik basierenden Kontexten betrachtet:
 
 - **[20.2.4 - SD-CONTEXT - *Studiendesign*-Kontext](./2024_study_design_context/README.md)**  
 
-  Wenn aus Prototypen ein belastbares Forschungsdesign werden muss: methodische Planung der Masterarbeit mit Sampling, Aufgaben, Instrumenten, Ethik und Auswertungslogik als Grundlage für die Feldstudie.
+  Wenn aus Prototypen ein belastbares Forschungsdesign werden muss: methodische Planung der Arbeit mit Sampling, Aufgaben, Instrumenten, Ethik und Auswertungslogik als Grundlage für die Feldstudie.
 
   - [20.2.4.1 - SD-WQ1 - Studiendesign und Stichprobe](./2024_study_design_context/2024a_study_design_sampling.md)  
   - [20.2.4.2 - SD-WQ2 - Aufgaben, Instrumente und Messlogik](./2024_study_design_context/2024b_tasks_instruments_metrics.md)  
