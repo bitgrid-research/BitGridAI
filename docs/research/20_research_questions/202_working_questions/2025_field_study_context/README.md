@@ -1,6 +1,6 @@
 # 20.2.5 - FIELD-CONTEXT - Feldstudie-Kontext
 
-Der Feldstudie-Kontext beschreibt die reale Durchfuehrung im Alltag und trennt
+Der Feldstudie-Kontext beschreibt die reale Durchführung im Alltag und trennt
 damit klar Planung und Umsetzung.
 
 Hier wird das zuvor entwickelte Studiendesign im Realbetrieb getestet und
@@ -16,4 +16,4 @@ ausgewertet.
 
 > Weiter zu **[20.2.5.1 - FIELD-WQ1 - Verstehen der Entscheidungen im Alltag](./2025a_understanding_in_the_wild.md)**
 >
-> Zurueck zu **[20.2 - WQ - Zentrale Arbeitsfragen](../README.md)**
+> Zurück zu **[20.2 - WQ - Zentrale Arbeitsfragen](../README.md)**

@@ -6,6 +6,6 @@ Forschungsdesign, Rekrutierungslogik und Stichprobenstrategie.
 ## TODO
 
 - Forschungsdesign festlegen (z. B. mixed methods mit begleitenden Logs).
-- Ein- und Ausschlusskriterien fuer Teilnehmende definieren.
-- Zielgroesse und Streuung der Stichprobe begruenden.
+- Ein- und Ausschlusskriterien für Teilnehmende definieren.
+- Zielgröße und Streuung der Stichprobe begründen.
 - Rekrutierungsweg und Zeitplan dokumentieren.

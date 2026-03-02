@@ -4,7 +4,7 @@ Diese Seite strukturiert, was in der Studie konkret beobachtet und gemessen wird
 
 ## TODO
 
-- Aufgaben und Szenarien fuer Teilnehmende entwickeln.
+- Aufgaben und Szenarien für Teilnehmende entwickeln.
 - Erhebungsinstrumente definieren (Interviewleitfaden, Fragebogen, Logdaten).
 - Messlogik je WQ operationalisieren (Transparenz, Kontrolle, Vertrauen).
 - Pilotdurchlauf planen und Anpassungskriterien festlegen.

@@ -1,7 +1,7 @@
 # 20.2.4 - SD-CONTEXT - Studiendesign-Kontext
 
 Der Studiendesign-Kontext trennt die methodische Forschungsplanung klar von der
-spaeteren Durchfuehrung der Feldstudie.
+späteren Durchführung der Feldstudie.
 
 Hier wird festgelegt, wie untersucht wird, bevor untersucht wird:
 Stichprobe, Aufgaben, Instrumente, Ethik und Auswertung.
@@ -16,4 +16,4 @@ Stichprobe, Aufgaben, Instrumente, Ethik und Auswertung.
 
 > Weiter zu **[20.2.4.1 - SD-WQ1 - Studiendesign und Stichprobe](./2024a_study_design_sampling.md)**
 >
-> Zurueck zu **[20.2 - WQ - Zentrale Arbeitsfragen](../README.md)**
+> Zurück zu **[20.2 - WQ - Zentrale Arbeitsfragen](../README.md)**
