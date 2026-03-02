@@ -1,0 +1,178 @@
+title: BitGridAI
+views:
+  - title: Overview
+    path: overview
+    icon: mdi:home-analytics
+    cards:
+      - type: entities
+        title: System State
+        show_header_toggle: false
+        entities:
+          - entity: input_select.system_state
+          - entity: input_select.autonomy_level
+          - entity: input_select.decision_action
+          - entity: input_datetime.decision_timestamp
+          - entity: input_boolean.override_active
+
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            name: Battery SoC
+            entity: sensor.battery_soc_pct
+            min: 0
+            max: 100
+          - type: gauge
+            name: Miner Temp
+            entity: sensor.miner_temp_c
+            min: 0
+            max: 120
+          - type: gauge
+            name: Surplus
+            entity: sensor.surplus_kw
+            min: -10
+            max: 20
+
+      - type: entities
+        title: Power
+        entities:
+          - entity: sensor.pv_power_w
+            name: PV Power
+          - entity: sensor.house_load_w
+            name: House Load
+          - entity: sensor.grid_import_w
+            name: Grid Import
+          - entity: sensor.surplus_kw
+            name: Surplus
+
+      - type: history-graph
+        title: Power History (8h)
+        hours_to_show: 8
+        refresh_interval: 60
+        entities:
+          - entity: sensor.pv_power_w
+          - entity: sensor.house_load_w
+          - entity: sensor.grid_import_w
+          - entity: sensor.surplus_kw
+
+      - type: entities
+        title: Miner Control
+        show_header_toggle: false
+        entities:
+          - entity: switch.miner_relay
+            name: Miner Relay
+          - entity: sensor.miner_status
+            name: Miner Status
+          - entity: sensor.miner_heartbeat_age_sec
+            name: Heartbeat Age
+          - entity: binary_sensor.r3_comm_timeout
+            name: Comm Timeout
+          - entity: binary_sensor.r3_overtemp
+            name: Overtemp
+          - entity: input_boolean.r3_emergency_stop
+            name: E-Stop (Control)
+          - entity: binary_sensor.r3_emergency_stop
+            name: E-Stop (State)
+
+      - type: glance
+        title: Rule Gates
+        show_name: true
+        entities:
+          - entity: binary_sensor.r1_surplus_ok
+            name: R1 Surplus OK
+          - entity: binary_sensor.r2_soc_soft
+            name: R2 SoC Soft
+          - entity: binary_sensor.r2_soc_hard
+            name: R2 SoC Hard
+          - entity: binary_sensor.r2_grid_import_ok
+            name: R2 Grid Import OK
+
+  - title: Tuning
+    path: tuning
+    icon: mdi:tune-vertical
+    cards:
+      - type: entities
+        title: R1 Surplus
+        entities:
+          - entity: input_number.r1_surplus_min_kw
+            name: Min Surplus (kW)
+
+      - type: entities
+        title: R2 Battery + Grid
+        entities:
+          - entity: input_number.r2_soc_soft_min_pct
+            name: Soft Min SoC (%)
+          - entity: input_number.r2_soc_hard_min_pct
+            name: Hard Min SoC (%)
+          - entity: input_number.r2_max_grid_import_w
+            name: Max Grid Import (W)
+
+      - type: entities
+        title: R3 Safety
+        entities:
+          - entity: input_number.r3_max_chip_temp_c
+            name: Max Chip Temp (C)
+          - entity: input_number.r3_comm_timeout_sec
+            name: Comm Timeout (s)
+          - entity: input_number.r3_safety_lockout_min
+            name: Safety Lockout (min)
+          - entity: input_boolean.r3_emergency_stop
+            name: E-Stop
+
+      - type: entities
+        title: R5 Deadband / Runtime
+        entities:
+          - entity: input_number.r5_deadband_hold_blocks
+            name: Deadband Hold (blocks)
+          - entity: input_number.r5_min_runtime_blocks
+            name: Min Runtime (blocks)
+          - entity: input_number.r5_min_pause_blocks
+            name: Min Pause (blocks)
+          - entity: input_number.block_minutes
+            name: Block Minutes
+
+      - type: entities
+        title: Deadband Timing
+        entities:
+          - entity: input_datetime.deadband_valid_until
+            name: Deadband Valid Until
+
+  - title: Simulation
+    path: simulation
+    icon: mdi:flask
+    cards:
+      - type: entities
+        title: Simulation Mode
+        show_header_toggle: false
+        entities:
+          - entity: input_boolean.simulation_mode
+            name: Simulation Mode
+          - entity: input_boolean.miner_relay_sim
+            name: Miner Relay Sim
+
+      - type: entities
+        title: Simulated Inputs
+        entities:
+          - entity: input_number.pv_power_w
+            name: PV Power (W)
+          - entity: input_number.house_load_w
+            name: House Load (W)
+          - entity: input_number.grid_import_w
+            name: Grid Import (W)
+          - entity: input_number.battery_soc_pct
+            name: Battery SoC (%)
+          - entity: input_number.miner_temp_c
+            name: Miner Temp (C)
+          - entity: input_number.miner_heartbeat_age_sec
+            name: Heartbeat Age (s)
+
+      - type: history-graph
+        title: Simulation History (8h)
+        hours_to_show: 8
+        refresh_interval: 60
+        entities:
+          - entity: sensor.pv_power_w
+          - entity: sensor.house_load_w
+          - entity: sensor.grid_import_w
+          - entity: sensor.battery_soc_pct
+          - entity: sensor.miner_temp_c
+          - entity: sensor.miner_heartbeat_age_sec
