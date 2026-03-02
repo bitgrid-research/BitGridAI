@@ -1,0 +1,284 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+input_boolean:
+  simulation_mode:
+    name: simulation_mode
+    icon: mdi:flask
+    initial: on
+  miner_relay_sim:
+    name: miner_relay_sim
+    icon: mdi:power
+  r3_emergency_stop:
+    name: r3_emergency_stop
+    icon: mdi:alert
+  override_active:
+    name: override_active
+    icon: mdi:hand
+
+input_select:
+  system_state:
+    name: system_state
+    options:
+      - OFF
+      - ARMED
+      - RUNNING
+      - THROTTLED
+      - COOLDOWN
+      - LOCKOUT
+      - SAFE_MODE
+      - ERROR
+    initial: OFF
+  decision_action:
+    name: decision_action
+    options:
+      - START
+      - STOP
+      - THROTTLE
+      - NOOP
+    initial: NOOP
+  autonomy_level:
+    name: autonomy_level
+    options:
+      - MANUAL
+      - ASSIST
+      - SEMI_AUTO
+      - AUTO
+    initial: MANUAL
+
+input_number:
+  pv_power_w:
+    name: pv_power_w
+    min: 0
+    max: 20000
+    step: 50
+    mode: box
+    initial: 0
+  house_load_w:
+    name: house_load_w
+    min: 0
+    max: 20000
+    step: 50
+    mode: box
+    initial: 0
+  grid_import_w:
+    name: grid_import_w
+    min: 0
+    max: 20000
+    step: 50
+    mode: box
+    initial: 0
+  battery_soc_pct:
+    name: battery_soc_pct
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 50
+  miner_temp_c:
+    name: miner_temp_c
+    min: 0
+    max: 120
+    step: 1
+    mode: box
+    initial: 55
+  miner_heartbeat_age_sec:
+    name: miner_heartbeat_age_sec
+    min: 0
+    max: 600
+    step: 1
+    mode: box
+    initial: 5
+
+  r1_surplus_min_kw:
+    name: r1_surplus_min_kw
+    min: 0
+    max: 20
+    step: 0.1
+    mode: box
+    initial: 0.5
+  r2_soc_soft_min_pct:
+    name: r2_soc_soft_min_pct
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 30
+  r2_soc_hard_min_pct:
+    name: r2_soc_hard_min_pct
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 20
+  r2_max_grid_import_w:
+    name: r2_max_grid_import_w
+    min: 0
+    max: 20000
+    step: 50
+    mode: box
+    initial: 300
+  r3_max_chip_temp_c:
+    name: r3_max_chip_temp_c
+    min: 0
+    max: 120
+    step: 1
+    mode: box
+    initial: 90
+  r3_comm_timeout_sec:
+    name: r3_comm_timeout_sec
+    min: 0
+    max: 600
+    step: 5
+    mode: box
+    initial: 120
+  r3_safety_lockout_min:
+    name: r3_safety_lockout_min
+    min: 0
+    max: 120
+    step: 1
+    mode: box
+    initial: 15
+  r5_deadband_hold_blocks:
+    name: r5_deadband_hold_blocks
+    min: 0
+    max: 24
+    step: 1
+    mode: box
+    initial: 2
+  r5_min_runtime_blocks:
+    name: r5_min_runtime_blocks
+    min: 0
+    max: 24
+    step: 1
+    mode: box
+    initial: 3
+  r5_min_pause_blocks:
+    name: r5_min_pause_blocks
+    min: 0
+    max: 24
+    step: 1
+    mode: box
+    initial: 2
+  block_minutes:
+    name: block_minutes
+    min: 1
+    max: 60
+    step: 1
+    mode: box
+    initial: 10
+
+input_datetime:
+  decision_timestamp:
+    name: decision_timestamp
+    has_date: true
+    has_time: true
+  deadband_valid_until:
+    name: deadband_valid_until
+    has_date: true
+    has_time: true
+
+template:
+  - sensor:
+      - name: pv_power_w
+        unique_id: pv_power_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.pv_power_w') | float(0) }}"
+      - name: house_load_w
+        unique_id: house_load_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.house_load_w') | float(0) }}"
+      - name: grid_import_w
+        unique_id: grid_import_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.grid_import_w') | float(0) }}"
+      - name: battery_soc_pct
+        unique_id: battery_soc_pct
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+        state: "{{ states('input_number.battery_soc_pct') | float(0) }}"
+      - name: miner_temp_c
+        unique_id: miner_temp_c
+        unit_of_measurement: "C"
+        state_class: measurement
+        state: "{{ states('input_number.miner_temp_c') | float(0) }}"
+      - name: miner_heartbeat_age_sec
+        unique_id: miner_heartbeat_age_sec
+        unit_of_measurement: "s"
+        state_class: measurement
+        state: "{{ states('input_number.miner_heartbeat_age_sec') | float(0) }}"
+      - name: surplus_kw
+        unique_id: surplus_kw
+        unit_of_measurement: "kW"
+        state_class: measurement
+        state: >-
+          {% set pv = states('sensor.pv_power_w') | float(0) %}
+          {% set load = states('sensor.house_load_w') | float(0) %}
+          {% set grid = states('sensor.grid_import_w') | float(0) %}
+          {{ ((pv - load - grid) / 1000) | round(3) }}
+      - name: miner_status
+        unique_id: miner_status
+        state: >-
+          {{ 'RUNNING' if is_state('switch.miner_relay', 'on') else 'STOPPED' }}
+  - binary_sensor:
+      - name: r1_surplus_ok
+        unique_id: r1_surplus_ok
+        state: >-
+          {{ (states('sensor.surplus_kw') | float(0)) >=
+             (states('input_number.r1_surplus_min_kw') | float(0)) }}
+      - name: r2_soc_soft
+        unique_id: r2_soc_soft
+        state: >-
+          {{ (states('sensor.battery_soc_pct') | float(0)) >=
+             (states('input_number.r2_soc_soft_min_pct') | float(0)) }}
+      - name: r2_soc_hard
+        unique_id: r2_soc_hard
+        state: >-
+          {{ (states('sensor.battery_soc_pct') | float(0)) >=
+             (states('input_number.r2_soc_hard_min_pct') | float(0)) }}
+      - name: r2_grid_import_ok
+        unique_id: r2_grid_import_ok
+        state: >-
+          {{ (states('sensor.grid_import_w') | float(0)) <=
+             (states('input_number.r2_max_grid_import_w') | float(0)) }}
+      - name: r3_overtemp
+        unique_id: r3_overtemp
+        state: >-
+          {{ (states('sensor.miner_temp_c') | float(0)) >=
+             (states('input_number.r3_max_chip_temp_c') | float(0)) }}
+      - name: r3_comm_timeout
+        unique_id: r3_comm_timeout
+        state: >-
+          {{ (states('sensor.miner_heartbeat_age_sec') | float(0)) >=
+             (states('input_number.r3_comm_timeout_sec') | float(0)) }}
+      - name: r3_emergency_stop
+        unique_id: r3_emergency_stop
+        state: "{{ is_state('input_boolean.r3_emergency_stop', 'on') }}"
+  - switch:
+      - name: miner_relay
+        unique_id: miner_relay
+        state: "{{ is_state('input_boolean.miner_relay_sim', 'on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.miner_relay_sim
+        turn_off:
+          service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.miner_relay_sim

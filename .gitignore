@@ -205,3 +205,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Home Assistant (runtime/state)
+src/ha/config/.storage/
+src/ha/config/.cloud/
+src/ha/config/deps/
+src/ha/config/tts/
+src/ha/config/.ha_run.lock
+src/ha/config/secrets.yaml
+src/ha/config/home-assistant_v2.db*
+src/ha/config/home-assistant.log*

@@ -1,0 +1,142 @@
+sim_reset:
+  alias: "SIM Reset"
+  mode: single
+  sequence:
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.pv_power_w
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.house_load_w
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.grid_import_w
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.battery_soc_pct
+      data:
+        value: 50
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_temp_c
+      data:
+        value: 55
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_heartbeat_age_sec
+      data:
+        value: 5
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.miner_relay_sim
+
+sim_sh1_stable_surplus:
+  alias: "SIM SH-1 stabiler Ueberschuss"
+  mode: single
+  sequence:
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.pv_power_w
+      data:
+        value: 6000
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.house_load_w
+      data:
+        value: 1500
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.grid_import_w
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.battery_soc_pct
+      data:
+        value: 80
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_temp_c
+      data:
+        value: 60
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_heartbeat_age_sec
+      data:
+        value: 5
+
+sim_sh2_variable_pv:
+  alias: "SIM SH-2 wechselhafte PV"
+  mode: single
+  sequence:
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.pv_power_w
+      data:
+        value: 2200
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.house_load_w
+      data:
+        value: 1800
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.grid_import_w
+      data:
+        value: 150
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.battery_soc_pct
+      data:
+        value: 45
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_temp_c
+      data:
+        value: 68
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_heartbeat_age_sec
+      data:
+        value: 5
+
+sim_sh3_soc_critical:
+  alias: "SIM SH-3 SoC kritisch"
+  mode: single
+  sequence:
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.pv_power_w
+      data:
+        value: 800
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.house_load_w
+      data:
+        value: 1200
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.grid_import_w
+      data:
+        value: 400
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.battery_soc_pct
+      data:
+        value: 12
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_temp_c
+      data:
+        value: 50
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_heartbeat_age_sec
+      data:
+        value: 5
