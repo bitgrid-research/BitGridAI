@@ -59,7 +59,7 @@ Systemlogik basierenden Kontexten betrachtet:
   [3. TODO: Vertrauensdimensionen – Theoretische Fundierung und Operationalisierung  
 (Systematische Analyse und konzeptionelle Ausarbeitung zentraler Vertrauensdimensionen – Benevolenz & Reziprozität, Integrität, Ähnlichkeit, Kontrolle & Transparenz sowie Prozess-Fairness und Expertise – zur Einbettung und Bewertung des regelbasierten Energiemanagementsystems.)]
 
-
+- **[20.2.4 - STUDY-CONTEXT - *Feldstudie*-Kontext](./2024_study_context/README.md)**  
 
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
