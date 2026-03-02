@@ -31,9 +31,9 @@ Systemlogik basierenden Kontexten betrachtet:
 
 - **[20.2.1 - SH-CONTEXT - *Smart-Home*-Kontext](./2021_smart_home_context/README.md)**  
   Wenn Energieentscheidungen zwischen Kaffeemaschine, Waschmaschine und Miner fallen: erklärbare, regelbasierte Automatik im häuslichen Umfeld (App / Web-Dashboard) mit Fokus auf Transparenz, Kontrolle und ein mentales Modell, das auch nach drei Wochen noch Sinn ergibt.  
-  - [20.2.1.1 - SH-WQ1 - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)  
-  - [20.2.1.2 - SH-WQ2 - Kontrolle und Override](./2021_smart_home_context/2021b_kontrolle.md)  
-  - [20.2.1.3 - SH-WQ3 - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)
+  - [20.2.1.1 - Verstehen der Entscheidung](./2021_smart_home_context/2021a_transparenz.md)  
+  - [20.2.1.2 - Kontrolle und Override](./2021_smart_home_context/2021b_kontrolle.md)  
+  - [20.2.1.3 - Vertrauen und Sicherheit](./2021_smart_home_context/2021c_vertrauen.md)
     
  &nbsp;
 
@@ -41,9 +41,9 @@ Systemlogik basierenden Kontexten betrachtet:
 
 - **[20.2.2 - AUTO-CONTEXT - *Automotive*-Kontext](./2022_automotive_context/README.md)**  
   Wenn Reichweite, Ladeleistung und Nervosität zusammenkommen: verständliche Erklärungen für automatisierte Ladeentscheidungen im aufmerksamkeitssensitiven Fahrzeugkontext (z. B. *Warum lädt er jetzt nicht und soll ich panisch werden?*), reduziert, vertrauenswürdig und ohne den Fahrer in den Infomodus zu schicken.  
-  - [20.2.2.1 - AUTO-WQ1 - Verstehen der Ladeentscheidung](./2022_automotive_context/2022a_transparenz.md)  
-  - [20.2.2.2 - AUTO-WQ2 - Kontrolle im Auto](./2022_automotive_context/2022b_kontrolle.md)  
-  - [20.2.2.3 - AUTO-WQ3 - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)
+  - [20.2.2.1 - Verstehen der Ladeentscheidung](./2022_automotive_context/2022a_transparenz.md)  
+  - [20.2.2.2 - Kontrolle im Auto](./2022_automotive_context/2022b_kontrolle.md)  
+  - [20.2.2.3 - Vertrauen und Reichweitenangst](./2022_automotive_context/2022c_vertrauen.md)
     
  &nbsp;
 
@@ -56,21 +56,31 @@ Systemlogik basierenden Kontexten betrachtet:
   - [20.2.3.2 - Smartphone-App: Interaktions- und Figma-Konzept](./2023_simulation_context/2023b_smartphone_app_figma_concept.md)  
   - [20.2.3.3 - Vertrauensdimensionen: Fundierung und Operationalisierung](./2023_simulation_context/2023c_trust_dimensions_operationalization.md)
 
+
+&nbsp;
+
+<img src="../../../media/context_studydesign.png" alt="context_studydesign" width="400" height="250">
+
 - **[20.2.4 - SD-CONTEXT - *Studiendesign*-Kontext](./2024_study_design_context/README.md)**  
 
   Wenn aus Prototypen ein belastbares Forschungsdesign werden muss: methodische Planung der Arbeit mit Sampling, Aufgaben, Instrumenten, Ethik und Auswertungslogik als Grundlage für die Feldstudie.
 
-  - [20.2.4.1 - SD-WQ1 - Studiendesign und Stichprobe](./2024_study_design_context/2024a_study_design_sampling.md)  
-  - [20.2.4.2 - SD-WQ2 - Aufgaben, Instrumente und Messlogik](./2024_study_design_context/2024b_tasks_instruments_metrics.md)  
-  - [20.2.4.3 - SD-WQ3 - Ethik, Datenschutz und Analyseplan](./2024_study_design_context/2024c_ethics_privacy_analysis.md)
+  - [20.2.4.1 - Studiendesign und Stichprobe](./2024_study_design_context/2024a_study_design_sampling.md)  
+  - [20.2.4.2 - Aufgaben, Instrumente und Messlogik](./2024_study_design_context/2024b_tasks_instruments_metrics.md)  
+  - [20.2.4.3 - Ethik, Datenschutz und Analyseplan](./2024_study_design_context/2024c_ethics_privacy_analysis.md)
+
+
+&nbsp;
+
+<img src="../../../media/context_field.png" alt="context_field" width="400" height="250">
 
 - **[20.2.5 - FIELD-CONTEXT - *Feldstudie*-Kontext](./2025_field_study_context/README.md)**  
 
   Wenn Automatiken im echten Leben auf Routinen, Zeitdruck und Unsicherheit treffen: Feldstudie im Realbetrieb, um zu prüfen, ob Erklärungen, Override-Optionen und sichtbare Sicherheitsreserven auch außerhalb des Labors tragfähig sind.
 
-  - [20.2.5.1 - FIELD-WQ1 - Verstehen der Entscheidungen im Alltag](./2025_field_study_context/2025a_understanding_in_the_wild.md)  
-  - [20.2.5.2 - FIELD-WQ2 - Kontrolle, Override und Recovery im Realbetrieb](./2025_field_study_context/2025b_control_override_recovery.md)  
-  - [20.2.5.3 - FIELD-WQ3 - Vertrauen, Sicherheit und Nutzung über Zeit](./2025_field_study_context/2025c_trust_safety_over_time.md)
+  - [20.2.5.1 - Verstehen der Entscheidungen im Alltag](./2025_field_study_context/2025a_understanding_in_the_wild.md)  
+  - [20.2.5.2 - Kontrolle, Override und Recovery im Realbetrieb](./2025_field_study_context/2025b_control_override_recovery.md)  
+  - [20.2.5.3 - Vertrauen, Sicherheit und Nutzung über Zeit](./2025_field_study_context/2025c_trust_safety_over_time.md)
 
 
 
