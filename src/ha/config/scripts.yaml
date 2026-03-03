@@ -24,6 +24,16 @@ sim_reset:
         value: 50
     - service: input_number.set_value
       target:
+        entity_id: input_number.battery_power_w
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_power_w
+      data:
+        value: 3000
+    - service: input_number.set_value
+      target:
         entity_id: input_number.miner_temp_c
       data:
         value: 55
@@ -62,6 +72,16 @@ sim_sh1_stable_surplus:
         value: 80
     - service: input_number.set_value
       target:
+        entity_id: input_number.battery_power_w
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_power_w
+      data:
+        value: 3000
+    - service: input_number.set_value
+      target:
         entity_id: input_number.miner_temp_c
       data:
         value: 60
@@ -97,6 +117,16 @@ sim_sh2_variable_pv:
         value: 45
     - service: input_number.set_value
       target:
+        entity_id: input_number.battery_power_w
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_power_w
+      data:
+        value: 3000
+    - service: input_number.set_value
+      target:
         entity_id: input_number.miner_temp_c
       data:
         value: 68
@@ -130,6 +160,16 @@ sim_sh3_soc_critical:
         entity_id: input_number.battery_soc_pct
       data:
         value: 12
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.battery_power_w
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_power_w
+      data:
+        value: 3000
     - service: input_number.set_value
       target:
         entity_id: input_number.miner_temp_c

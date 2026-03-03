@@ -8,6 +8,9 @@ frontend:
 
 lovelace:
   resource_mode: yaml
+  resources:
+    - url: /hacsfiles/power-flow-card-plus/power-flow-card-plus.js
+      type: module
   dashboards:
     bitgrid-ai:
       mode: yaml
@@ -94,6 +97,13 @@ input_number:
     step: 1
     mode: box
     initial: 50
+  battery_power_w:
+    name: battery_power_w
+    min: -10000
+    max: 10000
+    step: 50
+    mode: box
+    initial: 0
   miner_temp_c:
     name: miner_temp_c
     min: 0
@@ -108,6 +118,13 @@ input_number:
     step: 1
     mode: box
     initial: 5
+  miner_power_w:
+    name: miner_power_w
+    min: 0
+    max: 10000
+    step: 50
+    mode: box
+    initial: 3000
 
   r1_surplus_min_kw:
     name: r1_surplus_min_kw
@@ -205,6 +222,12 @@ template:
         device_class: power
         state_class: measurement
         state: "{{ states('input_number.pv_power_w') | float(0) }}"
+      - name: pv_generation_w
+        unique_id: pv_generation_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('sensor.pv_power_w') | float(0) }}"
       - name: house_load_w
         unique_id: house_load_w
         unit_of_measurement: "W"
@@ -223,6 +246,12 @@ template:
         device_class: battery
         state_class: measurement
         state: "{{ states('input_number.battery_soc_pct') | float(0) }}"
+      - name: battery_power_w
+        unique_id: battery_power_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.battery_power_w') | float(0) }}"
       - name: miner_temp_c
         unique_id: miner_temp_c
         unit_of_measurement: "C"
@@ -233,6 +262,17 @@ template:
         unit_of_measurement: "s"
         state_class: measurement
         state: "{{ states('input_number.miner_heartbeat_age_sec') | float(0) }}"
+      - name: miner_power_w
+        unique_id: miner_power_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >-
+          {% if is_state('switch.miner_relay', 'on') %}
+            {{ states('input_number.miner_power_w') | float(0) }}
+          {% else %}
+            0
+          {% endif %}
       - name: surplus_kw
         unique_id: surplus_kw
         unit_of_measurement: "kW"
