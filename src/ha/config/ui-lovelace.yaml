@@ -11,9 +11,29 @@ views:
           - entity: input_select.system_state
           - entity: input_select.autonomy_level
           - entity: input_select.decision_action
+          - entity: sensor.bg_decision_action
+          - entity: sensor.bg_decision_priority
+          - entity: input_text.decision_reason
+          - entity: input_text.decision_code
           - entity: input_datetime.decision_timestamp
+          - entity: sensor.block_id
+          - entity: sensor.block_window_start
+          - entity: sensor.block_window_end
           - entity: input_datetime.deadband_valid_until
+          - entity: binary_sensor.r5_deadband_active
+          - entity: binary_sensor.safety_lockout_active
+
+      - type: entities
+        title: Override Control
+        show_header_toggle: false
+        entities:
           - entity: input_boolean.override_active
+          - entity: input_select.override_action
+          - entity: input_number.override_duration_min
+          - entity: input_datetime.override_valid_until
+          - entity: input_text.override_status
+          - entity: input_text.decision_explanation
+          - entity: sensor.rule_states_json
 
       - type: vertical-stack
         cards:
@@ -125,6 +145,10 @@ views:
         title: Safety
         show_header_toggle: false
         entities:
+          - entity: binary_sensor.r3_safety_override
+            name: R3 Safety Override
+          - entity: binary_sensor.safety_lockout_active
+            name: Safety Lockout Active
           - entity: binary_sensor.r3_overtemp
             name: Overtemp
           - entity: binary_sensor.r3_comm_timeout
@@ -152,6 +176,14 @@ views:
             name: R3 Comm Timeout
           - entity: binary_sensor.r3_emergency_stop
             name: R3 E-Stop
+          - entity: binary_sensor.r3_safety_override
+            name: R3 Safety Override
+          - entity: binary_sensor.r5_deadband_active
+            name: R5 Deadband Active
+          - entity: binary_sensor.r5_min_runtime_active
+            name: R5 Min Runtime
+          - entity: binary_sensor.r5_min_pause_active
+            name: R5 Min Pause
 
       - type: entities
         title: Tuning (Quick)
@@ -262,8 +294,52 @@ views:
         entities:
           - entity: input_boolean.simulation_mode
             name: Simulation Mode
+          - entity: input_boolean.replay_mode
+            name: Replay Mode
           - entity: input_boolean.miner_relay_sim
             name: Miner Relay Sim
+
+      - type: entities
+        title: Simulation Actions
+        show_header_toggle: false
+        entities:
+          - entity: script.sim_run_sh_suite
+            name: Run SH Suite (SH-1..SH-4)
+          - entity: script.sim_tests_reset
+            name: Reset Test Counters
+          - entity: script.bg_decision_cycle
+            name: Decision Cycle Now
+          - entity: script.bg_force_safety_stop
+            name: Force Safety Stop
+          - entity: script.sim_reset
+            name: SIM Reset
+          - entity: script.sim_sh1_stable_surplus
+            name: SH-1 Stable Surplus
+          - entity: script.sim_sh2_variable_pv
+            name: SH-2 Variable PV
+          - entity: script.sim_sh3_soc_critical
+            name: SH-3 SoC Critical
+          - entity: script.sim_sh4_safety_overtemp
+            name: SH-4 Safety Overtemp
+
+      - type: entities
+        title: Test Protocol
+        show_header_toggle: false
+        entities:
+          - entity: sensor.bg_test_status
+            name: Suite Status
+          - entity: sensor.bg_test_totals
+            name: Totals
+          - entity: input_number.test_pass_count
+            name: Pass Count
+          - entity: input_number.test_fail_count
+            name: Fail Count
+          - entity: input_text.last_test_case
+            name: Last Test Case
+          - entity: input_text.last_test_result
+            name: Last Test Result
+          - entity: input_text.test_summary
+            name: Summary
 
       - type: entities
         title: Simulated PV Generation

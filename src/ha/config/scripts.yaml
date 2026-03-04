@@ -1,3 +1,438 @@
+bg_decision_cycle:
+  alias: "BG Decision Cycle"
+  mode: queued
+  sequence:
+    - condition: state
+      entity_id: input_boolean.simulation_mode
+      state: "on"
+    - variables:
+        action_candidate: "{{ states('sensor.bg_decision_action') | upper }}"
+        reason_candidate: "{{ states('sensor.bg_decision_reason') }}"
+        explanation_candidate: "{{ states('sensor.bg_decision_explanation') }}"
+        code_candidate: "{{ states('sensor.bg_decision_code') }}"
+        safety_active: "{{ is_state('binary_sensor.r3_safety_override', 'on') or is_state('binary_sensor.safety_lockout_active', 'on') }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ action_candidate in ['START', 'STOP', 'THROTTLE', 'NOOP'] }}"
+          sequence:
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.decision_action
+              data:
+                option: "{{ action_candidate }}"
+      default:
+        - service: input_select.select_option
+          target:
+            entity_id: input_select.decision_action
+          data:
+            option: "NOOP"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.decision_reason
+      data:
+        value: "{{ reason_candidate }}"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.decision_explanation
+      data:
+        value: "{{ explanation_candidate }}"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.decision_code
+      data:
+        value: "{{ code_candidate }}"
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.decision_timestamp
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+    - service: script.bg_apply_decision
+      data:
+        action: "{{ states('input_select.decision_action') }}"
+        is_safety: "{{ safety_active }}"
+
+bg_apply_decision:
+  alias: "BG Apply Decision"
+  mode: queued
+  fields:
+    action:
+      description: "START, STOP, THROTTLE oder NOOP"
+      example: "START"
+    is_safety:
+      description: "Markiert Safety-Stop Pfad"
+      example: true
+  sequence:
+    - variables:
+        normalized_action: "{{ (action | default('NOOP')) | upper }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ normalized_action == 'START' }}"
+          sequence:
+            - service: script.bg_start
+        - conditions:
+            - condition: template
+              value_template: "{{ normalized_action == 'STOP' }}"
+          sequence:
+            - service: script.bg_stop
+              data:
+                safety_stop: "{{ is_safety | default(false) }}"
+        - conditions:
+            - condition: template
+              value_template: "{{ normalized_action == 'THROTTLE' }}"
+          sequence:
+            - service: script.bg_throttle
+      default:
+        - service: script.bg_noop
+
+bg_set_deadband_until:
+  alias: "BG Set Deadband Until"
+  mode: parallel
+  sequence:
+    - variables:
+        hold_minutes: >-
+          {{ (states('input_number.r5_deadband_hold_blocks') | int(0)) *
+             (states('input_number.block_minutes') | int(10)) }}
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.deadband_valid_until
+      data:
+        datetime: "{{ (now() + timedelta(minutes=hold_minutes)).strftime('%Y-%m-%d %H:%M:%S') }}"
+
+bg_start:
+  alias: "BG Start Miner"
+  mode: queued
+  sequence:
+    - condition: template
+      value_template: >-
+        {{ is_state('binary_sensor.r3_safety_override', 'off') and
+           is_state('binary_sensor.safety_lockout_active', 'off') }}
+    - service: switch.turn_on
+      target:
+        entity_id: switch.miner_relay
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.system_state
+      data:
+        option: "RUNNING"
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.last_start_at
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+    - service: script.bg_set_deadband_until
+
+bg_stop:
+  alias: "BG Stop Miner"
+  mode: queued
+  fields:
+    safety_stop:
+      description: "True bei Safety-Stop"
+      example: true
+  sequence:
+    - variables:
+        is_safety_stop: "{{ safety_stop in [true, 'true', 'True', 'on', 1, '1'] }}"
+    - service: switch.turn_off
+      target:
+        entity_id: switch.miner_relay
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ is_safety_stop }}"
+          sequence:
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.system_state
+              data:
+                option: "SAFE_MODE"
+      default:
+        - service: input_select.select_option
+          target:
+            entity_id: input_select.system_state
+          data:
+            option: "OFF"
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.last_stop_at
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ is_safety_stop }}"
+          sequence:
+            - service: input_datetime.set_datetime
+              target:
+                entity_id: input_datetime.safety_lockout_until
+              data:
+                datetime: >-
+                  {{ (now() + timedelta(minutes=states('input_number.r3_safety_lockout_min') | int(15)))
+                     .strftime('%Y-%m-%d %H:%M:%S') }}
+      default:
+        - service: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.safety_lockout_until
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+    - service: script.bg_set_deadband_until
+
+bg_throttle:
+  alias: "BG Throttle Miner"
+  mode: queued
+  sequence:
+    - condition: template
+      value_template: >-
+        {{ is_state('binary_sensor.r3_safety_override', 'off') and
+           is_state('binary_sensor.safety_lockout_active', 'off') }}
+    - service: switch.turn_on
+      target:
+        entity_id: switch.miner_relay
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_power_w
+      data:
+        value: >-
+          {% set current = states('input_number.miner_power_w') | float(3000) %}
+          {% set throttled = (current * 0.60) | round(0) %}
+          {{ [throttled, 1000] | max }}
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.system_state
+      data:
+        option: "THROTTLED"
+    - service: script.bg_set_deadband_until
+
+bg_noop:
+  alias: "BG Noop"
+  mode: queued
+  sequence:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.r3_safety_override
+              state: "on"
+          sequence:
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.system_state
+              data:
+                option: "SAFE_MODE"
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.safety_lockout_active
+              state: "on"
+          sequence:
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.system_state
+              data:
+                option: "LOCKOUT"
+        - conditions:
+            - condition: state
+              entity_id: switch.miner_relay
+              state: "on"
+            - condition: numeric_state
+              entity_id: input_number.miner_power_w
+              below: 2200
+          sequence:
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.system_state
+              data:
+                option: "THROTTLED"
+        - conditions:
+            - condition: state
+              entity_id: switch.miner_relay
+              state: "on"
+          sequence:
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.system_state
+              data:
+                option: "RUNNING"
+      default:
+        - service: input_select.select_option
+          target:
+            entity_id: input_select.system_state
+          data:
+            option: "OFF"
+
+bg_force_safety_stop:
+  alias: "BG Force Safety Stop"
+  mode: queued
+  sequence:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.decision_action
+      data:
+        option: "STOP"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.decision_reason
+      data:
+        value: "Safety override active (R3)."
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.decision_explanation
+      data:
+        value: >-
+          STOP via R3_SAFETY | temp={{ states('sensor.miner_temp_c') }}C hb={{ states('sensor.miner_heartbeat_age_sec') }}s estop={{ states('input_boolean.r3_emergency_stop') }}
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.decision_code
+      data:
+        value: "STOP_R3_SAFETY"
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.decision_timestamp
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+    - service: script.bg_apply_decision
+      data:
+        action: "STOP"
+        is_safety: true
+
+sim_tests_reset:
+  alias: "SIM Tests Reset Counters"
+  mode: single
+  sequence:
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.test_pass_count
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.test_fail_count
+      data:
+        value: 0
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.last_test_case
+      data:
+        value: "none"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.last_test_result
+      data:
+        value: "none"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.test_summary
+      data:
+        value: "Suite reset."
+
+sim_assert_action:
+  alias: "SIM Assert Decision Action"
+  mode: queued
+  fields:
+    case_name:
+      description: "Name des Testfalls"
+      example: "SH-1 stable surplus"
+    expected_action:
+      description: "Erwartete Decision Action"
+      example: "START"
+  sequence:
+    - variables:
+        case_label: "{{ case_name | default('unnamed') }}"
+        expected: "{{ (expected_action | default('NOOP')) | upper }}"
+        actual: "{{ states('input_select.decision_action') | upper }}"
+        passed: "{{ actual == expected }}"
+        line: "{{ case_label ~ ' expected=' ~ expected ~ ' actual=' ~ actual }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ passed }}"
+          sequence:
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.test_pass_count
+              data:
+                value: "{{ states('input_number.test_pass_count') | int(0) + 1 }}"
+      default:
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.test_fail_count
+          data:
+            value: "{{ states('input_number.test_fail_count') | int(0) + 1 }}"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.last_test_case
+      data:
+        value: "{{ case_label }}"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.last_test_result
+      data:
+        value: "{{ ('PASS: ' if passed else 'FAIL: ') ~ line }}"
+    - service: logbook.log
+      data:
+        name: "BG SIM TEST"
+        message: "{{ ('PASS ' if passed else 'FAIL ') ~ line }}"
+        entity_id: input_select.decision_action
+
+sim_run_sh_suite:
+  alias: "SIM Run SH Suite"
+  mode: single
+  sequence:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.simulation_mode
+    - service: script.sim_tests_reset
+
+    - service: script.sim_reset
+    - delay: "00:00:01"
+    - service: script.sim_sh1_stable_surplus
+    - delay: "00:00:01"
+    - service: script.sim_assert_action
+      data:
+        case_name: "SH-1 stable surplus"
+        expected_action: "START"
+
+    - service: script.sim_reset
+    - delay: "00:00:01"
+    - service: script.sim_sh2_variable_pv
+    - delay: "00:00:01"
+    - service: script.sim_assert_action
+      data:
+        case_name: "SH-2 variable PV"
+        expected_action: "NOOP"
+
+    - service: script.sim_reset
+    - delay: "00:00:01"
+    - service: script.sim_sh3_soc_critical
+    - delay: "00:00:01"
+    - service: script.sim_assert_action
+      data:
+        case_name: "SH-3 SoC critical"
+        expected_action: "STOP"
+
+    - service: script.sim_reset
+    - delay: "00:00:01"
+    - service: script.sim_sh4_safety_overtemp
+    - delay: "00:00:01"
+    - service: script.sim_assert_action
+      data:
+        case_name: "SH-4 safety overtemp"
+        expected_action: "STOP"
+
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.test_summary
+      data:
+        value: >-
+          {% set p = states('input_number.test_pass_count') | int(0) %}
+          {% set f = states('input_number.test_fail_count') | int(0) %}
+          {% set total = p + f %}
+          {% if total == 0 %}
+            Suite NOT_RUN | pass=0 fail=0 total=0
+          {% elif f == 0 %}
+            Suite PASS | pass={{ p }} fail={{ f }} total={{ total }}
+          {% else %}
+            Suite FAIL | pass={{ p }} fail={{ f }} total={{ total }}
+          {% endif %}
+
 sim_reset:
   alias: "SIM Reset"
   mode: single
@@ -44,7 +479,21 @@ sim_reset:
         value: 5
     - service: input_boolean.turn_off
       target:
-        entity_id: input_boolean.miner_relay_sim
+        entity_id:
+          - input_boolean.miner_relay_sim
+          - input_boolean.r3_emergency_stop
+          - input_boolean.override_active
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.override_action
+      data:
+        option: "NOOP"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.override_status
+      data:
+        value: "inactive"
+    - service: script.bg_decision_cycle
 
 sim_sh1_stable_surplus:
   alias: "SIM SH-1 stabiler Ueberschuss"
@@ -90,6 +539,7 @@ sim_sh1_stable_surplus:
         entity_id: input_number.miner_heartbeat_age_sec
       data:
         value: 5
+    - service: script.bg_decision_cycle
 
 sim_sh2_variable_pv:
   alias: "SIM SH-2 wechselhafte PV"
@@ -135,6 +585,7 @@ sim_sh2_variable_pv:
         entity_id: input_number.miner_heartbeat_age_sec
       data:
         value: 5
+    - service: script.bg_decision_cycle
 
 sim_sh3_soc_critical:
   alias: "SIM SH-3 SoC kritisch"
@@ -180,3 +631,15 @@ sim_sh3_soc_critical:
         entity_id: input_number.miner_heartbeat_age_sec
       data:
         value: 5
+    - service: script.bg_decision_cycle
+
+sim_sh4_safety_overtemp:
+  alias: "SIM SH-4 Safety Overtemp"
+  mode: single
+  sequence:
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.miner_temp_c
+      data:
+        value: "{{ states('input_number.r3_max_chip_temp_c') | float(90) + 5 }}"
+    - service: script.bg_force_safety_stop

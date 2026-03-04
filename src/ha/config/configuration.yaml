@@ -37,6 +37,9 @@ input_boolean:
   override_active:
     name: override_active
     icon: mdi:hand
+  replay_mode:
+    name: replay_mode
+    icon: mdi:play-box-multiple
 
 input_select:
   system_state:
@@ -67,6 +70,14 @@ input_select:
       - SEMI_AUTO
       - AUTO
     initial: MANUAL
+  override_action:
+    name: override_action
+    options:
+      - START
+      - STOP
+      - THROTTLE
+      - NOOP
+    initial: NOOP
 
 input_number:
   pv_power_w:
@@ -125,6 +136,27 @@ input_number:
     step: 50
     mode: box
     initial: 3000
+  override_duration_min:
+    name: override_duration_min
+    min: 1
+    max: 180
+    step: 1
+    mode: box
+    initial: 30
+  test_pass_count:
+    name: test_pass_count
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 0
+  test_fail_count:
+    name: test_fail_count
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 0
 
   r1_surplus_min_kw:
     name: r1_surplus_min_kw
@@ -213,6 +245,52 @@ input_datetime:
     name: deadband_valid_until
     has_date: true
     has_time: true
+  last_start_at:
+    name: last_start_at
+    has_date: true
+    has_time: true
+  last_stop_at:
+    name: last_stop_at
+    has_date: true
+    has_time: true
+  safety_lockout_until:
+    name: safety_lockout_until
+    has_date: true
+    has_time: true
+  override_valid_until:
+    name: override_valid_until
+    has_date: true
+    has_time: true
+
+input_text:
+  decision_reason:
+    name: decision_reason
+    max: 255
+    initial: "Initial state"
+  decision_explanation:
+    name: decision_explanation
+    max: 255
+    initial: "Simulation not started"
+  decision_code:
+    name: decision_code
+    max: 120
+    initial: "INIT"
+  override_status:
+    name: override_status
+    max: 64
+    initial: "inactive"
+  last_test_case:
+    name: last_test_case
+    max: 255
+    initial: "none"
+  last_test_result:
+    name: last_test_result
+    max: 255
+    initial: "none"
+  test_summary:
+    name: test_summary
+    max: 255
+    initial: "No test run yet."
 
 template:
   - sensor:
@@ -286,6 +364,160 @@ template:
         unique_id: miner_status
         state: >-
           {{ 'RUNNING' if is_state('switch.miner_relay', 'on') else 'STOPPED' }}
+      - name: block_id
+        unique_id: block_id
+        state: >-
+          {% set block = states('input_number.block_minutes') | int(10) %}
+          {% set block = 1 if block < 1 else block %}
+          {{ (as_timestamp(now()) // (block * 60)) | int }}
+      - name: block_window_start
+        unique_id: block_window_start
+        state: >-
+          {% set block = states('input_number.block_minutes') | int(10) %}
+          {% set block = 1 if block < 1 else block %}
+          {% set ts = ((as_timestamp(now()) // (block * 60)) * block * 60) | int %}
+          {{ ts | timestamp_custom('%Y-%m-%d %H:%M:%S', true) }}
+      - name: block_window_end
+        unique_id: block_window_end
+        state: >-
+          {% set block = states('input_number.block_minutes') | int(10) %}
+          {% set block = 1 if block < 1 else block %}
+          {% set ts = (((as_timestamp(now()) // (block * 60)) + 1) * block * 60) | int %}
+          {{ ts | timestamp_custom('%Y-%m-%d %H:%M:%S', true) }}
+      - name: bg_decision_priority
+        unique_id: bg_decision_priority
+        state: >-
+          {% set safety = is_state('binary_sensor.r3_safety_override', 'on') or is_state('binary_sensor.safety_lockout_active', 'on') %}
+          {% set override = is_state('input_boolean.override_active', 'on') %}
+          {% set override_action = states('input_select.override_action') %}
+          {% set r2_hard = is_state('binary_sensor.r2_soc_hard', 'on') %}
+          {% set r2_grid = is_state('binary_sensor.r2_grid_import_ok', 'on') %}
+          {% set r5_hold = is_state('binary_sensor.r5_min_runtime_active', 'on') or is_state('binary_sensor.r5_min_pause_active', 'on') or is_state('binary_sensor.r5_deadband_active', 'on') %}
+          {% set r1 = is_state('binary_sensor.r1_surplus_ok', 'on') %}
+          {% if safety %}
+            R3_SAFETY
+          {% elif override and override_action in ['START', 'STOP', 'THROTTLE', 'NOOP'] %}
+            OVERRIDE
+          {% elif (not r2_hard) or (not r2_grid) %}
+            R2_AUTARKY
+          {% elif r5_hold %}
+            R5_STABILITY
+          {% elif r1 %}
+            R1_SURPLUS
+          {% else %}
+            IDLE
+          {% endif %}
+      - name: bg_decision_action
+        unique_id: bg_decision_action
+        state: >-
+          {% set safety = is_state('binary_sensor.r3_safety_override', 'on') or is_state('binary_sensor.safety_lockout_active', 'on') %}
+          {% set override = is_state('input_boolean.override_active', 'on') %}
+          {% set override_action = states('input_select.override_action') %}
+          {% set relay_on = is_state('switch.miner_relay', 'on') %}
+          {% set r1 = is_state('binary_sensor.r1_surplus_ok', 'on') %}
+          {% set r2_soft = is_state('binary_sensor.r2_soc_soft', 'on') %}
+          {% set r2_hard = is_state('binary_sensor.r2_soc_hard', 'on') %}
+          {% set r2_grid = is_state('binary_sensor.r2_grid_import_ok', 'on') %}
+          {% set min_runtime = is_state('binary_sensor.r5_min_runtime_active', 'on') %}
+          {% set min_pause = is_state('binary_sensor.r5_min_pause_active', 'on') %}
+          {% set deadband = is_state('binary_sensor.r5_deadband_active', 'on') %}
+          {% if safety %}
+            STOP
+          {% elif override and override_action in ['START', 'STOP', 'THROTTLE', 'NOOP'] %}
+            {{ override_action }}
+          {% elif (not r2_hard) or (not r2_grid) %}
+            STOP
+          {% elif relay_on %}
+            {% if not r2_soft %}
+              THROTTLE
+            {% elif min_runtime or deadband %}
+              NOOP
+            {% elif not r1 %}
+              THROTTLE
+            {% else %}
+              NOOP
+            {% endif %}
+          {% else %}
+            {% if min_pause or deadband %}
+              NOOP
+            {% elif r1 and r2_soft and r2_grid %}
+              START
+            {% else %}
+              NOOP
+            {% endif %}
+          {% endif %}
+      - name: bg_decision_reason
+        unique_id: bg_decision_reason
+        state: >-
+          {% set action = states('sensor.bg_decision_action') %}
+          {% set priority = states('sensor.bg_decision_priority') %}
+          {% set surplus = states('sensor.surplus_kw') | float(0) %}
+          {% set soc = states('sensor.battery_soc_pct') | float(0) %}
+          {% set grid = states('sensor.grid_import_w') | float(0) %}
+          {% if action == 'STOP' and priority == 'R3_SAFETY' %}
+            Safety active (R3) or lockout not expired.
+          {% elif action == 'STOP' and priority == 'R2_AUTARKY' %}
+            Autarky protection (R2): SoC or grid guard violated.
+          {% elif action == 'THROTTLE' %}
+            Controlled throttling due to soft constraints.
+          {% elif action == 'START' %}
+            Start allowed: surplus and battery guards are satisfied.
+          {% else %}
+            No transition in this block window.
+          {% endif %}
+      - name: bg_decision_code
+        unique_id: bg_decision_code
+        state: >-
+          {% set action = states('sensor.bg_decision_action') %}
+          {% set priority = states('sensor.bg_decision_priority') %}
+          {{ action ~ '_' ~ priority }}
+      - name: bg_decision_explanation
+        unique_id: bg_decision_explanation
+        state: >-
+          {% set action = states('sensor.bg_decision_action') %}
+          {% set priority = states('sensor.bg_decision_priority') %}
+          {% set surplus = states('sensor.surplus_kw') | float(0) %}
+          {% set soc = states('sensor.battery_soc_pct') | float(0) %}
+          {% set grid = states('sensor.grid_import_w') | float(0) %}
+          {% set temp = states('sensor.miner_temp_c') | float(0) %}
+          {% set hb = states('sensor.miner_heartbeat_age_sec') | float(0) %}
+          {{ action }} via {{ priority }} | surplus={{ surplus | round(2) }}kW soc={{ soc | round(1) }}% grid={{ grid | round(0) }}W temp={{ temp | round(1) }}C hb={{ hb | round(0) }}s
+      - name: rule_states_json
+        unique_id: rule_states_json
+        state: >-
+          {{
+            {
+              "r1_surplus_ok": is_state('binary_sensor.r1_surplus_ok', 'on'),
+              "r2_soc_soft": is_state('binary_sensor.r2_soc_soft', 'on'),
+              "r2_soc_hard": is_state('binary_sensor.r2_soc_hard', 'on'),
+              "r2_grid_import_ok": is_state('binary_sensor.r2_grid_import_ok', 'on'),
+              "r3_overtemp": is_state('binary_sensor.r3_overtemp', 'on'),
+              "r3_comm_timeout": is_state('binary_sensor.r3_comm_timeout', 'on'),
+              "r3_emergency_stop": is_state('binary_sensor.r3_emergency_stop', 'on'),
+              "r5_deadband_active": is_state('binary_sensor.r5_deadband_active', 'on'),
+              "r5_min_runtime_active": is_state('binary_sensor.r5_min_runtime_active', 'on'),
+              "r5_min_pause_active": is_state('binary_sensor.r5_min_pause_active', 'on')
+            } | to_json
+          }}
+      - name: bg_test_status
+        unique_id: bg_test_status
+        state: >-
+          {% set p = states('input_number.test_pass_count') | int(0) %}
+          {% set f = states('input_number.test_fail_count') | int(0) %}
+          {% set total = p + f %}
+          {% if total == 0 %}
+            NOT_RUN
+          {% elif f == 0 %}
+            PASS
+          {% else %}
+            FAIL
+          {% endif %}
+      - name: bg_test_totals
+        unique_id: bg_test_totals
+        state: >-
+          {% set p = states('input_number.test_pass_count') | int(0) %}
+          {% set f = states('input_number.test_fail_count') | int(0) %}
+          {{ "pass=" ~ p ~ " fail=" ~ f ~ " total=" ~ (p + f) }}
   - binary_sensor:
       - name: r1_surplus_ok
         unique_id: r1_surplus_ok
@@ -320,6 +552,56 @@ template:
       - name: r3_emergency_stop
         unique_id: r3_emergency_stop
         state: "{{ is_state('input_boolean.r3_emergency_stop', 'on') }}"
+      - name: r3_safety_override
+        unique_id: r3_safety_override
+        state: >-
+          {{ is_state('binary_sensor.r3_overtemp', 'on') or
+             is_state('binary_sensor.r3_comm_timeout', 'on') or
+             is_state('binary_sensor.r3_emergency_stop', 'on') }}
+      - name: safety_lockout_active
+        unique_id: safety_lockout_active
+        state: >-
+          {% set until = states('input_datetime.safety_lockout_until') %}
+          {% if until in ['unknown', 'unavailable', ''] %}
+            false
+          {% else %}
+            {{ as_timestamp(now()) < as_timestamp(until) }}
+          {% endif %}
+      - name: r5_deadband_active
+        unique_id: r5_deadband_active
+        state: >-
+          {% set until = states('input_datetime.deadband_valid_until') %}
+          {% if until in ['unknown', 'unavailable', ''] %}
+            false
+          {% else %}
+            {{ as_timestamp(now()) < as_timestamp(until) }}
+          {% endif %}
+      - name: r5_min_runtime_active
+        unique_id: r5_min_runtime_active
+        state: >-
+          {% set started = states('input_datetime.last_start_at') %}
+          {% if not is_state('switch.miner_relay', 'on') or started in ['unknown', 'unavailable', ''] %}
+            false
+          {% else %}
+            {% set start_ts = as_timestamp(started) %}
+            {% set hold_blocks = states('input_number.r5_min_runtime_blocks') | int(0) %}
+            {% set block_minutes = states('input_number.block_minutes') | int(10) %}
+            {% set valid_until = start_ts + (hold_blocks * block_minutes * 60) %}
+            {{ as_timestamp(now()) < valid_until }}
+          {% endif %}
+      - name: r5_min_pause_active
+        unique_id: r5_min_pause_active
+        state: >-
+          {% set stopped = states('input_datetime.last_stop_at') %}
+          {% if is_state('switch.miner_relay', 'on') or stopped in ['unknown', 'unavailable', ''] %}
+            false
+          {% else %}
+            {% set stop_ts = as_timestamp(stopped) %}
+            {% set hold_blocks = states('input_number.r5_min_pause_blocks') | int(0) %}
+            {% set block_minutes = states('input_number.block_minutes') | int(10) %}
+            {% set valid_until = stop_ts + (hold_blocks * block_minutes * 60) %}
+            {{ as_timestamp(now()) < valid_until }}
+          {% endif %}
   - switch:
       - name: miner_relay
         unique_id: miner_relay
