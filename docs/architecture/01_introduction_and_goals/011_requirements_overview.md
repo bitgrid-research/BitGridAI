@@ -39,7 +39,7 @@ Wir konzentrieren uns auf vier Kernfunktionen, die das System ausmachen:
 > 
 > **1. Mining als flexible Last**: *PV-Überschüsse werden erkannt und genutzt, indem Mining-Hardware automatisch gestartet, gestoppt oder gedrosselt wird.*
 > 
->**2. Explainability-Layer:** *Eine lokale Benutzeroberfläche zeigt Entscheidungen im zeitlichen Verlauf. Ein On-Device-Explain-Agent erklärt, warum das System so schaltet, ermöglicht Vorschauen und erlaubt manuelle Eingriffe mit zeitlicher Begrenzung.*
+>**2. Explainability-Layer:** *Eine lokale Benutzeroberfläche zeigt Entscheidungen im zeitlichen Verlauf. Ein On-Device-Explain-Agent erklärt, warum das System so schaltet.*
 > 
 >**3. Lokale Geräteanbindung:** *PV-Anlagen, Speicher, Smart Meter und Miner werden über gängige Schnittstellen wie MQTT, REST und Modbus angebunden.*
 > 
