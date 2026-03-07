@@ -53,8 +53,9 @@ Systemlogik basierenden Kontexten betrachtet:
   Wenn Regeln hörbar klicken und Miner sichtbar anspringen: physische Tischsimulation, in der Schwellen, Prioritäten und Sicherheitslogiken nicht nur erklärt, sondern provoziert, beobachtet und begriffen werden können.
 
   - [20.2.3.1 - Home Assistant: Regelwerk, UI und Relais](./2023_simulation_context/2023a_home_assistant_exploration.md)  
-  - [20.2.3.2 - Smartphone-App: Interaktions- und Figma-Konzept](./2023_simulation_context/2023b_smartphone_app_figma_concept.md)  
-  - [20.2.3.3 - Vertrauensdimensionen: Fundierung und Operationalisierung](./2023_simulation_context/2023c_trust_dimensions_operationalization.md)
+  - [20.2.3.2 - Simulations- und Systementwicklung](./2023_simulation_context/2023b_simulation_system_development.md)  
+  - [20.2.3.3 - Interface, Explainability und Demonstratorentwicklung](./2023_simulation_context/2023c_interface_explainability_demonstrator.md)  
+  - [20.2.3.4 - Vertrauensdimensionen: Fundierung und Operationalisierung](./2023_simulation_context/2023d_trust_dimensions_operationalization.md)
 
 
 &nbsp;

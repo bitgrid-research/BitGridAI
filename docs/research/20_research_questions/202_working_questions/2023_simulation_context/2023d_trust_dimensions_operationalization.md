@@ -1,4 +1,4 @@
-# 20.2.3.3 - SIM-WQ3 - Vertrauensdimensionen: Fundierung und Operationalisierung
+# 20.2.3.4 - Vertrauensdimensionen: Fundierung und Operationalisierung
 
 Diese Unterseite systematisiert zentrale Vertrauensdimensionen und übersetzt sie
 in beobachtbare Kriterien für die Einbettung und Bewertung des regelbasierten
