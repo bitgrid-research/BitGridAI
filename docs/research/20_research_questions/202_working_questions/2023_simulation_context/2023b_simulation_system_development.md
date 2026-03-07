@@ -1,4 +1,4 @@
-﻿# Arbeitsprotokoll Hiwi Backend - Simulations- und Systementwicklung
+﻿# Simulations- und Systementwicklung
 
 ## Rolle und Ziel
 
