@@ -20,10 +20,10 @@ Teilnehmende können die Entscheidungslogik provozieren, beobachten und erkläre
 
 ## Unterseiten
 
-- **[20.2.3.1 - SIM-WQ1 - Home Assistant: Regelwerk, UI und Relais](./2023a_home_assistant_exploration.md)**
+- **[20.2.3.1 - Home Assistant: Regelwerk, UI und Relais](./2023a_home_assistant_exploration.md)**
 - **[20.2.3.2 - Simulations- und Systementwicklung](./2023b_simulation_system_development.md)**
 - **[20.2.3.3 - Interface, Explainability und Demonstratorentwicklung](./2023c_interface_explainability_demonstrator.md)**
-- **[20.2.3.4 - SIM-WQ3 - Vertrauensdimensionen: Fundierung und Operationalisierung](./2023d_trust_dimensions_operationalization.md)**
+- **[20.2.3.4 - Vertrauensdimensionen: Fundierung und Operationalisierung](./2023d_trust_dimensions_operationalization.md)**
 
 &nbsp;
 
