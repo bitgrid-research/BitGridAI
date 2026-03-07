@@ -1,4 +1,4 @@
-﻿# Arbeitsprotokoll Hiwi Frontend - Interface, Explainability und Demonstratorentwicklung
+﻿# Interface, Explainability und Demonstratorentwicklung
 
 ## Rolle und Ziel
 
