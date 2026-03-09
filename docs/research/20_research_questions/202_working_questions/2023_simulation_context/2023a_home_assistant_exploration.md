@@ -33,16 +33,16 @@ des Simulationskontexts in Home Assistant.
 ## Implementierungsvorgehen in Home Assistant (ausgearbeitet)
 
 1. Basis und Struktur
-   Ziel: konsistentes Setup, spaeter reproduzierbar.
+   Ziel: konsistentes Setup, später reproduzierbar.
    Vorgehen: Repo-Struktur definieren, z. B. `packages/`, `scripts/`, `automations/`.
    Konventionen: Entities nach Schema `bg_` + Bereich + Funktion benennen.
    Beispiel: `sensor.bg_grid_power_w`, `input_number.bg_threshold_stop_w`.
 
 2. Rohdaten und Grenzwerte
-   Ziel: saubere Datenbasis fuer Regeln.
+   Ziel: saubere Datenbasis für Regeln.
    Rohsensoren: PV-Leistung, Netzbezug, Batterie-SOC, Lasten, Miner-Status.
-   Schwellwerte: `input_number` fuer Start/Stop/Throttle und Sicherheitsgrenzen.
-   Modi: `input_boolean` fuer Simulation, Override, Wartung, Not-Aus.
+   Schwellwerte: `input_number` für Start/Stop/Throttle und Sicherheitsgrenzen.
+   Modi: `input_boolean` für Simulation, Override, Wartung, Not-Aus.
 
 3. Regelableitung R1-R5
    Ziel: jede Regel als eigenen Zustand abbilden.
@@ -53,8 +53,8 @@ des Simulationskontexts in Home Assistant.
 4. Entscheidungszustand ableiten
    Ziel: eine eindeutige Aktion pro Zyklus.
    Umsetzung: ein Template-Sensor `sensor.bg_decision_state` mit Werten `START`, `STOP`, `THROTTLE`, `NOOP`.
-   Prioritaet: R3-Override und Sicherheitsstopps vor allen anderen Regeln.
-   Zusatz: `sensor.bg_decision_priority` fuer Debugging.
+   Priorität: R3-Override und Sicherheitsstopps vor allen anderen Regeln.
+   Zusatz: `sensor.bg_decision_priority` für Debugging.
 
 5. Orchestrierung als Skripte
    Ziel: Aktionen zentral und testbar halten.
@@ -62,41 +62,41 @@ des Simulationskontexts in Home Assistant.
    Orchestrator: `script.bg_apply_decision`, das nach `bg_decision_state` delegiert.
    Nebenwirkungen: Relais, Status-Flags und Logs zentral setzen.
 
-6. Erklaerungsebene
+6. Erklärungsebene
    Ziel: Entscheidung nachvollziehbar machen.
    Template-Sensoren: `sensor.bg_decision_reason` und `sensor.bg_decision_explanation`.
    Inhalt: kurze Textbausteine mit Regel, Schwelle, Sensorwert.
    Beispiel: "R2 aktiv: Netzbezug 1200W > Stop-Schwelle 800W".
 
 7. Automationen
-   Ziel: zyklische und eventbasierte Ausfuehrung.
-   Trigger: Zeitraster (z. B. jede Minute) und State-Aenderungen relevanter Sensoren.
-   Conditions: Not-Aus, Wartung, Override, Sensor-Validitaet.
+   Ziel: zyklische und eventbasierte Ausführung.
+   Trigger: Zeitraster (z. B. jede Minute) und State-Änderungen relevanter Sensoren.
+   Conditions: Not-Aus, Wartung, Override, Sensor-Validität.
    Actions: `script.bg_apply_decision`, plus persistente Logs (Logbook/History).
 
 8. UI und Monitoring
    Ziel: Regeln und Aktionen sichtbar machen.
    Dashboard-Karten: Energiefluss, Regelstatus (R1-R5), Entscheidung, Schwellen, Overrides.
    Controls: Schwellwerte und Modusumschaltung.
-   Verlauf: Diagramme fuer PV, Netz, Batterie, Entscheidung.
+   Verlauf: Diagramme für PV, Netz, Batterie, Entscheidung.
 
-9. Feedback ueber Relais/LED
-   Ziel: physische Rueckmeldung der Logik.
+9. Feedback über Relais/LED
+   Ziel: physische Rückmeldung der Logik.
    Phase 1: virtuelle Schalter (`input_boolean`) als Relais-Stub.
    Phase 2: ESPHome oder MQTT-Relais anbinden, gleiches Entity-Schema nutzen.
    Safety: Relais bei Not-Aus oder Fehlerzustand zwingend aus.
 
 10. Simulation und Replay
    Ziel: reproduzierbare Tests.
-   Simulation: manuelle Slider fuer Sensoren, CSV-Feeds oder feste Szenarien.
+   Simulation: manuelle Slider für Sensoren, CSV-Feeds oder feste Szenarien.
    Szenario-Sets: SH-1 bis SH-3 als definierte Sequenzen.
    Ergebnis: automatische Auswertung der erwarteten Decisions.
 
 11. Tests und Abnahme
-   Ziel: Stabilitaet und Sicherheit.
-   Tests: Regelprioritaeten, Grenzfaelle, Sensor-Ausfall, Relais-Stuck.
+   Ziel: Stabilität und Sicherheit.
+   Tests: Regelprioritäten, Grenzfälle, Sensor-Ausfall, Relais-Stuck.
    Dokumentation: Regelmatrix, Testprotokolle, offene Issues.
-   Freigabe: klarer Schritt fuer Wechsel von Simulation zu physischem Betrieb.
+   Freigabe: klarer Schritt für Wechsel von Simulation zu physischem Betrieb.
 
 ## Simulationsdarstellung (nur virtuell)
 
@@ -114,12 +114,12 @@ Ziel: Das komplette System in Home Assistant ohne physische Hardware abbilden.
 
 3. Reproduzierbarkeit
    Feste Szenarien als Scripts oder Blueprints definieren.
-   CSV-Replays ueber `input_number`-Sequenzen abspielen.
+   CSV-Replays über `input_number`-Sequenzen abspielen.
    Zeitraster standardisieren (z. B. 60s Takt).
 
 4. Sichtbarkeit in der UI
    Eine dedizierte "Simulation"-View erstellen.
-   Karten fuer Slider, Entscheidung, Regelstatus und Logbook.
+   Karten für Slider, Entscheidung, Regelstatus und Logbook.
    Klarer Hinweis, dass es sich um Simulation handelt.
 
 5. Schutzlogik
@@ -138,8 +138,8 @@ Ziel: Das komplette System in Home Assistant ohne physische Hardware abbilden.
 ### Bereits umgesetzt im Repo
 
 - `src/ha/config/configuration.yaml`
-  - neue Helper fuer Override, Lockout, Deadband und Decision-Texte
-  - Template-Sensoren fuer `bg_decision_action`, `bg_decision_priority`, `bg_decision_reason`, `bg_decision_explanation`
+  - neue Helper für Override, Lockout, Deadband und Decision-Texte
+  - Template-Sensoren für `bg_decision_action`, `bg_decision_priority`, `bg_decision_reason`, `bg_decision_explanation`
   - Rule-State-Sensoren inkl. `r3_safety_override`, `r5_deadband_active`, `r5_min_runtime_active`, `r5_min_pause_active`
 - `src/ha/config/scripts.yaml`
   - zentraler `bg_decision_cycle` + Dispatcher `bg_apply_decision`
@@ -148,26 +148,26 @@ Ziel: Das komplette System in Home Assistant ohne physische Hardware abbilden.
   - automatisches Testprotokoll: `sim_tests_reset`, `sim_assert_action`, `sim_run_sh_suite`
 - `src/ha/config/automations.yaml`
   - Block-Takt-Automation
-  - reaktive Neuberechnung bei Input-Aenderungen
+  - reaktive Neuberechnung bei Input-Änderungen
   - sofortiger Safety-Stop
   - Override-Lifecycle (aktivieren, ablaufen, deaktivieren)
 - `src/ha/config/ui-lovelace.yaml`
   - Decision/State um Explainability erweitert
   - Override-Control-Card integriert
-  - Simulation-Action-Card fuer manuelle Tests und SH-Szenarien
-  - Test-Protocol-Card mit PASS/FAIL-Zaehlern und Suite-Status
+  - Simulation-Action-Card für manuelle Tests und SH-Szenarien
+  - Test-Protocol-Card mit PASS/FAIL-Zählern und Suite-Status
 
 ### Validierung
 
-- Home-Assistant Config-Check im Container ausgefuehrt (`hass --script check_config --config /config`).
-- Fehler aus erstem Lauf (ungueltige `input_text`-Laenge) korrigiert.
-- SH-Suite kann nun per `script.sim_run_sh_suite` am Stueck durchlaufen werden.
+- Home-Assistant Config-Check im Container ausgeführt (`hass --script check_config --config /config`).
+- Fehler aus erstem Lauf (ungültige `input_text`-Länge) korrigiert.
+- SH-Suite kann nun per `script.sim_run_sh_suite` am Stück durchlaufen werden.
 
-### Naechster technischer Schritt
+### Nächster technischer Schritt
 
 1. SH-Suite einmal live laufen lassen und die Ist-Ergebnisse im Logbook/History gegen Erwartung spiegeln.
 2. Tuning der R5-Deadband-Parameter anhand der Flapping-Rate.
-3. Optional: R4-Forecast-Regel in derselben Struktur ergaenzen.
+3. Optional: R4-Forecast-Regel in derselben Struktur ergänzen.
 
 ## Geplante Artefakte
 

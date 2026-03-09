@@ -1,14 +1,14 @@
-﻿# Interface, Explainability und Demonstratorentwicklung
+# Interface, Explainability und Demonstratorentwicklung
 
 ## Rolle und Ziel
 
-Dieses Dokument protokolliert die konzeptionelle und technische Arbeit im Frontend fuer den Energielabor-Demonstrator von BitGridAI.
+Dieses Dokument protokolliert die konzeptionelle und technische Arbeit im Frontend für den Energielabor-Demonstrator von BitGridAI.
 
-- Rolle: Frontend, Explainability und persona-basierte Praesentationsoberflaeche
-- Fokus: Verstaendliche Visualisierung simulierter Energieentscheidungen, Interaktionsdesign, Demonstratorsteuerung
+- Rolle: Frontend, Explainability und persona-basierte Präsentationsoberfläche
+- Fokus: Verständliche Visualisierung simulierter Energieentscheidungen, Interaktionsdesign, Demonstratorsteuerung
 - Umfang: 10 Std./Woche
-- Zielbild: erklaerbare, nutzerzentrierte und praesentationsfaehige Benutzeroberflaeche fuer Forschung, Lehre und Demonstration
-- Gesamtziel im Projekt: persona-sensitives Interface fuer nachvollziehbare und kontrollierbare Interaktion mit dem Energiesystem
+- Zielbild: erklärbare, nutzerzentrierte und präsentationsfähige Benutzeroberfläche für Forschung, Lehre und Demonstration
+- Gesamtziel im Projekt: persona-sensitives Interface für nachvollziehbare und kontrollierbare Interaktion mit dem Energiesystem
 
 &nbsp;
 
@@ -18,9 +18,9 @@ Dieses Dokument protokolliert die konzeptionelle und technische Arbeit im Fronte
 
 Ziel ist die systematische Ableitung von Interface-Anforderungen aus unterschiedlichen Nutzungsprofilen.
 
-- Entwicklung synthetischer Personas mit variierenden Wissensstaenden, Kontrollbeduerfnissen und Vertrauenserwartungen
-- Analyse zentraler Informations- und Erklaerungsbedarfe pro Persona
-- Ueberfuehrung in konkrete Anforderungen an Dashboard, Entscheidungsansicht und Verlaufsdarstellung
+- Entwicklung synthetischer Personas mit variierenden Wissensständen, Kontrollbedürfnissen und Vertrauenserwartungen
+- Analyse zentraler Informations- und Erklärungsbedarfe pro Persona
+- Überführung in konkrete Anforderungen an Dashboard, Entscheidungsansicht und Verlaufsdarstellung
 
 Artefakte:
 
@@ -32,79 +32,79 @@ Artefakte:
 
 ### AP F2 - Gestaltung persona-sensitiver Interaktionsmodi (Monat 1-2)
 
-Ziel ist die Entwicklung unterschiedlicher Darstellungs- und Erklaerungstiefen fuer heterogene Nutzergruppen.
+Ziel ist die Entwicklung unterschiedlicher Darstellungs- und Erklärungstiefen für heterogene Nutzergruppen.
 
 - Entwurf einer reduzierten Basisansicht und einer erweiterten Explainability-Ansicht
-- Definition geeigneter Interaktionsformen fuer kontrollorientierte und alltagsorientierte Nutzung
-- Iterative Pruefung auf Verstaendlichkeit, Transparenz und Steuerbarkeit
+- Definition geeigneter Interaktionsformen für kontrollorientierte und alltagsorientierte Nutzung
+- Iterative Prüfung auf Verständlichkeit, Transparenz und Steuerbarkeit
 
 Artefakte:
 
 - Interaktionskonzept mit Moduslogik
-- Wireframes/Screenflows fuer Basis- und Expertensicht
+- Wireframes/Screenflows für Basis- und Expertensicht
 - Dokumentierte Designentscheidungen
 
 &nbsp;
 
 ### AP F3 - Implementierung eines interaktiven Energie-Dashboards (Monat 2-3)
 
-Ziel ist die prototypische Umsetzung eines nutzbaren Frontends fuer den Laborkontext.
+Ziel ist die prototypische Umsetzung eines nutzbaren Frontends für den Laborkontext.
 
-- Visualisierung simulierter Energiefluesse, Lastzustaende und KI-Begruendungen
+- Visualisierung simulierter Energieflüsse, Lastzustände und KI-Begründungen
 - Umsetzung zentraler UI-Bausteine (Zeitachsen, Entscheidungsfenster, einfache Kontrollelemente)
-- Ausrichtung der Darstellung an den Informationsbeduerfnissen der Personas
+- Ausrichtung der Darstellung an den Informationsbedürfnissen der Personas
 
 Artefakte:
 
-- Lauffaehiger Dashboard-Prototyp
-- Komponentenbibliothek fuer wiederverwendbare UI-Bausteine
+- Lauffähiger Dashboard-Prototyp
+- Komponentenbibliothek für wiederverwendbare UI-Bausteine
 - Technische Implementierungsdoku
 
 &nbsp;
 
 ### AP F4 - Entwicklung einer persona-basierten Szenario- und Demonstrationssteuerung (Monat 3)
 
-Ziel ist die Steuerbarkeit von Demonstrationsfaellen im Laborbetrieb.
+Ziel ist die Steuerbarkeit von Demonstrationsfällen im Laborbetrieb.
 
-- Integration von Interaktionsmoeglichkeiten zum Starten, Veraendern und Erklaeren definierter Energieszenarien
-- Entwicklung persona-bezogener Demo-Faelle zur vergleichenden Vermittlung derselben Systementscheidung
-- Aufbereitung fuer Forschungsvorfuehrungen und Lehrkontexte
+- Integration von Interaktionsmöglichkeiten zum Starten, Verändern und Erklären definierter Energieszenarien
+- Entwicklung persona-bezogener Demo-Fälle zur vergleichenden Vermittlung derselben Systementscheidung
+- Aufbereitung für Forschungsvorführungen und Lehrkontexte
 
 Artefakte:
 
 - Szenario-Steuerungsmodul
 - Persona-basierte Demo-Skripte
-- Kurzleitfaden fuer Demonstrationsbetrieb
+- Kurzleitfaden für Demonstrationsbetrieb
 
 &nbsp;
 
-### AP F5 - Nutzung in Studie und Praesentationsbetrieb (Monat 4-5)
+### AP F5 - Nutzung in Studie und Präsentationsbetrieb (Monat 4-5)
 
 Ziel ist die Anwendung und Beobachtung des Frontends im realen Nutzungskontext.
 
 - Einsatz des Frontends in explorativen Nutzerstudien und Demonstrationssituationen
-- Dokumentation von Verstaendlichkeit, Vertrauen, Kontrollwahrnehmung und Interaktionsproblemen
-- Aufbereitung UI-bezogener Beobachtungen fuer die Auswertung
+- Dokumentation von Verständlichkeit, Vertrauen, Kontrollwahrnehmung und Interaktionsproblemen
+- Aufbereitung UI-bezogener Beobachtungen für die Auswertung
 
 Artefakte:
 
-- Durchfuehrungsprotokolle fuer Studie/Demo
+- Durchführungsprotokolle für Studie/Demo
 - Beobachtungslog und Befundsammlung
 - Konsolidierte UI-Verbesserungspunkte
 
 &nbsp;
 
-### AP F6 - Ableitung von Gestaltungsrichtlinien fuer persona-sensitive, erklaerbare Energiedemonstratoren (Monat 5-6)
+### AP F6 - Ableitung von Gestaltungsrichtlinien für persona-sensitive, erklärbare Energiedemonstratoren (Monat 5-6)
 
 Ziel ist der Transfer der Ergebnisse in wiederverwendbare Designprinzipien.
 
 - Auswertung der Ergebnisse aus Entwicklung, Betrieb und Studie
-- Formulierung von Empfehlungen fuer transparente, KI-gestuetzte Energieschnittstellen im Labor- und Lehrkontext
-- Rueckkopplung an Folgevorhaben und wissenschaftliche Dokumentation
+- Formulierung von Empfehlungen für transparente, KI-gestützte Energieschnittstellen im Labor- und Lehrkontext
+- Rückkopplung an Folgevorhaben und wissenschaftliche Dokumentation
 
 Artefakte:
 
 - Guideline-Dokument mit Designprinzipien
 - Mapping Beobachtungen -> Gestaltungsempfehlungen
-- Abschlusszusammenfassung fuer Projekttransfer
+- Abschlusszusammenfassung für Projekttransfer
 
