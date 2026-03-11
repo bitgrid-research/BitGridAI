@@ -10,6 +10,7 @@ Energiemanagementsystems.
 - Die Dimensionen in konkrete Beobachtungs- und Bewertungsindikatoren überführen.
 - Eine Brücke zwischen Konzeptarbeit, Prototypdesign und späterer Feldstudie schaffen.
 
+TODO: Smarthome Aspekte: Kontrolle, Sicherheit und Komfort berrücksichtigen.
 
 ## Vertrauensdimensionen
 
