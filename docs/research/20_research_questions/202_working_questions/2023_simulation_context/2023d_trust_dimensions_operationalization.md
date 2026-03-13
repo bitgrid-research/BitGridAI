@@ -83,3 +83,6 @@ im Nutzungserleben messbar zu machen.
   Pro identifiziertem Problem werden Auslöser, betroffene Dimension,
   Änderungsvorschlag (Regel, Schwelle, UI, Erklärungstext), erwarteter Effekt auf
   Vertrauen sowie Priorität für die nächste Iteration dokumentiert.
+
+
+TODO: weiter ausarbeiten
