@@ -85,4 +85,69 @@ im Nutzungserleben messbar zu machen.
   Vertrauen sowie Priorität für die nächste Iteration dokumentiert.
 
 
-TODO: weiter ausarbeiten
+## Behavioral Influence (Verhaltensbeeinflussung)
+
+Behavioral Influence beschreibt, wie Systementscheidungen, Erklaerungen und
+UI-Impulse das Handeln der Nutzenden veraendern (z. B. Automatik aktiv lassen,
+manuell eingreifen oder Sicherheitsgrenzen akzeptieren). Ziel ist
+`kalibriertes Vertrauen`: Nutzende sollen angemessen folgen, nicht blind
+zustimmen und auch nicht pauschal blockieren.
+
+### Abgrenzung und Gestaltungsprinzipien
+
+- **Unterstuetzung statt Manipulation:** Einfluss wird nur eingesetzt, um
+  Sicherheit, Stabilitaet und alltagstaugliche Nutzung zu verbessern.
+- **Entscheidungsfreiheit bleibt erhalten:** Jede verhaltensrelevante
+  Empfehlung ist mit wirksamem `Override` kombinierbar.
+- **Begruendungspflicht:** Hinweise enthalten mindestens `Warum`,
+  `Risiko bei Nichtbefolgung` und `naechsten Pruefzeitpunkt`.
+- **Proportionalitaet:** Intensitaet der Intervention folgt dem Risiko
+  (`Info -> Warnung -> Sperre`), nicht technischen Detailpraeferenzen.
+
+### Operationalisierung entlang Kontrolle, Sicherheit und Komfort
+
+- **Kontrolle:**
+  Anteil der Empfehlungen mit klarem Alternativpfad, Zeit bis zum erfolgreichen
+  manuellen Eingriff, wahrgenommene Autonomie (Kurzrating 1-5).
+- **Sicherheit:**
+  Befolgungsrate sicherheitskritischer Hinweise, Anzahl riskanter Overrides
+  gegen Sicherheitslogik, Veraenderung von Near-Miss-Ereignissen.
+- **Komfort:**
+  Reduktion unnoetiger manueller Eingriffe, Deaktivierungsquote der Automatik
+  nach Hinweisen, subjektiver Entscheidungsaufwand.
+
+### Messbare Kernindikatoren (D2)
+
+| ID | Indikator | Datenquelle | Interpretation |
+|----|-----------|-------------|----------------|
+| BI-01 | Recommendation Acceptance Rate | Event-Logs (Empfehlung -> Aktion) | Nur positiv, wenn Sicherheitslage objektiv passt. |
+| BI-02 | Safety Compliance Rate | Logs zu Safety-Hinweis/Override | Kernindikator fuer sicherheitsorientierten Einfluss. |
+| BI-03 | Override Latency | UI-Interaktionslog | Zeigt, ob Eingriffe schnell und wirksam moeglich sind. |
+| BI-04 | Reactance Rate | Zustandswechsel (z. B. Automatik aus nach Hinweis) | Fruehwarnsignal fuer bevormundend wirkende Kommunikation. |
+| BI-05 | Calibrated Reliance | Verknuepfung aus Systemguete und Nutzerhandlung | Misst Angemessenheit statt blosser Zustimmung. |
+
+### Bewertungslogik (D4)
+
+- **Positiver Einfluss:**
+  Sicherheitskritische Hinweise werden ueberwiegend befolgt; nicht-kritische
+  Hinweise erzeugen keine hohe Reactance; Eingriffe sind gezielt statt impulsiv.
+- **Kritischer Einfluss:**
+  Hohe Zustimmung bei niedriger Transparenz (blinder Gehorsam), haeufige
+  Deaktivierung nach Warnungen (Reaktanz), viele Overrides mit spaeteren
+  Safety-Stopps (Fehlkalibrierung).
+- **Auswertungsregel:**
+  Komfortgewinne zaehlen nur dann als Erfolg, wenn `Sicherheit` stabil bleibt
+  und `Kontrolle` nicht messbar sinkt.
+
+### Umsetzung in Simulation und Feldstudie
+
+- **Simulation (Lab):**
+  A/B-Varianten fuer Hinweisgestaltung (`kurzer Grund` vs.
+  `Grund + Prognose + Handlungsoption`) und Messung BI-01 bis BI-04 je
+  Persona und Szenario.
+- **Feldstudie:**
+  Wochenweise Entwicklung von BI-05 (`Calibrated Reliance`) und qualitative
+  Nachbefragung bei Extremwerten (sehr hohe Zustimmung oder hohe Reactance).
+- **Rueckkopplung in Artefakte A1-A3:**
+  Befunde werden als priorisierte Anpassungen fuer Regelwerk, UI-Texte und
+  Eskalationslogik dokumentiert.
