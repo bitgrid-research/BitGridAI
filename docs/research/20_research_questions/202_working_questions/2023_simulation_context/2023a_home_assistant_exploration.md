@@ -170,6 +170,40 @@ Ziel: Das komplette System in Home Assistant ohne physische Hardware abbilden.
 2. Tuning der R5-Deadband-Parameter anhand der Flapping-Rate.
 3. Optional: R4-Forecast-Regel in derselben Struktur ergänzen.
 
+### Abnahmeprotokoll SH-Suite (Template, ab 2026-03-14)
+
+Ziel: `A2` von `in progress` auf `done` heben, sobald die Suite stabil reproduzierbar läuft.
+
+#### Durchführung je Lauf
+
+1. `script.sim_tests_reset` ausführen.
+2. `script.sim_run_sh_suite` vollständig durchlaufen lassen.
+3. Ergebniswerte aus der Test-Protocol-Card erfassen (`PASS`, `FAIL`, Suite-Status).
+4. Logbook/History auf unerwartete Action-Wechsel prüfen (`START`/`STOP`/`THROTTLE`/`NOOP`).
+5. Safety-Stop prüfen: `script.bg_force_safety_stop` auslösen und Reaktionszeit notieren.
+
+#### Akzeptanzkriterien (Go/No-Go)
+
+1. Drei aufeinanderfolgende Läufe ohne manuellen Eingriff.
+2. Pro Lauf `FAIL = 0` und Suite-Status `PASS`.
+3. Kein unerwartetes Flapping ausserhalb der definierten SH-Szenarien.
+4. Safety-Stop reagiert innerhalb eines Zyklus (max. 60s bei 60s-Takt).
+5. Im Simulationsmodus keine externen Schaltungen/Integrationen aktiv.
+
+#### Protokolltabelle (auszufüllen)
+
+| Lauf | Datum/Uhrzeit | PASS | FAIL | Suite-Status | Flapping beobachtet (ja/nein + kurz) | Safety-Stop Reaktionszeit | Abweichungen / Notizen |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | | | | | | | |
+| 2 | | | | | | | |
+| 3 | | | | | | | |
+
+#### Entscheidung
+
+- `A2 = done`, wenn alle Akzeptanzkriterien erfüllt sind.
+- Bei `No-Go`: Abweichung als Issue dokumentieren und betroffene Regel (`R1`-`R5`) + Sensoren benennen.
+- Nach `Go`: Deadband-Tuning (`R5`) mit definierter Parameter-Matrix starten.
+
 ## Geplante Artefakte
 
 - Funktionsfähiger Home-Assistant-Prototyp für den Simulationsbetrieb.
