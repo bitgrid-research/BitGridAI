@@ -1,5 +1,7 @@
 # 20.2.3.4 - Vertrauensdimensionen: Fundierung und Operationalisierung
 
+TODO: Wie ensteht in diesem Szenario Verrauen und Wertschätzung...
+
 Diese Unterseite systematisiert zentrale Vertrauensdimensionen und übersetzt sie
 in beobachtbare Kriterien für die Einbettung und Bewertung des regelbasierten
 Energiemanagementsystems.
