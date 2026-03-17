@@ -1,6 +1,6 @@
 # 20.2.3.4 - Vertrauensdimensionen: Fundierung und Operationalisierung
 
-TODO: Wie ensteht in diesem Szenario Verrauen und Wertschätzung...
+TODO: Wie entsteht in diesem Szenario Vertrauen und Wertschätzung...
 
 Diese Unterseite systematisiert zentrale Vertrauensdimensionen und übersetzt sie
 in beobachtbare Kriterien für die Einbettung und Bewertung des regelbasierten
@@ -89,22 +89,22 @@ im Nutzungserleben messbar zu machen.
 
 ## Behavioral Influence (Verhaltensbeeinflussung)
 
-Behavioral Influence beschreibt, wie Systementscheidungen, Erklaerungen und
-UI-Impulse das Handeln der Nutzenden veraendern (z. B. Automatik aktiv lassen,
+Behavioral Influence beschreibt, wie Systementscheidungen, Erklärungen und
+UI-Impulse das Handeln der Nutzenden verändern (z. B. Automatik aktiv lassen,
 manuell eingreifen oder Sicherheitsgrenzen akzeptieren). Ziel ist
 `kalibriertes Vertrauen`: Nutzende sollen angemessen folgen, nicht blind
 zustimmen und auch nicht pauschal blockieren.
 
 ### Abgrenzung und Gestaltungsprinzipien
 
-- **Unterstuetzung statt Manipulation:** Einfluss wird nur eingesetzt, um
-  Sicherheit, Stabilitaet und alltagstaugliche Nutzung zu verbessern.
+- **Unterstützung statt Manipulation:** Einfluss wird nur eingesetzt, um
+  Sicherheit, Stabilität und alltagstaugliche Nutzung zu verbessern.
 - **Entscheidungsfreiheit bleibt erhalten:** Jede verhaltensrelevante
   Empfehlung ist mit wirksamem `Override` kombinierbar.
-- **Begruendungspflicht:** Hinweise enthalten mindestens `Warum`,
-  `Risiko bei Nichtbefolgung` und `naechsten Pruefzeitpunkt`.
-- **Proportionalitaet:** Intensitaet der Intervention folgt dem Risiko
-  (`Info -> Warnung -> Sperre`), nicht technischen Detailpraeferenzen.
+- **Begründungspflicht:** Hinweise enthalten mindestens `Warum`,
+  `Risiko bei Nichtbefolgung` und `nächsten Prüfzeitpunkt`.
+- **Proportionalität:** Intensität der Intervention folgt dem Risiko
+  (`Info -> Warnung -> Sperre`), nicht technischen Detailpräferenzen.
 
 ### Operationalisierung entlang Kontrolle, Sicherheit und Komfort
 
@@ -113,9 +113,9 @@ zustimmen und auch nicht pauschal blockieren.
   manuellen Eingriff, wahrgenommene Autonomie (Kurzrating 1-5).
 - **Sicherheit:**
   Befolgungsrate sicherheitskritischer Hinweise, Anzahl riskanter Overrides
-  gegen Sicherheitslogik, Veraenderung von Near-Miss-Ereignissen.
+  gegen Sicherheitslogik, Veränderung von Near-Miss-Ereignissen.
 - **Komfort:**
-  Reduktion unnoetiger manueller Eingriffe, Deaktivierungsquote der Automatik
+  Reduktion unnötiger manueller Eingriffe, Deaktivierungsquote der Automatik
   nach Hinweisen, subjektiver Entscheidungsaufwand.
 
 ### Messbare Kernindikatoren (D2)
@@ -123,33 +123,33 @@ zustimmen und auch nicht pauschal blockieren.
 | ID | Indikator | Datenquelle | Interpretation |
 |----|-----------|-------------|----------------|
 | BI-01 | Recommendation Acceptance Rate | Event-Logs (Empfehlung -> Aktion) | Nur positiv, wenn Sicherheitslage objektiv passt. |
-| BI-02 | Safety Compliance Rate | Logs zu Safety-Hinweis/Override | Kernindikator fuer sicherheitsorientierten Einfluss. |
-| BI-03 | Override Latency | UI-Interaktionslog | Zeigt, ob Eingriffe schnell und wirksam moeglich sind. |
-| BI-04 | Reactance Rate | Zustandswechsel (z. B. Automatik aus nach Hinweis) | Fruehwarnsignal fuer bevormundend wirkende Kommunikation. |
-| BI-05 | Calibrated Reliance | Verknuepfung aus Systemguete und Nutzerhandlung | Misst Angemessenheit statt blosser Zustimmung. |
+| BI-02 | Safety Compliance Rate | Logs zu Safety-Hinweis/Override | Kernindikator für sicherheitsorientierten Einfluss. |
+| BI-03 | Override Latency | UI-Interaktionslog | Zeigt, ob Eingriffe schnell und wirksam möglich sind. |
+| BI-04 | Reactance Rate | Zustandswechsel (z. B. Automatik aus nach Hinweis) | Frühwarnsignal für bevormundend wirkende Kommunikation. |
+| BI-05 | Calibrated Reliance | Verknüpfung aus Systemgüte und Nutzerhandlung | Misst Angemessenheit statt blosser Zustimmung. |
 
 ### Bewertungslogik (D4)
 
 - **Positiver Einfluss:**
-  Sicherheitskritische Hinweise werden ueberwiegend befolgt; nicht-kritische
+  Sicherheitskritische Hinweise werden überwiegend befolgt; nicht-kritische
   Hinweise erzeugen keine hohe Reactance; Eingriffe sind gezielt statt impulsiv.
 - **Kritischer Einfluss:**
-  Hohe Zustimmung bei niedriger Transparenz (blinder Gehorsam), haeufige
-  Deaktivierung nach Warnungen (Reaktanz), viele Overrides mit spaeteren
+  Hohe Zustimmung bei niedriger Transparenz (blinder Gehorsam), häufige
+  Deaktivierung nach Warnungen (Reaktanz), viele Overrides mit späteren
   Safety-Stopps (Fehlkalibrierung).
 - **Auswertungsregel:**
-  Komfortgewinne zaehlen nur dann als Erfolg, wenn `Sicherheit` stabil bleibt
+  Komfortgewinne zählen nur dann als Erfolg, wenn `Sicherheit` stabil bleibt
   und `Kontrolle` nicht messbar sinkt.
 
 ### Umsetzung in Simulation und Feldstudie
 
 - **Simulation (Lab):**
-  A/B-Varianten fuer Hinweisgestaltung (`kurzer Grund` vs.
+  A/B-Varianten für Hinweisgestaltung (`kurzer Grund` vs.
   `Grund + Prognose + Handlungsoption`) und Messung BI-01 bis BI-04 je
   Persona und Szenario.
 - **Feldstudie:**
   Wochenweise Entwicklung von BI-05 (`Calibrated Reliance`) und qualitative
   Nachbefragung bei Extremwerten (sehr hohe Zustimmung oder hohe Reactance).
-- **Rueckkopplung in Artefakte A1-A3:**
-  Befunde werden als priorisierte Anpassungen fuer Regelwerk, UI-Texte und
+- **Rückkopplung in Artefakte A1-A3:**
+  Befunde werden als priorisierte Anpassungen für Regelwerk, UI-Texte und
   Eskalationslogik dokumentiert.
