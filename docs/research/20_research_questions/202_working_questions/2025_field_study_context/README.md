@@ -14,6 +14,8 @@ ausgewertet.
 
 ---
 
-> Weiter zu **[20.2.5.1 - FIELD-WQ1 - Verstehen der Entscheidungen im Alltag](./2025a_understanding_in_the_wild.md)**
+> **Nächster Schritt:** Starte mit den Unterseiten des Feldstudie-Kontexts.
 >
 > Zurück zu **[20.2 - WQ - Zentrale Arbeitsfragen](../README.md)**
+>
+> Zurück zur **[Hauptübersicht](../../../../README.md)**

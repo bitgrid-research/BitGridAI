@@ -14,6 +14,8 @@ Stichprobe, Aufgaben, Instrumente, Ethik und Auswertung.
 
 ---
 
-> Weiter zu **[20.2.4.1 - SD-WQ1 - Studiendesign und Stichprobe](./2024a_study_design_sampling.md)**
+> **Nächster Schritt:** Starte mit den Unterseiten des Studiendesign-Kontexts.
 >
 > Zurück zu **[20.2 - WQ - Zentrale Arbeitsfragen](../README.md)**
+>
+> Zurück zur **[Hauptübersicht](../../../../README.md)**
