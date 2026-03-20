@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(mkdir -p docs/development/30_setup)",
-      "Bash(mv docs/development/ssh_windows_setup.md docs/development/30_setup/)",
-      "Bash(mv docs/development/dev_environment.md docs/development/30_setup/)"
-    ]
-  }
-}
