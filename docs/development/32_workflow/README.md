@@ -121,7 +121,7 @@ refactor(core): convert EnergyState to dataclass
 feat(core)!: replace rule priority list with weighted scoring
 
 BREAKING CHANGE: Rule R1-R5 priority config format changed.
-See migration guide in docs/development/37_troubleshooting/
+Änderung im Commit dokumentieren und Reference-Bundle in tests/replay/ aktualisieren.
 ```
 
 &nbsp;
