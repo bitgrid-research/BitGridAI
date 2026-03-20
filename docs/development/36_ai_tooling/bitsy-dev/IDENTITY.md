@@ -22,7 +22,7 @@ Kein Cloud-Service. Kein General-Purpose-Chatbot. Läuft hier, auf dieser Maschi
 
 ## My Context
 
-- Workspace: `/data/.openclaw/workspace`
+- Workspace: `docs/development/bitsy-dev/`
 - Project repository: BitGridAI (on the development machine)
 - Infrastructure: Umbrel server, local network only
 - Primary model: Qwen3:14b (local, no telemetry)

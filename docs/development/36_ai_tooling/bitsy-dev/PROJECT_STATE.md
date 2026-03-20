@@ -66,8 +66,8 @@ Nur READMEs mit Planungsdokumenten — kein Code implementiert.
 
 | Bereich | Datei | Was fehlt |
 |---------|-------|-----------|
-| Setup | `docs/setup/dev_environment.md` | Dev-Umgebung noch undokumentiert |
-| Setup | `docs/setup/ssh_windows_setup.md` | In Planung |
+| Setup | `docs/development/30_setup/dev_environment.md` | Dev-Umgebung noch undokumentiert |
+| Setup | `docs/development/30_setup/ssh_windows_setup.md` | In Planung |
 | Research | `29_literature_review/README.md` | Noch nicht begonnen |
 | Research 2023 | `2023a_home_assistant_exploration.md` | Aufgabenpakete A1–A6 offen |
 | Research 2023 | `2023d_trust_dimensions_operationalization.md` | Trust & Appreciation Kontext offen (D1–D4) |

@@ -59,10 +59,19 @@ Wie interagieren Mensch und Technik, wie machen wir Entscheidungen erklärbar un
 
 ## 3. Entwicklung
 
-Hier führen wir die Bausteine aus **1. Architektur** und **2. Forschung** zusammen und leiten daraus die Umsetzung der Software ab. Zum Start helfen dir die folgenden Einstiege:
+Hier bringen wir zusammen, was Architektur und Forschung vorbereitet haben: konkrete Werkzeuge, Workflows und Strukturen für die tägliche Arbeit am System.
 
-* [30.1 - SSH unter Windows/Linux](./setup/ssh_windows_setup.md)
-* [30.2 - Entwicklungsumgebung](./setup/dev_environment.md)
+* [30 - Setup & Umgebung](./development/30_setup/README.md)
+* [31 - Projektstruktur](./development/31_project_structure/README.md)
+* [32 - Workflow & Branching](./development/32_workflow/README.md)
+* [33 - Komponenten & Module](./development/33_components/README.md)
+* [34 - Tests & Qualitätssicherung](./development/34_testing/README.md)
+* [35 - CI/CD & Deployment](./development/35_cicd/README.md)
+* [36 - AI-Agenten & Tooling](./development/36_ai_tooling/README.md)
+  * [₿itsy-Dev](./development/36_ai_tooling/bitsy-dev/SOUL.md) · [₿itsy-Home](./development/36_ai_tooling/bitsy-home/SOUL.md) · [₿itsy-Study](./development/36_ai_tooling/bitsy-study/SOUL.md)
+* [37 - Troubleshooting & FAQ](./development/37_troubleshooting/README.md)
+
+> Die vollständige *Kapitelübersicht der Entwicklung* inklusive Unterkapitel findest du in der [Kapitelübersicht](./development/README.md).
 
 <img src="./media/setup/setup.png" alt="Status" width="1000" />
 

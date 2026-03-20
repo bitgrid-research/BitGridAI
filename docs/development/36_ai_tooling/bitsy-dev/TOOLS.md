@@ -24,7 +24,7 @@ Keep this file updated with connection details, device names, and tool-specific 
 | Architecture docs | `docs/architecture/` (arc42) |
 | Research docs | `docs/research/` |
 | Source code | `src/` |
-| Dev environment | `docs/setup/dev_environment.md` |
+| Dev environment | `docs/development/30_setup/dev_environment.md` |
 
 ## Arc42 Chapter Reference
 
