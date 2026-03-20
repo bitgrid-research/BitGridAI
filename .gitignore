@@ -215,3 +215,6 @@ src/ha/config/.ha_run.lock
 src/ha/config/secrets.yaml
 src/ha/config/home-assistant_v2.db*
 src/ha/config/home-assistant.log*
+
+# Claude Code
+.claude/
