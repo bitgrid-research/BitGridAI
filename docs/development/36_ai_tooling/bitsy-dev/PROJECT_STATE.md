@@ -92,4 +92,46 @@ a0e3ef9 – Update 2023a_home_assistant_exploration.md
 
 ---
 
+---
+
+## Autonome Hintergrundarbeit — Was ₿itsy-Dev selbst tun kann
+
+Wenn keine aktive Session läuft (z. B. nachts), kannst du eigenständig arbeiten.
+Kein Auftrag nötig — diese Aufgaben laufen auf eigene Initiative.
+
+### Priorität 1 — Schwachstellen & Inkonsistenzen finden
+
+Systematisch durch das Repo gehen und Probleme dokumentieren:
+
+- **Docs ↔ Architektur:** Widersprechen sich Kapitel gegenseitig? Stimmen Nummerierungen? Verweise auf nicht existierende Dateien?
+- **arc42 ↔ BP-01–BP-21:** Gibt es Architekturentscheidungen die Prinzipien verletzen?
+- **Datenmodell:** Werden Feldnamen, Typen oder Zustände (z. B. `EnergyState`, `DecisionEvent`) konsistent über alle Kapitel hinweg verwendet?
+- **Laufzeitsicht:** Decken die 13 Szenarien alle kritischen Pfade ab? Fehlen Edge Cases?
+- **Glossar vs. Gebrauch:** Werden Begriffe im Text anders verwendet als im Glossar definiert?
+- **TODO-Markierungen:** Alle offenen `TODO`-Marker in Docs sammeln und in dieser Datei aktualisieren.
+
+### Priorität 2 — Strukturprobleme & Lücken
+
+- **Fehlende Inhalte:** Welche Kapitel haben nur Platzhalter oder sind inhaltlich dünn?
+- **Redundanzen:** Gleiche Information an mehreren Stellen — welche ist die kanonische?
+- **Verlinkungen:** Kaputte oder fehlende Querverweise zwischen Kapiteln.
+- **Nummerierungsschema:** Stimmen alle Dateinamen mit dem Schema `21_`, `0521_` etc. überein?
+
+### Priorität 3 — Qualitätsprüfung
+
+- **Sprache:** Deutsche Rechtschreibung, einheitliche Terminologie, kein Denglisch wo es vermeidbar ist.
+- **arc42-Konformität:** Entsprechen die Kapitel dem arc42-Standard? Fehlen Pflichtabschnitte?
+- **Forschungsfragen:** Sind alle Working Questions (2023/2024/2025) durch Inhalte abgedeckt?
+
+### Ergebnisse festhalten
+
+Befunde **nicht stillschweigend ignorieren** — dokumentieren in:
+- `FINDINGS.md` — alle Schwachstellen, Inkonsistenzen und Lücken mit Dateipfad, Zeilennummer, Schwere und Empfehlung
+- `MEMORY.md` — wenn ein Muster sich wiederholt oder strukturell wichtig ist
+- Direkt in der betroffenen Datei kommentieren (`<!-- TODO: ... -->`), wenn offensichtlich
+
+**Nichts eigenständig verändern** ohne menschliche Freigabe — außer Tippfehler und offensichtliche Formatfehler.
+
+---
+
 > Diese Datei regelmäßig aktualisieren — besonders nach größeren Doc-Änderungen oder wenn neue Kapitel fertiggestellt werden.
