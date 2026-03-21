@@ -1,0 +1,49 @@
+# MQTT-Topic-Konvention für BitGridAI
+# Schema: bitgrid/{location}/{device}/{signal}
+
+schema:
+  prefix: "bitgrid"
+  location: "${MQTT_LOCATION}"   # z.B. "home"
+
+signals:
+  pv_power_w:
+    topic: "bitgrid/{location}/pv_inverter/power_w"
+    unit: W
+    max_age_sec: 30
+
+  house_load_w:
+    topic: "bitgrid/{location}/house_meter/import_w"
+    unit: W
+    max_age_sec: 30
+
+  grid_import_w:
+    topic: "bitgrid/{location}/grid_meter/import_w"
+    unit: W
+    max_age_sec: 30
+
+  battery_soc_pct:
+    topic: "bitgrid/{location}/battery/soc_pct"
+    unit: "%"
+    max_age_sec: 60
+
+  miner_temp_c:
+    topic: "bitgrid/{location}/miner/temp_c"
+    unit: "°C"
+    max_age_sec: 30
+
+  miner_heartbeat_age_sec:
+    topic: "bitgrid/{location}/miner/heartbeat_age_sec"
+    unit: s
+    max_age_sec: 30
+
+actuators:
+  miner_relay:
+    set_topic: "bitgrid/{location}/miner/relay/set"
+    status_topic: "bitgrid/{location}/miner/relay/status"
+    payloads:
+      on: "ON"
+      off: "OFF"
+
+health:
+  adapters: "bitgrid/{location}/adapters/health"
+  system: "bitgrid/{location}/system/health"

@@ -1,0 +1,28 @@
+# Schwellen für R1–R5 — hot-reload ohne Neustart
+# Alle Werte in SI-Einheiten (W, °C, %, s, ct)
+
+rules:
+  r1:
+    surplus_min_kw: 1.5
+    price_max_ct_kwh: 25.0   # null = Preisfilter deaktiviert
+
+  r2:
+    soc_soft_min_pct: 20.0
+    soc_hard_min_pct: 10.0
+    max_grid_import_w: 500.0
+
+  r3:
+    max_chip_temp_c: 85.0
+    t_resume_c: 75.0
+    comm_timeout_sec: 60.0
+    safety_lockout_min: 30
+
+  r4:
+    forecast_lookahead_min: 60
+    min_predicted_surplus_kw: 2.0
+    price_spike_threshold_ct: 30.0
+
+  r5:
+    deadband_hold_blocks: 2
+    min_runtime_blocks: 3
+    min_pause_blocks: 2

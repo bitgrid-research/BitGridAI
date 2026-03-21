@@ -1,0 +1,17 @@
+{
+  "block_id": "2024-01-15T14:30:00",
+  "window_start": "2024-01-15T14:30:00+00:00",
+  "window_end": "2024-01-15T14:40:00+00:00",
+  "pv_power_w": 3500.0,
+  "house_load_w": 800.0,
+  "grid_import_w": 0.0,
+  "battery_soc_pct": 75.0,
+  "miner_temp_c": 92.0,
+  "miner_heartbeat_age_sec": 5.0,
+  "surplus_kw": 2.7,
+  "quality": "ok",
+  "missing_signals": [],
+  "grid_export_w": null,
+  "energy_price_ct_kwh": 8.0,
+  "pv_forecast_kw": 3.5
+}

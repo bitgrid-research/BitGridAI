@@ -1,0 +1,64 @@
+rules:
+  R1:
+    signals: [pv_power_w, house_load_w, surplus_kw, energy_price_ct_kwh]
+    thresholds: [surplus_min_kw, price_max_ct_kwh]
+    codes:
+      - condition: "surplus_kw >= surplus_min_kw"
+        action: START
+        code: START_R1_SURPLUS_OK
+      - condition: "surplus_kw < surplus_min_kw"
+        action: NOOP
+        code: NOOP_R1_INSUFFICIENT_SURPLUS
+      - condition: "energy_price_ct_kwh > price_max_ct_kwh"
+        action: NOOP
+        code: NOOP_R1_PRICE_TOO_HIGH
+
+  R2:
+    signals: [battery_soc_pct, grid_import_w]
+    thresholds: [soc_soft_min_pct, soc_hard_min_pct, max_grid_import_w]
+    codes:
+      - condition: "battery_soc_pct <= soc_hard_min_pct"
+        action: STOP
+        code: STOP_R2_SOC_HARD_MIN
+      - condition: "battery_soc_pct <= soc_soft_min_pct"
+        action: NOOP
+        code: NOOP_R2_SOC_SOFT_MIN
+      - condition: "grid_import_w > max_grid_import_w"
+        action: STOP
+        code: STOP_R2_GRID_IMPORT_EXCEEDED
+
+  R3:
+    signals: [miner_temp_c, miner_heartbeat_age_sec]
+    thresholds: [max_chip_temp_c, comm_timeout_sec]
+    codes:
+      - condition: "miner_temp_c > max_chip_temp_c"
+        action: STOP
+        code: STOP_R3_OVERTEMP
+      - condition: "miner_heartbeat_age_sec > comm_timeout_sec"
+        action: STOP
+        code: STOP_R3_COMM_TIMEOUT
+
+  R4:
+    signals: [pv_forecast_kw, energy_price_ct_kwh]
+    thresholds: [min_predicted_surplus_kw, price_spike_threshold_ct]
+    codes:
+      - condition: "pv_forecast_kw < min_predicted_surplus_kw"
+        action: NOOP
+        code: NOOP_R4_FORECAST_PV_INSUFFICIENT
+      - condition: "energy_price_ct_kwh >= price_spike_threshold_ct"
+        action: NOOP
+        code: NOOP_R4_FORECAST_PRICE_SPIKE
+
+  R5:
+    signals: []
+    thresholds: [deadband_hold_blocks, min_runtime_blocks, min_pause_blocks]
+    codes:
+      - condition: "blocks_since_last_change < min_runtime_blocks AND last_action == START"
+        action: NOOP
+        code: NOOP_R5_MIN_RUNTIME_NOT_REACHED
+      - condition: "blocks_since_last_change < min_pause_blocks AND last_action == STOP"
+        action: NOOP
+        code: NOOP_R5_MIN_PAUSE_NOT_REACHED
+      - condition: "blocks_since_last_change < deadband_hold_blocks"
+        action: NOOP
+        code: NOOP_R5_DEADBAND_ACTIVE

@@ -1,0 +1,81 @@
+de:
+  START_R1_SURPLUS_OK:
+    short: "Überschuss verfügbar — Miner läuft"
+    long: "PV-Leistung übersteigt Hausverbrauch um {surplus_kw:.1f} kW. Start ist wirtschaftlich."
+    trigger: "Schwelle {surplus_min_kw:.1f} kW überschritten"
+
+  NOOP_R1_INSUFFICIENT_SURPLUS:
+    short: "Zu wenig PV-Überschuss"
+    long: "Aktueller Überschuss {surplus_kw:.1f} kW liegt unter der Mindestschwelle {surplus_min_kw:.1f} kW."
+    trigger: "Schwelle nicht erreicht"
+
+  NOOP_R1_PRICE_TOO_HIGH:
+    short: "Strompreis zu hoch"
+    long: "Aktueller Preis {energy_price_ct_kwh:.1f} ct/kWh liegt über der Preisgrenze {price_max_ct_kwh:.1f} ct/kWh."
+    trigger: "Preisfilter aktiv"
+
+  STOP_R2_SOC_HARD_MIN:
+    short: "Batterie kritisch — Sicherheitsstopp"
+    long: "Batterieladung {battery_soc_pct:.0f} % liegt unter dem Sicherheitsminimum {soc_hard_min_pct:.0f} %."
+    trigger: "R2 Hard-Stop"
+
+  NOOP_R2_SOC_SOFT_MIN:
+    short: "Batterie zu niedrig — kein Neustart"
+    long: "Batterieladung {battery_soc_pct:.0f} % liegt unter dem Soft-Minimum {soc_soft_min_pct:.0f} %."
+    trigger: "R2 Soft-Limit"
+
+  STOP_R2_GRID_IMPORT_EXCEEDED:
+    short: "Zu viel Netzbezug — Miner gestoppt"
+    long: "Netzbezug {grid_import_w:.0f} W überschreitet Limit {max_grid_import_w:.0f} W."
+    trigger: "R2 Grid-Import-Limit"
+
+  STOP_R3_OVERTEMP:
+    short: "Sicherheitsstopp: Übertemperatur"
+    long: "Miner-Temperatur {miner_temp_c:.0f}°C überschreitet Sicherheitsgrenze {max_chip_temp_c:.0f}°C."
+    trigger: "R3 Safety-Override (asynchron)"
+
+  STOP_R3_COMM_TIMEOUT:
+    short: "Sicherheitsstopp: Kommunikationsausfall"
+    long: "Kein Heartbeat seit {miner_heartbeat_age_sec:.0f} s (Limit: {comm_timeout_sec:.0f} s)."
+    trigger: "R3 Comm-Timeout"
+
+  NOOP_R4_FORECAST_PV_INSUFFICIENT:
+    short: "PV-Einbruch erwartet"
+    long: "Vorhergesagte PV-Leistung {pv_forecast_kw:.1f} kW liegt unter Mindestüberschuss."
+    trigger: "R4 Forecast-Sperre"
+
+  NOOP_R4_FORECAST_PRICE_SPIKE:
+    short: "Preis-Peak erwartet"
+    long: "Hoher Strompreis erwartet. Kein Start, um Netzbezug zu vermeiden."
+    trigger: "R4 Preis-Vorschau"
+
+  NOOP_R5_DEADBAND_ACTIVE:
+    short: "Ruhephase aktiv"
+    long: "Entscheidung bleibt stabil bis {valid_until}. Flapping-Schutz aktiv."
+    trigger: "Mindesthaltezeit nicht abgelaufen"
+
+  NOOP_R5_MIN_RUNTIME_NOT_REACHED:
+    short: "Mindestlaufzeit nicht erreicht"
+    long: "Miner läuft seit {blocks_since_last_change} Blöcken. Mindestlaufzeit: {min_runtime_blocks} Blöcke."
+    trigger: "R5 Mindestlaufzeit"
+
+  NOOP_R5_MIN_PAUSE_NOT_REACHED:
+    short: "Mindestpause nicht erreicht"
+    long: "Miner ist seit {blocks_since_last_change} Blöcken gestoppt. Mindestpause: {min_pause_blocks} Blöcke."
+    trigger: "R5 Mindestpause"
+
+en:
+  START_R1_SURPLUS_OK:
+    short: "Surplus available — miner running"
+    long: "PV output exceeds house load by {surplus_kw:.1f} kW. Start is profitable."
+    trigger: "Threshold {surplus_min_kw:.1f} kW exceeded"
+
+  STOP_R3_OVERTEMP:
+    short: "Safety stop: overtemperature"
+    long: "Miner temperature {miner_temp_c:.0f}°C exceeds safety limit {max_chip_temp_c:.0f}°C."
+    trigger: "R3 Safety-Override (async)"
+
+  NOOP_R5_DEADBAND_ACTIVE:
+    short: "Hold phase active"
+    long: "Decision remains stable until {valid_until}. Anti-flapping active."
+    trigger: "Minimum hold time not elapsed"

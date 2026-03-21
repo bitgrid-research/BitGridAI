@@ -1,0 +1,84 @@
+# Gerätespezifische Konfiguration
+# Neue Hardware: Neues Gerät eintragen, kein Code-Änderung nötig
+
+devices:
+  pv_inverter:
+    # MqttInverterAdapter — generisch, funktioniert mit ESPHome-Bridge,
+    # Home Assistant MQTT, Solarman-to-MQTT, etc.
+    type: mqtt_generic
+    signal: pv_power_w
+    topic: "${PV_MQTT_TOPIC}"         # z.B. bitgrid/home/pv_inverter/power_w
+    scale: "${PV_MQTT_SCALE}"         # 1.0 wenn Topic in W, 1000.0 wenn in kW
+    max_age_sec: 30
+
+  grid_meter:
+    # ShellyEMAdapter — Shelly EM (1 Kanal) oder 3EM (3 Phasen)
+    type: shelly_em
+    device_id: "${SHELLY_EM_DEVICE_ID}"
+    channels: "${SHELLY_EM_CHANNELS}"    # 1 = Shelly EM, 3 = Shelly 3EM
+    signals:
+      - grid_import_w    # positiv = Bezug
+      - grid_export_w    # negativ → positiver Exportwert
+
+  battery:
+    # ModbusAdapter — generisch für Pylontech, BYD, Victron, Deye, Goodwe
+    type: modbus_tcp
+    host: "${MODBUS_HOST}"
+    port: "${MODBUS_PORT}"
+    poll_interval_sec: 10
+    registers:
+      soc_pct:
+        address: "${MODBUS_SOC_REG}"    # Pylontech: 0x0000, BYD: 0x0100, Victron: 840
+        type: uint16
+        scale: "${MODBUS_SOC_SCALE}"    # Pylontech: 1.0, BYD: 0.1, Victron: 0.1
+        unit: "%"
+        unit_id: "${MODBUS_UNIT_ID}"    # meist 1
+
+  miner:
+    type: canaan_avalon_q
+    model: "Canaan Avalon Q 90TH"
+    rated_power_w: 1674
+    rated_hashrate_th: 90
+
+    # Canaan CGMiner API — Temperatur und Hashrate
+    cgminer_api:
+      host: "${MINER_HOST}"       # IP des Miners
+      port: 4028                  # CGMiner API Port (Standard)
+      poll_interval_sec: 10
+
+    # Shelly Plug S — Leistungsmessung und Ein/Aus-Steuerung
+    shelly:
+      device_id: "${SHELLY_DEVICE_ID}"    # z.B. "shellyplug-s-ABC123"
+      power_topic: "shellies/${SHELLY_DEVICE_ID}/relay/0/power"
+      status_topic: "shellies/${SHELLY_DEVICE_ID}/relay/0"
+      command_topic: "shellies/${SHELLY_DEVICE_ID}/relay/0/command"
+
+    # Temperaturschwellen (müssen mit rules.yaml r3 übereinstimmen)
+    temp_limits:
+      warn_c: 80
+      stop_c: 85     # Canaan Avalon Q: sicher bis ~95°C, konservativ 85°C
+      resume_c: 75
+
+  bitaxe:
+    type: bitaxe_axeos
+    model: "Bitaxe (BM1366/BM1397)"
+    rated_power_w: 15              # ~15W je nach Modell und Overclock
+
+    # AxeOS HTTP-API — kein Login erforderlich
+    axeos_api:
+      host: "${BITAXE_HOST}"
+      port: 80
+      poll_interval_sec: 10
+      endpoint: "/api/system/info"
+
+    # Optional: Shelly Plug für Relay-Steuerung (falls gewünscht)
+    # Bei 15W ist dauerhafter Betrieb meist sinnvoller
+    shelly:
+      device_id: "${BITAXE_SHELLY_DEVICE_ID}"
+      command_topic: "shellies/${BITAXE_SHELLY_DEVICE_ID}/relay/0/command"
+
+    # Bitaxe-Temperaturschwellen (BM1366 sicher bis ~75°C Chip)
+    temp_limits:
+      warn_c: 65
+      stop_c: 70
+      resume_c: 60

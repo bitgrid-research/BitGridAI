@@ -1,0 +1,10 @@
+# SH-3: SoC kritisch → STOP (R2-Hard) → NOOP → NOOP
+#
+# Spalten: timestamp_offset_min, pv_power_w, house_load_w, grid_import_w,
+#          battery_soc_pct, miner_temp_c, miner_heartbeat_age_sec,
+#          energy_price_ct_kwh, pv_forecast_kw
+0,   3200, 800,   0, 25, 42, 5,  8.2, 3.0
+10,  3000, 820,  50, 18, 43, 5,  8.1, 2.8
+20,  2800, 850, 100,  9, 44, 5,  9.0, 2.5
+30,  2600, 800, 150,  8, 45, 5,  9.5, 2.2
+40,  2900, 790,  50, 12, 44, 5,  8.8, 2.6

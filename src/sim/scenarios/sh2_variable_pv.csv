@@ -1,0 +1,10 @@
+# SH-2: Wechselhafte PV → START → NOOP (R5-Hold) → STOP → NOOP
+#
+# Spalten: timestamp_offset_min, pv_power_w, house_load_w, grid_import_w,
+#          battery_soc_pct, miner_temp_c, miner_heartbeat_age_sec,
+#          energy_price_ct_kwh, pv_forecast_kw
+0,   3200,  800,    0, 80, 42, 5,  8.2, 1.2
+10,  2800,  850,    0, 78, 43, 5,  8.1, 1.0
+20,  1200,  900,  300, 75, 44, 5,  9.0, 0.8
+30,     0,  950,  950, 72, 45, 5, 12.0, 0.0
+40,   500,  800,  600, 70, 44, 5, 11.0, 0.3

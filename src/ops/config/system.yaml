@@ -1,0 +1,16 @@
+# Systemkonfiguration — Block-Takt, Logging, Datenpersistenz
+
+system:
+  block_duration_min: 10
+  autonomy_level: FULL      # FULL | SEMI | MANUAL
+  log_level: INFO           # DEBUG | INFO | WARNING | ERROR
+
+data:
+  db_path: "data/bitgrid.db"
+  retention_days: 90
+  storage_warn_mb: 500
+  storage_error_mb: 1000
+
+health:
+  publish_interval_sec: 30
+  mqtt_topic: "bitgrid/home/system/health"

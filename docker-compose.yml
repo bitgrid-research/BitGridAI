@@ -1,0 +1,44 @@
+services:
+
+  bitgrid-mqtt:
+    image: eclipse-mosquitto:2
+    container_name: bitgrid-mqtt
+    volumes:
+      - ./config/mosquitto:/mosquitto/config
+      - ./data/mqtt:/mosquitto/data
+      - ./data/mqtt-logs:/mosquitto/log
+    ports:
+      - "127.0.0.1:1883:1883"
+    restart: unless-stopped
+
+  bitgrid-core:
+    build:
+      context: .
+      dockerfile: src/core/Dockerfile
+    image: bitgrid-core:latest
+    container_name: bitgrid-core
+    depends_on:
+      - bitgrid-mqtt
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+    env_file: .env
+    restart: unless-stopped
+
+  bitgrid-ui:
+    build:
+      context: .
+      dockerfile: src/ui/Dockerfile
+    image: bitgrid-ui:latest
+    container_name: bitgrid-ui
+    depends_on:
+      - bitgrid-core
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file: .env
+    restart: unless-stopped
+
+networks:
+  default:
+    name: bitgrid_net

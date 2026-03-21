@@ -12,6 +12,9 @@ ohne Internetverbindung, ohne Cloud, ohne Umwege.
 
 ## Inhalt dieses Kapitels
 
+* **[30.0 – Schnelleinstieg](./quickstart.md)**
+    * In 5 Minuten: clone → venv → Tests grün → Simulation laufen lassen.
+
 * **[30.1 – SSH unter Windows/Linux](./ssh_windows_setup.md)**
     * SSH-Schlüssel erzeugen, zum Edge-Gerät (Umbrel/NUC/Pi) verbinden,
       `~/.ssh/config` für bequemen Zugriff einrichten.

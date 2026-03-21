@@ -1,0 +1,9 @@
+# Feature-Flags — hot-reload ohne Neustart
+# Alle Flags sind im Default deaktiviert
+
+features:
+  preview_mode: false         # What-if Vorschau in UI
+  research_export: false      # Anonymisierter Export für Forschung
+  simulation_mode: false      # Sim-Modus statt Live-MQTT
+  replay_mode: false          # Replay historischer Daten
+  auth_enabled: true          # API-Authentifizierung

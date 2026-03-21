@@ -1,0 +1,18 @@
+# Adapter-Konfiguration — MQTT, Modbus, ESPHome
+
+mqtt:
+  host: "${MQTT_HOST}"
+  port: 1883
+  keepalive_sec: 60
+  reconnect_delay_sec: [1, 5, 30]
+  topic_prefix: "bitgrid/${MQTT_LOCATION}"
+
+modbus:
+  host: "${MODBUS_HOST}"
+  port: 502
+  poll_interval_sec: 10
+  timeout_sec: 3
+
+health:
+  stale_signal_threshold_sec: 60
+  publish_topic: "bitgrid/home/adapters/health"

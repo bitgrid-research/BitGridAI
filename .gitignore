@@ -1,3 +1,47 @@
+# BitGridAI — Laufzeit-Daten (nie einchecken)
+data/bitgrid.db
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.db-journal
+data/logs/
+data/kpi/
+data/exports/
+data/*.parquet
+data/*.zip
+data/mqtt/
+data/mqtt-logs/
+logs/
+
+# BitGridAI — Credentials & Secrets (NIEMALS einchecken)
+# MQTT Passwort-Datei (Mosquitto Auth)
+config/mosquitto/passwd
+config/mosquitto/passwd.bak
+
+# Home Assistant Auth & Session-Tokens
+src/ha/config/auth
+src/ha/config/onboarding
+
+# .env-Varianten
+.env.local
+.env.production
+.env.staging
+.env.*.local
+
+# SSH-Schlüssel (falls versehentlich ins Projektverzeichnis gelegt)
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+id_ecdsa
+id_ecdsa.pub
+*.ppk
+
+# API-Token-Dateien
+*.token
+*.bearer
+api_token.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -218,3 +262,43 @@ src/ha/config/home-assistant.log*
 
 # Claude Code
 .claude/
+
+# SQLite WAL-Mode Artefakte (auch außerhalb data/)
+*.db-wal
+*.db-shm
+
+# Docker Build-Artefakte
+*.tar
+.docker/
+
+# pytest-benchmark
+.benchmarks/
+
+# JetBrains IDEs
+.idea/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Node.js (für spätere UI-Entwicklung)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Secrets (generell)
+secrets.yaml
+secrets.json
+*.pem
+*.key
+*.p12
