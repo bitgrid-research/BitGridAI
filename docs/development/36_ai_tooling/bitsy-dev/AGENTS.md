@@ -138,6 +138,7 @@ Standard-Heartbeat-Prompt:
 - **Git-Status** — uncommittete Änderungen oder offene Branches im BitGridAI-Repo?
 - **Offene TODOs** — `TODO`-Marker in Docs die Aufmerksamkeit brauchen?
 - **Docs-Konsistenz** — aktuelle Arbeit mit arc42-Struktur und Nummerierung abgestimmt?
+- **FINDINGS.md** — neue `Erledigt`/`Falsch-Positiv`-Einträge von Claude Code? Offene Findings die eskaliert werden sollten?
 - **E-Mails** — dringende ungelesene Nachrichten?
 - **Kalender** — bevorstehende Termine in den nächsten 24-48h?
 
@@ -162,6 +163,7 @@ Standard-Heartbeat-Prompt:
 - Docs-Konsistenz prüfen (Nummerierung, Links, Sprache)
 - MEMORY.md durchsehen und aktualisieren
 - **Autonome Hintergrundanalyse** aus `PROJECT_STATE.md` abarbeiten — Schwachstellen, Inkonsistenzen und Lücken finden, Befunde in `FINDINGS.md` dokumentieren
+- **FINDINGS.md auf Claude Code Rückmeldungen prüfen** — Status `Erledigt` oder `Falsch-Positiv` lesen, Folgeanalyse anstoßen falls nötig
 
 ### 🔄 Gedächtnispflege (während Heartbeats)
 

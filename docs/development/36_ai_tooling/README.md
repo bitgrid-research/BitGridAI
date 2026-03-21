@@ -9,6 +9,8 @@ Beide kennen die Projektprinzipien. Beide dürfen widersprechen.
 > **Wichtig:** KI unterstützt — sie entscheidet nicht.
 > Architekturprinzipien, Red Lines und Qualitätsziele gelten für Agenten genauso wie für Code.
 
+**Wie beide zusammenarbeiten:** [`COLLABORATION.md`](./COLLABORATION.md)
+
 &nbsp;
 
 ## Architektur: KI nur in der Erklärungsschicht
@@ -79,12 +81,22 @@ Claude Code ist die VSCode-Extension für alle aktiven Entwicklungsaufgaben.
 - Keine Cloud-Abhängigkeiten in den Code einführen
 - Keine Blackbox-AI in `src/core/` — der Entscheidungskern bleibt deterministisch
 
+### Workspace
+
+**Workspace:** `docs/development/36_ai_tooling/claude-code/`
+
+```
+claude-code/
+├── README.md     ← Tool-Überblick, Aufgaben, Zusammenspiel mit ₿itsy
+└── SKILL.md      ← Slash Commands & Projekt-Skills, typische Workflows
+```
+
 ### Kontext-Dateien
 
 Claude Code liest automatisch:
 
 ```
-CLAUDE.md          ← Projektweite Instruktionen (falls vorhanden)
+CLAUDE.md          ← Projektweite Instruktionen (Repo-Root)
 docs/              ← Architektur, Forschung, Entwicklungs-Docs
 src/               ← vollständiger Quellcode
 ```
