@@ -4,7 +4,36 @@ services:
     image: ghcr.io/home-assistant/home-assistant:stable
     volumes:
       - ./config:/config
-      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - ../../.env
+    environment:
+      - TZ=Europe/Berlin
     restart: unless-stopped
     ports:
       - "8123:8123"
+    depends_on:
+      - mqtt
+
+  mqtt:
+    container_name: mosquitto
+    image: eclipse-mosquitto:2
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    ports:
+      - "1883:1883"
+    restart: unless-stopped
+
+  miner-poller:
+    container_name: miner-poller
+    build:
+      context: ../..
+      dockerfile: src/ha/Dockerfile.poller
+    env_file:
+      - ../../.env
+    environment:
+      - MQTT_HOST=mqtt
+    restart: unless-stopped
+    depends_on:
+      - mqtt

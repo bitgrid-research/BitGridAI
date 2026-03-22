@@ -23,6 +23,99 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
+mqtt:
+  broker: mqtt
+  port: 1883
+
+sensor:
+  - platform: mqtt
+    name: miner_001_hashrate_ths
+    state_topic: "bitgrid/home/miner/001/hashrate_ths"
+    unit_of_measurement: "TH/s"
+    state_class: measurement
+    expire_after: 120
+
+  - platform: mqtt
+    name: miner_001_mode
+    state_topic: "bitgrid/home/miner/001/mode"
+    expire_after: 120
+
+  - platform: mqtt
+    name: miner_001_status
+    state_topic: "bitgrid/home/miner/001/status"
+    expire_after: 120
+
+  - platform: mqtt
+    name: miner_001_accepted
+    state_topic: "bitgrid/home/miner/001/accepted"
+    state_class: total_increasing
+    expire_after: 120
+
+  - platform: mqtt
+    name: miner_001_rejected
+    state_topic: "bitgrid/home/miner/001/rejected"
+    state_class: total_increasing
+    expire_after: 120
+
+  - platform: mqtt
+    name: miner_002_hashrate_ths
+    state_topic: "bitgrid/home/miner/002/hashrate_ths"
+    unit_of_measurement: "TH/s"
+    state_class: measurement
+    expire_after: 120
+
+  - platform: mqtt
+    name: miner_002_mode
+    state_topic: "bitgrid/home/miner/002/mode"
+    expire_after: 120
+
+  - platform: mqtt
+    name: miner_002_status
+    state_topic: "bitgrid/home/miner/002/status"
+    expire_after: 120
+
+  - platform: mqtt
+    name: miner_002_accepted
+    state_topic: "bitgrid/home/miner/002/accepted"
+    state_class: total_increasing
+    expire_after: 120
+
+  - platform: mqtt
+    name: miner_002_rejected
+    state_topic: "bitgrid/home/miner/002/rejected"
+    state_class: total_increasing
+    expire_after: 120
+
+  - platform: rest
+    name: f2pool_hashrate_ths
+    resource: "https://api.f2pool.com/bitcoin/bitgridai"
+    headers:
+      F2P-API-SECRET: "${F2POOL_API_TOKEN}"
+    value_template: "{{ (value_json.hash_rate | float / 1e12) | round(2) }}"
+    unit_of_measurement: "TH/s"
+    state_class: measurement
+    scan_interval: 300
+
+  - platform: rest
+    name: f2pool_balance_btc
+    resource: "https://api.f2pool.com/bitcoin/bitgridai"
+    headers:
+      F2P-API-SECRET: "${F2POOL_API_TOKEN}"
+    value_template: "{{ value_json.balance | float | round(8) }}"
+    unit_of_measurement: "BTC"
+    state_class: measurement
+    scan_interval: 300
+
+  - platform: rest
+    name: f2pool_paid_btc
+    resource: "https://api.f2pool.com/bitcoin/bitgridai"
+    headers:
+      F2P-API-SECRET: "${F2POOL_API_TOKEN}"
+    value_template: "{{ value_json.paid | float | round(8) }}"
+    unit_of_measurement: "BTC"
+    state_class: total_increasing
+    scan_interval: 300
+
 input_boolean:
   simulation_mode:
     name: simulation_mode
