@@ -262,6 +262,7 @@ src/ha/config/home-assistant.log*
 
 # Claude Code
 .claude/
+.mcp.json
 
 # SQLite WAL-Mode Artefakte (auch außerhalb data/)
 *.db-wal

@@ -1,19 +1,21 @@
-# Zusammenarbeit: ₿itsy-Dev & Claude Code
+# Zusammenarbeit: KI-Team – ₿itsy-Dev, Claude Code & Stitch
 
-Beide KI-Agenten arbeiten am gleichen Repo — mit unterschiedlichen Stärken und Rollen.
-Der gemeinsame Kanal: **`bitsy-dev/FINDINGS.md`** im Git-Repo.
+Das KI-Team besteht aus drei Agenten mit klar getrennten Rollen.
+Der gemeinsame Kanal für Code & Architektur: **`bitsy-dev/FINDINGS.md`** im Git-Repo.
+Design-Übergabe via **`src/ui/design.md`** (Stitch → Claude Code).
 
 &nbsp;
 
 ## Rollen
 
-| | ₿itsy-Dev | Claude Code |
-|---|---|---|
-| **Läuft auf** | Umbrel (LAN, offline-fähig) | Dev-Rechner (VSCode, API) |
-| **Modell** | Qwen3:14b (lokal) | Claude Sonnet 4.6 (Anthropic) |
-| **Arbeitet** | autonom, im Hintergrund | auf direkten Auftrag |
-| **Stärke** | Repo-Analyse, arc42-Konsistenz, Langzeitgedächtnis | Implementierung, Tests, Docs schreiben |
-| **Schreibt in** | `FINDINGS.md`, `MEMORY.md`, `memory/` | Code, Docs, `FINDINGS.md` (Status) |
+| | ₿itsy-Dev | Claude Code | Stitch |
+|---|---|---|---|
+| **Läuft auf** | Umbrel (LAN, offline-fähig) | Dev-Rechner (VSCode, API) | stitch.withgoogle.com (Cloud, via MCP) |
+| **Modell** | Qwen3:14b (lokal) | Claude Sonnet 4.6 (Anthropic) | Google Stitch |
+| **Arbeitet** | autonom, im Hintergrund | auf direkten Auftrag | auf direkten Auftrag |
+| **Stärke** | Repo-Analyse, arc42-Konsistenz, Langzeitgedächtnis | Implementierung, Tests, Docs schreiben | UI/UX Design, Design-System, Komponenten |
+| **Schreibt in** | `FINDINGS.md`, `MEMORY.md`, `memory/` | Code, Docs, `FINDINGS.md` (Status) | `src/ui/design.md` (Export oder MCP) |
+| **Kein Zugriff auf** | — | — | `core/`, keine Entscheidungslogik |
 
 &nbsp;
 
@@ -33,6 +35,26 @@ Der gemeinsame Kanal: **`bitsy-dev/FINDINGS.md`** im Git-Repo.
 
 **Der Entwickler vermittelt:** Ein kurzer Hinweis ("schau dir die neuen Findings an") reicht —
 Claude Code liest `FINDINGS.md` direkt, kein Copy-Paste nötig.
+
+&nbsp;
+
+## Stitch → Claude Code: Design-Übergabe
+
+```
+Stitch (Design-Prompt)
+    │── generiert Screens + Design System
+    │── exportiert design.md
+    │        Option A: Copy/Paste → src/ui/design.md
+    │        Option B: Stitch MCP → Claude Code liest direkt
+    ▼
+Claude Code
+    │── liest src/ui/design.md
+    │── implementiert UI in src/ui/
+    └── ergänzt design.md bei neuen Komponenten
+```
+
+**Regel:** Stitch entwirft nur — `core/` und Entscheidungslogik sind tabu.
+Feature-Drift prüfen: Stitch erfindet manchmal Features, die im Backend nicht existieren.
 
 &nbsp;
 
@@ -92,9 +114,14 @@ Claude Code liest `FINDINGS.md` direkt, kein Copy-Paste nötig.
 ├── claude-code/
 │   ├── README.md                 ← Claude Code Tool-Überblick
 │   └── SKILL.md                  ← Slash Commands & Workflows
+├── stitch-ui/
+│   ├── README.md                 ← Stitch Workflow-Guide (Design → Code)
+│   └── DESIGN.md                 ← Stitch-Prompt für BitGridAI UI
 └── bitsy-dev/
     ├── FINDINGS.md               ← geteilter Kanal: Befunde & Status
     ├── MEMORY.md                 ← ₿itsy-Dev Langzeitgedächtnis
     ├── PROJECT_STATE.md          ← Projektstatus + Hintergrundagenda
-    └── AGENTS.md                 ← ₿itsy-Dev Session & Heartbeat Regeln
+    ├── AGENTS.md                 ← ₿itsy-Dev Session & Heartbeat Regeln
+    ├── COMMANDS.md               ← Slash Commands (/full-review etc.) + Trigger-Flag-Protokoll
+    └── HEARTBEAT.md              ← aktive Checkliste + Trigger Flags (z. B. FULL_REVIEW_REQUESTED)
 ```

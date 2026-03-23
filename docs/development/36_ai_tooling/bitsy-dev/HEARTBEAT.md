@@ -2,16 +2,25 @@
 
 <!-- Keep this small. Edit freely. This is your active checklist. -->
 
+## Trigger Flags
+
+<!-- Flags werden von ₿itsy nach Bearbeitung sofort gelöscht. -->
+<!-- Zum manuellen Auslösen: Kommentarzeichen entfernen oder Zeile neu eintragen. -->
+<!-- Via Cron: printf "\nFULL_REVIEW_REQUESTED\n" >> HEARTBEAT.md -->
+
+<!-- Verfügbare Flags (nur wenn in COMMANDS.md definiert): FULL_REVIEW_REQUESTED -->
+<!-- Aktive Flags hier darunter (uncommented): -->
+
 ## Current Reminders
 
 - [ ] Keine aktiven Erinnerungen
 
-## Periodic Checks (rotate, don't do all at once)
+## Regelmäßige Prüfungen (rotieren, nicht alle auf einmal)
 
-- Git status of BitGridAI repo — any uncommitted work?
-- Open TODOs in docs (`TODO` markers)?
-- Urgent emails?
-- Calendar events in next 24h?
+- Git-Status des BitGridAI-Repos — uncommittete Änderungen?
+- Offene TODOs in Docs (`TODO`-Marker)?
+- Dringende ungelesene E-Mails?
+- Kalendertermine in den nächsten 24h?
 
 ## Notes
 

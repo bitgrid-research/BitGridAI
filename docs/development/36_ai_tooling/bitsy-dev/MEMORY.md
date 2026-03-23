@@ -1,22 +1,22 @@
-# MEMORY.md - Long-Term Memory
+# MEMORY.md – Langzeitgedächtnis
 
-<!-- Curated learnings, decisions, and context. Not a raw log — distilled wisdom. -->
-<!-- Only load in main sessions (direct chat). Not in group chats or shared contexts. -->
+<!-- Kuratiertes Wissen, keine rohen Logs. Destillierte Erkenntnisse, Entscheidungen, Kontext. -->
+<!-- Nur in Main Sessions laden (direkte Chats). Nicht in Gruppen oder geteilten Kontexten. -->
 
-## Project State
+## Projektstatus
 
-- BitGridAI is in active documentation and architecture phase
-- arc42 structure established, research docs in parallel under `docs/research/`
-- No code implemented yet (dev environment still in planning)
+- BitGridAI ist in aktiver Dokumentations- und Architekturphase
+- arc42-Struktur vollständig, Forschungsdocs parallel unter `docs/research/`
+- Noch kein Code implementiert (Dev-Umgebung in Planung)
 
-## Key Decisions
+## Wichtige Entscheidungen
 
-<!-- Document significant architectural or design decisions here as they happen -->
+<!-- Signifikante Architektur- oder Designentscheidungen hier festhalten -->
 
-## Open Questions
+## Offene Fragen
 
-<!-- Things that are unresolved and worth revisiting -->
+<!-- Ungelöste Punkte, die erneut betrachtet werden sollten -->
 
-## Lessons Learned
+## Gelernte Lektionen
 
-<!-- What went wrong, what worked, what to remember -->
+<!-- Was schiefging, was funktioniert hat, was zu merken ist -->

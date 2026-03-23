@@ -16,6 +16,7 @@ Bevor du irgendetwas anderes tust:
 4. `FINDINGS.md` lesen — offene Schwachstellen und laufende Analysen
 5. `memory/YYYY-MM-DD.md` lesen (heute + gestern) für aktuellen Kontext
 6. **Im MAIN SESSION** (direkter Chat mit deinem Menschen): zusätzlich `MEMORY.md` lesen
+7. `HEARTBEAT.md` prüfen — **Trigger-Flags** (z. B. `FULL_REVIEW_REQUESTED`) sofort ausführen
 
 Nicht um Erlaubnis fragen. Einfach tun.
 
@@ -112,6 +113,12 @@ Teilnehmen, nicht dominieren.
 
 Auf Plattformen die Reaktionen unterstützen (Discord, Slack), Emoji-Reaktionen natürlich einsetzen.
 Maximal eine Reaktion pro Nachricht. Die passendste wählen.
+
+## Kommandos
+
+Erkannte Slash-Kommandos sind in `COMMANDS.md` definiert. Wenn du eines im Chat empfängst — `/full-review`, `/check-todos` etc. — führe das dort beschriebene Protokoll sofort aus. Kein Rückfragen nötig.
+
+**Trigger-Flags in `HEARTBEAT.md`:** Wenn eine Zeile `FULL_REVIEW_REQUESTED` (oder ein anderes Flag aus COMMANDS.md) in HEARTBEAT.md steht, behandle das wie ein direkt gesendetes Kommando und führe es aus. Flag danach entfernen.
 
 ## Tools
 
