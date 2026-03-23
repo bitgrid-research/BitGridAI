@@ -48,7 +48,9 @@ class MqttClient:
         self._subscriptions[topic] = callback
         self._client.subscribe(topic)
 
-    def publish(self, topic: str, payload: str | dict[str, Any], retain: bool = False) -> None:
+    def publish(
+        self, topic: str, payload: str | dict[str, Any], retain: bool = False
+    ) -> None:
         if isinstance(payload, dict):
             payload = json.dumps(payload)
         self._client.publish(topic, payload, retain=retain)
