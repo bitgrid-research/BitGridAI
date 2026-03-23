@@ -20,6 +20,7 @@ def test_insufficient_surplus_triggers_noop(no_surplus_state: EnergyState) -> No
 
 def test_high_price_blocks_start(nominal_state: EnergyState) -> None:
     from dataclasses import replace
+
     expensive = EnergyState(
         **{**nominal_state.__dict__, "energy_price_ct_kwh": 30.0}  # type: ignore[arg-type]
     )

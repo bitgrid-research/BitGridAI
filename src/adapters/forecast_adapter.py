@@ -44,15 +44,23 @@ class ForecastAdapter:
         self._ingest = ingest
         self._lat = lat if lat is not None else float(os.getenv("FORECAST_LAT", "48.1"))
         self._lon = lon if lon is not None else float(os.getenv("FORECAST_LON", "11.6"))
-        self._dec = declination if declination is not None else int(os.getenv("FORECAST_DEC", "35"))
-        self._az = azimuth if azimuth is not None else int(os.getenv("FORECAST_AZ", "0"))
+        self._dec = (
+            declination
+            if declination is not None
+            else int(os.getenv("FORECAST_DEC", "35"))
+        )
+        self._az = (
+            azimuth if azimuth is not None else int(os.getenv("FORECAST_AZ", "0"))
+        )
         self._kwp = kwp if kwp is not None else float(os.getenv("FORECAST_KWP", "10.0"))
         self._poll_interval_sec = (
-            poll_interval_min if poll_interval_min is not None
+            poll_interval_min
+            if poll_interval_min is not None
             else float(os.getenv("FORECAST_POLL_MIN", "60"))
         ) * 60
         self._horizon_min = (
-            horizon_min if horizon_min is not None
+            horizon_min
+            if horizon_min is not None
             else int(os.getenv("FORECAST_HORIZON_MIN", "60"))
         )
         self._running = False
@@ -66,7 +74,10 @@ class ForecastAdapter:
         self._thread.start()
         log.info(
             "ForecastAdapter gestartet — %.4f,%.4f %.1f kWp (Horizont: %d min)",
-            self._lat, self._lon, self._kwp, self._horizon_min,
+            self._lat,
+            self._lon,
+            self._kwp,
+            self._horizon_min,
         )
 
     def stop(self) -> None:

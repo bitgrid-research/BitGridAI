@@ -29,7 +29,12 @@ import random
 from pathlib import Path
 
 
-def _pv_curve(offset_min: int, peak_kw: float = 10.0, sunrise_h: float = 6.5, sunset_h: float = 20.5) -> float:
+def _pv_curve(
+    offset_min: int,
+    peak_kw: float = 10.0,
+    sunrise_h: float = 6.5,
+    sunset_h: float = 20.5,
+) -> float:
     """Sinusförmige PV-Kurve basierend auf Tageszeit."""
     hour = (offset_min / 60) % 24
     if hour < sunrise_h or hour > sunset_h:
@@ -46,6 +51,7 @@ def _clamp(val: float, lo: float, hi: float) -> float:
 # Szenario-Generatoren
 # ---------------------------------------------------------------------------
 
+
 def sunny_day(blocks: int = 36, peak_kw: float = 10.0) -> list[dict]:
     """Klarer Sonnentag — stabiler Surplus am Mittag."""
     rows = []
@@ -57,17 +63,19 @@ def sunny_day(blocks: int = 36, peak_kw: float = 10.0) -> list[dict]:
         surplus = pv - house
         grid = _clamp(-surplus, 0, 2000)
         soc = _clamp(soc + surplus / 10000, 20.0, 100.0)
-        rows.append({
-            "offset_min": offset,
-            "pv_power_w": round(pv, 1),
-            "house_load_w": round(house, 1),
-            "grid_import_w": round(grid, 1),
-            "battery_soc_pct": round(soc, 1),
-            "miner_temp_c": round(65 + random.gauss(0, 2), 1),
-            "miner_heartbeat_age_sec": 5,
-            "energy_price_ct_kwh": round(18 + random.gauss(0, 2), 2),
-            "pv_forecast_kw": round(pv / 1000 * 0.9, 2),
-        })
+        rows.append(
+            {
+                "offset_min": offset,
+                "pv_power_w": round(pv, 1),
+                "house_load_w": round(house, 1),
+                "grid_import_w": round(grid, 1),
+                "battery_soc_pct": round(soc, 1),
+                "miner_temp_c": round(65 + random.gauss(0, 2), 1),
+                "miner_heartbeat_age_sec": 5,
+                "energy_price_ct_kwh": round(18 + random.gauss(0, 2), 2),
+                "pv_forecast_kw": round(pv / 1000 * 0.9, 2),
+            }
+        )
     return rows
 
 
@@ -89,17 +97,19 @@ def cloudy_day(blocks: int = 36, peak_kw: float = 10.0) -> list[dict]:
         surplus = pv - house
         grid = _clamp(-surplus, 0, 5000)
         soc = _clamp(soc + surplus / 12000, 15.0, 100.0)
-        rows.append({
-            "offset_min": offset,
-            "pv_power_w": round(pv, 1),
-            "house_load_w": round(house, 1),
-            "grid_import_w": round(grid, 1),
-            "battery_soc_pct": round(soc, 1),
-            "miner_temp_c": round(67 + random.gauss(0, 3), 1),
-            "miner_heartbeat_age_sec": 5,
-            "energy_price_ct_kwh": round(22 + random.gauss(0, 3), 2),
-            "pv_forecast_kw": round(pv / 1000 * cloud_factor, 2),
-        })
+        rows.append(
+            {
+                "offset_min": offset,
+                "pv_power_w": round(pv, 1),
+                "house_load_w": round(house, 1),
+                "grid_import_w": round(grid, 1),
+                "battery_soc_pct": round(soc, 1),
+                "miner_temp_c": round(67 + random.gauss(0, 3), 1),
+                "miner_heartbeat_age_sec": 5,
+                "energy_price_ct_kwh": round(22 + random.gauss(0, 3), 2),
+                "pv_forecast_kw": round(pv / 1000 * cloud_factor, 2),
+            }
+        )
     return rows
 
 
@@ -120,17 +130,19 @@ def price_spike(blocks: int = 24) -> list[dict]:
         else:
             price = round(18 + random.gauss(0, 1), 2)
 
-        rows.append({
-            "offset_min": offset,
-            "pv_power_w": round(pv, 1),
-            "house_load_w": round(house, 1),
-            "grid_import_w": 0.0,
-            "battery_soc_pct": round(soc, 1),
-            "miner_temp_c": 66.0,
-            "miner_heartbeat_age_sec": 5,
-            "energy_price_ct_kwh": price,
-            "pv_forecast_kw": round(pv / 1000, 2),
-        })
+        rows.append(
+            {
+                "offset_min": offset,
+                "pv_power_w": round(pv, 1),
+                "house_load_w": round(house, 1),
+                "grid_import_w": 0.0,
+                "battery_soc_pct": round(soc, 1),
+                "miner_temp_c": 66.0,
+                "miner_heartbeat_age_sec": 5,
+                "energy_price_ct_kwh": price,
+                "pv_forecast_kw": round(pv / 1000, 2),
+            }
+        )
     return rows
 
 
@@ -146,17 +158,19 @@ def battery_drain(blocks: int = 30) -> list[dict]:
 
         # Batterie entlädt sich um ~1% pro Block
         soc = _clamp(soc - 1.5 + random.gauss(0, 0.3), 0.0, 100.0)
-        rows.append({
-            "offset_min": offset,
-            "pv_power_w": 0.0,
-            "house_load_w": round(house, 1),
-            "grid_import_w": round(grid, 1),
-            "battery_soc_pct": round(soc, 1),
-            "miner_temp_c": 62.0,
-            "miner_heartbeat_age_sec": 5,
-            "energy_price_ct_kwh": 20.0,
-            "pv_forecast_kw": 0.0,
-        })
+        rows.append(
+            {
+                "offset_min": offset,
+                "pv_power_w": 0.0,
+                "house_load_w": round(house, 1),
+                "grid_import_w": round(grid, 1),
+                "battery_soc_pct": round(soc, 1),
+                "miner_temp_c": 62.0,
+                "miner_heartbeat_age_sec": 5,
+                "energy_price_ct_kwh": 20.0,
+                "pv_forecast_kw": 0.0,
+            }
+        )
     return rows
 
 
@@ -175,17 +189,19 @@ def overtemp(blocks: int = 20) -> list[dict]:
         else:
             temp = _clamp(65 + (i - 8) * 4, 65, 92)
 
-        rows.append({
-            "offset_min": offset,
-            "pv_power_w": pv,
-            "house_load_w": house,
-            "grid_import_w": 0.0,
-            "battery_soc_pct": round(soc, 1),
-            "miner_temp_c": round(temp, 1),
-            "miner_heartbeat_age_sec": 5,
-            "energy_price_ct_kwh": 18.0,
-            "pv_forecast_kw": 5.0,
-        })
+        rows.append(
+            {
+                "offset_min": offset,
+                "pv_power_w": pv,
+                "house_load_w": house,
+                "grid_import_w": 0.0,
+                "battery_soc_pct": round(soc, 1),
+                "miner_temp_c": round(temp, 1),
+                "miner_heartbeat_age_sec": 5,
+                "energy_price_ct_kwh": 18.0,
+                "pv_forecast_kw": 5.0,
+            }
+        )
     return rows
 
 
@@ -224,17 +240,19 @@ def full_day(peak_kw: float = 10.0) -> list[dict]:
         else:
             temp = round(65 + random.gauss(0, 2), 1)
 
-        rows.append({
-            "offset_min": offset,
-            "pv_power_w": round(pv, 1),
-            "house_load_w": round(house, 1),
-            "grid_import_w": round(grid, 1),
-            "battery_soc_pct": round(soc, 1),
-            "miner_temp_c": temp,
-            "miner_heartbeat_age_sec": 5,
-            "energy_price_ct_kwh": price,
-            "pv_forecast_kw": round(pv / 1000 * 0.85, 2),
-        })
+        rows.append(
+            {
+                "offset_min": offset,
+                "pv_power_w": round(pv, 1),
+                "house_load_w": round(house, 1),
+                "grid_import_w": round(grid, 1),
+                "battery_soc_pct": round(soc, 1),
+                "miner_temp_c": temp,
+                "miner_heartbeat_age_sec": 5,
+                "energy_price_ct_kwh": price,
+                "pv_forecast_kw": round(pv / 1000 * 0.85, 2),
+            }
+        )
     return rows
 
 
@@ -261,7 +279,9 @@ def generate_csv(scenario_type: str, **kwargs) -> str:
     """Generiert ein Szenario als CSV-String."""
     fn = _SCENARIO_MAP.get(scenario_type)
     if fn is None:
-        raise ValueError(f"Unbekanntes Szenario: {scenario_type!r}. Verfügbar: {list(_SCENARIO_MAP)}")
+        raise ValueError(
+            f"Unbekanntes Szenario: {scenario_type!r}. Verfügbar: {list(_SCENARIO_MAP)}"
+        )
 
     rows = fn(**kwargs)
 
@@ -286,17 +306,24 @@ def generate_csv(scenario_type: str, **kwargs) -> str:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="BitGridAI Scenario Generator")
     parser.add_argument(
-        "--type", default="sunny_day",
+        "--type",
+        default="sunny_day",
         choices=list(_SCENARIO_MAP),
         help="Szenario-Typ",
     )
-    parser.add_argument("--blocks", type=int, default=None, help="Anzahl Blöcke (10 min)")
-    parser.add_argument("--peak-kw", type=float, default=10.0, help="PV-Peakleistung (kW)")
     parser.add_argument(
-        "--out", default=None,
+        "--blocks", type=int, default=None, help="Anzahl Blöcke (10 min)"
+    )
+    parser.add_argument(
+        "--peak-kw", type=float, default=10.0, help="PV-Peakleistung (kW)"
+    )
+    parser.add_argument(
+        "--out",
+        default=None,
         help="Ausgabedatei (default: scenarios/{type}.csv)",
     )
     args = parser.parse_args()

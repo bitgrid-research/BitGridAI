@@ -49,16 +49,29 @@ class PriceAdapter:
         entsoe_area: str | None = None,
     ) -> None:
         self._ingest = ingest
-        self._source = (source if source is not None else os.getenv("PRICE_SOURCE", "awattar")).lower()
-        self._country = (country if country is not None else os.getenv("AWATTAR_COUNTRY", "de")).lower()
+        self._source = (
+            source if source is not None else os.getenv("PRICE_SOURCE", "awattar")
+        ).lower()
+        self._country = (
+            country if country is not None else os.getenv("AWATTAR_COUNTRY", "de")
+        ).lower()
         self._poll_interval_sec = (
-            poll_interval_min if poll_interval_min is not None
+            poll_interval_min
+            if poll_interval_min is not None
             else float(os.getenv("PRICE_POLL_MIN", "60"))
         ) * 60
-        self._vat = vat_factor if vat_factor is not None else float(os.getenv("PRICE_VAT_FACTOR", "1.19"))
-        self._entsoe_token = entsoe_token if entsoe_token is not None else os.getenv("ENTSOE_TOKEN", "")
-        self._entsoe_area = entsoe_area if entsoe_area is not None else os.getenv(
-            "ENTSOE_AREA", "10Y1001A1001A82H"
+        self._vat = (
+            vat_factor
+            if vat_factor is not None
+            else float(os.getenv("PRICE_VAT_FACTOR", "1.19"))
+        )
+        self._entsoe_token = (
+            entsoe_token if entsoe_token is not None else os.getenv("ENTSOE_TOKEN", "")
+        )
+        self._entsoe_area = (
+            entsoe_area
+            if entsoe_area is not None
+            else os.getenv("ENTSOE_AREA", "10Y1001A1001A82H")
         )
         self._running = False
         self._thread: threading.Thread | None = None
@@ -71,7 +84,9 @@ class PriceAdapter:
         self._thread.start()
         log.info(
             "PriceAdapter gestartet — Quelle: %s/%s (alle %.0f min)",
-            self._source, self._country, self._poll_interval_sec / 60,
+            self._source,
+            self._country,
+            self._poll_interval_sec / 60,
         )
 
     def stop(self) -> None:
@@ -95,10 +110,16 @@ class PriceAdapter:
             raise ValueError(f"Unbekannte Quelle: {self._source!r}")
 
         self._ingest.update(
-            Signal.ENERGY_PRICE_CT_KWH, price_ct,
+            Signal.ENERGY_PRICE_CT_KWH,
+            price_ct,
             source=f"price:{self._source}",
         )
-        log.info("Strompreis: %.2f Ct/kWh (inkl. MwSt, %s/%s)", price_ct, self._source, self._country)
+        log.info(
+            "Strompreis: %.2f Ct/kWh (inkl. MwSt, %s/%s)",
+            price_ct,
+            self._source,
+            self._country,
+        )
 
     # ------------------------------------------------------------------
     # aWATTar (kostenlos, kein Key) — Bug-Fix: nutzt self._country
@@ -141,6 +162,7 @@ class PriceAdapter:
         url = f"https://web-api.tp.entsoe.eu/api?{urlencode(params)}"
 
         import xml.etree.ElementTree as ET
+
         req = Request(url, headers={"Accept": "application/xml"})
         with urlopen(req, timeout=_HTTP_TIMEOUT) as resp:
             tree = ET.parse(resp)

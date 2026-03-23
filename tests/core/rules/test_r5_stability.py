@@ -44,7 +44,9 @@ def test_min_pause_blocks_respected(nominal_state: EnergyState) -> None:
 
 
 def test_no_last_action_returns_none(nominal_state: EnergyState) -> None:
-    vote = r5_stability.evaluate(nominal_state, last_action=None, blocks_since_last_change=0)
+    vote = r5_stability.evaluate(
+        nominal_state, last_action=None, blocks_since_last_change=0
+    )
     assert vote is None
 
 

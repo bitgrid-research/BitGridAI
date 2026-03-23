@@ -18,8 +18,8 @@ _DEDUP_CACHE_SIZE = 10
 
 @dataclass
 class ActuationCommand:
-    target: str          # z.B. "miner_relay"
-    action: str          # "ON" | "OFF"
+    target: str  # z.B. "miner_relay"
+    action: str  # "ON" | "OFF"
     command_id: str
     source: str = "bitgrid/core"
 
@@ -51,7 +51,11 @@ class ActuationWriter:
     ) -> ActuationCommand | None:
         """Übersetzt eine Decision-Action in ein ActuationCommand."""
         if action == "START":
-            return ActuationCommand(target="miner_relay", action="ON", command_id=command_id)
+            return ActuationCommand(
+                target="miner_relay", action="ON", command_id=command_id
+            )
         if action == "STOP":
-            return ActuationCommand(target="miner_relay", action="OFF", command_id=command_id)
+            return ActuationCommand(
+                target="miner_relay", action="OFF", command_id=command_id
+            )
         return None  # NOOP / THROTTLE → kein Kommando

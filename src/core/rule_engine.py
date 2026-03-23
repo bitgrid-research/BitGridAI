@@ -12,7 +12,13 @@ from datetime import datetime, timezone
 
 from src.core import block_scheduler
 from src.core.models import Decision, DecisionEvent, EnergyState, RuleVote
-from src.core.rules import r1_profitability, r2_autarky, r3_safety, r4_forecast, r5_stability
+from src.core.rules import (
+    r1_profitability,
+    r2_autarky,
+    r3_safety,
+    r4_forecast,
+    r5_stability,
+)
 
 
 class RuleEngineConfig:

@@ -53,7 +53,9 @@ class MqttClient:
             payload = json.dumps(payload)
         self._client.publish(topic, payload, retain=retain)
 
-    def _on_connect(self, client: mqtt.Client, userdata: object, flags: dict, rc: int) -> None:
+    def _on_connect(
+        self, client: mqtt.Client, userdata: object, flags: dict, rc: int
+    ) -> None:
         if rc == 0:
             log.info("MQTT verbunden mit %s:%s", self._host, self._port)
             for topic in self._subscriptions:
@@ -64,7 +66,9 @@ class MqttClient:
     def _on_disconnect(self, client: mqtt.Client, userdata: object, rc: int) -> None:
         log.warning("MQTT getrennt (rc=%s)", rc)
 
-    def _on_message(self, client: mqtt.Client, userdata: object, msg: mqtt.MQTTMessage) -> None:
+    def _on_message(
+        self, client: mqtt.Client, userdata: object, msg: mqtt.MQTTMessage
+    ) -> None:
         topic = msg.topic
         payload = msg.payload.decode("utf-8", errors="replace")
         cb = self._subscriptions.get(topic)

@@ -79,7 +79,7 @@ def no_surplus_state() -> EnergyState:
         window_end=datetime(2024, 1, 15, 6, 10, tzinfo=timezone.utc),
         pv_power_w=400.0,
         house_load_w=700.0,
-        grid_import_w=300.0,   # unter R2-Limit (500W)
+        grid_import_w=300.0,  # unter R2-Limit (500W)
         battery_soc_pct=60.0,
         miner_temp_c=38.0,
         miner_heartbeat_age_sec=5.0,

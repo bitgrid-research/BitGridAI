@@ -11,7 +11,7 @@ from typing import Literal
 
 @dataclass
 class ComponentHealth:
-    component: str                            # "core" | "mqtt" | "db" | "config"
+    component: str  # "core" | "mqtt" | "db" | "config"
     status: Literal["ok", "warn", "error"]
     message: str | None = None
     last_ok: datetime | None = None

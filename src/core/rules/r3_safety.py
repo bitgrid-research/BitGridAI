@@ -13,7 +13,6 @@ from __future__ import annotations
 
 from src.core.models import EnergyState, RuleVote
 
-
 # Absolute Sicherheitsgrenzen als Compile-Time-Konstanten (letzte Absicherung)
 _ABSOLUTE_MAX_TEMP_C: float = 95.0
 _ABSOLUTE_MAX_HEARTBEAT_SEC: float = 300.0

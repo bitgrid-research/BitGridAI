@@ -41,7 +41,9 @@ def test_insufficient_forecast_returns_noop(nominal_state: EnergyState) -> None:
     assert "FORECAST_PV" in vote.reason
 
 
-def test_price_spike_with_good_forecast_returns_noop(nominal_state: EnergyState) -> None:
+def test_price_spike_with_good_forecast_returns_noop(
+    nominal_state: EnergyState,
+) -> None:
     """Preis-Spike trotz guter PV-Prognose → NOOP."""
     state = _with(nominal_state, pv_forecast_kw=4.0, energy_price_ct_kwh=35.0)
     vote = r4_forecast.evaluate(state, price_spike_threshold_ct=30.0)
@@ -51,7 +53,9 @@ def test_price_spike_with_good_forecast_returns_noop(nominal_state: EnergyState)
     assert "PRICE_SPIKE" in vote.reason
 
 
-def test_price_spike_without_price_signal_returns_none(nominal_state: EnergyState) -> None:
+def test_price_spike_without_price_signal_returns_none(
+    nominal_state: EnergyState,
+) -> None:
     """Kein Preissignal → kein Preis-Veto (R4 ignoriert fehlende Optionalfelder)."""
     state = _with(nominal_state, pv_forecast_kw=4.0, energy_price_ct_kwh=None)
     vote = r4_forecast.evaluate(state, price_spike_threshold_ct=30.0)

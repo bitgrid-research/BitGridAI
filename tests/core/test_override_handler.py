@@ -10,7 +10,9 @@ from src.core.override_handler import OverrideHandler
 
 def test_override_accepted() -> None:
     handler = OverrideHandler()
-    accepted, msg = handler.request("STOP", duration_min=30, command_id=str(uuid.uuid4()))
+    accepted, msg = handler.request(
+        "STOP", duration_min=30, command_id=str(uuid.uuid4())
+    )
     assert accepted is True
     assert handler.get_active() is not None
 

@@ -36,8 +36,10 @@ class ShellyAdapter:
     ) -> None:
         self._mqtt = mqtt
         self._ingest = ingest
-        self._device_id = device_id if device_id is not None else os.getenv(
-            "SHELLY_DEVICE_ID", "shellyplug-s-XXXXXX"
+        self._device_id = (
+            device_id
+            if device_id is not None
+            else os.getenv("SHELLY_DEVICE_ID", "shellyplug-s-XXXXXX")
         )
         self._prefix = f"{_BASE}/{self._device_id}"
 
@@ -58,7 +60,8 @@ class ShellyAdapter:
         self._mqtt.subscribe(f"{self._prefix}/relay/0", self._on_relay_status)
         log.info(
             "ShellyAdapter registriert — %s | Relay: %s",
-            self._device_id, self.relay_command_topic,
+            self._device_id,
+            self.relay_command_topic,
         )
 
     # ------------------------------------------------------------------
@@ -77,7 +80,9 @@ class ShellyAdapter:
     def _on_power(self, topic: str, payload: str) -> None:
         try:
             watts = float(payload)
-            self._ingest.update(Signal.MINER_POWER_W, watts, source=f"shelly:{self._device_id}")
+            self._ingest.update(
+                Signal.MINER_POWER_W, watts, source=f"shelly:{self._device_id}"
+            )
             log.debug("Shelly Leistung: %.1f W", watts)
         except ValueError:
             log.warning("Shelly ungültige Power-Payload: %r", payload)

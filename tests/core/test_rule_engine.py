@@ -62,6 +62,7 @@ def test_decision_event_has_required_fields(nominal_state: EnergyState) -> None:
 def test_r3_safety_beats_r2_when_both_triggered(overtemp_state: EnergyState) -> None:
     """Übertemperatur + niedriger SoC → R3 gewinnt."""
     from src.core.models import EnergyState as ES
+
     combined = EnergyState(
         **{**overtemp_state.__dict__, "battery_soc_pct": 5.0}  # type: ignore[arg-type]
     )
@@ -71,6 +72,8 @@ def test_r3_safety_beats_r2_when_both_triggered(overtemp_state: EnergyState) -> 
 
 def test_deadband_keeps_decision_stable(nominal_state: EnergyState) -> None:
     """R5 Deadband hält Decision stabil — kein Flapping."""
-    e1 = rule_engine.evaluate(nominal_state, last_action="START", blocks_since_last_change=1)
+    e1 = rule_engine.evaluate(
+        nominal_state, last_action="START", blocks_since_last_change=1
+    )
     assert e1.decision.action == "NOOP"
     assert "R5" in e1.decision_code

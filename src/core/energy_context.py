@@ -102,9 +102,7 @@ def build_energy_state(
 
     # Fehlende Pflichtfelder bestimmen (via Signal-Enum, keine Magic Strings)
     missing: list[str] = [
-        sig.value
-        for sig in REQUIRED_SIGNALS
-        if getattr(raw, sig.value, None) is None
+        sig.value for sig in REQUIRED_SIGNALS if getattr(raw, sig.value, None) is None
     ]
 
     if missing:
@@ -115,11 +113,11 @@ def build_energy_state(
         load = raw.house_load_w or 0.0
         grid = raw.grid_import_w or 0.0
         soc = raw.battery_soc_pct or 0.0
-        temp = raw.miner_temp_c or 999.0        # hohe Temp → R3 greift sicher
+        temp = raw.miner_temp_c or 999.0  # hohe Temp → R3 greift sicher
         age = raw.miner_heartbeat_age_sec or 9999.0  # alter Heartbeat → R3 greift
     else:
         quality = "ok"
-        pv = raw.pv_power_w      # type: ignore[assignment]
+        pv = raw.pv_power_w  # type: ignore[assignment]
         load = raw.house_load_w  # type: ignore[assignment]
         grid = raw.grid_import_w  # type: ignore[assignment]
         soc = raw.battery_soc_pct  # type: ignore[assignment]

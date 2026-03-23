@@ -71,8 +71,12 @@ def cgminer_cmd(host: str, port: int, cmd: dict[str, str]) -> dict[str, Any]:
 
 def poll_miner(host: str, port: int, worker_id: str) -> dict[str, Any]:
     try:
-        summary: dict[str, Any] = cgminer_cmd(host, port, {"command": "summary"}).get("SUMMARY", [{}])[0]
-        pools: list[dict[str, Any]] = cgminer_cmd(host, port, {"command": "pools"}).get("POOLS", [{}])
+        summary: dict[str, Any] = cgminer_cmd(host, port, {"command": "summary"}).get(
+            "SUMMARY", [{}]
+        )[0]
+        pools: list[dict[str, Any]] = cgminer_cmd(host, port, {"command": "pools"}).get(
+            "POOLS", [{}]
+        )
 
         mhs = summary.get("MHS av") or summary.get("MHS 5s") or 0.0
         hashrate_ths = float(mhs) / 1_000_000.0
@@ -82,7 +86,9 @@ def poll_miner(host: str, port: int, worker_id: str) -> dict[str, Any]:
         hw_errors = int(summary.get("Hardware Errors", 0))
         uptime_sec = int(summary.get("Elapsed", 0))
 
-        active_pool: dict[str, Any] = next((p for p in pools if p.get("Status") == "Alive"), {})
+        active_pool: dict[str, Any] = next(
+            (p for p in pools if p.get("Status") == "Alive"), {}
+        )
         pool_url = active_pool.get("URL", "")
 
         if hashrate_ths > 0:
@@ -134,7 +140,9 @@ def publish(client: mqtt.Client, worker_id: str, data: dict[str, Any]) -> None:
 
 def main() -> None:
     hosts = parse_hosts()
-    log.info("Starte Miner-Poller: %d Miner, Intervall %.0fs", len(hosts), POLL_INTERVAL)
+    log.info(
+        "Starte Miner-Poller: %d Miner, Intervall %.0fs", len(hosts), POLL_INTERVAL
+    )
 
     client = mqtt.Client(CallbackAPIVersion.VERSION2)
     client.connect(MQTT_HOST, MQTT_PORT, keepalive=60)

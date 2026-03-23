@@ -17,10 +17,10 @@ from src.adapters.telemetry_ingest import TelemetryIngest
 from src.core.energy_context import RawMeasurements, build_energy_state, raw_from_ingest
 from src.core.signals import Signal
 
-
 # ---------------------------------------------------------------------------
 # Hilfsfunktionen
 # ---------------------------------------------------------------------------
+
 
 def _window() -> tuple[datetime, datetime]:
     start = datetime(2024, 1, 15, 10, 0, tzinfo=timezone.utc)
@@ -70,6 +70,7 @@ def _ingest_with(**signals: float) -> TelemetryIngest:
 # build_energy_state — Surplus
 # ---------------------------------------------------------------------------
 
+
 class TestSurplus:
     def test_surplus_calculated_correctly(self) -> None:
         state = _build(pv_power_w=3000.0, house_load_w=800.0)
@@ -88,6 +89,7 @@ class TestSurplus:
 # build_energy_state — Datenqualität
 # ---------------------------------------------------------------------------
 
+
 class TestQuality:
     def test_all_signals_present_quality_ok(self) -> None:
         state = _build()
@@ -97,9 +99,12 @@ class TestQuality:
     def test_one_missing_signal_quality_warn(self) -> None:
         start, end = _window()
         raw = RawMeasurements(
-            pv_power_w=3000.0, house_load_w=800.0,
+            pv_power_w=3000.0,
+            house_load_w=800.0,
             grid_import_w=None,  # fehlt
-            battery_soc_pct=80.0, miner_temp_c=42.0, miner_heartbeat_age_sec=5.0,
+            battery_soc_pct=80.0,
+            miner_temp_c=42.0,
+            miner_heartbeat_age_sec=5.0,
         )
         state = build_energy_state("2024-01-15T10:00:00", start, end, raw)
         assert state.quality == "warn"
@@ -107,9 +112,7 @@ class TestQuality:
 
     def test_many_missing_signals_quality_error(self) -> None:
         start, end = _window()
-        state = build_energy_state(
-            "2024-01-15T10:00:00", start, end, RawMeasurements()
-        )
+        state = build_energy_state("2024-01-15T10:00:00", start, end, RawMeasurements())
         assert state.quality == "error"
         assert len(state.missing_signals) > 2
 
@@ -118,13 +121,18 @@ class TestQuality:
 # build_energy_state — Safe Defaults
 # ---------------------------------------------------------------------------
 
+
 class TestSafeDefaults:
     def test_missing_temp_defaults_to_999(self) -> None:
         """Fehlende Temperatur → 999°C → R3 greift immer."""
         start, end = _window()
         raw = RawMeasurements(
-            pv_power_w=3000.0, house_load_w=800.0, grid_import_w=0.0,
-            battery_soc_pct=80.0, miner_temp_c=None, miner_heartbeat_age_sec=5.0,
+            pv_power_w=3000.0,
+            house_load_w=800.0,
+            grid_import_w=0.0,
+            battery_soc_pct=80.0,
+            miner_temp_c=None,
+            miner_heartbeat_age_sec=5.0,
         )
         state = build_energy_state("2024-01-15T10:00:00", start, end, raw)
         assert state.miner_temp_c == 999.0
@@ -133,8 +141,12 @@ class TestSafeDefaults:
         """Fehlender Heartbeat → 9999s → R3 Comm-Timeout greift."""
         start, end = _window()
         raw = RawMeasurements(
-            pv_power_w=3000.0, house_load_w=800.0, grid_import_w=0.0,
-            battery_soc_pct=80.0, miner_temp_c=42.0, miner_heartbeat_age_sec=None,
+            pv_power_w=3000.0,
+            house_load_w=800.0,
+            grid_import_w=0.0,
+            battery_soc_pct=80.0,
+            miner_temp_c=42.0,
+            miner_heartbeat_age_sec=None,
         )
         state = build_energy_state("2024-01-15T10:00:00", start, end, raw)
         assert state.miner_heartbeat_age_sec == 9999.0
@@ -142,8 +154,12 @@ class TestSafeDefaults:
     def test_missing_pv_defaults_to_zero(self) -> None:
         start, end = _window()
         raw = RawMeasurements(
-            pv_power_w=None, house_load_w=800.0, grid_import_w=0.0,
-            battery_soc_pct=80.0, miner_temp_c=42.0, miner_heartbeat_age_sec=5.0,
+            pv_power_w=None,
+            house_load_w=800.0,
+            grid_import_w=0.0,
+            battery_soc_pct=80.0,
+            miner_temp_c=42.0,
+            miner_heartbeat_age_sec=5.0,
         )
         state = build_energy_state("2024-01-15T10:00:00", start, end, raw)
         assert state.pv_power_w == 0.0
@@ -170,13 +186,14 @@ class TestSafeDefaults:
 # _derive_house_load — Energiebilanz-Fallback
 # ---------------------------------------------------------------------------
 
+
 class TestDeriveHouseLoad:
     def test_derived_from_pv_import_export_miner(self) -> None:
         """house_load = pv + import - export - miner"""
         start, end = _window()
         raw = RawMeasurements(
             pv_power_w=5000.0,
-            house_load_w=None,       # nicht direkt gemessen
+            house_load_w=None,  # nicht direkt gemessen
             grid_import_w=0.0,
             grid_export_w=500.0,
             battery_soc_pct=80.0,
@@ -213,7 +230,7 @@ class TestDeriveHouseLoad:
             pv_power_w=1000.0,
             house_load_w=None,
             grid_import_w=0.0,
-            grid_export_w=2000.0,   # mehr Export als PV → würde negativ
+            grid_export_w=2000.0,  # mehr Export als PV → würde negativ
             battery_soc_pct=80.0,
             miner_temp_c=42.0,
             miner_heartbeat_age_sec=5.0,
@@ -226,7 +243,7 @@ class TestDeriveHouseLoad:
         start, end = _window()
         raw = RawMeasurements(
             pv_power_w=5000.0,
-            house_load_w=700.0,     # direkt gemessen
+            house_load_w=700.0,  # direkt gemessen
             grid_import_w=0.0,
             grid_export_w=1000.0,
             battery_soc_pct=80.0,
@@ -256,11 +273,16 @@ class TestDeriveHouseLoad:
 # raw_from_ingest — Brücke TelemetryIngest → RawMeasurements
 # ---------------------------------------------------------------------------
 
+
 class TestRawFromIngest:
     def test_all_signals_mapped(self) -> None:
         ingest = _ingest_with(
-            pv_power_w=3000, house_load_w=800, grid_import_w=0,
-            battery_soc_pct=80, miner_temp_c=65, miner_heartbeat_age_sec=5,
+            pv_power_w=3000,
+            house_load_w=800,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=5,
         )
         raw = raw_from_ingest(ingest)
         assert raw.pv_power_w == pytest.approx(3000.0)
@@ -276,10 +298,15 @@ class TestRawFromIngest:
 
     def test_optional_signals_mapped(self) -> None:
         ingest = _ingest_with(
-            pv_power_w=4000, grid_import_w=0, battery_soc_pct=80,
-            miner_temp_c=65, miner_heartbeat_age_sec=5,
-            energy_price_ct_kwh=22.5, pv_forecast_kw=3.8,
-            miner_power_w=1674, grid_export_w=200,
+            pv_power_w=4000,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=5,
+            energy_price_ct_kwh=22.5,
+            pv_forecast_kw=3.8,
+            miner_power_w=1674,
+            grid_export_w=200,
         )
         raw = raw_from_ingest(ingest)
         assert raw.energy_price_ct_kwh == pytest.approx(22.5)
@@ -297,8 +324,12 @@ class TestRawFromIngest:
     def test_ingest_to_state_pipeline(self) -> None:
         """Vollständiger Pfad: Ingest → RawMeasurements → EnergyState."""
         ingest = _ingest_with(
-            pv_power_w=4000, house_load_w=600, grid_import_w=0,
-            battery_soc_pct=85, miner_temp_c=67, miner_heartbeat_age_sec=8,
+            pv_power_w=4000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=85,
+            miner_temp_c=67,
+            miner_heartbeat_age_sec=8,
         )
         raw = raw_from_ingest(ingest)
         start, end = _window()

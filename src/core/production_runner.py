@@ -91,7 +91,8 @@ class ProductionRunner:
         if active_override and not event.decision_code.startswith("STOP_R3_"):
             log.info(
                 "Override aktiv: %s → %s (Override-Aktion)",
-                event.decision.action, active_override.action,
+                event.decision.action,
+                active_override.action,
             )
             # Override ersetzt Entscheidung (vereinfacht — kein neues DecisionEvent)
             effective_action = active_override.action
@@ -106,7 +107,9 @@ class ProductionRunner:
             self._blocks_since_change += 1
 
         # Relay-Kommando senden
-        cmd = self._writer.decision_to_command(effective_action, event.decision.command_id)
+        cmd = self._writer.decision_to_command(
+            effective_action, event.decision.command_id
+        )
         if cmd is not None:
             self._writer.write(cmd, self._relay_topic)
 

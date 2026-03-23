@@ -59,7 +59,9 @@ class MqttRecorder:
         self._count = 0
 
     def start(self) -> None:
-        self._file = open(self._out, "a", encoding="utf-8", buffering=1)  # line-buffered
+        self._file = open(
+            self._out, "a", encoding="utf-8", buffering=1
+        )  # line-buffered
         self._mqtt.subscribe(self._topic, self._on_message)
         log.info("MqttRecorder gestartet — Topic: %s → %s", self._topic, self._out)
 
@@ -85,16 +87,23 @@ class MqttRecorder:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
+    )
 
     parser = argparse.ArgumentParser(description="BitGridAI MQTT Recorder")
     parser.add_argument("--host", default=_DEFAULT_MQTT_HOST)
     parser.add_argument("--port", type=int, default=_DEFAULT_MQTT_PORT)
-    parser.add_argument("--topic", default=_DEFAULT_TOPIC,
-                        help="MQTT-Topic oder Wildcard (default: #)")
-    parser.add_argument("--output", default=_DEFAULT_OUT,
-                        help="Ausgabedatei (JSONL, default: recordings/session.jsonl)")
+    parser.add_argument(
+        "--topic", default=_DEFAULT_TOPIC, help="MQTT-Topic oder Wildcard (default: #)"
+    )
+    parser.add_argument(
+        "--output",
+        default=_DEFAULT_OUT,
+        help="Ausgabedatei (JSONL, default: recordings/session.jsonl)",
+    )
     args = parser.parse_args()
 
     mqtt = MqttClient(
@@ -111,6 +120,7 @@ def main() -> None:
     log.info("Aufnahme läuft — Ctrl+C zum Stoppen")
     try:
         import time
+
         while True:
             time.sleep(1)
     except KeyboardInterrupt:

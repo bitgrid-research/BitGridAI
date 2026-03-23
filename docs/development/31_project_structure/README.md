@@ -269,7 +269,7 @@ Die Schichtenarchitektur ist **bindend** (Konvention `C-Architektur`):
 
 ## Namenskonventionen
 
-Alle Details stehen in [02.3 – Konventionen](../../architecture/02_archtecture_constraints/023_conventions.md). Die wichtigsten auf einen Blick:
+Alle Details stehen in [02.3 – Konventionen](../../architecture/02_architecture_constraints/023_conventions.md). Die wichtigsten auf einen Blick:
 
 | Was | Konvention | Beispiel |
 |-----|-----------|---------|

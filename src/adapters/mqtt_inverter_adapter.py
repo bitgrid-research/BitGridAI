@@ -33,16 +33,21 @@ class MqttInverterAdapter:
     ) -> None:
         self._mqtt = mqtt
         self._ingest = ingest
-        self._topic = topic if topic is not None else os.getenv(
-            "PV_MQTT_TOPIC", "bitgrid/home/pv_inverter/power_w"
+        self._topic = (
+            topic
+            if topic is not None
+            else os.getenv("PV_MQTT_TOPIC", "bitgrid/home/pv_inverter/power_w")
         )
-        self._scale = scale if scale is not None else float(os.getenv("PV_MQTT_SCALE", "1.0"))
+        self._scale = (
+            scale if scale is not None else float(os.getenv("PV_MQTT_SCALE", "1.0"))
+        )
 
     def register(self) -> None:
         self._mqtt.subscribe(self._topic, self._on_message)
         log.info(
             "MqttInverterAdapter registriert — Topic: %s (scale=%.1f)",
-            self._topic, self._scale,
+            self._topic,
+            self._scale,
         )
 
     def _on_message(self, topic: str, payload: str) -> None:

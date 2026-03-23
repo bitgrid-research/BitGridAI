@@ -68,7 +68,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="BitGridAI Simulation Runner")
     parser.add_argument("--scenario", required=True, help="Pfad zum CSV-Szenario")
-    parser.add_argument("--speed", type=float, default=1.0, help="Simulationsgeschwindigkeit (Default: 1.0)")
+    parser.add_argument(
+        "--speed",
+        type=float,
+        default=1.0,
+        help="Simulationsgeschwindigkeit (Default: 1.0)",
+    )
     args = parser.parse_args()
 
     run(args.scenario, speed=args.speed)

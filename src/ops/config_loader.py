@@ -18,7 +18,7 @@ import yaml
 @dataclass
 class ReloadResult:
     success: bool
-    config_version: str    # SHA256 der geladenen Datei
+    config_version: str  # SHA256 der geladenen Datei
     errors: list[str]
     timestamp: datetime = field(default_factory=lambda: datetime.now(tz=timezone.utc))
 
@@ -46,12 +46,16 @@ class ConfigLoader:
             new_data: dict[str, Any] = yaml.safe_load(raw) or {}
             errors = self._validate(new_data)
             if errors:
-                return ReloadResult(success=False, config_version=self._version, errors=errors)
+                return ReloadResult(
+                    success=False, config_version=self._version, errors=errors
+                )
             self._data = new_data
             self._version = hashlib.sha256(raw.encode()).hexdigest()[:12]
             return ReloadResult(success=True, config_version=self._version, errors=[])
         except Exception as exc:
-            return ReloadResult(success=False, config_version=self._version, errors=[str(exc)])
+            return ReloadResult(
+                success=False, config_version=self._version, errors=[str(exc)]
+            )
 
     def _validate(self, data: dict[str, Any]) -> list[str]:
         """Einfache Strukturvalidierung — gibt Fehlerliste zurück."""

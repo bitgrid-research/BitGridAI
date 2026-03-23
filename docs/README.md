@@ -15,7 +15,7 @@ Lass uns loslegen!
 So ist das Ganze aufgebaut. Wir nutzen die Struktur des [arc42](https://arc42.org)-Templates, damit die Technik für dich übersichtlich und nachvollziehbar bleibt.
 
 * [01 - Einführung & Ziele](./architecture/01_introduction_and_goals/README.md)
-* [02 - Rahmenbedingungen](./architecture/02_archtecture_constraints/README.md)
+* [02 - Rahmenbedingungen](./architecture/02_architecture_constraints/README.md)
 * [03 - Systemkontext](./architecture/03_context/README.md)
 * [04 - Lösungsstrategie](./architecture/04_solution_strategy/README.md)
 * [05 - Bausteinsicht](./architecture/05_building_block_view/README.md)

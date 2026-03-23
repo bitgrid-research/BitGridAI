@@ -1,5 +1,10 @@
 # BitGridAI – Stitch Design Prompt
 
+> **Hinweis:** Diese Datei enthält einen englischen Designprompt für [Google Stitch](https://stitch.withgoogle.com),
+> ein KI-gestütztes UI-Generierungstool von Google. Der Prompt ist bewusst auf Englisch verfasst,
+> da Stitch englische Eingaben deutlich zuverlässiger verarbeitet und bessere Ergebnisse liefert.
+> Der Prompt selbst wird **nicht verändert** — nur das generierte Design-System (`src/ui/design.md`) wird ins Projekt übernommen.
+
 Dieser Prompt wird in [Google Stitch](https://stitch.withgoogle.com) eingegeben,
 um das Design-System für das BitGridAI Web-UI zu generieren.
 

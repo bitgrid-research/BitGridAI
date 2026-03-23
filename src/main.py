@@ -29,6 +29,7 @@ def _setup_logging() -> None:
 def _load_env() -> None:
     try:
         from dotenv import load_dotenv
+
         load_dotenv()
     except ImportError:
         pass  # python-dotenv optional — Variablen können direkt gesetzt sein
@@ -103,6 +104,7 @@ def main(rules_path: str, db_path: str) -> None:
     miner_enabled = os.getenv("MINER_HOST")
     if miner_enabled:
         from src.adapters.canaan_adapter import CanaanAdapter
+
         canaan = CanaanAdapter(ingest=ingest)
         canaan.start()
         log.info("CanaanAdapter gestartet")
@@ -110,6 +112,7 @@ def main(rules_path: str, db_path: str) -> None:
     bitaxe_enabled = os.getenv("BITAXE_HOST")
     if bitaxe_enabled:
         from src.adapters.bitaxe_adapter import BitaxeAdapter
+
         bitaxe = BitaxeAdapter(ingest=ingest)
         bitaxe.start()
         log.info("BitaxeAdapter gestartet")

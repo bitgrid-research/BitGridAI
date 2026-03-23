@@ -15,6 +15,7 @@ def test_hard_min_soc_triggers_stop(low_soc_state: EnergyState) -> None:
 
 def test_soft_min_soc_triggers_noop(nominal_state: EnergyState) -> None:
     from src.core.models import EnergyState as ES
+
     soft_state = EnergyState(
         **{**nominal_state.__dict__, "battery_soc_pct": 15.0}  # type: ignore[arg-type]
     )

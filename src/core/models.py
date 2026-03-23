@@ -14,7 +14,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Literal, NamedTuple
 
-
 # ---------------------------------------------------------------------------
 # EnergyState
 # ---------------------------------------------------------------------------
@@ -73,11 +72,11 @@ class DecisionEvent:
     """Vollständiges Audit-Objekt: Decision + Kontext + State-Snapshot."""
 
     decision: Decision
-    reason: str          # maschinenlesbarer Code, z.B. "R3_OVERTEMP"
+    reason: str  # maschinenlesbarer Code, z.B. "R3_OVERTEMP"
     trigger: Literal["BLOCK_TICK", "SAFETY_ASYNC", "OVERRIDE"]
-    params: dict         # verwendete Schwellenwerte zum Zeitpunkt der Entscheidung
+    params: dict  # verwendete Schwellenwerte zum Zeitpunkt der Entscheidung
     state_snapshot: EnergyState
-    decision_code: str   # z.B. "STOP_R3_OVERTEMP_T92"
+    decision_code: str  # z.B. "STOP_R3_OVERTEMP_T92"
 
 
 # ---------------------------------------------------------------------------
@@ -90,5 +89,5 @@ class RuleVote(NamedTuple):
 
     rule: Literal["R1", "R2", "R3", "R4", "R5"]
     action: Literal["START", "STOP", "THROTTLE", "NOOP"]
-    confidence: float   # 0.0 – 1.0
-    reason: str         # maschinenlesbar, z.B. "SURPLUS_OK"
+    confidence: float  # 0.0 – 1.0
+    reason: str  # maschinenlesbar, z.B. "SURPLUS_OK"

@@ -34,10 +34,13 @@ class BitaxeAdapter:
         poll_interval_sec: float | None = None,
     ) -> None:
         self._ingest = ingest
-        self._host = host if host is not None else os.getenv("BITAXE_HOST", "192.168.1.60")
+        self._host = (
+            host if host is not None else os.getenv("BITAXE_HOST", "192.168.1.60")
+        )
         self._port = port if port is not None else int(os.getenv("BITAXE_PORT", "80"))
         self._poll_interval_sec = (
-            poll_interval_sec if poll_interval_sec is not None
+            poll_interval_sec
+            if poll_interval_sec is not None
             else float(os.getenv("BITAXE_POLL_INTERVAL_SEC", "10"))
         )
         self._url = f"http://{self._host}:{self._port}{_API_PATH}"
@@ -90,7 +93,10 @@ class BitaxeAdapter:
 
         log.debug(
             "Bitaxe: %.1f°C  %.1fW  %.0f GH/s  mining=%s",
-            temp_c, power_w, hashrate_gh, data.get("isMining", "?"),
+            temp_c,
+            power_w,
+            hashrate_gh,
+            data.get("isMining", "?"),
         )
 
     # ------------------------------------------------------------------

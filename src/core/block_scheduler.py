@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-
 BLOCK_DURATION_MIN: int = 10
 
 

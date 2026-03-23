@@ -29,10 +29,10 @@ from src.core.signals import Signal
 from src.data.event_store import EventStore
 from src.data.state_store import StateStore
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def ingest() -> TelemetryIngest:
@@ -54,6 +54,7 @@ def capture_writer() -> tuple[ActuationWriter, list[tuple[str, str]]]:
 def in_memory_stores():
     conn = sqlite3.connect(":memory:")
     from src.data.db import _SCHEMA
+
     conn.executescript(_SCHEMA)
     return EventStore(conn), StateStore(conn)
 
@@ -95,27 +96,42 @@ def _feed(ingest: TelemetryIngest, **signals: float) -> None:
 # Vollständige Pipeline
 # ---------------------------------------------------------------------------
 
+
 class TestSurplusStartsPipeline:
     def test_start_command_sent_on_surplus(self, runner, ingest) -> None:
         """PV-Überschuss + alle Signale OK → relay 'on' gesendet."""
         prod, sent = runner
-        _feed(ingest,
-              pv_power_w=4000, house_load_w=600, grid_import_w=0,
-              battery_soc_pct=80, miner_temp_c=65, miner_heartbeat_age_sec=5)
+        _feed(
+            ingest,
+            pv_power_w=4000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=5,
+        )
 
         event = prod.run_once(now=datetime(2024, 6, 15, 12, 0, tzinfo=timezone.utc))
 
         assert event.decision.action == "START"
         assert len(sent) == 1
-        assert sent[0][1] == "ON"  # ActuationWriter — Shelly-Konversion in ShellyAdapter
+        assert (
+            sent[0][1] == "ON"
+        )  # ActuationWriter — Shelly-Konversion in ShellyAdapter
 
     def test_decision_persisted(self, runner, ingest, in_memory_stores) -> None:
         """DecisionEvent und EnergyState werden in DB geschrieben."""
         prod, _ = runner
         event_store, state_store = in_memory_stores
-        _feed(ingest,
-              pv_power_w=4000, house_load_w=600, grid_import_w=0,
-              battery_soc_pct=80, miner_temp_c=65, miner_heartbeat_age_sec=5)
+        _feed(
+            ingest,
+            pv_power_w=4000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=5,
+        )
 
         event = prod.run_once(now=datetime(2024, 6, 15, 12, 0, tzinfo=timezone.utc))
 
@@ -128,9 +144,15 @@ class TestSafetyPipeline:
     def test_overtemp_sends_off(self, runner, ingest) -> None:
         """Übertemperatur → relay 'off', unabhängig vom PV-Überschuss."""
         prod, sent = runner
-        _feed(ingest,
-              pv_power_w=6000, house_load_w=600, grid_import_w=0,
-              battery_soc_pct=90, miner_temp_c=91, miner_heartbeat_age_sec=5)
+        _feed(
+            ingest,
+            pv_power_w=6000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=90,
+            miner_temp_c=91,
+            miner_heartbeat_age_sec=5,
+        )
 
         event = prod.run_once()
 
@@ -142,9 +164,15 @@ class TestSafetyPipeline:
     def test_comm_timeout_sends_off(self, runner, ingest) -> None:
         """Kein Heartbeat seit >60s → R3 STOP."""
         prod, sent = runner
-        _feed(ingest,
-              pv_power_w=4000, house_load_w=600, grid_import_w=0,
-              battery_soc_pct=80, miner_temp_c=65, miner_heartbeat_age_sec=120)
+        _feed(
+            ingest,
+            pv_power_w=4000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=120,
+        )
 
         event = prod.run_once()
 
@@ -154,12 +182,19 @@ class TestSafetyPipeline:
     def test_overtemp_cannot_be_overridden(self, runner, ingest) -> None:
         """R3 überstimmt aktiven Override — Safety ist non-negotiable."""
         from src.core.override_handler import OverrideHandler
+
         prod, sent = runner
 
         prod._override.request("START", duration_min=60, command_id="override-001")
-        _feed(ingest,
-              pv_power_w=6000, house_load_w=600, grid_import_w=0,
-              battery_soc_pct=90, miner_temp_c=93, miner_heartbeat_age_sec=5)
+        _feed(
+            ingest,
+            pv_power_w=6000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=90,
+            miner_temp_c=93,
+            miner_heartbeat_age_sec=5,
+        )
 
         event = prod.run_once()
 
@@ -182,9 +217,14 @@ class TestMissingSignals:
         """Kein miner_temp_c → Fallback 999°C → R3 STOP."""
         prod, sent = runner
         # Alle außer miner_temp_c
-        _feed(ingest,
-              pv_power_w=4000, house_load_w=600, grid_import_w=0,
-              battery_soc_pct=80, miner_heartbeat_age_sec=5)
+        _feed(
+            ingest,
+            pv_power_w=4000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_heartbeat_age_sec=5,
+        )
 
         event = prod.run_once()
 
@@ -201,10 +241,16 @@ class TestMissingSignals:
 class TestHouseLoadFallback:
     def test_house_load_derived_from_energy_balance(self, ingest) -> None:
         """house_load_w wird aus Energiebilanz berechnet wenn nicht direkt gemessen."""
-        _feed(ingest,
-              pv_power_w=4000, grid_import_w=0, grid_export_w=1000,
-              battery_soc_pct=80, miner_temp_c=65, miner_heartbeat_age_sec=5,
-              miner_power_w=1500)
+        _feed(
+            ingest,
+            pv_power_w=4000,
+            grid_import_w=0,
+            grid_export_w=1000,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=5,
+            miner_power_w=1500,
+        )
         # house_load_w bewusst NICHT gesetzt
 
         raw = raw_from_ingest(ingest)
@@ -217,10 +263,16 @@ class TestHouseLoadFallback:
 
     def test_surplus_correct_with_derived_house_load(self, ingest) -> None:
         """surplus_kw stimmt mit abgeleitetem house_load_w überein."""
-        _feed(ingest,
-              pv_power_w=5000, grid_import_w=0, grid_export_w=500,
-              battery_soc_pct=80, miner_temp_c=65, miner_heartbeat_age_sec=5,
-              miner_power_w=1000)
+        _feed(
+            ingest,
+            pv_power_w=5000,
+            grid_import_w=0,
+            grid_export_w=500,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=5,
+            miner_power_w=1000,
+        )
 
         raw = raw_from_ingest(ingest)
         now = datetime(2024, 6, 15, 12, 0, tzinfo=timezone.utc)
@@ -235,9 +287,15 @@ class TestDeduplication:
     def test_same_command_not_sent_twice(self, runner, ingest) -> None:
         """ActuationWriter dedupliziert — gleiche command_id → nur einmal senden."""
         prod, sent = runner
-        _feed(ingest,
-              pv_power_w=4000, house_load_w=600, grid_import_w=0,
-              battery_soc_pct=80, miner_temp_c=65, miner_heartbeat_age_sec=5)
+        _feed(
+            ingest,
+            pv_power_w=4000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=5,
+        )
 
         event = prod.run_once(now=datetime(2024, 6, 15, 12, 0, tzinfo=timezone.utc))
 
@@ -248,4 +306,4 @@ class TestDeduplication:
         result = prod._writer.write(cmd, "test/topic")
 
         assert result is False  # Duplikat erkannt
-        assert len(sent) == 1   # Nur einmal wirklich gesendet
+        assert len(sent) == 1  # Nur einmal wirklich gesendet

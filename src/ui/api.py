@@ -62,7 +62,7 @@ def get_decision() -> dict:
 
 
 class OverrideRequest(BaseModel):
-    action: str        # START | STOP | NOOP
+    action: str  # START | STOP | NOOP
     duration_min: int  # Gültigkeitsdauer in Minuten
 
 
@@ -72,10 +72,14 @@ def post_override(req: OverrideRequest) -> dict:
         raise HTTPException(status_code=400, detail=f"Ungültige Action: {req.action}")
 
     if req.duration_min < 1 or req.duration_min > 120:
-        raise HTTPException(status_code=400, detail="duration_min muss zwischen 1 und 120 liegen")
+        raise HTTPException(
+            status_code=400, detail="duration_min muss zwischen 1 und 120 liegen"
+        )
 
     # R3 Safety prüfen
-    if _current_decision and _current_decision.get("decision_code", "").startswith("STOP_R3_"):
+    if _current_decision and _current_decision.get("decision_code", "").startswith(
+        "STOP_R3_"
+    ):
         return {
             "accepted": False,
             "reason": "R3_SAFETY_ACTIVE — Override nicht erlaubt",

@@ -17,13 +17,13 @@ Die Kapitel bauen bewusst aufeinander auf und führen dich Schritt für Schritt 
 * [01 - Einführung & Ziele](./01_introduction_and_goals/README.md)
   * [01.1 - Anforderungen & Überblick](./01_introduction_and_goals/011_requirements_overview.md)
   * [01.2 - Qualitätsziele](./01_introduction_and_goals/012_quality_goals.md)
-  * [01.3 - Stakeholder](./01_introduction_and_goals/013_steakholder.md)
+  * [01.3 - Stakeholder](./01_introduction_and_goals/013_stakeholder.md)
 &nbsp;
 
-* [02 - Randbedingungen](./02_archtecture_constraints/README.md)
-  * [02.1 – Technische Randbedingungen (Technical Constraints)](./02_archtecture_constraints/021_technical_constraints.md)
-  * [02.2 - Organisatorische Randbedingungen (Organizational Constraints)](./02_archtecture_constraints/022_organizational_constraints.md)
-  * [02.3 - Leitplanken & Konventionen (Conventions)](./02_archtecture_constraints/023_conventions.md)
+* [02 - Randbedingungen](./02_architecture_constraints/README.md)
+  * [02.1 – Technische Randbedingungen (Technical Constraints)](./02_architecture_constraints/021_technical_constraints.md)
+  * [02.2 - Organisatorische Randbedingungen (Organizational Constraints)](./02_architecture_constraints/022_organizational_constraints.md)
+  * [02.3 - Leitplanken & Konventionen (Conventions)](./02_architecture_constraints/023_conventions.md)
 &nbsp;
 
 * [03 - Kontextabgrenzung](./03_context/README.md)

@@ -41,22 +41,26 @@ class ModbusAdapter:
         poll_interval_sec: float | None = None,
     ) -> None:
         self._ingest = ingest
-        self._host = host if host is not None else os.getenv("MODBUS_HOST", "192.168.1.100")
+        self._host = (
+            host if host is not None else os.getenv("MODBUS_HOST", "192.168.1.100")
+        )
         self._port = port if port is not None else int(os.getenv("MODBUS_PORT", "502"))
         self._soc_register = (
-            soc_register if soc_register is not None
+            soc_register
+            if soc_register is not None
             else int(os.getenv("MODBUS_SOC_REG", "0x0000"), 0)
         )
         self._soc_scale = (
-            soc_scale if soc_scale is not None
+            soc_scale
+            if soc_scale is not None
             else float(os.getenv("MODBUS_SOC_SCALE", "1.0"))
         )
         self._unit_id = (
-            unit_id if unit_id is not None
-            else int(os.getenv("MODBUS_UNIT_ID", "1"))
+            unit_id if unit_id is not None else int(os.getenv("MODBUS_UNIT_ID", "1"))
         )
         self._poll_interval_sec = (
-            poll_interval_sec if poll_interval_sec is not None
+            poll_interval_sec
+            if poll_interval_sec is not None
             else float(os.getenv("MODBUS_POLL_SEC", "10"))
         )
         self._running = False
@@ -71,7 +75,9 @@ class ModbusAdapter:
         self._thread.start()
         log.info(
             "ModbusAdapter gestartet — %s:%s Reg=0x%04X",
-            self._host, self._port, self._soc_register,
+            self._host,
+            self._port,
+            self._soc_register,
         )
 
     def stop(self) -> None:
@@ -103,7 +109,8 @@ class ModbusAdapter:
 
         soc_pct = max(0.0, min(100.0, result.registers[0] * self._soc_scale))
         self._ingest.update(
-            Signal.BATTERY_SOC_PCT, soc_pct,
+            Signal.BATTERY_SOC_PCT,
+            soc_pct,
             source=f"modbus:{self._host}:reg{self._soc_register:#06x}",
         )
         log.debug("Modbus SoC: %.1f %%", soc_pct)
@@ -113,7 +120,9 @@ class ModbusAdapter:
             try:
                 from pymodbus.client import ModbusTcpClient
             except ImportError:
-                raise ImportError("pymodbus nicht installiert: pip install 'pymodbus>=3.0'")
+                raise ImportError(
+                    "pymodbus nicht installiert: pip install 'pymodbus>=3.0'"
+                )
             self._client = ModbusTcpClient(host=self._host, port=self._port, timeout=5)
             self._client.connect()
         return self._client

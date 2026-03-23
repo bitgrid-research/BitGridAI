@@ -6,7 +6,7 @@ Willkommen am runden Tisch (oder am eckigen?) von **BitGridAI**. Software wird n
 
 Wir müssen ihre Brille aufsetzen, um zu verstehen, was das System leisten muss, damit es ein Erfolg wird.
 
-<img src="../../media/architecture/01_introduction_and_goals/stakeholder.png" alt="Qualitaet" width="1000" />
+<img src="../../media/architecture/01_introduction_and_goals/stakeholder.png" alt="Stakeholder" width="1000" />
 
 &nbsp;
 
@@ -25,6 +25,6 @@ Wir haben vier Hauptgruppen identifiziert, deren Bedürfnisse unsere Architektur
 ---
 > **Nächster Schritt:** Damit wissen wir, für wen wir BitGridAI bauen. Jetzt wird es ernst: Wir verlassen die Zielebene und schauen uns die harten Leitplanken an, die unsere Architektur einschränken.
 >
-> 👉 Weiter zu **[02 - Randbedingungen](../02_archtecture_constraints/README.md)**
+> 👉 Weiter zu **[02 - Randbedingungen](../02_architecture_constraints/README.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

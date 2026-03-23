@@ -29,7 +29,13 @@ class HealthCheck:
             component=component,
             status=status,
             message=message,
-            last_ok=now if status == "ok" else self._components.get(component, ComponentHealth(component, "error")).last_ok,
+            last_ok=(
+                now
+                if status == "ok"
+                else self._components.get(
+                    component, ComponentHealth(component, "error")
+                ).last_ok
+            ),
         )
 
     def get(self) -> SystemHealth:

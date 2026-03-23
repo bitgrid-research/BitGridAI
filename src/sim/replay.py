@@ -13,7 +13,11 @@ from pathlib import Path
 
 from src.core import rule_engine
 from src.core.models import EnergyState
-from src.sim.scenario_loader import load_fixture, load_csv_scenario, rows_to_energy_states
+from src.sim.scenario_loader import (
+    load_fixture,
+    load_csv_scenario,
+    rows_to_energy_states,
+)
 
 
 def replay_fixture(fixture_path: str | Path) -> dict:
@@ -49,17 +53,20 @@ def replay_scenario(csv_path: str | Path) -> list[dict]:
         else:
             blocks_since_change += 1
 
-        results.append({
-            "block_id": state.block_id,
-            "action": event.decision.action,
-            "decision_code": event.decision_code,
-            "reason": event.reason,
-        })
+        results.append(
+            {
+                "block_id": state.block_id,
+                "action": event.decision.action,
+                "decision_code": event.decision_code,
+                "reason": event.reason,
+            }
+        )
     return results
 
 
 def _dict_to_energy_state(data: dict) -> EnergyState:
     from datetime import datetime
+
     return EnergyState(
         block_id=data["block_id"],
         window_start=datetime.fromisoformat(data["window_start"]),
@@ -81,6 +88,7 @@ def _dict_to_energy_state(data: dict) -> EnergyState:
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="BitGridAI Replay")
     parser.add_argument("--fixture", help="Pfad zu einem JSON-Fixture")
     parser.add_argument("--scenario", help="Pfad zu einem CSV-Szenario")

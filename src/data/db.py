@@ -7,7 +7,6 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS decision_events (
     id            TEXT PRIMARY KEY,

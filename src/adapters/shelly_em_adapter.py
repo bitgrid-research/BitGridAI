@@ -37,11 +37,15 @@ class ShellyEMAdapter:
     ) -> None:
         self._mqtt = mqtt
         self._ingest = ingest
-        self._device_id = device_id if device_id is not None else os.getenv(
-            "SHELLY_EM_DEVICE_ID", "shellyem-XXXXXX"
+        self._device_id = (
+            device_id
+            if device_id is not None
+            else os.getenv("SHELLY_EM_DEVICE_ID", "shellyem-XXXXXX")
         )
-        self._channels = channels if channels is not None else int(
-            os.getenv("SHELLY_EM_CHANNELS", "1")
+        self._channels = (
+            channels
+            if channels is not None
+            else int(os.getenv("SHELLY_EM_CHANNELS", "1"))
         )
         self._phase_power: dict[int, float] = {}
 
@@ -56,11 +60,13 @@ class ShellyEMAdapter:
             self._mqtt.subscribe(topic, self._make_channel_callback(ch))
         log.info(
             "ShellyEMAdapter registriert — %s (%d Kanal/Kanäle)",
-            self._device_id, self._channels,
+            self._device_id,
+            self._channels,
         )
 
     def _make_channel_callback(self, channel: int):
         """Erzeugt einen Callback für den gegebenen Kanal."""
+
         def callback(topic: str, payload: str) -> None:
             try:
                 watts = float(payload)
@@ -87,5 +93,9 @@ class ShellyEMAdapter:
             self._ingest.update(Signal.GRID_IMPORT_W, 0.0, source=source)
             self._ingest.update(Signal.GRID_EXPORT_W, abs(watts), source=source)
 
-        log.debug("ShellyEM Netz: %.1f W (import=%.0f export=%.0f)",
-                  watts, max(watts, 0), max(-watts, 0))
+        log.debug(
+            "ShellyEM Netz: %.1f W (import=%.0f export=%.0f)",
+            watts,
+            max(watts, 0),
+            max(-watts, 0),
+        )

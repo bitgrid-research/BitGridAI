@@ -18,10 +18,10 @@ import yaml
 from src.ops.config_loader import ConfigLoader, rules_to_engine_config
 from src.core.rule_engine import RuleEngineConfig
 
-
 # ---------------------------------------------------------------------------
 # ConfigLoader.load()
 # ---------------------------------------------------------------------------
+
 
 class TestLoad:
     def test_load_returns_dict(self, tmp_path: Path) -> None:
@@ -62,6 +62,7 @@ class TestLoad:
 # ---------------------------------------------------------------------------
 # ConfigLoader.hot_reload()
 # ---------------------------------------------------------------------------
+
 
 class TestHotReload:
     def test_hot_reload_success_updates_data(self, tmp_path: Path) -> None:
@@ -142,6 +143,7 @@ class TestHotReload:
 # rules_to_engine_config()
 # ---------------------------------------------------------------------------
 
+
 class TestRulesToEngineConfig:
     def test_empty_dict_returns_all_defaults(self) -> None:
         cfg = rules_to_engine_config({})
@@ -174,10 +176,25 @@ class TestRulesToEngineConfig:
         data = {
             "rules": {
                 "r1": {"surplus_min_kw": 2.0, "price_max_ct_kwh": 20.0},
-                "r2": {"soc_soft_min_pct": 30.0, "soc_hard_min_pct": 15.0, "max_grid_import_w": 300.0},
-                "r3": {"max_chip_temp_c": 80.0, "t_resume_c": 70.0, "comm_timeout_sec": 45.0},
-                "r4": {"min_predicted_surplus_kw": 1.5, "price_spike_threshold_ct": 25.0},
-                "r5": {"deadband_hold_blocks": 3, "min_runtime_blocks": 4, "min_pause_blocks": 3},
+                "r2": {
+                    "soc_soft_min_pct": 30.0,
+                    "soc_hard_min_pct": 15.0,
+                    "max_grid_import_w": 300.0,
+                },
+                "r3": {
+                    "max_chip_temp_c": 80.0,
+                    "t_resume_c": 70.0,
+                    "comm_timeout_sec": 45.0,
+                },
+                "r4": {
+                    "min_predicted_surplus_kw": 1.5,
+                    "price_spike_threshold_ct": 25.0,
+                },
+                "r5": {
+                    "deadband_hold_blocks": 3,
+                    "min_runtime_blocks": 4,
+                    "min_pause_blocks": 3,
+                },
             }
         }
         cfg = rules_to_engine_config(data)

@@ -24,7 +24,7 @@ Diese sechs Säulen tragen unsere Architektur. An ihnen messen wir jede Designen
 | **Reproduzierbarkeit🔄** | Für die Wissenschaft. Alle Daten, Modelle und Logs sind standardisiert. Das ermöglicht es, Szenarien exakt "abzuspielen" (Replays) und Ergebnisse objektiv zu vergleichen – egal ob für deine eigene Analyse oder für Forschungsprojekte. |
 
 
-<img src="../../media/architecture/01_introduction_and_goals/quality_pillar.png" alt="Qualitaet" width="1000" />
+<img src="../../media/architecture/01_introduction_and_goals/quality_pillar.png" alt="Qualitätssäulen" width="1000" />
 
 &nbsp;
 
@@ -45,6 +45,6 @@ Wie messen wir objektiv, ob wir unsere Ziele erreichen? Wir haben harte Zahlen (
 ---
 > **Nächster Schritt:** Nachdem wir geklärt haben, was "gut" für BitGridAI bedeutet, schauen wir uns an, für wen wir das alles eigentlich machen.
 >
-> 👉 Weiter zu **[01.3 - Stakeholder](./013_steakholder.md)**
+> 👉 Weiter zu **[01.3 - Stakeholder](./013_stakeholder.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**

@@ -24,7 +24,9 @@ class AdapterHealth:
 class HealthMonitor:
     """Meldet Adapter-Health basierend auf Stale-Detection."""
 
-    def __init__(self, stale_warn_sec: float = 30.0, stale_error_sec: float = 60.0) -> None:
+    def __init__(
+        self, stale_warn_sec: float = 30.0, stale_error_sec: float = 60.0
+    ) -> None:
         self._stale_warn = stale_warn_sec
         self._stale_error = stale_error_sec
         self._last_seen: dict[str, datetime] = {}

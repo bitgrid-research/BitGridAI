@@ -143,9 +143,13 @@ class CanaanAdapter:
             total_hashrate_th = sum(r.hashrate_ths for r in alive)
 
             self._ingest.update(Signal.MINER_TEMP_C, max_temp, source=source)
-            self._ingest.update(Signal.MINER_HEARTBEAT_AGE_SEC, heartbeat_age, source=source)
+            self._ingest.update(
+                Signal.MINER_HEARTBEAT_AGE_SEC, heartbeat_age, source=source
+            )
             if total_hashrate_th > 0:
-                self._ingest.update(Signal.MINER_HASHRATE_TH, total_hashrate_th, source=source)
+                self._ingest.update(
+                    Signal.MINER_HASHRATE_TH, total_hashrate_th, source=source
+                )
 
             log.debug(
                 "Aggregate: %.1f TH/s | max_temp=%.1f°C | alive=%d/%d",
@@ -157,13 +161,13 @@ class CanaanAdapter:
         else:
             # Alle Miner tot — Safety: hohe Heartbeat-Age signalisieren
             log.warning("Alle Miner nicht erreichbar")
-            self._ingest.update(
-                Signal.MINER_HEARTBEAT_AGE_SEC, 9999.0, source=source
-            )
+            self._ingest.update(Signal.MINER_HEARTBEAT_AGE_SEC, 9999.0, source=source)
 
     def _poll_one(self, miner: MinerHost) -> MinerReading:
         try:
-            summary = self._send_command(miner, {"command": "summary"}).get("SUMMARY", [{}])[0]
+            summary = self._send_command(miner, {"command": "summary"}).get(
+                "SUMMARY", [{}]
+            )[0]
             devs = self._send_command(miner, {"command": "devs"}).get("DEVS", [{}])[0]
             return MinerReading(
                 worker_id=miner.worker_id,

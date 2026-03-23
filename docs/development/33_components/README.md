@@ -236,7 +236,7 @@ ha/                     ← Peer im LAN, liest MQTT
 | Vollständige Bausteinsicht (Level 1–3) | [Kapitel 05 – Bausteinsicht](../../architecture/05_building_block_view/README.md) |
 | Laufzeitverhalten & Szenarien | [Kapitel 06 – Laufzeitsicht](../../architecture/06_runtime_view/README.md) |
 | Schnittstellen & Protokolle | [Kapitel 08 – Konzepte](../../architecture/08_concepts/README.md) |
-| Namenskonventionen & Code-Style | [02.3 – Konventionen](../../architecture/02_archtecture_constraints/023_conventions.md) |
+| Namenskonventionen & Code-Style | [02.3 – Konventionen](../../architecture/02_architecture_constraints/023_conventions.md) |
 
 ---
 

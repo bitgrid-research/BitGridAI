@@ -13,7 +13,6 @@ from typing import Any
 
 import yaml
 
-
 _TEXT_BLOCKS_PATH = Path(__file__).parent / "mappings" / "text_blocks.yaml"
 _DEFAULT_LANG = "de"
 

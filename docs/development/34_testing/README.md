@@ -192,7 +192,7 @@ Black entscheidet. Immer.
 mypy src/ --strict
 ```
 
-Strikte Typisierung ist Pflicht (Konvention aus [02.3](../../architecture/02_archtecture_constraints/023_conventions.md)).
+Strikte Typisierung ist Pflicht (Konvention aus [02.3](../../architecture/02_architecture_constraints/023_conventions.md)).
 Jede Funktionssignatur braucht vollständige Type Hints.
 
 ### Tests & Coverage — pytest
