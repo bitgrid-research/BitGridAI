@@ -42,19 +42,19 @@ def set_decision(decision: dict[str, Any]) -> None:
 # ---------------------------------------------------------------------------
 
 
-@app.get("/health")
+@app.get("/health")  # type: ignore[misc]
 def health() -> dict[str, Any]:
     return {"status": "ok"}
 
 
-@app.get("/state")
+@app.get("/state")  # type: ignore[misc]
 def get_state() -> dict[str, Any]:
     if _current_state is None:
         raise HTTPException(status_code=503, detail="Noch kein EnergyState verfügbar")
     return _current_state
 
 
-@app.get("/decision")
+@app.get("/decision")  # type: ignore[misc]
 def get_decision() -> dict[str, Any]:
     if _current_decision is None:
         raise HTTPException(status_code=503, detail="Noch keine Decision verfügbar")
@@ -66,7 +66,7 @@ class OverrideRequest(BaseModel):
     duration_min: int  # Gültigkeitsdauer in Minuten
 
 
-@app.post("/override")
+@app.post("/override")  # type: ignore[misc]
 def post_override(req: OverrideRequest) -> dict[str, Any]:
     if req.action not in ("START", "STOP", "NOOP"):
         raise HTTPException(status_code=400, detail=f"Ungültige Action: {req.action}")

@@ -28,3 +28,4 @@ respx>=0.21
 # Code-Qualität
 black>=24.0
 mypy>=1.9
+types-PyYAML>=6.0

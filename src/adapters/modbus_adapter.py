@@ -88,7 +88,7 @@ class ModbusAdapter:
         self._running = False
         if self._client:
             try:
-                self._client.close()  # type: ignore[no-untyped-call]
+                self._client.close()
             except Exception:
                 pass
 
@@ -103,7 +103,7 @@ class ModbusAdapter:
 
     def _poll_once(self) -> None:
         client = self._get_client()
-        result = client.read_holding_registers(  # type: ignore[call-arg]
+        result = client.read_holding_registers(
             address=self._soc_register,
             count=1,
             slave=self._unit_id,
@@ -128,6 +128,6 @@ class ModbusAdapter:
                     "pymodbus nicht installiert: pip install 'pymodbus>=3.0'"
                 )
             self._client = ModbusTcpClient(host=self._host, port=self._port, timeout=5)
-            self._client.connect()  # type: ignore[no-untyped-call]
+            self._client.connect()
         assert self._client is not None
         return self._client
