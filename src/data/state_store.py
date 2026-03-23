@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from datetime import datetime
+from typing import Any
 
 from src.core.models import EnergyState
 
@@ -64,7 +65,7 @@ class StateStore:
         cols = [d[0] for d in cur.description]
         return [self._row_to_state(dict(zip(cols, row))) for row in cur.fetchall()]
 
-    def _row_to_state(self, row: dict) -> EnergyState:
+    def _row_to_state(self, row: dict[str, Any]) -> EnergyState:
         return EnergyState(
             block_id=row["block_id"],
             window_start=datetime.fromisoformat(row["window_start"]),

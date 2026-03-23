@@ -10,9 +10,12 @@ import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
+
+if TYPE_CHECKING:
+    from src.core.rule_engine import RuleEngineConfig
 
 
 @dataclass

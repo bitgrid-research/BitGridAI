@@ -12,7 +12,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Literal, NamedTuple
+from typing import Any, Literal, NamedTuple
 
 # ---------------------------------------------------------------------------
 # EnergyState
@@ -74,7 +74,7 @@ class DecisionEvent:
     decision: Decision
     reason: str  # maschinenlesbarer Code, z.B. "R3_OVERTEMP"
     trigger: Literal["BLOCK_TICK", "SAFETY_ASYNC", "OVERRIDE"]
-    params: dict  # verwendete Schwellenwerte zum Zeitpunkt der Entscheidung
+    params: dict[str, Any]  # verwendete Schwellenwerte zum Zeitpunkt der Entscheidung
     state_snapshot: EnergyState
     decision_code: str  # z.B. "STOP_R3_OVERTEMP_T92"
 

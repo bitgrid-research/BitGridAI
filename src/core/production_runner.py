@@ -14,6 +14,7 @@ from __future__ import annotations
 import logging
 import time
 from datetime import datetime, timezone
+from typing import Literal
 
 from src.adapters.actuation_writer import ActuationWriter
 from src.adapters.telemetry_ingest import TelemetryIngest
@@ -88,6 +89,7 @@ class ProductionRunner:
 
         # Override: manuelle Eingriffe, aber nie gegen R3
         active_override = self._override.get_active(now)
+        effective_action: Literal["START", "STOP", "THROTTLE", "NOOP"]
         if active_override and not event.decision_code.startswith("STOP_R3_"):
             log.info(
                 "Override aktiv: %s → %s (Override-Aktion)",

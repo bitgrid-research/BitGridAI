@@ -24,9 +24,10 @@ import socket
 import threading
 import time
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional, cast
 
 from src.core.signals import Signal
+from .mqtt_client import MqttClient
 from .telemetry_ingest import TelemetryIngest
 
 log = logging.getLogger(__name__)
@@ -67,11 +68,11 @@ class CanaanAdapter:
         ingest: TelemetryIngest,
         hosts: list[MinerHost] | None = None,
         poll_interval_sec: float | None = None,
-        mqtt_client: object | None = None,
+        mqtt_client: MqttClient | None = None,
         mqtt_location: str | None = None,
     ) -> None:
         self._ingest = ingest
-        self._mqtt = mqtt_client
+        self._mqtt: MqttClient | None = mqtt_client
         self._location = mqtt_location or os.getenv("MQTT_LOCATION", "home")
         self._poll_interval_sec = (
             poll_interval_sec
@@ -214,7 +215,7 @@ class CanaanAdapter:
     # CGMiner TCP-Protokoll
     # ------------------------------------------------------------------
 
-    def _send_command(self, miner: MinerHost, cmd: dict) -> dict:
+    def _send_command(self, miner: MinerHost, cmd: dict[str, Any]) -> dict[str, Any]:
         with socket.create_connection(
             (miner.host, miner.port), timeout=_SOCKET_TIMEOUT_SEC
         ) as sock:
@@ -227,14 +228,14 @@ class CanaanAdapter:
                 raw += chunk
                 if b"\x00" in chunk:
                     break
-        return json.loads(raw.rstrip(b"\x00"))
+        return cast(dict[str, Any], json.loads(raw.rstrip(b"\x00")))
 
     # ------------------------------------------------------------------
     # Canaan Avalon Feld-Mapping
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _parse_hashrate_ths(summary: dict) -> float:
+    def _parse_hashrate_ths(summary: dict[str, Any]) -> float:
         # Avalon Q liefert MHS (Megahashes/s), nicht GHS
         for key in ("MHS av", "MHS 5s", "GHS av", "GHS 5s"):
             val = summary.get(key)
@@ -248,7 +249,7 @@ class CanaanAdapter:
         return 0.0
 
     @staticmethod
-    def _parse_temp(devs: dict, summary: dict) -> float:
+    def _parse_temp(devs: dict[str, Any], summary: dict[str, Any]) -> float:
         # Avalon Q: Temperatur kommt aus `devs`, Fallback `summary`
         for source in (devs, summary):
             for key in ("Temperature", "Max Temp", "Temp"):

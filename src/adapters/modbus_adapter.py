@@ -16,9 +16,13 @@ import logging
 import os
 import threading
 import time
+from typing import TYPE_CHECKING
 
 from src.core.signals import Signal
 from .telemetry_ingest import TelemetryIngest
+
+if TYPE_CHECKING:
+    from pymodbus.client import ModbusTcpClient
 
 log = logging.getLogger(__name__)
 
@@ -65,7 +69,7 @@ class ModbusAdapter:
         )
         self._running = False
         self._thread: threading.Thread | None = None
-        self._client = None
+        self._client: ModbusTcpClient | None = None
 
     def start(self) -> None:
         self._running = True
@@ -84,7 +88,7 @@ class ModbusAdapter:
         self._running = False
         if self._client:
             try:
-                self._client.close()
+                self._client.close()  # type: ignore[no-untyped-call]
             except Exception:
                 pass
 
@@ -99,7 +103,7 @@ class ModbusAdapter:
 
     def _poll_once(self) -> None:
         client = self._get_client()
-        result = client.read_holding_registers(
+        result = client.read_holding_registers(  # type: ignore[call-arg]
             address=self._soc_register,
             count=1,
             slave=self._unit_id,
@@ -115,7 +119,7 @@ class ModbusAdapter:
         )
         log.debug("Modbus SoC: %.1f %%", soc_pct)
 
-    def _get_client(self):
+    def _get_client(self) -> ModbusTcpClient:
         if self._client is None:
             try:
                 from pymodbus.client import ModbusTcpClient
@@ -124,5 +128,6 @@ class ModbusAdapter:
                     "pymodbus nicht installiert: pip install 'pymodbus>=3.0'"
                 )
             self._client = ModbusTcpClient(host=self._host, port=self._port, timeout=5)
-            self._client.connect()
+            self._client.connect()  # type: ignore[no-untyped-call]
+        assert self._client is not None
         return self._client

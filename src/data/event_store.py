@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, cast
 
 from src.core.models import DecisionEvent
 
@@ -41,21 +41,21 @@ class EventStore:
         )
         self._conn.commit()
 
-    def read(self, command_id: str) -> dict | None:
+    def read(self, command_id: str) -> dict[str, Any] | None:
         cur = self._conn.execute(
             "SELECT * FROM decision_events WHERE id = ?", (command_id,)
         )
         row = cur.fetchone()
         return dict(zip([d[0] for d in cur.description], row)) if row else None
 
-    def latest(self, n: int = 10) -> list[dict]:
+    def latest(self, n: int = 10) -> list[dict[str, Any]]:
         cur = self._conn.execute(
             "SELECT * FROM decision_events ORDER BY timestamp DESC LIMIT ?", (n,)
         )
         cols = [d[0] for d in cur.description]
         return [dict(zip(cols, row)) for row in cur.fetchall()]
 
-    def read_range(self, start: datetime, end: datetime) -> list[dict]:
+    def read_range(self, start: datetime, end: datetime) -> list[dict[str, Any]]:
         cur = self._conn.execute(
             "SELECT * FROM decision_events WHERE timestamp BETWEEN ? AND ? ORDER BY timestamp",
             (start.isoformat(), end.isoformat()),

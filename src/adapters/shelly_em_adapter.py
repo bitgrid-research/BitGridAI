@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 import os
+from typing import Callable
 
 from src.core.signals import Signal
 from .mqtt_client import MqttClient
@@ -64,7 +65,7 @@ class ShellyEMAdapter:
             self._channels,
         )
 
-    def _make_channel_callback(self, channel: int):
+    def _make_channel_callback(self, channel: int) -> Callable[[str, str], None]:
         """Erzeugt einen Callback für den gegebenen Kanal."""
 
         def callback(topic: str, payload: str) -> None:

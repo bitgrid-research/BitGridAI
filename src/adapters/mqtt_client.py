@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Callable
+from typing import Any, Callable
 
 import paho.mqtt.client as mqtt
 
@@ -48,13 +48,13 @@ class MqttClient:
         self._subscriptions[topic] = callback
         self._client.subscribe(topic)
 
-    def publish(self, topic: str, payload: str | dict, retain: bool = False) -> None:
+    def publish(self, topic: str, payload: str | dict[str, Any], retain: bool = False) -> None:
         if isinstance(payload, dict):
             payload = json.dumps(payload)
         self._client.publish(topic, payload, retain=retain)
 
     def _on_connect(
-        self, client: mqtt.Client, userdata: object, flags: dict, rc: int
+        self, client: mqtt.Client, userdata: object, flags: dict[str, Any], rc: int
     ) -> None:
         if rc == 0:
             log.info("MQTT verbunden mit %s:%s", self._host, self._port)

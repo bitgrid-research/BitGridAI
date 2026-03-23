@@ -23,8 +23,8 @@ class ExplainResult:
     short: str
     long: str
     trigger: str
-    params: dict
-    rule_states: dict
+    params: dict[str, Any]
+    rule_states: dict[str, Any]
     energy_state_ref: str
     lang: str = "de"
 
@@ -42,8 +42,8 @@ class ExplainAgent:
     def explain(
         self,
         decision_code: str,
-        params: dict,
-        rule_states: dict | None = None,
+        params: dict[str, Any],
+        rule_states: dict[str, Any] | None = None,
         energy_state_ref: str = "",
     ) -> ExplainResult:
         """
@@ -69,7 +69,7 @@ class ExplainAgent:
             lang=self._lang,
         )
 
-    def _interpolate(self, template: str, params: dict) -> str:
+    def _interpolate(self, template: str, params: dict[str, Any]) -> str:
         """Interpoliert {key} und {key:.nf} — fehlende Keys → '?'."""
         if not template:
             return ""
@@ -79,7 +79,7 @@ class ExplainAgent:
             return template
 
 
-class _SafeDict(dict):
+class _SafeDict(dict[str, Any]):
     """Gibt '?' zurück für fehlende Keys statt KeyError."""
 
     def __missing__(self, key: str) -> str:

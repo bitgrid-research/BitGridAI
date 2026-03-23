@@ -9,6 +9,7 @@ R3 bricht bei Veto sofort ab — keine andere Regel kann R3 überstimmen.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from typing import Literal
 
 from src.core import block_scheduler
 from src.core.models import Decision, DecisionEvent, EnergyState, RuleVote
@@ -65,7 +66,7 @@ def evaluate(
     config: RuleEngineConfig | None = None,
     last_action: str | None = None,
     blocks_since_last_change: int = 0,
-    trigger: str = "BLOCK_TICK",
+    trigger: Literal["BLOCK_TICK", "SAFETY_ASYNC", "OVERRIDE"] = "BLOCK_TICK",
     now: datetime | None = None,
 ) -> DecisionEvent:
     """

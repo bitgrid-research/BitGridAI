@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from pathlib import Path
+from typing import Any
 
 from src.core import rule_engine
 from src.core.models import EnergyState
@@ -20,7 +21,7 @@ from src.sim.scenario_loader import (
 )
 
 
-def replay_fixture(fixture_path: str | Path) -> dict:
+def replay_fixture(fixture_path: str | Path) -> dict[str, Any]:
     """Replayed ein einzelnes JSON-Fixture und gibt das DecisionEvent als Dict zurück."""
     data = load_fixture(fixture_path)
     state = _dict_to_energy_state(data)
@@ -33,7 +34,7 @@ def replay_fixture(fixture_path: str | Path) -> dict:
     }
 
 
-def replay_scenario(csv_path: str | Path) -> list[dict]:
+def replay_scenario(csv_path: str | Path) -> list[dict[str, Any]]:
     """Replayed ein CSV-Szenario und gibt alle DecisionEvents als Liste zurück."""
     rows = load_csv_scenario(csv_path)
     states = rows_to_energy_states(rows)
@@ -64,7 +65,7 @@ def replay_scenario(csv_path: str | Path) -> list[dict]:
     return results
 
 
-def _dict_to_energy_state(data: dict) -> EnergyState:
+def _dict_to_energy_state(data: dict[str, Any]) -> EnergyState:
     from datetime import datetime
 
     return EnergyState(

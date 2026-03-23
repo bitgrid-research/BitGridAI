@@ -27,6 +27,7 @@ import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import IO
 
 from src.adapters.mqtt_client import MqttClient
 
@@ -55,7 +56,7 @@ class MqttRecorder:
         self._topic = topic
         self._out = Path(output_path)
         self._out.parent.mkdir(parents=True, exist_ok=True)
-        self._file = None
+        self._file: IO[str] | None = None
         self._count = 0
 
     def start(self) -> None:

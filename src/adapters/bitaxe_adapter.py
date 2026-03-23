@@ -12,6 +12,7 @@ import logging
 import os
 import threading
 import time
+from typing import Any, cast
 from urllib.request import Request, urlopen
 
 from src.core.signals import Signal
@@ -103,17 +104,17 @@ class BitaxeAdapter:
     # HTTP
     # ------------------------------------------------------------------
 
-    def _fetch(self) -> dict:
+    def _fetch(self) -> dict[str, Any]:
         req = Request(self._url, headers={"Accept": "application/json"})
         with urlopen(req, timeout=_HTTP_TIMEOUT_SEC) as resp:
-            return json.loads(resp.read())
+            return cast(dict[str, Any], json.loads(resp.read()))
 
     # ------------------------------------------------------------------
     # Feld-Mapping
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _parse_temp(data: dict) -> float:
+    def _parse_temp(data: dict[str, Any]) -> float:
         val = data.get("temp")
         if val is not None:
             return float(val)

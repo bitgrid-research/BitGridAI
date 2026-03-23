@@ -23,16 +23,16 @@ app = FastAPI(title="BitGridAI API", version="0.1.0")
 # In-Memory State (wird im echten Betrieb durch DI ersetzt)
 # ---------------------------------------------------------------------------
 
-_current_state: dict | None = None
-_current_decision: dict | None = None
+_current_state: dict[str, Any] | None = None
+_current_decision: dict[str, Any] | None = None
 
 
-def set_state(state: dict) -> None:
+def set_state(state: dict[str, Any]) -> None:
     global _current_state
     _current_state = state
 
 
-def set_decision(decision: dict) -> None:
+def set_decision(decision: dict[str, Any]) -> None:
     global _current_decision
     _current_decision = decision
 
@@ -43,19 +43,19 @@ def set_decision(decision: dict) -> None:
 
 
 @app.get("/health")
-def health() -> dict:
+def health() -> dict[str, Any]:
     return {"status": "ok"}
 
 
 @app.get("/state")
-def get_state() -> dict:
+def get_state() -> dict[str, Any]:
     if _current_state is None:
         raise HTTPException(status_code=503, detail="Noch kein EnergyState verfügbar")
     return _current_state
 
 
 @app.get("/decision")
-def get_decision() -> dict:
+def get_decision() -> dict[str, Any]:
     if _current_decision is None:
         raise HTTPException(status_code=503, detail="Noch keine Decision verfügbar")
     return _current_decision
@@ -67,7 +67,7 @@ class OverrideRequest(BaseModel):
 
 
 @app.post("/override")
-def post_override(req: OverrideRequest) -> dict:
+def post_override(req: OverrideRequest) -> dict[str, Any]:
     if req.action not in ("START", "STOP", "NOOP"):
         raise HTTPException(status_code=400, detail=f"Ungültige Action: {req.action}")
 

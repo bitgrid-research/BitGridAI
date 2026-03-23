@@ -27,6 +27,7 @@ import math
 import os
 import random
 from pathlib import Path
+from typing import Any, Callable
 
 
 def _pv_curve(
@@ -52,7 +53,7 @@ def _clamp(val: float, lo: float, hi: float) -> float:
 # ---------------------------------------------------------------------------
 
 
-def sunny_day(blocks: int = 36, peak_kw: float = 10.0) -> list[dict]:
+def sunny_day(blocks: int = 36, peak_kw: float = 10.0) -> list[dict[str, Any]]:
     """Klarer Sonnentag — stabiler Surplus am Mittag."""
     rows = []
     soc = 85.0
@@ -79,7 +80,7 @@ def sunny_day(blocks: int = 36, peak_kw: float = 10.0) -> list[dict]:
     return rows
 
 
-def cloudy_day(blocks: int = 36, peak_kw: float = 10.0) -> list[dict]:
+def cloudy_day(blocks: int = 36, peak_kw: float = 10.0) -> list[dict[str, Any]]:
     """Bedeckter Tag mit Wolkendurchgängen (PV bricht kurz ein)."""
     rows = []
     soc = 70.0
@@ -113,7 +114,7 @@ def cloudy_day(blocks: int = 36, peak_kw: float = 10.0) -> list[dict]:
     return rows
 
 
-def price_spike(blocks: int = 24) -> list[dict]:
+def price_spike(blocks: int = 24) -> list[dict[str, Any]]:
     """Preis-Spike in der Mitte → R1/R4 blockieren Mining."""
     rows = []
     soc = 90.0
@@ -146,7 +147,7 @@ def price_spike(blocks: int = 24) -> list[dict]:
     return rows
 
 
-def battery_drain(blocks: int = 30) -> list[dict]:
+def battery_drain(blocks: int = 30) -> list[dict[str, Any]]:
     """Batterie entlädt sich durch Nachtbetrieb → R2 greift bei SoC ≤ 20%."""
     rows = []
     soc = 45.0
@@ -174,7 +175,7 @@ def battery_drain(blocks: int = 30) -> list[dict]:
     return rows
 
 
-def overtemp(blocks: int = 20) -> list[dict]:
+def overtemp(blocks: int = 20) -> list[dict[str, Any]]:
     """Miner-Temperatur steigt auf >85°C → R3 Safety-Stop."""
     rows = []
     soc = 80.0
@@ -205,7 +206,7 @@ def overtemp(blocks: int = 20) -> list[dict]:
     return rows
 
 
-def full_day(peak_kw: float = 10.0) -> list[dict]:
+def full_day(peak_kw: float = 10.0) -> list[dict[str, Any]]:
     """24h-Szenario mit allen Ereignissen: PV-Kurve + Batterie + Preis-Spike + kurze Überhitzung."""
     blocks_per_hour = 6
     total_blocks = 24 * blocks_per_hour  # 144 Blöcke
@@ -260,7 +261,7 @@ def full_day(peak_kw: float = 10.0) -> list[dict]:
 # CSV-Export
 # ---------------------------------------------------------------------------
 
-_SCENARIO_MAP = {
+_SCENARIO_MAP: dict[str, Callable[..., list[dict[str, Any]]]] = {
     "sunny_day": sunny_day,
     "cloudy_day": cloudy_day,
     "price_spike": price_spike,
@@ -275,7 +276,7 @@ _HEADER = (
 )
 
 
-def generate_csv(scenario_type: str, **kwargs) -> str:
+def generate_csv(scenario_type: str, **kwargs: Any) -> str:
     """Generiert ein Szenario als CSV-String."""
     fn = _SCENARIO_MAP.get(scenario_type)
     if fn is None:

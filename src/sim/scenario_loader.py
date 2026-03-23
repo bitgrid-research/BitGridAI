@@ -8,11 +8,12 @@ import csv
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any, cast
 
 from src.core.models import EnergyState
 
 
-def load_csv_scenario(path: str | Path) -> list[dict]:
+def load_csv_scenario(path: str | Path) -> list[dict[str, Any]]:
     """
     Liest ein CSV-Szenario und gibt eine Liste von Row-Dicts zurück.
 
@@ -46,7 +47,7 @@ def load_csv_scenario(path: str | Path) -> list[dict]:
 
 
 def rows_to_energy_states(
-    rows: list[dict],
+    rows: list[dict[str, Any]],
     base_time: datetime | None = None,
 ) -> list[EnergyState]:
     """Konvertiert CSV-Rows in EnergyState-Objekte."""
@@ -85,7 +86,7 @@ def rows_to_energy_states(
     return states
 
 
-def load_fixture(path: str | Path) -> dict:
+def load_fixture(path: str | Path) -> dict[str, Any]:
     """Liest ein JSON-Fixture und gibt das Dict zurück."""
     with open(path, encoding="utf-8") as f:
-        return json.load(f)
+        return cast(dict[str, Any], json.load(f))
