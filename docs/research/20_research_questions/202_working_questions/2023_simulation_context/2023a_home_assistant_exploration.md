@@ -4,6 +4,7 @@ Diese Unterseite bündelt die technische Exploration und den prototypischen Aufb
 des Simulationskontexts in Home Assistant.
 
 
+
 ## Ziel
 
 - Das regelbasierte Energiemanagement in Home Assistant technisch abbilden.
