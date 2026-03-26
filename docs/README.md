@@ -75,5 +75,7 @@ Hier bringen wir zusammen, was Architektur und Forschung vorbereitet haben: konk
 
 <img src="./media/setup/setup.png" alt="Status" width="1000" />
 
+## 4. Energy-Lab
+
 ---
 > 🏠 Zurück zur **[Hauptübersicht](../README.md)**
