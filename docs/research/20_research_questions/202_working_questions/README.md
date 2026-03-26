@@ -82,7 +82,7 @@ Systemlogik basierenden Kontexten betrachtet:
   - [20.2.5.1 - Verstehen der Entscheidungen im Alltag](./2025_field_study_context/2025a_understanding_in_the_wild.md)  
   - [20.2.5.2 - Kontrolle, Override und Recovery im Realbetrieb](./2025_field_study_context/2025b_control_override_recovery.md)  
   - [20.2.5.3 - Vertrauen, Sicherheit und Nutzung über Zeit](./2025_field_study_context/2025c_trust_safety_over_time.md)
-
+  - [20.2.5.4 - Notizen](./2025_field_study_context/2025d_notes.md)
 
 
 Das zugrunde liegende Energiemanagementsystem bleibt identisch.
