@@ -1,0 +1,47 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# BitGridAI — Entwickler-Abhängigkeiten
+#
+# Enthält alle Runtime-Deps + alles für Tests und Code-Qualität.
+# Einmalig einrichten: pip install -r requirements-dev.txt
+#
+# Danach steht alles bereit:
+#   make check     → fmt + lint + alle Tests (vor jedem PR pflicht)
+#   make test      → alle Tests mit Coverage-Report
+#   make fmt       → black Autoformat
+#   make lint      → black check + mypy Typprüfung
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Alle Runtime-Deps einschließen
+-r requirements.txt
+
+# ── Testing ──────────────────────────────────────────────────────────────────
+
+# Test-Framework + Coverage (make test / make test-unit)
+pytest>=8.0
+pytest-cov>=5.0
+
+# Performance-Benchmarks (make test-replay)
+pytest-benchmark>=4.0
+
+# Integrationstests mit echten Containern (MQTT-Broker, DB)
+testcontainers>=4.0
+
+# Zeit einfrieren für deterministische Tests (z.B. Block-Fenster)
+freezegun>=1.4
+
+# HTTP-Client für API-Tests (src/ui/ Endpoints)
+httpx>=0.27
+
+# HTTPX-Mocking für Adapter-Tests (Shelly, Bitaxe, Forecast)
+respx>=0.21
+
+# ── Code-Qualität ─────────────────────────────────────────────────────────────
+
+# Formatter — Pflicht, kein PR ohne (make fmt)
+black>=24.0
+
+# Statische Typprüfung — strict mode (make lint)
+mypy>=1.9
+
+# mypy-Stubs für PyYAML
+types-PyYAML>=6.0
