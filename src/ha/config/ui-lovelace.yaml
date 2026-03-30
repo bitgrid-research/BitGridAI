@@ -1,239 +1,385 @@
 title: BitGridAI
 views:
-  - title: Overview
-    path: overview
-    icon: mdi:home-analytics
+
+  # ═══════════════════════════════════════════════════════
+  # MINER 2  —  IP aus .env: MINER2_IP
+  # ═══════════════════════════════════════════════════════
+  - title: Miner 2
+    path: miner2
+    icon: mdi:pickaxe
     cards:
-      - type: entities
-        title: Decision & State
-        show_header_toggle: false
-        entities:
-          - entity: input_select.system_state
-          - entity: input_select.autonomy_level
-          - entity: input_select.decision_action
-          - entity: sensor.bg_decision_action
-          - entity: sensor.bg_decision_priority
-          - entity: input_text.decision_reason
-          - entity: input_text.decision_code
-          - entity: input_datetime.decision_timestamp
-          - entity: sensor.block_id
-          - entity: sensor.block_window_start
-          - entity: sensor.block_window_end
-          - entity: input_datetime.deadband_valid_until
-          - entity: binary_sensor.r5_deadband_active
-          - entity: binary_sensor.safety_lockout_active
 
-      - type: entities
-        title: Override Control
-        show_header_toggle: false
-        entities:
-          - entity: input_boolean.override_active
-          - entity: input_select.override_action
-          - entity: input_number.override_duration_min
-          - entity: input_datetime.override_valid_until
-          - entity: input_text.override_status
-          - entity: input_text.decision_explanation
-          - entity: sensor.rule_states_json
-
-      - type: vertical-stack
-        cards:
-          - type: custom:power-flow-card-plus
-            title: HEMS Energy Flow
-            clickable_entities: true
-            w_decimals: 0
-            kw_decimals: 2
-            watt_threshold: 1000
-            entities:
-              solar:
-                entity: sensor.pv_generation_w
-                name: PV
-                icon: mdi:solar-power
-              battery:
-                entity: sensor.battery_power_w
-                state_of_charge: sensor.battery_soc_pct
-                name: Battery
-                icon: mdi:battery
-              grid:
-                entity: sensor.grid_import_w
-                name: Grid
-                icon: mdi:transmission-tower
-                display_state: one_way
-              home:
-                entity: sensor.house_load_w
-                name: House
-                icon: mdi:home-lightning-bolt
-              individual:
-                - entity: sensor.miner_power_w
-                  name: Miner
-                  icon: mdi:bitcoin
-          - type: history-graph
-            title: Energy Flow (2h)
-            hours_to_show: 2
-            refresh_interval: 60
-            entities:
-              - entity: sensor.pv_generation_w
-                name: PV
-              - entity: sensor.battery_power_w
-                name: Battery
-              - entity: sensor.house_load_w
-                name: House
-              - entity: sensor.grid_import_w
-                name: Grid
-              - entity: sensor.miner_power_w
-                name: Miner
-              - entity: sensor.surplus_kw
-                name: Surplus
-
+      # Status + Steuerung
       - type: horizontal-stack
         cards:
-          - type: gauge
-            name: Battery SoC
-            entity: sensor.battery_soc_pct
-            min: 0
-            max: 100
-          - type: gauge
-            name: Miner Temp
-            entity: sensor.miner_temp_c
-            min: 0
-            max: 120
-          - type: gauge
-            name: Surplus
-            entity: sensor.surplus_kw
-            min: -10
-            max: 20
+          - type: entities
+            title: Status
+            show_header_toggle: false
+            entities:
+              - entity: binary_sensor.miner2_available
+                name: Verbindung
+              - entity: sensor.miner2_workmode_status
+                name: Workmode
+              - entity: sensor.miner2_worklevel
+                name: Worklevel
+              - entity: sensor.miner2_systemstatus
+                name: Systemstatus
+              - entity: sensor.miner2_uptime
+                name: Uptime
+              - entity: input_boolean.miner2_auto_load_management
+                name: Auto-Steuerung
+              - entity: switch.miner2_lcdonoff_switch
+                name: Display
 
-      - type: entities
-        title: Power
-        entities:
-          - entity: sensor.pv_generation_w
-            name: PV Generation
-          - entity: sensor.battery_power_w
-            name: Battery Power
-          - entity: sensor.house_load_w
-            name: House Load
-          - entity: sensor.grid_import_w
-            name: Grid Import
-          - entity: sensor.miner_power_w
-            name: Miner Power
-          - entity: sensor.surplus_kw
-            name: Surplus
+          - type: vertical-stack
+            cards:
+              - type: entities
+                title: Steuerung
+                show_header_toggle: false
+                entities:
+                  - entity: select.miner2_workmode_set
+                    name: Workmode setzen
+              - type: horizontal-stack
+                cards:
+                  - type: button
+                    name: Standby
+                    icon: mdi:power-sleep
+                    tap_action:
+                      action: call-service
+                      service: select.select_option
+                      service_data:
+                        entity_id: select.miner2_workmode_set
+                        option: Standby
+                  - type: button
+                    name: Eco
+                    icon: mdi:leaf
+                    tap_action:
+                      action: call-service
+                      service: select.select_option
+                      service_data:
+                        entity_id: select.miner2_workmode_set
+                        option: Eco
+                  - type: button
+                    name: Standard
+                    icon: mdi:speedometer-medium
+                    tap_action:
+                      action: call-service
+                      service: select.select_option
+                      service_data:
+                        entity_id: select.miner2_workmode_set
+                        option: Standard
+                  - type: button
+                    name: Super
+                    icon: mdi:speedometer
+                    tap_action:
+                      action: call-service
+                      service: select.select_option
+                      service_data:
+                        entity_id: select.miner2_workmode_set
+                        option: Super
+              - type: button
+                name: Reboot Miner 2
+                icon: mdi:restart
+                tap_action:
+                  action: call-service
+                  service: shell_command.miner2_reboot
 
-      - type: history-graph
-        title: Power History (8h)
-        hours_to_show: 8
-        refresh_interval: 60
-        entities:
-          - entity: sensor.pv_generation_w
-          - entity: sensor.battery_power_w
-          - entity: sensor.house_load_w
-          - entity: sensor.grid_import_w
-          - entity: sensor.miner_power_w
-          - entity: sensor.surplus_kw
-
-      - type: entities
-        title: Miner Control
-        show_header_toggle: false
-        entities:
-          - entity: switch.miner_relay
-            name: Miner Relay
-          - entity: sensor.miner_status
-            name: Miner Status
-          - entity: sensor.miner_heartbeat_age_sec
-            name: Heartbeat Age
-
-      - type: entities
-        title: Safety
-        show_header_toggle: false
-        entities:
-          - entity: binary_sensor.r3_safety_override
-            name: R3 Safety Override
-          - entity: binary_sensor.safety_lockout_active
-            name: Safety Lockout Active
-          - entity: binary_sensor.r3_overtemp
-            name: Overtemp
-          - entity: binary_sensor.r3_comm_timeout
-            name: Comm Timeout
-          - entity: input_boolean.r3_emergency_stop
-            name: E-Stop (Control)
-          - entity: binary_sensor.r3_emergency_stop
-            name: E-Stop (State)
-
+      # Performance
       - type: glance
-        title: Rule Gates
+        title: Performance
         show_name: true
+        columns: 4
         entities:
-          - entity: binary_sensor.r1_surplus_ok
-            name: R1 Surplus OK
-          - entity: binary_sensor.r2_soc_soft
-            name: R2 SoC Soft
-          - entity: binary_sensor.r2_soc_hard
-            name: R2 SoC Hard
-          - entity: binary_sensor.r2_grid_import_ok
-            name: R2 Grid Import OK
-          - entity: binary_sensor.r3_overtemp
-            name: R3 Overtemp
-          - entity: binary_sensor.r3_comm_timeout
-            name: R3 Comm Timeout
-          - entity: binary_sensor.r3_emergency_stop
-            name: R3 E-Stop
-          - entity: binary_sensor.r3_safety_override
-            name: R3 Safety Override
-          - entity: binary_sensor.r5_deadband_active
-            name: R5 Deadband Active
-          - entity: binary_sensor.r5_min_runtime_active
-            name: R5 Min Runtime
-          - entity: binary_sensor.r5_min_pause_active
-            name: R5 Min Pause
+          - entity: sensor.miner2_thsspd
+            name: TH/s
+          - entity: sensor.miner2_energy_per_th
+            name: J/TH
+          - entity: sensor.miner2_cur_load
+            name: Ist-W
+          - entity: sensor.miner2_mode_power_output
+            name: Soll-W
+          - entity: sensor.miner2_fanr
+            name: Fan %
+          - entity: sensor.miner2_avg_shares_per_min
+            name: Sh/min
+          - entity: sensor.miner2_accepted_shares
+            name: Accepted
+          - entity: sensor.miner2_rejected_shares
+            name: Rejected
 
-      - type: entities
-        title: Tuning (Quick)
+      # Temperaturen + Pool
+      - type: horizontal-stack
+        cards:
+          - type: glance
+            title: Temperaturen
+            show_name: true
+            columns: 3
+            entities:
+              - entity: sensor.miner2_itemp
+                name: Intern
+              - entity: sensor.miner2_hbitemp
+                name: HB-In
+              - entity: sensor.miner2_hbotemp
+                name: HB-Out
+              - entity: sensor.miner2_tmax
+                name: T-Max
+              - entity: sensor.miner2_tavg
+                name: T-Avg
+              - entity: sensor.miner2_tart
+                name: T-Ziel
+
+          - type: entities
+            title: Pool
+            show_header_toggle: false
+            entities:
+              - entity: binary_sensor.miner2_pool_status
+                name: Pool OK
+              - entity: sensor.miner2_pool
+                name: URL
+              - entity: sensor.miner2_ping
+                name: Ping (ms)
+              - entity: sensor.miner2_latest_share
+                name: Letzter Share (s)
+              - entity: sensor.miner2_rejection_rate
+                name: Rejection Rate (%)
+              - entity: sensor.miner2_stratum_difficulty
+                name: Stratum Diff
+              - entity: sensor.miner2_network_difficulty
+                name: Netz Difficulty (T)
+
+      # Fehler + Hardware
+      - type: horizontal-stack
+        cards:
+          - type: glance
+            title: Fehler & Diagnose
+            show_name: true
+            columns: 4
+            entities:
+              - entity: sensor.miner2_hardware_errors
+                name: HW-Err
+              - entity: sensor.miner2_hardware_errorsr
+                name: HW-Err %
+              - entity: sensor.miner2_network_errors
+                name: Net-Err
+              - entity: sensor.miner2_fanerr
+                name: Fan-Err
+              - entity: sensor.miner2_total_asics
+                name: ASICs
+              - entity: sensor.miner2_filter
+                name: Filter (min)
+              - entity: sensor.miner2_found_blocks
+                name: Blocks
+              - entity: sensor.miner2_cpu_freq
+                name: CPU MHz
+
+          - type: entities
+            title: Hardware-Info
+            show_header_toggle: false
+            entities:
+              - entity: sensor.miner2_asic_model
+                name: ASIC
+              - entity: sensor.miner2_cpu_model
+                name: CPU
+              - entity: sensor.miner2_firmware
+                name: Firmware
+              - entity: sensor.miner2_cgminer_version
+                name: CGMiner
+              - entity: sensor.miner2_mac_address
+                name: MAC
+              - entity: sensor.miner2_id
+                name: Device-ID
+
+  # ═══════════════════════════════════════════════════════
+  # MINER 1  —  IP aus .env: MINER1_IP
+  # ═══════════════════════════════════════════════════════
+  - title: Miner 1
+    path: miner1
+    icon: mdi:pickaxe
+    cards:
+
+      # Status + Steuerung
+      - type: horizontal-stack
+        cards:
+          - type: entities
+            title: Status
+            show_header_toggle: false
+            entities:
+              - entity: binary_sensor.miner1_available
+                name: Verbindung
+              - entity: sensor.miner1_workmode_status
+                name: Workmode
+              - entity: sensor.miner1_worklevel
+                name: Worklevel
+              - entity: sensor.miner1_systemstatus
+                name: Systemstatus
+              - entity: sensor.miner1_uptime
+                name: Uptime
+              - entity: input_boolean.miner1_auto_load_management
+                name: Auto-Steuerung
+              - entity: switch.miner1_lcdonoff_switch
+                name: Display
+
+          - type: vertical-stack
+            cards:
+              - type: entities
+                title: Steuerung
+                show_header_toggle: false
+                entities:
+                  - entity: select.miner1_workmode_set
+                    name: Workmode setzen
+              - type: horizontal-stack
+                cards:
+                  - type: button
+                    name: Standby
+                    icon: mdi:power-sleep
+                    tap_action:
+                      action: call-service
+                      service: select.select_option
+                      service_data:
+                        entity_id: select.miner1_workmode_set
+                        option: Standby
+                  - type: button
+                    name: Eco
+                    icon: mdi:leaf
+                    tap_action:
+                      action: call-service
+                      service: select.select_option
+                      service_data:
+                        entity_id: select.miner1_workmode_set
+                        option: Eco
+                  - type: button
+                    name: Standard
+                    icon: mdi:speedometer-medium
+                    tap_action:
+                      action: call-service
+                      service: select.select_option
+                      service_data:
+                        entity_id: select.miner1_workmode_set
+                        option: Standard
+                  - type: button
+                    name: Super
+                    icon: mdi:speedometer
+                    tap_action:
+                      action: call-service
+                      service: select.select_option
+                      service_data:
+                        entity_id: select.miner1_workmode_set
+                        option: Super
+              - type: button
+                name: Reboot Miner 1
+                icon: mdi:restart
+                tap_action:
+                  action: call-service
+                  service: shell_command.miner1_reboot
+
+      # Performance
+      - type: glance
+        title: Performance
+        show_name: true
+        columns: 4
         entities:
-          - entity: input_number.r1_surplus_min_kw
-            name: R1 Min Surplus (kW)
-          - entity: input_number.r2_soc_soft_min_pct
-            name: R2 Soft Min SoC (%)
-          - entity: input_number.r2_soc_hard_min_pct
-            name: R2 Hard Min SoC (%)
-          - entity: input_number.r2_max_grid_import_w
-            name: R2 Max Grid Import (W)
-          - entity: input_number.r3_max_chip_temp_c
-            name: R3 Max Chip Temp (C)
-          - entity: input_number.r3_comm_timeout_sec
-            name: R3 Comm Timeout (s)
-          - entity: input_number.r5_deadband_hold_blocks
-            name: R5 Deadband Hold (blocks)
-          - entity: input_number.r5_min_runtime_blocks
-            name: R5 Min Runtime (blocks)
-          - entity: input_number.r5_min_pause_blocks
-            name: R5 Min Pause (blocks)
-          - entity: input_number.block_minutes
-            name: Block Minutes
+          - entity: sensor.miner1_thsspd
+            name: TH/s
+          - entity: sensor.miner1_energy_per_th
+            name: J/TH
+          - entity: sensor.miner1_cur_load
+            name: Ist-W
+          - entity: sensor.miner1_mode_power_output
+            name: Soll-W
+          - entity: sensor.miner1_fanr
+            name: Fan %
+          - entity: sensor.miner1_avg_shares_per_min
+            name: Sh/min
+          - entity: sensor.miner1_accepted_shares
+            name: Accepted
+          - entity: sensor.miner1_rejected_shares
+            name: Rejected
 
-      - type: conditional
-        conditions:
-          - entity: input_boolean.simulation_mode
-            state: "on"
-        card:
-          type: entities
-          title: Simulation Inputs
-          entities:
-            - entity: input_number.pv_power_w
-              name: PV Power (W)
-            - entity: input_number.house_load_w
-              name: House Load (W)
-            - entity: input_number.grid_import_w
-              name: Grid Import (W)
-            - entity: input_number.battery_soc_pct
-              name: Battery SoC (%)
-            - entity: input_number.battery_power_w
-              name: Battery Power (W)
-            - entity: input_number.miner_power_w
-              name: Miner Power (W)
-            - entity: input_number.miner_temp_c
-              name: Miner Temp (C)
-            - entity: input_number.miner_heartbeat_age_sec
-              name: Heartbeat Age (s)
+      # Temperaturen + Pool
+      - type: horizontal-stack
+        cards:
+          - type: glance
+            title: Temperaturen
+            show_name: true
+            columns: 3
+            entities:
+              - entity: sensor.miner1_itemp
+                name: Intern
+              - entity: sensor.miner1_hbitemp
+                name: HB-In
+              - entity: sensor.miner1_hbotemp
+                name: HB-Out
+              - entity: sensor.miner1_tmax
+                name: T-Max
+              - entity: sensor.miner1_tavg
+                name: T-Avg
+              - entity: sensor.miner1_tart
+                name: T-Ziel
 
+          - type: entities
+            title: Pool
+            show_header_toggle: false
+            entities:
+              - entity: binary_sensor.miner1_pool_status
+                name: Pool OK
+              - entity: sensor.miner1_pool
+                name: URL
+              - entity: sensor.miner1_ping
+                name: Ping (ms)
+              - entity: sensor.miner1_latest_share
+                name: Letzter Share (s)
+              - entity: sensor.miner1_rejection_rate
+                name: Rejection Rate (%)
+              - entity: sensor.miner1_stratum_difficulty
+                name: Stratum Diff
+              - entity: sensor.miner1_network_difficulty
+                name: Netz Difficulty (T)
+
+      # Fehler + Hardware
+      - type: horizontal-stack
+        cards:
+          - type: glance
+            title: Fehler & Diagnose
+            show_name: true
+            columns: 4
+            entities:
+              - entity: sensor.miner1_hardware_errors
+                name: HW-Err
+              - entity: sensor.miner1_hardware_errorsr
+                name: HW-Err %
+              - entity: sensor.miner1_network_errors
+                name: Net-Err
+              - entity: sensor.miner1_fanerr
+                name: Fan-Err
+              - entity: sensor.miner1_total_asics
+                name: ASICs
+              - entity: sensor.miner1_filter
+                name: Filter (min)
+              - entity: sensor.miner1_found_blocks
+                name: Blocks
+              - entity: sensor.miner1_cpu_freq
+                name: CPU MHz
+
+          - type: entities
+            title: Hardware-Info
+            show_header_toggle: false
+            entities:
+              - entity: sensor.miner1_asic_model
+                name: ASIC
+              - entity: sensor.miner1_cpu_model
+                name: CPU
+              - entity: sensor.miner1_firmware
+                name: Firmware
+              - entity: sensor.miner1_cgminer_version
+                name: CGMiner
+              - entity: sensor.miner1_mac_address
+                name: MAC
+              - entity: sensor.miner1_id
+                name: Device-ID
+
+  # ═══════════════════════════════════════════════════════
+  # TUNING
+  # ═══════════════════════════════════════════════════════
   - title: Tuning
     path: tuning
     icon: mdi:tune-vertical
@@ -284,6 +430,9 @@ views:
           - entity: input_datetime.deadband_valid_until
             name: Deadband Valid Until
 
+  # ═══════════════════════════════════════════════════════
+  # SIMULATION
+  # ═══════════════════════════════════════════════════════
   - title: Simulation
     path: simulation
     icon: mdi:flask

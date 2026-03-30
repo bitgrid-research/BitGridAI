@@ -4,8 +4,6 @@ services:
     image: ghcr.io/home-assistant/home-assistant:stable
     volumes:
       - ./config:/config
-    env_file:
-      - ../../.env
     environment:
       - TZ=Europe/Berlin
     restart: unless-stopped
@@ -24,16 +22,3 @@ services:
     ports:
       - "1883:1883"
     restart: unless-stopped
-
-  miner-poller:
-    container_name: miner-poller
-    build:
-      context: ../..
-      dockerfile: src/ha/Dockerfile.poller
-    env_file:
-      - ../../.env
-    environment:
-      - MQTT_HOST=mqtt
-    restart: unless-stopped
-    depends_on:
-      - mqtt

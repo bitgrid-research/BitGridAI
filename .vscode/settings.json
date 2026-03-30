@@ -1,10 +1,14 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python",
+  "python.terminal.activateEnvironment": true,
   "editor.formatOnSave": true,
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
-  "mypy-type-checker.args": ["--strict"],
+  "mypy-type-checker.args": [
+    "--strict"
+  ],
   "python.testing.pytestEnabled": true,
-  "python.testing.pytestArgs": ["tests"]
+  "python.testing.pytestArgs": [
+    "tests"
+  ]
 }

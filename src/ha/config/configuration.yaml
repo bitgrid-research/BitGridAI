@@ -2,7 +2,9 @@
 # Loads default set of integrations. Do not remove.
 default_config:
 
-# Load frontend themes from the themes folder
+homeassistant:
+  packages: !include_dir_merge_named packages
+
 frontend:
   themes: !include_dir_merge_named themes
 
@@ -23,107 +25,56 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
+# ── MQTT ──────────────────────────────────────────────────────────────────────
+# Broker wird über HA-UI konfiguriert: Einstellungen → Integrationen → MQTT
+# Umbrel-IP aus .env: MQTT_HOST
+#
+# Temp/Humidity-Sensoren (via Zigbee2MQTT oder andere MQTT-Bridge):
 mqtt:
-  broker: mqtt
-  port: 1883
+  sensor:
+    - name: temp_miner_room
+      unique_id: temp_miner_room
+      state_topic: "zigbee2mqtt/temp_miner_room"
+      value_template: "{{ value_json.temperature | float | round(1) }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      expire_after: 300
 
-sensor:
-  - platform: mqtt
-    name: miner_001_hashrate_ths
-    state_topic: "bitgrid/home/miner/001/hashrate_ths"
-    unit_of_measurement: "TH/s"
-    state_class: measurement
-    expire_after: 120
+    - name: humidity_miner_room
+      unique_id: humidity_miner_room
+      state_topic: "zigbee2mqtt/temp_miner_room"
+      value_template: "{{ value_json.humidity | float | round(1) }}"
+      unit_of_measurement: "%"
+      device_class: humidity
+      state_class: measurement
+      expire_after: 300
 
-  - platform: mqtt
-    name: miner_001_mode
-    state_topic: "bitgrid/home/miner/001/mode"
-    expire_after: 120
+    - name: temp_living_room
+      unique_id: temp_living_room
+      state_topic: "zigbee2mqtt/temp_living_room"
+      value_template: "{{ value_json.temperature | float | round(1) }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      expire_after: 300
 
-  - platform: mqtt
-    name: miner_001_status
-    state_topic: "bitgrid/home/miner/001/status"
-    expire_after: 120
+    - name: humidity_living_room
+      unique_id: humidity_living_room
+      state_topic: "zigbee2mqtt/temp_living_room"
+      value_template: "{{ value_json.humidity | float | round(1) }}"
+      unit_of_measurement: "%"
+      device_class: humidity
+      state_class: measurement
+      expire_after: 300
 
-  - platform: mqtt
-    name: miner_001_accepted
-    state_topic: "bitgrid/home/miner/001/accepted"
-    state_class: total_increasing
-    expire_after: 120
-
-  - platform: mqtt
-    name: miner_001_rejected
-    state_topic: "bitgrid/home/miner/001/rejected"
-    state_class: total_increasing
-    expire_after: 120
-
-  - platform: mqtt
-    name: miner_002_hashrate_ths
-    state_topic: "bitgrid/home/miner/002/hashrate_ths"
-    unit_of_measurement: "TH/s"
-    state_class: measurement
-    expire_after: 120
-
-  - platform: mqtt
-    name: miner_002_mode
-    state_topic: "bitgrid/home/miner/002/mode"
-    expire_after: 120
-
-  - platform: mqtt
-    name: miner_002_status
-    state_topic: "bitgrid/home/miner/002/status"
-    expire_after: 120
-
-  - platform: mqtt
-    name: miner_002_accepted
-    state_topic: "bitgrid/home/miner/002/accepted"
-    state_class: total_increasing
-    expire_after: 120
-
-  - platform: mqtt
-    name: miner_002_rejected
-    state_topic: "bitgrid/home/miner/002/rejected"
-    state_class: total_increasing
-    expire_after: 120
-
-  - platform: rest
-    name: f2pool_hashrate_ths
-    resource: "https://api.f2pool.com/bitcoin/bitgridai"
-    headers:
-      F2P-API-SECRET: "${F2POOL_API_TOKEN}"
-    value_template: "{{ (value_json.hash_rate | float / 1e12) | round(2) }}"
-    unit_of_measurement: "TH/s"
-    state_class: measurement
-    scan_interval: 300
-
-  - platform: rest
-    name: f2pool_balance_btc
-    resource: "https://api.f2pool.com/bitcoin/bitgridai"
-    headers:
-      F2P-API-SECRET: "${F2POOL_API_TOKEN}"
-    value_template: "{{ value_json.balance | float | round(8) }}"
-    unit_of_measurement: "BTC"
-    state_class: measurement
-    scan_interval: 300
-
-  - platform: rest
-    name: f2pool_paid_btc
-    resource: "https://api.f2pool.com/bitcoin/bitgridai"
-    headers:
-      F2P-API-SECRET: "${F2POOL_API_TOKEN}"
-    value_template: "{{ value_json.paid | float | round(8) }}"
-    unit_of_measurement: "BTC"
-    state_class: total_increasing
-    scan_interval: 300
-
+# ── BitGridAI Entscheidungs-Logik ─────────────────────────────────────────────
+# Alle Regelparameter als editierbare Helper
 input_boolean:
   simulation_mode:
     name: simulation_mode
     icon: mdi:flask
     initial: on
-  miner_relay_sim:
-    name: miner_relay_sim
-    icon: mdi:power
   r3_emergency_stop:
     name: r3_emergency_stop
     icon: mdi:alert
@@ -171,8 +122,17 @@ input_select:
       - THROTTLE
       - NOOP
     initial: NOOP
+  active_miner:
+    name: active_miner
+    options:
+      - BOTH
+      - MINER1
+      - MINER2
+      - NONE
+    initial: BOTH
 
 input_number:
+  # ── Simulation-Inputs (Slider) ───────────────────────────────────────────
   pv_power_w:
     name: pv_power_w
     min: 0
@@ -201,56 +161,8 @@ input_number:
     step: 1
     mode: box
     initial: 50
-  battery_power_w:
-    name: battery_power_w
-    min: -10000
-    max: 10000
-    step: 50
-    mode: box
-    initial: 0
-  miner_temp_c:
-    name: miner_temp_c
-    min: 0
-    max: 120
-    step: 1
-    mode: box
-    initial: 55
-  miner_heartbeat_age_sec:
-    name: miner_heartbeat_age_sec
-    min: 0
-    max: 600
-    step: 1
-    mode: box
-    initial: 5
-  miner_power_w:
-    name: miner_power_w
-    min: 0
-    max: 10000
-    step: 50
-    mode: box
-    initial: 3000
-  override_duration_min:
-    name: override_duration_min
-    min: 1
-    max: 180
-    step: 1
-    mode: box
-    initial: 30
-  test_pass_count:
-    name: test_pass_count
-    min: 0
-    max: 100
-    step: 1
-    mode: box
-    initial: 0
-  test_fail_count:
-    name: test_fail_count
-    min: 0
-    max: 100
-    step: 1
-    mode: box
-    initial: 0
 
+  # ── Regelparameter ───────────────────────────────────────────────────────
   r1_surplus_min_kw:
     name: r1_surplus_min_kw
     min: 0
@@ -328,6 +240,13 @@ input_number:
     step: 1
     mode: box
     initial: 10
+  override_duration_min:
+    name: override_duration_min
+    min: 1
+    max: 180
+    step: 1
+    mode: box
+    initial: 30
 
 input_datetime:
   decision_timestamp:
@@ -356,6 +275,13 @@ input_datetime:
     has_time: true
 
 input_text:
+  # ── SMA-Konfiguration ─────────────────────────────────────────────────────
+  # Nach SMA-Integration: Entity-ID der Batterie-SoC-Entität eintragen
+  sma_battery_entity:
+    name: SMA Battery SoC Entity
+    max: 100
+    initial: "sensor.sma_battery_state_of_charge"
+  # ── Entscheidungs-State ───────────────────────────────────────────────────
   decision_reason:
     name: decision_reason
     max: 255
@@ -363,7 +289,7 @@ input_text:
   decision_explanation:
     name: decision_explanation
     max: 255
-    initial: "Simulation not started"
+    initial: "System not started"
   decision_code:
     name: decision_code
     max: 120
@@ -372,97 +298,124 @@ input_text:
     name: override_status
     max: 64
     initial: "inactive"
-  last_test_case:
-    name: last_test_case
-    max: 255
-    initial: "none"
-  last_test_result:
-    name: last_test_result
-    max: 255
-    initial: "none"
-  test_summary:
-    name: test_summary
-    max: 255
-    initial: "No test run yet."
 
 template:
+  # ── Energie-Signale ───────────────────────────────────────────────────────
   - sensor:
+      # PV-Leistung: SMA Wechselrichter SN 3012953672
       - name: pv_power_w
         unique_id: pv_power_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
-        state: "{{ states('input_number.pv_power_w') | float(0) }}"
-      - name: pv_generation_w
-        unique_id: pv_generation_w
-        unit_of_measurement: "W"
-        device_class: power
-        state_class: measurement
-        state: "{{ states('sensor.pv_power_w') | float(0) }}"
+        state: >-
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.pv_power_w') | float(0) }}
+          {% else %}
+            {{ states('sensor.sn_3012953672_pv_power') | float(0) }}
+          {% endif %}
+
+      # Hauslast: PV + Batterie-Entladung + Netzbezug - Netzeinspeisung - Miner
       - name: house_load_w
         unique_id: house_load_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
-        state: "{{ states('input_number.house_load_w') | float(0) }}"
+        state: >-
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.house_load_w') | float(0) }}
+          {% else %}
+            {% set pv    = states('sensor.sn_3012953672_pv_power') | float(0) %}
+            {% set bat_d = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
+            {% set bat_c = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
+            {% set grid_in  = states('sensor.sn_3015995559_metering_power_absorbed') | float(0) %}
+            {% set grid_out = states('sensor.sn_3015995559_metering_power_supplied') | float(0) %}
+            {% set miner = states('sensor.miner_total_power_w') | float(0) %}
+            {{ ([pv + bat_d - bat_c + grid_in - grid_out - miner, 0] | max) | round(0) }}
+          {% endif %}
+
+      # Netzbezug: SMA Batterie-Wechselrichter SN 3015995559
       - name: grid_import_w
         unique_id: grid_import_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
-        state: "{{ states('input_number.grid_import_w') | float(0) }}"
+        state: >-
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.grid_import_w') | float(0) }}
+          {% else %}
+            {{ states('sensor.sn_3015995559_metering_power_absorbed') | float(0) }}
+          {% endif %}
+
+      # Batterie-SoC: SMA Batterie-Wechselrichter SN 3015995559
       - name: battery_soc_pct
         unique_id: battery_soc_pct
         unit_of_measurement: "%"
         device_class: battery
         state_class: measurement
-        state: "{{ states('input_number.battery_soc_pct') | float(0) }}"
+        state: >-
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.battery_soc_pct') | float(0) }}
+          {% else %}
+            {{ states('sensor.sn_3015995559_battery_soc_total') | float(0) }}
+          {% endif %}
+
+      # Batterie-Leistung: positiv = laden, negativ = entladen
       - name: battery_power_w
         unique_id: battery_power_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
-        state: "{{ states('input_number.battery_power_w') | float(0) }}"
-      - name: miner_temp_c
-        unique_id: miner_temp_c
-        unit_of_measurement: "C"
-        state_class: measurement
-        state: "{{ states('input_number.miner_temp_c') | float(0) }}"
-      - name: miner_heartbeat_age_sec
-        unique_id: miner_heartbeat_age_sec
-        unit_of_measurement: "s"
-        state_class: measurement
-        state: "{{ states('input_number.miner_heartbeat_age_sec') | float(0) }}"
-      - name: miner_power_w
-        unique_id: miner_power_w
-        unit_of_measurement: "W"
-        device_class: power
-        state_class: measurement
         state: >-
-          {% if is_state('switch.miner_relay', 'on') %}
-            {{ states('input_number.miner_power_w') | float(0) }}
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.battery_power_w') | float(0) }}
           {% else %}
-            0
+            {% set charge    = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
+            {% set discharge = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
+            {{ (charge - discharge) | round(0) }}
           {% endif %}
+
+      # Überschuss = PV - Hauslast - Netzbezug
       - name: surplus_kw
         unique_id: surplus_kw
         unit_of_measurement: "kW"
         state_class: measurement
         state: >-
-          {% set pv = states('sensor.pv_power_w') | float(0) %}
+          {% set pv   = states('sensor.pv_power_w') | float(0) %}
           {% set load = states('sensor.house_load_w') | float(0) %}
           {% set grid = states('sensor.grid_import_w') | float(0) %}
           {{ ((pv - load - grid) / 1000) | round(3) }}
-      - name: miner_status
-        unique_id: miner_status
+
+      # Miner-Gesamtleistung (direkt aus cgminer API)
+      - name: miner_total_power_w
+        unique_id: miner_total_power_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
         state: >-
-          {{ 'RUNNING' if is_state('switch.miner_relay', 'on') else 'STOPPED' }}
+          {% set m1 = states('sensor.miner1_cur_load') | float(0) %}
+          {% set m2 = states('sensor.miner2_cur_load') | float(0) %}
+          {{ (m1 + m2) | round(0) }}
+
+      # Maximale Chip-Temp beider Miner
+      - name: miner_max_chip_temp_c
+        unique_id: miner_max_chip_temp_c
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set t1 = states('sensor.miner1_tmax') | float(0) %}
+          {% set t2 = states('sensor.miner2_tmax') | float(0) %}
+          {{ [t1, t2] | max }}
+
+      # Block-Fenster
       - name: block_id
         unique_id: block_id
         state: >-
           {% set block = states('input_number.block_minutes') | int(10) %}
           {% set block = 1 if block < 1 else block %}
           {{ (as_timestamp(now()) // (block * 60)) | int }}
+
       - name: block_window_start
         unique_id: block_window_start
         state: >-
@@ -470,47 +423,19 @@ template:
           {% set block = 1 if block < 1 else block %}
           {% set ts = ((as_timestamp(now()) // (block * 60)) * block * 60) | int %}
           {{ ts | timestamp_custom('%Y-%m-%d %H:%M:%S', true) }}
-      - name: block_window_end
-        unique_id: block_window_end
-        state: >-
-          {% set block = states('input_number.block_minutes') | int(10) %}
-          {% set block = 1 if block < 1 else block %}
-          {% set ts = (((as_timestamp(now()) // (block * 60)) + 1) * block * 60) | int %}
-          {{ ts | timestamp_custom('%Y-%m-%d %H:%M:%S', true) }}
-      - name: bg_decision_priority
-        unique_id: bg_decision_priority
-        state: >-
-          {% set safety = is_state('binary_sensor.r3_safety_override', 'on') or is_state('binary_sensor.safety_lockout_active', 'on') %}
-          {% set override = is_state('input_boolean.override_active', 'on') %}
-          {% set override_action = states('input_select.override_action') %}
-          {% set r2_hard = is_state('binary_sensor.r2_soc_hard', 'on') %}
-          {% set r2_grid = is_state('binary_sensor.r2_grid_import_ok', 'on') %}
-          {% set r5_hold = is_state('binary_sensor.r5_min_runtime_active', 'on') or is_state('binary_sensor.r5_min_pause_active', 'on') or is_state('binary_sensor.r5_deadband_active', 'on') %}
-          {% set r1 = is_state('binary_sensor.r1_surplus_ok', 'on') %}
-          {% if safety %}
-            R3_SAFETY
-          {% elif override and override_action in ['START', 'STOP', 'THROTTLE', 'NOOP'] %}
-            OVERRIDE
-          {% elif (not r2_hard) or (not r2_grid) %}
-            R2_AUTARKY
-          {% elif r5_hold %}
-            R5_STABILITY
-          {% elif r1 %}
-            R1_SURPLUS
-          {% else %}
-            IDLE
-          {% endif %}
+
+      # Entscheidungs-Sensor (read-only Zusammenfassung)
       - name: bg_decision_action
         unique_id: bg_decision_action
         state: >-
           {% set safety = is_state('binary_sensor.r3_safety_override', 'on') or is_state('binary_sensor.safety_lockout_active', 'on') %}
           {% set override = is_state('input_boolean.override_active', 'on') %}
           {% set override_action = states('input_select.override_action') %}
-          {% set relay_on = is_state('switch.miner_relay', 'on') %}
-          {% set r1 = is_state('binary_sensor.r1_surplus_ok', 'on') %}
-          {% set r2_soft = is_state('binary_sensor.r2_soc_soft', 'on') %}
           {% set r2_hard = is_state('binary_sensor.r2_soc_hard', 'on') %}
           {% set r2_grid = is_state('binary_sensor.r2_grid_import_ok', 'on') %}
+          {% set r1 = is_state('binary_sensor.r1_surplus_ok', 'on') %}
+          {% set r2_soft = is_state('binary_sensor.r2_soc_soft', 'on') %}
+          {% set miners_on = is_state('binary_sensor.miners_any_running', 'on') %}
           {% set min_runtime = is_state('binary_sensor.r5_min_runtime_active', 'on') %}
           {% set min_pause = is_state('binary_sensor.r5_min_pause_active', 'on') %}
           {% set deadband = is_state('binary_sensor.r5_deadband_active', 'on') %}
@@ -520,190 +445,147 @@ template:
             {{ override_action }}
           {% elif (not r2_hard) or (not r2_grid) %}
             STOP
-          {% elif relay_on %}
-            {% if not r2_soft %}
-              THROTTLE
-            {% elif min_runtime or deadband %}
-              NOOP
-            {% elif not r1 %}
-              THROTTLE
-            {% else %}
-              NOOP
+          {% elif miners_on %}
+            {% if not r2_soft %}THROTTLE
+            {% elif min_runtime or deadband %}NOOP
+            {% elif not r1 %}THROTTLE
+            {% else %}NOOP
             {% endif %}
           {% else %}
-            {% if min_pause or deadband %}
-              NOOP
-            {% elif r1 and r2_soft and r2_grid %}
-              START
-            {% else %}
-              NOOP
+            {% if min_pause or deadband %}NOOP
+            {% elif r1 and r2_soft and r2_grid %}START
+            {% else %}NOOP
             {% endif %}
           {% endif %}
-      - name: bg_decision_reason
-        unique_id: bg_decision_reason
+
+      - name: bg_decision_priority
+        unique_id: bg_decision_priority
         state: >-
-          {% set action = states('sensor.bg_decision_action') %}
-          {% set priority = states('sensor.bg_decision_priority') %}
-          {% set surplus = states('sensor.surplus_kw') | float(0) %}
-          {% set soc = states('sensor.battery_soc_pct') | float(0) %}
-          {% set grid = states('sensor.grid_import_w') | float(0) %}
-          {% if action == 'STOP' and priority == 'R3_SAFETY' %}
-            Safety active (R3) or lockout not expired.
-          {% elif action == 'STOP' and priority == 'R2_AUTARKY' %}
-            Autarky protection (R2): SoC or grid guard violated.
-          {% elif action == 'THROTTLE' %}
-            Controlled throttling due to soft constraints.
-          {% elif action == 'START' %}
-            Start allowed: surplus and battery guards are satisfied.
-          {% else %}
-            No transition in this block window.
+          {% set safety = is_state('binary_sensor.r3_safety_override', 'on') or is_state('binary_sensor.safety_lockout_active', 'on') %}
+          {% set override = is_state('input_boolean.override_active', 'on') %}
+          {% set r2_hard = is_state('binary_sensor.r2_soc_hard', 'on') %}
+          {% set r2_grid = is_state('binary_sensor.r2_grid_import_ok', 'on') %}
+          {% set r5_hold = is_state('binary_sensor.r5_min_runtime_active', 'on') or is_state('binary_sensor.r5_min_pause_active', 'on') or is_state('binary_sensor.r5_deadband_active', 'on') %}
+          {% set r1 = is_state('binary_sensor.r1_surplus_ok', 'on') %}
+          {% if safety %}R3_SAFETY
+          {% elif override %}OVERRIDE
+          {% elif (not r2_hard) or (not r2_grid) %}R2_AUTARKY
+          {% elif r5_hold %}R5_STABILITY
+          {% elif r1 %}R1_SURPLUS
+          {% else %}IDLE
           {% endif %}
+
       - name: bg_decision_code
         unique_id: bg_decision_code
         state: >-
-          {% set action = states('sensor.bg_decision_action') %}
-          {% set priority = states('sensor.bg_decision_priority') %}
-          {{ action ~ '_' ~ priority }}
-      - name: bg_decision_explanation
-        unique_id: bg_decision_explanation
-        state: >-
-          {% set action = states('sensor.bg_decision_action') %}
-          {% set priority = states('sensor.bg_decision_priority') %}
-          {% set surplus = states('sensor.surplus_kw') | float(0) %}
-          {% set soc = states('sensor.battery_soc_pct') | float(0) %}
-          {% set grid = states('sensor.grid_import_w') | float(0) %}
-          {% set temp = states('sensor.miner_temp_c') | float(0) %}
-          {% set hb = states('sensor.miner_heartbeat_age_sec') | float(0) %}
-          {{ action }} via {{ priority }} | surplus={{ surplus | round(2) }}kW soc={{ soc | round(1) }}% grid={{ grid | round(0) }}W temp={{ temp | round(1) }}C hb={{ hb | round(0) }}s
-      - name: rule_states_json
-        unique_id: rule_states_json
-        state: >-
-          {{
-            {
-              "r1_surplus_ok": is_state('binary_sensor.r1_surplus_ok', 'on'),
-              "r2_soc_soft": is_state('binary_sensor.r2_soc_soft', 'on'),
-              "r2_soc_hard": is_state('binary_sensor.r2_soc_hard', 'on'),
-              "r2_grid_import_ok": is_state('binary_sensor.r2_grid_import_ok', 'on'),
-              "r3_overtemp": is_state('binary_sensor.r3_overtemp', 'on'),
-              "r3_comm_timeout": is_state('binary_sensor.r3_comm_timeout', 'on'),
-              "r3_emergency_stop": is_state('binary_sensor.r3_emergency_stop', 'on'),
-              "r5_deadband_active": is_state('binary_sensor.r5_deadband_active', 'on'),
-              "r5_min_runtime_active": is_state('binary_sensor.r5_min_runtime_active', 'on'),
-              "r5_min_pause_active": is_state('binary_sensor.r5_min_pause_active', 'on')
-            } | to_json
-          }}
-      - name: bg_test_status
-        unique_id: bg_test_status
-        state: >-
-          {% set p = states('input_number.test_pass_count') | int(0) %}
-          {% set f = states('input_number.test_fail_count') | int(0) %}
-          {% set total = p + f %}
-          {% if total == 0 %}
-            NOT_RUN
-          {% elif f == 0 %}
-            PASS
-          {% else %}
-            FAIL
-          {% endif %}
-      - name: bg_test_totals
-        unique_id: bg_test_totals
-        state: >-
-          {% set p = states('input_number.test_pass_count') | int(0) %}
-          {% set f = states('input_number.test_fail_count') | int(0) %}
-          {{ "pass=" ~ p ~ " fail=" ~ f ~ " total=" ~ (p + f) }}
+          {{ states('sensor.bg_decision_action') ~ '_' ~ states('sensor.bg_decision_priority') }}
+
+  # ── Regel-Binärsensoren ───────────────────────────────────────────────────
   - binary_sensor:
+      # R1: Überschuss vorhanden
       - name: r1_surplus_ok
         unique_id: r1_surplus_ok
         state: >-
           {{ (states('sensor.surplus_kw') | float(0)) >=
              (states('input_number.r1_surplus_min_kw') | float(0)) }}
+
+      # R2: SoC-Schutz (weich)
       - name: r2_soc_soft
         unique_id: r2_soc_soft
         state: >-
           {{ (states('sensor.battery_soc_pct') | float(0)) >=
              (states('input_number.r2_soc_soft_min_pct') | float(0)) }}
+
+      # R2: SoC-Schutz (hart)
       - name: r2_soc_hard
         unique_id: r2_soc_hard
         state: >-
           {{ (states('sensor.battery_soc_pct') | float(0)) >=
              (states('input_number.r2_soc_hard_min_pct') | float(0)) }}
+
+      # R2: Netzimport-Schutz
       - name: r2_grid_import_ok
         unique_id: r2_grid_import_ok
         state: >-
           {{ (states('sensor.grid_import_w') | float(0)) <=
              (states('input_number.r2_max_grid_import_w') | float(0)) }}
+
+      # R3: Übertemperatur (max beider Miner)
       - name: r3_overtemp
         unique_id: r3_overtemp
         state: >-
-          {{ (states('sensor.miner_temp_c') | float(0)) >=
+          {{ (states('sensor.miner_max_chip_temp_c') | float(0)) >=
              (states('input_number.r3_max_chip_temp_c') | float(0)) }}
+
+      # R3: Kommunikationsausfall (mindestens ein Miner offline)
       - name: r3_comm_timeout
         unique_id: r3_comm_timeout
         state: >-
-          {{ (states('sensor.miner_heartbeat_age_sec') | float(0)) >=
-             (states('input_number.r3_comm_timeout_sec') | float(0)) }}
+          {{ is_state('binary_sensor.miner1_available', 'off') or
+             is_state('binary_sensor.miner2_available', 'off') }}
+
+      # R3: Notfall-Stop
       - name: r3_emergency_stop
         unique_id: r3_emergency_stop
         state: "{{ is_state('input_boolean.r3_emergency_stop', 'on') }}"
+
+      # R3: Safety-Override (kombiniert)
       - name: r3_safety_override
         unique_id: r3_safety_override
         state: >-
           {{ is_state('binary_sensor.r3_overtemp', 'on') or
              is_state('binary_sensor.r3_comm_timeout', 'on') or
              is_state('binary_sensor.r3_emergency_stop', 'on') }}
+
+      # Safety-Lockout aktiv
       - name: safety_lockout_active
         unique_id: safety_lockout_active
         state: >-
           {% set until = states('input_datetime.safety_lockout_until') %}
-          {% if until in ['unknown', 'unavailable', ''] %}
-            false
-          {% else %}
-            {{ as_timestamp(now()) < as_timestamp(until) }}
+          {% if until in ['unknown', 'unavailable', ''] %}false
+          {% else %}{{ as_timestamp(now()) < as_timestamp(until) }}
           {% endif %}
+
+      # Miner läuft (mindestens einer)
+      - name: miners_any_running
+        unique_id: miners_any_running
+        state: >-
+          {{ states('sensor.miner1_workmode_status') in ['Eco', 'Standard', 'Super'] or
+             states('sensor.miner2_workmode_status') in ['Eco', 'Standard', 'Super'] }}
+
+      # R5: Deadband
       - name: r5_deadband_active
         unique_id: r5_deadband_active
         state: >-
           {% set until = states('input_datetime.deadband_valid_until') %}
-          {% if until in ['unknown', 'unavailable', ''] %}
-            false
-          {% else %}
-            {{ as_timestamp(now()) < as_timestamp(until) }}
+          {% if until in ['unknown', 'unavailable', ''] %}false
+          {% else %}{{ as_timestamp(now()) < as_timestamp(until) }}
           {% endif %}
+
+      # R5: Mindest-Laufzeit
       - name: r5_min_runtime_active
         unique_id: r5_min_runtime_active
         state: >-
           {% set started = states('input_datetime.last_start_at') %}
-          {% if not is_state('switch.miner_relay', 'on') or started in ['unknown', 'unavailable', ''] %}
+          {% if not is_state('binary_sensor.miners_any_running', 'on') or started in ['unknown', 'unavailable', ''] %}
             false
           {% else %}
             {% set start_ts = as_timestamp(started) %}
             {% set hold_blocks = states('input_number.r5_min_runtime_blocks') | int(0) %}
             {% set block_minutes = states('input_number.block_minutes') | int(10) %}
-            {% set valid_until = start_ts + (hold_blocks * block_minutes * 60) %}
-            {{ as_timestamp(now()) < valid_until }}
+            {{ as_timestamp(now()) < (start_ts + (hold_blocks * block_minutes * 60)) }}
           {% endif %}
+
+      # R5: Mindest-Pause
       - name: r5_min_pause_active
         unique_id: r5_min_pause_active
         state: >-
           {% set stopped = states('input_datetime.last_stop_at') %}
-          {% if is_state('switch.miner_relay', 'on') or stopped in ['unknown', 'unavailable', ''] %}
+          {% if is_state('binary_sensor.miners_any_running', 'on') or stopped in ['unknown', 'unavailable', ''] %}
             false
           {% else %}
             {% set stop_ts = as_timestamp(stopped) %}
             {% set hold_blocks = states('input_number.r5_min_pause_blocks') | int(0) %}
             {% set block_minutes = states('input_number.block_minutes') | int(10) %}
-            {% set valid_until = stop_ts + (hold_blocks * block_minutes * 60) %}
-            {{ as_timestamp(now()) < valid_until }}
+            {{ as_timestamp(now()) < (stop_ts + (hold_blocks * block_minutes * 60)) }}
           {% endif %}
-  - switch:
-      - name: miner_relay
-        unique_id: miner_relay
-        state: "{{ is_state('input_boolean.miner_relay_sim', 'on') }}"
-        turn_on:
-          service: input_boolean.turn_on
-          target:
-            entity_id: input_boolean.miner_relay_sim
-        turn_off:
-          service: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.miner_relay_sim
