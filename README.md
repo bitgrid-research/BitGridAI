@@ -50,7 +50,7 @@ Die Software wird als Open Source im aktuellen Forschungsstand bereitgestellt.
 &nbsp;
 
 <details>
-<summary><strong> ⚡ Transparenz & Unterstützung (optional)</strong></summary>
+<summary><strong> ⚡ Transparenz & Unterstützung ❤️</strong></summary>
 
 &nbsp;
 
