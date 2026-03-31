@@ -36,6 +36,15 @@ def evaluate(
             reason="PRICE_TOO_HIGH",
         )
 
+    # ε-path: price signal unavailable → price check skipped, proceed without it
+    if state.energy_price_ct_kwh is None:
+        return RuleVote(
+            rule="R1",
+            action="START",
+            confidence=0.7,
+            reason="SURPLUS_OK_NO_PRICE",
+        )
+
     return RuleVote(
         rule="R1",
         action="START",

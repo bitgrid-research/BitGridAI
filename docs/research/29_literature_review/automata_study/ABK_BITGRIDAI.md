@@ -82,6 +82,34 @@ if state.quality == "error":
 
 ---
 
+### Konzept: Nullable Variablen & ε-Elimination
+
+**V₁-Algorithmus auf EnergyState angewendet:**
+
+```
+Schritt 1: V₁ = {}
+Schritt 2: Signale die None sein können (= direkte ε-Regeln):
+           energy_price_ct_kwh → V₁ = { PRICE }
+           pv_forecast_kw      → V₁ = { PRICE, FORECAST }
+Schritt 3: Regeln die nur von nullable Signalen abhängen:
+           R4 hängt nur von FORECAST ab → V₁ = { PRICE, FORECAST, R4 }
+```
+
+**Ableitungen:**
+
+| Variable | Nullable? | Verhalten wenn None | reason-Code |
+|----------|-----------|---------------------|-------------|
+| `pv_forecast_kw` | ✓ | R4 gibt `None` zurück (kein Veto) | — |
+| `energy_price_ct_kwh` | ✓ | R1 überspringt Preis-Check | `SURPLUS_OK_NO_PRICE` (confidence 0.7) |
+| `grid_export_w` | ✓ | Nicht in Regeln genutzt | — |
+
+**Fix aus der Theorie abgeleitet (`r1_profitability.py`):**
+Vorher: stille ε-Ableitung ohne Dokumentation → START ohne reason.
+Nachher: expliziter ε-Pfad mit `SURPLUS_OK_NO_PRICE` und reduzierter confidence (0.7 statt 0.9),
+weil die Entscheidung weniger abgesichert ist.
+
+---
+
 ## W2 — DFA, NFA, Reguläre Ausdrücke (geplant)
 
 ### Idee: R3 Safety als formaler DFA
