@@ -1,3 +1,7 @@
+# BitGridAI — Studienmaterial 
+Automata.pdf
+*.pdf
+
 # BitGridAI — Laufzeit-Daten (nie einchecken)
 data/bitgrid.db
 data/*.db
