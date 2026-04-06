@@ -1,4 +1,4 @@
-.PHONY: check fmt lint test test-unit test-replay build clean
+.PHONY: check fmt lint test test-unit test-replay build clean deploy-ha deploy-ha-restart
 
 # Vollständiger Qualitätscheck (vor jedem PR)
 check: fmt lint test
@@ -30,6 +30,12 @@ down:
 
 logs:
 	docker compose logs -f --tail=50
+
+deploy-ha:
+	bash scripts/deploy_ha.sh
+
+deploy-ha-restart:
+	bash scripts/deploy_ha.sh --restart
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +

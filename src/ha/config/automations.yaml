@@ -1,137 +1,223 @@
 - id: bg_decision_block_tick
-  alias: "BG Decision Block Tick"
+  alias: BG Decision Block Tick
   mode: single
   trigger:
-    - platform: time_pattern
-      minutes: "/1"
+  - platform: time_pattern
+    minutes: /1
   condition:
-    - condition: state
-      entity_id: input_boolean.simulation_mode
-      state: "on"
-    - condition: template
-      value_template: >-
-        {% set block = states('input_number.block_minutes') | int(10) %}
-        {% set block = 1 if block < 1 else block %}
-        {{ (now().minute % block) == 0 }}
+  - condition: state
+    entity_id: input_boolean.simulation_mode
+    state: 'on'
+  - condition: template
+    value_template: '{% set block = states(''input_number.block_minutes'') | int(10)
+      %} {% set block = 1 if block < 1 else block %} {{ (now().minute % block) ==
+      0 }}'
   action:
-    - service: script.bg_decision_cycle
-
+  - service: script.bg_decision_cycle
 - id: bg_decision_reactive_inputs
-  alias: "BG Decision Reactive Inputs"
+  alias: BG Decision Reactive Inputs
   mode: restart
   trigger:
-    - platform: state
-      entity_id:
-        - input_number.pv_power_w
-        - input_number.house_load_w
-        - input_number.grid_import_w
-        - input_number.battery_soc_pct
-        - input_number.battery_power_w
-        - input_number.miner_temp_c
-        - input_number.miner_heartbeat_age_sec
-        - input_number.miner_power_w
-        - input_number.r1_surplus_min_kw
-        - input_number.r2_soc_soft_min_pct
-        - input_number.r2_soc_hard_min_pct
-        - input_number.r2_max_grid_import_w
-        - input_number.r3_max_chip_temp_c
-        - input_number.r3_comm_timeout_sec
-        - input_number.r5_deadband_hold_blocks
-        - input_number.r5_min_runtime_blocks
-        - input_number.r5_min_pause_blocks
-        - input_boolean.override_active
-        - input_select.override_action
-        - input_boolean.r3_emergency_stop
+  - platform: state
+    entity_id:
+    - input_number.pv_power_w
+    - input_number.house_load_w
+    - input_number.grid_import_w
+    - input_number.battery_soc_pct
+    - input_number.battery_power_w
+    - input_number.miner_temp_c
+    - input_number.miner_heartbeat_age_sec
+    - input_number.miner_power_w
+    - input_number.r1_surplus_min_kw
+    - input_number.r2_soc_soft_min_pct
+    - input_number.r2_soc_hard_min_pct
+    - input_number.r2_max_grid_import_w
+    - input_number.r3_max_chip_temp_c
+    - input_number.r3_comm_timeout_sec
+    - input_number.r5_deadband_hold_blocks
+    - input_number.r5_min_runtime_blocks
+    - input_number.r5_min_pause_blocks
+    - input_boolean.override_active
+    - input_select.override_action
+    - input_boolean.r3_emergency_stop
   condition:
-    - condition: state
-      entity_id: input_boolean.simulation_mode
-      state: "on"
+  - condition: state
+    entity_id: input_boolean.simulation_mode
+    state: 'on'
   action:
-    - service: script.bg_decision_cycle
-
+  - service: script.bg_decision_cycle
 - id: bg_safety_immediate_stop
-  alias: "BG Safety Immediate Stop"
+  alias: BG Safety Immediate Stop
   mode: single
   trigger:
-    - platform: state
-      entity_id:
-        - binary_sensor.r3_overtemp
-        - binary_sensor.r3_comm_timeout
-        - binary_sensor.r3_emergency_stop
-      to: "on"
+  - platform: state
+    entity_id:
+    - binary_sensor.r3_overtemp
+    - binary_sensor.r3_comm_timeout
+    - binary_sensor.r3_emergency_stop
+    to: 'on'
   condition:
-    - condition: state
-      entity_id: input_boolean.simulation_mode
-      state: "on"
+  - condition: state
+    entity_id: input_boolean.simulation_mode
+    state: 'on'
   action:
-    - service: script.bg_force_safety_stop
-
+  - service: script.bg_force_safety_stop
 - id: bg_override_activate
-  alias: "BG Override Activate"
+  alias: BG Override Activate
   mode: restart
   trigger:
-    - platform: state
-      entity_id: input_boolean.override_active
-      to: "on"
+  - platform: state
+    entity_id: input_boolean.override_active
+    to: 'on'
   action:
-    - service: input_datetime.set_datetime
-      target:
-        entity_id: input_datetime.override_valid_until
-      data:
-        datetime: >-
-          {{ (now() + timedelta(minutes=states('input_number.override_duration_min') | int(30)))
-             .strftime('%Y-%m-%d %H:%M:%S') }}
-    - service: input_text.set_value
-      target:
-        entity_id: input_text.override_status
-      data:
-        value: "active"
-    - service: script.bg_decision_cycle
-
+  - service: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.override_valid_until
+    data:
+      datetime: "{{ (now() + timedelta(minutes=states('input_number.override_duration_min')
+        | int(30)))\n   .strftime('%Y-%m-%d %H:%M:%S') }}"
+  - service: input_text.set_value
+    target:
+      entity_id: input_text.override_status
+    data:
+      value: active
+  - service: script.bg_decision_cycle
 - id: bg_override_expiry
-  alias: "BG Override Expiry Watchdog"
+  alias: BG Override Expiry Watchdog
   mode: single
   trigger:
-    - platform: time_pattern
-      minutes: "/1"
+  - platform: time_pattern
+    minutes: /1
   condition:
-    - condition: state
-      entity_id: input_boolean.override_active
-      state: "on"
-    - condition: template
-      value_template: >-
-        {% set until = states('input_datetime.override_valid_until') %}
-        {% if until in ['unknown', 'unavailable', ''] %}
-          false
-        {% else %}
-          {{ as_timestamp(now()) >= as_timestamp(until) }}
-        {% endif %}
+  - condition: state
+    entity_id: input_boolean.override_active
+    state: 'on'
+  - condition: template
+    value_template: "{% set until = states('input_datetime.override_valid_until')
+      %} {% if until in ['unknown', 'unavailable', ''] %}\n  false\n{% else %}\n  {{
+      as_timestamp(now()) >= as_timestamp(until) }}\n{% endif %}"
   action:
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.override_active
-    - service: input_text.set_value
-      target:
-        entity_id: input_text.override_status
-      data:
-        value: "expired"
-
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.override_active
+  - service: input_text.set_value
+    target:
+      entity_id: input_text.override_status
+    data:
+      value: expired
 - id: bg_override_deactivate
-  alias: "BG Override Deactivate"
+  alias: BG Override Deactivate
   mode: restart
   trigger:
-    - platform: state
-      entity_id: input_boolean.override_active
-      to: "off"
+  - platform: state
+    entity_id: input_boolean.override_active
+    to: 'off'
   action:
-    - service: input_select.select_option
+  - service: input_select.select_option
+    target:
+      entity_id: input_select.override_action
+    data:
+      option: NOOP
+  - service: input_text.set_value
+    target:
+      entity_id: input_text.override_status
+    data:
+      value: inactive
+  - service: script.bg_decision_cycle
+- id: '1775167102750'
+  alias: 'MVP: Miner auf Super (Akku voll)'
+  description: Schaltet laufende Miner auf Super wenn Akku voll
+  triggers:
+  - value_template: "{{ states('sensor.battery_soc_pct') | float(0) >=\n   states('input_number.mvp_soc_super_pct')
+      | float(100) }}\n"
+    for: 00:02:00
+    trigger: template
+  - event: start
+    trigger: homeassistant
+  conditions:
+  - condition: template
+    value_template: "{{ states('sensor.battery_soc_pct') | float(0) >=\n   states('input_number.mvp_soc_super_pct')
+      | float(100) }}\n"
+  actions:
+  - if:
+    - condition: state
+      entity_id: input_boolean.miner1_auto_load_management
+      state: 'on'
+    - condition: template
+      value_template: '{{ states(''sensor.miner1_workmode_status'') in [''Eco'', ''Standard'']
+        }}
+
+        '
+    then:
+    - action: select.select_option
       target:
-        entity_id: input_select.override_action
+        entity_id: select.miner1_workmode_set
       data:
-        option: "NOOP"
-    - service: input_text.set_value
+        option: Super
+  - if:
+    - condition: state
+      entity_id: input_boolean.miner2_auto_load_management
+      state: 'on'
+    - condition: template
+      value_template: '{{ states(''sensor.miner2_workmode_status'') in [''Eco'', ''Standard'']
+        }}
+
+        '
+    then:
+    - action: select.select_option
       target:
-        entity_id: input_text.override_status
+        entity_id: select.miner2_workmode_set
       data:
-        value: "inactive"
-    - service: script.bg_decision_cycle
+        option: Super
+  mode: single
+- id: '1775167222467'
+  alias: 'MVP: Miner Start Eco'
+  description: Startet beide Miner (Eco) wenn SoC >= Eco-Start-Schwelle
+  triggers:
+  - value_template: "{{ states('sensor.battery_soc_pct') | float(0) >=\n   states('input_number.mvp_soc_eco_start_pct')
+      | float(60) }}\n"
+    for: 00:01:00
+    trigger: template
+  - event: start
+    trigger: homeassistant
+  - entity_id:
+    - input_boolean.miner1_auto_load_management
+    - input_boolean.miner2_auto_load_management
+    to: 'on'
+    trigger: state
+  conditions:
+  - condition: template
+    value_template: "{{ states('sensor.battery_soc_pct') | float(0) >=\n   states('input_number.mvp_soc_eco_start_pct')
+      | float(60) }}\n"
+  actions:
+  - if:
+    - condition: state
+      entity_id: input_boolean.miner1_auto_load_management
+      state: 'on'
+    - condition: template
+      value_template: '{{ states(''sensor.miner1_workmode_status'') == ''Standby''
+        }}
+
+        '
+    then:
+    - action: select.select_option
+      target:
+        entity_id: select.miner1_workmode_set
+      data:
+        option: Eco
+  - if:
+    - condition: state
+      entity_id: input_boolean.miner2_auto_load_management
+      state: 'on'
+    - condition: template
+      value_template: '{{ states(''sensor.miner2_workmode_status'') == ''Standby''
+        }}
+
+        '
+    then:
+    - action: select.select_option
+      target:
+        entity_id: select.miner2_workmode_set
+      data:
+        option: Eco
+  mode: single

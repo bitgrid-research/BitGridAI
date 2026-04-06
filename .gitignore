@@ -1,3 +1,6 @@
+# Lokale Infrastruktur-Dokumentation (IPs, Passwörter, Geräte)
+INFRASTRUCTURE.md
+
 # BitGridAI — Laufzeit-Daten (nie einchecken)
 data/bitgrid.db
 data/*.db

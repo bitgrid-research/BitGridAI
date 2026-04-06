@@ -13,6 +13,8 @@ lovelace:
   resources:
     - url: /hacsfiles/power-flow-card-plus/power-flow-card-plus.js
       type: module
+    - url: /hacsfiles/button-card/button-card.js
+      type: module
   dashboards:
     bitgrid-ai:
       mode: yaml
@@ -74,7 +76,7 @@ input_boolean:
   simulation_mode:
     name: simulation_mode
     icon: mdi:flask
-    initial: on
+    initial: off
   r3_emergency_stop:
     name: r3_emergency_stop
     icon: mdi:alert
@@ -308,6 +310,7 @@ template:
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
+        availability: "true"
         state: >-
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.pv_power_w') | float(0) }}
@@ -375,7 +378,7 @@ template:
             {{ (charge - discharge) | round(0) }}
           {% endif %}
 
-      # Überschuss = PV - Hauslast - Netzbezug
+      # Überschuss für Regelengine = PV - Hauslast - Netzbezug (ohne Miner)
       - name: surplus_kw
         unique_id: surplus_kw
         unit_of_measurement: "kW"
@@ -385,6 +388,19 @@ template:
           {% set load = states('sensor.house_load_w') | float(0) %}
           {% set grid = states('sensor.grid_import_w') | float(0) %}
           {{ ((pv - load - grid) / 1000) | round(3) }}
+
+      # Netto-Überschuss (Display) = tatsächliche Netzeinspeisung
+      - name: grid_export_w
+        unique_id: grid_export_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >-
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            0
+          {% else %}
+            {{ states('sensor.sn_3015995559_metering_power_supplied') | float(0) }}
+          {% endif %}
 
       # Miner-Gesamtleistung (direkt aus cgminer API)
       - name: miner_total_power_w
