@@ -15,6 +15,8 @@ lovelace:
       type: module
     - url: /hacsfiles/button-card/button-card.js
       type: module
+    - url: /hacsfiles/lovelace-layout-card/layout-card.js
+      type: module
   dashboards:
     bitgrid-ai:
       mode: yaml
@@ -26,6 +28,24 @@ lovelace:
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
+
+# ── Recorder: kurze DB-Aufbewahrung, da Langzeit-Daten in JSON-Logs liegen ───
+# Block-Logs (10 min) + Daily-KPI + Monthly-Rollup ersetzen die lange DB-History.
+recorder:
+  purge_keep_days: 14
+  exclude:
+    entity_globs:
+      # Energie-Rohdaten: stündlich in Block-Logs, kein langer DB-Verlauf nötig
+      - sensor.pv_power_w
+      - sensor.house_load_w
+      - sensor.grid_import_w
+      - sensor.grid_export_w
+      - sensor.battery_power_w
+      - sensor.surplus_kw
+      # Prognose-Sensoren: werden nicht historisch ausgewertet
+      - sensor.house_load_forecast_w
+      - sensor.mining_window_free_w
+      - sensor.house_load_mean_7d
 
 # ── MQTT ──────────────────────────────────────────────────────────────────────
 # Broker wird über HA-UI konfiguriert: Einstellungen → Integrationen → MQTT
@@ -592,6 +612,19 @@ template:
             {{ as_timestamp(now()) < (start_ts + (hold_blocks * block_minutes * 60)) }}
           {% endif %}
 
+      # Mining aktiv (für History Stats)
+      - name: miners_in_super
+        unique_id: miners_in_super
+        state: >-
+          {{ states('sensor.miner1_workmode_status') == 'Super' or
+             states('sensor.miner2_workmode_status') == 'Super' }}
+
+      - name: miners_in_eco
+        unique_id: miners_in_eco
+        state: >-
+          {{ states('sensor.miner1_workmode_status') in ['Eco', 'Standard'] or
+             states('sensor.miner2_workmode_status') in ['Eco', 'Standard'] }}
+
       # R5: Mindest-Pause
       - name: r5_min_pause_active
         unique_id: r5_min_pause_active
@@ -605,3 +638,30 @@ template:
             {% set block_minutes = states('input_number.block_minutes') | int(10) %}
             {{ as_timestamp(now()) < (stop_ts + (hold_blocks * block_minutes * 60)) }}
           {% endif %}
+
+# ── Energie-Integration (W → kWh, Riemann-Summe) ─────────────────────────────
+# Liefert kumulative kWh-Werte für Statistiken und utility_meter
+sensor:
+  - platform: integration
+    source: sensor.pv_power_w
+    name: pv_energy_integral
+    unique_id: pv_energy_integral
+    unit_prefix: k
+    round: 3
+    method: trapezoidal
+
+  - platform: integration
+    source: sensor.miner_total_power_w
+    name: mining_energy_integral
+    unique_id: mining_energy_integral
+    unit_prefix: k
+    round: 3
+    method: trapezoidal
+
+  - platform: integration
+    source: sensor.grid_import_w
+    name: grid_import_integral
+    unique_id: grid_import_integral
+    unit_prefix: k
+    round: 3
+    method: trapezoidal

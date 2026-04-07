@@ -141,6 +141,12 @@ mvp_auto:
             - input_boolean.miner1_auto_load_management
             - input_boolean.miner2_auto_load_management
           to: "on"
+        # Miner kehrt nach Reboot in Idle (119W Warmstandby) zurück — sofort starten
+        - platform: state
+          entity_id:
+            - sensor.miner1_workmode_status
+            - sensor.miner2_workmode_status
+          to: "Idle"
       condition:
         - condition: template
           value_template: >
@@ -153,7 +159,7 @@ mvp_auto:
               state: "on"
             - condition: template
               value_template: >
-                {{ states('sensor.miner1_workmode_status') == 'Standby' }}
+                {{ states('sensor.miner1_workmode_status') in ['Standby', 'Idle', 'Off'] }}
           then:
             - action: select.select_option
               target:
@@ -166,13 +172,91 @@ mvp_auto:
               state: "on"
             - condition: template
               value_template: >
-                {{ states('sensor.miner2_workmode_status') == 'Standby' }}
+                {{ states('sensor.miner2_workmode_status') in ['Standby', 'Idle', 'Off'] }}
           then:
             - action: select.select_option
               target:
                 entity_id: select.miner2_workmode_set
               data:
                 option: Eco
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # REGEL 1b: Miner Idle → Standby (Soft-Off) wenn SoC zu niedrig zum Starten
+    # Avalon Q Idle = 119W Warmstandby nach Reboot — kostet Geld ohne Hash-Output
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: mvp_idle_to_standby
+      alias: "MVP: Miner Idle → Standby (kein Startrecht)"
+      description: "Schickt Miner aus Idle-Zustand (119W) per softoff in echten Standby (10W) wenn SoC unter Start-Schwelle"
+      trigger:
+        - platform: state
+          entity_id: sensor.miner1_workmode_status
+          to: "Idle"
+        - platform: state
+          entity_id: sensor.miner2_workmode_status
+          to: "Idle"
+        # Auch beim HA-Start prüfen — Miner könnte bereits in Idle sein
+        - platform: homeassistant
+          event: start
+      condition:
+        - condition: template
+          value_template: >
+            {{ states('sensor.battery_soc_pct') | float(0) <
+               states('input_number.mvp_soc_eco_start_pct') | float(60) }}
+      action:
+        # Beim HA-Start warten bis Entitäten bereit sind
+        - delay: "00:00:30"
+        - if:
+            - condition: template
+              value_template: >
+                {{ states('sensor.miner1_workmode_status') == 'Idle' }}
+            - condition: state
+              entity_id: input_boolean.miner1_auto_load_management
+              state: "on"
+          then:
+            - action: shell_command.miner1_set_softoff
+            # Verifizieren: warten bis Miner reagiert, dann Sensor aktualisieren
+            - delay: "00:00:20"
+            - action: homeassistant.update_entity
+              target:
+                entity_id: sensor.miner1_api_litestats
+            - delay: "00:00:10"
+            # Retry falls Miner immer noch in Idle (softoff wurde ignoriert)
+            - if:
+                - condition: template
+                  value_template: >
+                    {{ states('sensor.miner1_workmode_status') == 'Idle' }}
+              then:
+                - action: shell_command.miner1_set_softoff
+                - delay: "00:00:20"
+                - action: homeassistant.update_entity
+                  target:
+                    entity_id: sensor.miner1_api_litestats
+        - if:
+            - condition: template
+              value_template: >
+                {{ states('sensor.miner2_workmode_status') == 'Idle' }}
+            - condition: state
+              entity_id: input_boolean.miner2_auto_load_management
+              state: "on"
+          then:
+            - action: shell_command.miner2_set_softoff
+            # Verifizieren: warten bis Miner reagiert, dann Sensor aktualisieren
+            - delay: "00:00:20"
+            - action: homeassistant.update_entity
+              target:
+                entity_id: sensor.miner2_api_litestats
+            - delay: "00:00:10"
+            # Retry falls Miner immer noch in Idle (softoff wurde ignoriert)
+            - if:
+                - condition: template
+                  value_template: >
+                    {{ states('sensor.miner2_workmode_status') == 'Idle' }}
+              then:
+                - action: shell_command.miner2_set_softoff
+                - delay: "00:00:20"
+                - action: homeassistant.update_entity
+                  target:
+                    entity_id: sensor.miner2_api_litestats
 
     # ─────────────────────────────────────────────────────────────────────────
     # REGEL 2: Auf Super hochschalten wenn Akku voll
@@ -277,7 +361,7 @@ mvp_auto:
         - if:
             - condition: template
               value_template: >
-                {{ states('sensor.miner1_workmode_status') != 'Standby' }}
+                {{ states('sensor.miner1_workmode_status') not in ['Standby', 'Off'] }}
           then:
             - action: select.select_option
               target:
@@ -287,7 +371,7 @@ mvp_auto:
         - if:
             - condition: template
               value_template: >
-                {{ states('sensor.miner2_workmode_status') != 'Standby' }}
+                {{ states('sensor.miner2_workmode_status') not in ['Standby', 'Off'] }}
           then:
             - action: select.select_option
               target:

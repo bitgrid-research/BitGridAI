@@ -1,0 +1,48 @@
+pool:
+
+  # ── Mining Pool REST-Sensor (read-only, alle 5 Min) ──────────────────────────
+  # Kopieren nach pool.yaml und mit eigenen Werten befüllen.
+  # pool.yaml ist gitignored — Credentials bleiben lokal.
+  #
+  # F2Pool:   resource: "https://api.f2pool.com/bitcoin/<username>"
+  #           F-Api-Secret: "<read-only-key aus f2pool.com/mining-user/...>"
+  # Braiins:  resource: "https://pool.braiins.com/api/v1/..."
+  rest:
+    - resource: "https://api.f2pool.com/bitcoin/<username>"
+      headers:
+        F-Api-Secret: "<pool-api-key>"
+      scan_interval: 300
+      sensor:
+        - name: "pool_balance_btc"
+          unique_id: pool_balance_btc
+          value_template: "{{ value_json.balance | float(0) | round(8) }}"
+          unit_of_measurement: "BTC"
+          state_class: total
+          icon: mdi:bitcoin
+
+        - name: "pool_paid_total_btc"
+          unique_id: pool_paid_total_btc
+          value_template: "{{ value_json.paid | float(0) | round(8) }}"
+          unit_of_measurement: "BTC"
+          state_class: total_increasing
+          icon: mdi:bitcoin
+
+        - name: "pool_hashrate_ths"
+          unique_id: pool_hashrate_ths
+          value_template: "{{ (value_json.hashrate | float(0) / 1e12) | round(2) }}"
+          unit_of_measurement: "TH/s"
+          state_class: measurement
+          icon: mdi:pickaxe
+
+        - name: "pool_workers_active"
+          unique_id: pool_workers_active
+          value_template: "{{ value_json.workers_active | int(0) }}"
+          state_class: measurement
+          icon: mdi:server
+
+  # ── Tagesertrag: Delta von paid_total (reset Mitternacht) ───────────────────
+  utility_meter:
+    pool_earned_today_btc:
+      name: "Pool Ertrag heute (BTC)"
+      source: sensor.pool_paid_total_btc
+      cycle: daily

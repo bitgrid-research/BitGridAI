@@ -73,785 +73,1142 @@ views:
   - title: Miner
     path: miner
     icon: mdi:pickaxe
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 1fr 1fr
+          grid-template-rows: auto
+          margin: 8px
+          row-gap: 16px
+          column-gap: 40px
+        cards:
+
+        - type: vertical-stack
+          cards:
+
+            # ── Energie-Status ──────────────────────────────────────────────────────
+            - type: horizontal-stack
+              cards:
+
+                - type: custom:button-card
+                  entity: sensor.battery_soc_pct
+                  name: Akku
+                  icon: mdi:battery-charging
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v = parseFloat(entity.state);
+                            if (v <= 50) return '#F44336';
+                            if (v <= 64) return '#f59e0b';
+                            if (v <= 95) return '#4CAF50';
+                            return '#8BC34A';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.pv_power_w
+                  name: PV
+                  icon: mdi:solar-power
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v = parseFloat(entity.state);
+                            if (!v || v === 0) return 'var(--secondary-text-color)';
+                            if (v < 800)  return '#F44336';
+                            if (v < 1600) return '#f59e0b';
+                            if (v < 3400) return '#4CAF50';
+                            return '#8BC34A';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.grid_export_w
+                  name: Überschuss
+                  icon: mdi:transmission-tower-export
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v = parseFloat(entity.state);
+                            if (!v || v === 0) return 'var(--secondary-text-color)';
+                            if (v < 800) return '#f59e0b';
+                            return '#4CAF50';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.grid_import_w
+                  name: Netzbezug
+                  icon: mdi:transmission-tower-import
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v = parseFloat(entity.state);
+                            if (!v || v === 0) return 'var(--secondary-text-color)';
+                            if (v <= 500)      return '#f59e0b';
+                            return '#F44336';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.house_load_w
+                  name: Haus
+                  icon: mdi:home-lightning-bolt
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v = parseFloat(entity.state);
+                            if (!v || v === 0) return 'var(--secondary-text-color)';
+                            if (v < 500)  return '#4CAF50';
+                            if (v < 1500) return '#f59e0b';
+                            return '#F44336';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.miner_total_power_w
+                  name: Miner
+                  icon: mdi:pickaxe
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v = parseFloat(entity.state);
+                            if (!v || v === 0) return 'var(--secondary-text-color)';
+                            if (v < 400)  return '#f59e0b';
+                            return '#4CAF50';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: weather.forecast_home
+                  name: Wetter
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: var(--primary-color)
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+            # ── Miner links | Heizstab rechts ──────────────────────────────
+
+            - type: custom:button-card
+              show_name: false
+              show_icon: false
+              show_state: false
+              styles:
+                card:
+                  - background: transparent
+                  - box-shadow: none
+                  - height: 8px
+                  - padding: 0
+
+            # ── Miner Spalten ────────────────────────────────────────────────────────
+            - type: grid
+              columns: 2
+              square: false
+              cards:
+
+                # ─────────────────────────────────────────────
+                # MINER 1
+                # ─────────────────────────────────────────────
+                - type: vertical-stack
+                  cards:
+
+                    - type: custom:button-card
+                      template: miner_header
+                      entity: binary_sensor.miner1_available
+                      name: "Miner Avalon Q 01  ›"
+                      icon: mdi:memory
+
+                    - type: horizontal-stack
+                      cards:
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: sensor.miner1_workmode_status
+                          name: Power
+                          icon: mdi:power
+                          state_display: >
+                            [[[
+                              return entity.state === 'Standby' ? 'Aus' : 'Ein';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standby'
+                                      ? 'var(--disabled-color)' : '#4CAF50';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: >
+                              [[[
+                                return entity.state === 'Standby'
+                                  ? 'shell_command.miner1_set_softon'
+                                  : 'shell_command.miner1_set_softoff';
+                              ]]]
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: input_boolean.miner1_auto_load_management
+                          name: Auto
+                          icon: mdi:refresh-auto
+                          state_display: >
+                            [[[
+                              return entity.state === 'on' ? 'Ein' : 'Aus';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'on'
+                                      ? '#4CAF50' : 'var(--disabled-color)';
+                                  ]]]
+                          tap_action:
+                            action: toggle
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: switch.miner1_lcdonoff_switch
+                          name: Display
+                          icon: mdi:fit-to-screen
+                          state_display: >
+                            [[[
+                              return entity.state === 'on' ? 'Ein' : 'Aus';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'on'
+                                      ? '#2196F3' : 'var(--disabled-color)';
+                                  ]]]
+                          tap_action:
+                            action: toggle
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          name: Reboot
+                          icon: mdi:restart
+                          show_state: false
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: "#f59e0b"
+                          tap_action:
+                            action: call-service
+                            service: shell_command.miner1_reboot
+
+                    - type: horizontal-stack
+                      cards:
+                        - type: custom:button-card
+                          entity: select.miner1_workmode_set
+                          name: Standby
+                          icon: mdi:power-sleep
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    if (entity.state === 'Standby') return '#757575';
+                                    if (entity.state === 'Idle') return '#8D6E63';
+                                    return 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return ['Standby','Idle'].includes(entity.state)
+                                      ? '#fff' : '#757575';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return ['Standby','Idle'].includes(entity.state)
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner1_workmode_set
+                              option: Standby
+                        - type: custom:button-card
+                          entity: select.miner1_workmode_set
+                          name: Eco
+                          icon: mdi:leaf
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#4CAF50' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#fff' : '#4CAF50';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner1_workmode_set
+                              option: Eco
+                        - type: custom:button-card
+                          entity: select.miner1_workmode_set
+                          name: Standard
+                          icon: mdi:gauge
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#f59e0b' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#fff' : '#f59e0b';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner1_workmode_set
+                              option: Standard
+                        - type: custom:button-card
+                          entity: select.miner1_workmode_set
+                          name: Super
+                          icon: mdi:rocket-launch
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#F44336' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#fff' : '#F44336';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner1_workmode_set
+                              option: Super
+
+                    - type: custom:button-card
+                      show_name: false
+                      show_icon: false
+                      show_state: false
+                      styles:
+                        card:
+                          - padding: 12px 8px
+                        custom_fields:
+                          stats:
+                            - width: 100%
+                            - justify-self: stretch
+                            - box-sizing: border-box
+                      custom_fields:
+                        stats: >
+                          [[[
+                            const ths = states['sensor.miner1_thsspd']?.state ?? '—';
+                            const jth = states['sensor.miner1_energy_per_th']?.state ?? '—';
+                            const w   = states['sensor.miner1_cur_load']?.state ?? '—';
+                            const fan = states['sensor.miner1_fanr']?.state ?? '—';
+                            const row = (icon, label, val) =>
+                              `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                                <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
+                                <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val}</span>
+                              </div>`;
+                            return `<div style="width:100%;padding:4px 0;text-align:left;">
+                              ${row('mdi:speedometer','TH/s',ths)}
+                              ${row('mdi:lightning-bolt','J/TH',jth)}
+                              ${row('mdi:flash','W',w)}
+                              ${row('mdi:fan','Fan %',fan)}
+                            </div>`;
+                          ]]]
+
+                # ─────────────────────────────────────────────
+                # MINER 2
+                # ─────────────────────────────────────────────
+                - type: vertical-stack
+                  cards:
+
+                    - type: custom:button-card
+                      template: miner_header
+                      entity: binary_sensor.miner2_available
+                      name: "Miner Avalon Q 02  ›"
+                      icon: mdi:memory
+
+                    - type: horizontal-stack
+                      cards:
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: sensor.miner2_workmode_status
+                          name: Power
+                          icon: mdi:power
+                          state_display: >
+                            [[[
+                              return entity.state === 'Standby' ? 'Aus' : 'Ein';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standby'
+                                      ? 'var(--disabled-color)' : '#4CAF50';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: >
+                              [[[
+                                return entity.state === 'Standby'
+                                  ? 'shell_command.miner2_set_softon'
+                                  : 'shell_command.miner2_set_softoff';
+                              ]]]
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: input_boolean.miner2_auto_load_management
+                          name: Auto
+                          icon: mdi:refresh-auto
+                          state_display: >
+                            [[[
+                              return entity.state === 'on' ? 'Ein' : 'Aus';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'on'
+                                      ? '#4CAF50' : 'var(--disabled-color)';
+                                  ]]]
+                          tap_action:
+                            action: toggle
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: switch.miner2_lcdonoff_switch
+                          name: Display
+                          icon: mdi:fit-to-screen
+                          state_display: >
+                            [[[
+                              return entity.state === 'on' ? 'Ein' : 'Aus';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'on'
+                                      ? '#2196F3' : 'var(--disabled-color)';
+                                  ]]]
+                          tap_action:
+                            action: toggle
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          name: Reboot
+                          icon: mdi:restart
+                          show_state: false
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: "#f59e0b"
+                          tap_action:
+                            action: call-service
+                            service: shell_command.miner2_reboot
+
+                    - type: horizontal-stack
+                      cards:
+                        - type: custom:button-card
+                          entity: select.miner2_workmode_set
+                          name: Standby
+                          icon: mdi:power-sleep
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    if (entity.state === 'Standby') return '#757575';
+                                    if (entity.state === 'Idle') return '#8D6E63';
+                                    return 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return ['Standby','Idle'].includes(entity.state)
+                                      ? '#fff' : '#757575';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return ['Standby','Idle'].includes(entity.state)
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner2_workmode_set
+                              option: Standby
+                        - type: custom:button-card
+                          entity: select.miner2_workmode_set
+                          name: Eco
+                          icon: mdi:leaf
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#4CAF50' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#fff' : '#4CAF50';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner2_workmode_set
+                              option: Eco
+                        - type: custom:button-card
+                          entity: select.miner2_workmode_set
+                          name: Standard
+                          icon: mdi:gauge
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#f59e0b' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#fff' : '#f59e0b';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner2_workmode_set
+                              option: Standard
+                        - type: custom:button-card
+                          entity: select.miner2_workmode_set
+                          name: Super
+                          icon: mdi:rocket-launch
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#F44336' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#fff' : '#F44336';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner2_workmode_set
+                              option: Super
+
+                    - type: custom:button-card
+                      show_name: false
+                      show_icon: false
+                      show_state: false
+                      styles:
+                        card:
+                          - padding: 12px 8px
+                        custom_fields:
+                          stats:
+                            - width: 100%
+                            - justify-self: stretch
+                            - box-sizing: border-box
+                      custom_fields:
+                        stats: >
+                          [[[
+                            const ths = states['sensor.miner2_thsspd']?.state ?? '—';
+                            const jth = states['sensor.miner2_energy_per_th']?.state ?? '—';
+                            const w   = states['sensor.miner2_cur_load']?.state ?? '—';
+                            const fan = states['sensor.miner2_fanr']?.state ?? '—';
+                            const row = (icon, label, val) =>
+                              `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                                <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
+                                <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val}</span>
+                              </div>`;
+                            return `<div style="width:100%;padding:4px 0;text-align:left;">
+                              ${row('mdi:speedometer','TH/s',ths)}
+                              ${row('mdi:lightning-bolt','J/TH',jth)}
+                              ${row('mdi:flash','W',w)}
+                              ${row('mdi:fan','Fan %',fan)}
+                            </div>`;
+                          ]]]
+
+
+
+        - type: vertical-stack
+          cards:
+
+            - type: horizontal-stack
+              cards:
+                - type: custom:button-card
+                  entity: sensor.house_load_mean_7d
+                  name: "Ø Last 7d"
+                  icon: mdi:chart-bell-curve
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            return 'var(--secondary-text-color)';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.house_load_forecast_w
+                  name: "Prognose"
+                  icon: mdi:home-clock
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v=parseFloat(entity.state); if(!v||v===0) return 'var(--secondary-text-color)'; if(v<1000) return '#4CAF50'; if(v<3000) return '#f59e0b'; return '#F44336';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.mining_window_free_w
+                  name: "Frei f. Mining"
+                  icon: mdi:lightning-bolt
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v=parseFloat(entity.state); if(v>=1200) return '#4CAF50'; if(v>=600) return '#f59e0b'; return 'var(--disabled-color)';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: binary_sensor.mining_window_open
+                  name: "Fenster"
+                  icon: mdi:pickaxe
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            return entity.state==='on' ? '#4CAF50' : 'var(--disabled-color)';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.mining_window_used_pct
+                  name: "Ausnutzung"
+                  icon: mdi:gauge
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v=parseFloat(entity.state); if(v>=85) return '#4CAF50'; if(v>=70) return '#f59e0b'; if(v>0) return '#F44336'; return 'var(--secondary-text-color)';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                      - color: >
+                          [[[
+                            const v=parseFloat(entity.state); if(v>=85) return '#4CAF50'; if(v>=70) return '#f59e0b'; if(v>0) return '#F44336'; return 'var(--secondary-text-color)';
+                          ]]]
+                  tap_action:
+                    action: more-info
+
+
+            - type: custom:button-card
+              show_name: false
+              show_icon: false
+              show_state: false
+              styles:
+                card:
+                  - background: transparent
+                  - box-shadow: none
+                  - height: 8px
+                  - padding: 0
+
+            # ── Heizstab + Temperatur nebeneinander ─────────────────────────────────
+            - type: horizontal-stack
+              cards:
+
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 12px 16px
+                    custom_fields:
+                      heizstab:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    heizstab: >
+                      [[[
+                        const pfx = 'sensor.ac_elwa_2_192_168_178_58_';
+                        const mode   = states[pfx + 'screen_mode']?.state ?? '—';
+                        const t1     = states[pfx + 'temperatur_1']?.state ?? '—';
+                        const psolar = states[pfx + 'power1_solar']?.state ?? '—';
+                        const modeColor = mode === 'Standby' ? 'var(--secondary-text-color)' : '#4CAF50';
+                        const row = (icon, label, val, unit='') =>
+                          `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
+                            <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val === '—' ? '—' : val + (unit ? ' ' + unit : '')}</span>
+                          </div>`;
+                        return `<div style="width:100%;padding:4px 0;text-align:left;">
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                            <ha-icon icon="mdi:water-boiler" style="--mdc-icon-size:18px;color:var(--primary-text-color);"></ha-icon>
+                            <span style="font-size:0.9rem;font-weight:700;">Heizstab AC ELWA 2</span>
+                            <span style="margin-left:auto;font-size:0.85rem;font-weight:600;color:${modeColor};">${mode}</span>
+                          </div>
+                          ${row('mdi:thermometer-water','Temperatur',t1,'°C')}
+                          ${row('mdi:solar-power','Leistung',psolar,'W')}
+                        </div>`;
+                      ]]]
+
+                # ── Temperatur & Luftfeuchtigkeit ───────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 12px 16px
+                    custom_fields:
+                      env:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    env: >
+                      [[[
+                        const t_keller = states['sensor.temperatursensor_2_raum_temperatur']?.state ?? '—';
+                        const h_keller = states['sensor.temperatursensor_2_raum_luftfeuchtigkeit']?.state ?? '—';
+                        const t_m1     = states['sensor.zigbee_6_temperatur']?.state ?? '—';
+                        const row = (icon, label, val, unit) =>
+                          `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
+                            <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val === '—' ? '—' : val + ' ' + unit}</span>
+                          </div>`;
+                        return `<div style="width:100%;padding:4px 0;text-align:left;">
+                          ${row('mdi:thermometer','Keller Temp',t_keller,'°C')}
+                          ${row('mdi:water-percent','Keller Feuchte',h_keller,'%')}
+                          ${row('mdi:thermometer-alert','Miner 1 Temp',t_m1,'°C')}
+                        </div>`;
+                      ]]]
+
+
+
+
+                # ═══════════════════════════════════════════════════════
+              # TUNING
+              # ═══════════════════════════════════════════════════════
+
+
+      # ═══════════════════════════════════════════════════════
+      # STATISTIK — Tages-KPIs + Verlauf
+      # ═══════════════════════════════════════════════════════
+  - title: Statistik
+    path: statistik
+    icon: mdi:chart-line
     cards:
       - type: vertical-stack
         cards:
 
-          # ── Energie-Status ──────────────────────────────────────────────────────
-          - type: horizontal-stack
-            cards:
+          # ── KPI-Übersicht Heute ───────────────────────────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            styles:
+              card:
+                - padding: 20px 24px
+              custom_fields:
+                kpis:
+                  - width: 100%
+            custom_fields:
+              kpis: >
+                [[[
+                  const pv   = states['sensor.pv_energy_daily']?.state ?? '—';
+                  const mine = states['sensor.mining_energy_daily']?.state ?? '—';
+                  const grid = states['sensor.grid_import_daily']?.state ?? '—';
+                  const cov  = states['sensor.solar_coverage_pct']?.state ?? '—';
+                  const up   = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
+                  const sup  = states['sensor.miner_super_hours_today']?.state ?? '—';
+                  const eco  = states['sensor.miner_eco_hours_today']?.state ?? '—';
+                  const win  = states['sensor.mining_window_hours_today']?.state ?? '—';
+                  const used = states['sensor.mining_window_used_pct']?.state ?? '—';
+                  const dead = states['sensor.deadband_hit_rate_pct']?.state ?? '—';
 
-              - type: custom:button-card
-                entity: sensor.battery_soc_pct
-                name: Akku
-                icon: mdi:battery-charging
-                show_state: true
-                styles:
-                  card:
-                    - background: var(--secondary-background-color)
-                    - border-radius: 12px
-                    - padding: 12px 4px
-                  icon:
-                    - width: 36px
-                    - height: 36px
-                    - color: >
-                        [[[
-                          const v = parseFloat(entity.state);
-                          if (v <= 50) return '#F44336';
-                          if (v <= 64) return '#f59e0b';
-                          if (v <= 95) return '#4CAF50';
-                          return '#8BC34A';
-                        ]]]
-                  name:
-                    - font-size: 0.8rem
-                    - color: var(--secondary-text-color)
-                  state:
-                    - font-size: 0.9rem
-                    - font-weight: 600
-                tap_action:
-                  action: more-info
+                  const fmt = (v, unit, color) => {
+                    const n = parseFloat(v);
+                    const c = color ?? 'var(--primary-text-color)';
+                    return `<span style="font-size:1.4rem;font-weight:700;color:${c};">${isNaN(n) ? '—' : n.toFixed(2)} <span style="font-size:0.9rem;font-weight:400;color:var(--secondary-text-color);">${unit}</span></span>`;
+                  };
+                  const fmtH = (v, color) => {
+                    const n = parseFloat(v);
+                    const c = color ?? 'var(--primary-text-color)';
+                    return `<span style="font-size:1.4rem;font-weight:700;color:${c};">${isNaN(n) ? '—' : n.toFixed(1)} <span style="font-size:0.9rem;font-weight:400;color:var(--secondary-text-color);">h</span></span>`;
+                  };
+                  const tile = (icon, label, val) =>
+                    `<div style="display:flex;flex-direction:column;align-items:center;background:var(--secondary-background-color);border-radius:14px;padding:16px 12px;gap:6px;">
+                      <ha-icon icon="${icon}" style="--mdc-icon-size:28px;color:var(--secondary-text-color);"></ha-icon>
+                      <div style="font-size:0.8rem;color:var(--secondary-text-color);text-align:center;">${label}</div>
+                      <div>${val}</div>
+                    </div>`;
 
-              - type: custom:button-card
-                entity: sensor.pv_power_w
+                  const covN = parseFloat(cov);
+                  const covColor = covN >= 90 ? '#4CAF50' : covN >= 70 ? '#f59e0b' : '#F44336';
+                  const gridN = parseFloat(grid);
+                  const gridColor = gridN <= 0.1 ? '#4CAF50' : gridN <= 1 ? '#f59e0b' : '#F44336';
+
+                  return `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:100%;">
+                    ${tile('mdi:solar-power',       'PV erzeugt',        fmt(pv,  'kWh', '#4CAF50'))}
+                    ${tile('mdi:pickaxe',           'Mining verbraucht', fmt(mine,'kWh', '#f59e0b'))}
+                    ${tile('mdi:transmission-tower','Netzbezug',         fmt(grid,'kWh', gridColor))}
+                    ${tile('mdi:leaf-circle',       'Solar-Autarkie',    fmt(cov, '%',   covColor))}
+                    ${tile('mdi:gauge',             'Fenster-Ausnutzung',fmt(used,'%',   '#4CAF50'))}
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:100%;margin-top:12px;">
+                    ${tile('mdi:timer-outline',     'Uptime heute',      `<span style="font-size:1.4rem;font-weight:700;">${up}</span>`)}
+                    ${tile('mdi:rocket-launch',     'Super-Modus',       fmtH(sup, '#F44336'))}
+                    ${tile('mdi:leaf',              'Eco-Modus',         fmtH(eco, '#4CAF50'))}
+                    ${tile('mdi:clock-outline',     'Fenster offen',     fmtH(win, '#4CAF50'))}
+                    ${tile('mdi:speedometer',       'Deadband-Rate',     fmt(dead,'%', '#f59e0b'))}
+                  </div>`;
+                ]]]
+
+          # ── Verlauf: PV + Mining + Akku (24h) ───────────────────────────────
+          - type: history-graph
+            title: "PV · Mining · Akku (24h)"
+            hours_to_show: 24
+            refresh_interval: 60
+            entities:
+              - entity: sensor.pv_power_w
                 name: PV
-                icon: mdi:solar-power
-                show_state: true
-                styles:
-                  card:
-                    - background: var(--secondary-background-color)
-                    - border-radius: 12px
-                    - padding: 12px 4px
-                  icon:
-                    - width: 36px
-                    - height: 36px
-                    - color: >
-                        [[[
-                          const v = parseFloat(entity.state);
-                          if (!v || v === 0) return 'var(--secondary-text-color)';
-                          if (v < 800)  return '#F44336';
-                          if (v < 1600) return '#f59e0b';
-                          if (v < 3400) return '#4CAF50';
-                          return '#8BC34A';
-                        ]]]
-                  name:
-                    - font-size: 0.8rem
-                    - color: var(--secondary-text-color)
-                  state:
-                    - font-size: 0.9rem
-                    - font-weight: 600
-                tap_action:
-                  action: more-info
+              - entity: sensor.house_load_w
+                name: Haus
+              - entity: sensor.mining_total_load_w
+                name: Mining gesamt
+              - entity: sensor.battery_soc_pct
+                name: "Akku %"
 
-              - type: custom:button-card
-                entity: sensor.grid_export_w
+          # ── Verlauf: Grid + Überschuss (24h) ────────────────────────────────
+          - type: history-graph
+            title: "Netz · Überschuss (24h)"
+            hours_to_show: 24
+            refresh_interval: 60
+            entities:
+              - entity: sensor.grid_export_w
                 name: Überschuss
-                icon: mdi:transmission-tower-export
-                show_state: true
-                styles:
-                  card:
-                    - background: var(--secondary-background-color)
-                    - border-radius: 12px
-                    - padding: 12px 4px
-                  icon:
-                    - width: 36px
-                    - height: 36px
-                    - color: >
-                        [[[
-                          const v = parseFloat(entity.state);
-                          if (!v || v === 0) return 'var(--secondary-text-color)';
-                          if (v < 800) return '#f59e0b';
-                          return '#4CAF50';
-                        ]]]
-                  name:
-                    - font-size: 0.8rem
-                    - color: var(--secondary-text-color)
-                  state:
-                    - font-size: 0.9rem
-                    - font-weight: 600
-                tap_action:
-                  action: more-info
-
-              - type: custom:button-card
-                entity: sensor.grid_import_w
+              - entity: sensor.grid_import_w
                 name: Netzbezug
-                icon: mdi:transmission-tower-import
-                show_state: true
-                styles:
-                  card:
-                    - background: var(--secondary-background-color)
-                    - border-radius: 12px
-                    - padding: 12px 4px
-                  icon:
-                    - width: 36px
-                    - height: 36px
-                    - color: >
-                        [[[
-                          const v = parseFloat(entity.state);
-                          if (!v || v === 0) return 'var(--secondary-text-color)';
-                          if (v <= 500)      return '#f59e0b';
-                          return '#F44336';
-                        ]]]
-                  name:
-                    - font-size: 0.8rem
-                    - color: var(--secondary-text-color)
-                  state:
-                    - font-size: 0.9rem
-                    - font-weight: 600
-                tap_action:
-                  action: more-info
 
-              - type: custom:button-card
-                entity: weather.forecast_home
-                name: Wetter
-                show_state: true
-                styles:
-                  card:
-                    - background: var(--secondary-background-color)
-                    - border-radius: 12px
-                    - padding: 12px 4px
-                  icon:
-                    - width: 36px
-                    - height: 36px
-                    - color: var(--primary-color)
-                  name:
-                    - font-size: 0.8rem
-                    - color: var(--secondary-text-color)
-                  state:
-                    - font-size: 0.9rem
-                    - font-weight: 600
-                tap_action:
-                  action: more-info
-    
-          # ── Miner Spalten ────────────────────────────────────────────────────────
-          - type: grid
-            columns: 2
-            square: false
-            cards:
-    
-              # ─────────────────────────────────────────────
-              # MINER 1
-              # ─────────────────────────────────────────────
-              - type: vertical-stack
-                cards:
-    
-                  - type: custom:button-card
-                    template: miner_header
-                    entity: binary_sensor.miner1_available
-                    name: "Miner Avalon Q 01  ›"
-                    icon: mdi:memory
-    
-                  - type: horizontal-stack
-                    cards:
-    
-                      - type: custom:button-card
-                        template: miner_btn
-                        entity: sensor.miner1_workmode_status
-                        name: Power
-                        icon: mdi:power
-                        state_display: >
-                          [[[
-                            return entity.state === 'Standby' ? 'Aus' : 'Ein';
-                          ]]]
-                        styles:
-                          icon:
-                            - width: 44px
-                            - height: 44px
-                            - color: >
-                                [[[
-                                  return entity.state === 'Standby'
-                                    ? 'var(--disabled-color)' : '#4CAF50';
-                                ]]]
-                        tap_action:
-                          action: call-service
-                          service: >
-                            [[[
-                              return entity.state === 'Standby'
-                                ? 'shell_command.miner1_set_softon'
-                                : 'shell_command.miner1_set_softoff';
-                            ]]]
-    
-                      - type: custom:button-card
-                        template: miner_btn
-                        entity: input_boolean.miner1_auto_load_management
-                        name: Auto
-                        icon: mdi:refresh-auto
-                        state_display: >
-                          [[[
-                            return entity.state === 'on' ? 'Ein' : 'Aus';
-                          ]]]
-                        styles:
-                          icon:
-                            - width: 44px
-                            - height: 44px
-                            - color: >
-                                [[[
-                                  return entity.state === 'on'
-                                    ? '#4CAF50' : 'var(--disabled-color)';
-                                ]]]
-                        tap_action:
-                          action: toggle
-    
-                      - type: custom:button-card
-                        template: miner_btn
-                        entity: switch.miner1_lcdonoff_switch
-                        name: Display
-                        icon: mdi:fit-to-screen
-                        state_display: >
-                          [[[
-                            return entity.state === 'on' ? 'Ein' : 'Aus';
-                          ]]]
-                        styles:
-                          icon:
-                            - width: 44px
-                            - height: 44px
-                            - color: >
-                                [[[
-                                  return entity.state === 'on'
-                                    ? '#2196F3' : 'var(--disabled-color)';
-                                ]]]
-                        tap_action:
-                          action: toggle
-    
-                      - type: custom:button-card
-                        template: miner_btn
-                        name: Reboot
-                        icon: mdi:restart
-                        show_state: false
-                        styles:
-                          icon:
-                            - width: 44px
-                            - height: 44px
-                            - color: "#f59e0b"
-                        tap_action:
-                          action: call-service
-                          service: shell_command.miner1_reboot
-    
-                  - type: horizontal-stack
-                    cards:
-                      - type: custom:button-card
-                        entity: select.miner1_workmode_set
-                        name: Standby
-                        icon: mdi:power-sleep
-                        show_state: false
-                        styles:
-                          card:
-                            - background: >
-                                [[[
-                                  return entity.state === 'Standby'
-                                    ? '#757575' : 'var(--secondary-background-color)';
-                                ]]]
-                            - border-radius: 10px
-                            - padding: 10px 4px
-                          icon:
-                            - width: 26px
-                            - height: 26px
-                            - color: >
-                                [[[
-                                  return entity.state === 'Standby'
-                                    ? '#fff' : '#757575';
-                                ]]]
-                          name:
-                            - font-size: 0.68rem
-                            - color: >
-                                [[[
-                                  return entity.state === 'Standby'
-                                    ? '#fff' : 'var(--secondary-text-color)';
-                                ]]]
-                        tap_action:
-                          action: call-service
-                          service: select.select_option
-                          service_data:
-                            entity_id: select.miner1_workmode_set
-                            option: Standby
-                      - type: custom:button-card
-                        entity: select.miner1_workmode_set
-                        name: Eco
-                        icon: mdi:leaf
-                        show_state: false
-                        styles:
-                          card:
-                            - background: >
-                                [[[
-                                  return entity.state === 'Eco'
-                                    ? '#4CAF50' : 'var(--secondary-background-color)';
-                                ]]]
-                            - border-radius: 10px
-                            - padding: 10px 4px
-                          icon:
-                            - width: 26px
-                            - height: 26px
-                            - color: >
-                                [[[
-                                  return entity.state === 'Eco'
-                                    ? '#fff' : '#4CAF50';
-                                ]]]
-                          name:
-                            - font-size: 0.68rem
-                            - color: >
-                                [[[
-                                  return entity.state === 'Eco'
-                                    ? '#fff' : 'var(--secondary-text-color)';
-                                ]]]
-                        tap_action:
-                          action: call-service
-                          service: select.select_option
-                          service_data:
-                            entity_id: select.miner1_workmode_set
-                            option: Eco
-                      - type: custom:button-card
-                        entity: select.miner1_workmode_set
-                        name: Standard
-                        icon: mdi:gauge
-                        show_state: false
-                        styles:
-                          card:
-                            - background: >
-                                [[[
-                                  return entity.state === 'Standard'
-                                    ? '#f59e0b' : 'var(--secondary-background-color)';
-                                ]]]
-                            - border-radius: 10px
-                            - padding: 10px 4px
-                          icon:
-                            - width: 26px
-                            - height: 26px
-                            - color: >
-                                [[[
-                                  return entity.state === 'Standard'
-                                    ? '#fff' : '#f59e0b';
-                                ]]]
-                          name:
-                            - font-size: 0.68rem
-                            - color: >
-                                [[[
-                                  return entity.state === 'Standard'
-                                    ? '#fff' : 'var(--secondary-text-color)';
-                                ]]]
-                        tap_action:
-                          action: call-service
-                          service: select.select_option
-                          service_data:
-                            entity_id: select.miner1_workmode_set
-                            option: Standard
-                      - type: custom:button-card
-                        entity: select.miner1_workmode_set
-                        name: Super
-                        icon: mdi:rocket-launch
-                        show_state: false
-                        styles:
-                          card:
-                            - background: >
-                                [[[
-                                  return entity.state === 'Super'
-                                    ? '#F44336' : 'var(--secondary-background-color)';
-                                ]]]
-                            - border-radius: 10px
-                            - padding: 10px 4px
-                          icon:
-                            - width: 26px
-                            - height: 26px
-                            - color: >
-                                [[[
-                                  return entity.state === 'Super'
-                                    ? '#fff' : '#F44336';
-                                ]]]
-                          name:
-                            - font-size: 0.68rem
-                            - color: >
-                                [[[
-                                  return entity.state === 'Super'
-                                    ? '#fff' : 'var(--secondary-text-color)';
-                                ]]]
-                        tap_action:
-                          action: call-service
-                          service: select.select_option
-                          service_data:
-                            entity_id: select.miner1_workmode_set
-                            option: Super
-    
-                  - type: custom:button-card
-                    show_name: false
-                    show_icon: false
-                    show_state: false
-                    styles:
-                      card:
-                        - padding: 12px 8px
-                      custom_fields:
-                        stats:
-                          - width: 100%
-                          - justify-self: stretch
-                          - box-sizing: border-box
-                    custom_fields:
-                      stats: >
-                        [[[
-                          const ths = states['sensor.miner1_thsspd']?.state ?? '—';
-                          const jth = states['sensor.miner1_energy_per_th']?.state ?? '—';
-                          const w   = states['sensor.miner1_cur_load']?.state ?? '—';
-                          const fan = states['sensor.miner1_fanr']?.state ?? '—';
-                          const row = (icon, label, val) =>
-                            `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-                              <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
-                              <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-                              <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val}</span>
-                            </div>`;
-                          return `<div style="width:100%;padding:4px 0;text-align:left;">
-                            ${row('mdi:speedometer','TH/s',ths)}
-                            ${row('mdi:lightning-bolt','J/TH',jth)}
-                            ${row('mdi:flash','W',w)}
-                            ${row('mdi:fan','Fan %',fan)}
-                          </div>`;
-                        ]]]
-    
-              # ─────────────────────────────────────────────
-              # MINER 2
-              # ─────────────────────────────────────────────
-              - type: vertical-stack
-                cards:
-    
-                  - type: custom:button-card
-                    template: miner_header
-                    entity: binary_sensor.miner2_available
-                    name: "Miner Avalon Q 02  ›"
-                    icon: mdi:memory
-    
-                  - type: horizontal-stack
-                    cards:
-    
-                      - type: custom:button-card
-                        template: miner_btn
-                        entity: sensor.miner2_workmode_status
-                        name: Power
-                        icon: mdi:power
-                        state_display: >
-                          [[[
-                            return entity.state === 'Standby' ? 'Aus' : 'Ein';
-                          ]]]
-                        styles:
-                          icon:
-                            - width: 44px
-                            - height: 44px
-                            - color: >
-                                [[[
-                                  return entity.state === 'Standby'
-                                    ? 'var(--disabled-color)' : '#4CAF50';
-                                ]]]
-                        tap_action:
-                          action: call-service
-                          service: >
-                            [[[
-                              return entity.state === 'Standby'
-                                ? 'shell_command.miner2_set_softon'
-                                : 'shell_command.miner2_set_softoff';
-                            ]]]
-    
-                      - type: custom:button-card
-                        template: miner_btn
-                        entity: input_boolean.miner2_auto_load_management
-                        name: Auto
-                        icon: mdi:refresh-auto
-                        state_display: >
-                          [[[
-                            return entity.state === 'on' ? 'Ein' : 'Aus';
-                          ]]]
-                        styles:
-                          icon:
-                            - width: 44px
-                            - height: 44px
-                            - color: >
-                                [[[
-                                  return entity.state === 'on'
-                                    ? '#4CAF50' : 'var(--disabled-color)';
-                                ]]]
-                        tap_action:
-                          action: toggle
-    
-                      - type: custom:button-card
-                        template: miner_btn
-                        entity: switch.miner2_lcdonoff_switch
-                        name: Display
-                        icon: mdi:fit-to-screen
-                        state_display: >
-                          [[[
-                            return entity.state === 'on' ? 'Ein' : 'Aus';
-                          ]]]
-                        styles:
-                          icon:
-                            - width: 44px
-                            - height: 44px
-                            - color: >
-                                [[[
-                                  return entity.state === 'on'
-                                    ? '#2196F3' : 'var(--disabled-color)';
-                                ]]]
-                        tap_action:
-                          action: toggle
-    
-                      - type: custom:button-card
-                        template: miner_btn
-                        name: Reboot
-                        icon: mdi:restart
-                        show_state: false
-                        styles:
-                          icon:
-                            - width: 44px
-                            - height: 44px
-                            - color: "#f59e0b"
-                        tap_action:
-                          action: call-service
-                          service: shell_command.miner2_reboot
-    
-                  - type: horizontal-stack
-                    cards:
-                      - type: custom:button-card
-                        entity: select.miner2_workmode_set
-                        name: Standby
-                        icon: mdi:power-sleep
-                        show_state: false
-                        styles:
-                          card:
-                            - background: >
-                                [[[
-                                  return entity.state === 'Standby'
-                                    ? '#757575' : 'var(--secondary-background-color)';
-                                ]]]
-                            - border-radius: 10px
-                            - padding: 10px 4px
-                          icon:
-                            - width: 26px
-                            - height: 26px
-                            - color: >
-                                [[[
-                                  return entity.state === 'Standby'
-                                    ? '#fff' : '#757575';
-                                ]]]
-                          name:
-                            - font-size: 0.68rem
-                            - color: >
-                                [[[
-                                  return entity.state === 'Standby'
-                                    ? '#fff' : 'var(--secondary-text-color)';
-                                ]]]
-                        tap_action:
-                          action: call-service
-                          service: select.select_option
-                          service_data:
-                            entity_id: select.miner2_workmode_set
-                            option: Standby
-                      - type: custom:button-card
-                        entity: select.miner2_workmode_set
-                        name: Eco
-                        icon: mdi:leaf
-                        show_state: false
-                        styles:
-                          card:
-                            - background: >
-                                [[[
-                                  return entity.state === 'Eco'
-                                    ? '#4CAF50' : 'var(--secondary-background-color)';
-                                ]]]
-                            - border-radius: 10px
-                            - padding: 10px 4px
-                          icon:
-                            - width: 26px
-                            - height: 26px
-                            - color: >
-                                [[[
-                                  return entity.state === 'Eco'
-                                    ? '#fff' : '#4CAF50';
-                                ]]]
-                          name:
-                            - font-size: 0.68rem
-                            - color: >
-                                [[[
-                                  return entity.state === 'Eco'
-                                    ? '#fff' : 'var(--secondary-text-color)';
-                                ]]]
-                        tap_action:
-                          action: call-service
-                          service: select.select_option
-                          service_data:
-                            entity_id: select.miner2_workmode_set
-                            option: Eco
-                      - type: custom:button-card
-                        entity: select.miner2_workmode_set
-                        name: Standard
-                        icon: mdi:gauge
-                        show_state: false
-                        styles:
-                          card:
-                            - background: >
-                                [[[
-                                  return entity.state === 'Standard'
-                                    ? '#f59e0b' : 'var(--secondary-background-color)';
-                                ]]]
-                            - border-radius: 10px
-                            - padding: 10px 4px
-                          icon:
-                            - width: 26px
-                            - height: 26px
-                            - color: >
-                                [[[
-                                  return entity.state === 'Standard'
-                                    ? '#fff' : '#f59e0b';
-                                ]]]
-                          name:
-                            - font-size: 0.68rem
-                            - color: >
-                                [[[
-                                  return entity.state === 'Standard'
-                                    ? '#fff' : 'var(--secondary-text-color)';
-                                ]]]
-                        tap_action:
-                          action: call-service
-                          service: select.select_option
-                          service_data:
-                            entity_id: select.miner2_workmode_set
-                            option: Standard
-                      - type: custom:button-card
-                        entity: select.miner2_workmode_set
-                        name: Super
-                        icon: mdi:rocket-launch
-                        show_state: false
-                        styles:
-                          card:
-                            - background: >
-                                [[[
-                                  return entity.state === 'Super'
-                                    ? '#F44336' : 'var(--secondary-background-color)';
-                                ]]]
-                            - border-radius: 10px
-                            - padding: 10px 4px
-                          icon:
-                            - width: 26px
-                            - height: 26px
-                            - color: >
-                                [[[
-                                  return entity.state === 'Super'
-                                    ? '#fff' : '#F44336';
-                                ]]]
-                          name:
-                            - font-size: 0.68rem
-                            - color: >
-                                [[[
-                                  return entity.state === 'Super'
-                                    ? '#fff' : 'var(--secondary-text-color)';
-                                ]]]
-                        tap_action:
-                          action: call-service
-                          service: select.select_option
-                          service_data:
-                            entity_id: select.miner2_workmode_set
-                            option: Super
-    
-                  - type: custom:button-card
-                    show_name: false
-                    show_icon: false
-                    show_state: false
-                    styles:
-                      card:
-                        - padding: 12px 8px
-                      custom_fields:
-                        stats:
-                          - width: 100%
-                          - justify-self: stretch
-                          - box-sizing: border-box
-                    custom_fields:
-                      stats: >
-                        [[[
-                          const ths = states['sensor.miner2_thsspd']?.state ?? '—';
-                          const jth = states['sensor.miner2_energy_per_th']?.state ?? '—';
-                          const w   = states['sensor.miner2_cur_load']?.state ?? '—';
-                          const fan = states['sensor.miner2_fanr']?.state ?? '—';
-                          const row = (icon, label, val) =>
-                            `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-                              <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
-                              <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-                              <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val}</span>
-                            </div>`;
-                          return `<div style="width:100%;padding:4px 0;text-align:left;">
-                            ${row('mdi:speedometer','TH/s',ths)}
-                            ${row('mdi:lightning-bolt','J/TH',jth)}
-                            ${row('mdi:flash','W',w)}
-                            ${row('mdi:fan','Fan %',fan)}
-                          </div>`;
-                        ]]]
-    
-          # ── Heizstab + Temperatur nebeneinander ─────────────────────────────────
-          - type: horizontal-stack
-            cards:
+          # ── Miner-Modus-Verlauf (24h) ────────────────────────────────────────
+          - type: history-graph
+            title: "Miner-Modus Verlauf (24h)"
+            hours_to_show: 24
+            refresh_interval: 60
+            entities:
+              - entity: sensor.miner1_thsspd
+                name: "M1 TH/s"
+              - entity: sensor.miner2_thsspd
+                name: "M2 TH/s"
+              - entity: sensor.miner1_cur_load
+                name: "M1 W"
+              - entity: sensor.miner2_cur_load
+                name: "M2 W"
 
-              - type: custom:button-card
-                show_name: false
-                show_icon: false
-                show_state: false
-                styles:
-                  card:
-                    - padding: 12px 16px
-                  custom_fields:
-                    heizstab:
-                      - width: 100%
-                      - justify-self: stretch
-                      - box-sizing: border-box
-                custom_fields:
-                  heizstab: >
-                    [[[
-                      const pfx = 'sensor.ac_elwa_2_192_168_178_58_';
-                      const mode   = states[pfx + 'screen_mode']?.state ?? '—';
-                      const t1     = states[pfx + 'temperatur_1']?.state ?? '—';
-                      const psolar = states[pfx + 'power1_solar']?.state ?? '—';
-                      const modeColor = mode === 'Standby' ? 'var(--secondary-text-color)' : '#4CAF50';
-                      const row = (icon, label, val, unit='') =>
-                        `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-                          <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
-                          <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-                          <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val === '—' ? '—' : val + (unit ? ' ' + unit : '')}</span>
-                        </div>`;
-                      return `<div style="width:100%;padding:4px 0;text-align:left;">
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                          <ha-icon icon="mdi:water-boiler" style="--mdc-icon-size:18px;color:var(--primary-text-color);"></ha-icon>
-                          <span style="font-size:0.9rem;font-weight:700;">Heizstab AC ELWA 2</span>
-                          <span style="margin-left:auto;font-size:0.85rem;font-weight:600;color:${modeColor};">${mode}</span>
-                        </div>
-                        ${row('mdi:thermometer-water','Temperatur',t1,'°C')}
-                        ${row('mdi:solar-power','Leistung',psolar,'W')}
-                      </div>`;
-                    ]]]
-      
-              # ── Temperatur & Luftfeuchtigkeit ───────────────────────────────────────
-              - type: custom:button-card
-                show_name: false
-                show_icon: false
-                show_state: false
-                styles:
-                  card:
-                    - padding: 12px 16px
-                  custom_fields:
-                    env:
-                      - width: 100%
-                      - justify-self: stretch
-                      - box-sizing: border-box
-                custom_fields:
-                  env: >
-                    [[[
-                      const t_keller = states['sensor.temperatursensor_2_raum_temperatur']?.state ?? '—';
-                      const h_keller = states['sensor.temperatursensor_2_raum_luftfeuchtigkeit']?.state ?? '—';
-                      const t_m1     = states['sensor.zigbee_6_temperatur']?.state ?? '—';
-                      const row = (icon, label, val, unit) =>
-                        `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-                          <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
-                          <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-                          <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val === '—' ? '—' : val + ' ' + unit}</span>
-                        </div>`;
-                      return `<div style="width:100%;padding:4px 0;text-align:left;">
-                        ${row('mdi:thermometer','Keller Temp',t_keller,'°C')}
-                        ${row('mdi:water-percent','Keller Feuchte',h_keller,'%')}
-                        ${row('mdi:thermometer-alert','Miner 1 Temp',t_m1,'°C')}
-                      </div>`;
-                    ]]]
-      
-    # ═══════════════════════════════════════════════════════
-  # TUNING
-  # ═══════════════════════════════════════════════════════
   - title: Tuning
     path: tuning
     icon: mdi:tune-vertical

@@ -6,11 +6,13 @@
 # --all:   deploys everything (full sync)
 #
 # Prerequisites: SSH key auth to Umbrel
-#   ssh-copy-id umbrel@umbrel.local
+#   ssh-copy-id umbrel@$UMBREL_HOST
+# Env: UMBREL_HOST (default: umbrel.local), UMBREL_USER (default: umbrel)
+#   → in .env setzen: UMBREL_HOST=192.168.xxx.xxx
 
 set -euo pipefail
 
-UMBREL_HOST="${UMBREL_HOST:-umbrel.local}"
+UMBREL_HOST="${UMBREL_HOST:-192.168.178.62}"
 UMBREL_USER="${UMBREL_USER:-umbrel}"
 REMOTE_PATH="/home/umbrel/umbrel/app-data/home-assistant/data"
 LOCAL_PATH="src/ha/config"
@@ -27,6 +29,7 @@ for arg in "$@"; do
 done
 
 echo "→ Deploying HA config to ${UMBREL_USER}@${UMBREL_HOST}:${REMOTE_PATH}"
+
 
 if [[ "${DEPLOY_ALL}" == true ]]; then
   # Full deploy

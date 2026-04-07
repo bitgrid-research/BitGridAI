@@ -264,16 +264,22 @@ src/ha/config/secrets.yaml
 src/ha/config/home-assistant_v2.db*
 src/ha/config/home-assistant.log*
 
+# Home Assistant — Geräte-Metadaten (MACs, echte IPs, Gerätenamen)
+src/ha/config/known_devices.yaml
+src/ha/config/zigbee.db
+src/ha/config/zwcfg_*.xml
+src/ha/config/OZW_Log.txt
+
 # Home Assistant — HACS und installierte Custom Components (wie node_modules)
 src/ha/config/custom_components/
 
 # Home Assistant — hochgeladene Bilder (Laufzeit-State)
 src/ha/config/image/
 
-# HA Packages — generierte Dateien (enthalten echte IPs aus .env)
-# Nur das Template (avalonq.yaml.template) wird versioniert
+# HA Packages — Dateien mit Credentials/IPs (gitignored, .example-Vorlage in git)
 src/ha/config/packages/avalonq_miner1.yaml
 src/ha/config/packages/avalonq_miner2.yaml
+src/ha/config/packages/pool.yaml
 
 # Mosquitto — Broker-Laufzeitdaten
 src/ha/mosquitto/data/
@@ -322,3 +328,11 @@ secrets.json
 *.pem
 *.key
 *.p12
+
+# Aufzeichnungen (MQTT-Replay, können sensible Topics enthalten)
+recordings/
+*.jsonl
+
+# Temporäre Analyse-Ausgaben
+*.csv
+reports/
