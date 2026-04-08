@@ -1087,12 +1087,102 @@ views:
                         </div>`;
                       ]]]
 
+            # ── Spacer ──────────────────────────────────────────────────────────
+            - type: custom:button-card
+              show_name: false
+              show_icon: false
+              show_state: false
+              styles:
+                card:
+                  - background: transparent
+                  - box-shadow: none
+                  - height: 8px
+                  - padding: 0
 
+            # ── Statistik Heute ──────────────────────────────────────────────────
+            - type: custom:button-card
+              show_name: false
+              show_icon: false
+              show_state: false
+              styles:
+                card:
+                  - padding: 12px 16px
+                custom_fields:
+                  stats_heute:
+                    - width: 100%
+                    - justify-self: stretch
+                    - box-sizing: border-box
+              custom_fields:
+                stats_heute: >
+                  [[[
+                    const hausKwh   = states['sensor.house_energy_daily']?.state ?? '—';
+                    const hzKwh     = states['sensor.heizstab_energy_daily']?.state ?? '—';
+                    const mineKwh   = states['sensor.mining_energy_daily']?.state ?? '—';
+                    const startToday = states['input_datetime.last_start_at']?.state ?? '';
+                    const stopToday  = states['input_datetime.last_stop_at']?.state ?? '';
+                    const startYest  = states['input_datetime.miner_start_yesterday']?.state ?? '';
+                    const stopYest   = states['input_datetime.miner_stop_yesterday']?.state ?? '';
+                    const upFmt     = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
+                    const ecoH      = states['sensor.miner_eco_hours_today']?.state ?? '—';
+                    const stdH      = states['sensor.miner_standard_hours_today']?.state ?? '—';
+                    const supH      = states['sensor.miner_super_hours_today']?.state ?? '—';
 
+                    const fmtTime = (dt) => {
+                      if (!dt || dt === 'unknown' || dt === 'unavailable' || dt === '') return '–';
+                      const parts = dt.split(' ');
+                      return parts.length >= 2 ? parts[1].slice(0, 5) : '–';
+                    };
+                    const fmtKwh = (v) => {
+                      const n = parseFloat(v);
+                      return isNaN(n) ? '—' : n.toFixed(2) + ' kWh';
+                    };
+                    const fmtH = (v) => {
+                      const n = parseFloat(v);
+                      return isNaN(n) ? '—' : n.toFixed(1) + ' h';
+                    };
+                    const row = (icon, label, val, iconColor) =>
+                      `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;">
+                        <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                        <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;">${label}</span>
+                        <span style="font-size:0.85rem;font-weight:600;">${val}</span>
+                      </div>`;
+                    const modeBox = (label, val, color) =>
+                      `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                        <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                        <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                      </div>`;
 
-                # ═══════════════════════════════════════════════════════
-              # TUNING
-              # ═══════════════════════════════════════════════════════
+                    return `<div style="width:100%;padding:2px 0;">
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                        <ha-icon icon="mdi:chart-bar" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                        <span style="font-size:0.88rem;font-weight:700;">Statistik Heute</span>
+                      </div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px;">
+                        <div>
+                          ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(hausKwh),'#f59e0b')}
+                          ${row('mdi:water-boiler','Heizstab',fmtKwh(hzKwh),'#2196F3')}
+                          ${row('mdi:pickaxe','Miner',fmtKwh(mineKwh),'#f59e0b')}
+                        </div>
+                        <div>
+                          ${row('mdi:play-circle','Gestartet',fmtTime(startToday),'#4CAF50')}
+                          ${row('mdi:stop-circle','Gestoppt',fmtTime(stopToday),'#F44336')}
+                          ${row('mdi:play-circle-outline','Gestr. Start',fmtTime(startYest),'var(--secondary-text-color)')}
+                          ${row('mdi:stop-circle-outline','Gestr. Stop',fmtTime(stopYest),'var(--secondary-text-color)')}
+                        </div>
+                      </div>
+                      <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--divider-color);">
+                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
+                          <div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                            <div style="font-size:0.65rem;color:var(--secondary-text-color);">Gesamt</div>
+                            <div style="font-size:0.82rem;font-weight:700;">${upFmt}</div>
+                          </div>
+                          ${modeBox('Eco',fmtH(ecoH),'#4CAF50')}
+                          ${modeBox('Standard',fmtH(stdH),'#f59e0b')}
+                          ${modeBox('Speed',fmtH(supH),'#F44336')}
+                        </div>
+                      </div>
+                    </div>`;
+                  ]]]
 
 
       # ═══════════════════════════════════════════════════════
