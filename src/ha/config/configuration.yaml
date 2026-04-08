@@ -675,6 +675,14 @@ sensor:
     method: trapezoidal
 
   - platform: integration
+    source: sensor.grid_export_w
+    name: grid_export_integral
+    unique_id: grid_export_integral
+    unit_prefix: k
+    round: 3
+    method: trapezoidal
+
+  - platform: integration
     source: sensor.house_load_w
     name: house_energy_integral
     unique_id: house_energy_integral

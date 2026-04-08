@@ -21,6 +21,12 @@ stats:
       max: 1000000
       step: 0.001
       mode: box
+    grid_export_midnight:
+      name: "Einspeisung kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
     house_energy_midnight:
       name: "Hausverbrauch kWh Baseline Mitternacht"
       min: 0
@@ -122,6 +128,15 @@ stats:
           state: >-
             {% set cur  = states('sensor.grid_import_integral') | float(0) %}
             {% set base = states('input_number.grid_import_midnight') | float(0) %}
+            {{ [cur - base, 0] | max | round(3) }}
+
+        - name: "grid_export_daily"
+          unique_id: grid_export_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.grid_export_integral') | float(0) %}
+            {% set base = states('input_number.grid_export_midnight') | float(0) %}
             {{ [cur - base, 0] | max | round(3) }}
 
         - name: "house_energy_daily"
@@ -516,6 +531,11 @@ stats:
             entity_id: input_number.grid_import_midnight
           data:
             value: "{{ states('sensor.grid_import_integral') | float(0) }}"
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.grid_export_midnight
+          data:
+            value: "{{ states('sensor.grid_export_integral') | float(0) }}"
         - action: input_number.set_value
           target:
             entity_id: input_number.house_energy_midnight

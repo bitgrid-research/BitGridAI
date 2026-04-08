@@ -1115,6 +1115,11 @@ views:
               custom_fields:
                 stats_heute: >
                   [[[
+                    const pvKwh     = states['sensor.pv_energy_daily']?.state ?? '—';
+                    const pvExpKwh  = states['sensor.grid_export_daily']?.state ?? '—';
+                    const pvN       = parseFloat(pvKwh);
+                    const pvExpN    = parseFloat(pvExpKwh);
+                    const pvSelfUse = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0) ? Math.max(0, pvN - pvExpN) : null;
                     const hausKwh   = states['sensor.house_energy_daily']?.state ?? '—';
                     const hzKwh     = states['sensor.heizstab_energy_daily']?.state ?? '—';
                     const mineKwh   = states['sensor.mining_energy_daily']?.state ?? '—';
@@ -1156,6 +1161,11 @@ views:
                       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
                         <ha-icon icon="mdi:chart-bar" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
                         <span style="font-size:0.88rem;font-weight:700;">Statistik Heute</span>
+                      </div>
+                      <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                        ${row('mdi:solar-power','PV erzeugt',fmtKwh(pvKwh),'#4CAF50')}
+                        ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
+                        ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(pvExpKwh),'#66BB6A')}
                       </div>
                       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px;">
                         <div>
@@ -1209,16 +1219,17 @@ views:
             custom_fields:
               kpis: >
                 [[[
-                  const pv   = states['sensor.pv_energy_daily']?.state ?? '—';
-                  const mine = states['sensor.mining_energy_daily']?.state ?? '—';
-                  const grid = states['sensor.grid_import_daily']?.state ?? '—';
-                  const cov  = states['sensor.solar_coverage_pct']?.state ?? '—';
-                  const up   = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
-                  const sup  = states['sensor.miner_super_hours_today']?.state ?? '—';
-                  const eco  = states['sensor.miner_eco_hours_today']?.state ?? '—';
-                  const win  = states['sensor.mining_window_hours_today']?.state ?? '—';
-                  const used = states['sensor.mining_window_used_pct']?.state ?? '—';
-                  const dead = states['sensor.deadband_hit_rate_pct']?.state ?? '—';
+                  const pv     = states['sensor.pv_energy_daily']?.state ?? '—';
+                  const pvExp  = states['sensor.grid_export_daily']?.state ?? '—';
+                  const mine   = states['sensor.mining_energy_daily']?.state ?? '—';
+                  const grid   = states['sensor.grid_import_daily']?.state ?? '—';
+                  const cov    = states['sensor.solar_coverage_pct']?.state ?? '—';
+                  const up     = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
+                  const sup    = states['sensor.miner_super_hours_today']?.state ?? '—';
+                  const eco    = states['sensor.miner_eco_hours_today']?.state ?? '—';
+                  const win    = states['sensor.mining_window_hours_today']?.state ?? '—';
+                  const used   = states['sensor.mining_window_used_pct']?.state ?? '—';
+                  const dead   = states['sensor.deadband_hit_rate_pct']?.state ?? '—';
 
                   const fmt = (v, unit, color) => {
                     const n = parseFloat(v);
@@ -1241,20 +1252,28 @@ views:
                   const covColor = covN >= 90 ? '#4CAF50' : covN >= 70 ? '#f59e0b' : '#F44336';
                   const gridN = parseFloat(grid);
                   const gridColor = gridN <= 0.1 ? '#4CAF50' : gridN <= 1 ? '#f59e0b' : '#F44336';
+                  const pvN = parseFloat(pv);
+                  const pvExpN = parseFloat(pvExp);
+                  const selfUse = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0)
+                    ? Math.max(0, pvN - pvExpN)
+                    : null;
 
-                  return `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:100%;">
-                    ${tile('mdi:solar-power',       'PV erzeugt',        fmt(pv,  'kWh', '#4CAF50'))}
+                  return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;">
+                    ${tile('mdi:solar-power',              'PV erzeugt',        fmt(pv,    'kWh', '#4CAF50'))}
+                    ${tile('mdi:transmission-tower-export','PV eingespeist',     fmt(pvExp, 'kWh', '#66BB6A'))}
+                    ${tile('mdi:home-lightning-bolt',      'PV Eigenverbrauch',  selfUse !== null ? fmt(selfUse.toFixed(2), 'kWh', '#f59e0b') : '—')}
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;margin-top:12px;">
                     ${tile('mdi:pickaxe',           'Mining verbraucht', fmt(mine,'kWh', '#f59e0b'))}
                     ${tile('mdi:transmission-tower','Netzbezug',         fmt(grid,'kWh', gridColor))}
                     ${tile('mdi:leaf-circle',       'Solar-Autarkie',    fmt(cov, '%',   covColor))}
-                    ${tile('mdi:gauge',             'Fenster-Ausnutzung',fmt(used,'%',   '#4CAF50'))}
                   </div>
                   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:100%;margin-top:12px;">
                     ${tile('mdi:timer-outline',     'Uptime heute',      `<span style="font-size:1.4rem;font-weight:700;">${up}</span>`)}
                     ${tile('mdi:rocket-launch',     'Super-Modus',       fmtH(sup, '#F44336'))}
                     ${tile('mdi:leaf',              'Eco-Modus',         fmtH(eco, '#4CAF50'))}
                     ${tile('mdi:clock-outline',     'Fenster offen',     fmtH(win, '#4CAF50'))}
-                    ${tile('mdi:speedometer',       'Deadband-Rate',     fmt(dead,'%', '#f59e0b'))}
+                    ${tile('mdi:gauge',             'Fenster-Ausnutzung',fmt(used,'%',   '#4CAF50'))}
                   </div>`;
                 ]]]
 

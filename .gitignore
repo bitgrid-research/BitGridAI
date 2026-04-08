@@ -1,6 +1,9 @@
 # Lokale Infrastruktur-Dokumentation (IPs, Passwörter, Geräte)
 INFRASTRUCTURE.md
 
+# Deploy-Scripts (enthalten IPs, Pfade, sudo-Logik — nur lokal)
+scripts/deploy_ha.sh
+
 # BitGridAI — Laufzeit-Daten (nie einchecken)
 data/bitgrid.db
 data/*.db
