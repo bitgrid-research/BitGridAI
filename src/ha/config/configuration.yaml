@@ -430,15 +430,15 @@ template:
             {{ states('sensor.sn_3015995559_metering_power_supplied') | float(0) }}
           {% endif %}
 
-      # Miner-Gesamtleistung (direkt aus cgminer API)
+      # Miner-Gesamtleistung (Shelly Plug S Gen 3 — realer Wandverbrauch AC)
       - name: miner_total_power_w
         unique_id: miner_total_power_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
         state: >-
-          {% set m1 = states('sensor.miner1_cur_load') | float(0) %}
-          {% set m2 = states('sensor.miner2_cur_load') | float(0) %}
+          {% set m1 = states('sensor.shellyplugsg3_dcb4d9c5567c_leistung') | float(0) %}
+          {% set m2 = states('sensor.shellyplugsg3_d0cf13db3a00_leistung') | float(0) %}
           {{ (m1 + m2) | round(0) }}
 
       # Maximale Chip-Temp beider Miner

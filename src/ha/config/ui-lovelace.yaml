@@ -271,6 +271,35 @@ views:
                     action: more-info
 
                 - type: custom:button-card
+                  entity: sensor.ac_elwa_2_192_168_178_58_power1_solar
+                  name: Heizstab
+                  icon: mdi:water-boiler
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v = parseFloat(entity.state);
+                            if (!v || v === 0) return 'var(--secondary-text-color)';
+                            if (v < 1000) return '#f59e0b';
+                            return '#2196F3';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
                   entity: weather.forecast_home
                   name: Wetter
                   show_state: true
@@ -570,7 +599,7 @@ views:
                           [[[
                             const ths = states['sensor.miner1_thsspd']?.state ?? '—';
                             const jth = states['sensor.miner1_energy_per_th']?.state ?? '—';
-                            const w   = states['sensor.miner1_cur_load']?.state ?? '—';
+                            const sw  = states['sensor.shellyplugsg3_dcb4d9c5567c_leistung']?.state ?? '—';
                             const fan = states['sensor.miner1_fanr']?.state ?? '—';
                             const row = (icon, label, val) =>
                               `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
@@ -581,7 +610,7 @@ views:
                             return `<div style="width:100%;padding:4px 0;text-align:left;">
                               ${row('mdi:speedometer','TH/s',ths)}
                               ${row('mdi:lightning-bolt','J/TH',jth)}
-                              ${row('mdi:flash','W',w)}
+                              ${row('mdi:power-plug','Shelly W', sw !== '—' ? sw + ' W' : '—')}
                               ${row('mdi:fan','Fan %',fan)}
                             </div>`;
                           ]]]
@@ -845,7 +874,7 @@ views:
                           [[[
                             const ths = states['sensor.miner2_thsspd']?.state ?? '—';
                             const jth = states['sensor.miner2_energy_per_th']?.state ?? '—';
-                            const w   = states['sensor.miner2_cur_load']?.state ?? '—';
+                            const sw  = states['sensor.shellyplugsg3_d0cf13db3a00_leistung']?.state ?? '—';
                             const fan = states['sensor.miner2_fanr']?.state ?? '—';
                             const row = (icon, label, val) =>
                               `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
@@ -856,7 +885,7 @@ views:
                             return `<div style="width:100%;padding:4px 0;text-align:left;">
                               ${row('mdi:speedometer','TH/s',ths)}
                               ${row('mdi:lightning-bolt','J/TH',jth)}
-                              ${row('mdi:flash','W',w)}
+                              ${row('mdi:power-plug','Shelly W', sw !== '—' ? sw + ' W' : '—')}
                               ${row('mdi:fan','Fan %',fan)}
                             </div>`;
                           ]]]
@@ -1115,11 +1144,12 @@ views:
               custom_fields:
                 stats_heute: >
                   [[[
-                    const pvKwh     = states['sensor.pv_energy_daily']?.state ?? '—';
-                    const pvExpKwh  = states['sensor.grid_export_daily']?.state ?? '—';
-                    const pvN       = parseFloat(pvKwh);
-                    const pvExpN    = parseFloat(pvExpKwh);
-                    const pvSelfUse = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0) ? Math.max(0, pvN - pvExpN) : null;
+                    const pvKwh        = states['sensor.pv_energy_daily']?.state ?? '—';
+                    const pvExpKwh     = states['sensor.grid_export_daily']?.state ?? '—';
+                    const gridImpKwh   = states['sensor.grid_import_daily']?.state ?? '—';
+                    const pvN          = parseFloat(pvKwh);
+                    const pvExpN       = parseFloat(pvExpKwh);
+                    const pvSelfUse    = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0) ? Math.max(0, pvN - pvExpN) : null;
                     const hausKwh   = states['sensor.house_energy_daily']?.state ?? '—';
                     const hzKwh     = states['sensor.heizstab_energy_daily']?.state ?? '—';
                     const mineKwh   = states['sensor.mining_energy_daily']?.state ?? '—';
@@ -1165,7 +1195,8 @@ views:
                       <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
                         ${row('mdi:solar-power','PV erzeugt',fmtKwh(pvKwh),'#4CAF50')}
                         ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
-                        ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(pvExpKwh),'#66BB6A')}
+                        ${row('mdi:transmission-tower-export','Überschuss gesamt',fmtKwh(pvExpKwh),'#66BB6A')}
+                        ${row('mdi:transmission-tower-import','Netzbezug gesamt',fmtKwh(gridImpKwh),'#ef5350')}
                       </div>
                       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px;">
                         <div>
@@ -1313,10 +1344,25 @@ views:
                 name: "M1 TH/s"
               - entity: sensor.miner2_thsspd
                 name: "M2 TH/s"
-              - entity: sensor.miner1_cur_load
-                name: "M1 W"
-              - entity: sensor.miner2_cur_load
-                name: "M2 W"
+              - entity: sensor.shellyplugsg3_dcb4d9c5567c_leistung
+                name: "M1 Shelly W"
+              - entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
+                name: "M2 Shelly W"
+
+          # ── Mining-Fenster Analyse: Shelly-Verbrauch vs. PV-Überschuss (24h) ──
+          - type: history-graph
+            title: "Mining-Fenster Analyse (24h)"
+            hours_to_show: 24
+            refresh_interval: 60
+            entities:
+              - entity: sensor.shellyplugsg3_dcb4d9c5567c_leistung
+                name: "M1 Shelly W"
+              - entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
+                name: "M2 Shelly W"
+              - entity: sensor.grid_export_w
+                name: "PV-Überschuss W"
+              - entity: sensor.pv_power_w
+                name: "PV gesamt W"
 
   - title: Tuning
     path: tuning
