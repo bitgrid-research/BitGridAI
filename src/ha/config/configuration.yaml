@@ -438,7 +438,7 @@ template:
         state_class: measurement
         state: >-
           {% set m1 = states('sensor.shellyplugsg3_dcb4d9c5567c_leistung') | float(0) %}
-          {% set m2 = states('sensor.shellyplugsg3_d0cf13db3a00_leistung') | float(0) %}
+          {% set m2 = states('sensor.shellyplugsg3_d0cf13d86254_leistung') | float(0) %}
           {{ (m1 + m2) | round(0) }}
 
       # Maximale Chip-Temp beider Miner

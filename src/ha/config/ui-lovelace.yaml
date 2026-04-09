@@ -874,7 +874,7 @@ views:
                           [[[
                             const ths = states['sensor.miner2_thsspd']?.state ?? '—';
                             const jth = states['sensor.miner2_energy_per_th']?.state ?? '—';
-                            const sw  = states['sensor.shellyplugsg3_d0cf13db3a00_leistung']?.state ?? '—';
+                            const sw  = states['sensor.shellyplugsg3_d0cf13d86254_leistung']?.state ?? '—';
                             const fan = states['sensor.miner2_fanr']?.state ?? '—';
                             const row = (icon, label, val) =>
                               `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
@@ -1346,7 +1346,7 @@ views:
                 name: "M2 TH/s"
               - entity: sensor.shellyplugsg3_dcb4d9c5567c_leistung
                 name: "M1 Shelly W"
-              - entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
+              - entity: sensor.shellyplugsg3_d0cf13d86254_leistung
                 name: "M2 Shelly W"
 
           # ── Mining-Fenster Analyse: Shelly-Verbrauch vs. PV-Überschuss (24h) ──
@@ -1357,7 +1357,7 @@ views:
             entities:
               - entity: sensor.shellyplugsg3_dcb4d9c5567c_leistung
                 name: "M1 Shelly W"
-              - entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
+              - entity: sensor.shellyplugsg3_d0cf13d86254_leistung
                 name: "M2 Shelly W"
               - entity: sensor.grid_export_w
                 name: "PV-Überschuss W"
