@@ -53,6 +53,43 @@ Adapter schreiben nicht in `core/`-Strukturen.
 - Tests vor jedem PR: `make check`
 - Neue Funktionen in `core/` brauchen Unit-Tests
 
+## HA Deploy — Pflichtablauf
+
+**Immer so deployen, nie abkürzen:**
+
+```bash
+# Nur geänderte Dateien deployen + graceful restart
+bash scripts/deploy_ha.sh --restart
+
+# Alles deployen (nach größeren Änderungen)
+bash scripts/deploy_ha.sh --all --restart
+```
+
+### Regeln
+
+1. **Immer `--restart` mitgeben** — sonst lädt HA die neuen Dateien nicht
+2. **Niemals `docker restart` direkt aufrufen** — killt SMA WebConnect-Sessions hart → alle SMA-Sensoren zeigen 0W bis Sessions expiren (~15 min)
+3. **Nie mehrfach hintereinander restarten** — jeder harte Restart verbraucht eine SMA-Session (Limit: 4)
+4. **`.template` und `.example` Dateien nie deployen** — `deploy_ha.sh` filtert sie bereits heraus; nie manuell per `scp` oder `--all` ohne das Script deployen
+5. **`HA_TOKEN` in `.env` muss gesetzt sein** — sonst fällt das Script auf `docker restart` zurück (siehe Regel 2)
+
+### Was deployed wird
+
+| Pfad | Inhalt |
+|---|---|
+| `src/ha/config/configuration.yaml` | Template-Sensoren, Regellogik, MQTT |
+| `src/ha/config/ui-lovelace.yaml` | Dashboard |
+| `src/ha/config/packages/*.yaml` | Miner, Stats, Automations, Pool |
+| `src/ha/config/automations.yaml` | HA-Automationen |
+| `src/ha/config/custom_components/` | Custom Integrations |
+| `src/ha/config/www/` | Frontend-Assets |
+
+### SMA-Session-Problem (Notfall)
+
+Symptom: PV, Haus, Netzbezug zeigen 0W nach Restart.
+Ursache: SMA WebConnect hat Session-Limit erreicht.
+Fix: In HA-UI → **Settings → Devices & Services → pysmaplus → ⋮ → Reload** (kein Neustart nötig)
+
 ## Dev-Commands
 
 ```bash

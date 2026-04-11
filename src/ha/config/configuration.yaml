@@ -648,7 +648,7 @@ template:
           {% endif %}
 
 # ── Energie-Integration (W → kWh, Riemann-Summe) ─────────────────────────────
-# Liefert kumulative kWh-Werte für Statistiken und utility_meter
+# Liefert kumulative kWh-Werte als Tagesbasis (Midnight-Delta in stats.yaml)
 sensor:
   - platform: integration
     source: sensor.pv_power_w

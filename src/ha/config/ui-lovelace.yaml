@@ -88,6 +88,60 @@ views:
         - type: vertical-stack
           cards:
 
+            # ── Context-Header: Uhrzeit · Bitcoin-Blockhöhe · Log-Slot ────────────
+            - type: custom:button-card
+              show_name: false
+              show_icon: false
+              show_state: false
+              tap_action:
+                action: none
+              custom_fields:
+                context: >
+                  [[[
+                    const now = new Date();
+                    const hh  = String(now.getHours()).padStart(2, '0');
+                    const mm  = String(now.getMinutes()).padStart(2, '0');
+                    const time = hh + ':' + mm;
+
+                    const slotMin = Math.floor(now.getMinutes() / 10) * 10;
+                    const slotH   = String(now.getHours()).padStart(2, '0');
+                    const slotM   = String(slotMin).padStart(2, '0');
+                    const slot    = slotH + slotM + '.json';
+
+                    const blockState = states['sensor.bitcoin_block_height'];
+                    const block = blockState && blockState.state && blockState.state !== 'unavailable'
+                      ? parseInt(blockState.state).toLocaleString('de-DE')
+                      : '—';
+
+                    return `
+                      <div style="display:flex; align-items:center; gap:28px; padding:4px 8px;">
+                        <span>
+                          <span style="color:var(--secondary-text-color); font-size:0.75rem;">Uhrzeit</span><br>
+                          <span style="font-size:1.05rem; font-weight:700; font-variant-numeric:tabular-nums;">${time}</span>
+                        </span>
+                        <span style="color:var(--divider-color);">│</span>
+                        <span>
+                          <span style="color:var(--secondary-text-color); font-size:0.75rem;">₿ Block</span><br>
+                          <span style="font-size:1.05rem; font-weight:700; color:#f59e0b;">${block}</span>
+                        </span>
+                        <span style="color:var(--divider-color);">│</span>
+                        <span>
+                          <span style="color:var(--secondary-text-color); font-size:0.75rem;">Log-Slot</span><br>
+                          <span style="font-size:1.05rem; font-weight:700; font-family:monospace;">${slot}</span>
+                        </span>
+                      </div>
+                    `;
+                  ]]]
+              styles:
+                card:
+                  - background: var(--secondary-background-color)
+                  - border-radius: 12px
+                  - padding: 8px 16px
+                  - margin-bottom: 4px
+                custom_fields:
+                  context:
+                    - width: 100%
+
             # ── Energie-Status ──────────────────────────────────────────────────────
             - type: horizontal-stack
               cards:
@@ -362,7 +416,8 @@ views:
                           icon: mdi:power
                           state_display: >
                             [[[
-                              return entity.state === 'Standby' ? 'Aus' : 'Ein';
+                              const on = ['Eco','Standard','Super'].includes(entity.state);
+                              return on ? 'Ein' : 'Aus';
                             ]]]
                           styles:
                             icon:
@@ -370,16 +425,17 @@ views:
                               - height: 44px
                               - color: >
                                   [[[
-                                    return entity.state === 'Standby'
-                                      ? 'var(--disabled-color)' : '#4CAF50';
+                                    const on = ['Eco','Standard','Super'].includes(entity.state);
+                                    return on ? '#4CAF50' : 'var(--disabled-color)';
                                   ]]]
                           tap_action:
                             action: call-service
                             service: >
                               [[[
-                                return entity.state === 'Standby'
-                                  ? 'shell_command.miner1_set_softon'
-                                  : 'shell_command.miner1_set_softoff';
+                                const on = ['Eco','Standard','Super'].includes(entity.state);
+                                return on
+                                  ? 'shell_command.miner1_set_softoff'
+                                  : 'shell_command.miner1_set_softon';
                               ]]]
 
                         - type: custom:button-card
@@ -637,7 +693,8 @@ views:
                           icon: mdi:power
                           state_display: >
                             [[[
-                              return entity.state === 'Standby' ? 'Aus' : 'Ein';
+                              const on = ['Eco','Standard','Super'].includes(entity.state);
+                              return on ? 'Ein' : 'Aus';
                             ]]]
                           styles:
                             icon:
@@ -645,16 +702,17 @@ views:
                               - height: 44px
                               - color: >
                                   [[[
-                                    return entity.state === 'Standby'
-                                      ? 'var(--disabled-color)' : '#4CAF50';
+                                    const on = ['Eco','Standard','Super'].includes(entity.state);
+                                    return on ? '#4CAF50' : 'var(--disabled-color)';
                                   ]]]
                           tap_action:
                             action: call-service
                             service: >
                               [[[
-                                return entity.state === 'Standby'
-                                  ? 'shell_command.miner2_set_softon'
-                                  : 'shell_command.miner2_set_softoff';
+                                const on = ['Eco','Standard','Super'].includes(entity.state);
+                                return on
+                                  ? 'shell_command.miner2_set_softoff'
+                                  : 'shell_command.miner2_set_softon';
                               ]]]
 
                         - type: custom:button-card
@@ -1198,18 +1256,10 @@ views:
                         ${row('mdi:transmission-tower-export','Überschuss gesamt',fmtKwh(pvExpKwh),'#66BB6A')}
                         ${row('mdi:transmission-tower-import','Netzbezug gesamt',fmtKwh(gridImpKwh),'#ef5350')}
                       </div>
-                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px;">
-                        <div>
-                          ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(hausKwh),'#f59e0b')}
-                          ${row('mdi:water-boiler','Heizstab',fmtKwh(hzKwh),'#2196F3')}
-                          ${row('mdi:pickaxe','Miner',fmtKwh(mineKwh),'#f59e0b')}
-                        </div>
-                        <div>
-                          ${row('mdi:play-circle','Gestartet',fmtTime(startToday),'#4CAF50')}
-                          ${row('mdi:stop-circle','Gestoppt',fmtTime(stopToday),'#F44336')}
-                          ${row('mdi:play-circle-outline','Gestr. Start',fmtTime(startYest),'var(--secondary-text-color)')}
-                          ${row('mdi:stop-circle-outline','Gestr. Stop',fmtTime(stopYest),'var(--secondary-text-color)')}
-                        </div>
+                      <div>
+                        ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(hausKwh),'#f59e0b')}
+                        ${row('mdi:water-boiler','Heizstab',fmtKwh(hzKwh),'#2196F3')}
+                        ${row('mdi:pickaxe','Miner',fmtKwh(mineKwh),'#f59e0b')}
                       </div>
                       <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--divider-color);">
                         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
@@ -1373,6 +1423,8 @@ views:
         entities:
           - entity: input_number.mvp_soc_eco_start_pct
             name: Eco-Start SoC (%)
+          - entity: input_number.mvp_pv_start_w
+            name: Eco-Start PV (W)
           - entity: input_number.mvp_soc_super_pct
             name: Super-Start SoC (%)
           - entity: input_number.mvp_soc_super_stop_pct

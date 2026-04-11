@@ -1,0 +1,19 @@
+bitcoin:
+
+  # ── Bitcoin Block Height ─────────────────────────────────────────────────────
+  # REST-Sensor gegen lokale Mempool-Instanz auf Umbrel.
+  # Endpunkt: GET /api/blocks/tip/height → plain integer, z. B. 895432
+  #
+  # Port anpassen falls Mempool auf anderem Port läuft:
+  #   Standard Umbrel Mempool: umbrel.local:3006
+  #   Knots/Core RPC direkt:   umbrel.local:8332 (andere URL-Struktur)
+  #
+  sensor:
+    - platform: rest
+      name: bitcoin_block_height
+      unique_id: bitcoin_block_height
+      resource: "http://umbrel.local:3006/api/blocks/tip/height"
+      scan_interval: 60
+      value_template: "{{ value | int(0) }}"
+      unit_of_measurement: ""
+      icon: mdi:bitcoin

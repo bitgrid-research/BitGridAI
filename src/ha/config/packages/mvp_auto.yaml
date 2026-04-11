@@ -1,9 +1,9 @@
 mvp_auto:
 
-  # ── Konfigurierbare Schwellwerte ──────────────────────────────────────────
+  # ── Konfigurierbare SoC-Schwellwerte ──────────────────────────────────────
   input_number:
     mvp_soc_eco_start_pct:
-      name: "MVP: Eco-Start SoC (%)"
+      name: "Eco-Start SoC (%)"
       min: 0
       max: 100
       step: 5
@@ -11,8 +11,17 @@ mvp_auto:
       initial: 65
       icon: mdi:battery-charging-60
 
+    mvp_pv_start_w:
+      name: "Eco-Start PV (W)"
+      min: 0
+      max: 15000
+      step: 500
+      mode: box
+      initial: 6000
+      icon: mdi:solar-power
+
     mvp_soc_super_pct:
-      name: "MVP: Super-Start SoC (%)"
+      name: "Super-Start SoC (%)"
       min: 50
       max: 100
       step: 5
@@ -21,7 +30,7 @@ mvp_auto:
       icon: mdi:battery
 
     mvp_soc_super_stop_pct:
-      name: "MVP: Super-Stop SoC (%)"
+      name: "Super-Stop SoC (%)"
       min: 50
       max: 100
       step: 5
@@ -30,7 +39,7 @@ mvp_auto:
       icon: mdi:battery-arrow-down
 
     mvp_soc_stop_pct:
-      name: "MVP: Stop SoC (%)"
+      name: "Stop SoC (%)"
       min: 0
       max: 100
       step: 5
@@ -38,343 +47,147 @@ mvp_auto:
       initial: 60
       icon: mdi:battery-alert
 
-    miner1_workmode_slider:
-      name: "Miner 1 Workmode"
-      min: 0
-      max: 3
-      step: 1
-      mode: slider
-      initial: 0
-      icon: mdi:speedometer
-
-    miner2_workmode_slider:
-      name: "Miner 2 Workmode"
-      min: 0
-      max: 3
-      step: 1
-      mode: slider
-      initial: 0
-      icon: mdi:speedometer
-
   automation:
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # Workmode Slider → Select (Miner 1)
-    # ─────────────────────────────────────────────────────────────────────────
-    - id: mvp_miner1_slider_to_select
-      alias: "MVP: Miner1 Slider → Workmode"
+    # ── Einzige Steuerungs-Automation: läuft alle 2 Min + bei SoC-Änderung ──
+    - id: mvp_watchdog
+      alias: "MVP: SoC Watchdog"
+      description: >
+        Prüft SoC und setzt Workmode beider Miner.
+        Priorität: Stop > Super > Super-Downgrade > Eco-Start
       trigger:
-        - platform: state
-          entity_id: input_number.miner1_workmode_slider
-      action:
-        - action: select.select_option
-          target:
-            entity_id: select.miner1_workmode_set
-          data:
-            option: >
-              {% set m = {'0':'Standby','1':'Eco','2':'Standard','3':'Super'} %}
-              {{ m[trigger.to_state.state | int | string] }}
-
-    # Workmode Select → Slider (Miner 1, Sync zurück)
-    - id: mvp_miner1_select_to_slider
-      alias: "MVP: Miner1 Workmode → Slider"
-      trigger:
-        - platform: state
-          entity_id: select.miner1_workmode_set
-      action:
-        - action: input_number.set_value
-          target:
-            entity_id: input_number.miner1_workmode_slider
-          data:
-            value: >
-              {% set m = {'Standby':0,'Eco':1,'Standard':2,'Super':3} %}
-              {{ m[trigger.to_state.state] | default(0) }}
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # Workmode Slider → Select (Miner 2)
-    # ─────────────────────────────────────────────────────────────────────────
-    - id: mvp_miner2_slider_to_select
-      alias: "MVP: Miner2 Slider → Workmode"
-      trigger:
-        - platform: state
-          entity_id: input_number.miner2_workmode_slider
-      action:
-        - action: select.select_option
-          target:
-            entity_id: select.miner2_workmode_set
-          data:
-            option: >
-              {% set m = {'0':'Standby','1':'Eco','2':'Standard','3':'Super'} %}
-              {{ m[trigger.to_state.state | int | string] }}
-
-    # Workmode Select → Slider (Miner 2, Sync zurück)
-    - id: mvp_miner2_select_to_slider
-      alias: "MVP: Miner2 Workmode → Slider"
-      trigger:
-        - platform: state
-          entity_id: select.miner2_workmode_set
-      action:
-        - action: input_number.set_value
-          target:
-            entity_id: input_number.miner2_workmode_slider
-          data:
-            value: >
-              {% set m = {'Standby':0,'Eco':1,'Standard':2,'Super':3} %}
-              {{ m[trigger.to_state.state] | default(0) }}
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # REGEL 1: Miner starten (Eco) wenn SoC >= Start-Schwelle
-    # ─────────────────────────────────────────────────────────────────────────
-    - id: mvp_start_eco
-      alias: "MVP: Miner Start Eco"
-      description: "Startet beide Miner (Eco) wenn SoC >= Eco-Start-Schwelle"
-      trigger:
-        - platform: template
-          value_template: >
-            {{ states('sensor.battery_soc_pct') | float(0) >=
-               states('input_number.mvp_soc_eco_start_pct') | float(60) }}
-          for: "00:01:00"
+        - platform: time_pattern
+          minutes: "/2"
         - platform: homeassistant
           event: start
         - platform: state
-          entity_id:
-            - input_boolean.miner1_auto_load_management
-            - input_boolean.miner2_auto_load_management
-          to: "on"
-        # Miner kehrt nach Reboot in Idle (119W Warmstandby) zurück — sofort starten
+          entity_id: sensor.battery_soc_pct
         - platform: state
-          entity_id:
-            - sensor.miner1_workmode_status
-            - sensor.miner2_workmode_status
-          to: "Idle"
-      condition:
-        - condition: template
-          value_template: >
-            {{ states('sensor.battery_soc_pct') | float(0) >=
-               states('input_number.mvp_soc_eco_start_pct') | float(60) }}
+          entity_id: sensor.pv_power_w
       action:
+        - variables:
+            soc: "{{ states('sensor.battery_soc_pct') | float(0) }}"
+            pv: "{{ states('sensor.pv_power_w') | float(0) }}"
+            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(65) }}"
+            pv_start: "{{ states('input_number.mvp_pv_start_w') | float(6000) }}"
+            soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(90) }}"
+            soc_super_off: "{{ states('input_number.mvp_soc_super_stop_pct') | float(85) }}"
+            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(60) }}"
+
+        # ── Miner 1 ────────────────────────────────────────────────────────
         - if:
             - condition: state
               entity_id: input_boolean.miner1_auto_load_management
               state: "on"
-            - condition: template
-              value_template: >
-                {{ states('sensor.miner1_workmode_status') in ['Standby', 'Idle', 'Off'] }}
           then:
-            - action: select.select_option
-              target:
-                entity_id: select.miner1_workmode_set
-              data:
-                option: Eco
+            - choose:
+                # P1: SoC zu niedrig → Standby
+                - conditions:
+                    - condition: template
+                      value_template: "{{ soc < soc_stop }}"
+                  sequence:
+                    - condition: template
+                      value_template: "{{ states('sensor.miner1_workmode_status') not in ['Standby', 'Off'] }}"
+                    - action: select.select_option
+                      target:
+                        entity_id: select.miner1_workmode_set
+                      data:
+                        option: Standby
+
+                # P2: Akku voll → Super
+                - conditions:
+                    - condition: template
+                      value_template: "{{ soc >= soc_super_on }}"
+                  sequence:
+                    - condition: template
+                      value_template: "{{ states('sensor.miner1_workmode_status') != 'Super' }}"
+                    - action: select.select_option
+                      target:
+                        entity_id: select.miner1_workmode_set
+                      data:
+                        option: Super
+
+                # P3: Super-Deadband unterschritten → Eco
+                - conditions:
+                    - condition: template
+                      value_template: >
+                        {{ soc < soc_super_off and
+                           states('sensor.miner1_workmode_status') == 'Super' }}
+                  sequence:
+                    - action: select.select_option
+                      target:
+                        entity_id: select.miner1_workmode_set
+                      data:
+                        option: Eco
+
+                # P4: SoC ok ODER PV stark genug, Miner aus → Eco starten
+                - conditions:
+                    - condition: template
+                      value_template: >
+                        {{ (soc >= soc_start or pv >= pv_start) and
+                           states('sensor.miner1_workmode_status') in ['Standby', 'Idle', 'Off'] }}
+                  sequence:
+                    - action: select.select_option
+                      target:
+                        entity_id: select.miner1_workmode_set
+                      data:
+                        option: Eco
+
+        # ── Miner 2 ────────────────────────────────────────────────────────
         - if:
             - condition: state
               entity_id: input_boolean.miner2_auto_load_management
               state: "on"
-            - condition: template
-              value_template: >
-                {{ states('sensor.miner2_workmode_status') in ['Standby', 'Idle', 'Off'] }}
           then:
-            - action: select.select_option
-              target:
-                entity_id: select.miner2_workmode_set
-              data:
-                option: Eco
+            - choose:
+                # P1: SoC zu niedrig → Standby
+                - conditions:
+                    - condition: template
+                      value_template: "{{ soc < soc_stop }}"
+                  sequence:
+                    - condition: template
+                      value_template: "{{ states('sensor.miner2_workmode_status') not in ['Standby', 'Off'] }}"
+                    - action: select.select_option
+                      target:
+                        entity_id: select.miner2_workmode_set
+                      data:
+                        option: Standby
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # REGEL 1b: Miner Idle → Standby (Soft-Off) wenn SoC zu niedrig zum Starten
-    # Avalon Q Idle = 119W Warmstandby nach Reboot — kostet Geld ohne Hash-Output
-    # ─────────────────────────────────────────────────────────────────────────
-    - id: mvp_idle_to_standby
-      alias: "MVP: Miner Idle → Standby (kein Startrecht)"
-      description: "Schickt Miner aus Idle-Zustand (119W) per softoff in echten Standby (10W) wenn SoC unter Start-Schwelle"
-      trigger:
-        - platform: state
-          entity_id: sensor.miner1_workmode_status
-          to: "Idle"
-        - platform: state
-          entity_id: sensor.miner2_workmode_status
-          to: "Idle"
-        # Auch beim HA-Start prüfen — Miner könnte bereits in Idle sein
-        - platform: homeassistant
-          event: start
-      condition:
-        - condition: template
-          value_template: >
-            {{ states('sensor.battery_soc_pct') | float(0) <
-               states('input_number.mvp_soc_eco_start_pct') | float(60) }}
-      action:
-        # Beim HA-Start warten bis Entitäten bereit sind
-        - delay: "00:00:30"
-        - if:
-            - condition: template
-              value_template: >
-                {{ states('sensor.miner1_workmode_status') == 'Idle' }}
-            - condition: state
-              entity_id: input_boolean.miner1_auto_load_management
-              state: "on"
-          then:
-            - action: shell_command.miner1_set_softoff
-            # Verifizieren: warten bis Miner reagiert, dann Sensor aktualisieren
-            - delay: "00:00:20"
-            - action: homeassistant.update_entity
-              target:
-                entity_id: sensor.miner1_api_litestats
-            - delay: "00:00:10"
-            # Retry falls Miner immer noch in Idle (softoff wurde ignoriert)
-            - if:
-                - condition: template
-                  value_template: >
-                    {{ states('sensor.miner1_workmode_status') == 'Idle' }}
-              then:
-                - action: shell_command.miner1_set_softoff
-                - delay: "00:00:20"
-                - action: homeassistant.update_entity
-                  target:
-                    entity_id: sensor.miner1_api_litestats
-        - if:
-            - condition: template
-              value_template: >
-                {{ states('sensor.miner2_workmode_status') == 'Idle' }}
-            - condition: state
-              entity_id: input_boolean.miner2_auto_load_management
-              state: "on"
-          then:
-            - action: shell_command.miner2_set_softoff
-            # Verifizieren: warten bis Miner reagiert, dann Sensor aktualisieren
-            - delay: "00:00:20"
-            - action: homeassistant.update_entity
-              target:
-                entity_id: sensor.miner2_api_litestats
-            - delay: "00:00:10"
-            # Retry falls Miner immer noch in Idle (softoff wurde ignoriert)
-            - if:
-                - condition: template
-                  value_template: >
-                    {{ states('sensor.miner2_workmode_status') == 'Idle' }}
-              then:
-                - action: shell_command.miner2_set_softoff
-                - delay: "00:00:20"
-                - action: homeassistant.update_entity
-                  target:
-                    entity_id: sensor.miner2_api_litestats
+                # P2: Akku voll → Super
+                - conditions:
+                    - condition: template
+                      value_template: "{{ soc >= soc_super_on }}"
+                  sequence:
+                    - condition: template
+                      value_template: "{{ states('sensor.miner2_workmode_status') != 'Super' }}"
+                    - action: select.select_option
+                      target:
+                        entity_id: select.miner2_workmode_set
+                      data:
+                        option: Super
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # REGEL 2: Auf Super hochschalten wenn Akku voll
-    # ─────────────────────────────────────────────────────────────────────────
-    - id: mvp_upgrade_super
-      alias: "MVP: Miner auf Super (Akku voll)"
-      description: "Schaltet laufende Miner auf Super wenn Akku voll"
-      trigger:
-        - platform: template
-          value_template: >
-            {{ states('sensor.battery_soc_pct') | float(0) >=
-               states('input_number.mvp_soc_super_pct') | float(100) }}
-          for: "00:02:00"
-        - platform: homeassistant
-          event: start
-      condition:
-        - condition: template
-          value_template: >
-            {{ states('sensor.battery_soc_pct') | float(0) >=
-               states('input_number.mvp_soc_super_pct') | float(100) }}
-      action:
-        - if:
-            - condition: state
-              entity_id: input_boolean.miner1_auto_load_management
-              state: "on"
-            - condition: template
-              value_template: >
-                {{ states('sensor.miner1_workmode_status') in ['Eco', 'Standard'] }}
-          then:
-            - action: select.select_option
-              target:
-                entity_id: select.miner1_workmode_set
-              data:
-                option: Super
-        - if:
-            - condition: state
-              entity_id: input_boolean.miner2_auto_load_management
-              state: "on"
-            - condition: template
-              value_template: >
-                {{ states('sensor.miner2_workmode_status') in ['Eco', 'Standard'] }}
-          then:
-            - action: select.select_option
-              target:
-                entity_id: select.miner2_workmode_set
-              data:
-                option: Super
+                # P3: Super-Deadband unterschritten → Eco
+                - conditions:
+                    - condition: template
+                      value_template: >
+                        {{ soc < soc_super_off and
+                           states('sensor.miner2_workmode_status') == 'Super' }}
+                  sequence:
+                    - action: select.select_option
+                      target:
+                        entity_id: select.miner2_workmode_set
+                      data:
+                        option: Eco
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # REGEL 2b: Super → Eco Downgrade (Deadband Anti-Flapping)
-    # ─────────────────────────────────────────────────────────────────────────
-    - id: mvp_downgrade_super
-      alias: "MVP: Miner Super → Eco (Deadband)"
-      description: "Schaltet Miner von Super auf Eco wenn SoC unter Super-Stop-Schwelle fällt"
-      trigger:
-        - platform: template
-          value_template: >
-            {{ states('sensor.battery_soc_pct') | float(0) <
-               states('input_number.mvp_soc_super_stop_pct') | float(85) }}
-          for: "00:02:00"
-      action:
-        - if:
-            - condition: state
-              entity_id: input_boolean.miner1_auto_load_management
-              state: "on"
-            - condition: template
-              value_template: >
-                {{ states('sensor.miner1_workmode_status') == 'Super' }}
-          then:
-            - action: select.select_option
-              target:
-                entity_id: select.miner1_workmode_set
-              data:
-                option: Eco
-        - if:
-            - condition: state
-              entity_id: input_boolean.miner2_auto_load_management
-              state: "on"
-            - condition: template
-              value_template: >
-                {{ states('sensor.miner2_workmode_status') == 'Super' }}
-          then:
-            - action: select.select_option
-              target:
-                entity_id: select.miner2_workmode_set
-              data:
-                option: Eco
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # REGEL 3: Miner stoppen wenn SoC < Stop-Schwelle (fallend)
-    # ─────────────────────────────────────────────────────────────────────────
-    - id: mvp_stop_standby
-      alias: "MVP: Miner Stop (SoC zu niedrig)"
-      description: "Stoppt Miner wenn SoC unter Stop-Schwelle fällt"
-      trigger:
-        - platform: template
-          value_template: >
-            {{ states('sensor.battery_soc_pct') | float(0) <
-               states('input_number.mvp_soc_stop_pct') | float(60) }}
-          for: "00:02:00"
-      action:
-        - if:
-            - condition: template
-              value_template: >
-                {{ states('sensor.miner1_workmode_status') not in ['Standby', 'Off'] }}
-          then:
-            - action: select.select_option
-              target:
-                entity_id: select.miner1_workmode_set
-              data:
-                option: Standby
-        - if:
-            - condition: template
-              value_template: >
-                {{ states('sensor.miner2_workmode_status') not in ['Standby', 'Off'] }}
-          then:
-            - action: select.select_option
-              target:
-                entity_id: select.miner2_workmode_set
-              data:
-                option: Standby
+                # P4: SoC ok ODER PV stark genug, Miner aus → Eco starten
+                - conditions:
+                    - condition: template
+                      value_template: >
+                        {{ (soc >= soc_start or pv >= pv_start) and
+                           states('sensor.miner2_workmode_status') in ['Standby', 'Idle', 'Off'] }}
+                  sequence:
+                    - action: select.select_option
+                      target:
+                        entity_id: select.miner2_workmode_set
+                      data:
+                        option: Eco
