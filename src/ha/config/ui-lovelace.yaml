@@ -505,9 +505,8 @@ views:
                             card:
                               - background: >
                                   [[[
-                                    if (entity.state === 'Standby') return '#757575';
-                                    if (entity.state === 'Idle') return '#8D6E63';
-                                    return 'var(--secondary-background-color)';
+                                    return entity.state === 'Standby'
+                                      ? '#757575' : 'var(--secondary-background-color)';
                                   ]]]
                               - border-radius: 10px
                               - padding: 10px 4px
@@ -516,14 +515,14 @@ views:
                               - height: 26px
                               - color: >
                                   [[[
-                                    return ['Standby','Idle'].includes(entity.state)
+                                    return entity.state === 'Standby'
                                       ? '#fff' : '#757575';
                                   ]]]
                             name:
                               - font-size: 0.68rem
                               - color: >
                                   [[[
-                                    return ['Standby','Idle'].includes(entity.state)
+                                    return entity.state === 'Standby'
                                       ? '#fff' : 'var(--secondary-text-color)';
                                   ]]]
                           tap_action:
@@ -782,9 +781,8 @@ views:
                             card:
                               - background: >
                                   [[[
-                                    if (entity.state === 'Standby') return '#757575';
-                                    if (entity.state === 'Idle') return '#8D6E63';
-                                    return 'var(--secondary-background-color)';
+                                    return entity.state === 'Standby'
+                                      ? '#757575' : 'var(--secondary-background-color)';
                                   ]]]
                               - border-radius: 10px
                               - padding: 10px 4px
@@ -793,14 +791,14 @@ views:
                               - height: 26px
                               - color: >
                                   [[[
-                                    return ['Standby','Idle'].includes(entity.state)
+                                    return entity.state === 'Standby'
                                       ? '#fff' : '#757575';
                                   ]]]
                             name:
                               - font-size: 0.68rem
                               - color: >
                                   [[[
-                                    return ['Standby','Idle'].includes(entity.state)
+                                    return entity.state === 'Standby'
                                       ? '#fff' : 'var(--secondary-text-color)';
                                   ]]]
                           tap_action:
@@ -1089,6 +1087,43 @@ views:
                   tap_action:
                     action: more-info
 
+                - type: custom:button-card
+                  entity: sensor.lueftung_status_display
+                  name: "Lüftung"
+                  icon: mdi:fan
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const s = entity.state;
+                            if (s === 'Aktiv') return '#4CAF50';
+                            if (s === 'Aus' || !s) return 'var(--disabled-color)';
+                            return '#f59e0b';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                      - color: >
+                          [[[
+                            const s = entity.state;
+                            if (s === 'Aktiv') return '#4CAF50';
+                            if (s === 'Aus' || !s) return 'var(--secondary-text-color)';
+                            return '#f59e0b';
+                          ]]]
+                  tap_action:
+                    action: more-info
+                    entity: switch.shellyplugsg3_dcb4d9c6b46c
+
 
             - type: custom:button-card
               show_name: false
@@ -1158,19 +1193,30 @@ views:
                   custom_fields:
                     env: >
                       [[[
-                        const t_keller = states['sensor.temperatursensor_2_raum_temperatur']?.state ?? '—';
-                        const h_keller = states['sensor.temperatursensor_2_raum_luftfeuchtigkeit']?.state ?? '—';
-                        const t_m1     = states['sensor.zigbee_6_temperatur']?.state ?? '—';
-                        const row = (icon, label, val, unit) =>
-                          `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                        const raw = (id) => states[id];
+                        const val = (id) => {
+                          const s = raw(id)?.state;
+                          return (!s || s === 'unknown' || s === 'unavailable') ? null : s;
+                        };
+                        const t_keller = val('sensor.miner_raumtemp_temperatur');
+                        const h_keller = val('sensor.miner_raumtemp_luftfeuchtigkeit');
+                        const t_m1     = val('sensor.zigbee_6_temperatur');
+                        const h_m1     = val('sensor.zigbee_6_luftfeuchtigkeit');
+                        const row = (icon, label, v, unit) => {
+                          const display = v !== null
+                            ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;">${v} ${unit}</span>`
+                            : `<span style="font-size:0.8rem;font-weight:600;margin-left:8px;color:#ef5350;background:rgba(239,83,80,0.12);padding:1px 6px;border-radius:4px;">✕ unknown</span>`;
+                          return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
                             <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
                             <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-                            <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val === '—' ? '—' : val + ' ' + unit}</span>
+                            ${display}
                           </div>`;
+                        };
                         return `<div style="width:100%;padding:4px 0;text-align:left;">
                           ${row('mdi:thermometer','Keller Temp',t_keller,'°C')}
                           ${row('mdi:water-percent','Keller Feuchte',h_keller,'%')}
                           ${row('mdi:thermometer-alert','Miner 1 Temp',t_m1,'°C')}
+                          ${row('mdi:water-percent','Miner 1 Feuchte',h_m1,'%')}
                         </div>`;
                       ]]]
 
