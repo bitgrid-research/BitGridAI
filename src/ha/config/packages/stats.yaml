@@ -1,5 +1,14 @@
 stats:
 
+  # ── Tageslog: Mining-Sessions persistieren ────────────────────────────────────
+  # Format pro Eintrag: YYYY-MM-DD,HH:MM,HH:MM,tot_h,eco_h,std_h,sup_h,kwh
+  # Pipe-separiert, max 3 Einträge (~135 Zeichen) — passt in HA 255-Zeichen-Limit.
+  input_text:
+    mining_daily_log:
+      name: "Mining Tageslog"
+      max: 255
+      icon: mdi:database-clock
+
   # ── Midnight-Baselines (ersetzt utility_meter, das in HA 2026.x entfernt wurde)
   # Speichern den Integral-Wert zum Tagesbeginn; Template-Sensor berechnet Delta.
   input_number:
@@ -38,6 +47,50 @@ stats:
       min: 0
       max: 1000000
       step: 0.001
+      mode: box
+
+    # YTD-Akkumulatoren: täglich um 00:00:03 aufgefüllt, am 1.1. zurückgesetzt.
+    pv_kwh_ytd:
+      name: "PV kWh YTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    mining_kwh_ytd:
+      name: "Mining kWh YTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    grid_import_ytd:
+      name: "Netzbezug kWh YTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    grid_export_ytd:
+      name: "Einspeisung kWh YTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    house_kwh_ytd:
+      name: "Hausverbrauch kWh YTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    heizstab_kwh_ytd:
+      name: "Heizstab kWh YTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    mining_uptime_ytd_h:
+      name: "Mining Uptime YTD (h)"
+      min: 0
+      max: 99999
+      step: 0.01
       mode: box
 
   # ── Laufzeit-Tracking via history_stats + Lastprofil-Baseline ───────────────
@@ -326,6 +379,112 @@ stats:
             entity_id: input_number.heizstab_energy_midnight
           data:
             value: "{{ states('sensor.heizstab_energy_integral') | float(0) }}"
+
+    # YTD-Akkumulatoren: Tageswerte addieren (vor Baseline-Reset bei 00:00:05!)
+    - id: stats_accumulate_ytd
+      alias: "Stats: YTD Akkumulatoren tageweise erhöhen"
+      trigger:
+        - platform: time
+          at: "00:00:03"
+      action:
+        - variables:
+            pv_d:     "{{ states('sensor.pv_energy_daily')      | float(0) }}"
+            mine_d:   "{{ states('sensor.mining_energy_daily')  | float(0) }}"
+            imp_d:    "{{ states('sensor.grid_import_daily')    | float(0) }}"
+            exp_d:    "{{ states('sensor.grid_export_daily')    | float(0) }}"
+            house_d:  "{{ states('sensor.house_energy_daily')   | float(0) }}"
+            hz_d:     "{{ states('sensor.heizstab_energy_daily')| float(0) }}"
+            up_d:     "{{ states('sensor.miner_uptime_today_h') | float(0) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.pv_kwh_ytd }
+          data:
+            value: "{{ (states('input_number.pv_kwh_ytd') | float(0) + pv_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.mining_kwh_ytd }
+          data:
+            value: "{{ (states('input_number.mining_kwh_ytd') | float(0) + mine_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.grid_import_ytd }
+          data:
+            value: "{{ (states('input_number.grid_import_ytd') | float(0) + imp_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.grid_export_ytd }
+          data:
+            value: "{{ (states('input_number.grid_export_ytd') | float(0) + exp_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.house_kwh_ytd }
+          data:
+            value: "{{ (states('input_number.house_kwh_ytd') | float(0) + house_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.heizstab_kwh_ytd }
+          data:
+            value: "{{ (states('input_number.heizstab_kwh_ytd') | float(0) + hz_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.mining_uptime_ytd_h }
+          data:
+            value: "{{ (states('input_number.mining_uptime_ytd_h') | float(0) + up_d) | round(2) }}"
+
+    # YTD-Reset am 1. Januar (läuft täglich mit, zündet nur am 1.1.)
+    - id: stats_ytd_new_year_reset
+      alias: "Stats: YTD Reset am 1. Januar"
+      trigger:
+        - platform: time
+          at: "00:00:20"
+      condition:
+        - condition: template
+          value_template: "{{ now().month == 1 and now().day == 1 }}"
+      action:
+        - action: input_number.set_value
+          target: { entity_id: input_number.pv_kwh_ytd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.mining_kwh_ytd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.grid_import_ytd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.grid_export_ytd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.house_kwh_ytd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.heizstab_kwh_ytd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.mining_uptime_ytd_h }
+          data: { value: 0 }
+
+    # Tageslog: Mining-Session tageweise persistieren (vor Baseline-Reset!)
+    - id: stats_save_daily_mining_log
+      alias: "Stats: Mining Tageslog sichern"
+      trigger:
+        - platform: time
+          at: "00:00:01"
+      action:
+        - variables:
+            log_date: "{{ now().strftime('%Y-%m-%d') }}"
+            start_t: >-
+              {% set s = states('input_datetime.last_start_at') %}
+              {{ s.split(' ')[1][:5] if ' ' in s and s not in ['unknown','unavailable'] else '--:--' }}
+            stop_t: >-
+              {% set s = states('input_datetime.last_stop_at') %}
+              {{ s.split(' ')[1][:5] if ' ' in s and s not in ['unknown','unavailable'] else '--:--' }}
+            tot_h: "{{ states('sensor.miner_uptime_today_h') | float(0) | round(2) }}"
+            eco_h: "{{ states('sensor.miner_eco_hours_today') | float(0) | round(1) }}"
+            std_h: "{{ states('sensor.miner_standard_hours_today') | float(0) | round(1) }}"
+            sup_h: "{{ states('sensor.miner_super_hours_today') | float(0) | round(1) }}"
+            kwh: "{{ states('sensor.mining_energy_daily') | float(0) | round(2) }}"
+            existing: "{{ states('input_text.mining_daily_log') }}"
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.mining_daily_log
+          data:
+            value: >-
+              {% set e = log_date ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh %}
+              {% set old = existing.split('|') if existing not in ['','unknown','unavailable'] else [] %}
+              {{ ([e] + old[:2]) | join('|') }}
 
     # Gestern-Zeiten sichern: letzten Start/Stop des Vortages speichern
     - id: stats_save_yesterday_miner_times

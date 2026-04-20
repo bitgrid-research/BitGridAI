@@ -1316,7 +1316,147 @@ views:
                   - height: 8px
                   - padding: 0
 
-            # ── Statistik Heute ──────────────────────────────────────────────────
+            # ── Statistik: 2026 YTD | Heute nebeneinander ────────────────────────
+            - type: horizontal-stack
+              cards:
+
+                # ── links: 2026 Gesamtstatistik ─────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 12px 16px
+                    custom_fields:
+                      stats_ytd:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    stats_ytd: >
+                      [[[
+                        const fmtKwh = (v) => {
+                          const n = parseFloat(v);
+                          if (isNaN(n)) return '—';
+                          return n >= 1000
+                            ? (n / 1000).toFixed(2) + ' MWh'
+                            : n.toFixed(1) + ' kWh';
+                        };
+                        const fmtUptime = (v) => {
+                          const n = parseFloat(v);
+                          if (isNaN(n) || n <= 0) return '0 h';
+                          const d = Math.floor(n / 24);
+                          const h = Math.floor(n % 24);
+                          return d > 0 ? `${d}d ${h}h` : `${h} h`;
+                        };
+                        const row = (icon, label, val, iconColor) =>
+                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;">${label}</span>
+                            <span style="font-size:0.85rem;font-weight:600;">${val}</span>
+                          </div>`;
+                        const pv     = states['input_number.pv_kwh_ytd']?.state ?? '0';
+                        const mine   = states['input_number.mining_kwh_ytd']?.state ?? '0';
+                        const imp    = states['input_number.grid_import_ytd']?.state ?? '0';
+                        const exp    = states['input_number.grid_export_ytd']?.state ?? '0';
+                        const house  = states['input_number.house_kwh_ytd']?.state ?? '0';
+                        const hz     = states['input_number.heizstab_kwh_ytd']?.state ?? '0';
+                        const up     = states['input_number.mining_uptime_ytd_h']?.state ?? '0';
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            <ha-icon icon="mdi:calendar-today" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                            <span style="font-size:0.88rem;font-weight:700;">2026 gesamt</span>
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:solar-power','PV erzeugt',fmtKwh(pv),'#4CAF50')}
+                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(exp),'#66BB6A')}
+                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(imp),'#ef5350')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(house),'#f59e0b')}
+                            ${row('mdi:water-boiler','Heizstab',fmtKwh(hz),'#2196F3')}
+                            ${row('mdi:pickaxe','Mining',fmtKwh(mine),'#f59e0b')}
+                          </div>
+                          <div>
+                            ${row('mdi:timer-outline','Mining Uptime',fmtUptime(up),'var(--secondary-text-color)')}
+                          </div>
+                        </div>`;
+                      ]]]
+
+                # ── rechts: Statistik Heute ──────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 12px 16px
+                    custom_fields:
+                      stats_heute:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    stats_heute: >
+                      [[[
+                        const pvKwh      = states['sensor.pv_energy_daily']?.state ?? '—';
+                        const pvExpKwh   = states['sensor.grid_export_daily']?.state ?? '—';
+                        const gridImpKwh = states['sensor.grid_import_daily']?.state ?? '—';
+                        const pvN        = parseFloat(pvKwh);
+                        const pvExpN     = parseFloat(pvExpKwh);
+                        const pvSelfUse  = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0) ? Math.max(0, pvN - pvExpN) : null;
+                        const hausKwh    = states['sensor.house_energy_daily']?.state ?? '—';
+                        const hzKwh      = states['sensor.heizstab_energy_daily']?.state ?? '—';
+                        const mineKwh    = states['sensor.mining_energy_daily']?.state ?? '—';
+                        const upFmt      = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
+                        const ecoH       = states['sensor.miner_eco_hours_today']?.state ?? '—';
+                        const stdH       = states['sensor.miner_standard_hours_today']?.state ?? '—';
+                        const supH       = states['sensor.miner_super_hours_today']?.state ?? '—';
+                        const fmtKwh = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(2) + ' kWh'; };
+                        const fmtH   = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(1) + ' h'; };
+                        const row = (icon, label, val, iconColor) =>
+                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;">${label}</span>
+                            <span style="font-size:0.85rem;font-weight:600;">${val}</span>
+                          </div>`;
+                        const modeBox = (label, val, color) =>
+                          `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                            <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                            <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                          </div>`;
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            <ha-icon icon="mdi:chart-bar" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                            <span style="font-size:0.88rem;font-weight:700;">Statistik Heute</span>
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:solar-power','PV erzeugt',fmtKwh(pvKwh),'#4CAF50')}
+                            ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
+                            ${row('mdi:transmission-tower-export','Überschuss gesamt',fmtKwh(pvExpKwh),'#66BB6A')}
+                            ${row('mdi:transmission-tower-import','Netzbezug gesamt',fmtKwh(gridImpKwh),'#ef5350')}
+                          </div>
+                          <div>
+                            ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(hausKwh),'#f59e0b')}
+                            ${row('mdi:water-boiler','Heizstab',fmtKwh(hzKwh),'#2196F3')}
+                            ${row('mdi:pickaxe','Miner',fmtKwh(mineKwh),'#f59e0b')}
+                          </div>
+                          <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--divider-color);">
+                            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
+                              <div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                                <div style="font-size:0.65rem;color:var(--secondary-text-color);">Gesamt</div>
+                                <div style="font-size:0.82rem;font-weight:700;">${upFmt}</div>
+                              </div>
+                              ${modeBox('Eco',fmtH(ecoH),'#4CAF50')}
+                              ${modeBox('Standard',fmtH(stdH),'#f59e0b')}
+                              ${modeBox('Speed',fmtH(supH),'#F44336')}
+                            </div>
+                          </div>
+                        </div>`;
+                      ]]]
+
+            # ── Mining Verlauf (volle Breite) ─────────────────────────────────────
             - type: custom:button-card
               show_name: false
               show_icon: false
@@ -1325,83 +1465,66 @@ views:
                 card:
                   - padding: 12px 16px
                 custom_fields:
-                  stats_heute:
+                  mining_log:
                     - width: 100%
                     - justify-self: stretch
                     - box-sizing: border-box
               custom_fields:
-                stats_heute: >
+                mining_log: >
                   [[[
-                    const pvKwh        = states['sensor.pv_energy_daily']?.state ?? '—';
-                    const pvExpKwh     = states['sensor.grid_export_daily']?.state ?? '—';
-                    const gridImpKwh   = states['sensor.grid_import_daily']?.state ?? '—';
-                    const pvN          = parseFloat(pvKwh);
-                    const pvExpN       = parseFloat(pvExpKwh);
-                    const pvSelfUse    = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0) ? Math.max(0, pvN - pvExpN) : null;
-                    const hausKwh   = states['sensor.house_energy_daily']?.state ?? '—';
-                    const hzKwh     = states['sensor.heizstab_energy_daily']?.state ?? '—';
-                    const mineKwh   = states['sensor.mining_energy_daily']?.state ?? '—';
-                    const startToday = states['input_datetime.last_start_at']?.state ?? '';
-                    const stopToday  = states['input_datetime.last_stop_at']?.state ?? '';
-                    const startYest  = states['input_datetime.miner_start_yesterday']?.state ?? '';
-                    const stopYest   = states['input_datetime.miner_stop_yesterday']?.state ?? '';
-                    const upFmt     = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
-                    const ecoH      = states['sensor.miner_eco_hours_today']?.state ?? '—';
-                    const stdH      = states['sensor.miner_standard_hours_today']?.state ?? '—';
-                    const supH      = states['sensor.miner_super_hours_today']?.state ?? '—';
-
-                    const fmtTime = (dt) => {
-                      if (!dt || dt === 'unknown' || dt === 'unavailable' || dt === '') return '–';
-                      const parts = dt.split(' ');
-                      return parts.length >= 2 ? parts[1].slice(0, 5) : '–';
+                    const logRaw = states['input_text.mining_daily_log']?.state ?? '';
+                    const logEntries = (logRaw && logRaw !== 'unknown' && logRaw !== 'unavailable')
+                      ? logRaw.split('|').filter(e => e.includes(','))
+                      : [];
+                    const parseEntry = (e) => {
+                      const p = e.split(',');
+                      return { d: p[0]??'', on: p[1]??'–', off: p[2]??'–',
+                        tot: parseFloat(p[3])||0, ec: parseFloat(p[4])||0,
+                        st: parseFloat(p[5])||0, sp: parseFloat(p[6])||0, kw: parseFloat(p[7])||0 };
                     };
-                    const fmtKwh = (v) => {
-                      const n = parseFloat(v);
-                      return isNaN(n) ? '—' : n.toFixed(2) + ' kWh';
+                    const fmtDt  = (iso) => (iso && iso.length >= 10) ? iso.slice(8,10)+'.'+iso.slice(5,7) : '—';
+                    const fmtT   = (dt)  => (!dt || !dt.includes(' ')) ? '–' : dt.split(' ')[1].slice(0,5);
+                    const fmtHm  = (v)   => { const n=parseFloat(v); if(!n||n<=0) return '0h'; const h=Math.floor(n),m=Math.round((n-h)*60); return m>0?`${h}h${m}m`:`${h}h`; };
+                    const fmtH1  = (v)   => { const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(1); };
+                    const todayIso = new Date().toISOString().slice(0,10);
+                    const startDt  = states['input_datetime.last_start_at']?.state ?? '';
+                    const stopDt   = states['input_datetime.last_stop_at']?.state ?? '';
+                    const todayRow = {
+                      d: todayIso, on: fmtT(startDt), off: fmtT(stopDt),
+                      tot: parseFloat(states['sensor.miner_uptime_today_h']?.state)||0,
+                      ec:  parseFloat(states['sensor.miner_eco_hours_today']?.state)||0,
+                      st:  parseFloat(states['sensor.miner_standard_hours_today']?.state)||0,
+                      sp:  parseFloat(states['sensor.miner_super_hours_today']?.state)||0,
+                      kw:  parseFloat(states['sensor.mining_energy_daily']?.state)||0,
+                      live: true
                     };
-                    const fmtH = (v) => {
-                      const n = parseFloat(v);
-                      return isNaN(n) ? '—' : n.toFixed(1) + ' h';
-                    };
-                    const row = (icon, label, val, iconColor) =>
-                      `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;">
-                        <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
-                        <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;">${label}</span>
-                        <span style="font-size:0.85rem;font-weight:600;">${val}</span>
+                    const allRows = [todayRow, ...logEntries.map(parseEntry)];
+                    const cols = '60px 52px 52px 62px 48px 48px 52px 56px';
+                    const th = (t,r) => `<div style="font-size:0.65rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
+                    const headers = `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;border-bottom:1px solid var(--divider-color);margin-bottom:2px;">
+                      ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Gesamt',1)}${th('Eco',1)}${th('Std',1)}${th('Speed',1)}${th('kWh',1)}
+                    </div>`;
+                    const rowHtml = (r) => {
+                      const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
+                      const dc = r.live ? 'var(--primary-text-color)' : 'var(--secondary-text-color)';
+                      const fw = r.live ? '600' : '400';
+                      const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
+                      return `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;${hl}">
+                        <div style="font-size:0.82rem;color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
+                        ${c(r.on,'inherit')}${c(r.off,'inherit')}
+                        ${c(fmtHm(r.tot),'var(--primary-text-color)')}
+                        ${c(fmtH1(r.ec)+'h','#4CAF50')}
+                        ${c(fmtH1(r.st)+'h','#f59e0b')}
+                        ${c(fmtH1(r.sp)+'h','#F44336')}
+                        ${c(r.kw.toFixed(2),'#f59e0b')}
                       </div>`;
-                    const modeBox = (label, val, color) =>
-                      `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
-                        <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
-                        <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
-                      </div>`;
-
-                    return `<div style="width:100%;padding:2px 0;">
+                    };
+                    return `<div style="width:100%;">
                       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-                        <ha-icon icon="mdi:chart-bar" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
-                        <span style="font-size:0.88rem;font-weight:700;">Statistik Heute</span>
+                        <ha-icon icon="mdi:calendar-clock" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                        <span style="font-size:0.88rem;font-weight:700;">Mining Verlauf</span>
                       </div>
-                      <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-                        ${row('mdi:solar-power','PV erzeugt',fmtKwh(pvKwh),'#4CAF50')}
-                        ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
-                        ${row('mdi:transmission-tower-export','Überschuss gesamt',fmtKwh(pvExpKwh),'#66BB6A')}
-                        ${row('mdi:transmission-tower-import','Netzbezug gesamt',fmtKwh(gridImpKwh),'#ef5350')}
-                      </div>
-                      <div>
-                        ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(hausKwh),'#f59e0b')}
-                        ${row('mdi:water-boiler','Heizstab',fmtKwh(hzKwh),'#2196F3')}
-                        ${row('mdi:pickaxe','Miner',fmtKwh(mineKwh),'#f59e0b')}
-                      </div>
-                      <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--divider-color);">
-                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
-                          <div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
-                            <div style="font-size:0.65rem;color:var(--secondary-text-color);">Gesamt</div>
-                            <div style="font-size:0.82rem;font-weight:700;">${upFmt}</div>
-                          </div>
-                          ${modeBox('Eco',fmtH(ecoH),'#4CAF50')}
-                          ${modeBox('Standard',fmtH(stdH),'#f59e0b')}
-                          ${modeBox('Speed',fmtH(supH),'#F44336')}
-                        </div>
-                      </div>
+                      ${headers}${allRows.map(rowHtml).join('')}
                     </div>`;
                   ]]]
 

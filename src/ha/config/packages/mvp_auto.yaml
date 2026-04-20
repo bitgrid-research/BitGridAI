@@ -430,7 +430,7 @@ mvp_auto:
       alias: "MVP: Lüftung Watchdog"
       description: >
         Schaltet Lüftungs-Shelly (shellyplugsg3_dcb4d9c6b46c) ein sobald
-        irgendein Miner läuft. Nach Miner-Stop: 5 min Nachlaufzeit, dann aus.
+        irgendein Miner läuft. Nach Miner-Stop: 30 min Nachlaufzeit, dann aus.
         mode: restart → Neustart des Miners während Cooldown bricht Abschaltung ab.
       mode: restart
       trigger:
@@ -469,15 +469,15 @@ mvp_auto:
               state: "on"
             - action: system_log.write
               data:
-                message: "[lueftung] Alle Miner inaktiv — starte 5 min Nachlauf"
+                message: "[lueftung] Alle Miner inaktiv — starte 30 min Nachlauf"
                 level: info
             - action: input_number.set_value
               target:
                 entity_id: input_number.lueftung_cooldown_end_ts
               data:
-                value: "{{ (now().timestamp() + 300) | int }}"
+                value: "{{ (now().timestamp() + 1800) | int }}"
             - delay:
-                minutes: 5
+                minutes: 30
             - action: system_log.write
               data:
                 message: "[lueftung] Nachlauf abgelaufen — Lüftung aus"
