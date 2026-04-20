@@ -656,17 +656,59 @@ views:
                             const jth = states['sensor.miner1_energy_per_th']?.state ?? '—';
                             const sw  = states['sensor.shellyplugsg3_dcb4d9c5567c_leistung']?.state ?? '—';
                             const fan = states['sensor.miner1_fanr']?.state ?? '—';
-                            const row = (icon, label, val) =>
+                            const tmax = states['sensor.miner1_tmax']?.state ?? '—';
+                            const tavg = states['sensor.miner1_tavg']?.state ?? '—';
+                            const hbi  = states['sensor.miner1_hbitemp']?.state ?? '—';
+                            const hbo  = states['sensor.miner1_hbotemp']?.state ?? '—';
+                            const statusEnt = states['sensor.miner1_workmode_status'];
+                            const mode = statusEnt?.state ?? '—';
+                            const lc = statusEnt?.last_changed;
+                            const since = lc
+                              ? new Date(lc).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
+                              : '—';
+                            const cd = states['sensor.miner_1_cooldown_status']?.state ?? '—';
+                            const cdActive = cd !== '—' && cd !== 'unavailable' && cd !== 'unknown';
+                            const cdColor = cdActive ? '#f59e0b' : 'var(--secondary-text-color)';
+                            const cdTag = cdActive
+                              ? `<span style="margin-left:8px;font-size:0.78rem;color:#f59e0b;font-weight:600;">${cd}</span>`
+                              : '';
+                            const tmaxColor = tmax === '—' ? 'var(--secondary-text-color)'
+                              : parseFloat(tmax) >= 110 ? '#F44336'
+                              : parseFloat(tmax) >= 100 ? '#f59e0b'
+                              : '#4CAF50';
+                            const tavgColor = tavg === '—' ? 'var(--secondary-text-color)'
+                              : parseFloat(tavg) >= 100 ? '#F44336'
+                              : parseFloat(tavg) >= 90  ? '#f59e0b'
+                              : '#4CAF50';
+                            const hbiColor = hbi === '—' ? 'var(--secondary-text-color)'
+                              : parseFloat(hbi) >= 85 ? '#F44336'
+                              : parseFloat(hbi) >= 80 ? '#f59e0b'
+                              : '#4CAF50';
+                            const hboColor = hbo === '—' ? 'var(--secondary-text-color)'
+                              : parseFloat(hbo) >= 90 ? '#F44336'
+                              : parseFloat(hbo) >= 85 ? '#f59e0b'
+                              : '#4CAF50';
+                            const row = (icon, label, val, color) =>
                               `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-                                <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
-                                <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val}</span>
+                                <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color ?? 'var(--secondary-text-color)'};"></ha-icon>
+                                <span style="color:${color ?? 'var(--secondary-text-color)'};font-size:0.85rem;">${label}:</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;color:${color ?? 'inherit'};">${val}</span>
                               </div>`;
                             return `<div style="width:100%;padding:4px 0;text-align:left;">
                               ${row('mdi:speedometer','TH/s',ths)}
                               ${row('mdi:lightning-bolt','J/TH',jth)}
                               ${row('mdi:power-plug','Shelly W', sw !== '—' ? sw + ' W' : '—')}
                               ${row('mdi:fan','Fan %',fan)}
+                              ${row('mdi:thermometer-high','TMax', tmax !== '—' ? tmax + ' °C' : '—', tmaxColor)}
+                              ${row('mdi:thermometer-auto','TAvg', tavg !== '—' ? tavg + ' °C' : '—', tavgColor)}
+                              ${row('mdi:thermometer-chevron-down','HBI', hbi !== '—' ? hbi + ' °C' : '—', hbiColor)}
+                              ${row('mdi:thermometer-chevron-up','HBO', hbo !== '—' ? hbo + ' °C' : '—', hboColor)}
+                              <div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                                <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:16px;color:${cdColor};"></ha-icon>
+                                <span style="color:${cdColor};font-size:0.85rem;">Seit:</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${mode}  ${since}</span>
+                                ${cdTag}
+                              </div>
                             </div>`;
                           ]]]
 
@@ -932,17 +974,59 @@ views:
                             const jth = states['sensor.miner2_energy_per_th']?.state ?? '—';
                             const sw  = states['sensor.shellyplugsg3_d0cf13d86254_leistung']?.state ?? '—';
                             const fan = states['sensor.miner2_fanr']?.state ?? '—';
-                            const row = (icon, label, val) =>
+                            const tmax = states['sensor.miner2_tmax']?.state ?? '—';
+                            const tavg = states['sensor.miner2_tavg']?.state ?? '—';
+                            const hbi  = states['sensor.miner2_hbitemp']?.state ?? '—';
+                            const hbo  = states['sensor.miner2_hbotemp']?.state ?? '—';
+                            const statusEnt = states['sensor.miner2_workmode_status'];
+                            const mode = statusEnt?.state ?? '—';
+                            const lc = statusEnt?.last_changed;
+                            const since = lc
+                              ? new Date(lc).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
+                              : '—';
+                            const cd = states['sensor.miner_2_cooldown_status']?.state ?? '—';
+                            const cdActive = cd !== '—' && cd !== 'unavailable' && cd !== 'unknown';
+                            const cdColor = cdActive ? '#f59e0b' : 'var(--secondary-text-color)';
+                            const cdTag = cdActive
+                              ? `<span style="margin-left:8px;font-size:0.78rem;color:#f59e0b;font-weight:600;">${cd}</span>`
+                              : '';
+                            const tmaxColor = tmax === '—' ? 'var(--secondary-text-color)'
+                              : parseFloat(tmax) >= 110 ? '#F44336'
+                              : parseFloat(tmax) >= 100 ? '#f59e0b'
+                              : '#4CAF50';
+                            const tavgColor = tavg === '—' ? 'var(--secondary-text-color)'
+                              : parseFloat(tavg) >= 100 ? '#F44336'
+                              : parseFloat(tavg) >= 90  ? '#f59e0b'
+                              : '#4CAF50';
+                            const hbiColor = hbi === '—' ? 'var(--secondary-text-color)'
+                              : parseFloat(hbi) >= 85 ? '#F44336'
+                              : parseFloat(hbi) >= 80 ? '#f59e0b'
+                              : '#4CAF50';
+                            const hboColor = hbo === '—' ? 'var(--secondary-text-color)'
+                              : parseFloat(hbo) >= 90 ? '#F44336'
+                              : parseFloat(hbo) >= 85 ? '#f59e0b'
+                              : '#4CAF50';
+                            const row = (icon, label, val, color) =>
                               `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-                                <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
-                                <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val}</span>
+                                <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color ?? 'var(--secondary-text-color)'};"></ha-icon>
+                                <span style="color:${color ?? 'var(--secondary-text-color)'};font-size:0.85rem;">${label}:</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;color:${color ?? 'inherit'};">${val}</span>
                               </div>`;
                             return `<div style="width:100%;padding:4px 0;text-align:left;">
                               ${row('mdi:speedometer','TH/s',ths)}
                               ${row('mdi:lightning-bolt','J/TH',jth)}
                               ${row('mdi:power-plug','Shelly W', sw !== '—' ? sw + ' W' : '—')}
                               ${row('mdi:fan','Fan %',fan)}
+                              ${row('mdi:thermometer-high','TMax', tmax !== '—' ? tmax + ' °C' : '—', tmaxColor)}
+                              ${row('mdi:thermometer-auto','TAvg', tavg !== '—' ? tavg + ' °C' : '—', tavgColor)}
+                              ${row('mdi:thermometer-chevron-down','HBI', hbi !== '—' ? hbi + ' °C' : '—', hbiColor)}
+                              ${row('mdi:thermometer-chevron-up','HBO', hbo !== '—' ? hbo + ' °C' : '—', hboColor)}
+                              <div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                                <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:16px;color:${cdColor};"></ha-icon>
+                                <span style="color:${cdColor};font-size:0.85rem;">Seit:</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${mode}  ${since}</span>
+                                ${cdTag}
+                              </div>
                             </div>`;
                           ]]]
 
@@ -1088,7 +1172,7 @@ views:
                     action: more-info
 
                 - type: custom:button-card
-                  entity: sensor.lueftung_status_display
+                  entity: sensor.luftung_status
                   name: "Lüftung"
                   icon: mdi:fan
                   show_state: true
@@ -1198,10 +1282,10 @@ views:
                           const s = raw(id)?.state;
                           return (!s || s === 'unknown' || s === 'unavailable') ? null : s;
                         };
-                        const t_keller = val('sensor.miner_raumtemp_temperatur');
-                        const h_keller = val('sensor.miner_raumtemp_luftfeuchtigkeit');
-                        const t_m1     = val('sensor.zigbee_6_temperatur');
-                        const h_m1     = val('sensor.zigbee_6_luftfeuchtigkeit');
+                        const t_keller = val('sensor.ewelink_snzb_02p_temperatur_2');
+                        const h_keller = val('sensor.ewelink_snzb_02p_luftfeuchtigkeit_2');
+                        const t_m1     = val('sensor.ewelink_snzb_01p_temperatur');
+                        const h_m1     = val('sensor.ewelink_snzb_01p_luftfeuchtigkeit');
                         const row = (icon, label, v, unit) => {
                           const display = v !== null
                             ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;">${v} ${unit}</span>`
