@@ -47,6 +47,30 @@ Adapter schreiben nicht in `core/`-Strukturen.
 - Keine destruktiven Aktionen ohne Bestätigung
 - Kein `--no-verify` bei Git Hooks
 
+## Codex Review (Strikt)
+
+ChatGPT Codex fungiert als zusätzlicher, strenger Reviewer.
+
+Die Reviews dienen als unabhängige Kontrollinstanz für:
+- Determinismus im Entscheidungskern
+- Einhaltung der Architekturgrenzen
+- Nachvollziehbarkeit und Regelklarheit
+
+Abweichungen von den Kernprinzipien werden direkt und ungeschönt markiert.
+
+**Wichtig:**
+Wenn wiederholt gravierende Probleme übersehen oder ignoriert werden, kann der Reviewte durch ein anderes Modell ersetzt werden.
+
+Regeln:
+- Jeder Befund muss behoben oder begründet abgelehnt werden
+- Ignorieren ohne Begründung ist nicht zulässig
+- Reviews sind ernst zu nehmen, auch wenn sie unbequem sind
+
+Output:
+- Kritische Befunde zuerst
+- Klare, direkte Sprache
+- Kein Beschönigen
+
 ### Code-Qualität
 - Formatter: `black src/ tests/`
 - Linter + Typen: `mypy src/ --strict`
