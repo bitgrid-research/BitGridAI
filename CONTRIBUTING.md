@@ -1,6 +1,6 @@
 # Mitarbeit an BitGridAI
 
-Willkommen. Dieses Dokument beschreibt wie du als HiWi oder externer Beitragender ins Projekt einsteigst.
+Willkommen. Dieses Dokument beschreibt wie du als Mitarbeiter oder externer Beitragender ins Projekt einsteigst.
 
 ## Rollen
 
