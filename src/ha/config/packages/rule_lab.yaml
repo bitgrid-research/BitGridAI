@@ -1,0 +1,257 @@
+rule_lab:
+
+  # ── Szenario-Eingaben (Messwerte) ───────────────────────────────────────────
+  # Alle Entities mit 'lab_'-Prefix — nie mit Prod-Entities verbunden.
+  input_number:
+    lab_pv_power_w:
+      name: "Lab: PV-Leistung"
+      min: 0
+      max: 10000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:solar-power
+
+    lab_house_load_w:
+      name: "Lab: Hauslast"
+      min: 0
+      max: 5000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:home-lightning-bolt
+
+    lab_battery_soc_pct:
+      name: "Lab: Batterie SoC"
+      min: 0
+      max: 100
+      step: 1
+      unit_of_measurement: "%"
+      mode: slider
+      icon: mdi:battery
+
+    lab_miner_temp_c:
+      name: "Lab: Miner Temperatur"
+      min: 20
+      max: 120
+      step: 1
+      unit_of_measurement: "°C"
+      mode: slider
+      icon: mdi:thermometer
+
+    lab_grid_import_w:
+      name: "Lab: Netzbezug"
+      min: 0
+      max: 3000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:transmission-tower
+
+    lab_heartbeat_age_sec:
+      name: "Lab: Heartbeat-Alter"
+      min: 0
+      max: 600
+      step: 5
+      unit_of_measurement: s
+      mode: slider
+      icon: mdi:heart-pulse
+
+  # ── Config-Parameter (Schwellenwerte) ────────────────────────────────────────
+    lab_surplus_min_kw:
+      name: "Lab: Mindest-Überschuss (R1)"
+      min: 0.0
+      max: 5.0
+      step: 0.1
+      unit_of_measurement: kW
+      mode: slider
+      icon: mdi:flash
+
+    lab_soc_soft_min_pct:
+      name: "Lab: SoC Soft-Min (R2)"
+      min: 0
+      max: 50
+      step: 1
+      unit_of_measurement: "%"
+      mode: slider
+      icon: mdi:battery-low
+
+    lab_soc_hard_min_pct:
+      name: "Lab: SoC Hard-Min (R2)"
+      min: 0
+      max: 30
+      step: 1
+      unit_of_measurement: "%"
+      mode: slider
+      icon: mdi:battery-alert
+
+    lab_max_grid_import_w:
+      name: "Lab: Max Netzbezug (R2)"
+      min: 0
+      max: 2000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:transmission-tower-off
+
+    lab_max_chip_temp_c:
+      name: "Lab: Max Chip-Temp (R3)"
+      min: 60
+      max: 105
+      step: 1
+      unit_of_measurement: "°C"
+      mode: slider
+      icon: mdi:thermometer-alert
+
+    lab_comm_timeout_sec:
+      name: "Lab: Comm-Timeout (R3)"
+      min: 10
+      max: 300
+      step: 5
+      unit_of_measurement: s
+      mode: slider
+      icon: mdi:wifi-alert
+
+  # ── Template-Sensoren: R1–R3 Regellogik nachgebaut ─────────────────────────
+  # Spiegelt die Python-Implementierung in src/core/rules/ wider.
+  # R4 (Forecast) und R5 (Deadband) werden im Lab weggelassen —
+  # sie brauchen Zeitreihen-Kontext den HA-Templates nicht abbilden können.
+  template:
+    - sensor:
+        - name: "lab_surplus_kw"
+          unique_id: lab_surplus_kw
+          unit_of_measurement: kW
+          state_class: measurement
+          state: >-
+            {% set pv   = states('input_number.lab_pv_power_w') | float(0) %}
+            {% set load = states('input_number.lab_house_load_w') | float(0) %}
+            {{ ((pv - load) / 1000) | round(2) }}
+
+        # R3 Safety — höchste Priorität, bricht sofort ab
+        - name: "lab_r3_result"
+          unique_id: lab_r3_result
+          state: >-
+            {% set temp    = states('input_number.lab_miner_temp_c') | float(999) %}
+            {% set max_t   = states('input_number.lab_max_chip_temp_c') | float(85) %}
+            {% set hb_age  = states('input_number.lab_heartbeat_age_sec') | float(9999) %}
+            {% set timeout = states('input_number.lab_comm_timeout_sec') | float(60) %}
+            {% if temp > max_t %}
+              STOP_R3_OVERTEMP
+            {% elif hb_age > timeout %}
+              STOP_R3_COMM_TIMEOUT
+            {% else %}
+              PASS
+            {% endif %}
+
+        # R2 Autarkie — STOP vor NOOP (Priorität wie in r2_autarky.py)
+        - name: "lab_r2_result"
+          unique_id: lab_r2_result
+          state: >-
+            {% set soc      = states('input_number.lab_battery_soc_pct') | float(0) %}
+            {% set hard_min = states('input_number.lab_soc_hard_min_pct') | float(10) %}
+            {% set soft_min = states('input_number.lab_soc_soft_min_pct') | float(20) %}
+            {% set grid     = states('input_number.lab_grid_import_w') | float(0) %}
+            {% set max_grid = states('input_number.lab_max_grid_import_w') | float(500) %}
+            {% if soc <= hard_min %}
+              STOP_R2_SOC_HARD_MIN
+            {% elif grid > max_grid %}
+              STOP_R2_GRID_IMPORT_EXCEEDED
+            {% elif soc <= soft_min %}
+              NOOP_R2_SOC_SOFT_MIN
+            {% else %}
+              PASS
+            {% endif %}
+
+        # R1 Profitabilität — letzte Instanz
+        - name: "lab_r1_result"
+          unique_id: lab_r1_result
+          state: >-
+            {% set surplus     = states('sensor.lab_surplus_kw') | float(0) %}
+            {% set surplus_min = states('input_number.lab_surplus_min_kw') | float(1.5) %}
+            {% if surplus >= surplus_min %}
+              START_R1_SURPLUS_OK
+            {% else %}
+              NOOP_R1_INSUFFICIENT_SURPLUS
+            {% endif %}
+
+        # Finale Entscheidung: Priorität R3 > R2 > R1
+        - name: "lab_final_decision"
+          unique_id: lab_final_decision
+          state: >-
+            {% set r3 = states('sensor.lab_r3_result') %}
+            {% set r2 = states('sensor.lab_r2_result') %}
+            {% set r1 = states('sensor.lab_r1_result') %}
+            {% if r3 not in ['PASS', 'unknown', 'unavailable'] %}
+              {{ r3 }}
+            {% elif r2 not in ['PASS', 'unknown', 'unavailable'] %}
+              {{ r2 }}
+            {% else %}
+              {{ r1 if r1 not in ['unknown', 'unavailable'] else 'NOOP_R1_INSUFFICIENT_SURPLUS' }}
+            {% endif %}
+
+        # Erklärungstext (aus text_blocks.yaml nachgebaut für HA-Templates)
+        - name: "lab_explain_short"
+          unique_id: lab_explain_short
+          state: >-
+            {% set code    = states('sensor.lab_final_decision') %}
+            {% set surplus = states('sensor.lab_surplus_kw') | float(0) %}
+            {% set soc     = states('input_number.lab_battery_soc_pct') | float(0) %}
+            {% set temp    = states('input_number.lab_miner_temp_c') | float(0) %}
+            {% set grid    = states('input_number.lab_grid_import_w') | float(0) %}
+            {% if   code == 'START_R1_SURPLUS_OK'          %} Überschuss {{ surplus }} kW — Miner würde starten
+            {% elif code == 'NOOP_R1_INSUFFICIENT_SURPLUS' %} Zu wenig Überschuss ({{ surplus }} kW)
+            {% elif code == 'STOP_R2_SOC_HARD_MIN'         %} Batterie kritisch {{ soc | round(0) }}% — Sicherheitsstopp
+            {% elif code == 'NOOP_R2_SOC_SOFT_MIN'         %} Batterie {{ soc | round(0) }}% — kein Neustart
+            {% elif code == 'STOP_R2_GRID_IMPORT_EXCEEDED' %} Netzbezug {{ grid | round(0) }} W — Stopp
+            {% elif code == 'STOP_R3_OVERTEMP'             %} Sicherheitsstopp: {{ temp | round(0) }}°C Übertemperatur
+            {% elif code == 'STOP_R3_COMM_TIMEOUT'         %} Sicherheitsstopp: Kommunikationsausfall
+            {% else                                        %} {{ code }}
+            {% endif %}
+
+  # ── Script: Lab-Slider mit Prod-Werten befüllen ─────────────────────────────
+  script:
+    lab_sync_from_prod:
+      alias: "Lab: Sync von Prod-Parametern"
+      icon: mdi:sync
+      sequence:
+        # Schwellenwerte aus Prod kopieren
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_surplus_min_kw }
+          data: { value: "{{ states('input_number.r1_surplus_min_kw') | float(1.5) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_soc_soft_min_pct }
+          data: { value: "{{ states('input_number.r2_soc_soft_min_pct') | float(20) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_soc_hard_min_pct }
+          data: { value: "{{ states('input_number.r2_soc_hard_min_pct') | float(10) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_max_grid_import_w }
+          data: { value: "{{ states('input_number.r2_max_grid_import_w') | float(500) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_max_chip_temp_c }
+          data: { value: "{{ states('input_number.r3_max_chip_temp_c') | float(85) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_comm_timeout_sec }
+          data: { value: "{{ states('input_number.r3_comm_timeout_sec') | float(60) }}" }
+        # Live-Messwerte aus Prod übernehmen
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_pv_power_w }
+          data: { value: "{{ states('sensor.pv_power_w') | float(0) | round(0) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_house_load_w }
+          data: { value: "{{ states('sensor.house_load_w') | float(0) | round(0) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_battery_soc_pct }
+          data: { value: "{{ states('sensor.battery_soc_pct') | float(0) | round(1) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_grid_import_w }
+          data: { value: "{{ states('sensor.grid_import_w') | float(0) | round(0) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_miner_temp_c }
+          data: { value: "{{ states('sensor.miner_max_chip_temp_c') | float(0) | round(1) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_heartbeat_age_sec }
+          data:
+            value: >-
+              {{ 5 if (is_state('binary_sensor.miner1_available', 'on') and
+                       is_state('binary_sensor.miner2_available', 'on')) else 120 }}

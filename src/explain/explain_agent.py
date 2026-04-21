@@ -9,9 +9,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
+
+if TYPE_CHECKING:
+    from src.core.models import DecisionEvent
 
 _TEXT_BLOCKS_PATH = Path(__file__).parent / "mappings" / "text_blocks.yaml"
 _DEFAULT_LANG = "de"
@@ -68,6 +71,14 @@ class ExplainAgent:
             energy_state_ref=energy_state_ref,
             lang=self._lang,
         )
+
+    def explain_short(self, event: "DecisionEvent") -> str:
+        """Convenience-Methode für Dependency Injection in ProductionRunner."""
+        return self.explain(
+            event.decision_code,
+            event.params,
+            energy_state_ref=event.state_snapshot.block_id,
+        ).short
 
     def _interpolate(self, template: str, params: dict[str, Any]) -> str:
         """Interpoliert {key} und {key:.nf} — fehlende Keys → '?'."""

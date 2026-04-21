@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import time
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Callable, Literal
 
 from src.adapters.actuation_writer import ActuationWriter
 from src.adapters.telemetry_ingest import TelemetryIngest
@@ -46,6 +46,7 @@ class ProductionRunner:
         event_store: EventStore,
         state_store: StateStore,
         override_handler: OverrideHandler | None = None,
+        explainer: Callable[[DecisionEvent], str] | None = None,
     ) -> None:
         self._config = config
         self._ingest = ingest
@@ -54,6 +55,7 @@ class ProductionRunner:
         self._event_store = event_store
         self._state_store = state_store
         self._override = override_handler or OverrideHandler()
+        self._explainer = explainer
         self._last_action: str | None = None
         self._blocks_since_change: int = 0
 
@@ -116,7 +118,8 @@ class ProductionRunner:
             self._writer.write(cmd, self._relay_topic)
 
         # Persistenz
-        self._event_store.write(event)
+        explain_short = self._explainer(event) if self._explainer else ""
+        self._event_store.write(event, explain_short=explain_short)
         self._state_store.write(state)
 
         log.info(

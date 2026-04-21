@@ -283,6 +283,62 @@ class TestHouseLoadFallback:
         assert state.surplus_kw == pytest.approx(1.5)
 
 
+class TestExplainerIntegration:
+    def test_explain_short_persisted_when_explainer_set(
+        self, ingest, capture_writer, in_memory_stores
+    ) -> None:
+        """explain_short landet in der DB wenn explainer injiziert wird."""
+        writer, _ = capture_writer
+        event_store, state_store = in_memory_stores
+
+        prod = ProductionRunner(
+            config=RuleEngineConfig(),
+            ingest=ingest,
+            writer=writer,
+            relay_topic="test/miner/relay/command",
+            event_store=event_store,
+            state_store=state_store,
+            explainer=lambda e: f"TEST:{e.decision_code}",
+        )
+        _feed(
+            ingest,
+            pv_power_w=4000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=5,
+        )
+
+        event = prod.run_once(now=datetime(2024, 6, 15, 12, 0, tzinfo=timezone.utc))
+
+        stored = event_store.read(event.decision.command_id)
+        assert stored is not None
+        assert stored["explain_short"] == f"TEST:{event.decision_code}"
+
+    def test_no_explainer_stores_empty_string(
+        self, runner, ingest, in_memory_stores
+    ) -> None:
+        """Ohne explainer bleibt explain_short leer — kein Fehler."""
+        prod, _ = runner
+        event_store, _ = in_memory_stores
+        _feed(
+            ingest,
+            pv_power_w=4000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=5,
+        )
+
+        event = prod.run_once(now=datetime(2024, 6, 15, 12, 0, tzinfo=timezone.utc))
+
+        stored = event_store.read(event.decision.command_id)
+        assert stored is not None
+        assert stored["explain_short"] == ""
+
+
 class TestDeduplication:
     def test_same_command_not_sent_twice(self, runner, ingest) -> None:
         """ActuationWriter dedupliziert — gleiche command_id → nur einmal senden."""

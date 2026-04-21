@@ -2,7 +2,8 @@ stats:
 
   # ── Tageslog: Mining-Sessions persistieren ────────────────────────────────────
   # Format pro Eintrag: YYYY-MM-DD,HH:MM,HH:MM,tot_h,eco_h,std_h,sup_h,kwh
-  # Pipe-separiert, max 3 Einträge (~135 Zeichen) — passt in HA 255-Zeichen-Limit.
+  # Pipe-separiert, max 3 Einträge (~135 Zeichen) — Rolling Window für UI-Anzeige.
+  # Langzeit-Archiv: /config/mining_log.csv (täglich 23:59:59, nie überschrieben).
   input_text:
     mining_daily_log:
       name: "Mining Tageslog"
@@ -456,12 +457,12 @@ stats:
           target: { entity_id: input_number.mining_uptime_ytd_h }
           data: { value: 0 }
 
-    # Tageslog: Mining-Session tageweise persistieren (vor Baseline-Reset!)
+    # Tageslog: Mining-Session tageweise persistieren
     - id: stats_save_daily_mining_log
       alias: "Stats: Mining Tageslog sichern"
       trigger:
         - platform: time
-          at: "00:00:01"
+          at: "23:59:59"
       action:
         - variables:
             log_date: "{{ now().strftime('%Y-%m-%d') }}"
@@ -485,6 +486,47 @@ stats:
               {% set e = log_date ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh %}
               {% set old = existing.split('|') if existing not in ['','unknown','unavailable'] else [] %}
               {{ ([e] + old[:2]) | join('|') }}
+        - action: shell_command.mining_log_append
+          data:
+            entry: "{{ log_date }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }}"
+
+    # Start/Stop-Zeiten live tracken (MVP-Watchdog ruft bg_start/bg_stop nicht auf)
+    # Erster Start des Tages: nur wenn last_start_at noch nicht von heute ist.
+    # Letzter Stop des Tages: immer überschreiben.
+    - id: stats_track_miner_times
+      alias: "Stats: Miner Start/Stop Zeiten tracken"
+      trigger:
+        - platform: state
+          entity_id: binary_sensor.miners_any_running
+          to: "on"
+          id: started
+        - platform: state
+          entity_id: binary_sensor.miners_any_running
+          to: "off"
+          id: stopped
+      action:
+        - choose:
+            - conditions:
+                - condition: trigger
+                  id: started
+                - condition: template
+                  value_template: >-
+                    {{ states('input_datetime.last_start_at')[:10] != now().strftime('%Y-%m-%d') }}
+              sequence:
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.last_start_at
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+            - conditions:
+                - condition: trigger
+                  id: stopped
+              sequence:
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.last_stop_at
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
     # Gestern-Zeiten sichern: letzten Start/Stop des Vortages speichern
     - id: stats_save_yesterday_miner_times
@@ -503,4 +545,14 @@ stats:
             entity_id: input_datetime.miner_stop_yesterday
           data:
             datetime: "{{ states('input_datetime.last_stop_at') }}"
+
+  # ── Langzeit-Archiv: täglich in CSV schreiben ─────────────────────────────────
+  # Datei: /config/mining_log.csv (auf dem HA-Host, nie von Deploy überschrieben)
+  # Format: date,start,stop,total_h,eco_h,std_h,speed_h,kwh
+  # Variablen aus dem Service-Call werden als Umgebungsvariablen übergeben ($ENTRY).
+  shell_command:
+    mining_log_append: >-
+      bash -c 'f=/config/mining_log.csv;
+      [ ! -f "$f" ] && echo "date,start,stop,total_h,eco_h,std_h,speed_h,kwh" > "$f";
+      printf "%s\n" "$ENTRY" >> "$f"'
 

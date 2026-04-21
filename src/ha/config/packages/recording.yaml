@@ -1,0 +1,49 @@
+recording:
+
+  # ── Block-Snapshot: alle 10 Min auf MQTT publizieren ─────────────────────────
+  # Topic:   bitgrid/rec/snapshot
+  # Zweck:   Echtdaten für Simulations-Szenarien aufzeichnen (mqtt_recorder.py)
+  # Format:  JSON, ein Objekt pro Block-Tick
+  #
+  # Aufnahme starten:
+  #   python -m src.sim.mqtt_recorder --topic "bitgrid/rec/#" --output recordings/YYYY-MM-DD.jsonl
+  #
+  # Konvertieren:
+  #   python -m src.sim.jsonl_to_csv recordings/YYYY-MM-DD.jsonl --out scenarios/real_YYYY-MM-DD.csv
+
+  automation:
+    - id: recording_block_snapshot
+      alias: "Recording: Block-Snapshot alle 10 Min auf MQTT"
+      description: >
+        Publiziert alle 10 Minuten einen Snapshot aller Regel-Engine-Signale.
+        Nur aktiv wenn input_boolean.recording_active eingeschaltet ist.
+        Kein Einfluss auf Produktions-Logik — rein lesend.
+      trigger:
+        - platform: time_pattern
+          minutes: "/10"
+      condition:
+        - condition: state
+          entity_id: input_boolean.recording_active
+          state: "on"
+      action:
+        - action: mqtt.publish
+          data:
+            topic: "bitgrid/rec/snapshot"
+            retain: false
+            qos: 0
+            payload: >-
+              {"ts":"{{ now().strftime('%Y-%m-%dT%H:%M:%S') }}",
+               "pv_w":{{ states('sensor.pv_power_w') | float(0) | round(1) }},
+               "load_w":{{ states('sensor.house_load_w') | float(0) | round(1) }},
+               "grid_w":{{ states('sensor.grid_import_w') | float(0) | round(1) }},
+               "soc":{{ states('sensor.battery_soc_pct') | float(0) | round(1) }},
+               "temp_c":{{ states('sensor.miner_max_chip_temp_c') | float(0) | round(1) }},
+               "hb_ok":{{ (is_state('binary_sensor.miner1_available', 'on') and is_state('binary_sensor.miner2_available', 'on')) | lower }},
+               "miner_w":{{ states('sensor.miner_total_power_w') | float(0) | round(1) }},
+               "surplus_kw":{{ states('sensor.surplus_kw') | float(0) | round(3) }}}
+
+  input_boolean:
+    recording_active:
+      name: "Recording: Aktiv"
+      icon: mdi:record-circle
+      initial: off

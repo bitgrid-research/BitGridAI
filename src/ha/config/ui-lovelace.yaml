@@ -88,7 +88,7 @@ views:
         - type: vertical-stack
           cards:
 
-            # ── Context-Header: Uhrzeit · Bitcoin-Blockhöhe · Log-Slot ────────────
+            # ── Bitsy XAI — Warum passiert das gerade? ─────────────────────────
             - type: custom:button-card
               show_name: false
               show_icon: false
@@ -96,51 +96,171 @@ views:
               tap_action:
                 action: none
               custom_fields:
-                context: >
+                xai: >
                   [[[
+                    const code     = states['sensor.bg_decision_code']?.state     || '—';
+                    const priority = states['sensor.bg_decision_priority']?.state || '—';
+                    const pv       = parseFloat(states['sensor.pv_power_w']?.state      || 0);
+                    const load     = parseFloat(states['sensor.house_load_w']?.state    || 0);
+                    const soc      = parseFloat(states['sensor.battery_soc_pct']?.state || 0);
+                    const surplus  = parseFloat(states['sensor.surplus_kw']?.state) || 0;
+                    const temp     = parseFloat(states['sensor.miner_max_chip_temp_c']?.state || 0);
+                    const block    = states['sensor.block_id']?.state || '?';
+                    const blockStart = states['sensor.block_window_start']?.state || '';
+
+                    // Tageszeit-Greeting
+                    const h = new Date().getHours();
+                    const greeting = h < 5  ? 'Gute Nacht'
+                                   : h < 11 ? 'Guten Morgen'
+                                   : h < 14 ? 'Guten Mittag'
+                                   : h < 18 ? 'Guten Nachmittag'
+                                   : h < 22 ? 'Guten Abend'
+                                   :          'Gute Nacht';
+
+                    // Wetter-Kontext aus PV-Leistung
+                    let weather, wColor;
+                    if      (pv > 4000) { weather = '☀️ Volle Sonne';       wColor = '#FFC107'; }
+                    else if (pv > 2000) { weather = '⛅ Teilweise bewölkt'; wColor = '#90A4AE'; }
+                    else if (pv > 500)  { weather = '☁️ Bewölkt';           wColor = '#78909C'; }
+                    else                { weather = '🌙 Kein PV';            wColor = '#5C6BC0'; }
+
+                    // Schwellenwerte aus HA-Entities (nicht hardcoded)
+                    const surplusMinKw  = parseFloat(states['input_number.r1_surplus_min_kw']?.state  || 1.5);
+                    const socSoftMin    = parseFloat(states['input_number.r2_soc_soft_min_pct']?.state || 65);
+                    const socHardMin    = parseFloat(states['input_number.r2_soc_hard_min_pct']?.state || 10);
+                    const gridLimit     = parseFloat(states['input_number.r2_max_grid_import_w']?.state || 500);
+                    const maxTemp       = parseFloat(states['input_number.r3_max_chip_temp_c']?.state  || 85);
+                    const grid          = parseFloat(states['sensor.grid_import_w']?.state || 0);
+
+                    // Bitsy erklärt die Entscheidung — Zeile 1: Ursache · Zeile 2: Bedingung
+                    let lines;
+                    if (code === 'STOP_R3_OVERTEMP') {
+                      lines = [
+                        `Übertemperatur — ${temp.toFixed(0)}°C überschreitet Limit ${maxTemp.toFixed(0)}°C.`,
+                        `Miner startet automatisch wenn Temperatur sinkt.`
+                      ];
+                    } else if (code === 'STOP_R3_COMM_TIMEOUT') {
+                      lines = [
+                        `Kommunikationsausfall — kein Heartbeat vom Miner.`,
+                        `Mining gestoppt bis MQTT-Verbindung wiederhergestellt.`
+                      ];
+                    } else if (code === 'STOP_R2_SOC_HARD_MIN') {
+                      lines = [
+                        `Batterie kritisch — ${soc.toFixed(0)}% unter Sicherheitsminimum ${socHardMin.toFixed(0)}%.`,
+                        `Mining startet erst wenn Akku ≥ ${socSoftMin.toFixed(0)}%.`
+                      ];
+                    } else if (code === 'NOOP_R2_SOC_SOFT_MIN') {
+                      lines = [
+                        `Batterie bei ${soc.toFixed(0)}% — Mindest-SoC ${socSoftMin.toFixed(0)}% nicht erreicht.`,
+                        `Mining startet wenn Akku ≥ ${socSoftMin.toFixed(0)}%.`
+                      ];
+                    } else if (code === 'STOP_R2_GRID_IMPORT_EXCEEDED') {
+                      lines = [
+                        `Netzbezug ${grid.toFixed(0)} W — Limit ${gridLimit.toFixed(0)} W überschritten.`,
+                        `Mining pausiert bis Netzbezug unter ${gridLimit.toFixed(0)} W sinkt.`
+                      ];
+                    } else if (priority === 'R5_STABILITY') {
+                      lines = [
+                        `Deadband aktiv — letzte Entscheidung wird gehalten.`,
+                        `Flapping-Schutz: kein Wechsel bis Mindesthaltezeit abläuft.`
+                      ];
+                    } else if (code.startsWith('START')) {
+                      lines = [
+                        `${surplus.toFixed(1)} kW Überschuss — alle Regeln erfüllt.`,
+                        `Mining läuft. Batterie ${soc.toFixed(0)}%, PV ${(pv / 1000).toFixed(1)} kW.`
+                      ];
+                    } else if (soc < socSoftMin) {
+                      lines = [
+                        `Batterie bei ${soc.toFixed(0)}% — Mindest-SoC ${socSoftMin.toFixed(0)}% nicht erreicht.`,
+                        `Mining startet wenn Akku ≥ ${socSoftMin.toFixed(0)}%.`
+                      ];
+                    } else {
+                      lines = [
+                        `PV-Überschuss ${surplus.toFixed(1)} kW — Minimum ${surplusMinKw.toFixed(1)} kW nicht erreicht.`,
+                        `Mining startet bei ≥ ${surplusMinKw.toFixed(1)} kW Überschuss.`
+                      ];
+                    }
+
+                    const blockKnown = block && block !== '?' && !isNaN(Number(block));
+                    const blockTime = blockStart
+                      ? (blockStart.includes(' ') ? blockStart.split(' ')[1].slice(0,5) : blockStart)
+                      : '';
+
                     const now = new Date();
                     const hh  = String(now.getHours()).padStart(2, '0');
                     const mm  = String(now.getMinutes()).padStart(2, '0');
                     const time = hh + ':' + mm;
-
                     const slotMin = Math.floor(now.getMinutes() / 10) * 10;
                     const slotH   = String(now.getHours()).padStart(2, '0');
                     const slotM   = String(slotMin).padStart(2, '0');
                     const slot    = slotH + slotM + '.json';
-
-                    const blockState = states['sensor.bitcoin_block_height'];
-                    const block = blockState && blockState.state && blockState.state !== 'unavailable'
-                      ? parseInt(blockState.state).toLocaleString('de-DE')
+                    const blockDisplay = states['sensor.bitcoin_block_height']?.state
+                      && states['sensor.bitcoin_block_height'].state !== 'unavailable'
+                      ? parseInt(states['sensor.bitcoin_block_height'].state).toLocaleString('de-DE')
                       : '—';
 
                     return `
-                      <div style="display:flex; align-items:center; gap:28px; padding:4px 8px;">
-                        <span>
-                          <span style="color:var(--secondary-text-color); font-size:0.75rem;">Uhrzeit</span><br>
-                          <span style="font-size:1.05rem; font-weight:700; font-variant-numeric:tabular-nums;">${time}</span>
-                        </span>
-                        <span style="color:var(--divider-color);">│</span>
-                        <span>
-                          <span style="color:var(--secondary-text-color); font-size:0.75rem;">₿ Block</span><br>
-                          <span style="font-size:1.05rem; font-weight:700; color:#f59e0b;">${block}</span>
-                        </span>
-                        <span style="color:var(--divider-color);">│</span>
-                        <span>
-                          <span style="color:var(--secondary-text-color); font-size:0.75rem;">Log-Slot</span><br>
-                          <span style="font-size:1.05rem; font-weight:700; font-family:monospace;">${slot}</span>
-                        </span>
-                      </div>
-                    `;
+                      <div style="position:relative;padding-right:100px">
+                        <div style="position:absolute;top:0;right:0;
+                                    display:flex;flex-direction:column;gap:4px;
+                                    padding-left:12px;border-left:1px solid var(--divider-color);
+                                    text-align:right;">
+                          <div>
+                            <div style="font-size:0.65rem;color:var(--secondary-text-color);">Uhrzeit</div>
+                            <div style="font-size:1.8rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1;">${time}</div>
+                          </div>
+                          <div>
+                            <div style="font-size:0.65rem;color:var(--secondary-text-color);">₿ Block</div>
+                            <div style="font-size:0.85rem;font-weight:700;color:#f59e0b;">${blockDisplay}</div>
+                          </div>
+                          <div>
+                            <div style="font-size:0.65rem;color:var(--secondary-text-color);">Log-Slot</div>
+                            <div style="font-size:0.78rem;font-weight:700;font-family:monospace;">${slot}</div>
+                          </div>
+                        </div>
+                        <div style="font-size:0.8rem;font-weight:700;
+                                    color:var(--primary-text-color);margin-bottom:10px">
+                          BitGridAI &nbsp;·&nbsp;
+                          <span style="color:var(--secondary-text-color);font-weight:400">${greeting}</span>
+                        </div>
+                        <div style="display:flex;gap:12px;align-items:flex-start">
+                          <img src="/local/bithamster.png"
+                               style="width:72px;height:72px;border-radius:50%;
+                                      flex-shrink:0;object-fit:cover;
+                                      border:2px solid var(--divider-color)">
+                          <div style="flex:1">
+                            <div style="font-size:0.75rem;font-weight:700;
+                                        color:${wColor};margin-bottom:4px">
+                              ${weather}
+                            </div>
+                            <div style="font-size:0.88rem;color:var(--primary-text-color);
+                                        line-height:1.55">
+                              ${lines.join('<br>')}
+                            </div>
+                            ${blockKnown ? `
+                            <div style="font-size:0.68rem;color:var(--disabled-text-color);
+                                        margin-top:8px;font-style:italic">
+                              Block&nbsp;${block}${blockTime ? ' &middot; ' + blockTime : ''} &middot; 10-min Fenster
+                            </div>` : ''}
+                          </div>
+                        </div>
+                      </div>`;
                   ]]]
               styles:
                 card:
                   - background: var(--secondary-background-color)
                   - border-radius: 12px
-                  - padding: 8px 16px
-                  - margin-bottom: 4px
+                  - padding: 14px 16px
+                  - border: 1px solid rgba(100,221,23,0.15)
+                  - text-align: left
+                grid:
+                  - grid-template-areas: '"xai"'
+                  - grid-template-columns: 1fr
                 custom_fields:
-                  context:
+                  xai:
                     - width: 100%
+                    - text-align: left
+                    - justify-self: start
 
             # ── Energie-Status ──────────────────────────────────────────────────────
             - type: horizontal-stack
@@ -353,27 +473,6 @@ views:
                   tap_action:
                     action: more-info
 
-                - type: custom:button-card
-                  entity: weather.forecast_home
-                  name: Wetter
-                  show_state: true
-                  styles:
-                    card:
-                      - background: var(--secondary-background-color)
-                      - border-radius: 12px
-                      - padding: 12px 4px
-                    icon:
-                      - width: 36px
-                      - height: 36px
-                      - color: var(--primary-color)
-                    name:
-                      - font-size: 0.8rem
-                      - color: var(--secondary-text-color)
-                    state:
-                      - font-size: 0.9rem
-                      - font-weight: 600
-                  tap_action:
-                    action: more-info
 
             # ── Miner links | Heizstab rechts ──────────────────────────────
 
@@ -1035,6 +1134,19 @@ views:
         - type: vertical-stack
           cards:
 
+            # ── Wetter-Zeitstrahl ───────────────────────────────────────────────────
+            - type: weather-forecast
+              entity: weather.forecast_home
+              forecast_type: hourly
+              show_current: true
+              show_forecast: true
+              card_mod:
+                style: |
+                  ha-card {
+                    height: 175px;
+                    overflow: hidden;
+                  }
+
             - type: horizontal-stack
               cards:
                 - type: custom:button-card
@@ -1220,7 +1332,7 @@ views:
                   - height: 8px
                   - padding: 0
 
-            # ── Heizstab + Temperatur nebeneinander ─────────────────────────────────
+            # ── Heizstab + Keller + Miner 1 nebeneinander ──────────────────────────
             - type: horizontal-stack
               cards:
 
@@ -1261,14 +1373,14 @@ views:
                         </div>`;
                       ]]]
 
-                # ── Temperatur & Luftfeuchtigkeit ───────────────────────────────────────
+                # ── Keller Klima ────────────────────────────────────────────────────
                 - type: custom:button-card
                   show_name: false
                   show_icon: false
                   show_state: false
                   styles:
                     card:
-                      - padding: 12px 16px
+                      - padding: 10px 16px
                     custom_fields:
                       env:
                         - width: 100%
@@ -1284,8 +1396,6 @@ views:
                         };
                         const t_keller = val('sensor.ewelink_snzb_02p_temperatur_2');
                         const h_keller = val('sensor.ewelink_snzb_02p_luftfeuchtigkeit_2');
-                        const t_m1     = val('sensor.ewelink_snzb_01p_temperatur');
-                        const h_m1     = val('sensor.ewelink_snzb_01p_luftfeuchtigkeit');
                         const row = (icon, label, v, unit) => {
                           const display = v !== null
                             ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;">${v} ${unit}</span>`
@@ -1296,11 +1406,50 @@ views:
                             ${display}
                           </div>`;
                         };
-                        return `<div style="width:100%;padding:4px 0;text-align:left;">
-                          ${row('mdi:thermometer','Keller Temp',t_keller,'°C')}
-                          ${row('mdi:water-percent','Keller Feuchte',h_keller,'%')}
-                          ${row('mdi:thermometer-alert','Miner 1 Temp',t_m1,'°C')}
-                          ${row('mdi:water-percent','Miner 1 Feuchte',h_m1,'%')}
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Keller</div>
+                          ${row('mdi:thermometer','Temperatur',t_keller,'°C')}
+                          ${row('mdi:water-percent','Feuchte',h_keller,'%')}
+                        </div>`;
+                      ]]]
+
+                # ── Miner 1 Klima ───────────────────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 10px 16px
+                    custom_fields:
+                      env:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    env: >
+                      [[[
+                        const raw = (id) => states[id];
+                        const val = (id) => {
+                          const s = raw(id)?.state;
+                          return (!s || s === 'unknown' || s === 'unavailable') ? null : s;
+                        };
+                        const t_m1 = val('sensor.ewelink_snzb_01p_temperatur');
+                        const h_m1 = val('sensor.ewelink_snzb_01p_luftfeuchtigkeit');
+                        const row = (icon, label, v, unit) => {
+                          const display = v !== null
+                            ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;">${v} ${unit}</span>`
+                            : `<span style="font-size:0.8rem;font-weight:600;margin-left:8px;color:#ef5350;background:rgba(239,83,80,0.12);padding:1px 6px;border-radius:4px;">✕ unknown</span>`;
+                          return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
+                            ${display}
+                          </div>`;
+                        };
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Miner 1</div>
+                          ${row('mdi:thermometer-alert','Temperatur',t_m1,'°C')}
+                          ${row('mdi:water-percent','Feuchte',h_m1,'%')}
                         </div>`;
                       ]]]
 
@@ -1486,11 +1635,13 @@ views:
                     const fmtT   = (dt)  => (!dt || !dt.includes(' ')) ? '–' : dt.split(' ')[1].slice(0,5);
                     const fmtHm  = (v)   => { const n=parseFloat(v); if(!n||n<=0) return '0h'; const h=Math.floor(n),m=Math.round((n-h)*60); return m>0?`${h}h${m}m`:`${h}h`; };
                     const fmtH1  = (v)   => { const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(1); };
-                    const todayIso = new Date().toISOString().slice(0,10);
+                    const _d = new Date(); const todayIso = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
                     const startDt  = states['input_datetime.last_start_at']?.state ?? '';
                     const stopDt   = states['input_datetime.last_stop_at']?.state ?? '';
+                    const startTime = startDt.startsWith(todayIso) ? fmtT(startDt) : '–';
+                    const stopTime  = stopDt.startsWith(todayIso)  ? fmtT(stopDt)  : '–';
                     const todayRow = {
-                      d: todayIso, on: fmtT(startDt), off: fmtT(stopDt),
+                      d: todayIso, on: startTime, off: stopTime,
                       tot: parseFloat(states['sensor.miner_uptime_today_h']?.state)||0,
                       ec:  parseFloat(states['sensor.miner_eco_hours_today']?.state)||0,
                       st:  parseFloat(states['sensor.miner_standard_hours_today']?.state)||0,
@@ -1516,7 +1667,7 @@ views:
                         ${c(fmtH1(r.ec)+'h','#4CAF50')}
                         ${c(fmtH1(r.st)+'h','#f59e0b')}
                         ${c(fmtH1(r.sp)+'h','#F44336')}
-                        ${c(r.kw.toFixed(2),'#f59e0b')}
+                        ${c(r.kw.toFixed(2),'white')}
                       </div>`;
                     };
                     return `<div style="width:100%;">
@@ -1830,3 +1981,176 @@ views:
           - entity: sensor.miner_power_w
           - entity: sensor.miner_temp_c
           - entity: sensor.miner_heartbeat_age_sec
+
+  # ═══════════════════════════════════════════════════════
+  # RULE LAB — isoliertes Sandbox für Regelexperimente
+  # Keine Verbindung zu Prod-Entities. Kein Miner-Command.
+  # Schieberegler → R3/R2/R1 Auswertung → Entscheidung live.
+  # ═══════════════════════════════════════════════════════
+  - title: Rule Lab
+    path: rule-lab
+    icon: mdi:test-tube
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 1fr 1fr
+          grid-template-rows: auto
+          margin: 8px
+          row-gap: 12px
+          column-gap: 40px
+        cards:
+
+          # ── Linke Spalte: Eingaben ─────────────────────────────────────────
+          - type: vertical-stack
+            cards:
+
+              - type: entities
+                title: "Szenario — Messwerte"
+                show_header_toggle: false
+                entities:
+                  - entity: input_number.lab_pv_power_w
+                    name: PV-Leistung
+                  - entity: input_number.lab_house_load_w
+                    name: Hauslast
+                  - entity: input_number.lab_battery_soc_pct
+                    name: Batterie SoC
+                  - entity: input_number.lab_miner_temp_c
+                    name: Miner Temperatur
+                  - entity: input_number.lab_grid_import_w
+                    name: Netzbezug
+                  - entity: input_number.lab_heartbeat_age_sec
+                    name: Heartbeat-Alter
+
+              - type: entities
+                title: "Config — Schwellenwerte"
+                show_header_toggle: false
+                entities:
+                  - entity: input_number.lab_surplus_min_kw
+                    name: Mindest-Überschuss (R1)
+                  - entity: input_number.lab_soc_soft_min_pct
+                    name: SoC Soft-Min (R2)
+                  - entity: input_number.lab_soc_hard_min_pct
+                    name: SoC Hard-Min (R2)
+                  - entity: input_number.lab_max_grid_import_w
+                    name: Max Netzbezug (R2)
+                  - entity: input_number.lab_max_chip_temp_c
+                    name: Max Chip-Temp (R3)
+                  - entity: input_number.lab_comm_timeout_sec
+                    name: Comm-Timeout (R3)
+
+          # ── Rechte Spalte: Auswertung ──────────────────────────────────────
+          - type: vertical-stack
+            cards:
+
+              # Regel-Trace: R3 → R2 → R1 mit Farb-Feedback
+              - type: custom:button-card
+                show_name: false
+                show_icon: false
+                show_state: false
+                tap_action:
+                  action: none
+                custom_fields:
+                  trace: >
+                    [[[
+                      const r3      = states['sensor.lab_r3_result']?.state      || '?';
+                      const r2      = states['sensor.lab_r2_result']?.state      || '?';
+                      const r1      = states['sensor.lab_r1_result']?.state      || '?';
+                      const surplus = parseFloat(states['sensor.lab_surplus_kw']?.state || 0).toFixed(2);
+
+                      function badge(result) {
+                        if (result === 'PASS')          return { icon: '✅', color: '#4CAF50', bg: 'rgba(76,175,80,0.12)'  };
+                        if (result.startsWith('STOP'))  return { icon: '🛑', color: '#F44336', bg: 'rgba(244,67,54,0.12)'  };
+                        if (result.startsWith('NOOP'))  return { icon: '⏸',  color: '#FF9800', bg: 'rgba(255,152,0,0.12)'  };
+                        return                                 { icon: '⏭',  color: '#9E9E9E', bg: 'transparent'           };
+                      }
+
+                      function row(rule, label, result) {
+                        const b   = badge(result);
+                        const tag = result === 'PASS' ? 'OK' : result.replace(/^(?:STOP|NOOP)_R\d+_/, '');
+                        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;
+                                            margin:3px 0;border-radius:8px;background:${b.bg}">
+                          <span style="font-weight:700;color:var(--secondary-text-color);
+                                       font-size:0.8rem;width:22px">${rule}</span>
+                          <span style="flex:1;color:var(--primary-text-color);font-size:0.9rem">${label}</span>
+                          <span style="color:${b.color};font-size:0.75rem;font-family:monospace">
+                            ${b.icon} ${tag}
+                          </span>
+                        </div>`;
+                      }
+
+                      return `<div style="padding:4px 0">
+                        <div style="font-size:0.8rem;color:var(--secondary-text-color);
+                                    margin-bottom:8px;padding:0 4px">
+                          Überschuss: <strong style="color:var(--primary-text-color)">${surplus} kW</strong>
+                        </div>
+                        ${row('R3', 'Safety',        r3)}
+                        ${row('R2', 'Autarkie',       r2)}
+                        <div style="font-size:0.72rem;color:var(--disabled-text-color);
+                                    padding:4px 10px">
+                          R4 Forecast · R5 Deadband — brauchen Zeitreihen-Kontext
+                        </div>
+                        ${row('R1', 'Profitabilität', r1)}
+                      </div>`;
+                    ]]]
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                  custom_fields:
+                    trace:
+                      - width: 100%
+
+              # Finale Entscheidung + Erklärungstext
+              - type: custom:button-card
+                show_name: false
+                show_icon: false
+                show_state: false
+                tap_action:
+                  action: none
+                custom_fields:
+                  decision: >
+                    [[[
+                      const code    = states['sensor.lab_final_decision']?.state || '—';
+                      const explain = states['sensor.lab_explain_short']?.state   || '—';
+
+                      let bg, icon;
+                      if      (code.startsWith('START')) { bg = '#1B5E20'; icon = '▶'; }
+                      else if (code.startsWith('STOP'))  { bg = '#B71C1C'; icon = '⏹'; }
+                      else if (code.startsWith('NOOP'))  { bg = '#E65100'; icon = '⏸'; }
+                      else                               { bg = 'var(--secondary-background-color)'; icon = '?'; }
+
+                      return `<div style="background:${bg};border-radius:8px;
+                                          padding:14px 16px;width:100%;box-sizing:border-box">
+                        <div style="font-size:0.72rem;color:rgba(255,255,255,0.55);margin-bottom:4px">
+                          Entscheidung
+                        </div>
+                        <div style="font-size:1.05rem;font-weight:700;color:white;font-family:monospace">
+                          ${icon} ${code}
+                        </div>
+                        <div style="font-size:0.85rem;color:rgba(255,255,255,0.75);margin-top:6px">
+                          ${explain}
+                        </div>
+                      </div>`;
+                    ]]]
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                  custom_fields:
+                    decision:
+                      - width: 100%
+
+              # Sync-Button + Recording-Toggle
+              - type: entities
+                show_header_toggle: false
+                entities:
+                  - entity: script.lab_sync_from_prod
+                    name: "Sync von Prod (Parameter + Live-Werte)"
+                    icon: mdi:sync
+                  - entity: input_boolean.recording_active
+                    name: "Aufnahme (10-Min Snapshots auf MQTT)"
+                    icon: mdi:record-circle
