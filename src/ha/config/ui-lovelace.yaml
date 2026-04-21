@@ -233,7 +233,7 @@ views:
                                         color:${wColor};margin-bottom:4px">
                               ${weather}
                             </div>
-                            <div style="font-size:0.88rem;color:var(--primary-text-color);
+                            <div style="font-size:1.0rem;color:var(--primary-text-color);
                                         line-height:1.55">
                               ${lines.join('<br>')}
                             </div>
@@ -344,7 +344,6 @@ views:
                           [[[
                             const v = parseFloat(entity.state);
                             if (!v || v === 0) return 'var(--secondary-text-color)';
-                            if (v < 800) return '#f59e0b';
                             return '#4CAF50';
                           ]]]
                     name:
@@ -373,7 +372,6 @@ views:
                           [[[
                             const v = parseFloat(entity.state);
                             if (!v || v === 0) return 'var(--secondary-text-color)';
-                            if (v <= 500)      return '#f59e0b';
                             return '#F44336';
                           ]]]
                     name:
@@ -402,8 +400,8 @@ views:
                           [[[
                             const v = parseFloat(entity.state);
                             if (!v || v === 0) return 'var(--secondary-text-color)';
-                            if (v < 500)  return '#4CAF50';
-                            if (v < 1500) return '#f59e0b';
+                            if (v <= 2500) return '#4CAF50';
+                            if (v <= 4000) return '#f59e0b';
                             return '#F44336';
                           ]]]
                     name:
@@ -431,7 +429,7 @@ views:
                       - color: >
                           [[[
                             const v = parseFloat(entity.state);
-                            if (!v || v === 0) return 'var(--secondary-text-color)';
+                            if (!v || v < 30) return 'var(--secondary-text-color)';
                             if (v < 400)  return '#f59e0b';
                             return '#4CAF50';
                           ]]]
@@ -461,7 +459,6 @@ views:
                           [[[
                             const v = parseFloat(entity.state);
                             if (!v || v === 0) return 'var(--secondary-text-color)';
-                            if (v < 1000) return '#f59e0b';
                             return '#2196F3';
                           ]]]
                     name:
@@ -488,9 +485,7 @@ views:
                   - padding: 0
 
             # ── Miner Spalten ────────────────────────────────────────────────────────
-            - type: grid
-              columns: 2
-              square: false
+            - type: horizontal-stack
               cards:
 
                 # ─────────────────────────────────────────────
@@ -588,7 +583,7 @@ views:
                             icon:
                               - width: 44px
                               - height: 44px
-                              - color: "#f59e0b"
+                              - color: "var(--secondary-text-color)"
                           tap_action:
                             action: call-service
                             service: shell_command.miner1_reboot
@@ -774,18 +769,22 @@ views:
                             const tmaxColor = tmax === '—' ? 'var(--secondary-text-color)'
                               : parseFloat(tmax) >= 110 ? '#F44336'
                               : parseFloat(tmax) >= 100 ? '#f59e0b'
+                              : (mode === 'Standby' || parseFloat(tmax) < 45) ? 'var(--primary-text-color)'
                               : '#4CAF50';
                             const tavgColor = tavg === '—' ? 'var(--secondary-text-color)'
                               : parseFloat(tavg) >= 100 ? '#F44336'
                               : parseFloat(tavg) >= 90  ? '#f59e0b'
+                              : (mode === 'Standby' || parseFloat(tavg) < 45) ? 'var(--primary-text-color)'
                               : '#4CAF50';
                             const hbiColor = hbi === '—' ? 'var(--secondary-text-color)'
                               : parseFloat(hbi) >= 85 ? '#F44336'
                               : parseFloat(hbi) >= 80 ? '#f59e0b'
+                              : (mode === 'Standby' || parseFloat(hbi) < 45) ? 'var(--primary-text-color)'
                               : '#4CAF50';
                             const hboColor = hbo === '—' ? 'var(--secondary-text-color)'
                               : parseFloat(hbo) >= 90 ? '#F44336'
                               : parseFloat(hbo) >= 85 ? '#f59e0b'
+                              : (mode === 'Standby' || parseFloat(hbo) < 45) ? 'var(--primary-text-color)'
                               : '#4CAF50';
                             const row = (icon, label, val, color) =>
                               `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
@@ -805,11 +804,27 @@ views:
                               <div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
                                 <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:16px;color:${cdColor};"></ha-icon>
                                 <span style="color:${cdColor};font-size:0.85rem;">Seit:</span>
-                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${mode}  ${since}</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${since}  ${mode}</span>
                                 ${cdTag}
                               </div>
                             </div>`;
                           ]]]
+
+                # ─────────────────────────────────────────────
+                # 8px Spacer
+                # ─────────────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - background: transparent
+                      - box-shadow: none
+                      - width: 8px
+                      - min-width: 8px
+                      - max-width: 8px
+                      - padding: 0
 
                 # ─────────────────────────────────────────────
                 # MINER 2
@@ -906,7 +921,7 @@ views:
                             icon:
                               - width: 44px
                               - height: 44px
-                              - color: "#f59e0b"
+                              - color: "var(--secondary-text-color)"
                           tap_action:
                             action: call-service
                             service: shell_command.miner2_reboot
@@ -1092,18 +1107,22 @@ views:
                             const tmaxColor = tmax === '—' ? 'var(--secondary-text-color)'
                               : parseFloat(tmax) >= 110 ? '#F44336'
                               : parseFloat(tmax) >= 100 ? '#f59e0b'
+                              : (mode === 'Standby' || parseFloat(tmax) < 45) ? 'var(--primary-text-color)'
                               : '#4CAF50';
                             const tavgColor = tavg === '—' ? 'var(--secondary-text-color)'
                               : parseFloat(tavg) >= 100 ? '#F44336'
                               : parseFloat(tavg) >= 90  ? '#f59e0b'
+                              : (mode === 'Standby' || parseFloat(tavg) < 45) ? 'var(--primary-text-color)'
                               : '#4CAF50';
                             const hbiColor = hbi === '—' ? 'var(--secondary-text-color)'
                               : parseFloat(hbi) >= 85 ? '#F44336'
                               : parseFloat(hbi) >= 80 ? '#f59e0b'
+                              : (mode === 'Standby' || parseFloat(hbi) < 45) ? 'var(--primary-text-color)'
                               : '#4CAF50';
                             const hboColor = hbo === '—' ? 'var(--secondary-text-color)'
                               : parseFloat(hbo) >= 90 ? '#F44336'
                               : parseFloat(hbo) >= 85 ? '#f59e0b'
+                              : (mode === 'Standby' || parseFloat(hbo) < 45) ? 'var(--primary-text-color)'
                               : '#4CAF50';
                             const row = (icon, label, val, color) =>
                               `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
@@ -1123,7 +1142,7 @@ views:
                               <div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
                                 <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:16px;color:${cdColor};"></ha-icon>
                                 <span style="color:${cdColor};font-size:0.85rem;">Seit:</span>
-                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${mode}  ${since}</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${since}  ${mode}</span>
                                 ${cdTag}
                               </div>
                             </div>`;
@@ -1162,10 +1181,7 @@ views:
                     icon:
                       - width: 36px
                       - height: 36px
-                      - color: >
-                          [[[
-                            return 'var(--secondary-text-color)';
-                          ]]]
+                      - color: '#4CAF50'
                     name:
                       - font-size: 0.8rem
                       - color: var(--secondary-text-color)
@@ -1190,7 +1206,7 @@ views:
                       - height: 36px
                       - color: >
                           [[[
-                            const v=parseFloat(entity.state); if(!v||v===0) return 'var(--secondary-text-color)'; if(v<1000) return '#4CAF50'; if(v<3000) return '#f59e0b'; return '#F44336';
+                            const v=parseFloat(entity.state); if(!v||v===0) return 'var(--secondary-text-color)'; if(v<=2000) return '#4CAF50'; if(v<=4000) return '#f59e0b'; return '#F44336';
                           ]]]
                     name:
                       - font-size: 0.8rem
@@ -1268,7 +1284,7 @@ views:
                       - height: 36px
                       - color: >
                           [[[
-                            const v=parseFloat(entity.state); if(v>=85) return '#4CAF50'; if(v>=70) return '#f59e0b'; if(v>0) return '#F44336'; return 'var(--secondary-text-color)';
+                            const v=parseFloat(entity.state); if(v>=75) return '#4CAF50'; if(v>=50) return '#f59e0b'; if(v>0) return '#F44336'; return 'var(--secondary-text-color)';
                           ]]]
                     name:
                       - font-size: 0.8rem
@@ -1276,10 +1292,7 @@ views:
                     state:
                       - font-size: 0.9rem
                       - font-weight: 600
-                      - color: >
-                          [[[
-                            const v=parseFloat(entity.state); if(v>=85) return '#4CAF50'; if(v>=70) return '#f59e0b'; if(v>0) return '#F44336'; return 'var(--secondary-text-color)';
-                          ]]]
+                      - color: var(--primary-text-color)
                   tap_action:
                     action: more-info
 
@@ -1342,7 +1355,7 @@ views:
                   show_state: false
                   styles:
                     card:
-                      - padding: 12px 16px
+                      - padding: 10px 16px
                     custom_fields:
                       heizstab:
                         - width: 100%
@@ -1356,20 +1369,25 @@ views:
                         const t1     = states[pfx + 'temperatur_1']?.state ?? '—';
                         const psolar = states[pfx + 'power1_solar']?.state ?? '—';
                         const modeColor = mode === 'Standby' ? 'var(--secondary-text-color)' : '#4CAF50';
-                        const row = (icon, label, val, unit='') =>
-                          `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                        const row = (icon, label, val, unit='', color=null) => {
+                          const c = color ? `color:${color};` : '';
+                          return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
                             <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
                             <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-                            <span style="font-size:1rem;font-weight:600;margin-left:8px;">${val === '—' ? '—' : val + (unit ? ' ' + unit : '')}</span>
+                            <span style="font-size:1rem;font-weight:600;margin-left:8px;${c}">${val === '—' ? '—' : val + (unit ? ' ' + unit : '')}</span>
                           </div>`;
-                        return `<div style="width:100%;padding:4px 0;text-align:left;">
-                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                            <ha-icon icon="mdi:water-boiler" style="--mdc-icon-size:18px;color:var(--primary-text-color);"></ha-icon>
-                            <span style="font-size:0.9rem;font-weight:700;">Heizstab AC ELWA 2</span>
-                            <span style="margin-left:auto;font-size:0.85rem;font-weight:600;color:${modeColor};">${mode}</span>
-                          </div>
+                        };
+                        const modeEl =
+                          `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                            <ha-icon icon="mdi:information-outline" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.85rem;">Zustand:</span>
+                            <span style="font-size:1rem;font-weight:600;margin-left:8px;color:${modeColor};">${mode}</span>
+                          </div>`;
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Heizstab</div>
+                          ${modeEl}
                           ${row('mdi:thermometer-water','Temperatur',t1,'°C')}
-                          ${row('mdi:solar-power','Leistung',psolar,'W')}
+                          ${row('mdi:solar-power','Leistung',psolar,'W', parseFloat(psolar) > 0 ? '#2196F3' : null)}
                         </div>`;
                       ]]]
 
@@ -1396,6 +1414,7 @@ views:
                         };
                         const t_keller = val('sensor.ewelink_snzb_02p_temperatur_2');
                         const h_keller = val('sensor.ewelink_snzb_02p_luftfeuchtigkeit_2');
+                        const b_keller = val('sensor.ewelink_snzb_02p_batterie_2');
                         const row = (icon, label, v, unit) => {
                           const display = v !== null
                             ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;">${v} ${unit}</span>`
@@ -1410,6 +1429,7 @@ views:
                           <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Keller</div>
                           ${row('mdi:thermometer','Temperatur',t_keller,'°C')}
                           ${row('mdi:water-percent','Feuchte',h_keller,'%')}
+                          ${row('mdi:battery','Akku',b_keller,'%')}
                         </div>`;
                       ]]]
 
@@ -1436,6 +1456,7 @@ views:
                         };
                         const t_m1 = val('sensor.ewelink_snzb_01p_temperatur');
                         const h_m1 = val('sensor.ewelink_snzb_01p_luftfeuchtigkeit');
+                        const b_m1 = val('sensor.ewelink_snzb_01p_batterie');
                         const row = (icon, label, v, unit) => {
                           const display = v !== null
                             ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;">${v} ${unit}</span>`
@@ -1450,6 +1471,7 @@ views:
                           <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Miner 1</div>
                           ${row('mdi:thermometer-alert','Temperatur',t_m1,'°C')}
                           ${row('mdi:water-percent','Feuchte',h_m1,'%')}
+                          ${row('mdi:battery','Akku',b_m1,'%')}
                         </div>`;
                       ]]]
 
@@ -1500,10 +1522,10 @@ views:
                           return d > 0 ? `${d}d ${h}h` : `${h} h`;
                         };
                         const row = (icon, label, val, iconColor) =>
-                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;">
+                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
                             <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
-                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;">${label}</span>
-                            <span style="font-size:0.85rem;font-weight:600;">${val}</span>
+                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                            <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
                           </div>`;
                         const pv     = states['input_number.pv_kwh_ytd']?.state ?? '0';
                         const mine   = states['input_number.mining_kwh_ytd']?.state ?? '0';
@@ -1565,10 +1587,10 @@ views:
                         const fmtKwh = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(2) + ' kWh'; };
                         const fmtH   = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(1) + ' h'; };
                         const row = (icon, label, val, iconColor) =>
-                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;">
+                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
                             <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
-                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;">${label}</span>
-                            <span style="font-size:0.85rem;font-weight:600;">${val}</span>
+                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                            <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
                           </div>`;
                         const modeBox = (label, val, color) =>
                           `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
