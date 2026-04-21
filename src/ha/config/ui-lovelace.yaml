@@ -1391,7 +1391,7 @@ views:
                         </div>`;
                       ]]]
 
-                # ── Keller Klima ────────────────────────────────────────────────────
+                # ── Raumklima ───────────────────────────────────────────────────────
                 - type: custom:button-card
                   show_name: false
                   show_icon: false
@@ -1426,7 +1426,7 @@ views:
                           </div>`;
                         };
                         return `<div style="width:100%;padding:2px 0;">
-                          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Keller</div>
+                          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Raumklima</div>
                           ${row('mdi:thermometer','Temperatur',t_keller,'°C')}
                           ${row('mdi:water-percent','Feuchte',h_keller,'%')}
                           ${row('mdi:battery','Akku',b_keller,'%')}
@@ -1468,7 +1468,7 @@ views:
                           </div>`;
                         };
                         return `<div style="width:100%;padding:2px 0;">
-                          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Miner 1</div>
+                          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Miner-Rack</div>
                           ${row('mdi:thermometer-alert','Temperatur',t_m1,'°C')}
                           ${row('mdi:water-percent','Feuchte',h_m1,'%')}
                           ${row('mdi:battery','Akku',b_m1,'%')}
