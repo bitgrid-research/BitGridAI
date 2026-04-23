@@ -92,6 +92,44 @@ mvp_auto:
       initial: 0
       icon: mdi:arrow-down-circle
 
+    mvp_tmax_eco_threshold_c:
+      name: "TMax Eco-Sicherheitsschwelle (°C)"
+      min: 100
+      max: 120
+      step: 1
+      mode: box
+      initial: 113
+      icon: mdi:thermometer-alert
+
+    mvp_room_temp_eco_threshold_c:
+      name: "Raumtemp Eco-Sicherheitsschwelle (°C)"
+      min: 25
+      max: 40
+      step: 0.5
+      mode: box
+      initial: 31
+      icon: mdi:home-thermometer-outline
+
+  input_boolean:
+    mvp_night_block_enabled:
+      name: "Nacht-Sperre (Mining)"
+      icon: mdi:weather-night
+      initial: true
+
+  input_datetime:
+    mvp_night_block_start:
+      name: "Nacht-Sperre Start"
+      has_time: true
+      has_date: false
+      icon: mdi:weather-night
+      initial: "22:00:00"
+    mvp_night_block_end:
+      name: "Nacht-Sperre Ende"
+      has_time: true
+      has_date: false
+      icon: mdi:weather-sunset-up
+      initial: "06:00:00"
+
   template:
     - sensor:
         - name: "Miner 1 Cooldown Status"
@@ -142,6 +180,23 @@ mvp_auto:
             {% else %}
               Aus
             {% endif %}
+
+    - binary_sensor:
+        - name: "MVP Nacht-Sperre aktiv"
+          unique_id: mvp_night_block_active
+          icon: mdi:weather-night
+          state: >
+            {% set now_min   = now().hour * 60 + now().minute %}
+            {% set s = states('input_datetime.mvp_night_block_start') %}
+            {% set e = states('input_datetime.mvp_night_block_end') %}
+            {% set start_min = s.split(':')[0] | int(0) * 60 + s.split(':')[1] | int(0) %}
+            {% set end_min   = e.split(':')[0] | int(0) * 60 + e.split(':')[1] | int(0) %}
+            {% if start_min > end_min %}
+              {% set in_block = now_min >= start_min or now_min < end_min %}
+            {% else %}
+              {% set in_block = now_min >= start_min and now_min < end_min %}
+            {% endif %}
+            {{ states('input_boolean.mvp_night_block_enabled') == 'on' and in_block }}
 
   automation:
 
@@ -261,8 +316,11 @@ mvp_auto:
                   data:
                     value: "{{ now().timestamp() | int }}"
 
-            # P4: SoC ok ODER PV stark genug, Miner aus → Eco starten (blockiert wenn Downgrade-Cooldown aktiv)
+            # P4: SoC ok ODER PV stark genug, Miner aus → Eco starten (blockiert wenn Downgrade-Cooldown aktiv oder Nacht-Sperre)
             - conditions:
+                - condition: state
+                  entity_id: binary_sensor.mvp_night_block_active
+                  state: "off"
                 - condition: template
                   value_template: >
                     {{ (soc >= soc_start or pv >= pv_start) and
@@ -401,8 +459,11 @@ mvp_auto:
                   data:
                     value: "{{ now().timestamp() | int }}"
 
-            # P4: SoC ok ODER PV stark genug, Miner aus → Eco starten (blockiert wenn Downgrade-Cooldown aktiv)
+            # P4: SoC ok ODER PV stark genug, Miner aus → Eco starten (blockiert wenn Downgrade-Cooldown aktiv oder Nacht-Sperre)
             - conditions:
+                - condition: state
+                  entity_id: binary_sensor.mvp_night_block_active
+                  state: "off"
                 - condition: template
                   value_template: >
                     {{ (soc >= soc_start or pv >= pv_start) and
@@ -491,6 +552,135 @@ mvp_auto:
               data:
                 value: 0
 
+    # ── TMax-Sicherheit: Eco-Drosselung bei Überhitzung ───────────────────
+    # Greift wenn TMax die konfigurierte Schwelle überschreitet.
+    # Kein Cooldown — Sicherheit hat immer Vorrang vor dem MVP-Watchdog.
+    - id: mvp_room_temp_safety
+      alias: "MVP: Raumtemperatur → Eco"
+      description: >
+        Drosselt alle aktiven Miner auf Eco wenn die Raumtemperatur die
+        Sicherheitsschwelle überschreitet. Kein Cooldown.
+      mode: single
+      trigger:
+        - platform: numeric_state
+          entity_id: sensor.temp_miner_room
+          above: input_number.mvp_room_temp_eco_threshold_c
+      condition:
+        - condition: template
+          value_template: >
+            {{ states('sensor.miner1_workmode_status') in ['Standard', 'Super']
+               or states('sensor.miner2_workmode_status') in ['Standard', 'Super'] }}
+      action:
+        - variables:
+            room_temp: "{{ states('sensor.temp_miner_room') | float(0) }}"
+            threshold: "{{ states('input_number.mvp_room_temp_eco_threshold_c') | float(31) }}"
+            m1_status: "{{ states('sensor.miner1_workmode_status') }}"
+            m2_status: "{{ states('sensor.miner2_workmode_status') }}"
+        - action: system_log.write
+          data:
+            message: >
+              [mvp-room-temp] Raumtemp {{ room_temp }}°C >= {{ threshold }}°C
+              — m1={{ m1_status }} m2={{ m2_status }} → Eco (kein Cooldown)
+            level: warning
+        - if:
+            - condition: template
+              value_template: "{{ m1_status in ['Standard', 'Super'] }}"
+          then:
+            - action: select.select_option
+              target:
+                entity_id: select.miner1_workmode_set
+              data:
+                option: Eco
+            - action: input_number.set_value
+              target:
+                entity_id: input_number.mvp_miner1_last_downgrade_ts
+              data:
+                value: "{{ now().timestamp() | int }}"
+        - if:
+            - condition: template
+              value_template: "{{ m2_status in ['Standard', 'Super'] }}"
+          then:
+            - action: select.select_option
+              target:
+                entity_id: select.miner2_workmode_set
+              data:
+                option: Eco
+            - action: input_number.set_value
+              target:
+                entity_id: input_number.mvp_miner2_last_downgrade_ts
+              data:
+                value: "{{ now().timestamp() | int }}"
+
+    - id: mvp_miner1_tmax_safety
+      alias: "MVP: Miner 1 TMax → Eco"
+      description: >
+        Drosselt Miner 1 auf Eco sobald TMax die Sicherheitsschwelle überschreitet.
+        Kein Cooldown — überschreibt Standard/Super sofort.
+      mode: single
+      trigger:
+        - platform: numeric_state
+          entity_id: sensor.miner1_tmax
+          above: input_number.mvp_tmax_eco_threshold_c
+      condition:
+        - condition: template
+          value_template: "{{ states('sensor.miner1_workmode_status') in ['Standard', 'Super'] }}"
+      action:
+        - variables:
+            tmax: "{{ states('sensor.miner1_tmax') | float(0) }}"
+            threshold: "{{ states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}"
+            m1_status: "{{ states('sensor.miner1_workmode_status') }}"
+        - action: system_log.write
+          data:
+            message: >
+              [mvp-miner1] TMax-Safety: tmax={{ tmax }}°C >= {{ threshold }}°C
+              — status={{ m1_status }} → Eco (kein Cooldown)
+            level: warning
+        - action: select.select_option
+          target:
+            entity_id: select.miner1_workmode_set
+          data:
+            option: Eco
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.mvp_miner1_last_downgrade_ts
+          data:
+            value: "{{ now().timestamp() | int }}"
+
+    - id: mvp_miner2_tmax_safety
+      alias: "MVP: Miner 2 TMax → Eco"
+      description: >
+        Drosselt Miner 2 auf Eco sobald TMax die Sicherheitsschwelle überschreitet.
+        Kein Cooldown — überschreibt Standard/Super sofort.
+      mode: single
+      trigger:
+        - platform: numeric_state
+          entity_id: sensor.miner2_tmax
+          above: input_number.mvp_tmax_eco_threshold_c
+      condition:
+        - condition: template
+          value_template: "{{ states('sensor.miner2_workmode_status') in ['Standard', 'Super'] }}"
+      action:
+        - variables:
+            tmax: "{{ states('sensor.miner2_tmax') | float(0) }}"
+            threshold: "{{ states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}"
+            m2_status: "{{ states('sensor.miner2_workmode_status') }}"
+        - action: system_log.write
+          data:
+            message: >
+              [mvp-miner2] TMax-Safety: tmax={{ tmax }}°C >= {{ threshold }}°C
+              — status={{ m2_status }} → Eco (kein Cooldown)
+            level: warning
+        - action: select.select_option
+          target:
+            entity_id: select.miner2_workmode_set
+          data:
+            option: Eco
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.mvp_miner2_last_downgrade_ts
+          data:
+            value: "{{ now().timestamp() | int }}"
+
     # ── State-Transition-Logger ────────────────────────────────────────────
     - id: miner_state_transition_logger
       alias: "Miner: State-Transitions loggen"
@@ -509,3 +699,54 @@ mvp_auto:
               | state={{ states('sensor.' ~ trigger.entity_id.split('.')[1].replace('workmode_status', 'state')) }}
               | w={{ states('sensor.shellyplugsg3_' ~ ('dcb4d9c5567c_leistung' if 'miner1' in trigger.entity_id else 'd0cf13d86254_leistung')) }}W
             level: warning
+
+    # ── Nacht-Sperre: Miner stoppen wenn Hamster schläft ─────────────────
+    - id: mvp_night_block_start
+      alias: "MVP: Nacht-Sperre — Mining stoppen"
+      description: >
+        Stoppt alle Miner um 22:00 Uhr. Mining wird automatisch wieder gestartet
+        durch den Watchdog sobald die Nacht-Sperre endet und SoC/PV-Bedingungen
+        erfüllt sind. Auch bei HA-Start geprüft (Nacht-Neustart).
+      mode: single
+      trigger:
+        - platform: time
+          at: input_datetime.mvp_night_block_start
+        - platform: homeassistant
+          event: start
+      condition:
+        - condition: state
+          entity_id: binary_sensor.mvp_night_block_active
+          state: "on"
+      action:
+        - action: system_log.write
+          data:
+            message: "[mvp-night] Nacht-Sperre aktiv — Miner 1 + 2 → Standby"
+            level: warning
+        - if:
+            - condition: template
+              value_template: "{{ states('sensor.miner1_workmode_status') not in ['Standby', 'Off'] }}"
+          then:
+            - action: select.select_option
+              target:
+                entity_id: select.miner1_workmode_set
+              data:
+                option: Standby
+            - action: input_number.set_value
+              target:
+                entity_id: input_number.mvp_miner1_last_downgrade_ts
+              data:
+                value: "{{ now().timestamp() | int }}"
+        - if:
+            - condition: template
+              value_template: "{{ states('sensor.miner2_workmode_status') not in ['Standby', 'Off'] }}"
+          then:
+            - action: select.select_option
+              target:
+                entity_id: select.miner2_workmode_set
+              data:
+                option: Standby
+            - action: input_number.set_value
+              target:
+                entity_id: input_number.mvp_miner2_last_downgrade_ts
+              data:
+                value: "{{ now().timestamp() | int }}"

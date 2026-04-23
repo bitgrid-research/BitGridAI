@@ -133,8 +133,15 @@ views:
                     const grid          = parseFloat(states['sensor.grid_import_w']?.state || 0);
 
                     // Bitsy erklärt die Entscheidung — Zeile 1: Ursache · Zeile 2: Bedingung
+                    const nightBlockActive = states['binary_sensor.mvp_night_block_active']?.state === 'on'
+                      || (h >= 22 || h < 6);
                     let lines;
-                    if (code === 'STOP_R3_OVERTEMP') {
+                    if (nightBlockActive) {
+                      lines = [
+                        `Die Nacht gehört der Stille. Kein Block braucht Eile. 🌙`,
+                        `Solar-Mining only. Hodl the line bis 06:00. ₿`
+                      ];
+                    } else if (code === 'STOP_R3_OVERTEMP') {
                       lines = [
                         `Übertemperatur — ${temp.toFixed(0)}°C überschreitet Limit ${maxTemp.toFixed(0)}°C.`,
                         `Miner startet automatisch wenn Temperatur sinkt.`
@@ -224,16 +231,16 @@ views:
                           <span style="color:var(--secondary-text-color);font-weight:400">${greeting}</span>
                         </div>
                         <div style="display:flex;gap:12px;align-items:flex-start">
-                          <img src="/local/bithamster.png"
-                               style="width:72px;height:72px;border-radius:50%;
+                          <img src="/local/${nightBlockActive ? 'bithamster_sleep.png' : 'bithamster.png'}"
+                               style="width:90px;height:90px;border-radius:50%;
                                       flex-shrink:0;object-fit:cover;
                                       border:2px solid var(--divider-color)">
                           <div style="flex:1">
-                            <div style="font-size:0.75rem;font-weight:700;
+                            <div style="font-size:0.85rem;font-weight:700;
                                         color:${wColor};margin-bottom:4px">
                               ${weather}
                             </div>
-                            <div style="font-size:1.0rem;color:var(--primary-text-color);
+                            <div style="font-size:1.1rem;color:var(--primary-text-color);
                                         line-height:1.55">
                               ${lines.join('<br>')}
                             </div>
@@ -248,10 +255,22 @@ views:
                   ]]]
               styles:
                 card:
-                  - background: var(--secondary-background-color)
+                  - background: >
+                      [[[
+                        const h = new Date().getHours();
+                        const night = states['binary_sensor.mvp_night_block_active']?.state === 'on'
+                          || (h >= 22 || h < 6);
+                        return night ? '#0c0f18' : 'var(--secondary-background-color)';
+                      ]]]
                   - border-radius: 12px
                   - padding: 14px 16px
-                  - border: 1px solid rgba(100,221,23,0.15)
+                  - border: >
+                      [[[
+                        const h = new Date().getHours();
+                        const night = states['binary_sensor.mvp_night_block_active']?.state === 'on'
+                          || (h >= 22 || h < 6);
+                        return night ? '1px solid rgba(247,147,26,0.08)' : '1px solid rgba(247,147,26,0.4)';
+                      ]]]
                   - text-align: left
                 grid:
                   - grid-template-areas: '"xai"'
@@ -1956,6 +1975,13 @@ views:
             name: Super-Stop SoC (%) — Deadband
           - entity: input_number.mvp_soc_stop_pct
             name: Stop SoC (%)
+          - type: divider
+          - entity: input_boolean.mvp_night_block_enabled
+            name: Nacht-Sperre
+          - entity: input_datetime.mvp_night_block_start
+            name: Nacht-Sperre Start
+          - entity: input_datetime.mvp_night_block_end
+            name: Nacht-Sperre Ende
 
       - type: entities
         title: R1 Surplus
@@ -1984,6 +2010,10 @@ views:
             name: Safety Lockout (min)
           - entity: input_boolean.r3_emergency_stop
             name: E-Stop
+          - entity: input_number.mvp_tmax_eco_threshold_c
+            name: "TMax → Eco (°C)"
+          - entity: input_number.mvp_room_temp_eco_threshold_c
+            name: "Raumtemp → Eco (°C)"
 
       - type: entities
         title: R5 Deadband / Runtime
