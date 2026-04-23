@@ -93,6 +93,84 @@ stats:
       max: 99999
       step: 0.01
       mode: box
+    miner_eco_ytd_h:
+      name: "Miner Eco YTD (h)"
+      min: 0
+      max: 99999
+      step: 0.01
+      mode: box
+    miner_standard_ytd_h:
+      name: "Miner Standard YTD (h)"
+      min: 0
+      max: 99999
+      step: 0.01
+      mode: box
+    miner_super_ytd_h:
+      name: "Miner Speed YTD (h)"
+      min: 0
+      max: 99999
+      step: 0.01
+      mode: box
+    pv_kwh_mtd:
+      name: "PV kWh MTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    mining_kwh_mtd:
+      name: "Mining kWh MTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    grid_import_mtd:
+      name: "Grid Import MTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    grid_export_mtd:
+      name: "Grid Export MTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    house_kwh_mtd:
+      name: "Hausverbrauch kWh MTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    heizstab_kwh_mtd:
+      name: "Heizstab kWh MTD"
+      min: 0
+      max: 999999
+      step: 0.001
+      mode: box
+    mining_uptime_mtd_h:
+      name: "Mining Uptime MTD (h)"
+      min: 0
+      max: 99999
+      step: 0.01
+      mode: box
+    miner_eco_mtd_h:
+      name: "Miner Eco MTD (h)"
+      min: 0
+      max: 99999
+      step: 0.01
+      mode: box
+    miner_standard_mtd_h:
+      name: "Miner Standard MTD (h)"
+      min: 0
+      max: 99999
+      step: 0.01
+      mode: box
+    miner_super_mtd_h:
+      name: "Miner Speed MTD (h)"
+      min: 0
+      max: 99999
+      step: 0.01
+      mode: box
 
   # ── Laufzeit-Tracking via history_stats + Lastprofil-Baseline ───────────────
   sensor:
@@ -396,6 +474,9 @@ stats:
             house_d:  "{{ states('sensor.house_energy_daily')   | float(0) }}"
             hz_d:     "{{ states('sensor.heizstab_energy_daily')| float(0) }}"
             up_d:     "{{ states('sensor.miner_uptime_today_h') | float(0) }}"
+            eco_d:    "{{ states('sensor.miner_eco_hours_today')      | float(0) }}"
+            std_d:    "{{ states('sensor.miner_standard_hours_today') | float(0) }}"
+            sup_d:    "{{ states('sensor.miner_super_hours_today')    | float(0) }}"
         - action: input_number.set_value
           target: { entity_id: input_number.pv_kwh_ytd }
           data:
@@ -424,6 +505,58 @@ stats:
           target: { entity_id: input_number.mining_uptime_ytd_h }
           data:
             value: "{{ (states('input_number.mining_uptime_ytd_h') | float(0) + up_d) | round(2) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_eco_ytd_h }
+          data:
+            value: "{{ (states('input_number.miner_eco_ytd_h') | float(0) + eco_d) | round(2) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_standard_ytd_h }
+          data:
+            value: "{{ (states('input_number.miner_standard_ytd_h') | float(0) + std_d) | round(2) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_super_ytd_h }
+          data:
+            value: "{{ (states('input_number.miner_super_ytd_h') | float(0) + sup_d) | round(2) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.pv_kwh_mtd }
+          data:
+            value: "{{ (states('input_number.pv_kwh_mtd') | float(0) + pv_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.mining_kwh_mtd }
+          data:
+            value: "{{ (states('input_number.mining_kwh_mtd') | float(0) + mine_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.grid_import_mtd }
+          data:
+            value: "{{ (states('input_number.grid_import_mtd') | float(0) + imp_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.grid_export_mtd }
+          data:
+            value: "{{ (states('input_number.grid_export_mtd') | float(0) + exp_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.house_kwh_mtd }
+          data:
+            value: "{{ (states('input_number.house_kwh_mtd') | float(0) + house_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.heizstab_kwh_mtd }
+          data:
+            value: "{{ (states('input_number.heizstab_kwh_mtd') | float(0) + hz_d) | round(3) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.mining_uptime_mtd_h }
+          data:
+            value: "{{ (states('input_number.mining_uptime_mtd_h') | float(0) + up_d) | round(2) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_eco_mtd_h }
+          data:
+            value: "{{ (states('input_number.miner_eco_mtd_h') | float(0) + eco_d) | round(2) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_standard_mtd_h }
+          data:
+            value: "{{ (states('input_number.miner_standard_mtd_h') | float(0) + std_d) | round(2) }}"
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_super_mtd_h }
+          data:
+            value: "{{ (states('input_number.miner_super_mtd_h') | float(0) + sup_d) | round(2) }}"
 
     # YTD-Reset am 1. Januar (läuft täglich mit, zündet nur am 1.1.)
     - id: stats_ytd_new_year_reset
@@ -455,6 +588,56 @@ stats:
           data: { value: 0 }
         - action: input_number.set_value
           target: { entity_id: input_number.mining_uptime_ytd_h }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_eco_ytd_h }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_standard_ytd_h }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_super_ytd_h }
+          data: { value: 0 }
+
+    # MTD-Reset am 1. jedes Monats
+    - id: stats_mtd_monthly_reset
+      alias: "Stats: MTD Reset am Monatsersten"
+      trigger:
+        - platform: time
+          at: "00:00:25"
+      condition:
+        - condition: template
+          value_template: "{{ now().day == 1 }}"
+      action:
+        - action: input_number.set_value
+          target: { entity_id: input_number.pv_kwh_mtd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.mining_kwh_mtd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.grid_import_mtd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.grid_export_mtd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.house_kwh_mtd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.heizstab_kwh_mtd }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.mining_uptime_mtd_h }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_eco_mtd_h }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_standard_mtd_h }
+          data: { value: 0 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.miner_super_mtd_h }
           data: { value: 0 }
 
     # Tageslog: Mining-Session tageweise persistieren

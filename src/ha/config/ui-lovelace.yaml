@@ -282,10 +282,10 @@ views:
                       - color: >
                           [[[
                             const v = parseFloat(entity.state);
-                            if (v <= 50) return '#F44336';
-                            if (v <= 64) return '#f59e0b';
-                            if (v <= 95) return '#4CAF50';
-                            return '#8BC34A';
+                            if (v <= 20) return '#F44336';
+                            if (v <= 40) return '#f59e0b';
+                            if (v <= 90) return '#4CAF50';
+                            return '#26A69A';
                           ]]]
                     name:
                       - font-size: 0.8rem
@@ -313,10 +313,10 @@ views:
                           [[[
                             const v = parseFloat(entity.state);
                             if (!v || v === 0) return 'var(--secondary-text-color)';
-                            if (v < 800)  return '#F44336';
-                            if (v < 1600) return '#f59e0b';
+                            if (v < 800)  return '#f59e0b';
+                            if (v < 1600) return '#8BC34A';
                             if (v < 3400) return '#4CAF50';
-                            return '#8BC34A';
+                            return '#FFD600';
                           ]]]
                     name:
                       - font-size: 0.8rem
@@ -344,6 +344,7 @@ views:
                           [[[
                             const v = parseFloat(entity.state);
                             if (!v || v === 0) return 'var(--secondary-text-color)';
+                            if (v <= 500) return '#8BC34A';
                             return '#4CAF50';
                           ]]]
                     name:
@@ -372,7 +373,9 @@ views:
                           [[[
                             const v = parseFloat(entity.state);
                             if (!v || v === 0) return 'var(--secondary-text-color)';
-                            return '#F44336';
+                            if (v <= 100) return '#4CAF50';
+                            if (v <= 500) return '#f59e0b';
+                            return '#5C6BC0';
                           ]]]
                     name:
                       - font-size: 0.8rem
@@ -569,7 +572,7 @@ views:
                               - color: >
                                   [[[
                                     return entity.state === 'on'
-                                      ? '#2196F3' : 'var(--disabled-color)';
+                                      ? '#26C6DA' : 'var(--disabled-color)';
                                   ]]]
                           tap_action:
                             action: toggle
@@ -670,7 +673,7 @@ views:
                               - background: >
                                   [[[
                                     return entity.state === 'Standard'
-                                      ? '#f59e0b' : 'var(--secondary-background-color)';
+                                      ? '#26C6DA' : 'var(--secondary-background-color)';
                                   ]]]
                               - border-radius: 10px
                               - padding: 10px 4px
@@ -680,7 +683,7 @@ views:
                               - color: >
                                   [[[
                                     return entity.state === 'Standard'
-                                      ? '#fff' : '#f59e0b';
+                                      ? '#fff' : '#26C6DA';
                                   ]]]
                             name:
                               - font-size: 0.68rem
@@ -705,7 +708,7 @@ views:
                               - background: >
                                   [[[
                                     return entity.state === 'Super'
-                                      ? '#F44336' : 'var(--secondary-background-color)';
+                                      ? '#F7931A' : 'var(--secondary-background-color)';
                                   ]]]
                               - border-radius: 10px
                               - padding: 10px 4px
@@ -715,7 +718,7 @@ views:
                               - color: >
                                   [[[
                                     return entity.state === 'Super'
-                                      ? '#fff' : '#F44336';
+                                      ? '#fff' : '#F7931A';
                                   ]]]
                             name:
                               - font-size: 0.68rem
@@ -901,7 +904,7 @@ views:
                               - color: >
                                   [[[
                                     return entity.state === 'on'
-                                      ? '#2196F3' : 'var(--disabled-color)';
+                                      ? '#26C6DA' : 'var(--disabled-color)';
                                   ]]]
                           tap_action:
                             action: toggle
@@ -1002,7 +1005,7 @@ views:
                               - background: >
                                   [[[
                                     return entity.state === 'Standard'
-                                      ? '#f59e0b' : 'var(--secondary-background-color)';
+                                      ? '#26C6DA' : 'var(--secondary-background-color)';
                                   ]]]
                               - border-radius: 10px
                               - padding: 10px 4px
@@ -1012,7 +1015,7 @@ views:
                               - color: >
                                   [[[
                                     return entity.state === 'Standard'
-                                      ? '#fff' : '#f59e0b';
+                                      ? '#fff' : '#26C6DA';
                                   ]]]
                             name:
                               - font-size: 0.68rem
@@ -1037,7 +1040,7 @@ views:
                               - background: >
                                   [[[
                                     return entity.state === 'Super'
-                                      ? '#F44336' : 'var(--secondary-background-color)';
+                                      ? '#F7931A' : 'var(--secondary-background-color)';
                                   ]]]
                               - border-radius: 10px
                               - padding: 10px 4px
@@ -1047,7 +1050,7 @@ views:
                               - color: >
                                   [[[
                                     return entity.state === 'Super'
-                                      ? '#fff' : '#F44336';
+                                      ? '#fff' : '#F7931A';
                                   ]]]
                             name:
                               - font-size: 0.68rem
@@ -1272,7 +1275,7 @@ views:
                       - height: 36px
                       - color: >
                           [[[
-                            const v=parseFloat(entity.state); if(v>=75) return '#4CAF50'; if(v>=50) return '#f59e0b'; if(v>0) return '#F44336'; return 'var(--secondary-text-color)';
+                            const v=parseFloat(entity.state); if(v>=75) return '#00C853'; if(v>=50) return '#4CAF50'; if(v>0) return '#f59e0b'; return 'var(--secondary-text-color)';
                           ]]]
                     name:
                       - font-size: 0.8rem
@@ -1403,9 +1406,28 @@ views:
                         const t_keller = val('sensor.ewelink_snzb_02p_temperatur_2');
                         const h_keller = val('sensor.ewelink_snzb_02p_luftfeuchtigkeit_2');
                         const b_keller = val('sensor.ewelink_snzb_02p_batterie_2');
-                        const row = (icon, label, v, unit) => {
+                        const roomTempColor = (v) => {
+                          if (v === null) return null;
+                          const t = parseFloat(v);
+                          if (t < 16) return '#26C6DA';
+                          if (t < 25) return '#4CAF50';
+                          if (t < 29) return '#f59e0b';
+                          if (t < 33) return '#FF7043';
+                          return '#F44336';
+                        };
+                        const roomHumColor = (v) => {
+                          if (v === null) return null;
+                          const h = parseFloat(v);
+                          if (h < 40) return '#26C6DA';
+                          if (h < 61) return '#4CAF50';
+                          if (h < 71) return '#f59e0b';
+                          if (h < 81) return '#FF7043';
+                          return '#F44336';
+                        };
+                        const row = (icon, label, v, unit, color) => {
+                          const c = color ?? 'var(--secondary-text-color)';
                           const display = v !== null
-                            ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;">${v} ${unit}</span>`
+                            ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;color:${c};">${v} ${unit}</span>`
                             : `<span style="font-size:0.8rem;font-weight:600;margin-left:8px;color:#ef5350;background:rgba(239,83,80,0.12);padding:1px 6px;border-radius:4px;">✕ unknown</span>`;
                           return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
                             <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
@@ -1415,8 +1437,8 @@ views:
                         };
                         return `<div style="width:100%;padding:2px 0;">
                           <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Raumklima</div>
-                          ${row('mdi:thermometer','Temperatur',t_keller,'°C')}
-                          ${row('mdi:water-percent','Feuchte',h_keller,'%')}
+                          ${row('mdi:thermometer','Temperatur',t_keller,'°C',roomTempColor(t_keller))}
+                          ${row('mdi:water-percent','Feuchte',h_keller,'%',roomHumColor(h_keller))}
                           ${row('mdi:battery','Akku',b_keller,'%')}
                         </div>`;
                       ]]]
@@ -1475,7 +1497,7 @@ views:
                   - height: 8px
                   - padding: 0
 
-            # ── Statistik: 2026 YTD | Heute nebeneinander ────────────────────────
+            # ── Statistik: 2026 YTD | Monat | Heute nebeneinander ───────────────
             - type: horizontal-stack
               cards:
 
@@ -1515,6 +1537,11 @@ views:
                             <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
                             <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
                           </div>`;
+                        const modeBox = (label, val, color) =>
+                          `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                            <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                            <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                          </div>`;
                         const pv     = states['input_number.pv_kwh_ytd']?.state ?? '0';
                         const mine   = states['input_number.mining_kwh_ytd']?.state ?? '0';
                         const imp    = states['input_number.grid_import_ytd']?.state ?? '0';
@@ -1522,6 +1549,12 @@ views:
                         const house  = states['input_number.house_kwh_ytd']?.state ?? '0';
                         const hz     = states['input_number.heizstab_kwh_ytd']?.state ?? '0';
                         const up     = states['input_number.mining_uptime_ytd_h']?.state ?? '0';
+                        const ecoY   = states['input_number.miner_eco_ytd_h']?.state ?? '0';
+                        const stdY   = states['input_number.miner_standard_ytd_h']?.state ?? '0';
+                        const supY   = states['input_number.miner_super_ytd_h']?.state ?? '0';
+                        const pvN    = parseFloat(pv);
+                        const expN   = parseFloat(exp);
+                        const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
                         return `<div style="width:100%;padding:2px 0;">
                           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
                             <ha-icon icon="mdi:calendar-today" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
@@ -1529,16 +1562,95 @@ views:
                           </div>
                           <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
                             ${row('mdi:solar-power','PV erzeugt',fmtKwh(pv),'#4CAF50')}
-                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(exp),'#66BB6A')}
-                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(imp),'#ef5350')}
+                            ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
+                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(exp),'#8BC34A')}
+                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(imp),'#5C6BC0')}
                           </div>
                           <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
                             ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(house),'#f59e0b')}
                             ${row('mdi:water-boiler','Heizstab',fmtKwh(hz),'#2196F3')}
-                            ${row('mdi:pickaxe','Mining',fmtKwh(mine),'#f59e0b')}
+                            ${row('mdi:pickaxe','Miner',fmtKwh(mine),'#f59e0b')}
                           </div>
-                          <div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
                             ${row('mdi:timer-outline','Mining Uptime',fmtUptime(up),'var(--secondary-text-color)')}
+                          </div>
+                          <div style="margin-top:2px;">
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                              ${modeBox('Eco',     fmtUptime(ecoY), '#4CAF50')}
+                              ${modeBox('Standard',fmtUptime(stdY), '#26C6DA')}
+                              ${modeBox('Speed',   fmtUptime(supY), '#F7931A')}
+                            </div>
+                          </div>
+                        </div>`;
+                      ]]]
+
+                # ── mitte: Monatsstatistik ──────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 12px 16px
+                    custom_fields:
+                      stats_monat:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    stats_monat: >
+                      [[[
+                        const pv   = states['input_number.pv_kwh_mtd']?.state ?? '0';
+                        const exp  = states['input_number.grid_export_mtd']?.state ?? '0';
+                        const imp  = states['input_number.grid_import_mtd']?.state ?? '0';
+                        const house= states['input_number.house_kwh_mtd']?.state ?? '0';
+                        const hz   = states['input_number.heizstab_kwh_mtd']?.state ?? '0';
+                        const mine = states['input_number.mining_kwh_mtd']?.state ?? '0';
+                        const up   = states['input_number.mining_uptime_mtd_h']?.state ?? '0';
+                        const ecoM = states['input_number.miner_eco_mtd_h']?.state ?? '0';
+                        const stdM = states['input_number.miner_standard_mtd_h']?.state ?? '0';
+                        const supM = states['input_number.miner_super_mtd_h']?.state ?? '0';
+                        const pvN = parseFloat(pv), expN = parseFloat(exp);
+                        const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
+                        const fmtKwh = (v) => { const n = parseFloat(v); if (isNaN(n)) return '—'; return n >= 1000 ? (n/1000).toFixed(2)+' MWh' : n.toFixed(1)+' kWh'; };
+                        const fmtUptime = (v) => { const n = parseFloat(v); if (isNaN(n) || n <= 0) return '0 h'; const d = Math.floor(n/24), h = Math.floor(n%24); return d > 0 ? `${d}d ${h}h` : `${h} h`; };
+                        const row = (icon, label, val, iconColor) =>
+                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                            <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+                          </div>`;
+                        const modeBox = (label, val, color) =>
+                          `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                            <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                            <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                          </div>`;
+                        const month = new Date().toLocaleString('de-DE',{month:'long'});
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            <ha-icon icon="mdi:calendar-month" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                            <span style="font-size:0.88rem;font-weight:700;">${month}</span>
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:solar-power','PV erzeugt',fmtKwh(pv),'#4CAF50')}
+                            ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
+                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(exp),'#8BC34A')}
+                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(imp),'#5C6BC0')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(house),'#f59e0b')}
+                            ${row('mdi:water-boiler','Heizstab',fmtKwh(hz),'#2196F3')}
+                            ${row('mdi:pickaxe','Miner',fmtKwh(mine),'#f59e0b')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:timer-outline','Mining Uptime',fmtUptime(up),'var(--secondary-text-color)')}
+                          </div>
+                          <div style="margin-top:2px;">
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                              ${modeBox('Eco',     fmtUptime(ecoM), '#4CAF50')}
+                              ${modeBox('Standard',fmtUptime(stdM), '#26C6DA')}
+                              ${modeBox('Speed',   fmtUptime(supM), '#F7931A')}
+                            </div>
                           </div>
                         </div>`;
                       ]]]
@@ -1593,23 +1705,22 @@ views:
                           <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
                             ${row('mdi:solar-power','PV erzeugt',fmtKwh(pvKwh),'#4CAF50')}
                             ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
-                            ${row('mdi:transmission-tower-export','Überschuss gesamt',fmtKwh(pvExpKwh),'#66BB6A')}
-                            ${row('mdi:transmission-tower-import','Netzbezug gesamt',fmtKwh(gridImpKwh),'#ef5350')}
+                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(pvExpKwh),'#8BC34A')}
+                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(gridImpKwh),'#5C6BC0')}
                           </div>
-                          <div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
                             ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(hausKwh),'#f59e0b')}
                             ${row('mdi:water-boiler','Heizstab',fmtKwh(hzKwh),'#2196F3')}
                             ${row('mdi:pickaxe','Miner',fmtKwh(mineKwh),'#f59e0b')}
                           </div>
+                          <div>
+                            ${row('mdi:timer-outline','Mining Uptime',upFmt,'var(--secondary-text-color)')}
+                          </div>
                           <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--divider-color);">
-                            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
-                              <div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
-                                <div style="font-size:0.65rem;color:var(--secondary-text-color);">Gesamt</div>
-                                <div style="font-size:0.82rem;font-weight:700;">${upFmt}</div>
-                              </div>
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
                               ${modeBox('Eco',fmtH(ecoH),'#4CAF50')}
-                              ${modeBox('Standard',fmtH(stdH),'#f59e0b')}
-                              ${modeBox('Speed',fmtH(supH),'#F44336')}
+                              ${modeBox('Standard',fmtH(stdH),'#26C6DA')}
+                              ${modeBox('Speed',fmtH(supH),'#F7931A')}
                             </div>
                           </div>
                         </div>`;
@@ -1675,8 +1786,8 @@ views:
                         ${c(r.on,'inherit')}${c(r.off,'inherit')}
                         ${c(fmtHm(r.tot),'var(--primary-text-color)')}
                         ${c(fmtH1(r.ec)+'h','#4CAF50')}
-                        ${c(fmtH1(r.st)+'h','#f59e0b')}
-                        ${c(fmtH1(r.sp)+'h','#F44336')}
+                        ${c(fmtH1(r.st)+'h','#26C6DA')}
+                        ${c(fmtH1(r.sp)+'h','#F7931A')}
                         ${c(r.kw.toFixed(2),'white')}
                       </div>`;
                     };
@@ -1755,7 +1866,7 @@ views:
 
                   return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;">
                     ${tile('mdi:solar-power',              'PV erzeugt',        fmt(pv,    'kWh', '#4CAF50'))}
-                    ${tile('mdi:transmission-tower-export','PV eingespeist',     fmt(pvExp, 'kWh', '#66BB6A'))}
+                    ${tile('mdi:transmission-tower-export','PV eingespeist',     fmt(pvExp, 'kWh', '#26C6DA'))}
                     ${tile('mdi:home-lightning-bolt',      'PV Eigenverbrauch',  selfUse !== null ? fmt(selfUse.toFixed(2), 'kWh', '#f59e0b') : '—')}
                   </div>
                   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;margin-top:12px;">
