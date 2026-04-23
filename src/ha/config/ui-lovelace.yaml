@@ -1501,7 +1501,149 @@ views:
             - type: horizontal-stack
               cards:
 
-                # ── links: 2026 Gesamtstatistik ─────────────────────────────────
+                # ── links: Statistik Heute ──────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 12px 16px
+                    custom_fields:
+                      stats_heute:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    stats_heute: >
+                      [[[
+                        const pvKwh      = states['sensor.pv_energy_daily']?.state ?? '—';
+                        const pvExpKwh   = states['sensor.grid_export_daily']?.state ?? '—';
+                        const gridImpKwh = states['sensor.grid_import_daily']?.state ?? '—';
+                        const pvN        = parseFloat(pvKwh);
+                        const pvExpN     = parseFloat(pvExpKwh);
+                        const pvSelfUse  = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0) ? Math.max(0, pvN - pvExpN) : null;
+                        const hausKwh    = states['sensor.house_energy_daily']?.state ?? '—';
+                        const hzKwh      = states['sensor.heizstab_energy_daily']?.state ?? '—';
+                        const mineKwh    = states['sensor.mining_energy_daily']?.state ?? '—';
+                        const upFmt      = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
+                        const ecoH       = states['sensor.miner_eco_hours_today']?.state ?? '—';
+                        const stdH       = states['sensor.miner_standard_hours_today']?.state ?? '—';
+                        const supH       = states['sensor.miner_super_hours_today']?.state ?? '—';
+                        const fmtKwh = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(2) + ' kWh'; };
+                        const fmtH   = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(1) + ' h'; };
+                        const row = (icon, label, val, iconColor) =>
+                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                            <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+                          </div>`;
+                        const modeBox = (label, val, color) =>
+                          `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                            <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                            <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                          </div>`;
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            <ha-icon icon="mdi:chart-bar" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                            <span style="font-size:0.88rem;font-weight:700;">Statistik Heute</span>
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:solar-power','PV erzeugt',fmtKwh(pvKwh),'#4CAF50')}
+                            ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
+                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(pvExpKwh),'#8BC34A')}
+                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(gridImpKwh),'#5C6BC0')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(hausKwh),'#f59e0b')}
+                            ${row('mdi:water-boiler','Heizstab',fmtKwh(hzKwh),'#2196F3')}
+                            ${row('mdi:pickaxe','Miner',fmtKwh(mineKwh),'#f59e0b')}
+                          </div>
+                          <div>
+                            ${row('mdi:timer-outline','Mining Uptime',upFmt,'var(--secondary-text-color)')}
+                          </div>
+                          <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--divider-color);">
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                              ${modeBox('Eco',fmtH(ecoH),'#4CAF50')}
+                              ${modeBox('Standard',fmtH(stdH),'#26C6DA')}
+                              ${modeBox('Speed',fmtH(supH),'#F7931A')}
+                            </div>
+                          </div>
+                        </div>`;
+                      ]]]
+
+                # ── mitte: Monatsstatistik ──────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 12px 16px
+                    custom_fields:
+                      stats_monat:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    stats_monat: >
+                      [[[
+                        const pv   = states['input_number.pv_kwh_mtd']?.state ?? '0';
+                        const exp  = states['input_number.grid_export_mtd']?.state ?? '0';
+                        const imp  = states['input_number.grid_import_mtd']?.state ?? '0';
+                        const house= states['input_number.house_kwh_mtd']?.state ?? '0';
+                        const hz   = states['input_number.heizstab_kwh_mtd']?.state ?? '0';
+                        const mine = states['input_number.mining_kwh_mtd']?.state ?? '0';
+                        const up   = states['input_number.mining_uptime_mtd_h']?.state ?? '0';
+                        const ecoM = states['input_number.miner_eco_mtd_h']?.state ?? '0';
+                        const stdM = states['input_number.miner_standard_mtd_h']?.state ?? '0';
+                        const supM = states['input_number.miner_super_mtd_h']?.state ?? '0';
+                        const pvN = parseFloat(pv), expN = parseFloat(exp);
+                        const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
+                        const fmtKwh = (v) => { const n = parseFloat(v); if (isNaN(n)) return '—'; return n >= 1000 ? (n/1000).toFixed(2)+' MWh' : n.toFixed(1)+' kWh'; };
+                        const fmtUptime = (v) => { const n = parseFloat(v); if (isNaN(n) || n <= 0) return '0 h'; const d = Math.floor(n/24), h = Math.floor(n%24); return d > 0 ? `${d}d ${h}h` : `${h} h`; };
+                        const row = (icon, label, val, iconColor) =>
+                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                            <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+                          </div>`;
+                        const modeBox = (label, val, color) =>
+                          `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                            <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                            <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                          </div>`;
+                        const month = new Date().toLocaleString('de-DE',{month:'long'});
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            <ha-icon icon="mdi:calendar-month" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                            <span style="font-size:0.88rem;font-weight:700;">${month}</span>
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:solar-power','PV erzeugt',fmtKwh(pv),'#4CAF50')}
+                            ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
+                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(exp),'#8BC34A')}
+                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(imp),'#5C6BC0')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(house),'#f59e0b')}
+                            ${row('mdi:water-boiler','Heizstab',fmtKwh(hz),'#2196F3')}
+                            ${row('mdi:pickaxe','Miner',fmtKwh(mine),'#f59e0b')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:timer-outline','Mining Uptime',fmtUptime(up),'var(--secondary-text-color)')}
+                          </div>
+                          <div style="margin-top:2px;">
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                              ${modeBox('Eco',     fmtUptime(ecoM), '#4CAF50')}
+                              ${modeBox('Standard',fmtUptime(stdM), '#26C6DA')}
+                              ${modeBox('Speed',   fmtUptime(supM), '#F7931A')}
+                            </div>
+                          </div>
+                        </div>`;
+                      ]]]
+
+                # ── rechts: 2026 Gesamtstatistik ─────────────────────────────────
                 - type: custom:button-card
                   show_name: false
                   show_icon: false
@@ -1579,148 +1721,6 @@ views:
                               ${modeBox('Eco',     fmtUptime(ecoY), '#4CAF50')}
                               ${modeBox('Standard',fmtUptime(stdY), '#26C6DA')}
                               ${modeBox('Speed',   fmtUptime(supY), '#F7931A')}
-                            </div>
-                          </div>
-                        </div>`;
-                      ]]]
-
-                # ── mitte: Monatsstatistik ──────────────────────────────────────
-                - type: custom:button-card
-                  show_name: false
-                  show_icon: false
-                  show_state: false
-                  styles:
-                    card:
-                      - padding: 12px 16px
-                    custom_fields:
-                      stats_monat:
-                        - width: 100%
-                        - justify-self: stretch
-                        - box-sizing: border-box
-                  custom_fields:
-                    stats_monat: >
-                      [[[
-                        const pv   = states['input_number.pv_kwh_mtd']?.state ?? '0';
-                        const exp  = states['input_number.grid_export_mtd']?.state ?? '0';
-                        const imp  = states['input_number.grid_import_mtd']?.state ?? '0';
-                        const house= states['input_number.house_kwh_mtd']?.state ?? '0';
-                        const hz   = states['input_number.heizstab_kwh_mtd']?.state ?? '0';
-                        const mine = states['input_number.mining_kwh_mtd']?.state ?? '0';
-                        const up   = states['input_number.mining_uptime_mtd_h']?.state ?? '0';
-                        const ecoM = states['input_number.miner_eco_mtd_h']?.state ?? '0';
-                        const stdM = states['input_number.miner_standard_mtd_h']?.state ?? '0';
-                        const supM = states['input_number.miner_super_mtd_h']?.state ?? '0';
-                        const pvN = parseFloat(pv), expN = parseFloat(exp);
-                        const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
-                        const fmtKwh = (v) => { const n = parseFloat(v); if (isNaN(n)) return '—'; return n >= 1000 ? (n/1000).toFixed(2)+' MWh' : n.toFixed(1)+' kWh'; };
-                        const fmtUptime = (v) => { const n = parseFloat(v); if (isNaN(n) || n <= 0) return '0 h'; const d = Math.floor(n/24), h = Math.floor(n%24); return d > 0 ? `${d}d ${h}h` : `${h} h`; };
-                        const row = (icon, label, val, iconColor) =>
-                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
-                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
-                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
-                            <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
-                          </div>`;
-                        const modeBox = (label, val, color) =>
-                          `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
-                            <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
-                            <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
-                          </div>`;
-                        const month = new Date().toLocaleString('de-DE',{month:'long'});
-                        return `<div style="width:100%;padding:2px 0;">
-                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-                            <ha-icon icon="mdi:calendar-month" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
-                            <span style="font-size:0.88rem;font-weight:700;">${month}</span>
-                          </div>
-                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-                            ${row('mdi:solar-power','PV erzeugt',fmtKwh(pv),'#4CAF50')}
-                            ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
-                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(exp),'#8BC34A')}
-                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(imp),'#5C6BC0')}
-                          </div>
-                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-                            ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(house),'#f59e0b')}
-                            ${row('mdi:water-boiler','Heizstab',fmtKwh(hz),'#2196F3')}
-                            ${row('mdi:pickaxe','Miner',fmtKwh(mine),'#f59e0b')}
-                          </div>
-                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-                            ${row('mdi:timer-outline','Mining Uptime',fmtUptime(up),'var(--secondary-text-color)')}
-                          </div>
-                          <div style="margin-top:2px;">
-                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
-                              ${modeBox('Eco',     fmtUptime(ecoM), '#4CAF50')}
-                              ${modeBox('Standard',fmtUptime(stdM), '#26C6DA')}
-                              ${modeBox('Speed',   fmtUptime(supM), '#F7931A')}
-                            </div>
-                          </div>
-                        </div>`;
-                      ]]]
-
-                # ── rechts: Statistik Heute ──────────────────────────────────────
-                - type: custom:button-card
-                  show_name: false
-                  show_icon: false
-                  show_state: false
-                  styles:
-                    card:
-                      - padding: 12px 16px
-                    custom_fields:
-                      stats_heute:
-                        - width: 100%
-                        - justify-self: stretch
-                        - box-sizing: border-box
-                  custom_fields:
-                    stats_heute: >
-                      [[[
-                        const pvKwh      = states['sensor.pv_energy_daily']?.state ?? '—';
-                        const pvExpKwh   = states['sensor.grid_export_daily']?.state ?? '—';
-                        const gridImpKwh = states['sensor.grid_import_daily']?.state ?? '—';
-                        const pvN        = parseFloat(pvKwh);
-                        const pvExpN     = parseFloat(pvExpKwh);
-                        const pvSelfUse  = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0) ? Math.max(0, pvN - pvExpN) : null;
-                        const hausKwh    = states['sensor.house_energy_daily']?.state ?? '—';
-                        const hzKwh      = states['sensor.heizstab_energy_daily']?.state ?? '—';
-                        const mineKwh    = states['sensor.mining_energy_daily']?.state ?? '—';
-                        const upFmt      = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
-                        const ecoH       = states['sensor.miner_eco_hours_today']?.state ?? '—';
-                        const stdH       = states['sensor.miner_standard_hours_today']?.state ?? '—';
-                        const supH       = states['sensor.miner_super_hours_today']?.state ?? '—';
-                        const fmtKwh = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(2) + ' kWh'; };
-                        const fmtH   = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(1) + ' h'; };
-                        const row = (icon, label, val, iconColor) =>
-                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
-                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
-                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
-                            <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
-                          </div>`;
-                        const modeBox = (label, val, color) =>
-                          `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
-                            <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
-                            <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
-                          </div>`;
-                        return `<div style="width:100%;padding:2px 0;">
-                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-                            <ha-icon icon="mdi:chart-bar" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
-                            <span style="font-size:0.88rem;font-weight:700;">Statistik Heute</span>
-                          </div>
-                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-                            ${row('mdi:solar-power','PV erzeugt',fmtKwh(pvKwh),'#4CAF50')}
-                            ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
-                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(pvExpKwh),'#8BC34A')}
-                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(gridImpKwh),'#5C6BC0')}
-                          </div>
-                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-                            ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(hausKwh),'#f59e0b')}
-                            ${row('mdi:water-boiler','Heizstab',fmtKwh(hzKwh),'#2196F3')}
-                            ${row('mdi:pickaxe','Miner',fmtKwh(mineKwh),'#f59e0b')}
-                          </div>
-                          <div>
-                            ${row('mdi:timer-outline','Mining Uptime',upFmt,'var(--secondary-text-color)')}
-                          </div>
-                          <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--divider-color);">
-                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
-                              ${modeBox('Eco',fmtH(ecoH),'#4CAF50')}
-                              ${modeBox('Standard',fmtH(stdH),'#26C6DA')}
-                              ${modeBox('Speed',fmtH(supH),'#F7931A')}
                             </div>
                           </div>
                         </div>`;
