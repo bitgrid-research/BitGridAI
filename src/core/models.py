@@ -44,6 +44,8 @@ class EnergyState:
 
     # Optionale Felder
     grid_export_w: float | None = None
+    miner_power_w: float | None = None
+    heizstab_power_w: float | None = None
     energy_price_ct_kwh: float | None = None
     pv_forecast_kw: float | None = None
 

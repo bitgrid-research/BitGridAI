@@ -41,6 +41,15 @@ def load_csv_scenario(path: str | Path) -> list[dict[str, Any]]:
                     "pv_forecast_kw": (
                         float(parts[8]) if len(parts) > 8 and parts[8] else None
                     ),
+                    "grid_export_w": (
+                        float(parts[9]) if len(parts) > 9 and parts[9] else None
+                    ),
+                    "miner_power_w": (
+                        float(parts[10]) if len(parts) > 10 and parts[10] else None
+                    ),
+                    "heizstab_power_w": (
+                        float(parts[11]) if len(parts) > 11 and parts[11] else None
+                    ),
                 }
             )
     return rows
@@ -79,6 +88,9 @@ def rows_to_energy_states(
                 surplus_kw=surplus_kw,
                 quality="ok",
                 missing_signals=(),
+                grid_export_w=row.get("grid_export_w"),
+                miner_power_w=row.get("miner_power_w"),
+                heizstab_power_w=row.get("heizstab_power_w"),
                 energy_price_ct_kwh=row.get("energy_price_ct_kwh"),
                 pv_forecast_kw=row.get("pv_forecast_kw"),
             )

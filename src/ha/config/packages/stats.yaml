@@ -568,6 +568,22 @@ stats:
         - condition: template
           value_template: "{{ now().month == 1 and now().day == 1 }}"
       action:
+        - variables:
+            y:    "{{ now().year - 1 }}"
+            pv:   "{{ states('input_number.pv_kwh_ytd')         | float(0) | round(3) }}"
+            exp:  "{{ states('input_number.grid_export_ytd')    | float(0) | round(3) }}"
+            imp:  "{{ states('input_number.grid_import_ytd')    | float(0) | round(3) }}"
+            hs:   "{{ states('input_number.house_kwh_ytd')      | float(0) | round(3) }}"
+            hz:   "{{ states('input_number.heizstab_kwh_ytd')   | float(0) | round(3) }}"
+            mn:   "{{ states('input_number.mining_kwh_ytd')     | float(0) | round(3) }}"
+            up:   "{{ states('input_number.mining_uptime_ytd_h')| float(0) | round(2) }}"
+            eco:  "{{ states('input_number.miner_eco_ytd_h')    | float(0) | round(2) }}"
+            std:  "{{ states('input_number.miner_standard_ytd_h')| float(0) | round(2) }}"
+            spd:  "{{ states('input_number.miner_super_ytd_h')  | float(0) | round(2) }}"
+            self: "{{ [0, (states('input_number.pv_kwh_ytd') | float(0)) - (states('input_number.grid_export_ytd') | float(0))] | max | round(3) }}"
+        - action: shell_command.stats_yearly_log_append
+          data:
+            ENTRY: "{{ y }},{{ pv }},{{ self }},{{ exp }},{{ imp }},{{ hs }},{{ hz }},{{ mn }},{{ up }},{{ eco }},{{ std }},{{ spd }}"
         - action: input_number.set_value
           target: { entity_id: input_number.pv_kwh_ytd }
           data: { value: 0 }
@@ -609,6 +625,24 @@ stats:
         - condition: template
           value_template: "{{ now().day == 1 }}"
       action:
+        - variables:
+            prev: "{{ (now().replace(day=1) - timedelta(days=1)) }}"
+            y:    "{{ prev.year }}"
+            m:    "{{ '%02d' % prev.month }}"
+            pv:   "{{ states('input_number.pv_kwh_mtd')         | float(0) | round(3) }}"
+            exp:  "{{ states('input_number.grid_export_mtd')    | float(0) | round(3) }}"
+            imp:  "{{ states('input_number.grid_import_mtd')    | float(0) | round(3) }}"
+            hs:   "{{ states('input_number.house_kwh_mtd')      | float(0) | round(3) }}"
+            hz:   "{{ states('input_number.heizstab_kwh_mtd')   | float(0) | round(3) }}"
+            mn:   "{{ states('input_number.mining_kwh_mtd')     | float(0) | round(3) }}"
+            up:   "{{ states('input_number.mining_uptime_mtd_h')| float(0) | round(2) }}"
+            eco:  "{{ states('input_number.miner_eco_mtd_h')    | float(0) | round(2) }}"
+            std:  "{{ states('input_number.miner_standard_mtd_h')| float(0) | round(2) }}"
+            spd:  "{{ states('input_number.miner_super_mtd_h')  | float(0) | round(2) }}"
+            self: "{{ [0, (states('input_number.pv_kwh_mtd') | float(0)) - (states('input_number.grid_export_mtd') | float(0))] | max | round(3) }}"
+        - action: shell_command.stats_monthly_log_append
+          data:
+            ENTRY: "{{ y }},{{ m }},{{ pv }},{{ self }},{{ exp }},{{ imp }},{{ hs }},{{ hz }},{{ mn }},{{ up }},{{ eco }},{{ std }},{{ spd }}"
         - action: input_number.set_value
           target: { entity_id: input_number.pv_kwh_mtd }
           data: { value: 0 }
@@ -737,5 +771,13 @@ stats:
     mining_log_append: >-
       bash -c 'f=/config/mining_log.csv;
       [ ! -f "$f" ] && echo "date,start,stop,total_h,eco_h,std_h,speed_h,kwh" > "$f";
+      printf "%s\n" "$ENTRY" >> "$f"'
+    stats_monthly_log_append: >-
+      bash -c 'f=/config/stats_monthly.csv;
+      [ ! -f "$f" ] && echo "year,month,pv_kwh,pv_selfuse_kwh,export_kwh,import_kwh,house_kwh,heizstab_kwh,miner_kwh,uptime_h,eco_h,standard_h,speed_h" > "$f";
+      printf "%s\n" "$ENTRY" >> "$f"'
+    stats_yearly_log_append: >-
+      bash -c 'f=/config/stats_yearly.csv;
+      [ ! -f "$f" ] && echo "year,pv_kwh,pv_selfuse_kwh,export_kwh,import_kwh,house_kwh,heizstab_kwh,miner_kwh,uptime_h,eco_h,standard_h,speed_h" > "$f";
       printf "%s\n" "$ENTRY" >> "$f"'
 
