@@ -98,19 +98,23 @@ def _load_snapshots(path: Path) -> list[dict[str, Any]]:
             try:
                 ts = datetime.fromisoformat(ts_raw)
             except ValueError:
-                print(f"Zeile {lineno}: ungültiger Timestamp '{ts_raw}'", file=sys.stderr)
+                print(
+                    f"Zeile {lineno}: ungültiger Timestamp '{ts_raw}'", file=sys.stderr
+                )
                 continue
 
-            records.append({
-                "ts": ts,
-                "pv_w":     float(payload.get("pv_w", 0)),
-                "load_w":   float(payload.get("load_w", 0)),
-                "grid_w":   float(payload.get("grid_w", 0)),
-                "soc":      float(payload.get("soc", 0)),
-                "temp_c":   float(payload.get("temp_c", 0)),
-                "hb_ok":    str(payload.get("hb_ok", "true")).lower() == "true",
-                "miner_w":  float(payload.get("miner_w", 0)),
-            })
+            records.append(
+                {
+                    "ts": ts,
+                    "pv_w": float(payload.get("pv_w", 0)),
+                    "load_w": float(payload.get("load_w", 0)),
+                    "grid_w": float(payload.get("grid_w", 0)),
+                    "soc": float(payload.get("soc", 0)),
+                    "temp_c": float(payload.get("temp_c", 0)),
+                    "hb_ok": str(payload.get("hb_ok", "true")).lower() == "true",
+                    "miner_w": float(payload.get("miner_w", 0)),
+                }
+            )
 
     return records
 
@@ -125,7 +129,7 @@ def _filter_timewindow(
         return int(h), int(m)
 
     from_hm = _hhmm(time_from) if time_from else (0, 0)
-    to_hm   = _hhmm(time_to)   if time_to   else (23, 59)
+    to_hm = _hhmm(time_to) if time_to else (23, 59)
 
     def _in_window(ts: datetime) -> bool:
         t = (ts.hour, ts.minute)
@@ -175,10 +179,18 @@ def main() -> None:
     )
     parser.add_argument("input", help="JSONL-Datei vom mqtt_recorder.py")
     parser.add_argument("--out", help="Ausgabe-CSV (default: <input>.csv)")
-    parser.add_argument("--from", dest="time_from", metavar="HH:MM",
-                        help="Nur Einträge ab dieser Uhrzeit (z.B. 06:00)")
-    parser.add_argument("--to",   dest="time_to",   metavar="HH:MM",
-                        help="Nur Einträge bis zu dieser Uhrzeit (z.B. 20:00)")
+    parser.add_argument(
+        "--from",
+        dest="time_from",
+        metavar="HH:MM",
+        help="Nur Einträge ab dieser Uhrzeit (z.B. 06:00)",
+    )
+    parser.add_argument(
+        "--to",
+        dest="time_to",
+        metavar="HH:MM",
+        help="Nur Einträge bis zu dieser Uhrzeit (z.B. 20:00)",
+    )
     args = parser.parse_args()
 
     convert(
