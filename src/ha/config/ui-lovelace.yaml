@@ -766,26 +766,20 @@ views:
                             const cdTag = cdActive
                               ? `<span style="margin-left:8px;font-size:0.78rem;color:#f59e0b;font-weight:600;">${cd}</span>`
                               : '';
-                            const tmaxColor = tmax === '—' ? 'var(--secondary-text-color)'
-                              : parseFloat(tmax) >= 110 ? '#F44336'
-                              : parseFloat(tmax) >= 100 ? '#f59e0b'
-                              : (mode === 'Standby' || parseFloat(tmax) < 45) ? 'var(--primary-text-color)'
-                              : '#4CAF50';
-                            const tavgColor = tavg === '—' ? 'var(--secondary-text-color)'
-                              : parseFloat(tavg) >= 100 ? '#F44336'
-                              : parseFloat(tavg) >= 90  ? '#f59e0b'
-                              : (mode === 'Standby' || parseFloat(tavg) < 45) ? 'var(--primary-text-color)'
-                              : '#4CAF50';
-                            const hbiColor = hbi === '—' ? 'var(--secondary-text-color)'
-                              : parseFloat(hbi) >= 85 ? '#F44336'
-                              : parseFloat(hbi) >= 80 ? '#f59e0b'
-                              : (mode === 'Standby' || parseFloat(hbi) < 45) ? 'var(--primary-text-color)'
-                              : '#4CAF50';
-                            const hboColor = hbo === '—' ? 'var(--secondary-text-color)'
-                              : parseFloat(hbo) >= 90 ? '#F44336'
-                              : parseFloat(hbo) >= 85 ? '#f59e0b'
-                              : (mode === 'Standby' || parseFloat(hbo) < 45) ? 'var(--primary-text-color)'
-                              : '#4CAF50';
+                            const tempColor = (v) => {
+                              if (v === '—') return 'var(--secondary-text-color)';
+                              const t = parseFloat(v);
+                              if (mode === 'Standby' || mode === 'Idle' || mode === 'Off' || t < 45) return 'var(--secondary-text-color)';
+                              if (mode === 'Eco')
+                                return t >= 80 ? '#F44336' : t >= 70 ? '#f59e0b' : t >= 60 ? '#26C6DA' : '#4CAF50';
+                              if (mode === 'Standard')
+                                return t >= 100 ? '#F44336' : t >= 90 ? '#FF7043' : t >= 80 ? '#f59e0b' : t >= 70 ? '#26C6DA' : '#4CAF50';
+                              return t >= 108 ? '#F44336' : t >= 100 ? '#FF7043' : t >= 90 ? '#f59e0b' : t >= 80 ? '#26C6DA' : '#4CAF50';
+                            };
+                            const tmaxColor = tempColor(tmax);
+                            const tavgColor = tempColor(tavg);
+                            const hbiColor  = tempColor(hbi);
+                            const hboColor  = tempColor(hbo);
                             const row = (icon, label, val, color) =>
                               `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
                                 <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color ?? 'var(--secondary-text-color)'};"></ha-icon>
@@ -1104,26 +1098,20 @@ views:
                             const cdTag = cdActive
                               ? `<span style="margin-left:8px;font-size:0.78rem;color:#f59e0b;font-weight:600;">${cd}</span>`
                               : '';
-                            const tmaxColor = tmax === '—' ? 'var(--secondary-text-color)'
-                              : parseFloat(tmax) >= 110 ? '#F44336'
-                              : parseFloat(tmax) >= 100 ? '#f59e0b'
-                              : (mode === 'Standby' || parseFloat(tmax) < 45) ? 'var(--primary-text-color)'
-                              : '#4CAF50';
-                            const tavgColor = tavg === '—' ? 'var(--secondary-text-color)'
-                              : parseFloat(tavg) >= 100 ? '#F44336'
-                              : parseFloat(tavg) >= 90  ? '#f59e0b'
-                              : (mode === 'Standby' || parseFloat(tavg) < 45) ? 'var(--primary-text-color)'
-                              : '#4CAF50';
-                            const hbiColor = hbi === '—' ? 'var(--secondary-text-color)'
-                              : parseFloat(hbi) >= 85 ? '#F44336'
-                              : parseFloat(hbi) >= 80 ? '#f59e0b'
-                              : (mode === 'Standby' || parseFloat(hbi) < 45) ? 'var(--primary-text-color)'
-                              : '#4CAF50';
-                            const hboColor = hbo === '—' ? 'var(--secondary-text-color)'
-                              : parseFloat(hbo) >= 90 ? '#F44336'
-                              : parseFloat(hbo) >= 85 ? '#f59e0b'
-                              : (mode === 'Standby' || parseFloat(hbo) < 45) ? 'var(--primary-text-color)'
-                              : '#4CAF50';
+                            const tempColor = (v) => {
+                              if (v === '—') return 'var(--secondary-text-color)';
+                              const t = parseFloat(v);
+                              if (mode === 'Standby' || mode === 'Idle' || mode === 'Off' || t < 45) return 'var(--secondary-text-color)';
+                              if (mode === 'Eco')
+                                return t >= 80 ? '#F44336' : t >= 70 ? '#f59e0b' : t >= 60 ? '#26C6DA' : '#4CAF50';
+                              if (mode === 'Standard')
+                                return t >= 100 ? '#F44336' : t >= 90 ? '#FF7043' : t >= 80 ? '#f59e0b' : t >= 70 ? '#26C6DA' : '#4CAF50';
+                              return t >= 108 ? '#F44336' : t >= 100 ? '#FF7043' : t >= 90 ? '#f59e0b' : t >= 80 ? '#26C6DA' : '#4CAF50';
+                            };
+                            const tmaxColor = tempColor(tmax);
+                            const tavgColor = tempColor(tavg);
+                            const hbiColor  = tempColor(hbi);
+                            const hboColor  = tempColor(hbo);
                             const row = (icon, label, val, color) =>
                               `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
                                 <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color ?? 'var(--secondary-text-color)'};"></ha-icon>
