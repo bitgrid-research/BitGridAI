@@ -2,17 +2,57 @@ stats:
 
   # ── Tageslog: Mining-Sessions persistieren ────────────────────────────────────
   # Format pro Eintrag: YYYY-MM-DD,HH:MM,HH:MM,tot_h,eco_h,std_h,sup_h,kwh
-  # Pipe-separiert, max 3 Einträge (~135 Zeichen) — Rolling Window für UI-Anzeige.
+  # Pipe-separiert, 5+5 Einträge über zwei input_text — Rolling Window für UI.
   # Langzeit-Archiv: /config/mining_log.csv (täglich 23:59:59, nie überschrieben).
   input_text:
     mining_daily_log:
-      name: "Mining Tageslog"
+      name: "Mining Tageslog (Einträge 1-5)"
       max: 255
       icon: mdi:database-clock
+    mining_daily_log_b:
+      name: "Mining Tageslog (Einträge 6-10)"
+      max: 255
+      icon: mdi:database-clock
+
+  # ── Recovery-Snapshot: heutige Werte kurz vor Mitternacht sichern ───────────────
+  # Wird um 23:59:30 geschrieben. Wenn die Hauptautomation (23:59:59) ausfällt,
+  # kann stats_recover_missed_daily_log beim nächsten HA-Start darauf zugreifen.
+  # input_datetime.miner_start/stop_yesterday liefert die Start/Stop-Zeiten.
 
   # ── Midnight-Baselines (ersetzt utility_meter, das in HA 2026.x entfernt wurde)
   # Speichern den Integral-Wert zum Tagesbeginn; Template-Sensor berechnet Delta.
   input_number:
+    yesterday_mining_h:
+      name: "Mining Gestern (h) — Recovery-Snapshot"
+      min: 0
+      max: 24
+      step: 0.01
+      mode: box
+    yesterday_eco_h:
+      name: "Eco Gestern (h) — Recovery-Snapshot"
+      min: 0
+      max: 24
+      step: 0.01
+      mode: box
+    yesterday_std_h:
+      name: "Standard Gestern (h) — Recovery-Snapshot"
+      min: 0
+      max: 24
+      step: 0.01
+      mode: box
+    yesterday_sup_h:
+      name: "Speed Gestern (h) — Recovery-Snapshot"
+      min: 0
+      max: 24
+      step: 0.01
+      mode: box
+    yesterday_kwh:
+      name: "Mining kWh Gestern — Recovery-Snapshot"
+      min: 0
+      max: 9999
+      step: 0.01
+      mode: box
+
     pv_energy_midnight:
       name: "PV kWh Baseline Mitternacht"
       min: 0
@@ -674,6 +714,31 @@ stats:
           target: { entity_id: input_number.miner_super_mtd_h }
           data: { value: 0 }
 
+    # Recovery-Snapshot: Tageswerte kurz vor Mitternacht sichern
+    # Feuert bei 23:59:30 — bevor history_stats-Sensoren um Mitternacht resetten.
+    # Wenn die Hauptautomation (23:59:59) ausfällt, hat stats_recover beim Start Daten.
+    - id: stats_snapshot_today_for_recovery
+      alias: "Stats: Recovery-Snapshot um 23:59:30"
+      trigger:
+        - platform: time
+          at: "23:59:30"
+      action:
+        - action: input_number.set_value
+          target: { entity_id: input_number.yesterday_mining_h }
+          data: { value: "{{ states('sensor.miner_uptime_today_h') | float(0) | round(2) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.yesterday_eco_h }
+          data: { value: "{{ states('sensor.miner_eco_hours_today') | float(0) | round(1) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.yesterday_std_h }
+          data: { value: "{{ states('sensor.miner_standard_hours_today') | float(0) | round(1) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.yesterday_sup_h }
+          data: { value: "{{ states('sensor.miner_super_hours_today') | float(0) | round(1) }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.yesterday_kwh }
+          data: { value: "{{ states('sensor.mining_energy_daily') | float(0) | round(2) }}" }
+
     # Tageslog: Mining-Session tageweise persistieren
     - id: stats_save_daily_mining_log
       alias: "Stats: Mining Tageslog sichern"
@@ -694,56 +759,79 @@ stats:
             std_h: "{{ states('sensor.miner_standard_hours_today') | float(0) | round(1) }}"
             sup_h: "{{ states('sensor.miner_super_hours_today') | float(0) | round(1) }}"
             kwh: "{{ states('sensor.mining_energy_daily') | float(0) | round(2) }}"
-            existing: "{{ states('input_text.mining_daily_log') }}"
+            existing_a: "{{ states('input_text.mining_daily_log') }}"
+            existing_b: "{{ states('input_text.mining_daily_log_b') }}"
+        - condition: template
+          value_template: "{{ not existing_a.startswith(log_date) }}"
+        - variables:
+            _new: "{{ log_date ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh }}"
+            _old_a: "{{ existing_a.split('|') if existing_a not in ['','unknown','unavailable'] else [] }}"
+            _old_b: "{{ existing_b.split('|') if existing_b not in ['','unknown','unavailable'] else [] }}"
+        - variables:
+            _combined: "{{ ([_new] + _old_a + _old_b) | join('|') }}"
         - action: input_text.set_value
           target:
             entity_id: input_text.mining_daily_log
           data:
-            value: >-
-              {% set e = log_date ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh %}
-              {% set old = existing.split('|') if existing not in ['','unknown','unavailable'] else [] %}
-              {{ ([e] + old[:2]) | join('|') }}
+            value: "{{ _combined.split('|')[:5] | join('|') }}"
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.mining_daily_log_b
+          data:
+            value: "{{ _combined.split('|')[5:10] | join('|') }}"
         - action: shell_command.mining_log_append
           data:
             entry: "{{ log_date }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }}"
 
-    # Start/Stop-Zeiten live tracken (MVP-Watchdog ruft bg_start/bg_stop nicht auf)
-    # Erster Start des Tages: nur wenn last_start_at noch nicht von heute ist.
-    # Letzter Stop des Tages: immer überschreiben.
-    - id: stats_track_miner_times
-      alias: "Stats: Miner Start/Stop Zeiten tracken"
+    # Recovery: fehlenden Gestern-Eintrag beim HA-Start nachholen
+    # Greift nur wenn gestern nicht im Log ist UND der Snapshot existiert.
+    - id: stats_recover_missed_daily_log
+      alias: "Stats: Fehlenden Tageslog-Eintrag nachholen"
       trigger:
-        - platform: state
-          entity_id: binary_sensor.miners_any_running
-          to: "on"
-          id: started
-        - platform: state
-          entity_id: binary_sensor.miners_any_running
-          to: "off"
-          id: stopped
+        - platform: homeassistant
+          event: start
       action:
-        - choose:
-            - conditions:
-                - condition: trigger
-                  id: started
-                - condition: template
-                  value_template: >-
-                    {{ states('input_datetime.last_start_at')[:10] != now().strftime('%Y-%m-%d') }}
-              sequence:
-                - action: input_datetime.set_datetime
-                  target:
-                    entity_id: input_datetime.last_start_at
-                  data:
-                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
-            - conditions:
-                - condition: trigger
-                  id: stopped
-              sequence:
-                - action: input_datetime.set_datetime
-                  target:
-                    entity_id: input_datetime.last_stop_at
-                  data:
-                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+        - delay: "00:00:45"
+        - variables:
+            yesterday: "{{ (now() - timedelta(days=1)).strftime('%Y-%m-%d') }}"
+            existing_a: "{{ states('input_text.mining_daily_log') }}"
+            existing_b: "{{ states('input_text.mining_daily_log_b') }}"
+        - condition: template
+          value_template: >-
+            {{ yesterday not in existing_a and yesterday not in existing_b }}
+        - variables:
+            start_t: >-
+              {% set s = states('input_datetime.miner_start_yesterday') %}
+              {{ s.split(' ')[1][:5] if ' ' in s and s.startswith(yesterday) and s not in ['unknown','unavailable'] else '--:--' }}
+            stop_t: >-
+              {% set s = states('input_datetime.miner_stop_yesterday') %}
+              {{ s.split(' ')[1][:5] if ' ' in s and s.startswith(yesterday) and s not in ['unknown','unavailable'] else '--:--' }}
+            tot_h: "{{ states('input_number.yesterday_mining_h') | float(0) | round(2) }}"
+            eco_h: "{{ states('input_number.yesterday_eco_h') | float(0) | round(1) }}"
+            std_h: "{{ states('input_number.yesterday_std_h') | float(0) | round(1) }}"
+            sup_h: "{{ states('input_number.yesterday_sup_h') | float(0) | round(1) }}"
+            kwh: "{{ states('input_number.yesterday_kwh') | float(0) | round(2) }}"
+        - action: system_log.write
+          data:
+            message: "[stats-recover] Gestern ({{ yesterday }}) fehlt im Log — trage nach: {{ tot_h }}h {{ kwh }}kWh"
+            level: warning
+        - variables:
+            _new: "{{ yesterday ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh }}"
+            _old_a: "{{ existing_a.split('|') if existing_a not in ['','unknown','unavailable'] else [] }}"
+            _old_b: "{{ existing_b.split('|') if existing_b not in ['','unknown','unavailable'] else [] }}"
+        - variables:
+            _combined: "{{ ([_new] + _old_a + _old_b) | join('|') }}"
+        - action: input_text.set_value
+          target: { entity_id: input_text.mining_daily_log }
+          data:
+            value: "{{ _combined.split('|')[:5] | join('|') }}"
+        - action: input_text.set_value
+          target: { entity_id: input_text.mining_daily_log_b }
+          data:
+            value: "{{ _combined.split('|')[5:10] | join('|') }}"
+        - action: shell_command.mining_log_append
+          data:
+            entry: "{{ yesterday }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }}"
 
     # Gestern-Zeiten sichern: letzten Start/Stop des Vortages speichern
     - id: stats_save_yesterday_miner_times

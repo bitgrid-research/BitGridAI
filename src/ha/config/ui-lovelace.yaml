@@ -65,6 +65,61 @@ button_card_templates:
         - color: var(--secondary-text-color)
         - margin-top: 2px
 
+  weather_forecast_6h:
+    entity: sensor.weather_forecast_6h
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    custom_fields:
+      row: >
+        [[[
+          const f = entity?.attributes?.forecast ?? [];
+          const icons = {
+            'clear-night':     'mdi:weather-night',
+            'sunny':           'mdi:weather-sunny',
+            'partlycloudy':    'mdi:weather-partly-cloudy',
+            'cloudy':          'mdi:weather-cloudy',
+            'fog':             'mdi:weather-fog',
+            'rainy':           'mdi:weather-rainy',
+            'pouring':         'mdi:weather-pouring',
+            'lightning':       'mdi:weather-lightning',
+            'lightning-rainy': 'mdi:weather-lightning-rainy',
+            'snowy':           'mdi:weather-snowy',
+            'snowy-rainy':     'mdi:weather-snowy-rainy',
+            'windy':           'mdi:weather-windy',
+            'windy-variant':   'mdi:weather-windy-variant',
+            'hail':            'mdi:weather-hail',
+            'exceptional':     'mdi:alert-circle-outline',
+          };
+          const blocks = f.map(h => {
+            const dt   = new Date(h.datetime);
+            const time = dt.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+            const icon = icons[h.condition] ?? 'mdi:weather-partly-cloudy';
+            const temp = Math.round(h.temperature);
+            return `
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex:1">
+                <span style="font-size:.75rem;color:var(--secondary-text-color);font-weight:500">${time}</span>
+                <ha-icon icon="${icon}" style="--mdc-icon-size:28px;color:var(--primary-text-color)"></ha-icon>
+                <span style="font-size:.95rem;font-weight:600">${temp}°C</span>
+              </div>`;
+          }).join('');
+          return `<div style="display:flex;width:100%;padding:4px 0">${blocks}</div>`;
+        ]]]
+    styles:
+      card:
+        - padding: 12px 16px
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+      grid:
+        - grid-template-areas: '"row"'
+        - grid-template-columns: 1fr
+      custom_fields:
+        row:
+          - width: 100%
+          - overflow: hidden
+
 views:
 
   # ═══════════════════════════════════════════════════════
@@ -131,15 +186,18 @@ views:
                     const gridLimit     = parseFloat(states['input_number.r2_max_grid_import_w']?.state || 500);
                     const maxTemp       = parseFloat(states['input_number.r3_max_chip_temp_c']?.state  || 85);
                     const grid          = parseFloat(states['sensor.grid_import_w']?.state || 0);
+                    // MVP-Schwellen (tatsächliche Steuerlogik)
+                    const mvpSocStart   = parseFloat(states['input_number.mvp_soc_eco_start_pct']?.state || 65);
+                    const mvpPvStartKw  = parseFloat(states['input_number.mvp_pv_start_w']?.state || 6000) / 1000;
 
                     // Bitsy erklärt die Entscheidung — Zeile 1: Ursache · Zeile 2: Bedingung
-                    const nightBlockActive = states['binary_sensor.mvp_night_block_active']?.state === 'on'
+                    const nightBlockActive = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
                       || (h >= 22 || h < 6);
                     let lines;
                     if (nightBlockActive) {
                       lines = [
                         `Die Nacht gehört der Stille. Kein Block braucht Eile. 🌙`,
-                        `Solar-Mining only. Hodl the line bis 06:00. ₿`
+                        `Solar-Mining only. Hodl bis 06:00. ₿`
                       ];
                     } else if (code === 'STOP_R3_OVERTEMP') {
                       lines = [
@@ -183,8 +241,8 @@ views:
                       ];
                     } else {
                       lines = [
-                        `PV-Überschuss ${surplus.toFixed(1)} kW — Minimum ${surplusMinKw.toFixed(1)} kW nicht erreicht.`,
-                        `Mining startet bei ≥ ${surplusMinKw.toFixed(1)} kW Überschuss.`
+                        `PV ${(pv/1000).toFixed(1)} kW · Akku ${soc.toFixed(0)}% — Minimum nicht erreicht.`,
+                        `Mining startet bei Akku ≥ ${mvpSocStart.toFixed(0)}% oder PV ≥ ${mvpPvStartKw.toFixed(1)} kW.`
                       ];
                     }
 
@@ -258,7 +316,7 @@ views:
                   - background: >
                       [[[
                         const h = new Date().getHours();
-                        const night = states['binary_sensor.mvp_night_block_active']?.state === 'on'
+                        const night = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
                           || (h >= 22 || h < 6);
                         return night ? '#0c0f18' : 'var(--secondary-background-color)';
                       ]]]
@@ -267,7 +325,7 @@ views:
                   - border: >
                       [[[
                         const h = new Date().getHours();
-                        const night = states['binary_sensor.mvp_night_block_active']?.state === 'on'
+                        const night = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
                           || (h >= 22 || h < 6);
                         return night ? '1px solid rgba(247,147,26,0.08)' : '1px solid rgba(247,147,26,0.4)';
                       ]]]
@@ -1607,16 +1665,16 @@ views:
                   custom_fields:
                     stats_monat: >
                       [[[
-                        const pv   = states['input_number.pv_kwh_mtd']?.state ?? '0';
-                        const exp  = states['input_number.grid_export_mtd']?.state ?? '0';
-                        const imp  = states['input_number.grid_import_mtd']?.state ?? '0';
-                        const house= states['input_number.house_kwh_mtd']?.state ?? '0';
-                        const hz   = states['input_number.heizstab_kwh_mtd']?.state ?? '0';
-                        const mine = states['input_number.mining_kwh_mtd']?.state ?? '0';
-                        const up   = states['input_number.mining_uptime_mtd_h']?.state ?? '0';
-                        const ecoM = states['input_number.miner_eco_mtd_h']?.state ?? '0';
-                        const stdM = states['input_number.miner_standard_mtd_h']?.state ?? '0';
-                        const supM = states['input_number.miner_super_mtd_h']?.state ?? '0';
+                        const pv   = (parseFloat(states['input_number.pv_kwh_mtd']?.state ?? '0')   + parseFloat(states['sensor.pv_energy_daily']?.state ?? '0')).toFixed(3);
+                        const exp  = (parseFloat(states['input_number.grid_export_mtd']?.state ?? '0') + parseFloat(states['sensor.grid_export_daily']?.state ?? '0')).toFixed(3);
+                        const imp  = (parseFloat(states['input_number.grid_import_mtd']?.state ?? '0') + parseFloat(states['sensor.grid_import_daily']?.state ?? '0')).toFixed(3);
+                        const house= (parseFloat(states['input_number.house_kwh_mtd']?.state ?? '0')   + parseFloat(states['sensor.house_energy_daily']?.state ?? '0')).toFixed(3);
+                        const hz   = (parseFloat(states['input_number.heizstab_kwh_mtd']?.state ?? '0')+ parseFloat(states['sensor.heizstab_energy_daily']?.state ?? '0')).toFixed(3);
+                        const mine = (parseFloat(states['input_number.mining_kwh_mtd']?.state ?? '0')  + parseFloat(states['sensor.mining_energy_daily']?.state ?? '0')).toFixed(3);
+                        const up   = (parseFloat(states['input_number.mining_uptime_mtd_h']?.state ?? '0') + parseFloat(states['sensor.miner_uptime_today_h']?.state ?? '0')).toFixed(2);
+                        const ecoM = (parseFloat(states['input_number.miner_eco_mtd_h']?.state ?? '0')      + parseFloat(states['sensor.miner_eco_hours_today']?.state ?? '0')).toFixed(2);
+                        const stdM = (parseFloat(states['input_number.miner_standard_mtd_h']?.state ?? '0') + parseFloat(states['sensor.miner_standard_hours_today']?.state ?? '0')).toFixed(2);
+                        const supM = (parseFloat(states['input_number.miner_super_mtd_h']?.state ?? '0')    + parseFloat(states['sensor.miner_super_hours_today']?.state ?? '0')).toFixed(2);
                         const pvN = parseFloat(pv), expN = parseFloat(exp);
                         const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
                         const fmtKwh = (v) => { const n = parseFloat(v); if (isNaN(n)) return '—'; return n >= 1000 ? (n/1000).toFixed(2)+' MWh' : n.toFixed(1)+' kWh'; };
@@ -1761,10 +1819,8 @@ views:
               custom_fields:
                 mining_log: >
                   [[[
-                    const logRaw = states['input_text.mining_daily_log']?.state ?? '';
-                    const logEntries = (logRaw && logRaw !== 'unknown' && logRaw !== 'unavailable')
-                      ? logRaw.split('|').filter(e => e.includes(','))
-                      : [];
+                    const parseLog = (raw) => (raw && raw !== 'unknown' && raw !== 'unavailable') ? raw.split('|').filter(e => e.includes(',')) : [];
+                    const logEntries = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
                     const parseEntry = (e) => {
                       const p = e.split(',');
                       return { d: p[0]??'', on: p[1]??'–', off: p[2]??'–',
@@ -1815,7 +1871,10 @@ views:
                         <ha-icon icon="mdi:calendar-clock" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
                         <span style="font-size:0.88rem;font-weight:700;">Mining Verlauf</span>
                       </div>
-                      ${headers}${allRows.map(rowHtml).join('')}
+                      ${headers}
+                      <div style="max-height:308px;overflow-y:auto;scrollbar-width:thin;">
+                        ${allRows.map(rowHtml).join('')}
+                      </div>
                     </div>`;
                   ]]]
 

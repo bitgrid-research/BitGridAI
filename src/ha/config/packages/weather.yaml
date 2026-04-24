@@ -1,0 +1,21 @@
+template:
+  - trigger:
+      - platform: time_pattern
+        minutes: "/30"
+      - platform: homeassistant
+        event: start
+    action:
+      - action: weather.get_forecast
+        data:
+          type: hourly
+        target:
+          entity_id: weather.forecast_home
+        response_variable: forecast_resp
+    sensor:
+      - name: weather_forecast_6h
+        unique_id: weather_forecast_6h
+        state: "{{ now().strftime('%H:%M') }}"
+        attributes:
+          forecast: "{{ forecast_resp['weather.forecast_home']['forecast'][:6] }}"
+          updated_at: "{{ now().isoformat() }}"
+          source_entity: weather.forecast_home

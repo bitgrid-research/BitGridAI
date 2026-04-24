@@ -269,6 +269,16 @@ mvp_auto:
                     entity_id: input_number.mvp_miner1_last_downgrade_ts
                   data:
                     value: "{{ now().timestamp() | int }}"
+                - if:
+                    - condition: template
+                      value_template: >-
+                        {{ states('sensor.miner2_workmode_status') in ['Standby', 'Off', 'Idle'] }}
+                  then:
+                    - action: input_datetime.set_datetime
+                      target:
+                        entity_id: input_datetime.last_stop_at
+                      data:
+                        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
             # P2: Akku voll → Super (blockiert wenn Downgrade-Cooldown aktiv)
             - conditions:
@@ -317,9 +327,10 @@ mvp_auto:
                     value: "{{ now().timestamp() | int }}"
 
             # P4: SoC ok ODER PV stark genug, Miner aus → Eco starten (blockiert wenn Downgrade-Cooldown aktiv oder Nacht-Sperre)
+            # SoC-basierter Start bypasses Cooldown — SoC ist ein stabiler Zustand, kein Flapping-Risiko
             - conditions:
                 - condition: state
-                  entity_id: binary_sensor.mvp_night_block_active
+                  entity_id: binary_sensor.mvp_nacht_sperre_aktiv
                   state: "off"
                 - condition: template
                   value_template: >
@@ -327,7 +338,7 @@ mvp_auto:
                        m1_status in ['Standby', 'Idle', 'Off'] }}
               sequence:
                 - condition: template
-                  value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
+                  value_template: "{{ soc >= soc_start or (now_ts - m1_dn_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
                     message: "[mvp-miner1] P4 Eco-Start: soc={{ soc }}% pv={{ pv }}W — status={{ m1_status }}"
@@ -342,6 +353,16 @@ mvp_auto:
                     entity_id: input_number.mvp_miner1_last_upgrade_ts
                   data:
                     value: "{{ now().timestamp() | int }}"
+                - if:
+                    - condition: template
+                      value_template: >-
+                        {{ states('input_datetime.last_start_at')[:10] != now().strftime('%Y-%m-%d') }}
+                  then:
+                    - action: input_datetime.set_datetime
+                      target:
+                        entity_id: input_datetime.last_start_at
+                      data:
+                        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
     # ── Miner 2: Steuerungs-Automation ────────────────────────────────────
     - id: mvp_miner2_watchdog
@@ -412,6 +433,16 @@ mvp_auto:
                     entity_id: input_number.mvp_miner2_last_downgrade_ts
                   data:
                     value: "{{ now().timestamp() | int }}"
+                - if:
+                    - condition: template
+                      value_template: >-
+                        {{ states('sensor.miner1_workmode_status') in ['Standby', 'Off', 'Idle'] }}
+                  then:
+                    - action: input_datetime.set_datetime
+                      target:
+                        entity_id: input_datetime.last_stop_at
+                      data:
+                        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
             # P2: Akku voll → Super (blockiert wenn Downgrade-Cooldown aktiv)
             - conditions:
@@ -460,9 +491,10 @@ mvp_auto:
                     value: "{{ now().timestamp() | int }}"
 
             # P4: SoC ok ODER PV stark genug, Miner aus → Eco starten (blockiert wenn Downgrade-Cooldown aktiv oder Nacht-Sperre)
+            # SoC-basierter Start bypasses Cooldown — SoC ist ein stabiler Zustand, kein Flapping-Risiko
             - conditions:
                 - condition: state
-                  entity_id: binary_sensor.mvp_night_block_active
+                  entity_id: binary_sensor.mvp_nacht_sperre_aktiv
                   state: "off"
                 - condition: template
                   value_template: >
@@ -470,7 +502,7 @@ mvp_auto:
                        m2_status in ['Standby', 'Idle', 'Off'] }}
               sequence:
                 - condition: template
-                  value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
+                  value_template: "{{ soc >= soc_start or (now_ts - m2_dn_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
                     message: "[mvp-miner2] P4 Eco-Start: soc={{ soc }}% pv={{ pv }}W — status={{ m2_status }}"
@@ -485,6 +517,16 @@ mvp_auto:
                     entity_id: input_number.mvp_miner2_last_upgrade_ts
                   data:
                     value: "{{ now().timestamp() | int }}"
+                - if:
+                    - condition: template
+                      value_template: >-
+                        {{ states('input_datetime.last_start_at')[:10] != now().strftime('%Y-%m-%d') }}
+                  then:
+                    - action: input_datetime.set_datetime
+                      target:
+                        entity_id: input_datetime.last_start_at
+                      data:
+                        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
     # ── Lüftung: Shelly-Plug Watchdog ─────────────────────────────────────
     - id: mvp_lueftung_watchdog
@@ -715,13 +757,24 @@ mvp_auto:
           event: start
       condition:
         - condition: state
-          entity_id: binary_sensor.mvp_night_block_active
+          entity_id: binary_sensor.mvp_nacht_sperre_aktiv
           state: "on"
       action:
         - action: system_log.write
           data:
             message: "[mvp-night] Nacht-Sperre aktiv — Miner 1 + 2 → Standby"
             level: warning
+        - if:
+            - condition: template
+              value_template: >-
+                {{ states('sensor.miner1_workmode_status') not in ['Standby', 'Off'] or
+                   states('sensor.miner2_workmode_status') not in ['Standby', 'Off'] }}
+          then:
+            - action: input_datetime.set_datetime
+              target:
+                entity_id: input_datetime.last_stop_at
+              data:
+                datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
         - if:
             - condition: template
               value_template: "{{ states('sensor.miner1_workmode_status') not in ['Standby', 'Off'] }}"
