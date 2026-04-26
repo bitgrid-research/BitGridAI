@@ -90,7 +90,24 @@ mvp_auto:
       step: 1
       mode: box
       initial: 0
-      icon: mdi:arrow-down-circle
+
+    mvp_miner1_temp_lockout_until:
+      name: "Miner 1 Temp-Sperre bis (Timestamp)"
+      min: 0
+      max: 9999999999
+      step: 1
+      mode: box
+      initial: 0
+      icon: mdi:thermometer-lock
+
+    mvp_miner2_temp_lockout_until:
+      name: "Miner 2 Temp-Sperre bis (Timestamp)"
+      min: 0
+      max: 9999999999
+      step: 1
+      mode: box
+      initial: 0
+      icon: mdi:thermometer-lock
 
     mvp_tmax_eco_threshold_c:
       name: "TMax Eco-Sicherheitsschwelle (°C)"
@@ -109,6 +126,15 @@ mvp_auto:
       mode: box
       initial: 31
       icon: mdi:home-thermometer-outline
+
+    battery_capacity_kwh:
+      name: "Batterie-Kapazität (kWh)"
+      min: 1
+      max: 30
+      step: 0.5
+      mode: box
+      initial: 10
+      icon: mdi:battery-high
 
   input_boolean:
     mvp_night_block_enabled:
@@ -182,6 +208,24 @@ mvp_auto:
             {% endif %}
 
     - binary_sensor:
+        - name: "Raumtemperatur zu heiß"
+          unique_id: mvp_room_too_hot
+          device_class: heat
+          icon: mdi:thermometer-high
+          state: >
+            {% set temp = states('sensor.ewelink_snzb_02p_temperatur_2') %}
+            {% if temp in ['unknown', 'unavailable'] %}
+              false
+            {% else %}
+              {% set t = temp | float %}
+              {% set threshold = states('input_number.mvp_room_temp_eco_threshold_c') | float(30) %}
+              {% if this.state == 'on' %}
+                {{ t >= (threshold - 2.0) }}
+              {% else %}
+                {{ t >= threshold }}
+              {% endif %}
+            {% endif %}
+
         - name: "MVP Nacht-Sperre aktiv"
           unique_id: mvp_night_block_active
           icon: mdi:weather-night
@@ -280,7 +324,7 @@ mvp_auto:
                       data:
                         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P2: Akku voll → Super (blockiert wenn Downgrade-Cooldown aktiv)
+            # P2: Akku voll → Super (blockiert wenn Downgrade-Cooldown aktiv ODER Raumtemp zu hoch ODER Temp-Sperre aktiv)
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
@@ -289,6 +333,11 @@ mvp_auto:
                   value_template: "{{ m1_status != 'Super' }}"
                 - condition: template
                   value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
+                - condition: state
+                  entity_id: binary_sensor.raumtemperatur_zu_heiss
+                  state: "off"
+                - condition: template
+                  value_template: "{{ now_ts >= states('input_number.mvp_miner1_temp_lockout_until') | float(0) }}"
                 - action: system_log.write
                   data:
                     message: "[mvp-miner1] P2 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m1_status }}"
@@ -444,7 +493,7 @@ mvp_auto:
                       data:
                         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P2: Akku voll → Super (blockiert wenn Downgrade-Cooldown aktiv)
+            # P2: Akku voll → Super (blockiert wenn Downgrade-Cooldown aktiv ODER Raumtemp zu hoch ODER Temp-Sperre aktiv)
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
@@ -453,6 +502,11 @@ mvp_auto:
                   value_template: "{{ m2_status != 'Super' }}"
                 - condition: template
                   value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
+                - condition: state
+                  entity_id: binary_sensor.raumtemperatur_zu_heiss
+                  state: "off"
+                - condition: template
+                  value_template: "{{ now_ts >= states('input_number.mvp_miner2_temp_lockout_until') | float(0) }}"
                 - action: system_log.write
                   data:
                     message: "[mvp-miner2] P2 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }}"
@@ -600,13 +654,15 @@ mvp_auto:
     - id: mvp_room_temp_safety
       alias: "MVP: Raumtemperatur → Eco"
       description: >
-        Drosselt alle aktiven Miner auf Eco wenn die Raumtemperatur die
-        Sicherheitsschwelle überschreitet. Kein Cooldown.
+        Drosselt alle aktiven Miner auf Eco sobald binary_sensor.raumtemperatur_zu_heiss
+        ON wird (Raumtemp >= Schwelle). Kein Cooldown.
+        Der binary_sensor hat 2°C Hysterese gegen Flapping.
+        Sensor unavailable → fail-open (false), da TMax-Safety die Hardware schützt.
       mode: single
       trigger:
-        - platform: numeric_state
-          entity_id: sensor.temp_miner_room
-          above: input_number.mvp_room_temp_eco_threshold_c
+        - platform: state
+          entity_id: binary_sensor.raumtemperatur_zu_heiss
+          to: "on"
       condition:
         - condition: template
           value_template: >
@@ -614,15 +670,15 @@ mvp_auto:
                or states('sensor.miner2_workmode_status') in ['Standard', 'Super'] }}
       action:
         - variables:
-            room_temp: "{{ states('sensor.temp_miner_room') | float(0) }}"
-            threshold: "{{ states('input_number.mvp_room_temp_eco_threshold_c') | float(31) }}"
+            room_temp: "{{ states('sensor.ewelink_snzb_02p_temperatur_2') | float(99) }}"
+            threshold: "{{ states('input_number.mvp_room_temp_eco_threshold_c') | float(30) }}"
             m1_status: "{{ states('sensor.miner1_workmode_status') }}"
             m2_status: "{{ states('sensor.miner2_workmode_status') }}"
         - action: system_log.write
           data:
             message: >
               [mvp-room-temp] Raumtemp {{ room_temp }}°C >= {{ threshold }}°C
-              — m1={{ m1_status }} m2={{ m2_status }} → Eco (kein Cooldown)
+              (room_too_hot=on) — m1={{ m1_status }} m2={{ m2_status }} → Eco (kein Cooldown)
             level: warning
         - if:
             - condition: template
@@ -652,6 +708,16 @@ mvp_auto:
                 entity_id: input_number.mvp_miner2_last_downgrade_ts
               data:
                 value: "{{ now().timestamp() | int }}"
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.mvp_miner1_temp_lockout_until
+          data:
+            value: "{{ (now().timestamp() + 7200) | int }}"
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.mvp_miner2_temp_lockout_until
+          data:
+            value: "{{ (now().timestamp() + 7200) | int }}"
 
     - id: mvp_miner1_tmax_safety
       alias: "MVP: Miner 1 TMax → Eco"
@@ -687,6 +753,11 @@ mvp_auto:
             entity_id: input_number.mvp_miner1_last_downgrade_ts
           data:
             value: "{{ now().timestamp() | int }}"
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.mvp_miner1_temp_lockout_until
+          data:
+            value: "{{ (now().timestamp() + 7200) | int }}"
 
     - id: mvp_miner2_tmax_safety
       alias: "MVP: Miner 2 TMax → Eco"
@@ -722,6 +793,11 @@ mvp_auto:
             entity_id: input_number.mvp_miner2_last_downgrade_ts
           data:
             value: "{{ now().timestamp() | int }}"
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.mvp_miner2_temp_lockout_until
+          data:
+            value: "{{ (now().timestamp() + 7200) | int }}"
 
     # ── State-Transition-Logger ────────────────────────────────────────────
     - id: miner_state_transition_logger

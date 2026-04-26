@@ -183,16 +183,71 @@ views:
                     const surplusMinKw  = parseFloat(states['input_number.r1_surplus_min_kw']?.state  || 1.5);
                     const socSoftMin    = parseFloat(states['input_number.r2_soc_soft_min_pct']?.state || 65);
                     const socHardMin    = parseFloat(states['input_number.r2_soc_hard_min_pct']?.state || 10);
-                    const gridLimit     = parseFloat(states['input_number.r2_max_grid_import_w']?.state || 500);
-                    const maxTemp       = parseFloat(states['input_number.r3_max_chip_temp_c']?.state  || 85);
-                    const grid          = parseFloat(states['sensor.grid_import_w']?.state || 0);
+                    const gridLimit       = parseFloat(states['input_number.r2_max_grid_import_w']?.state || 500);
+                    const maxTemp         = parseFloat(states['input_number.r3_max_chip_temp_c']?.state  || 85);
+                    const grid            = parseFloat(states['sensor.grid_import_w']?.state || 0);
+                    const roomTempRaw     = parseFloat(states['sensor.ewelink_snzb_02p_temperatur_2']?.state);
+                    const roomTemp        = isNaN(roomTempRaw) ? null : roomTempRaw;
+                    const roomTempLimit   = parseFloat(states['input_number.mvp_room_temp_eco_threshold_c']?.state || 30);
+                    const ecoTempLimit    = parseFloat(states['input_number.mvp_tmax_eco_threshold_c']?.state || 113);
+                    const minerMode     = states['sensor.miner1_workmode_status']?.state
+                                      || states['sensor.miner2_workmode_status']?.state || '';
                     // MVP-Schwellen (tatsächliche Steuerlogik)
                     const mvpSocStart   = parseFloat(states['input_number.mvp_soc_eco_start_pct']?.state || 65);
                     const mvpPvStartKw  = parseFloat(states['input_number.mvp_pv_start_w']?.state || 6000) / 1000;
+                    const socSuperOn    = parseFloat(states['input_number.mvp_soc_super_pct']?.state     || 90);
+                    const socSuperOff   = parseFloat(states['input_number.mvp_soc_super_stop_pct']?.state || 85);
+                    const socStop       = parseFloat(states['input_number.mvp_soc_stop_pct']?.state       || 60);
+
+                    // ETA-Schätzung: Wie lange bis Akku socSoftMin erreicht?
+                    const batPowerW   = parseFloat(states['sensor.battery_power_w']?.state || 0);
+                    const battCapKwh  = parseFloat(states['input_number.battery_capacity_kwh']?.state || 10);
+                    const socGap      = Math.max(0, socSoftMin - soc);
+                    const etaMin      = batPowerW > 100
+                      ? Math.round(socGap / 100 * battCapKwh * 1000 / batPowerW * 60)
+                      : null;
+                    const etaStr      = etaMin === null ? null
+                      : etaMin < 60   ? `~${etaMin} min`
+                      : `~${Math.floor(etaMin / 60)}h ${etaMin % 60}min`;
+
+                    // ETA-Schätzung: Wie lange bis Akku socSuperOn für Speed erreicht?
+                    const socSuperGap  = Math.max(0, socSuperOn - soc);
+                    const etaSuperMin  = batPowerW > 100
+                      ? Math.round(socSuperGap / 100 * battCapKwh * 1000 / batPowerW * 60)
+                      : null;
+                    const etaSuperStr  = etaSuperMin === null ? null
+                      : etaSuperMin < 60 ? `~${etaSuperMin} min`
+                      : `~${Math.floor(etaSuperMin / 60)}h ${etaSuperMin % 60}min`;
+
+                    // Eco-Start-Uhrzeit + Deadband-Cooldown bis Speed-Upgrade erlaubt
+                    const ecoEntLc     = states['sensor.miner1_workmode_status']?.last_changed
+                                      || states['sensor.miner2_workmode_status']?.last_changed;
+                    const ecoStartDate = ecoEntLc ? new Date(ecoEntLc) : null;
+                    const ecoStartStr  = ecoStartDate
+                      ? `${String(ecoStartDate.getHours()).padStart(2,'0')}:${String(ecoStartDate.getMinutes()).padStart(2,'0')}`
+                      : null;
+                    const nowTs        = Date.now() / 1000;
+                    const cooldownSec  = 1800;
+                    const m1DnTs        = parseFloat(states['input_number.mvp_miner1_last_downgrade_ts']?.state || 0);
+                    const m1UpTs        = parseFloat(states['input_number.mvp_miner1_last_upgrade_ts']?.state   || 0);
+                    const speedBlockSec = Math.max(0, m1DnTs + cooldownSec - nowTs);
+                    const speedBlockMin = Math.ceil(speedBlockSec / 60);
+                    const speedBlockStr = speedBlockSec > 0
+                      ? (speedBlockMin < 60 ? `${speedBlockMin} min` : `${Math.floor(speedBlockMin / 60)}h ${speedBlockMin % 60}min`)
+                      : null;
+                    const ecoBlockSec   = Math.max(0, m1UpTs + cooldownSec - nowTs);
+                    const ecoBlockMin   = Math.ceil(ecoBlockSec / 60);
+                    const ecoBlockStr   = ecoBlockSec > 0
+                      ? (ecoBlockMin < 60 ? `${ecoBlockMin} min` : `${Math.floor(ecoBlockMin / 60)}h ${ecoBlockMin % 60}min`)
+                      : null;
 
                     // Bitsy erklärt die Entscheidung — Zeile 1: Ursache · Zeile 2: Bedingung
                     const nightBlockActive = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
                       || (h >= 22 || h < 6);
+                    const isWaiting = !nightBlockActive
+                      && (code === 'NOOP_R2_SOC_SOFT_MIN' || soc < socSoftMin);
+                    const isEco     = !nightBlockActive && !isWaiting && minerMode === 'Eco';
+                    const isSpeed   = !nightBlockActive && !isWaiting && minerMode === 'Super';
                     let lines;
                     if (nightBlockActive) {
                       lines = [
@@ -216,19 +271,47 @@ views:
                       ];
                     } else if (code === 'NOOP_R2_SOC_SOFT_MIN') {
                       lines = [
-                        `Batterie bei ${soc.toFixed(0)}% — Mindest-SoC ${socSoftMin.toFixed(0)}% nicht erreicht.`,
-                        `Mining startet wenn Akku ≥ ${socSoftMin.toFixed(0)}%.`
+                        `⚡ Automatik an · Miner im Standby.`,
+                        `Akku lädt: ${soc.toFixed(0)}% → ${socSoftMin.toFixed(0)}%.`,
+                        etaStr
+                          ? `Los geht's in ${etaStr} — bis dann: Hodl strong! ₿`
+                          : `Start bei ≥ ${socSoftMin.toFixed(0)}% Akku — bis dann: Hodl strong! ₿`
                       ];
                     } else if (code === 'STOP_R2_GRID_IMPORT_EXCEEDED') {
                       lines = [
                         `Netzbezug ${grid.toFixed(0)} W — Limit ${gridLimit.toFixed(0)} W überschritten.`,
                         `Mining pausiert bis Netzbezug unter ${gridLimit.toFixed(0)} W sinkt.`
                       ];
-                    } else if (priority === 'R5_STABILITY') {
+                    } else if (minerMode === 'Eco') {
+                      const ecoLine3 = soc <= socStop
+                        ? `⚠️ Unter ${socStop.toFixed(0)}% — wechselt zu Standby`
+                        : speedBlockStr
+                          ? `Deadband: Wechsel in ${speedBlockStr} freigegeben ₿`
+                          : soc >= socSuperOn
+                            ? `Super-Schwelle erreicht — Upgrade kommt gleich. 🚀`
+                            : etaSuperStr
+                              ? `Super in ${etaSuperStr} — Sonne lädt, Hamster hasht! ₿`
+                              : null;
                       lines = [
-                        `Deadband aktiv — letzte Entscheidung wird gehalten.`,
-                        `Flapping-Schutz: kein Wechsel bis Mindesthaltezeit abläuft.`
-                      ];
+                        `🌿 Automatik aktiv · Miner in Eco seit ${ecoStartStr || '—'}`,
+                        `Akku ${soc.toFixed(0)}% → ${socSuperOn.toFixed(0)}% für Super`,
+                        ecoLine3
+                      ].filter(Boolean);
+                    } else if (minerMode === 'Super') {
+                      const speedLine3 = soc < socSuperOff
+                        ? ecoBlockStr
+                          ? `Deadband: Eco-Wechsel in ${ecoBlockStr} freigegeben`
+                          : `⚠️ Akku unter ${socSuperOff.toFixed(0)}% — wechselt zu Eco`
+                        : ecoBlockStr
+                          ? `Deadband: Eco-Wechsel in ${ecoBlockStr} freigegeben`
+                          : null;
+                      const tempLine = `Chip ${temp.toFixed(0)}°C · Raum ${roomTemp !== null ? roomTemp.toFixed(1) + '°C' : '—'} — Eco ab ${ecoTempLimit.toFixed(0)}°C / ${roomTempLimit.toFixed(0)}°C`;
+                      lines = [
+                        `🚀 Automatik aktiv · Miner in Super seit ${ecoStartStr || '—'}`,
+                        `Akku ${soc.toFixed(0)}% → ${socSuperOff.toFixed(0)}% Eco`,
+                        tempLine,
+                        speedLine3
+                      ].filter(Boolean);
                     } else if (code.startsWith('START')) {
                       lines = [
                         `${surplus.toFixed(1)} kW Überschuss — alle Regeln erfüllt.`,
@@ -236,13 +319,20 @@ views:
                       ];
                     } else if (soc < socSoftMin) {
                       lines = [
-                        `Batterie bei ${soc.toFixed(0)}% — Mindest-SoC ${socSoftMin.toFixed(0)}% nicht erreicht.`,
-                        `Mining startet wenn Akku ≥ ${socSoftMin.toFixed(0)}%.`
+                        `⚡ Automatik an · Miner im Standby.`,
+                        `Akku lädt: ${soc.toFixed(0)}% → ${socSoftMin.toFixed(0)}%.`,
+                        etaStr
+                          ? `Los geht's in ${etaStr} — bis dann: Hodl strong! ₿`
+                          : `Start bei ≥ ${socSoftMin.toFixed(0)}% Akku — bis dann: Hodl strong! ₿`
                       ];
                     } else {
+                      const idleLine3 = priority === 'R5_STABILITY'
+                        ? `Deadband aktiv — Mining startet nach Ablauf. ₿`
+                        : `Start bei Akku ≥ ${mvpSocStart.toFixed(0)}% oder PV ≥ ${mvpPvStartKw.toFixed(1)} kW.`;
                       lines = [
-                        `PV ${(pv/1000).toFixed(1)} kW · Akku ${soc.toFixed(0)}% — Minimum nicht erreicht.`,
-                        `Mining startet bei Akku ≥ ${mvpSocStart.toFixed(0)}% oder PV ≥ ${mvpPvStartKw.toFixed(1)} kW.`
+                        `⚡ Automatik an · Miner im Standby.`,
+                        `PV ${(pv/1000).toFixed(1)} kW · Akku ${soc.toFixed(0)}%`,
+                        idleLine3
                       ];
                     }
 
@@ -267,20 +357,23 @@ views:
                     return `
                       <div style="position:relative;padding-right:100px">
                         <div style="position:absolute;top:0;right:0;
-                                    display:flex;flex-direction:column;gap:4px;
+                                    display:flex;flex-direction:column;
                                     padding-left:12px;border-left:1px solid var(--divider-color);
-                                    text-align:right;">
-                          <div>
-                            <div style="font-size:0.65rem;color:var(--secondary-text-color);">Uhrzeit</div>
-                            <div style="font-size:1.8rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1;">${time}</div>
+                                    text-align:right;min-height:100%;">
+                          <div style="margin-bottom:8px;">
+                            <div style="font-size:0.62rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;">Uhrzeit</div>
+                            <div style="font-size:1.8rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.05;margin-top:1px;">${time}</div>
                           </div>
-                          <div>
-                            <div style="font-size:0.65rem;color:var(--secondary-text-color);">₿ Block</div>
-                            <div style="font-size:0.85rem;font-weight:700;color:#f59e0b;">${blockDisplay}</div>
+                          <div style="margin-bottom:12px;">
+                            <div style="font-size:0.62rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;">Datum</div>
+                            <div style="font-size:0.85rem;font-weight:600;margin-top:1px;">${new Date().toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'short'})}</div>
                           </div>
-                          <div>
-                            <div style="font-size:0.65rem;color:var(--secondary-text-color);">Log-Slot</div>
-                            <div style="font-size:0.78rem;font-weight:700;font-family:monospace;">${slot}</div>
+                          <div style="border-top:1px solid var(--divider-color);padding-top:8px;margin-bottom:auto;">
+                            <div style="font-size:0.62rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;">₿ Block</div>
+                            <div style="font-size:0.85rem;font-weight:600;color:#f59e0b;margin-top:1px;">${blockDisplay}</div>
+                          </div>
+                          <div style="margin-top:6px;">
+                            <div style="font-size:0.55rem;color:var(--secondary-text-color);opacity:0.5;font-family:monospace;">${slot}</div>
                           </div>
                         </div>
                         <div style="font-size:0.8rem;font-weight:700;
@@ -289,8 +382,8 @@ views:
                           <span style="color:var(--secondary-text-color);font-weight:400">${greeting}</span>
                         </div>
                         <div style="display:flex;gap:12px;align-items:flex-start">
-                          <img src="/local/${nightBlockActive ? 'bithamster_sleep.png' : 'bithamster.png'}"
-                               style="width:90px;height:90px;border-radius:50%;
+                          <img src="/local/${nightBlockActive ? 'bithamster_sleep.png' : isWaiting ? 'bithamster_wait.png' : isEco ? 'bithamster_eco.png' : isSpeed ? 'bithamster_super.png' : 'bithamster_standard.png'}"
+                               style="width:113px;height:113px;border-radius:50%;
                                       flex-shrink:0;object-fit:cover;
                                       border:2px solid var(--divider-color)">
                           <div style="flex:1">
@@ -298,9 +391,10 @@ views:
                                         color:${wColor};margin-bottom:4px">
                               ${weather}
                             </div>
-                            <div style="font-size:1.1rem;color:var(--primary-text-color);
-                                        line-height:1.55">
-                              ${lines.join('<br>')}
+                            <div style="display:flex;flex-direction:column;gap:5px;">
+                              ${lines.map((l, i) => `<div style="font-size:${i === 0 ? '1.05rem' : '0.9rem'};
+                                color:${i === 0 ? 'var(--primary-text-color)' : 'var(--secondary-text-color)'};
+                                line-height:1.4;font-weight:${i === 0 ? '500' : '400'};">${l}</div>`).join('')}
                             </div>
                             ${blockKnown ? `
                             <div style="font-size:0.68rem;color:var(--disabled-text-color);
@@ -318,7 +412,18 @@ views:
                         const h = new Date().getHours();
                         const night = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
                           || (h >= 22 || h < 6);
-                        return night ? '#0c0f18' : 'var(--secondary-background-color)';
+                        const code  = states['sensor.bg_decision_code']?.state || '';
+                        const soc   = parseFloat(states['sensor.battery_soc_pct']?.state || 0);
+                        const socSoftMin = parseFloat(states['input_number.r2_soc_soft_min_pct']?.state || 65);
+                        const minerMode = states['sensor.miner1_workmode_status']?.state || states['sensor.miner2_workmode_status']?.state || '';
+                        const waiting = !night && (code === 'NOOP_R2_SOC_SOFT_MIN' || soc < socSoftMin);
+                        const eco   = !night && !waiting && minerMode === 'Eco';
+                        const speed = !night && !waiting && !eco && minerMode === 'Super';
+                        return night   ? '#0c0f18'
+                             : waiting ? '#10141f'
+                             : eco     ? '#091410'
+                             : speed   ? '#140d00'
+                             :            '#00141a';
                       ]]]
                   - border-radius: 12px
                   - padding: 14px 16px
@@ -327,7 +432,18 @@ views:
                         const h = new Date().getHours();
                         const night = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
                           || (h >= 22 || h < 6);
-                        return night ? '1px solid rgba(247,147,26,0.08)' : '1px solid rgba(247,147,26,0.4)';
+                        const code  = states['sensor.bg_decision_code']?.state || '';
+                        const soc   = parseFloat(states['sensor.battery_soc_pct']?.state || 0);
+                        const socSoftMin = parseFloat(states['input_number.r2_soc_soft_min_pct']?.state || 65);
+                        const minerMode = states['sensor.miner1_workmode_status']?.state || states['sensor.miner2_workmode_status']?.state || '';
+                        const waiting = !night && (code === 'NOOP_R2_SOC_SOFT_MIN' || soc < socSoftMin);
+                        const eco   = !night && !waiting && minerMode === 'Eco';
+                        const speed = !night && !waiting && !eco && minerMode === 'Super';
+                        return night   ? '1px solid rgba(247,147,26,0.08)'
+                             : waiting ? '1px solid rgba(247,147,26,0.15)'
+                             : eco     ? '1px solid #4CAF50'
+                             : speed   ? '1px solid #F7931A'
+                             :            '1px solid #26C6DA';
                       ]]]
                   - text-align: left
                 grid:
