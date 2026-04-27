@@ -215,6 +215,19 @@ views:
                     const ecoBlockStr  = ecoBlockSec > 0
                       ? (ecoBlockMin < 60 ? `${ecoBlockMin} min` : `${Math.floor(ecoBlockMin / 60)}h ${ecoBlockMin % 60}min`)
                       : null;
+                    const m1TLRaw = states['input_datetime.mvp_miner1_temp_lockout_until']?.state || '';
+                    const m2TLRaw = states['input_datetime.mvp_miner2_temp_lockout_until']?.state || '';
+                    const m1TempLockTs = (m1TLRaw && m1TLRaw !== 'unknown' && m1TLRaw !== 'unavailable')
+                      ? new Date(m1TLRaw.replace(' ', 'T')).getTime() / 1000 : 0;
+                    const m2TempLockTs = (m2TLRaw && m2TLRaw !== 'unknown' && m2TLRaw !== 'unavailable')
+                      ? new Date(m2TLRaw.replace(' ', 'T')).getTime() / 1000 : 0;
+                    const tempLockTs     = Math.max(m1TempLockTs, m2TempLockTs);
+                    const tempLockRemSec = Math.max(0, tempLockTs - nowTs);
+                    const tempLockActive = tempLockRemSec > 30;
+                    const tempLockRemMin = Math.ceil(tempLockRemSec / 60);
+                    const tempLockStr    = tempLockRemMin < 60
+                      ? `${tempLockRemMin} min`
+                      : `${Math.floor(tempLockRemMin / 60)}h ${tempLockRemMin % 60}min`;
                     const nightBlockActive = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
                       || (h >= 22 || h < 6);
                     const minerRunning = ['Eco', 'Standard', 'Super'].includes(minerMode);
@@ -288,15 +301,17 @@ views:
                         : `~${Math.floor(ecoEtaStopMin / 60)}h ${ecoEtaStopMin % 60}min`;
                       const ecoLine3 = soc <= socStop
                         ? `⚠️ Unter ${socStop.toFixed(0)}% — wechselt zu Standby`
-                        : speedBlockStr
-                          ? `Deadband: Wechsel in ${speedBlockStr} freigegeben ₿`
-                          : soc >= socSuperOn
-                            ? `Super-Schwelle erreicht — Upgrade kommt gleich. 🚀`
-                            : ecoEtaStopStr
-                              ? `Standby (${socStop.toFixed(0)}%) in ${ecoEtaStopStr} · ${ecoDischargeW.toFixed(0)} W`
-                              : etaSuperStr
-                                ? `Super in ${etaSuperStr} — Sonne lädt, Hamster hasht! ₿`
-                                : null;
+                        : tempLockActive
+                          ? `🌡️ Eco wegen Überhitzung — Sperre noch ${tempLockStr}`
+                          : speedBlockStr
+                            ? `Deadband: Wechsel in ${speedBlockStr} freigegeben ₿`
+                            : soc >= socSuperOn
+                              ? `Super-Schwelle erreicht — Upgrade kommt gleich. 🚀`
+                              : ecoEtaStopStr
+                                ? `Standby (${socStop.toFixed(0)}%) in ${ecoEtaStopStr} · ${ecoDischargeW.toFixed(0)} W`
+                                : etaSuperStr
+                                  ? `Super in ${etaSuperStr} — Sonne lädt, Hamster hasht! ₿`
+                                  : null;
                       lines = [
                         `🌿 Automatik aktiv · Miner in Eco seit ${ecoStartStr || '—'}`,
                         `Akku ${soc.toFixed(0)}% → ${socSuperOn.toFixed(0)}% für Super`,

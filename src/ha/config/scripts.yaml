@@ -152,11 +152,6 @@ bg_stop:
             entity_id: input_select.system_state
           data:
             option: "OFF"
-    - service: input_datetime.set_datetime
-      target:
-        entity_id: input_datetime.last_stop_at
-      data:
-        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
     - choose:
         - conditions:
             - condition: template

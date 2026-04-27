@@ -56,10 +56,6 @@
     - binary_sensor.r3_comm_timeout
     - binary_sensor.r3_emergency_stop
     to: 'on'
-  condition:
-  - condition: state
-    entity_id: input_boolean.simulation_mode
-    state: 'on'
   action:
   - service: script.bg_force_safety_stop
 - id: bg_override_activate
