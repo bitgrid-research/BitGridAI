@@ -375,19 +375,19 @@ mvp_auto:
                   data:
                     value: "{{ now().timestamp() | int }}"
 
-            # P4: SoC ok ODER PV stark genug, Miner aus → Eco starten (blockiert wenn Downgrade-Cooldown aktiv oder Nacht-Sperre)
-            # SoC-basierter Start bypasses Cooldown — SoC ist ein stabiler Zustand, kein Flapping-Risiko
+            # P4: SoC >= Schwelle, Miner aus → Eco starten
+            # SoC ist immer Pflicht. PV >= pv_start erlaubt Cooldown-Bypass (kein Flapping-Risiko bei stabilem SoC).
             - conditions:
                 - condition: state
                   entity_id: binary_sensor.mvp_nacht_sperre_aktiv
                   state: "off"
                 - condition: template
                   value_template: >
-                    {{ (soc >= soc_start or pv >= pv_start) and
+                    {{ soc >= soc_start and
                        m1_status in ['Standby', 'Idle', 'Off'] }}
               sequence:
                 - condition: template
-                  value_template: "{{ soc >= soc_start or (now_ts - m1_dn_ts) >= cooldown_sec }}"
+                  value_template: "{{ pv >= pv_start or (now_ts - m1_dn_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
                     message: "[mvp-miner1] P4 Eco-Start: soc={{ soc }}% pv={{ pv }}W — status={{ m1_status }}"
@@ -544,19 +544,19 @@ mvp_auto:
                   data:
                     value: "{{ now().timestamp() | int }}"
 
-            # P4: SoC ok ODER PV stark genug, Miner aus → Eco starten (blockiert wenn Downgrade-Cooldown aktiv oder Nacht-Sperre)
-            # SoC-basierter Start bypasses Cooldown — SoC ist ein stabiler Zustand, kein Flapping-Risiko
+            # P4: SoC >= Schwelle, Miner aus → Eco starten
+            # SoC ist immer Pflicht. PV >= pv_start erlaubt Cooldown-Bypass (kein Flapping-Risiko bei stabilem SoC).
             - conditions:
                 - condition: state
                   entity_id: binary_sensor.mvp_nacht_sperre_aktiv
                   state: "off"
                 - condition: template
                   value_template: >
-                    {{ (soc >= soc_start or pv >= pv_start) and
+                    {{ soc >= soc_start and
                        m2_status in ['Standby', 'Idle', 'Off'] }}
               sequence:
                 - condition: template
-                  value_template: "{{ soc >= soc_start or (now_ts - m2_dn_ts) >= cooldown_sec }}"
+                  value_template: "{{ pv >= pv_start or (now_ts - m2_dn_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
                     message: "[mvp-miner2] P4 Eco-Start: soc={{ soc }}% pv={{ pv }}W — status={{ m2_status }}"

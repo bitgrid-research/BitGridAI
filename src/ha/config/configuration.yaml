@@ -406,6 +406,22 @@ template:
             {{ (charge - discharge) | round(0) }}
           {% endif %}
 
+      # Batterie-Leistung für Flowchart: positiv = entladen (power-flow-card-plus Konvention)
+      # battery_power_w nutzt positiv=laden; der Flowchart erwartet positiv=entladen → invertiert
+      - name: battery_power_flowchart_w
+        unique_id: battery_power_flowchart_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >-
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ -(states('input_number.battery_power_w') | float(0)) | round(0) }}
+          {% else %}
+            {% set charge    = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
+            {% set discharge = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
+            {{ (discharge - charge) | round(0) }}
+          {% endif %}
+
       # Überschuss für Regelengine = PV - Hauslast - Netzbezug (ohne Miner)
       - name: surplus_kw
         unique_id: surplus_kw
