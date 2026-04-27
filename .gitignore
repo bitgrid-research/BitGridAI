@@ -339,3 +339,4 @@ recordings/
 # Temporäre Analyse-Ausgaben
 *.csv
 reports/
+scripts/deploy_ha_paramiko.py
