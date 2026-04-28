@@ -1,0 +1,24 @@
+sma_watchdog:
+
+  automation:
+    - id: sma_session_watchdog
+      alias: "SMA: Session Watchdog — Auto-Reload bei unavailable"
+      mode: single
+      max_exceeded: silent
+      trigger:
+        - platform: state
+          entity_id: sensor.sn_3012953672_pv_power
+          to: "unavailable"
+          for:
+            minutes: 2
+      action:
+        - action: homeassistant.reload_config_entry
+          target:
+            entity_id: sensor.sn_3012953672_pv_power
+        - action: persistent_notification.create
+          data:
+            title: "SMA Session wiederhergestellt"
+            message: >
+              pysmaplus wurde automatisch neu geladen um
+              {{ now().strftime('%H:%M') }} Uhr.
+            notification_id: sma_watchdog

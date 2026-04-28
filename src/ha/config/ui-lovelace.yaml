@@ -195,16 +195,19 @@ views:
                     const etaSuperStr   = etaSuperMin === null ? null
                       : etaSuperMin < 60 ? `~${etaSuperMin} min`
                       : `~${Math.floor(etaSuperMin / 60)}h ${etaSuperMin % 60}min`;
-                    const ecoEntLc     = states['sensor.miner1_workmode_status']?.last_changed
-                                      || states['sensor.miner2_workmode_status']?.last_changed;
-                    const ecoStartDate = ecoEntLc ? new Date(ecoEntLc) : null;
+                    const parseIdt     = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
+                      ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
+                    const nowTs        = Date.now() / 1000;
+                    const cooldownSec  = 1800;
+                    const m1DnTs       = parseIdt(states['input_datetime.mvp_miner1_last_downgrade']?.state);
+                    const m1UpTs       = parseIdt(states['input_datetime.mvp_miner1_last_upgrade']?.state);
+                    const m2DnTs       = parseIdt(states['input_datetime.mvp_miner2_last_downgrade']?.state);
+                    const m2UpTs       = parseIdt(states['input_datetime.mvp_miner2_last_upgrade']?.state);
+                    const ecoSinceTs   = Math.max(m1UpTs, m1DnTs, m2UpTs, m2DnTs);
+                    const ecoStartDate = ecoSinceTs > 0 ? new Date(ecoSinceTs * 1000) : null;
                     const ecoStartStr  = ecoStartDate
                       ? `${String(ecoStartDate.getHours()).padStart(2,'0')}:${String(ecoStartDate.getMinutes()).padStart(2,'0')}`
                       : null;
-                    const nowTs        = Date.now() / 1000;
-                    const cooldownSec  = 1800;
-                    const m1DnTs       = parseFloat(states['input_number.mvp_miner1_last_downgrade_ts']?.state || 0);
-                    const m1UpTs       = parseFloat(states['input_number.mvp_miner1_last_upgrade_ts']?.state   || 0);
                     const speedBlockSec = Math.max(0, m1DnTs + cooldownSec - nowTs);
                     const speedBlockMin = Math.ceil(speedBlockSec / 60);
                     const speedBlockStr = speedBlockSec > 0
@@ -280,7 +283,7 @@ views:
                     } else if (code === 'NOOP_R2_SOC_SOFT_MIN' && !minerRunning) {
                       lines = [
                         `⚡ Automatik an · Miner im Standby.`,
-                        `Akku lädt: ${soc.toFixed(0)}% → ${socSoftMin.toFixed(0)}%.`,
+                        `Akku ${soc.toFixed(0)}% → ${socSoftMin.toFixed(0)}% Eco`,
                         etaStr
                           ? `Los geht's in ${etaStr} — bis dann: Hodl strong! ₿`
                           : `Start bei ≥ ${socSoftMin.toFixed(0)}% Akku — bis dann: Hodl strong! ₿`
@@ -340,7 +343,7 @@ views:
                     } else if (soc < socSoftMin && !minerRunning) {
                       lines = [
                         `⚡ Automatik an · Miner im Standby.`,
-                        `Akku lädt: ${soc.toFixed(0)}% → ${socSoftMin.toFixed(0)}%.`,
+                        `Akku ${soc.toFixed(0)}% → ${socSoftMin.toFixed(0)}% Eco`,
                         etaStr
                           ? `Los geht's in ${etaStr} — bis dann: Hodl strong! ₿`
                           : `Start bei ≥ ${socSoftMin.toFixed(0)}% Akku — bis dann: Hodl strong! ₿`
@@ -355,7 +358,6 @@ views:
                         idleLine3
                       ];
                     }
-                    const blockKnown = block && block !== '?' && !isNaN(Number(block));
                     const blockTime  = blockStart
                       ? (blockStart.includes(' ') ? blockStart.split(' ')[1].slice(0,5) : blockStart)
                       : '';
@@ -377,13 +379,18 @@ views:
                       && states['sensor.bitcoin_block_height'].state !== 'unavailable'
                       ? parseInt(states['sensor.bitcoin_block_height'].state).toLocaleString('de-DE')
                       : '—';
+                    const blockKnown = blockDisplay && blockDisplay !== '—';
+                    const balanceBtc = parseFloat(states['sensor.pool_balance_btc']?.state);
+                    const balanceSats = (!isNaN(balanceBtc) && balanceBtc > 0)
+                      ? Math.round(balanceBtc * 1e8).toLocaleString('de-DE')
+                      : '58.122';
                     const imgSrc = nightBlockActive ? 'bithamster_sleep.png'
                                  : isWaiting        ? 'bithamster_wait.png'
                                  : isEco            ? 'bithamster_eco.png'
                                  : isSpeed          ? 'bithamster_super.png'
                                  :                    'bithamster_standard.png';
                     return `
-                      <div style="position:relative;padding-right:100px">
+                      <div style="position:relative;padding-right:100px;min-height:165px">
                         <div style="position:absolute;top:0;right:0;
                                     display:flex;flex-direction:column;
                                     padding-left:12px;border-left:1px solid var(--divider-color);
@@ -397,8 +404,10 @@ views:
                             <div style="font-size:0.85rem;font-weight:600;margin-top:1px;">${new Date().toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'short'})}</div>
                           </div>
                           <div style="border-top:1px solid var(--divider-color);padding-top:8px;margin-bottom:auto;">
-                            <div style="font-size:0.62rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;">₿ Block</div>
-                            <div style="font-size:0.85rem;font-weight:600;color:#f59e0b;margin-top:1px;">${blockDisplay}</div>
+                            <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;">₿ Blockzeit</div>
+                            <div style="font-size:0.72rem;font-weight:600;color:#f59e0b;margin-top:1px;">${blockDisplay}</div>
+                            <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Balance in SATs</div>
+                            <div style="font-size:0.65rem;font-weight:600;color:#F7931A;margin-top:1px;">${balanceSats}</div>
                           </div>
                           <div style="margin-top:6px;">
                             <div style="font-size:0.55rem;color:var(--secondary-text-color);opacity:0.5;font-family:monospace;">${slot}</div>
@@ -410,18 +419,18 @@ views:
                           <span style="color:var(--secondary-text-color);font-weight:400">${greeting}</span>
                         </div>
                         <div style="display:flex;gap:12px;align-items:flex-start">
-                          <img src="/local/${imgSrc}?v=20260426" style="width:113px;height:113px;border-radius:50%;flex-shrink:0;object-fit:cover;border:2px solid var(--divider-color)">
+                          <img src="/local/${imgSrc}?v=20260426" style="width:141px;height:141px;border-radius:50%;flex-shrink:0;object-fit:cover;border:2px solid var(--divider-color)">
                           <div style="flex:1">
-                            <div style="font-size:0.85rem;font-weight:700;color:${wColor};margin-bottom:4px">${weather}</div>
-                            <div style="display:flex;flex-direction:column;gap:5px;">
+                            <div style="font-size:1rem;font-weight:700;color:${wColor};margin-bottom:10px">${weather}</div>
+                            <div style="display:flex;flex-direction:column;gap:4px;">
                               ${lines.map((l, i) => `<div style="font-size:${i === 0 ? '1.05rem' : '0.9rem'};
                                 color:${i === 0 ? 'var(--primary-text-color)' : 'var(--secondary-text-color)'};
-                                line-height:1.4;font-weight:${i === 0 ? '500' : '400'};">${l}</div>`).join('')}
+                                line-height:1.5;font-weight:${i === 0 ? '500' : '400'};${i === 0 ? 'margin-bottom:6px;' : ''}">${l}</div>`).join('')}
                             </div>
                             ${blockKnown ? `
                             <div style="font-size:0.68rem;color:var(--disabled-text-color);
                                         margin-top:8px;font-style:italic">
-                              Block&nbsp;${block}${blockTime ? ' &middot; ' + blockTime : ''} &middot; 10-min Fenster
+                              Block&nbsp;${blockDisplay}${blockTime ? ' &middot; ' + blockTime : ''} &middot; 10-min Fenster
                             </div>` : ''}
                           </div>
                         </div>
@@ -1011,9 +1020,14 @@ views:
                             const hbo  = states['sensor.miner1_hbotemp']?.state ?? '—';
                             const statusEnt = states['sensor.miner1_workmode_status'];
                             const mode = statusEnt?.state ?? '—';
-                            const lc = statusEnt?.last_changed;
-                            const since = lc
-                              ? new Date(lc).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
+                            const parseIdt = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
+                              ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
+                            const sinceTs  = Math.max(
+                              parseIdt(states['input_datetime.mvp_miner1_last_upgrade']?.state),
+                              parseIdt(states['input_datetime.mvp_miner1_last_downgrade']?.state)
+                            );
+                            const since    = sinceTs > 0
+                              ? new Date(sinceTs * 1000).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
                               : '—';
                             const cd = states['sensor.miner_1_cooldown_status']?.state ?? '—';
                             const cdActive = cd !== '—' && cd !== 'unavailable' && cd !== 'unknown';
@@ -1343,9 +1357,14 @@ views:
                             const hbo  = states['sensor.miner2_hbotemp']?.state ?? '—';
                             const statusEnt = states['sensor.miner2_workmode_status'];
                             const mode = statusEnt?.state ?? '—';
-                            const lc = statusEnt?.last_changed;
-                            const since = lc
-                              ? new Date(lc).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
+                            const parseIdt = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
+                              ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
+                            const sinceTs  = Math.max(
+                              parseIdt(states['input_datetime.mvp_miner2_last_upgrade']?.state),
+                              parseIdt(states['input_datetime.mvp_miner2_last_downgrade']?.state)
+                            );
+                            const since    = sinceTs > 0
+                              ? new Date(sinceTs * 1000).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
                               : '—';
                             const cd = states['sensor.miner_2_cooldown_status']?.state ?? '—';
                             const cdActive = cd !== '—' && cd !== 'unavailable' && cd !== 'unknown';
@@ -1615,16 +1634,16 @@ views:
                         const row = (icon, label, val, unit='', color=null) => {
                           const c = color ? `color:${color};` : '';
                           return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-                            <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
-                            <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-                            <span style="font-size:1rem;font-weight:600;margin-left:8px;${c}">${val === '—' ? '—' : val + (unit ? ' ' + unit : '')}</span>
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.85rem;flex:1;">${label}:</span>
+                            <span style="font-size:1rem;font-weight:600;${c}">${val === '—' ? '—' : val + (unit ? ' ' + unit : '')}</span>
                           </div>`;
                         };
                         const modeEl =
                           `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-                            <ha-icon icon="mdi:information-outline" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
-                            <span style="color:var(--secondary-text-color);font-size:0.85rem;">Zustand:</span>
-                            <span style="font-size:1rem;font-weight:600;margin-left:8px;color:${modeColor};">${mode}</span>
+                            <ha-icon icon="mdi:information-outline" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.85rem;flex:1;">Zustand:</span>
+                            <span style="font-size:1rem;font-weight:600;color:${modeColor};">${mode}</span>
                           </div>`;
                         return `<div style="width:100%;padding:2px 0;">
                           <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Heizstab</div>
@@ -1818,7 +1837,7 @@ views:
                             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
                               ${modeBox('Eco',fmtH(ecoH),'#4CAF50')}
                               ${modeBox('Standard',fmtH(stdH),'#26C6DA')}
-                              ${modeBox('Speed',fmtH(supH),'#F7931A')}
+                              ${modeBox('Super',fmtH(supH),'#F7931A')}
                             </div>
                           </div>
                         </div>`;
@@ -1889,7 +1908,7 @@ views:
                             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
                               ${modeBox('Eco',     fmtUptime(ecoM), '#4CAF50')}
                               ${modeBox('Standard',fmtUptime(stdM), '#26C6DA')}
-                              ${modeBox('Speed',   fmtUptime(supM), '#F7931A')}
+                              ${modeBox('Super',   fmtUptime(supM), '#F7931A')}
                             </div>
                           </div>
                         </div>`;
@@ -1972,7 +1991,7 @@ views:
                             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
                               ${modeBox('Eco',     fmtUptime(ecoY), '#4CAF50')}
                               ${modeBox('Standard',fmtUptime(stdY), '#26C6DA')}
-                              ${modeBox('Speed',   fmtUptime(supY), '#F7931A')}
+                              ${modeBox('Super',   fmtUptime(supY), '#F7931A')}
                             </div>
                           </div>
                         </div>`;
@@ -1996,6 +2015,9 @@ views:
                   [[[
                     const parseLog = (raw) => (raw && raw !== 'unknown' && raw !== 'unavailable') ? raw.split('|').filter(e => e.includes(',')) : [];
                     const logEntries = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
+                    const btcRaw = states['input_text.pool_btc_daily_log']?.state ?? '';
+                    const btcMap = {};
+                    parseLog(btcRaw).forEach(e => { const [d, b] = e.split(','); if (d) btcMap[d] = parseFloat(b) || 0; });
                     const parseEntry = (e) => {
                       const p = e.split(',');
                       return { d: p[0]??'', on: p[1]??'–', off: p[2]??'–',
@@ -2006,6 +2028,7 @@ views:
                     const fmtT   = (dt)  => (!dt || !dt.includes(' ')) ? '–' : dt.split(' ')[1].slice(0,5);
                     const fmtHm  = (v)   => { const n=parseFloat(v); if(!n||n<=0) return '0h'; const h=Math.floor(n),m=Math.round((n-h)*60); return m>0?`${h}h${m}m`:`${h}h`; };
                     const fmtH1  = (v)   => { const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(1); };
+                    const fmtSat = (btc) => (!btc || btc <= 0) ? '—' : Math.round(btc * 1e8);
                     const _d = new Date(); const todayIso = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
                     const startDt  = states['input_datetime.last_start_at']?.state ?? '';
                     const stopDt   = states['input_datetime.last_stop_at']?.state ?? '';
@@ -2021,16 +2044,17 @@ views:
                       live: true
                     };
                     const allRows = [todayRow, ...logEntries.map(parseEntry)];
-                    const cols = '60px 52px 52px 62px 48px 48px 52px 56px';
+                    const cols = '60px 52px 52px 62px 48px 48px 52px 56px 48px';
                     const th = (t,r) => `<div style="font-size:0.65rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
                     const headers = `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;border-bottom:1px solid var(--divider-color);margin-bottom:2px;">
-                      ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Gesamt',1)}${th('Eco',1)}${th('Std',1)}${th('Speed',1)}${th('kWh',1)}
+                      ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Gesamt',1)}${th('Eco',1)}${th('Std',1)}${th('Super',1)}${th('kWh',1)}${th('SATs',1)}
                     </div>`;
                     const rowHtml = (r) => {
                       const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
                       const dc = r.live ? 'var(--primary-text-color)' : 'var(--secondary-text-color)';
                       const fw = r.live ? '600' : '400';
                       const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
+                      const sat = r.live ? '—' : fmtSat(btcMap[r.d]);
                       return `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;${hl}">
                         <div style="font-size:0.82rem;color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
                         ${c(r.on,'inherit')}${c(r.off,'inherit')}
@@ -2039,6 +2063,7 @@ views:
                         ${c(fmtH1(r.st)+'h','#26C6DA')}
                         ${c(fmtH1(r.sp)+'h','#F7931A')}
                         ${c(r.kw.toFixed(2),'white')}
+                        ${c(sat,'#F7931A')}
                       </div>`;
                     };
                     return `<div style="width:100%;">

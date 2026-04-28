@@ -891,27 +891,15 @@ mvp_auto:
         - if:
             - condition: template
               value_template: >-
-                {{ states('input_datetime.last_start_at')[:10] == now().strftime('%Y-%m-%d') }}
+                {{ states('input_datetime.last_start_at')[:10] == now().strftime('%Y-%m-%d')
+                   and (states('sensor.miner1_workmode_status') not in ['Standby', 'Off']
+                        or states('sensor.miner2_workmode_status') not in ['Standby', 'Off']) }}
           then:
             - action: input_datetime.set_datetime
               target:
                 entity_id: input_datetime.last_stop_at
               data:
-                datetime: >
-                  {% set m1_active = states('sensor.miner1_workmode_status') not in ['Standby', 'Off'] %}
-                  {% set m2_active = states('sensor.miner2_workmode_status') not in ['Standby', 'Off'] %}
-                  {% if m1_active or m2_active %}
-                    {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
-                  {% else %}
-                    {% set ts1 = as_timestamp(states('input_datetime.mvp_miner1_last_downgrade'), 0) %}
-                    {% set ts2 = as_timestamp(states('input_datetime.mvp_miner2_last_downgrade'), 0) %}
-                    {% set last_ts = [ts1, ts2] | max %}
-                    {% if last_ts > as_timestamp(today_at()) %}
-                      {{ last_ts | timestamp_custom('%Y-%m-%d %H:%M:%S', true) }}
-                    {% else %}
-                      {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
-                    {% endif %}
-                  {% endif %}
+                datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
         - if:
             - condition: template
               value_template: "{{ states('sensor.miner1_workmode_status') not in ['Standby', 'Off'] }}"
