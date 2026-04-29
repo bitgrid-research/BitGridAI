@@ -928,3 +928,40 @@ mvp_auto:
                 entity_id: input_datetime.mvp_miner2_last_downgrade
               data:
                 datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    # ── Beide-Miner-Standby: last_stop_at Race-Condition absichern ────────────
+    - id: mvp_all_miners_standby
+      alias: "MVP: last_stop_at — beide Miner in Standby"
+      description: >
+        Setzt last_stop_at wenn beide Miner in Standby/Off wechseln.
+        Sicherheitsnetz gegen Race Condition im P1-Stop: gehen beide Miner
+        gleichzeitig in Standby (gleicher SoC-Trigger), sieht jeder den anderen
+        noch aktiv — last_stop_at bleibt sonst leer.
+      mode: single
+      trigger:
+        - platform: state
+          entity_id:
+            - sensor.miner1_workmode_status
+            - sensor.miner2_workmode_status
+          to:
+            - Standby
+            - Off
+      condition:
+        - condition: template
+          value_template: >-
+            {{ states('sensor.miner1_workmode_status') in ['Standby', 'Off']
+               and states('sensor.miner2_workmode_status') in ['Standby', 'Off']
+               and trigger.from_state.state not in ['Standby', 'Off', 'unavailable', 'unknown']
+               and states('input_datetime.last_start_at')[:10] == now().strftime('%Y-%m-%d') }}
+      action:
+        - action: system_log.write
+          data:
+            message: >
+              [mvp-all-standby] Beide Miner Standby — last_stop_at gesetzt
+              (via={{ trigger.entity_id }}, von={{ trigger.from_state.state }})
+            level: warning
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.last_stop_at
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"

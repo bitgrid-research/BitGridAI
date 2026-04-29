@@ -384,6 +384,10 @@ views:
                     const balanceSats = (!isNaN(balanceBtc) && balanceBtc > 0)
                       ? Math.round(balanceBtc * 1e8).toLocaleString('de-DE')
                       : '58.122';
+                    const btcEurPrice = parseFloat(states['sensor.btc_eur_price']?.state);
+                    const btcEurDisplay = (!isNaN(btcEurPrice) && btcEurPrice > 0)
+                      ? btcEurPrice.toLocaleString('de-DE') + ' €'
+                      : '—';
                     const imgSrc = nightBlockActive ? 'bithamster_sleep.png'
                                  : isWaiting        ? 'bithamster_wait.png'
                                  : isEco            ? 'bithamster_eco.png'
@@ -408,6 +412,8 @@ views:
                             <div style="font-size:0.72rem;font-weight:600;color:#f59e0b;margin-top:1px;">${blockDisplay}</div>
                             <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Balance in SATs</div>
                             <div style="font-size:0.65rem;font-weight:600;color:#F7931A;margin-top:1px;">${balanceSats}</div>
+                            <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Kurs EUR</div>
+                            <div style="font-size:0.65rem;font-weight:600;color:#4CAF50;margin-top:1px;">${btcEurDisplay}</div>
                           </div>
                           <div style="margin-top:6px;">
                             <div style="font-size:0.55rem;color:var(--secondary-text-color);opacity:0.5;font-family:monospace;">${slot}</div>
@@ -665,9 +671,9 @@ views:
                           [[[
                             const v = parseFloat(entity.state);
                             if (!v || v === 0) return 'var(--secondary-text-color)';
-                            if (v <= 2500) return '#EF9A9A';
-                            if (v <= 4000) return '#E57373';
-                            return '#F44336';
+                            if (v <= 2500) return '#80DEEA';
+                            if (v <= 4000) return '#26C6DA';
+                            return '#00838F';
                           ]]]
                     name:
                       - font-size: 0.8rem
@@ -2015,9 +2021,43 @@ views:
                   [[[
                     const parseLog = (raw) => (raw && raw !== 'unknown' && raw !== 'unavailable') ? raw.split('|').filter(e => e.includes(',')) : [];
                     const logEntries = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
-                    const btcRaw = states['input_text.pool_btc_daily_log']?.state ?? '';
                     const btcMap = {};
-                    parseLog(btcRaw).forEach(e => { const [d, b] = e.split(','); if (d) btcMap[d] = parseFloat(b) || 0; });
+                    (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
+                      if (!e[0] || !e[2]) return;
+                      const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
+                      btcMap[sd.toISOString().slice(0, 10)] = e[2];
+                    });
+                    parseLog(states['input_text.pool_btc_daily_log']?.state ?? '').forEach(e => {
+                      const [d, b] = e.split(','); if (d && !btcMap[d]) btcMap[d] = parseFloat(b) || 0;
+                    });
+                    const thsYest = parseFloat(states['sensor.pool_ths_yesterday']?.state) || 0;
+                    const phArr   = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
+                    const thsApi  = {};
+                    if (thsYest > 0 && phArr.length > 0) {
+                      const sd = new Date(phArr[0][0]); sd.setUTCDate(sd.getUTCDate() - 1);
+                      thsApi[sd.toISOString().slice(0, 10)] = thsYest.toFixed(1);
+                    }
+                    const csvThs = {
+                      '2026-04-27':'62.04','2026-04-26':'52.91','2026-04-25':'58.40',
+                      '2026-04-24':'64.92','2026-04-23':'65.03','2026-04-22':'64.86',
+                      '2026-04-21':'14.59','2026-04-20':'50.26','2026-04-19':'25.12',
+                      '2026-04-18':'36.90','2026-04-17':'50.09','2026-04-16':'49.84',
+                      '2026-04-15':'58.32','2026-04-14':'44.94','2026-04-12':'14.36',
+                      '2026-04-11':'36.88','2026-04-10':'10.14','2026-04-09':'52.46',
+                      '2026-04-08':'45.44','2026-04-07':'50.52','2026-04-06':'55.23',
+                      '2026-04-05':'23.90','2026-04-04':'12.39','2026-04-03':'11.26',
+                      '2026-04-02':'56.48','2026-04-01':'32.51','2026-03-31':'20.18',
+                      '2026-03-30':'18.85','2026-03-29':'15.74','2026-03-28':'19.06'
+                    };
+                    const curDiff   = states['sensor.bitcoin_network_difficulty']?.state ?? null;
+                    const diffEpochs = [
+                      ['2026-04-17', curDiff ?? '135.59'],
+                      ['2026-04-03', '138.97'],
+                      ['2026-03-20', '133.79'],
+                    ];
+                    const getDiff = (d) => { for (const [s,v] of diffEpochs) { if (d>=s) return v; } return '—'; };
+                    const btcEur    = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+                    const STROM_EUR = 0.078;
                     const parseEntry = (e) => {
                       const p = e.split(',');
                       return { d: p[0]??'', on: p[1]??'–', off: p[2]??'–',
@@ -2044,17 +2084,30 @@ views:
                       live: true
                     };
                     const allRows = [todayRow, ...logEntries.map(parseEntry)];
-                    const cols = '60px 52px 52px 62px 48px 48px 52px 56px 48px';
-                    const th = (t,r) => `<div style="font-size:0.65rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
+                    const cols = '50px 42px 42px 54px 36px 36px 40px 44px 44px 44px 50px 46px 46px';
+                    const th = (t,r) => `<div style="font-size:0.62rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
                     const headers = `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;border-bottom:1px solid var(--divider-color);margin-bottom:2px;">
-                      ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Gesamt',1)}${th('Eco',1)}${th('Std',1)}${th('Super',1)}${th('kWh',1)}${th('SATs',1)}
+                      ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Ges.',1)}${th('Eco',1)}${th('Std',1)}${th('Sup',1)}${th('kWh',1)}${th('TH/s',1)}${th('SATs',1)}${th('S/kWh',1)}${th('€/kWh',1)}${th('Diff',1)}
                     </div>`;
                     const rowHtml = (r) => {
                       const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
                       const dc = r.live ? 'var(--primary-text-color)' : 'var(--secondary-text-color)';
                       const fw = r.live ? '600' : '400';
                       const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
-                      const sat = r.live ? '—' : fmtSat(btcMap[r.d]);
+                      const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
+                      const ths    = thsApi[r.d] ?? csvThs[r.d] ?? '—';
+                      const diff   = getDiff(r.d);
+                      const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
+                      const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';
+                      const earnedEur = (satNum !== null && r.kw > 0 && btcEur > 0)
+                        ? satNum * btcEur / 1e8 / r.kw : null;
+                      const eurStr   = earnedEur !== null ? earnedEur.toFixed(3) : '—';
+                      const eurColor = earnedEur === null ? 'var(--secondary-text-color)'
+                        : earnedEur >= 0.156 ? '#F7931A'
+                        : earnedEur >= 0.125 ? '#26C6DA'
+                        : earnedEur >= 0.100 ? '#4CAF50'
+                        : earnedEur >= 0.078 ? '#FFFFFF'
+                        : '#9E9E9E';
                       return `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;${hl}">
                         <div style="font-size:0.82rem;color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
                         ${c(r.on,'inherit')}${c(r.off,'inherit')}
@@ -2063,17 +2116,23 @@ views:
                         ${c(fmtH1(r.st)+'h','#26C6DA')}
                         ${c(fmtH1(r.sp)+'h','#F7931A')}
                         ${c(r.kw.toFixed(2),'white')}
+                        ${c(ths,'#FFFFFF')}
                         ${c(sat,'#F7931A')}
+                        ${c(sPerKwh,'#F7931A')}
+                        ${c(eurStr,eurColor)}
+                        ${c(diff+'T','var(--secondary-text-color)')}
                       </div>`;
                     };
-                    return `<div style="width:100%;">
-                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-                        <ha-icon icon="mdi:calendar-clock" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
-                        <span style="font-size:0.88rem;font-weight:700;">Mining Verlauf</span>
-                      </div>
-                      ${headers}
-                      <div style="max-height:308px;overflow-y:auto;scrollbar-width:thin;">
-                        ${allRows.map(rowHtml).join('')}
+                    return `<div style="width:100%;overflow-x:auto;">
+                      <div style="min-width:620px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                          <ha-icon icon="mdi:calendar-clock" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                          <span style="font-size:0.88rem;font-weight:700;">Mining Verlauf</span>
+                        </div>
+                        ${headers}
+                        <div style="max-height:308px;overflow-y:auto;scrollbar-width:thin;">
+                          ${allRows.map(rowHtml).join('')}
+                        </div>
                       </div>
                     </div>`;
                   ]]]

@@ -1,19 +1,27 @@
 bitcoin:
 
+  # ── Bitcoin Network Difficulty ────────────────────────────────────────────────
+  # Unabhängig vom Miner-Status — pollt direkt von blockchain.info.
+  # Wert in T (Trillion = 1e12). Beispiel: 135.59 T
+  rest:
+    - resource: "https://blockchain.info/q/getdifficulty"
+      scan_interval: 3600
+      sensor:
+        - name: "bitcoin_network_difficulty"
+          unique_id: bitcoin_network_difficulty
+          value_template: "{{ (value | float(0) / 1e12) | round(2) }}"
+          unit_of_measurement: "T"
+          state_class: measurement
+          icon: mdi:bitcoin
+
   # ── Bitcoin Block Height ─────────────────────────────────────────────────────
-  # REST-Sensor gegen lokale Mempool-Instanz auf Umbrel.
-  # Endpunkt: GET /api/blocks/tip/height → plain integer, z. B. 895432
+  # Mempool-Instanz auf Umbrel — einkommentieren wenn Mempool läuft (Port 3006)
   #
-  # Port anpassen falls Mempool auf anderem Port läuft:
-  #   Standard Umbrel Mempool: umbrel.local:3006
-  #   Knots/Core RPC direkt:   umbrel.local:8332 (andere URL-Struktur)
-  #
-  sensor:
-    - platform: rest
-      name: bitcoin_block_height
-      unique_id: bitcoin_block_height
-      resource: "http://umbrel.local:3006/api/blocks/tip/height"
-      scan_interval: 60
-      value_template: "{{ value | int(0) }}"
-      unit_of_measurement: ""
-      icon: mdi:bitcoin
+  # rest:
+  #   - resource: "http://umbrel.local:3006/api/blocks/tip/height"
+  #     scan_interval: 60
+  #     sensor:
+  #       - name: "bitcoin_block_height"
+  #         unique_id: bitcoin_block_height
+  #         value_template: "{{ value | int(0) }}"
+  #         icon: mdi:bitcoin
