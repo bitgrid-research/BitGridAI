@@ -189,7 +189,7 @@ rule_lab:
               {{ r1 if r1 not in ['unknown', 'unavailable'] else 'NOOP_R1_INSUFFICIENT_SURPLUS' }}
             {% endif %}
 
-        # Erklärungstext (aus text_blocks.yaml nachgebaut für HA-Templates)
+        # Erklärungstext — Baustein 0: Kurztext (aus text_blocks.yaml)
         - name: "lab_explain_short"
           unique_id: lab_explain_short
           state: >-
@@ -198,14 +198,88 @@ rule_lab:
             {% set soc     = states('input_number.lab_battery_soc_pct') | float(0) %}
             {% set temp    = states('input_number.lab_miner_temp_c') | float(0) %}
             {% set grid    = states('input_number.lab_grid_import_w') | float(0) %}
-            {% if   code == 'START_R1_SURPLUS_OK'          %} Überschuss {{ surplus }} kW — Miner würde starten
-            {% elif code == 'NOOP_R1_INSUFFICIENT_SURPLUS' %} Zu wenig Überschuss ({{ surplus }} kW)
+            {% if   code == 'START_R1_SURPLUS_OK'          %} Überschuss {{ surplus | round(1) }} kW — Miner würde starten
+            {% elif code == 'NOOP_R1_INSUFFICIENT_SURPLUS' %} Zu wenig Überschuss ({{ surplus | round(1) }} kW)
             {% elif code == 'STOP_R2_SOC_HARD_MIN'         %} Batterie kritisch {{ soc | round(0) }}% — Sicherheitsstopp
             {% elif code == 'NOOP_R2_SOC_SOFT_MIN'         %} Batterie {{ soc | round(0) }}% — kein Neustart
             {% elif code == 'STOP_R2_GRID_IMPORT_EXCEEDED' %} Netzbezug {{ grid | round(0) }} W — Stopp
             {% elif code == 'STOP_R3_OVERTEMP'             %} Sicherheitsstopp: {{ temp | round(0) }}°C Übertemperatur
             {% elif code == 'STOP_R3_COMM_TIMEOUT'         %} Sicherheitsstopp: Kommunikationsausfall
             {% else                                        %} {{ code }}
+            {% endif %}
+
+        # Erklärungstext — Baustein 1: Auslöser
+        - name: "lab_explain_trigger"
+          unique_id: lab_explain_trigger
+          state: >-
+            {% set code        = states('sensor.lab_final_decision') %}
+            {% set surplus_min = states('input_number.lab_surplus_min_kw') | float(1.5) %}
+            {% if   code == 'START_R1_SURPLUS_OK'          %} Schwelle {{ surplus_min | round(1) }} kW überschritten
+            {% elif code == 'NOOP_R1_INSUFFICIENT_SURPLUS' %} Schwelle nicht erreicht
+            {% elif code == 'STOP_R2_SOC_HARD_MIN'         %} R2 Hard-Stop
+            {% elif code == 'NOOP_R2_SOC_SOFT_MIN'         %} R2 Soft-Limit
+            {% elif code == 'STOP_R2_GRID_IMPORT_EXCEEDED' %} R2 Grid-Import-Limit
+            {% elif code == 'STOP_R3_OVERTEMP'             %} R3 Safety-Override (asynchron)
+            {% elif code == 'STOP_R3_COMM_TIMEOUT'         %} R3 Comm-Timeout
+            {% else                                        %} —
+            {% endif %}
+
+        # Erklärungstext — Baustein 2: Datenbasis
+        - name: "lab_explain_data_basis"
+          unique_id: lab_explain_data_basis
+          state: >-
+            {% set code        = states('sensor.lab_final_decision') %}
+            {% set surplus     = states('sensor.lab_surplus_kw') | float(0) %}
+            {% set surplus_min = states('input_number.lab_surplus_min_kw') | float(1.5) %}
+            {% set soc         = states('input_number.lab_battery_soc_pct') | float(0) %}
+            {% set soc_hard    = states('input_number.lab_soc_hard_min_pct') | float(10) %}
+            {% set soc_soft    = states('input_number.lab_soc_soft_min_pct') | float(20) %}
+            {% set temp        = states('input_number.lab_miner_temp_c') | float(0) %}
+            {% set temp_max    = states('input_number.lab_max_chip_temp_c') | float(85) %}
+            {% set grid        = states('input_number.lab_grid_import_w') | float(0) %}
+            {% set max_grid    = states('input_number.lab_max_grid_import_w') | float(500) %}
+            {% if   code == 'START_R1_SURPLUS_OK'          %} Überschuss {{ surplus | round(1) }} kW · Schwelle {{ surplus_min | round(1) }} kW
+            {% elif code == 'NOOP_R1_INSUFFICIENT_SURPLUS' %} Überschuss {{ surplus | round(1) }} kW · Schwelle {{ surplus_min | round(1) }} kW
+            {% elif code == 'STOP_R2_SOC_HARD_MIN'         %} Batterie {{ soc | round(0) }}% · Minimum {{ soc_hard | round(0) }}%
+            {% elif code == 'NOOP_R2_SOC_SOFT_MIN'         %} Batterie {{ soc | round(0) }}% · Eco-Start {{ soc_soft | round(0) }}%
+            {% elif code == 'STOP_R2_GRID_IMPORT_EXCEEDED' %} Netzbezug {{ grid | round(0) }} W · Limit {{ max_grid | round(0) }} W
+            {% elif code == 'STOP_R3_OVERTEMP'             %} Chip-Temp {{ temp | round(0) }}°C · Limit {{ temp_max | round(0) }}°C
+            {% elif code == 'STOP_R3_COMM_TIMEOUT'         %} Heartbeat überfällig
+            {% else                                        %} —
+            {% endif %}
+
+        # Erklärungstext — Baustein 3: Wirkung
+        - name: "lab_explain_effect"
+          unique_id: lab_explain_effect
+          state: >-
+            {% set code = states('sensor.lab_final_decision') %}
+            {% if   code == 'START_R1_SURPLUS_OK'          %} Miner würde starten
+            {% elif code == 'NOOP_R1_INSUFFICIENT_SURPLUS' %} Keine Aktion — Miner bleibt gestoppt
+            {% elif code == 'STOP_R2_SOC_HARD_MIN'         %} Miner gestoppt — Batteriesicherheit
+            {% elif code == 'NOOP_R2_SOC_SOFT_MIN'         %} Kein Neustart — Speicherreserve
+            {% elif code == 'STOP_R2_GRID_IMPORT_EXCEEDED' %} Miner gestoppt — Netz entlasten
+            {% elif code == 'STOP_R3_OVERTEMP'             %} Sicherheitsstopp — Überhitzung
+            {% elif code == 'STOP_R3_COMM_TIMEOUT'         %} Sicherheitsstopp — Verbindungsausfall
+            {% else                                        %} —
+            {% endif %}
+
+        # Erklärungstext — Baustein 4: Optionen
+        - name: "lab_explain_options"
+          unique_id: lab_explain_options
+          state: >-
+            {% set code        = states('sensor.lab_final_decision') %}
+            {% set surplus_min = states('input_number.lab_surplus_min_kw') | float(1.5) %}
+            {% set soc_soft    = states('input_number.lab_soc_soft_min_pct') | float(20) %}
+            {% set max_grid    = states('input_number.lab_max_grid_import_w') | float(500) %}
+            {% set temp_max    = states('input_number.lab_max_chip_temp_c') | float(85) %}
+            {% if   code == 'START_R1_SURPLUS_OK'          %} —
+            {% elif code == 'NOOP_R1_INSUFFICIENT_SURPLUS' %} Start ab {{ surplus_min | round(1) }} kW Überschuss möglich
+            {% elif code == 'STOP_R2_SOC_HARD_MIN'         %} Neustart erst ab {{ soc_soft | round(0) }}% Ladezustand
+            {% elif code == 'NOOP_R2_SOC_SOFT_MIN'         %} Start ab {{ soc_soft | round(0) }}% Ladezustand
+            {% elif code == 'STOP_R2_GRID_IMPORT_EXCEEDED' %} Neustart wenn Netzbezug unter {{ max_grid | round(0) }} W sinkt
+            {% elif code == 'STOP_R3_OVERTEMP'             %} Neustart nach Abkühlung unter {{ temp_max | round(0) }}°C
+            {% elif code == 'STOP_R3_COMM_TIMEOUT'         %} Neustart nach MQTT-Reconnect
+            {% else                                        %} —
             {% endif %}
 
   # ── Script: Lab-Slider mit Prod-Werten befüllen ─────────────────────────────

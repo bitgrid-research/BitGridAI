@@ -176,9 +176,11 @@ views:
                                       || states['sensor.miner2_workmode_status']?.state || '';
                     const mvpSocStart   = parseFloat(states['input_number.mvp_soc_eco_start_pct']?.state || 65);
                     const mvpPvStartKw  = parseFloat(states['input_number.mvp_pv_start_w']?.state || 6000) / 1000;
-                    const socSuperOn    = parseFloat(states['input_number.mvp_soc_super_pct']?.state     || 90);
-                    const socSuperOff   = parseFloat(states['input_number.mvp_soc_super_stop_pct']?.state || 85);
-                    const socStop       = parseFloat(states['input_number.mvp_soc_stop_pct']?.state       || 60);
+                    const socStdOn      = parseFloat(states['input_number.mvp_soc_std_pct']?.state         || 80);
+                    const socStdOff     = parseFloat(states['input_number.mvp_soc_std_stop_pct']?.state   || 75);
+                    const socSuperOn    = parseFloat(states['input_number.mvp_soc_super_pct']?.state       || 90);
+                    const socSuperOff   = parseFloat(states['input_number.mvp_soc_super_stop_pct']?.state  || 85);
+                    const socStop       = parseFloat(states['input_number.mvp_soc_stop_pct']?.state        || 50);
                     const batPowerW     = parseFloat(states['sensor.battery_power_w']?.state || 0);
                     const battCapKwh    = parseFloat(states['input_number.battery_capacity_kwh']?.state || 10);
                     const socGap        = Math.max(0, socSoftMin - soc);
@@ -307,18 +309,45 @@ views:
                         : tempLockActive
                           ? `🌡️ Eco wegen Überhitzung — Sperre noch ${tempLockStr}`
                           : speedBlockStr
-                            ? `Deadband: Wechsel in ${speedBlockStr} freigegeben ₿`
-                            : soc >= socSuperOn
-                              ? `Super-Schwelle erreicht — Upgrade kommt gleich. 🚀`
+                            ? `Standard-Upgrade in ${speedBlockStr} freigegeben ₿`
+                            : soc >= socStdOn
+                              ? `Standard-Schwelle erreicht — Upgrade kommt gleich. ⚡`
                               : ecoEtaStopStr
                                 ? `Standby (${socStop.toFixed(0)}%) in ${ecoEtaStopStr} · ${ecoDischargeW.toFixed(0)} W`
-                                : etaSuperStr
-                                  ? `Super in ${etaSuperStr} — Sonne lädt, Hamster hasht! ₿`
-                                  : null;
+                                : null;
                       lines = [
                         `🌿 Automatik aktiv · Miner in Eco seit ${ecoStartStr || '—'}`,
-                        `Akku ${soc.toFixed(0)}% → ${socSuperOn.toFixed(0)}% für Super`,
+                        `Akku ${soc.toFixed(0)}% · Standard ≥ ${socStdOn.toFixed(0)}% · Super ≥ ${socSuperOn.toFixed(0)}%`,
                         ecoLine3
+                      ].filter(Boolean);
+                    } else if (minerMode === 'Standard') {
+                      const stdDischargeW = -batPowerW;
+                      const stdSocGapEco  = Math.max(0, soc - socStdOff);
+                      const stdEtaEcoMin  = stdDischargeW > 50 && stdSocGapEco > 0
+                        ? Math.round(stdSocGapEco / 100 * battCapKwh * 1000 / stdDischargeW * 60)
+                        : null;
+                      const stdEtaEcoStr  = stdEtaEcoMin === null ? null
+                        : stdEtaEcoMin < 60 ? `~${stdEtaEcoMin} min`
+                        : `~${Math.floor(stdEtaEcoMin / 60)}h ${stdEtaEcoMin % 60}min`;
+                      const stdLine3 = soc <= socStdOff
+                        ? ecoBlockStr
+                          ? `Deadband: Eco-Wechsel in ${ecoBlockStr} freigegeben`
+                          : `⚠️ Akku unter ${socStdOff.toFixed(0)}% — wechselt zu Eco`
+                        : tempLockActive
+                          ? `🌡️ Super gesperrt wegen Überhitzung — Sperre noch ${tempLockStr}`
+                          : speedBlockStr
+                            ? `Super-Upgrade in ${speedBlockStr} freigegeben ₿`
+                            : soc >= socSuperOn
+                              ? `Super-Schwelle erreicht — Upgrade kommt gleich. 🚀`
+                              : stdEtaEcoStr
+                                ? `Eco (${socStdOff.toFixed(0)}%) in ${stdEtaEcoStr} · ${stdDischargeW.toFixed(0)} W`
+                                : etaSuperStr
+                                  ? `Super in ${etaSuperStr} — noch ein bisschen! ₿`
+                                  : null;
+                      lines = [
+                        `⚡ Automatik aktiv · Miner in Standard seit ${ecoStartStr || '—'}`,
+                        `Akku ${soc.toFixed(0)}% · Eco < ${socStdOff.toFixed(0)}% · Super ≥ ${socSuperOn.toFixed(0)}%`,
+                        stdLine3
                       ].filter(Boolean);
                     } else if (minerMode === 'Super') {
                       const speedLine3 = soc < socSuperOff
@@ -351,7 +380,7 @@ views:
                     } else {
                       const idleLine3 = priority === 'R5_STABILITY'
                         ? `Deadband aktiv — Mining startet nach Ablauf. ₿`
-                        : `Start bei Akku ≥ ${mvpSocStart.toFixed(0)}% oder PV ≥ ${mvpPvStartKw.toFixed(1)} kW.`;
+                        : `Eco ≥ ${mvpSocStart.toFixed(0)}% · Standard ≥ ${socStdOn.toFixed(0)}% · Super ≥ ${socSuperOn.toFixed(0)}%`;
                       lines = [
                         `⚡ Automatik an · Miner im Standby.`,
                         `PV ${(pv/1000).toFixed(1)} kW · Akku ${soc.toFixed(0)}%`,
@@ -412,7 +441,7 @@ views:
                             <div style="font-size:0.72rem;font-weight:600;color:#9e7e3a;margin-top:1px;">${blockDisplay}</div>
                             <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Balance in SATs</div>
                             <div style="font-size:0.65rem;font-weight:600;color:#b07830;margin-top:1px;">${balanceSats}</div>
-                            <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Kurs EUR</div>
+                            <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Kurs in EUR</div>
                             <div style="font-size:0.65rem;font-weight:600;color:#5e9668;margin-top:1px;">${btcEurDisplay}</div>
                           </div>
                           <div style="margin-top:6px;">
@@ -428,10 +457,22 @@ views:
                           <img src="/local/${imgSrc}?v=20260426" style="width:141px;height:141px;border-radius:50%;flex-shrink:0;object-fit:cover;border:2px solid var(--divider-color)">
                           <div style="flex:1">
                             <div style="font-size:1rem;font-weight:700;color:${wColor};margin-bottom:10px">${weather}</div>
-                            <div style="display:flex;flex-direction:column;gap:4px;">
-                              ${lines.map((l, i) => `<div style="font-size:${i === 0 ? '1.05rem' : '0.9rem'};
-                                color:${i === 0 ? 'var(--primary-text-color)' : 'var(--secondary-text-color)'};
-                                line-height:1.5;font-weight:${i === 0 ? '500' : '400'};${i === 0 ? 'margin-bottom:6px;' : ''}">${l}</div>`).join('')}
+                            <div style="display:flex;flex-direction:column;">
+                              ${lines.map((l, i) => {
+                                const bLabel = ['Wirkung','Datenbasis','Optionen',''][i] || '';
+                                const isFirst = i === 0;
+                                const lbl = bLabel
+                                  ? `<div style="font-size:0.55rem;color:var(--secondary-text-color);opacity:0.45;
+                                                 text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1px">
+                                       ${bLabel}</div>`
+                                  : '';
+                                return `<div style="${isFirst ? 'margin-bottom:8px' : 'margin-top:4px'}">
+                                  ${lbl}
+                                  <div style="font-size:${isFirst ? '1.05rem' : '0.88rem'};
+                                              color:${isFirst ? 'var(--primary-text-color)' : 'var(--secondary-text-color)'};
+                                              line-height:1.4;font-weight:${isFirst ? '500' : '400'}">${l}</div>
+                                </div>`;
+                              }).join('')}
                             </div>
                             ${blockKnown ? `
                             <div style="font-size:0.68rem;color:var(--disabled-text-color);
@@ -2585,7 +2626,7 @@ views:
                     trace:
                       - width: 100%
 
-              # Finale Entscheidung + Erklärungstext
+              # Finale Entscheidung + strukturierte Bausteine
               - type: custom:button-card
                 show_name: false
                 show_icon: false
@@ -2595,8 +2636,11 @@ views:
                 custom_fields:
                   decision: >
                     [[[
-                      const code    = states['sensor.lab_final_decision']?.state || '—';
-                      const explain = states['sensor.lab_explain_short']?.state   || '—';
+                      const code      = states['sensor.lab_final_decision']?.state         || '—';
+                      const trigger   = states['sensor.lab_explain_trigger']?.state        || '—';
+                      const dataBasis = states['sensor.lab_explain_data_basis']?.state     || '—';
+                      const effect    = states['sensor.lab_explain_effect']?.state         || '—';
+                      const options   = states['sensor.lab_explain_options']?.state        || '—';
 
                       let bg, icon;
                       if      (code.startsWith('START')) { bg = '#1B5E20'; icon = '▶'; }
@@ -2604,16 +2648,26 @@ views:
                       else if (code.startsWith('NOOP'))  { bg = '#E65100'; icon = '⏸'; }
                       else                               { bg = 'var(--secondary-background-color)'; icon = '?'; }
 
-                      return `<div style="background:${bg};border-radius:8px;
-                                          padding:14px 16px;width:100%;box-sizing:border-box">
+                      const row = (label, val) =>
+                        `<div style="display:flex;gap:8px;align-items:baseline;margin-top:6px">
+                          <span style="font-size:0.6rem;color:rgba(255,255,255,0.4);text-transform:uppercase;
+                                       letter-spacing:0.06em;min-width:72px;flex-shrink:0">${label}</span>
+                          <span style="font-size:0.82rem;color:rgba(255,255,255,0.85)">${val}</span>
+                        </div>`;
+
+                      return `<div style="background:${bg};border-radius:8px;padding:14px 16px;
+                                          width:100%;box-sizing:border-box">
                         <div style="font-size:0.72rem;color:rgba(255,255,255,0.55);margin-bottom:4px">
                           Entscheidung
                         </div>
                         <div style="font-size:1.05rem;font-weight:700;color:white;font-family:monospace">
                           ${icon} ${code}
                         </div>
-                        <div style="font-size:0.85rem;color:rgba(255,255,255,0.75);margin-top:6px">
-                          ${explain}
+                        <div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:10px">
+                          ${row('Wirkung',    effect)}
+                          ${row('Auslöser',   trigger)}
+                          ${row('Datenbasis', dataBasis)}
+                          ${row('Optionen',   options)}
                         </div>
                       </div>`;
                     ]]]

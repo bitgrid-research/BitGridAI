@@ -26,6 +26,9 @@ class ExplainResult:
     short: str
     long: str
     trigger: str
+    data_basis: str
+    effect: str
+    options: str
     params: dict[str, Any]
     rule_states: dict[str, Any]
     energy_state_ref: str
@@ -57,15 +60,21 @@ class ExplainAgent:
         lang_blocks = self._blocks.get(self._lang, self._blocks.get("de", {}))
         block = lang_blocks.get(decision_code, {})
 
-        short = self._interpolate(block.get("short", decision_code), params)
-        long = self._interpolate(block.get("long", ""), params)
-        trigger = self._interpolate(block.get("trigger", ""), params)
+        short      = self._interpolate(block.get("short",      decision_code), params)
+        long       = self._interpolate(block.get("long",       ""),            params)
+        trigger    = self._interpolate(block.get("trigger",    ""),            params)
+        data_basis = self._interpolate(block.get("data_basis", ""),            params)
+        effect     = self._interpolate(block.get("effect",     ""),            params)
+        options    = self._interpolate(block.get("options",    ""),            params)
 
         return ExplainResult(
             decision_code=decision_code,
             short=short,
             long=long,
             trigger=trigger,
+            data_basis=data_basis,
+            effect=effect,
+            options=options,
             params=params,
             rule_states=rule_states or {},
             energy_state_ref=energy_state_ref,
@@ -90,8 +99,18 @@ class ExplainAgent:
             return template
 
 
-class _SafeDict(dict[str, Any]):
-    """Gibt '?' zurück für fehlende Keys statt KeyError."""
+class _Missing:
+    """Gibt '?' für jeden Format-Spec zurück, damit {key:.0f} nicht wirft."""
 
-    def __missing__(self, key: str) -> str:
+    def __format__(self, spec: str) -> str:
         return "?"
+
+    def __str__(self) -> str:
+        return "?"
+
+
+class _SafeDict(dict[str, Any]):
+    """Gibt _Missing zurück für fehlende Keys — safe für alle Format-Specs."""
+
+    def __missing__(self, key: str) -> _Missing:
+        return _Missing()

@@ -6,9 +6,9 @@ mvp_auto:
       name: "Eco-Start SoC (%)"
       min: 0
       max: 100
-      step: 5
+      step: 1
       mode: box
-      initial: 65
+      initial: 58
       icon: mdi:battery-charging-60
 
     mvp_pv_start_w:
@@ -19,6 +19,24 @@ mvp_auto:
       mode: box
       initial: 6000
       icon: mdi:solar-power
+
+    mvp_soc_std_pct:
+      name: "Standard-Start SoC (%)"
+      min: 50
+      max: 100
+      step: 1
+      mode: box
+      initial: 80
+      icon: mdi:battery-70
+
+    mvp_soc_std_stop_pct:
+      name: "Standard-Stop SoC (%)"
+      min: 50
+      max: 100
+      step: 1
+      mode: box
+      initial: 75
+      icon: mdi:battery-arrow-down-outline
 
     mvp_soc_super_pct:
       name: "Super-Start SoC (%)"
@@ -42,9 +60,9 @@ mvp_auto:
       name: "Stop SoC (%)"
       min: 0
       max: 100
-      step: 5
+      step: 1
       mode: box
-      initial: 60
+      initial: 50
       icon: mdi:battery-alert
 
 
@@ -153,8 +171,8 @@ mvp_auto:
           icon: mdi:timer-lock
           state: >
             {% set now_ts = now().timestamp() %}
-            {% set up_rem = (as_timestamp(states('input_datetime.mvp_miner1_last_upgrade'), 0) + 3600 - now_ts) | int %}
-            {% set dn_rem = (as_timestamp(states('input_datetime.mvp_miner1_last_downgrade'), 0) + 3600 - now_ts) | int %}
+            {% set up_rem = (state_attr('input_datetime.mvp_miner1_last_upgrade', 'timestamp') | float(0) + 3600 - now_ts) | int %}
+            {% set dn_rem = (state_attr('input_datetime.mvp_miner1_last_downgrade', 'timestamp') | float(0) + 3600 - now_ts) | int %}
             {% if up_rem > 0 %}
               ↑ {{ (up_rem // 60) }} min
             {% elif dn_rem > 0 %}
@@ -167,8 +185,8 @@ mvp_auto:
           icon: mdi:timer-lock
           state: >
             {% set now_ts = now().timestamp() %}
-            {% set up_rem = (as_timestamp(states('input_datetime.mvp_miner2_last_upgrade'), 0) + 3600 - now_ts) | int %}
-            {% set dn_rem = (as_timestamp(states('input_datetime.mvp_miner2_last_downgrade'), 0) + 3600 - now_ts) | int %}
+            {% set up_rem = (state_attr('input_datetime.mvp_miner2_last_upgrade', 'timestamp') | float(0) + 3600 - now_ts) | int %}
+            {% set dn_rem = (state_attr('input_datetime.mvp_miner2_last_downgrade', 'timestamp') | float(0) + 3600 - now_ts) | int %}
             {% if up_rem > 0 %}
               ↑ {{ (up_rem // 60) }} min
             {% elif dn_rem > 0 %}
@@ -267,15 +285,18 @@ mvp_auto:
         - variables:
             soc: "{{ states('sensor.battery_soc_pct') | float(0) }}"
             pv: "{{ states('sensor.pv_power_w') | float(0) }}"
-            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(65) }}"
+            bat_w: "{{ states('sensor.battery_power_w') | float(0) }}"
+            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(58) }}"
             pv_start: "{{ states('input_number.mvp_pv_start_w') | float(6000) }}"
+            soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(80) }}"
+            soc_std_off: "{{ states('input_number.mvp_soc_std_stop_pct') | float(75) }}"
             soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(90) }}"
             soc_super_off: "{{ states('input_number.mvp_soc_super_stop_pct') | float(85) }}"
-            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(60) }}"
+            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(50) }}"
             m1_status: "{{ states('sensor.miner1_workmode_status') }}"
             m1_select: "{{ states('select.miner1_workmode_set') }}"
-            m1_up_ts: "{{ as_timestamp(states('input_datetime.mvp_miner1_last_upgrade'), 0) }}"
-            m1_dn_ts: "{{ as_timestamp(states('input_datetime.mvp_miner1_last_downgrade'), 0) }}"
+            m1_up_ts: "{{ state_attr('input_datetime.mvp_miner1_last_upgrade', 'timestamp') | float(0) }}"
+            m1_dn_ts: "{{ state_attr('input_datetime.mvp_miner1_last_downgrade', 'timestamp') | float(0) }}"
             now_ts: "{{ now().timestamp() }}"
             cooldown_sec: 3600
 
@@ -283,11 +304,12 @@ mvp_auto:
           data:
             message: >
               [mvp-miner1] trigger={{ trigger.platform }}
-              soc={{ soc }}% pv={{ pv }}W
+              soc={{ soc }}% pv={{ pv }}W bat={{ bat_w | round(0) }}W
               status={{ m1_status }} select={{ m1_select }}
-              thresholds: stop={{ soc_stop }} start={{ soc_start }} super={{ soc_super_on }}
+              thresholds: stop={{ soc_stop }} start={{ soc_start }} std={{ soc_std_on }} super={{ soc_super_on }}
               up_cd={{ [0, (m1_up_ts + cooldown_sec - now_ts) | int] | max }}s
               dn_cd={{ [0, (m1_dn_ts + cooldown_sec - now_ts) | int] | max }}s
+              pv_bypass_in={{ [0, (m1_dn_ts + 900 - now_ts) | int] | max }}s
             level: warning
 
         - choose:
@@ -298,7 +320,9 @@ mvp_auto:
               sequence:
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P1 Stop: soc={{ soc }}% < {{ soc_stop }}% — status={{ m1_status }}"
+                    message: >
+                      [mvp-miner1] P1 Stop: soc={{ soc }}% < {{ soc_stop }}% bat={{ bat_w | round(0) }}W
+                      — status={{ m1_status }} → Standby (PV-Bypass gesperrt für 15min)
                     level: warning
                 - condition: template
                   value_template: "{{ m1_status not in ['Standby', 'Off'] }}"
@@ -327,7 +351,7 @@ mvp_auto:
             - conditions:
                 - condition: template
                   value_template: >
-                    {{ now_ts < as_timestamp(states('input_datetime.mvp_miner1_temp_lockout_until'), 0)
+                    {{ now_ts < state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0)
                        and m1_status in ['Super', 'Standard'] }}
               sequence:
                 - action: system_log.write
@@ -356,7 +380,7 @@ mvp_auto:
                   entity_id: binary_sensor.raumtemperatur_zu_heiss
                   state: "off"
                 - condition: template
-                  value_template: "{{ now_ts >= as_timestamp(states('input_datetime.mvp_miner1_temp_lockout_until'), 0) }}"
+                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0) }}"
                 - action: system_log.write
                   data:
                     message: "[mvp-miner1] P2 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m1_status }}"
@@ -372,7 +396,7 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P3: Super-Deadband unterschritten → Eco (blockiert wenn Upgrade-Cooldown aktiv)
+            # P3: Super-Deadband unterschritten → Standard (blockiert wenn Upgrade-Cooldown aktiv)
             - conditions:
                 - condition: template
                   value_template: "{{ soc < soc_super_off and m1_status == 'Super' }}"
@@ -381,7 +405,56 @@ mvp_auto:
                   value_template: "{{ (now_ts - m1_up_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P3 Super→Eco: soc={{ soc }}% < {{ soc_super_off }}%"
+                    message: "[mvp-miner1] P3 Super→Standard: soc={{ soc }}% < {{ soc_super_off }}% — Deadband unterschritten"
+                    level: info
+                - action: select.select_option
+                  target:
+                    entity_id: select.miner1_workmode_set
+                  data:
+                    option: Standard
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.mvp_miner1_last_downgrade
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+            # P2.5: SoC im Standard-Bereich → Standard (Eco→Standard, blockiert wenn Downgrade-Cooldown aktiv)
+            - conditions:
+                - condition: template
+                  value_template: "{{ soc >= soc_std_on and m1_status == 'Eco' }}"
+              sequence:
+                - condition: template
+                  value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
+                - condition: state
+                  entity_id: binary_sensor.raumtemperatur_zu_heiss
+                  state: "off"
+                - condition: template
+                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0) }}"
+                - action: system_log.write
+                  data:
+                    message: "[mvp-miner1] P2.5 Standard: soc={{ soc }}% >= {{ soc_std_on }}% — Eco→Standard"
+                    level: info
+                - action: select.select_option
+                  target:
+                    entity_id: select.miner1_workmode_set
+                  data:
+                    option: Standard
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.mvp_miner1_last_upgrade
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+            # P3.5: Standard-Deadband unterschritten → Eco (blockiert wenn Upgrade-Cooldown aktiv)
+            - conditions:
+                - condition: template
+                  value_template: "{{ soc < soc_std_off and m1_status == 'Standard' }}"
+              sequence:
+                - condition: template
+                  value_template: "{{ (now_ts - m1_up_ts) >= cooldown_sec }}"
+                - action: system_log.write
+                  data:
+                    message: "[mvp-miner1] P3.5 Standard→Eco: soc={{ soc }}% < {{ soc_std_off }}% — Deadband unterschritten"
                     level: info
                 - action: select.select_option
                   target:
@@ -395,7 +468,8 @@ mvp_auto:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
             # P4: SoC >= Schwelle, Miner aus → Eco starten
-            # SoC ist immer Pflicht. PV >= pv_start erlaubt Cooldown-Bypass (kein Flapping-Risiko bei stabilem SoC).
+            # SoC ist immer Pflicht. PV >= pv_start erlaubt Cooldown-Bypass nach min. 15 min seit letztem Stop.
+            # Mindest-15min verhindert P1→P4-Flapping bei kurzen Solareinbrüchen.
             # Temp-Lockout blockiert immer — auch wenn Miner intern durch Hardware-Schutz abgeschaltet hat.
             - conditions:
                 - condition: state
@@ -406,13 +480,18 @@ mvp_auto:
                     {{ soc >= soc_start and
                        m1_status in ['Standby', 'Idle', 'Off'] }}
                 - condition: template
-                  value_template: "{{ now_ts >= as_timestamp(states('input_datetime.mvp_miner1_temp_lockout_until'), 0) }}"
+                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0) }}"
               sequence:
                 - condition: template
-                  value_template: "{{ pv >= pv_start or (now_ts - m1_dn_ts) >= cooldown_sec }}"
+                  value_template: >
+                    {{ (pv >= pv_start and (now_ts - m1_dn_ts) >= 900)
+                       or (now_ts - m1_dn_ts) >= cooldown_sec }}
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P4 Eco-Start: soc={{ soc }}% pv={{ pv }}W — status={{ m1_status }}"
+                    message: >
+                      [mvp-miner1] P4 Eco-Start: soc={{ soc }}% pv={{ pv }}W bat={{ bat_w | round(0) }}W
+                      — via={{ 'PV-Bypass(>15min)' if (pv >= pv_start and (now_ts - m1_dn_ts) >= 900) else '1h-Cooldown' }}
+                      — status={{ m1_status }}
                     level: info
                 - action: select.select_option
                   target:
@@ -468,15 +547,18 @@ mvp_auto:
         - variables:
             soc: "{{ states('sensor.battery_soc_pct') | float(0) }}"
             pv: "{{ states('sensor.pv_power_w') | float(0) }}"
-            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(65) }}"
+            bat_w: "{{ states('sensor.battery_power_w') | float(0) }}"
+            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(58) }}"
             pv_start: "{{ states('input_number.mvp_pv_start_w') | float(6000) }}"
+            soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(80) }}"
+            soc_std_off: "{{ states('input_number.mvp_soc_std_stop_pct') | float(75) }}"
             soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(90) }}"
             soc_super_off: "{{ states('input_number.mvp_soc_super_stop_pct') | float(85) }}"
-            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(60) }}"
+            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(50) }}"
             m2_status: "{{ states('sensor.miner2_workmode_status') }}"
             m2_select: "{{ states('select.miner2_workmode_set') }}"
-            m2_up_ts: "{{ as_timestamp(states('input_datetime.mvp_miner2_last_upgrade'), 0) }}"
-            m2_dn_ts: "{{ as_timestamp(states('input_datetime.mvp_miner2_last_downgrade'), 0) }}"
+            m2_up_ts: "{{ state_attr('input_datetime.mvp_miner2_last_upgrade', 'timestamp') | float(0) }}"
+            m2_dn_ts: "{{ state_attr('input_datetime.mvp_miner2_last_downgrade', 'timestamp') | float(0) }}"
             now_ts: "{{ now().timestamp() }}"
             cooldown_sec: 3600
 
@@ -484,11 +566,12 @@ mvp_auto:
           data:
             message: >
               [mvp-miner2] trigger={{ trigger.platform }}
-              soc={{ soc }}% pv={{ pv }}W
+              soc={{ soc }}% pv={{ pv }}W bat={{ bat_w | round(0) }}W
               status={{ m2_status }} select={{ m2_select }}
-              thresholds: stop={{ soc_stop }} start={{ soc_start }} super={{ soc_super_on }}
+              thresholds: stop={{ soc_stop }} start={{ soc_start }} std={{ soc_std_on }} super={{ soc_super_on }}
               up_cd={{ [0, (m2_up_ts + cooldown_sec - now_ts) | int] | max }}s
               dn_cd={{ [0, (m2_dn_ts + cooldown_sec - now_ts) | int] | max }}s
+              pv_bypass_in={{ [0, (m2_dn_ts + 900 - now_ts) | int] | max }}s
             level: warning
 
         - choose:
@@ -499,7 +582,9 @@ mvp_auto:
               sequence:
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P1 Stop: soc={{ soc }}% < {{ soc_stop }}% — status={{ m2_status }}"
+                    message: >
+                      [mvp-miner2] P1 Stop: soc={{ soc }}% < {{ soc_stop }}% bat={{ bat_w | round(0) }}W
+                      — status={{ m2_status }} → Standby (PV-Bypass gesperrt für 15min)
                     level: warning
                 - condition: template
                   value_template: "{{ m2_status not in ['Standby', 'Off'] }}"
@@ -528,7 +613,7 @@ mvp_auto:
             - conditions:
                 - condition: template
                   value_template: >
-                    {{ now_ts < as_timestamp(states('input_datetime.mvp_miner2_temp_lockout_until'), 0)
+                    {{ now_ts < state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0)
                        and m2_status in ['Super', 'Standard'] }}
               sequence:
                 - action: system_log.write
@@ -557,7 +642,7 @@ mvp_auto:
                   entity_id: binary_sensor.raumtemperatur_zu_heiss
                   state: "off"
                 - condition: template
-                  value_template: "{{ now_ts >= as_timestamp(states('input_datetime.mvp_miner2_temp_lockout_until'), 0) }}"
+                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0) }}"
                 - action: system_log.write
                   data:
                     message: "[mvp-miner2] P2 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }}"
@@ -573,7 +658,7 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P3: Super-Deadband unterschritten → Eco (blockiert wenn Upgrade-Cooldown aktiv)
+            # P3: Super-Deadband unterschritten → Standard (blockiert wenn Upgrade-Cooldown aktiv)
             - conditions:
                 - condition: template
                   value_template: "{{ soc < soc_super_off and m2_status == 'Super' }}"
@@ -582,7 +667,56 @@ mvp_auto:
                   value_template: "{{ (now_ts - m2_up_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P3 Super→Eco: soc={{ soc }}% < {{ soc_super_off }}%"
+                    message: "[mvp-miner2] P3 Super→Standard: soc={{ soc }}% < {{ soc_super_off }}% — Deadband unterschritten"
+                    level: info
+                - action: select.select_option
+                  target:
+                    entity_id: select.miner2_workmode_set
+                  data:
+                    option: Standard
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.mvp_miner2_last_downgrade
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+            # P2.5: SoC im Standard-Bereich → Standard (Eco→Standard, blockiert wenn Downgrade-Cooldown aktiv)
+            - conditions:
+                - condition: template
+                  value_template: "{{ soc >= soc_std_on and m2_status == 'Eco' }}"
+              sequence:
+                - condition: template
+                  value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
+                - condition: state
+                  entity_id: binary_sensor.raumtemperatur_zu_heiss
+                  state: "off"
+                - condition: template
+                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0) }}"
+                - action: system_log.write
+                  data:
+                    message: "[mvp-miner2] P2.5 Standard: soc={{ soc }}% >= {{ soc_std_on }}% — Eco→Standard"
+                    level: info
+                - action: select.select_option
+                  target:
+                    entity_id: select.miner2_workmode_set
+                  data:
+                    option: Standard
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.mvp_miner2_last_upgrade
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+            # P3.5: Standard-Deadband unterschritten → Eco (blockiert wenn Upgrade-Cooldown aktiv)
+            - conditions:
+                - condition: template
+                  value_template: "{{ soc < soc_std_off and m2_status == 'Standard' }}"
+              sequence:
+                - condition: template
+                  value_template: "{{ (now_ts - m2_up_ts) >= cooldown_sec }}"
+                - action: system_log.write
+                  data:
+                    message: "[mvp-miner2] P3.5 Standard→Eco: soc={{ soc }}% < {{ soc_std_off }}% — Deadband unterschritten"
                     level: info
                 - action: select.select_option
                   target:
@@ -596,7 +730,8 @@ mvp_auto:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
             # P4: SoC >= Schwelle, Miner aus → Eco starten
-            # SoC ist immer Pflicht. PV >= pv_start erlaubt Cooldown-Bypass (kein Flapping-Risiko bei stabilem SoC).
+            # SoC ist immer Pflicht. PV >= pv_start erlaubt Cooldown-Bypass nach min. 15 min seit letztem Stop.
+            # Mindest-15min verhindert P1→P4-Flapping bei kurzen Solareinbrüchen.
             # Temp-Lockout blockiert immer — auch wenn Miner intern durch Hardware-Schutz abgeschaltet hat.
             - conditions:
                 - condition: state
@@ -607,13 +742,18 @@ mvp_auto:
                     {{ soc >= soc_start and
                        m2_status in ['Standby', 'Idle', 'Off'] }}
                 - condition: template
-                  value_template: "{{ now_ts >= as_timestamp(states('input_datetime.mvp_miner2_temp_lockout_until'), 0) }}"
+                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0) }}"
               sequence:
                 - condition: template
-                  value_template: "{{ pv >= pv_start or (now_ts - m2_dn_ts) >= cooldown_sec }}"
+                  value_template: >
+                    {{ (pv >= pv_start and (now_ts - m2_dn_ts) >= 900)
+                       or (now_ts - m2_dn_ts) >= cooldown_sec }}
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P4 Eco-Start: soc={{ soc }}% pv={{ pv }}W — status={{ m2_status }}"
+                    message: >
+                      [mvp-miner2] P4 Eco-Start: soc={{ soc }}% pv={{ pv }}W bat={{ bat_w | round(0) }}W
+                      — via={{ 'PV-Bypass(>15min)' if (pv >= pv_start and (now_ts - m2_dn_ts) >= 900) else '1h-Cooldown' }}
+                      — status={{ m2_status }}
                     level: info
                 - action: select.select_option
                   target:
@@ -635,6 +775,65 @@ mvp_auto:
                         entity_id: input_datetime.last_start_at
                       data:
                         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    # ── P3b: PV-reaktiver Super→Eco Downgrade ────────────────────────────
+    - id: mvp_p3b_pv_reactive_downgrade
+      alias: "MVP: P3b PV-reaktiver Super→Eco Downgrade"
+      description: >
+        Downgrades Miner von Super→Eco wenn der Akku >800W sustained für 5 min abgibt.
+        Bypasses den normalen Upgrade-Cooldown (P3 wäre blockiert).
+        Setzt last_downgrade → verhindert sofortigen P2-Re-Upgrade für 1h.
+        Typischer Auslöser: Solareinbruch am Abend, PV kann Super-Modus nicht mehr tragen.
+      mode: single
+      trigger:
+        - platform: numeric_state
+          entity_id: sensor.battery_power_w
+          below: -800
+          for: "00:05:00"
+      action:
+        - variables:
+            m1_status: "{{ states('sensor.miner1_workmode_status') }}"
+            m2_status: "{{ states('sensor.miner2_workmode_status') }}"
+            bat_w: "{{ states('sensor.battery_power_w') | float(0) }}"
+            m1_auto: "{{ is_state('input_boolean.miner1_auto_load_management', 'on') }}"
+            m2_auto: "{{ is_state('input_boolean.miner2_auto_load_management', 'on') }}"
+        - condition: template
+          value_template: "{{ m1_status == 'Super' or m2_status == 'Super' }}"
+        - action: system_log.write
+          data:
+            message: >
+              [mvp-p3b] PV-reaktiver Super→Eco: bat={{ bat_w | round(0) }}W < -800W (5min sustained)
+              — m1={{ m1_status }} m2={{ m2_status }} → Eco
+              (Upgrade-Cooldown überbrückt, last_downgrade gesetzt — P2 gesperrt für 1h)
+            level: warning
+        - if:
+            - condition: template
+              value_template: "{{ m1_status == 'Super' and m1_auto }}"
+          then:
+            - action: select.select_option
+              target:
+                entity_id: select.miner1_workmode_set
+              data:
+                option: Eco
+            - action: input_datetime.set_datetime
+              target:
+                entity_id: input_datetime.mvp_miner1_last_downgrade
+              data:
+                datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+        - if:
+            - condition: template
+              value_template: "{{ m2_status == 'Super' and m2_auto }}"
+          then:
+            - action: select.select_option
+              target:
+                entity_id: select.miner2_workmode_set
+              data:
+                option: Eco
+            - action: input_datetime.set_datetime
+              target:
+                entity_id: input_datetime.mvp_miner2_last_downgrade
+              data:
+                datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
     # ── Lüftung: Shelly-Plug Watchdog ─────────────────────────────────────
     - id: mvp_lueftung_watchdog
