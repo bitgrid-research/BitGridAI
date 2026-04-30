@@ -198,7 +198,7 @@ views:
                     const parseIdt     = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
                       ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
                     const nowTs        = Date.now() / 1000;
-                    const cooldownSec  = 1800;
+                    const cooldownSec  = 3600;
                     const m1DnTs       = parseIdt(states['input_datetime.mvp_miner1_last_downgrade']?.state);
                     const m1UpTs       = parseIdt(states['input_datetime.mvp_miner1_last_upgrade']?.state);
                     const m2DnTs       = parseIdt(states['input_datetime.mvp_miner2_last_downgrade']?.state);
@@ -2030,6 +2030,14 @@ views:
                     parseLog(states['input_text.pool_btc_daily_log']?.state ?? '').forEach(e => {
                       const [d, b] = e.split(','); if (d && !btcMap[d]) btcMap[d] = parseFloat(b) || 0;
                     });
+                    const settleThs = {};
+                    (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {
+                      const hr = tx.mining_extra?.hash_rate;
+                      const md = tx.mining_extra?.mining_date;
+                      if (!hr || !md) return;
+                      const d = new Date(md * 1000).toISOString().slice(0, 10);
+                      settleThs[d] = (hr / 1e12).toFixed(2);
+                    });
                     const thsYest = parseFloat(states['sensor.pool_ths_yesterday']?.state) || 0;
                     const phArr   = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
                     const thsApi  = {};
@@ -2037,7 +2045,12 @@ views:
                       const sd = new Date(phArr[0][0]); sd.setUTCDate(sd.getUTCDate() - 1);
                       thsApi[sd.toISOString().slice(0, 10)] = thsYest.toFixed(1);
                     }
+                    const thsLog  = {};
+                    parseLog(states['input_text.pool_ths_daily_log']?.state ?? '').forEach(e => {
+                      const [d, t] = e.split(','); if (d && t) thsLog[d] = t;
+                    });
                     const csvThs = {
+                      '2026-04-29':'54.91','2026-04-28':'56.54',
                       '2026-04-27':'62.04','2026-04-26':'52.91','2026-04-25':'58.40',
                       '2026-04-24':'64.92','2026-04-23':'65.03','2026-04-22':'64.86',
                       '2026-04-21':'14.59','2026-04-20':'50.26','2026-04-19':'25.12',
@@ -2095,7 +2108,7 @@ views:
                       const fw = r.live ? '600' : '400';
                       const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
                       const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
-                      const ths    = thsApi[r.d] ?? csvThs[r.d] ?? '—';
+                      const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? '—';
                       const diff   = getDiff(r.d);
                       const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
                       const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';

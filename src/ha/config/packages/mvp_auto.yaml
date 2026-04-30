@@ -153,12 +153,12 @@ mvp_auto:
           icon: mdi:timer-lock
           state: >
             {% set now_ts = now().timestamp() %}
-            {% set up_rem = (as_timestamp(states('input_datetime.mvp_miner1_last_upgrade'), 0) + 1800 - now_ts) | int %}
-            {% set dn_rem = (as_timestamp(states('input_datetime.mvp_miner1_last_downgrade'), 0) + 1800 - now_ts) | int %}
+            {% set up_rem = (as_timestamp(states('input_datetime.mvp_miner1_last_upgrade'), 0) + 3600 - now_ts) | int %}
+            {% set dn_rem = (as_timestamp(states('input_datetime.mvp_miner1_last_downgrade'), 0) + 3600 - now_ts) | int %}
             {% if up_rem > 0 %}
-              ↑ {{ '%d:%02d' | format(up_rem // 60, up_rem % 60) }}
+              ↑ {{ (up_rem // 60) }} min
             {% elif dn_rem > 0 %}
-              ↓ {{ '%d:%02d' | format(dn_rem // 60, dn_rem % 60) }}
+              ↓ {{ (dn_rem // 60) }} min
             {% else %}
               —
             {% endif %}
@@ -167,12 +167,12 @@ mvp_auto:
           icon: mdi:timer-lock
           state: >
             {% set now_ts = now().timestamp() %}
-            {% set up_rem = (as_timestamp(states('input_datetime.mvp_miner2_last_upgrade'), 0) + 1800 - now_ts) | int %}
-            {% set dn_rem = (as_timestamp(states('input_datetime.mvp_miner2_last_downgrade'), 0) + 1800 - now_ts) | int %}
+            {% set up_rem = (as_timestamp(states('input_datetime.mvp_miner2_last_upgrade'), 0) + 3600 - now_ts) | int %}
+            {% set dn_rem = (as_timestamp(states('input_datetime.mvp_miner2_last_downgrade'), 0) + 3600 - now_ts) | int %}
             {% if up_rem > 0 %}
-              ↑ {{ '%d:%02d' | format(up_rem // 60, up_rem % 60) }}
+              ↑ {{ (up_rem // 60) }} min
             {% elif dn_rem > 0 %}
-              ↓ {{ '%d:%02d' | format(dn_rem // 60, dn_rem % 60) }}
+              ↓ {{ (dn_rem // 60) }} min
             {% else %}
               —
             {% endif %}
@@ -277,7 +277,7 @@ mvp_auto:
             m1_up_ts: "{{ as_timestamp(states('input_datetime.mvp_miner1_last_upgrade'), 0) }}"
             m1_dn_ts: "{{ as_timestamp(states('input_datetime.mvp_miner1_last_downgrade'), 0) }}"
             now_ts: "{{ now().timestamp() }}"
-            cooldown_sec: 1800
+            cooldown_sec: 3600
 
         - action: system_log.write
           data:
@@ -396,6 +396,7 @@ mvp_auto:
 
             # P4: SoC >= Schwelle, Miner aus → Eco starten
             # SoC ist immer Pflicht. PV >= pv_start erlaubt Cooldown-Bypass (kein Flapping-Risiko bei stabilem SoC).
+            # Temp-Lockout blockiert immer — auch wenn Miner intern durch Hardware-Schutz abgeschaltet hat.
             - conditions:
                 - condition: state
                   entity_id: binary_sensor.mvp_nacht_sperre_aktiv
@@ -404,6 +405,8 @@ mvp_auto:
                   value_template: >
                     {{ soc >= soc_start and
                        m1_status in ['Standby', 'Idle', 'Off'] }}
+                - condition: template
+                  value_template: "{{ now_ts >= as_timestamp(states('input_datetime.mvp_miner1_temp_lockout_until'), 0) }}"
               sequence:
                 - condition: template
                   value_template: "{{ pv >= pv_start or (now_ts - m1_dn_ts) >= cooldown_sec }}"
@@ -475,7 +478,7 @@ mvp_auto:
             m2_up_ts: "{{ as_timestamp(states('input_datetime.mvp_miner2_last_upgrade'), 0) }}"
             m2_dn_ts: "{{ as_timestamp(states('input_datetime.mvp_miner2_last_downgrade'), 0) }}"
             now_ts: "{{ now().timestamp() }}"
-            cooldown_sec: 1800
+            cooldown_sec: 3600
 
         - action: system_log.write
           data:
@@ -594,6 +597,7 @@ mvp_auto:
 
             # P4: SoC >= Schwelle, Miner aus → Eco starten
             # SoC ist immer Pflicht. PV >= pv_start erlaubt Cooldown-Bypass (kein Flapping-Risiko bei stabilem SoC).
+            # Temp-Lockout blockiert immer — auch wenn Miner intern durch Hardware-Schutz abgeschaltet hat.
             - conditions:
                 - condition: state
                   entity_id: binary_sensor.mvp_nacht_sperre_aktiv
@@ -602,6 +606,8 @@ mvp_auto:
                   value_template: >
                     {{ soc >= soc_start and
                        m2_status in ['Standby', 'Idle', 'Off'] }}
+                - condition: template
+                  value_template: "{{ now_ts >= as_timestamp(states('input_datetime.mvp_miner2_temp_lockout_until'), 0) }}"
               sequence:
                 - condition: template
                   value_template: "{{ pv >= pv_start or (now_ts - m2_dn_ts) >= cooldown_sec }}"
@@ -760,12 +766,12 @@ mvp_auto:
           target:
             entity_id: input_datetime.mvp_miner1_temp_lockout_until
           data:
-            datetime: "{{ (now() + timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S') }}"
+            datetime: "{{ (now() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') }}"
         - action: input_datetime.set_datetime
           target:
             entity_id: input_datetime.mvp_miner2_temp_lockout_until
           data:
-            datetime: "{{ (now() + timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S') }}"
+            datetime: "{{ (now() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') }}"
 
     - id: mvp_miner1_tmax_safety
       alias: "MVP: Miner 1 TMax → Eco"
@@ -805,7 +811,7 @@ mvp_auto:
           target:
             entity_id: input_datetime.mvp_miner1_temp_lockout_until
           data:
-            datetime: "{{ (now() + timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S') }}"
+            datetime: "{{ (now() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') }}"
 
     - id: mvp_miner2_tmax_safety
       alias: "MVP: Miner 2 TMax → Eco"
@@ -845,7 +851,96 @@ mvp_auto:
           target:
             entity_id: input_datetime.mvp_miner2_temp_lockout_until
           data:
-            datetime: "{{ (now() + timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S') }}"
+            datetime: "{{ (now() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    # ── TMax-Lockout bei internem Hardware-Schutzabschalten ──────────────
+    # Wenn der Miner selbst wegen Überhitzung stoppt (Status aktiv→Standby/Off)
+    # und TMax noch >= Schwelle, muss der Lockout gesetzt werden.
+    # Sonst würde P4 den Miner sofort neu starten da tmax_safety nur auf
+    # Standard/Super feuert und keinen Lockout für diesen Fall setzt.
+    - id: mvp_miner1_tmax_lockout_on_selfstop
+      alias: "MVP: Miner 1 TMax-Lockout bei Selbstabschaltung"
+      description: >
+        Setzt 3h Temp-Lockout wenn Miner 1 von aktiver Workmode nach Standby/Off
+        wechselt und TMax noch >= Schwelle (interner Hardware-Schutz ausgelöst).
+      mode: single
+      trigger:
+        - platform: state
+          entity_id: sensor.miner1_workmode_status
+          from:
+            - Eco
+            - Standard
+            - Super
+          to:
+            - Standby
+            - "Off"
+      condition:
+        - condition: template
+          value_template: >
+            {{ states('sensor.miner1_tmax') | float(0) >=
+               states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}
+      action:
+        - variables:
+            tmax: "{{ states('sensor.miner1_tmax') | float(0) }}"
+            threshold: "{{ states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}"
+        - action: system_log.write
+          data:
+            message: >
+              [mvp-miner1] TMax-Lockout bei Selbstabschaltung: tmax={{ tmax }}°C >= {{ threshold }}°C
+              — Miner hat intern gestoppt → Lockout 3h gesetzt (verhindert P4-Neustart)
+            level: warning
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.mvp_miner1_last_downgrade
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.mvp_miner1_temp_lockout_until
+          data:
+            datetime: "{{ (now() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    - id: mvp_miner2_tmax_lockout_on_selfstop
+      alias: "MVP: Miner 2 TMax-Lockout bei Selbstabschaltung"
+      description: >
+        Setzt 3h Temp-Lockout wenn Miner 2 von aktiver Workmode nach Standby/Off
+        wechselt und TMax noch >= Schwelle (interner Hardware-Schutz ausgelöst).
+      mode: single
+      trigger:
+        - platform: state
+          entity_id: sensor.miner2_workmode_status
+          from:
+            - Eco
+            - Standard
+            - Super
+          to:
+            - Standby
+            - "Off"
+      condition:
+        - condition: template
+          value_template: >
+            {{ states('sensor.miner2_tmax') | float(0) >=
+               states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}
+      action:
+        - variables:
+            tmax: "{{ states('sensor.miner2_tmax') | float(0) }}"
+            threshold: "{{ states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}"
+        - action: system_log.write
+          data:
+            message: >
+              [mvp-miner2] TMax-Lockout bei Selbstabschaltung: tmax={{ tmax }}°C >= {{ threshold }}°C
+              — Miner hat intern gestoppt → Lockout 3h gesetzt (verhindert P4-Neustart)
+            level: warning
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.mvp_miner2_last_downgrade
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.mvp_miner2_temp_lockout_until
+          data:
+            datetime: "{{ (now() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') }}"
 
     # ── State-Transition-Logger ────────────────────────────────────────────
     - id: miner_state_transition_logger
@@ -945,7 +1040,7 @@ mvp_auto:
             - sensor.miner2_workmode_status
           to:
             - Standby
-            - Off
+            - "Off"
       condition:
         - condition: template
           value_template: >-
