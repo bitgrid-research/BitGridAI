@@ -409,11 +409,11 @@ views:
                           </div>
                           <div style="border-top:1px solid var(--divider-color);padding-top:8px;margin-bottom:auto;">
                             <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;">₿ Blockzeit</div>
-                            <div style="font-size:0.72rem;font-weight:600;color:#f59e0b;margin-top:1px;">${blockDisplay}</div>
+                            <div style="font-size:0.72rem;font-weight:600;color:#9e7e3a;margin-top:1px;">${blockDisplay}</div>
                             <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Balance in SATs</div>
-                            <div style="font-size:0.65rem;font-weight:600;color:#F7931A;margin-top:1px;">${balanceSats}</div>
+                            <div style="font-size:0.65rem;font-weight:600;color:#b07830;margin-top:1px;">${balanceSats}</div>
                             <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Kurs EUR</div>
-                            <div style="font-size:0.65rem;font-weight:600;color:#4CAF50;margin-top:1px;">${btcEurDisplay}</div>
+                            <div style="font-size:0.65rem;font-weight:600;color:#5e9668;margin-top:1px;">${btcEurDisplay}</div>
                           </div>
                           <div style="margin-top:6px;">
                             <div style="font-size:0.55rem;color:var(--secondary-text-color);opacity:0.5;font-family:monospace;">${slot}</div>
@@ -2109,7 +2109,7 @@ views:
                       const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
                       const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
                       const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? '—';
-                      const diff   = getDiff(r.d);
+                      const diff   = r.live ? '—' : getDiff(r.d);
                       const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
                       const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';
                       const earnedEur = (satNum !== null && r.kw > 0 && btcEur > 0)

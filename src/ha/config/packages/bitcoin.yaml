@@ -14,14 +14,16 @@ bitcoin:
           state_class: measurement
           icon: mdi:bitcoin
 
-  # ── Bitcoin Block Height ─────────────────────────────────────────────────────
-  # Mempool-Instanz auf Umbrel — einkommentieren wenn Mempool läuft (Port 3006)
-  #
-  # rest:
-  #   - resource: "http://umbrel.local:3006/api/blocks/tip/height"
-  #     scan_interval: 60
-  #     sensor:
-  #       - name: "bitcoin_block_height"
-  #         unique_id: bitcoin_block_height
-  #         value_template: "{{ value | int(0) }}"
-  #         icon: mdi:bitcoin
+    # ── Bitcoin Block Height ───────────────────────────────────────────────────
+    # Primär (TODO): Umbrel-Mempool ersetzen wenn läuft (Port 3006):
+    #   resource: "http://umbrel.local:3006/api/blocks/tip/height"
+    # Fallback: Blockstream public API — kein API-Key nötig
+    - resource: "https://blockstream.info/api/blocks/tip/height"
+      scan_interval: 60
+      sensor:
+        - name: "bitcoin_block_height"
+          unique_id: bitcoin_block_height
+          value_template: "{{ value | int(0) }}"
+          unit_of_measurement: ""
+          state_class: measurement
+          icon: mdi:bitcoin
