@@ -781,7 +781,7 @@ stats:
             value: "{{ _combined.split('|')[5:10] | join('|') }}"
         - action: shell_command.mining_log_append
           data:
-            entry: "{{ log_date }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }}"
+            ENTRY: "{{ log_date }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }}"
 
     # Recovery: fehlenden Gestern-Eintrag beim HA-Start nachholen
     # Greift nur wenn gestern nicht im Log ist UND der Snapshot existiert.
@@ -831,7 +831,28 @@ stats:
             value: "{{ _combined.split('|')[5:10] | join('|') }}"
         - action: shell_command.mining_log_append
           data:
-            entry: "{{ yesterday }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }}"
+            ENTRY: "{{ yesterday }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }}"
+
+    # Startzeit erfassen: feuert bei jedem off→on, unabhängig vom Start-Pfad (Eco/Std/Super).
+    # Schreibt last_start_at nur wenn noch kein Eintrag für heute existiert.
+    - id: stats_track_miner_first_start_today
+      alias: "Stats: Miner Startzeit erfassen (erster Start des Tages)"
+      trigger:
+        - platform: state
+          entity_id: binary_sensor.miners_any_running
+          from: "off"
+          to: "on"
+      action:
+        - if:
+            - condition: template
+              value_template: >-
+                {{ states('input_datetime.last_start_at')[:10] != now().strftime('%Y-%m-%d') }}
+          then:
+            - action: input_datetime.set_datetime
+              target:
+                entity_id: input_datetime.last_start_at
+              data:
+                datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
     # Gestern-Zeiten sichern: letzten Start/Stop des Vortages speichern
     - id: stats_save_yesterday_miner_times
@@ -850,6 +871,25 @@ stats:
             entity_id: input_datetime.miner_stop_yesterday
           data:
             datetime: "{{ states('input_datetime.last_stop_at') }}"
+
+  # ── CSV-History-Sensor: liest mining_log.csv für UI (>10 Einträge) ──────────────
+  command_line:
+    - sensor:
+        name: "mining_log_history"
+        unique_id: mining_log_history
+        scan_interval: 3600
+        command: >-
+          python3 -c "
+          import json
+          try:
+              with open('/config/mining_log.csv') as f:
+                  lines = [l.strip() for l in f if l.strip() and not l.startswith('date')]
+              print(json.dumps({'rows': '|'.join(lines[-60:])}))
+          except Exception as e:
+              print(json.dumps({'rows': '', 'error': str(e)}))"
+        value_template: "OK"
+        json_attributes:
+          - rows
 
   # ── Langzeit-Archiv: täglich in CSV schreiben ─────────────────────────────────
   # Datei: /config/mining_log.csv (auf dem HA-Host, nie von Deploy überschrieben)

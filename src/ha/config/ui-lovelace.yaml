@@ -183,7 +183,7 @@ views:
                     const socStop       = parseFloat(states['input_number.mvp_soc_stop_pct']?.state        || 50);
                     const batPowerW     = parseFloat(states['sensor.battery_power_w']?.state || 0);
                     const battCapKwh    = parseFloat(states['input_number.battery_capacity_kwh']?.state || 10);
-                    const socGap        = Math.max(0, socSoftMin - soc);
+                    const socGap        = Math.max(0, mvpSocStart - soc);
                     const etaMin        = batPowerW > 100
                       ? Math.round(socGap / 100 * battCapKwh * 1000 / batPowerW * 60)
                       : null;
@@ -237,8 +237,9 @@ views:
                       || (h >= 22 || h < 6);
                     const minerRunning = ['Eco', 'Standard', 'Super'].includes(minerMode);
                     const isWaiting = !nightBlockActive && !minerRunning && (code === 'NOOP_R2_SOC_SOFT_MIN' || soc < socSoftMin);
-                    const isEco     = !nightBlockActive && !isWaiting && minerMode === 'Eco';
-                    const isSpeed   = !nightBlockActive && !isWaiting && minerMode === 'Super';
+                    const isEco      = !nightBlockActive && !isWaiting && minerMode === 'Eco';
+                    const isStandard = !nightBlockActive && !isWaiting && minerMode === 'Standard';
+                    const isSpeed    = !nightBlockActive && !isWaiting && minerMode === 'Super';
                     let weather, wColor;
                     if      (pv > 4000) { weather = '☀️ Volle Sonne';       wColor = '#FFC107'; }
                     else if (pv > 2000) { weather = '⛅ Teilweise bewölkt'; wColor = '#90A4AE'; }
@@ -280,15 +281,15 @@ views:
                     } else if (code === 'STOP_R2_SOC_HARD_MIN') {
                       lines = [
                         `Batterie kritisch — ${soc.toFixed(0)}% unter Sicherheitsminimum ${socHardMin.toFixed(0)}%.`,
-                        `Mining startet erst wenn Akku ≥ ${socSoftMin.toFixed(0)}%.`
+                        `Mining startet erst wenn Akku ≥ ${mvpSocStart.toFixed(0)}%.`
                       ];
                     } else if (code === 'NOOP_R2_SOC_SOFT_MIN' && !minerRunning) {
                       lines = [
                         `⚡ Automatik an · Miner im Standby.`,
-                        `Akku ${soc.toFixed(0)}% → ${socSoftMin.toFixed(0)}% Eco`,
+                        `Akku ${soc.toFixed(0)}% → ${mvpSocStart.toFixed(0)}% Eco`,
                         etaStr
                           ? `Los geht's in ${etaStr} — bis dann: Hodl strong! ₿`
-                          : `Start bei ≥ ${socSoftMin.toFixed(0)}% Akku — bis dann: Hodl strong! ₿`
+                          : `Start bei ≥ ${mvpSocStart.toFixed(0)}% Akku — bis dann: Hodl strong! ₿`
                       ];
                     } else if (code === 'STOP_R2_GRID_IMPORT_EXCEEDED') {
                       lines = [
@@ -305,7 +306,9 @@ views:
                         : ecoEtaStopMin < 60 ? `~${ecoEtaStopMin} min`
                         : `~${Math.floor(ecoEtaStopMin / 60)}h ${ecoEtaStopMin % 60}min`;
                       const ecoLine3 = soc <= socStop
-                        ? `⚠️ Unter ${socStop.toFixed(0)}% — wechselt zu Standby`
+                        ? ecoBlockStr
+                          ? `Deadband: Standby-Wechsel in ${ecoBlockStr} freigegeben`
+                          : `⚠️ Unter ${socStop.toFixed(0)}% — wechselt zu Standby`
                         : tempLockActive
                           ? `🌡️ Eco wegen Überhitzung — Sperre noch ${tempLockStr}`
                           : speedBlockStr
@@ -372,10 +375,10 @@ views:
                     } else if (soc < socSoftMin && !minerRunning) {
                       lines = [
                         `⚡ Automatik an · Miner im Standby.`,
-                        `Akku ${soc.toFixed(0)}% → ${socSoftMin.toFixed(0)}% Eco`,
+                        `Akku ${soc.toFixed(0)}% → ${mvpSocStart.toFixed(0)}% Eco`,
                         etaStr
                           ? `Los geht's in ${etaStr} — bis dann: Hodl strong! ₿`
-                          : `Start bei ≥ ${socSoftMin.toFixed(0)}% Akku — bis dann: Hodl strong! ₿`
+                          : `Start bei ≥ ${mvpSocStart.toFixed(0)}% Akku — bis dann: Hodl strong! ₿`
                       ];
                     } else {
                       const idleLine3 = priority === 'R5_STABILITY'
@@ -411,17 +414,17 @@ views:
                     const blockKnown = blockDisplay && blockDisplay !== '—';
                     const balanceBtc = parseFloat(states['sensor.pool_balance_btc']?.state);
                     const balanceSats = (!isNaN(balanceBtc) && balanceBtc > 0)
-                      ? Math.round(balanceBtc * 1e8).toLocaleString('de-DE')
-                      : '58.122';
+                      ? Math.round(balanceBtc * 1e8).toLocaleString('de-DE') + ' SATs'
+                      : '58.122 SATs';
                     const btcEurPrice = parseFloat(states['sensor.btc_eur_price']?.state);
                     const btcEurDisplay = (!isNaN(btcEurPrice) && btcEurPrice > 0)
                       ? btcEurPrice.toLocaleString('de-DE') + ' €'
                       : '—';
                     const imgSrc = nightBlockActive ? 'bithamster_sleep.png'
-                                 : isWaiting        ? 'bithamster_wait.png'
                                  : isEco            ? 'bithamster_eco.png'
+                                 : isStandard       ? 'bithamster_standard.png'
                                  : isSpeed          ? 'bithamster_super.png'
-                                 :                    'bithamster_standard.png';
+                                 :                    'bithamster_wait.png';
                     return `
                       <div style="position:relative;padding-right:100px;min-height:165px">
                         <div style="position:absolute;top:0;right:0;
@@ -438,11 +441,11 @@ views:
                           </div>
                           <div style="border-top:1px solid var(--divider-color);padding-top:8px;margin-bottom:auto;">
                             <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;">₿ Blockzeit</div>
-                            <div style="font-size:0.72rem;font-weight:600;color:#9e7e3a;margin-top:1px;">${blockDisplay}</div>
-                            <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Balance in SATs</div>
-                            <div style="font-size:0.65rem;font-weight:600;color:#b07830;margin-top:1px;">${balanceSats}</div>
-                            <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Kurs in EUR</div>
-                            <div style="font-size:0.65rem;font-weight:600;color:#5e9668;margin-top:1px;">${btcEurDisplay}</div>
+                            <div style="font-size:0.72rem;font-weight:600;color:#a8a8a8;margin-top:1px;">${blockDisplay}</div>
+                            <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Balance</div>
+                            <div style="font-size:0.65rem;font-weight:600;color:#a8a8a8;margin-top:1px;">${balanceSats}</div>
+                            <div style="font-size:0.55rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Kurs</div>
+                            <div style="font-size:0.65rem;font-weight:600;color:#a8a8a8;margin-top:1px;">${btcEurDisplay}</div>
                           </div>
                           <div style="margin-top:6px;">
                             <div style="font-size:0.55rem;color:var(--secondary-text-color);opacity:0.5;font-family:monospace;">${slot}</div>
@@ -1756,7 +1759,7 @@ views:
                         return `<div style="width:100%;padding:2px 0;">
                           <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Raumklima</div>
                           ${row('mdi:thermometer','Temperatur',t_keller,'°C',roomTempColor(t_keller))}
-                          ${row('mdi:water-percent','Feuchte',h_keller,'%',roomHumColor(h_keller))}
+                          ${row('mdi:water-percent','Feuchte',h_keller,'%','var(--primary-text-color)')}
                           ${row('mdi:battery','Akku',b_keller,'%')}
                         </div>`;
                       ]]]
@@ -2061,23 +2064,30 @@ views:
                 mining_log: >
                   [[[
                     const parseLog = (raw) => (raw && raw !== 'unknown' && raw !== 'unavailable') ? raw.split('|').filter(e => e.includes(',')) : [];
-                    const logEntries = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
+                    const recentLog = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
+                    const csvLog = parseLog(states['sensor.mining_log_history']?.attributes?.rows ?? '');
+                    const seenDates = new Set(recentLog.map(e => e.split(',')[0]));
+                    const logEntries = [...recentLog, ...csvLog.filter(e => !seenDates.has(e.split(',')[0]))].sort((a,b) => b.split(',')[0].localeCompare(a.split(',')[0]));
                     const btcMap = {};
-                    (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
-                      if (!e[0] || !e[2]) return;
-                      const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
-                      btcMap[sd.toISOString().slice(0, 10)] = e[2];
-                    });
-                    parseLog(states['input_text.pool_btc_daily_log']?.state ?? '').forEach(e => {
-                      const [d, b] = e.split(','); if (d && !btcMap[d]) btcMap[d] = parseFloat(b) || 0;
-                    });
                     const settleThs = {};
                     (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {
                       const hr = tx.mining_extra?.hash_rate;
                       const md = tx.mining_extra?.mining_date;
                       if (!hr || !md) return;
-                      const d = new Date(md * 1000).toISOString().slice(0, 10);
+                      const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
+                      const d = sd.toISOString().slice(0, 10);
                       settleThs[d] = (hr / 1e12).toFixed(2);
+                      const btcVal = parseFloat(tx.value);
+                      if (btcVal > 0) btcMap[d] = btcVal;
+                    });
+                    (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
+                      if (!e[0] || !e[2]) return;
+                      const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
+                      const d = sd.toISOString().slice(0, 10);
+                      if (!btcMap[d]) btcMap[d] = e[2];
+                    });
+                    parseLog(states['input_text.pool_btc_daily_log']?.state ?? '').forEach(e => {
+                      const [d, b] = e.split(','); if (d && !btcMap[d]) btcMap[d] = parseFloat(b) || 0;
                     });
                     const thsYest = parseFloat(states['sensor.pool_ths_yesterday']?.state) || 0;
                     const phArr   = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
@@ -2091,7 +2101,7 @@ views:
                       const [d, t] = e.split(','); if (d && t) thsLog[d] = t;
                     });
                     const csvThs = {
-                      '2026-04-29':'54.91','2026-04-28':'56.54',
+                      '2026-04-30':'61.47','2026-04-29':'54.91','2026-04-28':'56.54',
                       '2026-04-27':'62.04','2026-04-26':'52.91','2026-04-25':'58.40',
                       '2026-04-24':'64.92','2026-04-23':'65.03','2026-04-22':'64.86',
                       '2026-04-21':'14.59','2026-04-20':'50.26','2026-04-19':'25.12',
