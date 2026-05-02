@@ -66,14 +66,14 @@ mvp_auto:
       icon: mdi:battery-alert
 
 
-    mvp_tmax_eco_threshold_c:
-      name: "TMax Eco-Sicherheitsschwelle (°C)"
+    mvp_tmax_std_threshold_c:
+      name: "TMax Standard-Sicherheitsschwelle (°C)"
       min: 100
       max: 120
       step: 1
       mode: box
-      initial: 113
-      icon: mdi:thermometer-alert
+      initial: 112
+      icon: mdi:thermometer-high
 
     mvp_room_temp_eco_threshold_c:
       name: "Raumtemp Eco-Sicherheitsschwelle (°C)"
@@ -972,35 +972,40 @@ mvp_auto:
           data:
             datetime: "{{ (now() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') }}"
 
-    - id: mvp_miner1_tmax_safety
-      alias: "MVP: Miner 1 TMax → Eco"
+    # ── TMax-Stufe 1: Super → Standard bei 112°C ─────────────────────────
+    # Erster Schritt des Temperatur-Kaskade: Super → Standard sobald TMax
+    # mvp_tmax_std_threshold_c (112°C) überschreitet. Gibt dem Miner die
+    # Chance sich auf Standard zu kühlen bevor Stufe 2 (Standard → Eco) greift.
+    - id: mvp_miner1_tmax_std_safety
+      alias: "MVP: Miner 1 TMax → Standard"
       description: >
-        Drosselt Miner 1 auf Eco sobald TMax die Sicherheitsschwelle überschreitet.
-        Kein Cooldown — überschreibt Standard/Super sofort.
+        Drosselt Miner 1 von Super auf Standard sobald TMax >= 112°C.
+        Stufe 1 der Kaskade: 112°C → Standard, 113°C → Eco.
+        Kein Cooldown — Sicherheit hat Vorrang.
       mode: single
       trigger:
         - platform: numeric_state
           entity_id: sensor.miner1_tmax
-          above: input_number.mvp_tmax_eco_threshold_c
+          above: "{{ states('input_number.mvp_tmax_std_threshold_c') | float(112) - 1 }}"
       condition:
         - condition: template
-          value_template: "{{ states('sensor.miner1_workmode_status') in ['Standard', 'Super'] }}"
+          value_template: "{{ states('sensor.miner1_workmode_status') == 'Super' }}"
       action:
         - variables:
             tmax: "{{ states('sensor.miner1_tmax') | float(0) }}"
-            threshold: "{{ states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}"
+            threshold: "{{ states('input_number.mvp_tmax_std_threshold_c') | float(112) }}"
             m1_status: "{{ states('sensor.miner1_workmode_status') }}"
         - action: system_log.write
           data:
             message: >
-              [mvp-miner1] TMax-Safety: tmax={{ tmax }}°C >= {{ threshold }}°C
-              — status={{ m1_status }} → Eco (kein Cooldown)
+              [mvp-miner1] TMax-Stufe1: tmax={{ tmax }}°C >= {{ threshold }}°C
+              — status={{ m1_status }} → Standard (kein Cooldown)
             level: warning
         - action: select.select_option
           target:
             entity_id: select.miner1_workmode_set
           data:
-            option: Eco
+            option: Standard
         - action: input_datetime.set_datetime
           target:
             entity_id: input_datetime.mvp_miner1_last_downgrade
@@ -1012,35 +1017,36 @@ mvp_auto:
           data:
             datetime: "{{ (now() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') }}"
 
-    - id: mvp_miner2_tmax_safety
-      alias: "MVP: Miner 2 TMax → Eco"
+    - id: mvp_miner2_tmax_std_safety
+      alias: "MVP: Miner 2 TMax → Standard"
       description: >
-        Drosselt Miner 2 auf Eco sobald TMax die Sicherheitsschwelle überschreitet.
-        Kein Cooldown — überschreibt Standard/Super sofort.
+        Drosselt Miner 2 von Super auf Standard sobald TMax >= 112°C.
+        Stufe 1 der Kaskade: 112°C → Standard, 113°C → Eco.
+        Kein Cooldown — Sicherheit hat Vorrang.
       mode: single
       trigger:
         - platform: numeric_state
           entity_id: sensor.miner2_tmax
-          above: input_number.mvp_tmax_eco_threshold_c
+          above: "{{ states('input_number.mvp_tmax_std_threshold_c') | float(112) - 1 }}"
       condition:
         - condition: template
-          value_template: "{{ states('sensor.miner2_workmode_status') in ['Standard', 'Super'] }}"
+          value_template: "{{ states('sensor.miner2_workmode_status') == 'Super' }}"
       action:
         - variables:
             tmax: "{{ states('sensor.miner2_tmax') | float(0) }}"
-            threshold: "{{ states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}"
+            threshold: "{{ states('input_number.mvp_tmax_std_threshold_c') | float(112) }}"
             m2_status: "{{ states('sensor.miner2_workmode_status') }}"
         - action: system_log.write
           data:
             message: >
-              [mvp-miner2] TMax-Safety: tmax={{ tmax }}°C >= {{ threshold }}°C
-              — status={{ m2_status }} → Eco (kein Cooldown)
+              [mvp-miner2] TMax-Stufe1: tmax={{ tmax }}°C >= {{ threshold }}°C
+              — status={{ m2_status }} → Standard (kein Cooldown)
             level: warning
         - action: select.select_option
           target:
             entity_id: select.miner2_workmode_set
           data:
-            option: Eco
+            option: Standard
         - action: input_datetime.set_datetime
           target:
             entity_id: input_datetime.mvp_miner2_last_downgrade
@@ -1061,7 +1067,10 @@ mvp_auto:
       alias: "MVP: Miner 1 TMax-Lockout bei Selbstabschaltung"
       description: >
         Setzt 3h Temp-Lockout wenn Miner 1 von aktiver Workmode nach Standby/Off
-        wechselt und TMax noch >= Schwelle (interner Hardware-Schutz ausgelöst).
+        wechselt und TMax erhöht ist oder die API nicht mehr antwortet.
+        95°C statt Schwelle (113°C): interner Hardware-Schutz greift früher;
+        unavailable fängt den Fall ab wo die API beim Übertemperatur-Stop schon
+        abgestürzt ist und float(0) die Bedingung sonst fälschlicherweise killen würde.
       mode: single
       trigger:
         - platform: state
@@ -1076,16 +1085,15 @@ mvp_auto:
       condition:
         - condition: template
           value_template: >
-            {{ states('sensor.miner1_tmax') | float(0) >=
-               states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}
+            {% set tmax = states('sensor.miner1_tmax') %}
+            {{ tmax in ['unavailable', 'unknown'] or tmax | float(0) >= 95 }}
       action:
         - variables:
             tmax: "{{ states('sensor.miner1_tmax') | float(0) }}"
-            threshold: "{{ states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}"
         - action: system_log.write
           data:
             message: >
-              [mvp-miner1] TMax-Lockout bei Selbstabschaltung: tmax={{ tmax }}°C >= {{ threshold }}°C
+              [mvp-miner1] TMax-Lockout bei Selbstabschaltung: tmax={{ tmax }}°C
               — Miner hat intern gestoppt → Lockout 3h gesetzt (verhindert P4-Neustart)
             level: warning
         - action: input_datetime.set_datetime
@@ -1103,7 +1111,10 @@ mvp_auto:
       alias: "MVP: Miner 2 TMax-Lockout bei Selbstabschaltung"
       description: >
         Setzt 3h Temp-Lockout wenn Miner 2 von aktiver Workmode nach Standby/Off
-        wechselt und TMax noch >= Schwelle (interner Hardware-Schutz ausgelöst).
+        wechselt und TMax erhöht ist oder die API nicht mehr antwortet.
+        95°C statt Schwelle (113°C): interner Hardware-Schutz greift früher;
+        unavailable fängt den Fall ab wo die API beim Übertemperatur-Stop schon
+        abgestürzt ist und float(0) die Bedingung sonst fälschlicherweise killen würde.
       mode: single
       trigger:
         - platform: state
@@ -1118,16 +1129,15 @@ mvp_auto:
       condition:
         - condition: template
           value_template: >
-            {{ states('sensor.miner2_tmax') | float(0) >=
-               states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}
+            {% set tmax = states('sensor.miner2_tmax') %}
+            {{ tmax in ['unavailable', 'unknown'] or tmax | float(0) >= 95 }}
       action:
         - variables:
             tmax: "{{ states('sensor.miner2_tmax') | float(0) }}"
-            threshold: "{{ states('input_number.mvp_tmax_eco_threshold_c') | float(113) }}"
         - action: system_log.write
           data:
             message: >
-              [mvp-miner2] TMax-Lockout bei Selbstabschaltung: tmax={{ tmax }}°C >= {{ threshold }}°C
+              [mvp-miner2] TMax-Lockout bei Selbstabschaltung: tmax={{ tmax }}°C
               — Miner hat intern gestoppt → Lockout 3h gesetzt (verhindert P4-Neustart)
             level: warning
         - action: input_datetime.set_datetime

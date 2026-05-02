@@ -1,7 +1,7 @@
 stats:
 
   # ── Tageslog: Mining-Sessions persistieren ────────────────────────────────────
-  # Format pro Eintrag: YYYY-MM-DD,HH:MM,HH:MM,tot_h,eco_h,std_h,sup_h,kwh
+  # Format pro Eintrag: YYYY-MM-DD,HH:MM,HH:MM,tot_h,eco_h,std_h,sup_h,kwh,diff
   # Pipe-separiert, 5+5 Einträge über zwei input_text — Rolling Window für UI.
   # Langzeit-Archiv: /config/mining_log.csv (täglich 23:59:59, nie überschrieben).
   input_text:
@@ -759,12 +759,13 @@ stats:
             std_h: "{{ states('sensor.miner_standard_hours_today') | float(0) | round(1) }}"
             sup_h: "{{ states('sensor.miner_super_hours_today') | float(0) | round(1) }}"
             kwh: "{{ states('sensor.mining_energy_daily') | float(0) | round(2) }}"
+            diff: "{{ states('sensor.bitcoin_network_difficulty') | float(0) | round(2) }}"
             existing_a: "{{ states('input_text.mining_daily_log') }}"
             existing_b: "{{ states('input_text.mining_daily_log_b') }}"
         - condition: template
           value_template: "{{ not existing_a.startswith(log_date) }}"
         - variables:
-            _new: "{{ log_date ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh }}"
+            _new: "{{ log_date ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh ~ ',' ~ diff }}"
             _old_a: "{{ existing_a.split('|') if existing_a not in ['','unknown','unavailable'] else [] }}"
             _old_b: "{{ existing_b.split('|') if existing_b not in ['','unknown','unavailable'] else [] }}"
         - variables:
@@ -781,7 +782,7 @@ stats:
             value: "{{ _combined.split('|')[5:10] | join('|') }}"
         - action: shell_command.mining_log_append
           data:
-            ENTRY: "{{ log_date }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }}"
+            ENTRY: "{{ log_date }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }},{{ diff }}"
 
     # Recovery: fehlenden Gestern-Eintrag beim HA-Start nachholen
     # Greift nur wenn gestern nicht im Log ist UND der Snapshot existiert.
@@ -811,12 +812,13 @@ stats:
             std_h: "{{ states('input_number.yesterday_std_h') | float(0) | round(1) }}"
             sup_h: "{{ states('input_number.yesterday_sup_h') | float(0) | round(1) }}"
             kwh: "{{ states('input_number.yesterday_kwh') | float(0) | round(2) }}"
+            diff: "{{ states('sensor.bitcoin_network_difficulty') | float(0) | round(2) }}"
         - action: system_log.write
           data:
             message: "[stats-recover] Gestern ({{ yesterday }}) fehlt im Log — trage nach: {{ tot_h }}h {{ kwh }}kWh"
             level: warning
         - variables:
-            _new: "{{ yesterday ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh }}"
+            _new: "{{ yesterday ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh ~ ',' ~ diff }}"
             _old_a: "{{ existing_a.split('|') if existing_a not in ['','unknown','unavailable'] else [] }}"
             _old_b: "{{ existing_b.split('|') if existing_b not in ['','unknown','unavailable'] else [] }}"
         - variables:
@@ -831,7 +833,7 @@ stats:
             value: "{{ _combined.split('|')[5:10] | join('|') }}"
         - action: shell_command.mining_log_append
           data:
-            ENTRY: "{{ yesterday }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }}"
+            ENTRY: "{{ yesterday }},{{ start_t }},{{ stop_t }},{{ tot_h }},{{ eco_h }},{{ std_h }},{{ sup_h }},{{ kwh }},{{ diff }}"
 
     # Startzeit erfassen: feuert bei jedem off→on, unabhängig vom Start-Pfad (Eco/Std/Super).
     # Schreibt last_start_at nur wenn noch kein Eintrag für heute existiert.
@@ -893,12 +895,12 @@ stats:
 
   # ── Langzeit-Archiv: täglich in CSV schreiben ─────────────────────────────────
   # Datei: /config/mining_log.csv (auf dem HA-Host, nie von Deploy überschrieben)
-  # Format: date,start,stop,total_h,eco_h,std_h,speed_h,kwh
+  # Format: date,start,stop,total_h,eco_h,std_h,speed_h,kwh,diff
   # Variablen aus dem Service-Call werden als Umgebungsvariablen übergeben ($ENTRY).
   shell_command:
     mining_log_append: >-
       bash -c 'f=/config/mining_log.csv;
-      [ ! -f "$f" ] && echo "date,start,stop,total_h,eco_h,std_h,speed_h,kwh" > "$f";
+      [ ! -f "$f" ] && echo "date,start,stop,total_h,eco_h,std_h,speed_h,kwh,diff" > "$f";
       printf "%s\n" "$ENTRY" >> "$f"'
     stats_monthly_log_append: >-
       bash -c 'f=/config/stats_monthly.csv;

@@ -1,0 +1,159 @@
+title: Mining Verlauf
+path: mining-verlauf
+icon: mdi:calendar-clock
+
+cards:
+  - type: vertical-stack
+    cards:
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        styles:
+          card:
+            - padding: 16px
+        custom_fields:
+          mining_log:
+            - width: 100%
+            - justify-self: stretch
+            - box-sizing: border-box
+        custom_fields:
+          mining_log: >
+            [[[
+              const parseLog = (raw) => (raw && raw !== 'unknown' && raw !== 'unavailable') ? raw.split('|').filter(e => e.includes(',')) : [];
+              const recentLog = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
+              const csvLog = parseLog(states['sensor.mining_log_history']?.attributes?.rows ?? '');
+              const seenDates = new Set(recentLog.map(e => e.split(',')[0]));
+              const logEntries = [...recentLog, ...csvLog.filter(e => !seenDates.has(e.split(',')[0]))].sort((a,b) => b.split(',')[0].localeCompare(a.split(',')[0]));
+              const btcMap = {};
+              const settleThs = {};
+              (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {
+                const hr = tx.mining_extra?.hash_rate;
+                const md = tx.mining_extra?.mining_date;
+                if (!hr || !md) return;
+                const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
+                const d = sd.toISOString().slice(0, 10);
+                settleThs[d] = (hr / 1e12).toFixed(2);
+                const btcVal = parseFloat(tx.value);
+                if (btcVal > 0) btcMap[d] = btcVal;
+              });
+              (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
+                if (!e[0] || !e[2]) return;
+                const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
+                const d = sd.toISOString().slice(0, 10);
+                if (!btcMap[d]) btcMap[d] = e[2];
+              });
+              parseLog(states['input_text.pool_btc_daily_log']?.state ?? '').forEach(e => {
+                const [d, b] = e.split(','); if (d && !btcMap[d]) btcMap[d] = parseFloat(b) || 0;
+              });
+              const thsYest = parseFloat(states['sensor.pool_ths_yesterday']?.state) || 0;
+              const phArr   = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
+              const thsApi  = {};
+              if (thsYest > 0 && phArr.length > 0) {
+                const sd = new Date(phArr[0][0]); sd.setUTCDate(sd.getUTCDate() - 1);
+                thsApi[sd.toISOString().slice(0, 10)] = thsYest.toFixed(1);
+              }
+              const thsLog  = {};
+              parseLog(states['input_text.pool_ths_daily_log']?.state ?? '').forEach(e => {
+                const [d, t] = e.split(','); if (d && t) thsLog[d] = t;
+              });
+              const csvThs = {
+                '2026-04-30':'61.47','2026-04-29':'54.91','2026-04-28':'56.54',
+                '2026-04-27':'62.04','2026-04-26':'52.91','2026-04-25':'58.40',
+                '2026-04-24':'64.92','2026-04-23':'65.03','2026-04-22':'64.86',
+                '2026-04-21':'14.59','2026-04-20':'50.26','2026-04-19':'25.12',
+                '2026-04-18':'36.90','2026-04-17':'50.09','2026-04-16':'49.84',
+                '2026-04-15':'58.32','2026-04-14':'44.94','2026-04-12':'14.36',
+                '2026-04-11':'36.88','2026-04-10':'10.14','2026-04-09':'52.46',
+                '2026-04-08':'45.44','2026-04-07':'50.52','2026-04-06':'55.23',
+                '2026-04-05':'23.90','2026-04-04':'12.39','2026-04-03':'11.26',
+                '2026-04-02':'56.48','2026-04-01':'32.51','2026-03-31':'20.18',
+                '2026-03-30':'18.85','2026-03-29':'15.74','2026-03-28':'19.06'
+              };
+              const curDiff   = states['sensor.bitcoin_network_difficulty']?.state ?? null;
+              const diffEpochs = [
+                ['2026-05-02', curDiff ?? '132.47'],
+                ['2026-04-17', '135.59'],
+                ['2026-04-03', '138.97'],
+                ['2026-03-20', '133.79'],
+              ];
+              const getDiff = (d) => { for (const [s,v] of diffEpochs) { if (d>=s) return v; } return '—'; };
+              const btcEur    = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+              const STROM_EUR = 0.078;
+              const parseEntry = (e) => {
+                const p = e.split(',');
+                return { d: p[0]??'', on: p[1]??'–', off: p[2]??'–',
+                  tot: parseFloat(p[3])||0, ec: parseFloat(p[4])||0,
+                  st: parseFloat(p[5])||0, sp: parseFloat(p[6])||0, kw: parseFloat(p[7])||0,
+                  diff: (p[8] && p[8].trim() && parseFloat(p[8]) > 0) ? parseFloat(p[8]).toFixed(2) : null };
+              };
+              const fmtDt  = (iso) => (iso && iso.length >= 10) ? iso.slice(8,10)+'.'+iso.slice(5,7) : '—';
+              const fmtT   = (dt)  => (!dt || !dt.includes(' ')) ? '–' : dt.split(' ')[1].slice(0,5);
+              const fmtHm  = (v)   => { const n=parseFloat(v); if(!n||n<=0) return '0h'; const h=Math.floor(n),m=Math.round((n-h)*60); return m>0?`${h}h${m}m`:`${h}h`; };
+              const fmtH1  = (v)   => { const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(1); };
+              const fmtSat = (btc) => (!btc || btc <= 0) ? '—' : Math.round(btc * 1e8);
+              const _d = new Date(); const todayIso = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
+              const startDt  = states['input_datetime.last_start_at']?.state ?? '';
+              const stopDt   = states['input_datetime.last_stop_at']?.state ?? '';
+              const startTime = startDt.startsWith(todayIso) ? fmtT(startDt) : '–';
+              const stopTime  = stopDt.startsWith(todayIso)  ? fmtT(stopDt)  : '–';
+              const todayRow = {
+                d: todayIso, on: startTime, off: stopTime,
+                tot: parseFloat(states['sensor.miner_uptime_today_h']?.state)||0,
+                ec:  parseFloat(states['sensor.miner_eco_hours_today']?.state)||0,
+                st:  parseFloat(states['sensor.miner_standard_hours_today']?.state)||0,
+                sp:  parseFloat(states['sensor.miner_super_hours_today']?.state)||0,
+                kw:  parseFloat(states['sensor.mining_energy_daily']?.state)||0,
+                live: true
+              };
+              const allRows = [todayRow, ...logEntries.map(parseEntry)];
+              const cols = '50px 42px 42px 54px 36px 36px 40px 44px 44px 44px 50px 46px 46px';
+              const th = (t,r) => `<div style="font-size:0.62rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
+              const headers = `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;border-bottom:1px solid var(--divider-color);margin-bottom:2px;">
+                ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Ges.',1)}${th('Eco',1)}${th('Std',1)}${th('Sup',1)}${th('kWh',1)}${th('TH/s',1)}${th('SATs',1)}${th('S/kWh',1)}${th('€/kWh',1)}${th('Diff',1)}
+              </div>`;
+              const rowHtml = (r) => {
+                const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
+                const dc = r.live ? 'var(--primary-text-color)' : 'var(--secondary-text-color)';
+                const fw = r.live ? '600' : '400';
+                const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
+                const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
+                const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? '—';
+                const diff   = r.live ? '—' : (r.diff ?? getDiff(r.d));
+                const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
+                const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';
+                const earnedEur = (satNum !== null && r.kw > 0 && btcEur > 0)
+                  ? satNum * btcEur / 1e8 / r.kw : null;
+                const eurStr   = earnedEur !== null ? earnedEur.toFixed(3) : '—';
+                const eurColor = earnedEur === null ? 'var(--secondary-text-color)'
+                  : earnedEur >= 0.156 ? '#F7931A'
+                  : earnedEur >= 0.125 ? '#26C6DA'
+                  : earnedEur >= 0.100 ? '#4CAF50'
+                  : earnedEur >= 0.078 ? '#FFFFFF'
+                  : '#9E9E9E';
+                return `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;${hl}">
+                  <div style="font-size:0.82rem;color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
+                  ${c(r.on,'inherit')}${c(r.off,'inherit')}
+                  ${c(fmtHm(r.tot),'var(--primary-text-color)')}
+                  ${c(fmtH1(r.ec)+'h','#4CAF50')}
+                  ${c(fmtH1(r.st)+'h','#26C6DA')}
+                  ${c(fmtH1(r.sp)+'h','#F7931A')}
+                  ${c(r.kw.toFixed(2),'white')}
+                  ${c(ths,'#FFFFFF')}
+                  ${c(sat,'#F7931A')}
+                  ${c(sPerKwh,'#F7931A')}
+                  ${c(eurStr,eurColor)}
+                  ${c(diff+'T','var(--secondary-text-color)')}
+                </div>`;
+              };
+              return `<div style="width:100%;overflow-x:auto;">
+                <div style="min-width:620px;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                    <ha-icon icon="mdi:calendar-clock" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                    <span style="font-size:0.88rem;font-weight:700;">Mining Verlauf</span>
+                  </div>
+                  ${headers}
+                  ${allRows.map(rowHtml).join('')}
+                </div>
+              </div>`;
+            ]]]

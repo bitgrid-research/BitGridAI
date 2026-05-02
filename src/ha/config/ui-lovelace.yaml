@@ -171,7 +171,7 @@ views:
                     const roomTempRaw   = parseFloat(states['sensor.ewelink_snzb_02p_temperatur_2']?.state);
                     const roomTemp      = isNaN(roomTempRaw) ? null : roomTempRaw;
                     const roomTempLimit = parseFloat(states['input_number.mvp_room_temp_eco_threshold_c']?.state || 30);
-                    const ecoTempLimit  = parseFloat(states['input_number.mvp_tmax_eco_threshold_c']?.state || 113);
+                    const ecoTempLimit  = parseFloat(states['input_number.mvp_tmax_std_threshold_c']?.state || 112);
                     const minerMode     = states['sensor.miner1_workmode_status']?.state
                                       || states['sensor.miner2_workmode_status']?.state || '';
                     const mvpSocStart   = parseFloat(states['input_number.mvp_soc_eco_start_pct']?.state || 65);
@@ -2392,8 +2392,6 @@ views:
             name: Safety Lockout (min)
           - entity: input_boolean.r3_emergency_stop
             name: E-Stop
-          - entity: input_number.mvp_tmax_eco_threshold_c
-            name: "TMax → Eco (°C)"
           - entity: input_number.mvp_room_temp_eco_threshold_c
             name: "Raumtemp → Eco (°C)"
 
