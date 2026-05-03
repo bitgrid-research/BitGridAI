@@ -367,13 +367,13 @@ mvp_auto:
                   data:
                     option: Eco
 
-            # P2: Akku voll → Super (blockiert wenn Downgrade-Cooldown aktiv ODER Raumtemp zu hoch ODER Temp-Sperre aktiv)
+            # P2: Akku voll → Standard-Cap (Super deaktiviert — Testmodus)
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
               sequence:
                 - condition: template
-                  value_template: "{{ m1_status != 'Super' }}"
+                  value_template: "{{ m1_status != 'Standard' }}"
                 - condition: template
                   value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -383,13 +383,13 @@ mvp_auto:
                   value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0) }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P2 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m1_status }}"
+                    message: "[mvp-miner1] P2 Standard-Cap: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m1_status }} (Super gesperrt)"
                     level: info
                 - action: select.select_option
                   target:
                     entity_id: select.miner1_workmode_set
                   data:
-                    option: Super
+                    option: Standard
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.mvp_miner1_last_upgrade
@@ -629,13 +629,13 @@ mvp_auto:
                   data:
                     option: Eco
 
-            # P2: Akku voll → Super (blockiert wenn Downgrade-Cooldown aktiv ODER Raumtemp zu hoch ODER Temp-Sperre aktiv)
+            # P2: Akku voll → Standard-Cap (Super deaktiviert — Testmodus)
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
               sequence:
                 - condition: template
-                  value_template: "{{ m2_status != 'Super' }}"
+                  value_template: "{{ m2_status != 'Standard' }}"
                 - condition: template
                   value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -645,13 +645,13 @@ mvp_auto:
                   value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0) }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P2 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }}"
+                    message: "[mvp-miner2] P2 Standard-Cap: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }} (Super gesperrt)"
                     level: info
                 - action: select.select_option
                   target:
                     entity_id: select.miner2_workmode_set
                   data:
-                    option: Super
+                    option: Standard
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.mvp_miner2_last_upgrade
@@ -979,17 +979,20 @@ mvp_auto:
     - id: mvp_miner1_tmax_std_safety
       alias: "MVP: Miner 1 TMax → Standard"
       description: >
-        Drosselt Miner 1 von Super auf Standard sobald TMax >= 112°C.
+        Drosselt Miner 1 von Super auf Standard sobald TMax >= mvp_tmax_std_threshold_c (112°C).
         Stufe 1 der Kaskade: 112°C → Standard, 113°C → Eco.
         Kein Cooldown — Sicherheit hat Vorrang.
+        Trigger static 99°C (< min. Schwelle 100°C) — Condition prüft konfigurierten Wert.
       mode: single
       trigger:
         - platform: numeric_state
           entity_id: sensor.miner1_tmax
-          above: "{{ states('input_number.mvp_tmax_std_threshold_c') | float(112) - 1 }}"
+          above: 99
       condition:
         - condition: template
-          value_template: "{{ states('sensor.miner1_workmode_status') == 'Super' }}"
+          value_template: >
+            {{ states('sensor.miner1_workmode_status') == 'Super'
+               and states('sensor.miner1_tmax') | float(0) >= states('input_number.mvp_tmax_std_threshold_c') | float(112) }}
       action:
         - variables:
             tmax: "{{ states('sensor.miner1_tmax') | float(0) }}"
@@ -1020,17 +1023,20 @@ mvp_auto:
     - id: mvp_miner2_tmax_std_safety
       alias: "MVP: Miner 2 TMax → Standard"
       description: >
-        Drosselt Miner 2 von Super auf Standard sobald TMax >= 112°C.
+        Drosselt Miner 2 von Super auf Standard sobald TMax >= mvp_tmax_std_threshold_c (112°C).
         Stufe 1 der Kaskade: 112°C → Standard, 113°C → Eco.
         Kein Cooldown — Sicherheit hat Vorrang.
+        Trigger static 99°C (< min. Schwelle 100°C) — Condition prüft konfigurierten Wert.
       mode: single
       trigger:
         - platform: numeric_state
           entity_id: sensor.miner2_tmax
-          above: "{{ states('input_number.mvp_tmax_std_threshold_c') | float(112) - 1 }}"
+          above: 99
       condition:
         - condition: template
-          value_template: "{{ states('sensor.miner2_workmode_status') == 'Super' }}"
+          value_template: >
+            {{ states('sensor.miner2_workmode_status') == 'Super'
+               and states('sensor.miner2_tmax') | float(0) >= states('input_number.mvp_tmax_std_threshold_c') | float(112) }}
       action:
         - variables:
             tmax: "{{ states('sensor.miner2_tmax') | float(0) }}"
