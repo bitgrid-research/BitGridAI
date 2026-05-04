@@ -20,6 +20,7 @@ def agent_en() -> ExplainAgent:
 
 # ── Grundstruktur ────────────────────────────────────────────────────────────
 
+
 def test_result_is_explain_result(agent: ExplainAgent) -> None:
     result = agent.explain(dc.START_R1_SURPLUS_OK, {})
     assert isinstance(result, ExplainResult)
@@ -45,9 +46,14 @@ def test_lang_preserved(agent: ExplainAgent) -> None:
 
 # ── Parameterinterpolation ────────────────────────────────────────────────────
 
+
 def test_data_basis_interpolates_params(agent: ExplainAgent) -> None:
-    params = {"pv_power_w": 4200.0, "house_load_w": 800.0, "surplus_kw": 3.4,
-              "surplus_min_kw": 1.5}
+    params = {
+        "pv_power_w": 4200.0,
+        "house_load_w": 800.0,
+        "surplus_kw": 3.4,
+        "surplus_min_kw": 1.5,
+    }
     result = agent.explain(dc.START_R1_SURPLUS_OK, params)
     assert "4200" in result.data_basis
     assert "800" in result.data_basis
@@ -77,6 +83,7 @@ def test_missing_param_returns_question_mark(agent: ExplainAgent) -> None:
     result = agent.explain(dc.START_R1_SURPLUS_OK, {})
     assert "?" in result.data_basis
 
+
 def test_missing_simple_key_returns_question_mark(agent: ExplainAgent) -> None:
     # NOOP_R5_DEADBAND data_basis has {blocks_since_last_change} (no format spec).
     result = agent.explain(dc.NOOP_R5_DEADBAND_ACTIVE, {})
@@ -84,6 +91,7 @@ def test_missing_simple_key_returns_question_mark(agent: ExplainAgent) -> None:
 
 
 # ── Alle Decision-Codes haben die drei neuen Felder befüllt ──────────────────
+
 
 @pytest.mark.parametrize("code", sorted(dc.ALL_CODES))
 def test_all_codes_have_effect(agent: ExplainAgent, code: str) -> None:
@@ -112,6 +120,7 @@ def test_all_codes_have_options_str(agent: ExplainAgent, code: str) -> None:
 
 
 # ── Inhaltliche Korrektheit ausgewählter Codes ────────────────────────────────
+
 
 def test_stop_r2_soc_hard_min_effect(agent: ExplainAgent) -> None:
     result = agent.explain(dc.STOP_R2_SOC_HARD_MIN, {})
@@ -148,6 +157,7 @@ def test_start_r1_options_is_empty(agent: ExplainAgent) -> None:
 
 # ── NOOP ist aktive Entscheidung — effect darf nicht leer sein ───────────────
 
+
 @pytest.mark.parametrize("code", [c for c in dc.ALL_CODES if c.startswith("NOOP")])
 def test_noop_codes_have_nonempty_effect(agent: ExplainAgent, code: str) -> None:
     result = agent.explain(code, {})
@@ -155,6 +165,7 @@ def test_noop_codes_have_nonempty_effect(agent: ExplainAgent, code: str) -> None
 
 
 # ── Englische Sprache ─────────────────────────────────────────────────────────
+
 
 def test_en_effect_for_start(agent_en: ExplainAgent) -> None:
     result = agent_en.explain(dc.START_R1_SURPLUS_OK, {})
@@ -169,6 +180,7 @@ def test_en_stop_r3_overtemp_options(agent_en: ExplainAgent) -> None:
 
 # ── Unbekannter Code — kein Crash ─────────────────────────────────────────────
 
+
 def test_unknown_code_returns_code_as_short(agent: ExplainAgent) -> None:
     result = agent.explain("UNKNOWN_CODE_XYZ", {})
     assert result.short == "UNKNOWN_CODE_XYZ"
@@ -179,6 +191,7 @@ def test_unknown_code_returns_code_as_short(agent: ExplainAgent) -> None:
 
 # ── rule_states und energy_state_ref werden durchgereicht ────────────────────
 
+
 def test_rule_states_passed_through(agent: ExplainAgent) -> None:
     states = {"R1": "ok", "R3": "blocked"}
     result = agent.explain(dc.STOP_R3_OVERTEMP, {}, rule_states=states)
@@ -186,5 +199,7 @@ def test_rule_states_passed_through(agent: ExplainAgent) -> None:
 
 
 def test_energy_state_ref_passed_through(agent: ExplainAgent) -> None:
-    result = agent.explain(dc.START_R1_SURPLUS_OK, {}, energy_state_ref="2024-01-15T10:00:00")
+    result = agent.explain(
+        dc.START_R1_SURPLUS_OK, {}, energy_state_ref="2024-01-15T10:00:00"
+    )
     assert result.energy_state_ref == "2024-01-15T10:00:00"

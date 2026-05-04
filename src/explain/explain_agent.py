@@ -60,12 +60,12 @@ class ExplainAgent:
         lang_blocks = self._blocks.get(self._lang, self._blocks.get("de", {}))
         block = lang_blocks.get(decision_code, {})
 
-        short      = self._interpolate(block.get("short",      decision_code), params)
-        long       = self._interpolate(block.get("long",       ""),            params)
-        trigger    = self._interpolate(block.get("trigger",    ""),            params)
-        data_basis = self._interpolate(block.get("data_basis", ""),            params)
-        effect     = self._interpolate(block.get("effect",     ""),            params)
-        options    = self._interpolate(block.get("options",    ""),            params)
+        short = self._interpolate(block.get("short", decision_code), params)
+        long = self._interpolate(block.get("long", ""), params)
+        trigger = self._interpolate(block.get("trigger", ""), params)
+        data_basis = self._interpolate(block.get("data_basis", ""), params)
+        effect = self._interpolate(block.get("effect", ""), params)
+        options = self._interpolate(block.get("options", ""), params)
 
         return ExplainResult(
             decision_code=decision_code,
