@@ -2077,7 +2077,7 @@ views:
                       const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
                       const d = sd.toISOString().slice(0, 10);
                       settleThs[d] = (hr / 1e12).toFixed(2);
-                      const btcVal = parseFloat(tx.value);
+                      const btcVal = parseFloat(tx.changed_balance);
                       if (btcVal > 0) btcMap[d] = btcVal;
                     });
                     (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
@@ -2101,6 +2101,7 @@ views:
                       const [d, t] = e.split(','); if (d && t) thsLog[d] = t;
                     });
                     const csvThs = {
+                      '2026-05-03':'51.46','2026-05-02':'54.36','2026-05-01':'57.62',
                       '2026-04-30':'61.47','2026-04-29':'54.91','2026-04-28':'56.54',
                       '2026-04-27':'62.04','2026-04-26':'52.91','2026-04-25':'58.40',
                       '2026-04-24':'64.92','2026-04-23':'65.03','2026-04-22':'64.86',
@@ -2113,13 +2114,6 @@ views:
                       '2026-04-02':'56.48','2026-04-01':'32.51','2026-03-31':'20.18',
                       '2026-03-30':'18.85','2026-03-29':'15.74','2026-03-28':'19.06'
                     };
-                    const curDiff   = states['sensor.bitcoin_network_difficulty']?.state ?? null;
-                    const diffEpochs = [
-                      ['2026-04-17', curDiff ?? '135.59'],
-                      ['2026-04-03', '138.97'],
-                      ['2026-03-20', '133.79'],
-                    ];
-                    const getDiff = (d) => { for (const [s,v] of diffEpochs) { if (d>=s) return v; } return '—'; };
                     const btcEur    = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
                     const STROM_EUR = 0.078;
                     const parseEntry = (e) => {
@@ -2147,11 +2141,13 @@ views:
                       kw:  parseFloat(states['sensor.mining_energy_daily']?.state)||0,
                       live: true
                     };
-                    const allRows = [todayRow, ...logEntries.map(parseEntry)];
-                    const cols = '50px 42px 42px 54px 36px 36px 40px 44px 44px 44px 50px 46px 46px';
+                    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
+                    const cutoffIso = cutoff.toISOString().slice(0, 10);
+                    const allRows = [todayRow, ...logEntries.map(parseEntry).filter(r => r.d >= cutoffIso)];
+                    const cols = '50px 42px 42px 54px 36px 36px 40px 44px 44px 44px 50px 46px';
                     const th = (t,r) => `<div style="font-size:0.62rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
                     const headers = `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;border-bottom:1px solid var(--divider-color);margin-bottom:2px;">
-                      ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Ges.',1)}${th('Eco',1)}${th('Std',1)}${th('Sup',1)}${th('kWh',1)}${th('TH/s',1)}${th('SATs',1)}${th('S/kWh',1)}${th('€/kWh',1)}${th('Diff',1)}
+                      ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Ges.',1)}${th('Eco',1)}${th('Std',1)}${th('Sup',1)}${th('kWh',1)}${th('TH/s',1)}${th('SATs',1)}${th('S/kWh',1)}${th('€/kWh',1)}
                     </div>`;
                     const rowHtml = (r) => {
                       const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
@@ -2160,7 +2156,6 @@ views:
                       const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
                       const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
                       const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? '—';
-                      const diff   = r.live ? '—' : getDiff(r.d);
                       const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
                       const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';
                       const earnedEur = (satNum !== null && r.kw > 0 && btcEur > 0)
@@ -2184,7 +2179,6 @@ views:
                         ${c(sat,'#F7931A')}
                         ${c(sPerKwh,'#F7931A')}
                         ${c(eurStr,eurColor)}
-                        ${c(diff+'T','var(--secondary-text-color)')}
                       </div>`;
                     };
                     return `<div style="width:100%;overflow-x:auto;">
@@ -2194,7 +2188,7 @@ views:
                           <span style="font-size:0.88rem;font-weight:700;">Mining Verlauf</span>
                         </div>
                         ${headers}
-                        <div style="max-height:308px;overflow-y:auto;scrollbar-width:thin;">
+                        <div style="max-height:560px;overflow-y:auto;scrollbar-width:thin;">
                           ${allRows.map(rowHtml).join('')}
                         </div>
                       </div>
