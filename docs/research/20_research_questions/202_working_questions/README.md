@@ -62,7 +62,9 @@ Systemlogik basierenden Kontexten betrachtet:
 
 <img src="../../../media/context_studydesign.png" alt="context_studydesign" width="400" height="250">
 
-- **[20.2.4 - SD-CONTEXT - *Studiendesign*-Kontext](./2024_study_design_context/README.md)**  
+- **[20.2.4 - SD-CONTEXT - *Studiendesign*-Kontext](./2024_study_design_context/README.md)**
+
+[TODO: Komponenten, Tabs, Erklärmodell]
 
   Wenn aus Prototypen ein belastbares Forschungsdesign werden muss: methodische Planung der Arbeit mit Sampling, Aufgaben, Instrumenten, Ethik und Auswertungslogik als Grundlage für die Feldstudie.
 
