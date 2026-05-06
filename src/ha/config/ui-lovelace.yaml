@@ -2067,7 +2067,9 @@ views:
                     const recentLog = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
                     const csvLog = parseLog(states['sensor.mining_log_history']?.attributes?.rows ?? '');
                     const seenDates = new Set(recentLog.map(e => e.split(',')[0]));
-                    const logEntries = [...recentLog, ...csvLog.filter(e => !seenDates.has(e.split(',')[0]))].sort((a,b) => b.split(',')[0].localeCompare(a.split(',')[0]));
+                    const deduped = [];
+                    csvLog.forEach(e => { const d = e.split(',')[0]; if (!seenDates.has(d)) { seenDates.add(d); deduped.push(e); } });
+                    const logEntries = [...recentLog, ...deduped].sort((a,b) => b.split(',')[0].localeCompare(a.split(',')[0]));
                     const btcMap = {};
                     const settleThs = {};
                     (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {

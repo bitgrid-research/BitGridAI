@@ -765,7 +765,7 @@ stats:
         - condition: template
           value_template: "{{ not existing_a.startswith(log_date) }}"
         - variables:
-            _new: "{{ log_date ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh ~ ',' ~ diff }}"
+            _new: "{{ log_date ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh }}"
             _old_a: "{{ existing_a.split('|') if existing_a not in ['','unknown','unavailable'] else [] }}"
             _old_b: "{{ existing_b.split('|') if existing_b not in ['','unknown','unavailable'] else [] }}"
         - variables:
@@ -799,7 +799,10 @@ stats:
             existing_b: "{{ states('input_text.mining_daily_log_b') }}"
         - condition: template
           value_template: >-
-            {{ yesterday not in existing_a and yesterday not in existing_b }}
+            {{ existing_a not in ['unknown','unavailable']
+               and existing_b not in ['unknown','unavailable']
+               and yesterday not in existing_a
+               and yesterday not in existing_b }}
         - variables:
             start_t: >-
               {% set s = states('input_datetime.miner_start_yesterday') %}
@@ -818,7 +821,7 @@ stats:
             message: "[stats-recover] Gestern ({{ yesterday }}) fehlt im Log — trage nach: {{ tot_h }}h {{ kwh }}kWh"
             level: warning
         - variables:
-            _new: "{{ yesterday ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh ~ ',' ~ diff }}"
+            _new: "{{ yesterday ~ ',' ~ start_t ~ ',' ~ stop_t ~ ',' ~ tot_h ~ ',' ~ eco_h ~ ',' ~ std_h ~ ',' ~ sup_h ~ ',' ~ kwh }}"
             _old_a: "{{ existing_a.split('|') if existing_a not in ['','unknown','unavailable'] else [] }}"
             _old_b: "{{ existing_b.split('|') if existing_b not in ['','unknown','unavailable'] else [] }}"
         - variables:
@@ -901,7 +904,8 @@ stats:
     mining_log_append: >-
       bash -c 'f=/config/mining_log.csv;
       [ ! -f "$f" ] && echo "date,start,stop,total_h,eco_h,std_h,speed_h,kwh,diff" > "$f";
-      printf "%s\n" "$ENTRY" >> "$f"'
+      d=$(echo "$ENTRY" | cut -d, -f1);
+      grep -q "^$d," "$f" || printf "%s\n" "$ENTRY" >> "$f"'
     stats_monthly_log_append: >-
       bash -c 'f=/config/stats_monthly.csv;
       [ ! -f "$f" ] && echo "year,month,pv_kwh,pv_selfuse_kwh,export_kwh,import_kwh,house_kwh,heizstab_kwh,miner_kwh,uptime_h,eco_h,standard_h,speed_h" > "$f";
