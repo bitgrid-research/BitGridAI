@@ -394,8 +394,9 @@ views:
                       ? (blockStart.includes(' ') ? blockStart.split(' ')[1].slice(0,5) : blockStart)
                       : '';
                     const greeting  = h < 5  ? 'Gute Nacht'
-                                    : h < 11 ? 'Guten Morgen'
-                                    : h < 14 ? 'Guten Mittag'
+                                    : h < 10 ? 'Guten Morgen'
+                                    : h < 12 ? 'Guten Vormittag'
+                                    : h < 15 ? 'Guten Mittag'
                                     : h < 18 ? 'Guten Nachmittag'
                                     : h < 22 ? 'Guten Abend'
                                     :          'Gute Nacht';
