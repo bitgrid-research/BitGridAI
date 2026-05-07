@@ -311,16 +311,14 @@ views:
                           : `⚠️ Unter ${socStop.toFixed(0)}% — wechselt zu Standby`
                         : tempLockActive
                           ? `🌡️ Eco wegen Überhitzung — Sperre noch ${tempLockStr}`
-                          : speedBlockStr
-                            ? `Standard-Upgrade in ${speedBlockStr} freigegeben ₿`
-                            : soc >= socStdOn
-                              ? `Standard-Schwelle erreicht — Upgrade kommt gleich. ⚡`
-                              : ecoEtaStopStr
-                                ? `Standby (${socStop.toFixed(0)}%) in ${ecoEtaStopStr} · ${ecoDischargeW.toFixed(0)} W`
-                                : null;
+                          : speedBlockStr || soc >= socStdOn
+                            ? `⛔ Upgrade gesperrt — Eco-Only-Testmodus aktiv`
+                            : ecoEtaStopStr
+                              ? `Standby (${socStop.toFixed(0)}%) in ${ecoEtaStopStr} · ${ecoDischargeW.toFixed(0)} W`
+                              : null;
                       lines = [
-                        `🌿 Automatik aktiv · Miner in Eco seit ${ecoStartStr || '—'}`,
-                        `Akku ${soc.toFixed(0)}% · Standard ≥ ${socStdOn.toFixed(0)}% · Super ≥ ${socSuperOn.toFixed(0)}%`,
+                        `🌿 Eco-Only-Testmodus · Miner in Eco seit ${ecoStartStr || '—'}`,
+                        `Akku ${soc.toFixed(0)}% · Standard & Super aktuell gesperrt`,
                         ecoLine3
                       ].filter(Boolean);
                     } else if (minerMode === 'Standard') {
