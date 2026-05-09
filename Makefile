@@ -1,3 +1,5 @@
+COMPOSE := docker compose -f infra/docker-compose.yml
+
 .PHONY: check fmt lint test test-unit test-replay build clean deploy-ha deploy-ha-restart
 
 # Vollständiger Qualitätscheck (vor jedem PR)
@@ -20,16 +22,16 @@ test-replay:
 	pytest tests/replay/ -v
 
 build:
-	docker compose build
+	$(COMPOSE) build
 
 up:
-	docker compose up -d
+	$(COMPOSE) up -d
 
 down:
-	docker compose down
+	$(COMPOSE) down
 
 logs:
-	docker compose logs -f --tail=50
+	$(COMPOSE) logs -f --tail=50
 
 deploy-ha:
 	bash scripts/deploy_ha.sh

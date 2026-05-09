@@ -22,8 +22,9 @@ import pytest
 from src.adapters.actuation_writer import ActuationCommand, ActuationWriter
 from src.adapters.telemetry_ingest import TelemetryIngest
 from src.core import rule_engine
-from src.core.energy_context import build_energy_state, raw_from_ingest
-from src.core.production_runner import ProductionRunner
+from src.adapters.telemetry_ingest import raw_from_ingest
+from src.core.energy_context import build_energy_state
+from src.production_runner import ProductionRunner
 from src.core.rule_engine import RuleEngineConfig
 from src.core.signals import Signal
 from src.data.event_store import EventStore

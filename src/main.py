@@ -45,7 +45,7 @@ def main(rules_path: str, db_path: str) -> None:
     from src.adapters.shelly_adapter import ShellyAdapter
     from src.adapters.shelly_em_adapter import ShellyEMAdapter
     from src.adapters.telemetry_ingest import TelemetryIngest
-    from src.core.production_runner import ProductionRunner
+    from src.production_runner import ProductionRunner
     from src.data.db import get_connection
     from src.data.event_store import EventStore
     from src.data.state_store import StateStore

@@ -1,6 +1,9 @@
 # Lokale Infrastruktur-Dokumentation (IPs, Passwörter, Geräte)
 INFRASTRUCTURE.md
 
+# Claude Code Projektanweisungen (nur lokal, nicht öffentlich)
+CLAUDE.md
+
 # Deploy-Scripts (enthalten IPs, Pfade, sudo-Logik — nur lokal)
 scripts/deploy_ha.sh
 
@@ -21,8 +24,8 @@ logs/
 
 # BitGridAI — Credentials & Secrets (NIEMALS einchecken)
 # MQTT Passwort-Datei (Mosquitto Auth)
-config/mosquitto/passwd
-config/mosquitto/passwd.bak
+infra/mosquitto/passwd
+infra/mosquitto/passwd.bak
 
 # Home Assistant Auth & Session-Tokens
 src/ha/config/auth

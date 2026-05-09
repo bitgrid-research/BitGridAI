@@ -1,0 +1,24 @@
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+exclude = "src/ha/config/custom_components/"
+
+[[tool.mypy.overrides]]
+module = "pymodbus.*"
+ignore_missing_imports = true
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = "yaml"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "src.ui.api"
+warn_unused_ignores = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
