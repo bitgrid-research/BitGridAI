@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f infra/docker-compose.yml
 
-.PHONY: check fmt lint test test-unit test-replay build clean deploy-ha deploy-ha-restart
+.PHONY: check fmt lint test test-unit test-replay build build-ci clean deploy-ha deploy-ha-restart
 
 # Vollständiger Qualitätscheck (vor jedem PR)
 check: fmt lint test
@@ -23,6 +23,10 @@ test-replay:
 
 build:
 	$(COMPOSE) build
+
+build-ci:
+	docker build -t bitgrid-core:ci -f src/core/Dockerfile .
+	docker build -t bitgrid-ui:ci -f src/ui/Dockerfile .
 
 up:
 	$(COMPOSE) up -d

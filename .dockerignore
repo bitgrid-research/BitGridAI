@@ -1,0 +1,45 @@
+# Git
+.git/
+.gitignore
+
+# Docs & planning
+docs/
+examples/
+*.md
+LICENSE
+
+# Tests (nicht im Image, laufen in CI separat)
+tests/
+
+# Infra & Scripts (nur zur Laufzeit per Volume oder lokal)
+infra/
+scripts/
+
+# Dev-Artefakte
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+*.egg-info/
+dist/
+build/
+
+# Daten & Logs (zur Laufzeit als Volume gemountet)
+data/
+logs/
+
+# Env & Secrets
+.env
+.env.*
+*.local
+
+# GitHub
+.github/
+
+# IDE
+.vscode/
+.idea/
