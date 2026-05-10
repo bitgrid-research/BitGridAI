@@ -19,7 +19,7 @@ jobs:
       - name: Black format check
         run: black --check src/ tests/
       - name: mypy type check
-        run: mypy src/ --strict --ignore-missing-imports
+        run: mypy src/
 
   test:
     name: Tests

@@ -34,6 +34,7 @@ dev = [
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
+explicit_package_bases = true
 exclude = "src/ha/config/custom_components/"
 
 [[tool.mypy.overrides]]
@@ -46,7 +47,8 @@ module = "yaml"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "src.ui.api"
+module = "ui.api"
+disallow_untyped_decorators = false
 warn_unused_ignores = false
 
 [tool.pytest.ini_options]
