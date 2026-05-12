@@ -1,6 +1,6 @@
 # 20.2.3 - SIM-CONTEXT - Simulation-Lab-Kontext
 
-[TO DO: Idee: Notizen (Blue) durchlesen - Ideen extrahieren - Skizzen für Simulationsaufbau - Workshop Buch CUXD? - Förderantrag + Arbeitspläne synchronsieren - Arbeitspakete -> Milestones? - Task herausfinden die wir abarbeiten müssen - Wie MA schreiben? anklären]
+[TO DO: Idee: Notizen (Blue) durchlesen - Ideen extrahieren - Skizzen für Simulationsaufbau - Workshop Buch CUXD? - Förderantrag + Arbeitspläne synchronsieren - Arbeitspakete -> Milestones? - Task herausfinden die wir abarbeiten müssen im Team - Wie MA schreiben? abklären - Meetings planen]
 
 
 
