@@ -1,5 +1,7 @@
 # Simulations- und Systementwicklung
 
+[TODO: Aufbau]
+
 ## Rolle und Ziel
 
 Dieses Dokument protokolliert die technische Arbeit im Backend für den lokalen Energielabor-Demonstrator von BitGridAI.
