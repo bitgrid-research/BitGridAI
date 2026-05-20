@@ -2,7 +2,7 @@
 
 Dieses Dokument beschreibt wie man exportierte HA-Daten in der Simulation ausführt und die Ergebnisse interpretiert.
 
-Voraussetzung: CSV-Datei wurde mit `ha_export_scenario.py` erstellt (siehe [REALDATEN.md](REALDATEN.md)).
+Voraussetzung: CSV-Datei wurde mit `ha_export_scenario.py` erstellt (siehe [real_data_export.md](real_data_export.md)).
 
 ---
 

@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Literal
 
+from src.core.energy_context import RawMeasurements
 from src.core.signals import Signal
 
 log = logging.getLogger(__name__)
@@ -68,3 +69,25 @@ class TelemetryIngest:
 
     def all_signals(self) -> dict[Signal, float | None]:
         return {sig: self.get_value(sig) for sig in self._cache}
+
+
+def raw_from_ingest(ingest: TelemetryIngest) -> RawMeasurements:
+    """
+    Liest alle Signal-Werte aus TelemetryIngest → RawMeasurements.
+
+    Verbindet Infrastruktur (TelemetryIngest) mit Domain (RawMeasurements).
+    Stale oder fehlende Signale landen als None — build_energy_state()
+    füllt sie mit sicheren Defaults auf.
+    """
+    return RawMeasurements(
+        pv_power_w=ingest.get_value(Signal.PV_POWER_W),
+        house_load_w=ingest.get_value(Signal.HOUSE_LOAD_W),
+        grid_import_w=ingest.get_value(Signal.GRID_IMPORT_W),
+        grid_export_w=ingest.get_value(Signal.GRID_EXPORT_W),
+        battery_soc_pct=ingest.get_value(Signal.BATTERY_SOC_PCT),
+        miner_temp_c=ingest.get_value(Signal.MINER_TEMP_C),
+        miner_heartbeat_age_sec=ingest.get_value(Signal.MINER_HEARTBEAT_AGE_SEC),
+        energy_price_ct_kwh=ingest.get_value(Signal.ENERGY_PRICE_CT_KWH),
+        pv_forecast_kw=ingest.get_value(Signal.PV_FORECAST_KW),
+        miner_power_w=ingest.get_value(Signal.MINER_POWER_W),
+    )

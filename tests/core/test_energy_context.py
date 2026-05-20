@@ -14,7 +14,8 @@ from datetime import datetime, timezone
 import pytest
 
 from src.adapters.telemetry_ingest import TelemetryIngest
-from src.core.energy_context import RawMeasurements, build_energy_state, raw_from_ingest
+from src.adapters.telemetry_ingest import raw_from_ingest
+from src.core.energy_context import RawMeasurements, build_energy_state
 from src.core.signals import Signal
 
 # ---------------------------------------------------------------------------

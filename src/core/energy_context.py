@@ -15,7 +15,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 
-from src.adapters.telemetry_ingest import TelemetryIngest
 from src.core.models import EnergyState
 from src.core.signals import REQUIRED_SIGNALS, Signal
 
@@ -58,28 +57,6 @@ def _derive_house_load(raw: RawMeasurements) -> float | None:
 
     computed = raw.pv_power_w + raw.grid_import_w - export - miner
     return max(0.0, computed)  # Basislast kann nicht negativ sein
-
-
-def raw_from_ingest(ingest: TelemetryIngest) -> RawMeasurements:
-    """
-    Liest alle Signal-Werte aus TelemetryIngest → RawMeasurements.
-
-    Verbindet Infrastruktur (TelemetryIngest) mit Domain (RawMeasurements).
-    Stale oder fehlende Signale landen als None — build_energy_state()
-    füllt sie mit sicheren Defaults auf.
-    """
-    return RawMeasurements(
-        pv_power_w=ingest.get_value(Signal.PV_POWER_W),
-        house_load_w=ingest.get_value(Signal.HOUSE_LOAD_W),
-        grid_import_w=ingest.get_value(Signal.GRID_IMPORT_W),
-        grid_export_w=ingest.get_value(Signal.GRID_EXPORT_W),
-        battery_soc_pct=ingest.get_value(Signal.BATTERY_SOC_PCT),
-        miner_temp_c=ingest.get_value(Signal.MINER_TEMP_C),
-        miner_heartbeat_age_sec=ingest.get_value(Signal.MINER_HEARTBEAT_AGE_SEC),
-        energy_price_ct_kwh=ingest.get_value(Signal.ENERGY_PRICE_CT_KWH),
-        pv_forecast_kw=ingest.get_value(Signal.PV_FORECAST_KW),
-        miner_power_w=ingest.get_value(Signal.MINER_POWER_W),
-    )
 
 
 def build_energy_state(

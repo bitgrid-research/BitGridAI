@@ -1,5 +1,9 @@
 # 20.2.3.1 - SIM-WQ1 - Home Assistant: Regelwerk, UI und Relais
 
+#TODO - Neue Ausrichtung ab 18.05
+
+- Simulatoraufbau
+
 Diese Unterseite bündelt die technische Exploration und den prototypischen Aufbau
 des Simulationskontexts in Home Assistant.
 

@@ -17,9 +17,9 @@ from datetime import datetime, timezone
 from typing import Callable, Literal
 
 from src.adapters.actuation_writer import ActuationWriter
-from src.adapters.telemetry_ingest import TelemetryIngest
+from src.adapters.telemetry_ingest import TelemetryIngest, raw_from_ingest
 from src.core import block_scheduler, rule_engine
-from src.core.energy_context import build_energy_state, raw_from_ingest
+from src.core.energy_context import build_energy_state
 from src.core.models import DecisionEvent
 from src.core.override_handler import OverrideHandler
 from src.core.rule_engine import RuleEngineConfig

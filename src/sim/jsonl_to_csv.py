@@ -150,13 +150,17 @@ def _build_csv_lines(records: list[dict[str, Any]], base_ts: datetime) -> list[s
         offset_min = int((rec["ts"] - base_ts).total_seconds() / 60)
         hb_age = _HB_OK_SEC if rec["hb_ok"] else _HB_FAIL_SEC
         lines.append(
-            f"{offset_min},"
-            f"{rec['pv_w']:.1f},"
-            f"{rec['load_w']:.1f},"
-            f"{rec['grid_w']:.1f},"
-            f"{rec['soc']:.1f},"
-            f"{rec['temp_c']:.1f},"
-            f"{hb_age:.1f}"
+            ",".join(
+                [
+                    str(offset_min),
+                    f"{rec['pv_w']:.1f}",
+                    f"{rec['load_w']:.1f}",
+                    f"{rec['grid_w']:.1f}",
+                    f"{rec['soc']:.1f}",
+                    f"{rec['temp_c']:.1f}",
+                    f"{hb_age:.1f}",
+                ]
+            )
         )
 
     return lines

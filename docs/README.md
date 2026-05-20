@@ -77,5 +77,8 @@ Hier bringen wir zusammen, was Architektur und Forschung vorbereitet haben: konk
 
 ## 4. Energy-Lab
 
+
+[TODO]
+
 ---
 > 🏠 Zurück zur **[Hauptübersicht](../README.md)**

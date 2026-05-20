@@ -1,6 +1,8 @@
 # 20.2.3 - SIM-CONTEXT - Simulation-Lab-Kontext
 
-[TO DO: Arbeitspläne synchronisieren]
+[TO DO: Idee: Notizen (Blue) durchlesen - Ideen extrahieren - Skizzen für Simulationsaufbau - Workshop Buch CUXD? - Förderantrag + Arbeitspläne synchronsieren - Arbeitspakete -> Milestones? - Task herausfinden die wir abarbeiten müssen im Team - Wie MA schreiben? abklären - Meetings planen - MA Thema spezifizieren - MA anmelden <3]
+
+
 
 Der Simulation-Lab-Kontext modelliert das Energiemanagement als physisches Tisch-Setup.
 Ziel ist es, Regeln, Schwellen und Sicherheitslogiken haptisch und auditiv erlebbar zu

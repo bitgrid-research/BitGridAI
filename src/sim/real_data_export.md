@@ -4,7 +4,7 @@ Dieses Dokument beschreibt wie man aus der Home Assistant Datenbank echte Messda
 
 ## Voraussetzungen
 
-- SSH-Zugang zum Umbrel (`umbrel@192.168.178.62`)
+- SSH-Zugang zum Umbrel (`umbrel@umbrel.local`)
 - Python 3.11+ lokal installiert
 - Repo ausgecheckt, Virtual Environment aktiv
 
