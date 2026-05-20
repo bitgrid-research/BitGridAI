@@ -1,4 +1,3 @@
-
 # Loads default set of integrations. Do not remove.
 default_config:
 
@@ -21,7 +20,14 @@ lovelace:
     bitgrid-ai:
       mode: yaml
       filename: ui-lovelace.yaml
-      title: BitGridAI
+      title: BitGridAI - Dashboard
+      icon: mdi:view-dashboard
+      show_in_sidebar: true
+
+    bitgrid-ai-simulation-dashboard:
+      mode: yaml
+      filename: bitgrid.yaml
+      title: BitGridAI - Simulation Dashboard
       icon: mdi:view-dashboard
       show_in_sidebar: true
     bitgrid-ai-simulation:
@@ -161,34 +167,62 @@ input_select:
 
 input_number:
   # ── Simulation-Inputs (Slider) ───────────────────────────────────────────
-  pv_power_w:
-    name: pv_power_w
+  sim_pv_power_w:
+    name: Sim PV Power (W)
     min: 0
     max: 20000
     step: 50
     mode: box
-    initial: 0
-  house_load_w:
-    name: house_load_w
+    initial: 5000
+  sim_house_load_w:
+    name: Sim House Load (W)
     min: 0
     max: 20000
     step: 50
     mode: box
-    initial: 0
-  grid_import_w:
-    name: grid_import_w
+    initial: 2500
+  sim_grid_import_w:
+    name: Sim Grid Import (W)
     min: 0
     max: 20000
     step: 50
     mode: box
-    initial: 0
-  battery_soc_pct:
-    name: battery_soc_pct
+    initial: 200
+  sim_grid_export_w:
+    name: Sim Grid Export (W)
+    min: 0
+    max: 20000
+    step: 50
+    mode: box
+    initial: 1000
+  sim_battery_soc_pct:
+    name: Sim Battery SoC (%)
     min: 0
     max: 100
     step: 1
     mode: box
     initial: 50
+  sim_battery_power_w:
+    name: Sim Battery Power (W)
+    min: -10000
+    max: 10000
+    step: 50
+    mode: box
+    initial: 500
+  sim_miner_power_w:
+    name: Sim Miner Power (W)
+    min: 0
+    max: 10000
+    step: 10
+    mode: box
+    initial: 75
+  sim_heizstab_power_w:
+    name: Sim Heizstab Power (W)
+    min: 0
+    max: 4000
+    step: 50
+    mode: box
+    initial: 25
 
   # ── Regelparameter ───────────────────────────────────────────────────────
   r1_surplus_min_kw:
@@ -338,95 +372,68 @@ input_text:
 template:
   # ── Energie-Signale ───────────────────────────────────────────────────────
   - sensor:
-      # PV-Leistung: SMA Wechselrichter SN 3012953672
+      # PV-Leistung: SMA Wechselrichter SN 3012953672 (Production - immer echte Daten)
       - name: pv_power_w
         unique_id: pv_power_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
         availability: "true"
-        state: >-
-          {% if is_state('input_boolean.simulation_mode', 'on') %}
-            {{ states('input_number.pv_power_w') | float(0) }}
-          {% else %}
-            {{ states('sensor.sn_3012953672_pv_power') | float(0) }}
-          {% endif %}
+        state: "{{ states('sensor.sn_3012953672_pv_power') | float(0) }}"
 
-      # Hauslast: PV + Batterie-Entladung + Netzbezug - Netzeinspeisung - Miner
+      # Hauslast: PV + Batterie-Entladung + Netzbezug - Netzeinspeisung - Miner (Production - immer echte Daten)
       - name: house_load_w
         unique_id: house_load_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
         state: >-
-          {% if is_state('input_boolean.simulation_mode', 'on') %}
-            {{ states('input_number.house_load_w') | float(0) }}
-          {% else %}
-            {% set pv    = states('sensor.sn_3012953672_pv_power') | float(0) %}
-            {% set bat_d = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
-            {% set bat_c = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
-            {% set grid_in  = states('sensor.sn_3015995559_metering_power_absorbed') | float(0) %}
-            {% set grid_out = states('sensor.sn_3015995559_metering_power_supplied') | float(0) %}
-            {% set miner = states('sensor.miner_total_power_w') | float(0) %}
-            {{ ([pv + bat_d - bat_c + grid_in - grid_out - miner, 0] | max) | round(0) }}
-          {% endif %}
+          {% set pv    = states('sensor.sn_3012953672_pv_power') | float(0) %}
+          {% set bat_d = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
+          {% set bat_c = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
+          {% set grid_in  = states('sensor.sn_3015995559_metering_power_absorbed') | float(0) %}
+          {% set grid_out = states('sensor.sn_3015995559_metering_power_supplied') | float(0) %}
+          {% set miner = states('sensor.miner_total_power_w') | float(0) %}
+          {{ ([pv + bat_d - bat_c + grid_in - grid_out - miner, 0] | max) | round(0) }}
 
-      # Netzbezug: SMA Batterie-Wechselrichter SN 3015995559
+      # Netzbezug: SMA Batterie-Wechselrichter SN 3015995559 (Production - immer echte Daten)
       - name: grid_import_w
         unique_id: grid_import_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
-        state: >-
-          {% if is_state('input_boolean.simulation_mode', 'on') %}
-            {{ states('input_number.grid_import_w') | float(0) }}
-          {% else %}
-            {{ states('sensor.sn_3015995559_metering_power_absorbed') | float(0) }}
-          {% endif %}
+        state: "{{ states('sensor.sn_3015995559_metering_power_absorbed') | float(0) }}"
 
-      # Batterie-SoC: SMA Batterie-Wechselrichter SN 3015995559
+      # Batterie-SoC: SMA Batterie-Wechselrichter SN 3015995559 (Production - immer echte Daten)
       - name: battery_soc_pct
         unique_id: battery_soc_pct
         unit_of_measurement: "%"
         device_class: battery
         state_class: measurement
-        state: >-
-          {% if is_state('input_boolean.simulation_mode', 'on') %}
-            {{ states('input_number.battery_soc_pct') | float(0) }}
-          {% else %}
-            {{ states('sensor.sn_3015995559_battery_soc_total') | float(0) }}
-          {% endif %}
+        state: "{{ states('sensor.sn_3015995559_battery_soc_total') | float(0) }}"
 
-      # Batterie-Leistung: positiv = laden, negativ = entladen
+      # Batterie-Leistung: positiv = laden, negativ = entladen (Production - immer echte Daten)
       - name: battery_power_w
         unique_id: battery_power_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
         state: >-
-          {% if is_state('input_boolean.simulation_mode', 'on') %}
-            {{ states('input_number.battery_power_w') | float(0) }}
-          {% else %}
-            {% set charge    = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
-            {% set discharge = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
-            {{ (charge - discharge) | round(0) }}
-          {% endif %}
+          {% set charge    = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
+          {% set discharge = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
+          {{ (charge - discharge) | round(0) }}
 
       # Batterie-Leistung für Flowchart: positiv = entladen (power-flow-card-plus Konvention)
-      # battery_power_w nutzt positiv=laden; der Flowchart erwartet positiv=entladen → invertiert
+      # battery_power_w nutzt positiv=laden; der Flowchart erwartet positiv=entladen → invertiert (Production - immer echte Daten)
       - name: battery_power_flowchart_w
         unique_id: battery_power_flowchart_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
         state: >-
-          {% if is_state('input_boolean.simulation_mode', 'on') %}
-            {{ -(states('input_number.battery_power_w') | float(0)) | round(0) }}
-          {% else %}
-            {% set charge    = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
-            {% set discharge = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
-            {{ (discharge - charge) | round(0) }}
-          {% endif %}
+          {% set charge    = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
+          {% set discharge = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
+          {{ (discharge - charge) | round(0) }}
 
       # Überschuss für Regelengine = PV - Hauslast - Netzbezug (ohne Miner)
       - name: surplus_kw
@@ -439,20 +446,99 @@ template:
           {% set grid = states('sensor.grid_import_w') | float(0) %}
           {{ ((pv - load - grid) / 1000) | round(3) }}
 
-      # Netto-Überschuss (Display) = tatsächliche Netzeinspeisung
+      # ── Simulation-Sensoren (dediziert für Simulation Dashboard) ───────────
+      # PV Power Simulation
+      - name: sim_pv_power_w
+        unique_id: sim_pv_power_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.sim_pv_power_w') | float(0) }}"
+
+      # House Load Simulation
+      - name: sim_house_load_w
+        unique_id: sim_house_load_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.sim_house_load_w') | float(0) }}"
+
+      # Grid Import Simulation
+      - name: sim_grid_import_w
+        unique_id: sim_grid_import_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.sim_grid_import_w') | float(0) }}"
+
+      # Grid Export Simulation
+      - name: sim_grid_export_w
+        unique_id: sim_grid_export_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.sim_grid_export_w') | float(0) }}"
+
+      # Battery SoC Simulation
+      - name: sim_battery_soc_pct
+        unique_id: sim_battery_soc_pct
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+        state: "{{ states('input_number.sim_battery_soc_pct') | float(0) }}"
+
+      # Battery Power Simulation (positiv = laden, negativ = entladen)
+      - name: sim_battery_power_w
+        unique_id: sim_battery_power_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.sim_battery_power_w') | float(0) }}"
+
+      # Battery Power Flowchart Simulation (positiv = entladen für power-flow-card)
+      - name: sim_battery_power_flowchart_w
+        unique_id: sim_battery_power_flowchart_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ -(states('input_number.sim_battery_power_w') | float(0)) | round(0) }}"
+
+      # Miner Power Simulation
+      - name: sim_miner_power_w
+        unique_id: sim_miner_power_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.sim_miner_power_w') | float(0) }}"
+
+      # Heizstab Power Simulation
+      - name: sim_heizstab_power_w
+        unique_id: sim_heizstab_power_w
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('input_number.sim_heizstab_power_w') | float(0) }}"
+
+      # Simulated Surplus (for simulation rule testing)
+      - name: sim_surplus_kw
+        unique_id: sim_surplus_kw
+        unit_of_measurement: "kW"
+        state_class: measurement
+        state: >-
+          {% set pv   = states('input_number.sim_pv_power_w') | float(0) %}
+          {% set load = states('input_number.sim_house_load_w') | float(0) %}
+          {% set grid = states('input_number.sim_grid_import_w') | float(0) %}
+          {{ ((pv - load - grid) / 1000) | round(3) }}
+
+      # Netto-Überschuss (Display) = tatsächliche Netzeinspeisung (Production - immer echte Daten)
       - name: grid_export_w
         unique_id: grid_export_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
-        state: >-
-          {% if is_state('input_boolean.simulation_mode', 'on') %}
-            0
-          {% else %}
-            {{ states('sensor.sn_3015995559_metering_power_supplied') | float(0) }}
-          {% endif %}
+        state: "{{ states('sensor.sn_3015995559_metering_power_supplied') | float(0) }}"
 
-      # Miner-Gesamtleistung (Shelly Plug S Gen 3 — realer Wandverbrauch AC)
+      # Miner-Gesamtleistung (Shelly Plug S Gen 3 — realer Wandverbrauch AC) (Production - immer echte Daten)
       - name: miner_total_power_w
         unique_id: miner_total_power_w
         unit_of_measurement: "W"
@@ -463,7 +549,7 @@ template:
           {% set m2 = states('sensor.shellyplugsg3_d0cf13d86254_leistung') | float(0) %}
           {{ (m1 + m2) | round(0) }}
 
-      # Maximale Chip-Temp beider Miner
+      # Maximale Chip-Temp beider Miner (Production - immer echte Daten)
       - name: miner_max_chip_temp_c
         unique_id: miner_max_chip_temp_c
         unit_of_measurement: "°C"
@@ -473,6 +559,14 @@ template:
           {% set t1 = states('sensor.miner1_tmax') | float(0) %}
           {% set t2 = states('sensor.miner2_tmax') | float(0) %}
           {{ [t1, t2] | max }}
+
+      # Heizstab-Leistung: AC Elwa 2 (Production - immer echte Daten)
+      - name: ac_elwa_2_192_168_178_58_power1_solar
+        unique_id: ac_elwa_2_192_168_178_58_power1_solar
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ states('sensor.ac_elwa_2_192_168_178_58_power1_solar') | float(0) }}"
 
       # Block-Fenster
       - name: block_id

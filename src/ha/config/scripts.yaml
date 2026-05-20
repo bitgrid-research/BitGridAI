@@ -432,52 +432,55 @@ sim_reset:
   alias: "SIM Reset"
   mode: single
   sequence:
+    # Reset simulation input sliders to defaults
     - service: input_number.set_value
       target:
-        entity_id: input_number.pv_power_w
+        entity_id: input_number.sim_pv_power_w
       data:
         value: 0
     - service: input_number.set_value
       target:
-        entity_id: input_number.house_load_w
+        entity_id: input_number.sim_house_load_w
       data:
         value: 0
     - service: input_number.set_value
       target:
-        entity_id: input_number.grid_import_w
+        entity_id: input_number.sim_grid_import_w
       data:
         value: 0
     - service: input_number.set_value
       target:
-        entity_id: input_number.battery_soc_pct
+        entity_id: input_number.sim_grid_export_w
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.sim_battery_soc_pct
       data:
         value: 50
     - service: input_number.set_value
       target:
-        entity_id: input_number.battery_power_w
+        entity_id: input_number.sim_battery_power_w
       data:
         value: 0
     - service: input_number.set_value
       target:
-        entity_id: input_number.miner_power_w
+        entity_id: input_number.sim_miner_power_w
       data:
         value: 3000
     - service: input_number.set_value
       target:
-        entity_id: input_number.miner_temp_c
+        entity_id: input_number.sim_heizstab_power_w
       data:
-        value: 55
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.miner_heartbeat_age_sec
-      data:
-        value: 5
+        value: 0
     - service: input_boolean.turn_off
       target:
         entity_id:
           - input_boolean.miner_relay_sim
           - input_boolean.r3_emergency_stop
           - input_boolean.override_active
+          - input_boolean.simulation_mode
+          - input_boolean.replay_mode
     - service: input_select.select_option
       target:
         entity_id: input_select.override_action
@@ -496,44 +499,39 @@ sim_sh1_stable_surplus:
   sequence:
     - service: input_number.set_value
       target:
-        entity_id: input_number.pv_power_w
+        entity_id: input_number.sim_pv_power_w
       data:
         value: 6000
     - service: input_number.set_value
       target:
-        entity_id: input_number.house_load_w
+        entity_id: input_number.sim_house_load_w
       data:
         value: 1500
     - service: input_number.set_value
       target:
-        entity_id: input_number.grid_import_w
+        entity_id: input_number.sim_grid_import_w
       data:
         value: 0
     - service: input_number.set_value
       target:
-        entity_id: input_number.battery_soc_pct
+        entity_id: input_number.sim_battery_soc_pct
       data:
         value: 80
     - service: input_number.set_value
       target:
-        entity_id: input_number.battery_power_w
+        entity_id: input_number.sim_battery_power_w
       data:
         value: 0
     - service: input_number.set_value
       target:
-        entity_id: input_number.miner_power_w
+        entity_id: input_number.sim_miner_power_w
       data:
         value: 3000
     - service: input_number.set_value
       target:
-        entity_id: input_number.miner_temp_c
+        entity_id: input_number.sim_heizstab_power_w
       data:
-        value: 60
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.miner_heartbeat_age_sec
-      data:
-        value: 5
+        value: 0
     - service: script.bg_decision_cycle
 
 sim_sh2_variable_pv:
@@ -542,44 +540,39 @@ sim_sh2_variable_pv:
   sequence:
     - service: input_number.set_value
       target:
-        entity_id: input_number.pv_power_w
+        entity_id: input_number.sim_pv_power_w
       data:
         value: 2200
     - service: input_number.set_value
       target:
-        entity_id: input_number.house_load_w
+        entity_id: input_number.sim_house_load_w
       data:
         value: 1800
     - service: input_number.set_value
       target:
-        entity_id: input_number.grid_import_w
+        entity_id: input_number.sim_grid_import_w
       data:
         value: 150
     - service: input_number.set_value
       target:
-        entity_id: input_number.battery_soc_pct
+        entity_id: input_number.sim_battery_soc_pct
       data:
         value: 45
     - service: input_number.set_value
       target:
-        entity_id: input_number.battery_power_w
+        entity_id: input_number.sim_battery_power_w
       data:
         value: 0
     - service: input_number.set_value
       target:
-        entity_id: input_number.miner_power_w
+        entity_id: input_number.sim_miner_power_w
       data:
         value: 3000
     - service: input_number.set_value
       target:
-        entity_id: input_number.miner_temp_c
+        entity_id: input_number.sim_heizstab_power_w
       data:
-        value: 68
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.miner_heartbeat_age_sec
-      data:
-        value: 5
+        value: 0
     - service: script.bg_decision_cycle
 
 sim_sh3_soc_critical:
@@ -588,53 +581,79 @@ sim_sh3_soc_critical:
   sequence:
     - service: input_number.set_value
       target:
-        entity_id: input_number.pv_power_w
+        entity_id: input_number.sim_pv_power_w
       data:
         value: 800
     - service: input_number.set_value
       target:
-        entity_id: input_number.house_load_w
+        entity_id: input_number.sim_house_load_w
       data:
         value: 1200
     - service: input_number.set_value
       target:
-        entity_id: input_number.grid_import_w
+        entity_id: input_number.sim_grid_import_w
       data:
         value: 400
     - service: input_number.set_value
       target:
-        entity_id: input_number.battery_soc_pct
+        entity_id: input_number.sim_battery_soc_pct
       data:
         value: 12
     - service: input_number.set_value
       target:
-        entity_id: input_number.battery_power_w
+        entity_id: input_number.sim_battery_power_w
       data:
         value: 0
     - service: input_number.set_value
       target:
-        entity_id: input_number.miner_power_w
+        entity_id: input_number.sim_miner_power_w
       data:
         value: 3000
     - service: input_number.set_value
       target:
-        entity_id: input_number.miner_temp_c
+        entity_id: input_number.sim_heizstab_power_w
       data:
-        value: 50
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.miner_heartbeat_age_sec
-      data:
-        value: 5
+        value: 0
     - service: script.bg_decision_cycle
 
 sim_sh4_safety_overtemp:
   alias: "SIM SH-4 Safety Overtemp"
   mode: single
   sequence:
+    # Set high miner power to simulate heavy load
     - service: input_number.set_value
       target:
-        entity_id: input_number.miner_temp_c
+        entity_id: input_number.sim_miner_power_w
       data:
-        value: "{{ states('input_number.r3_max_chip_temp_c') | float(90) + 5 }}"
-    - service: script.bg_force_safety_stop
+        value: 6000
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.sim_pv_power_w
+      data:
+        value: 8000
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.sim_house_load_w
+      data:
+        value: 1500
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.sim_battery_soc_pct
+      data:
+        value: 80
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.sim_battery_power_w
+      data:
+        value: 0
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.sim_heizstab_power_w
+      data:
+        value: 0
+    - service: script.bg_decision_cycle
+    # Force emergency stop to simulate overtemp condition
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.r3_emergency_stop
+    - service: script.bg_decision_cycle

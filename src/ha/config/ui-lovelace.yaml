@@ -142,40 +142,6 @@ views:
 
         - type: vertical-stack
           cards:
-            # ── Power Flow ──────────────────────────────────────────────────────────
-            - type: custom:power-flow-card-plus
-              entities:
-                  grid:
-                    entity:
-                      consumption: sensor.grid_import_w
-                      production: sensor.grid_export_w
-                    color:
-                      consumption: "#5C6BC0"
-                      production: "#4CAF50"
-                  solar:
-                    entity: sensor.pv_power_w
-                    color: "#FFC107"
-                  battery:
-                    entity: sensor.battery_power_flowchart_w
-                    state_of_charge: sensor.battery_soc_pct
-                    color:
-                      consumption: "#26A69A"
-                      production: "#4CAF50"
-                  home:
-                    entity: sensor.house_load_w
-                    color: "#EF9A9A"
-                  individual:
-                    - entity: sensor.miner_total_power_w
-                      name: Miner
-                      icon: mdi:pickaxe
-                      color: "#F7931A"
-                      display_zero: false
-                      display_zero_tolerance: 25
-                    - entity: sensor.ac_elwa_2_192_168_178_58_power1_solar
-                      name: Heizstab
-                      icon: mdi:water-boiler
-                      color: "#2196F3"
-
 
 
             # ── Status-Erklärung ────────────────────────────────────────────────
@@ -345,16 +311,14 @@ views:
                           : `⚠️ Unter ${socStop.toFixed(0)}% — wechselt zu Standby`
                         : tempLockActive
                           ? `🌡️ Eco wegen Überhitzung — Sperre noch ${tempLockStr}`
-                          : speedBlockStr
-                            ? `Standard-Upgrade in ${speedBlockStr} freigegeben ₿`
-                            : soc >= socStdOn
-                              ? `Standard-Schwelle erreicht — Upgrade kommt gleich. ⚡`
-                              : ecoEtaStopStr
-                                ? `Standby (${socStop.toFixed(0)}%) in ${ecoEtaStopStr} · ${ecoDischargeW.toFixed(0)} W`
-                                : null;
+                          : speedBlockStr || soc >= socStdOn
+                            ? `⛔ Upgrade gesperrt — Eco-Only-Testmodus aktiv`
+                            : ecoEtaStopStr
+                              ? `Standby (${socStop.toFixed(0)}%) in ${ecoEtaStopStr} · ${ecoDischargeW.toFixed(0)} W`
+                              : null;
                       lines = [
-                        `🌿 Automatik aktiv · Miner in Eco seit ${ecoStartStr || '—'}`,
-                        `Akku ${soc.toFixed(0)}% · Standard ≥ ${socStdOn.toFixed(0)}% · Super ≥ ${socSuperOn.toFixed(0)}%`,
+                        `🌿 Eco-Only-Testmodus · Miner in Eco seit ${ecoStartStr || '—'}`,
+                        `Akku ${soc.toFixed(0)}% · Standard & Super aktuell gesperrt`,
                         ecoLine3
                       ].filter(Boolean);
                     } else if (minerMode === 'Standard') {
@@ -428,9 +392,8 @@ views:
                       ? (blockStart.includes(' ') ? blockStart.split(' ')[1].slice(0,5) : blockStart)
                       : '';
                     const greeting  = h < 5  ? 'Gute Nacht'
-                                    : h < 10 ? 'Guten Morgen'
-                                    : h < 12 ? 'Guten Vormittag'
-                                    : h < 15 ? 'Guten Mittag'
+                                    : h < 11 ? 'Guten Morgen'
+                                    : h < 14 ? 'Guten Mittag'
                                     : h < 18 ? 'Guten Nachmittag'
                                     : h < 22 ? 'Guten Abend'
                                     :          'Gute Nacht';
@@ -575,700 +538,39 @@ views:
                     - text-align: left
                     - justify-self: start
 
-
-
-            # ── Miner links | Heizstab rechts ──────────────────────────────
-
-            # - type: custom:button-card
-            #   show_name: false
-            #   show_icon: false
-            #   show_state: false
-            #   styles:
-            #     card:
-            #       - background: transparent
-            #       - box-shadow: none
-            #       - height: 8px
-            #       - padding: 0
-
-            # ── Miner Spalten ────────────────────────────────────────────────────────
-            # - type: horizontal-stack
-            #   cards:
-
-            #     # ─────────────────────────────────────────────
-            #     # MINER 1
-            #     # ─────────────────────────────────────────────
-            #     - type: vertical-stack
-            #       cards:
-
-            #         - type: custom:button-card
-            #           template: miner_header
-            #           entity: binary_sensor.miner1_available
-            #           name: "Miner Avalon Q 01  ›"
-            #           icon: mdi:memory
-
-            #         - type: horizontal-stack
-            #           cards:
-
-            #             - type: custom:button-card
-            #               template: miner_btn
-            #               entity: sensor.miner1_workmode_status
-            #               name: Power
-            #               icon: mdi:power
-            #               state_display: >
-            #                 [[[
-            #                   const on = ['Eco','Standard','Super'].includes(entity.state);
-            #                   return on ? 'Ein' : 'Aus';
-            #                 ]]]
-            #               styles:
-            #                 icon:
-            #                   - width: 44px
-            #                   - height: 44px
-            #                   - color: >
-            #                       [[[
-            #                         const on = ['Eco','Standard','Super'].includes(entity.state);
-            #                         return on ? '#4CAF50' : 'var(--disabled-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: call-service
-            #                 service: >
-            #                   [[[
-            #                     const on = ['Eco','Standard','Super'].includes(entity.state);
-            #                     return on
-            #                       ? 'shell_command.miner1_set_softoff'
-            #                       : 'shell_command.miner1_set_softon';
-            #                   ]]]
-
-            #             - type: custom:button-card
-            #               template: miner_btn
-            #               entity: input_boolean.miner1_auto_load_management
-            #               name: Auto
-            #               icon: mdi:refresh-auto
-            #               state_display: >
-            #                 [[[
-            #                   return entity.state === 'on' ? 'Ein' : 'Aus';
-            #                 ]]]
-            #               styles:
-            #                 icon:
-            #                   - width: 44px
-            #                   - height: 44px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'on'
-            #                           ? '#4CAF50' : 'var(--disabled-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: toggle
-
-            #             - type: custom:button-card
-            #               template: miner_btn
-            #               entity: switch.miner1_lcdonoff_switch
-            #               name: Display
-            #               icon: mdi:fit-to-screen
-            #               state_display: >
-            #                 [[[
-            #                   return entity.state === 'on' ? 'Ein' : 'Aus';
-            #                 ]]]
-            #               styles:
-            #                 icon:
-            #                   - width: 44px
-            #                   - height: 44px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'on'
-            #                           ? '#26C6DA' : 'var(--disabled-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: toggle
-
-            #             - type: custom:button-card
-            #               template: miner_btn
-            #               name: Reboot
-            #               icon: mdi:restart
-            #               show_state: false
-            #               styles:
-            #                 icon:
-            #                   - width: 44px
-            #                   - height: 44px
-            #                   - color: "var(--secondary-text-color)"
-            #               tap_action:
-            #                 action: call-service
-            #                 service: shell_command.miner1_reboot
-
-            #         - type: horizontal-stack
-            #           cards:
-            #             - type: custom:button-card
-            #               entity: select.miner1_workmode_set
-            #               name: Standby
-            #               icon: mdi:power-sleep
-            #               show_state: false
-            #               styles:
-            #                 card:
-            #                   - background: >
-            #                       [[[
-            #                         return entity.state === 'Standby'
-            #                           ? '#757575' : 'var(--secondary-background-color)';
-            #                       ]]]
-            #                   - border-radius: 10px
-            #                   - padding: 10px 4px
-            #                 icon:
-            #                   - width: 26px
-            #                   - height: 26px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Standby'
-            #                           ? '#fff' : '#757575';
-            #                       ]]]
-            #                 name:
-            #                   - font-size: 0.68rem
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Standby'
-            #                           ? '#fff' : 'var(--secondary-text-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: call-service
-            #                 service: select.select_option
-            #                 service_data:
-            #                   entity_id: select.miner1_workmode_set
-            #                   option: Standby
-            #             - type: custom:button-card
-            #               entity: select.miner1_workmode_set
-            #               name: Eco
-            #               icon: mdi:leaf
-            #               show_state: false
-            #               styles:
-            #                 card:
-            #                   - background: >
-            #                       [[[
-            #                         return entity.state === 'Eco'
-            #                           ? '#4CAF50' : 'var(--secondary-background-color)';
-            #                       ]]]
-            #                   - border-radius: 10px
-            #                   - padding: 10px 4px
-            #                 icon:
-            #                   - width: 26px
-            #                   - height: 26px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Eco'
-            #                           ? '#fff' : '#4CAF50';
-            #                       ]]]
-            #                 name:
-            #                   - font-size: 0.68rem
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Eco'
-            #                           ? '#fff' : 'var(--secondary-text-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: call-service
-            #                 service: select.select_option
-            #                 service_data:
-            #                   entity_id: select.miner1_workmode_set
-            #                   option: Eco
-            #             - type: custom:button-card
-            #               entity: select.miner1_workmode_set
-            #               name: Standard
-            #               icon: mdi:gauge
-            #               show_state: false
-            #               styles:
-            #                 card:
-            #                   - background: >
-            #                       [[[
-            #                         return entity.state === 'Standard'
-            #                           ? '#26C6DA' : 'var(--secondary-background-color)';
-            #                       ]]]
-            #                   - border-radius: 10px
-            #                   - padding: 10px 4px
-            #                 icon:
-            #                   - width: 26px
-            #                   - height: 26px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Standard'
-            #                           ? '#fff' : '#26C6DA';
-            #                       ]]]
-            #                 name:
-            #                   - font-size: 0.68rem
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Standard'
-            #                           ? '#fff' : 'var(--secondary-text-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: call-service
-            #                 service: select.select_option
-            #                 service_data:
-            #                   entity_id: select.miner1_workmode_set
-            #                   option: Standard
-            #             - type: custom:button-card
-            #               entity: select.miner1_workmode_set
-            #               name: Super
-            #               icon: mdi:rocket-launch
-            #               show_state: false
-            #               styles:
-            #                 card:
-            #                   - background: >
-            #                       [[[
-            #                         return entity.state === 'Super'
-            #                           ? '#F7931A' : 'var(--secondary-background-color)';
-            #                       ]]]
-            #                   - border-radius: 10px
-            #                   - padding: 10px 4px
-            #                 icon:
-            #                   - width: 26px
-            #                   - height: 26px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Super'
-            #                           ? '#fff' : '#F7931A';
-            #                       ]]]
-            #                 name:
-            #                   - font-size: 0.68rem
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Super'
-            #                           ? '#fff' : 'var(--secondary-text-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: call-service
-            #                 service: select.select_option
-            #                 service_data:
-            #                   entity_id: select.miner1_workmode_set
-            #                   option: Super
-
-            #         - type: custom:button-card
-            #           show_name: false
-            #           show_icon: false
-            #           show_state: false
-            #           styles:
-            #             card:
-            #               - padding: 12px 8px
-            #             custom_fields:
-            #               stats:
-            #                 - width: 100%
-            #                 - justify-self: stretch
-            #                 - box-sizing: border-box
-            #           custom_fields:
-            #             stats: >
-            #               [[[
-            #                 const ths = states['sensor.miner1_thsspd']?.state ?? '—';
-            #                 const jth = states['sensor.miner1_energy_per_th']?.state ?? '—';
-            #                 const sw  = states['sensor.shellyplugsg3_dcb4d9c5567c_leistung']?.state ?? '—';
-            #                 const fan = states['sensor.miner1_fanr']?.state ?? '—';
-            #                 const tmax = states['sensor.miner1_tmax']?.state ?? '—';
-            #                 const tavg = states['sensor.miner1_tavg']?.state ?? '—';
-            #                 const hbi  = states['sensor.miner1_hbitemp']?.state ?? '—';
-            #                 const hbo  = states['sensor.miner1_hbotemp']?.state ?? '—';
-            #                 const statusEnt = states['sensor.miner1_workmode_status'];
-            #                 const mode = statusEnt?.state ?? '—';
-            #                 const parseIdt = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
-            #                   ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
-            #                 const sinceTs  = Math.max(
-            #                   parseIdt(states['input_datetime.mvp_miner1_last_upgrade']?.state),
-            #                   parseIdt(states['input_datetime.mvp_miner1_last_downgrade']?.state)
-            #                 );
-            #                 const since    = sinceTs > 0
-            #                   ? new Date(sinceTs * 1000).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
-            #                   : '—';
-            #                 const cd = states['sensor.miner_1_cooldown_status']?.state ?? '—';
-            #                 const cdActive = cd !== '—' && cd !== 'unavailable' && cd !== 'unknown';
-            #                 const cdColor = cdActive ? '#f59e0b' : 'var(--secondary-text-color)';
-            #                 const cdTag = cdActive
-            #                   ? `<span style="margin-left:8px;font-size:0.78rem;color:#f59e0b;font-weight:600;">${cd}</span>`
-            #                   : '';
-            #                 const tempColor = (v) => {
-            #                   if (v === '—') return 'var(--secondary-text-color)';
-            #                   const t = parseFloat(v);
-            #                   if (mode === 'Standby' || mode === 'Idle' || mode === 'Off' || t < 45) return 'var(--secondary-text-color)';
-            #                   if (mode === 'Eco')
-            #                     return t >= 80 ? '#F44336' : t >= 70 ? '#f59e0b' : t >= 60 ? '#26C6DA' : '#4CAF50';
-            #                   if (mode === 'Standard')
-            #                     return t >= 100 ? '#F44336' : t >= 90 ? '#FF7043' : t >= 80 ? '#f59e0b' : t >= 70 ? '#26C6DA' : '#4CAF50';
-            #                   return t >= 108 ? '#F44336' : t >= 100 ? '#FF7043' : t >= 90 ? '#f59e0b' : t >= 80 ? '#26C6DA' : '#4CAF50';
-            #                 };
-            #                 const tmaxColor = tempColor(tmax);
-            #                 const tavgColor = tempColor(tavg);
-            #                 const hbiColor  = tempColor(hbi);
-            #                 const hboColor  = tempColor(hbo);
-            #                 const row = (icon, label, val, color) =>
-            #                   `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-            #                     <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color ?? 'var(--secondary-text-color)'};"></ha-icon>
-            #                     <span style="color:${color ?? 'var(--secondary-text-color)'};font-size:0.85rem;">${label}:</span>
-            #                     <span style="font-size:1rem;font-weight:600;margin-left:8px;color:${color ?? 'inherit'};">${val}</span>
-            #                   </div>`;
-            #                 return `<div style="width:100%;padding:4px 0;text-align:left;">
-            #                   ${row('mdi:speedometer','TH/s',ths)}
-            #                   ${row('mdi:lightning-bolt','J/TH',jth)}
-            #                   ${row('mdi:power-plug','Shelly W', sw !== '—' ? sw + ' W' : '—')}
-            #                   ${row('mdi:fan','Fan %',fan)}
-            #                   ${row('mdi:thermometer-high','TMax', tmax !== '—' ? tmax + ' °C' : '—', tmaxColor)}
-            #                   ${row('mdi:thermometer-auto','TAvg', tavg !== '—' ? tavg + ' °C' : '—', tavgColor)}
-            #                   ${row('mdi:thermometer-chevron-down','HBI', hbi !== '—' ? hbi + ' °C' : '—', hbiColor)}
-            #                   ${row('mdi:thermometer-chevron-up','HBO', hbo !== '—' ? hbo + ' °C' : '—', hboColor)}
-            #                   <div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-            #                     <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:16px;color:${cdColor};"></ha-icon>
-            #                     <span style="color:${cdColor};font-size:0.85rem;">Seit:</span>
-            #                     <span style="font-size:1rem;font-weight:600;margin-left:8px;">${since}  ${mode}</span>
-            #                     ${cdTag}
-            #                   </div>
-            #                 </div>`;
-            #               ]]]
-
-            #     # ─────────────────────────────────────────────
-            #     # 8px Spacer
-            #     # ─────────────────────────────────────────────
-            #     - type: custom:button-card
-            #       show_name: false
-            #       show_icon: false
-            #       show_state: false
-            #       styles:
-            #         card:
-            #           - background: transparent
-            #           - box-shadow: none
-            #           - width: 8px
-            #           - min-width: 8px
-            #           - max-width: 8px
-            #           - padding: 0
-
-            #     # ─────────────────────────────────────────────
-            #     # MINER 2
-            #     # ─────────────────────────────────────────────
-            #     - type: vertical-stack
-            #       cards:
-
-            #         - type: custom:button-card
-            #           template: miner_header
-            #           entity: binary_sensor.miner2_available
-            #           name: "Miner Avalon Q 02  ›"
-            #           icon: mdi:memory
-
-            #         - type: horizontal-stack
-            #           cards:
-
-            #             - type: custom:button-card
-            #               template: miner_btn
-            #               entity: sensor.miner2_workmode_status
-            #               name: Power
-            #               icon: mdi:power
-            #               state_display: >
-            #                 [[[
-            #                   const on = ['Eco','Standard','Super'].includes(entity.state);
-            #                   return on ? 'Ein' : 'Aus';
-            #                 ]]]
-            #               styles:
-            #                 icon:
-            #                   - width: 44px
-            #                   - height: 44px
-            #                   - color: >
-            #                       [[[
-            #                         const on = ['Eco','Standard','Super'].includes(entity.state);
-            #                         return on ? '#4CAF50' : 'var(--disabled-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: call-service
-            #                 service: >
-            #                   [[[
-            #                     const on = ['Eco','Standard','Super'].includes(entity.state);
-            #                     return on
-            #                       ? 'shell_command.miner2_set_softoff'
-            #                       : 'shell_command.miner2_set_softon';
-            #                   ]]]
-
-            #             - type: custom:button-card
-            #               template: miner_btn
-            #               entity: input_boolean.miner2_auto_load_management
-            #               name: Auto
-            #               icon: mdi:refresh-auto
-            #               state_display: >
-            #                 [[[
-            #                   return entity.state === 'on' ? 'Ein' : 'Aus';
-            #                 ]]]
-            #               styles:
-            #                 icon:
-            #                   - width: 44px
-            #                   - height: 44px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'on'
-            #                           ? '#4CAF50' : 'var(--disabled-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: toggle
-
-            #             - type: custom:button-card
-            #               template: miner_btn
-            #               entity: switch.miner2_lcdonoff_switch
-            #               name: Display
-            #               icon: mdi:fit-to-screen
-            #               state_display: >
-            #                 [[[
-            #                   return entity.state === 'on' ? 'Ein' : 'Aus';
-            #                 ]]]
-            #               styles:
-            #                 icon:
-            #                   - width: 44px
-            #                   - height: 44px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'on'
-            #                           ? '#26C6DA' : 'var(--disabled-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: toggle
-
-            #             - type: custom:button-card
-            #               template: miner_btn
-            #               name: Reboot
-            #               icon: mdi:restart
-            #               show_state: false
-            #               styles:
-            #                 icon:
-            #                   - width: 44px
-            #                   - height: 44px
-            #                   - color: "var(--secondary-text-color)"
-            #               tap_action:
-            #                 action: call-service
-            #                 service: shell_command.miner2_reboot
-
-            #         - type: horizontal-stack
-            #           cards:
-            #             - type: custom:button-card
-            #               entity: select.miner2_workmode_set
-            #               name: Standby
-            #               icon: mdi:power-sleep
-            #               show_state: false
-            #               styles:
-            #                 card:
-            #                   - background: >
-            #                       [[[
-            #                         return entity.state === 'Standby'
-            #                           ? '#757575' : 'var(--secondary-background-color)';
-            #                       ]]]
-            #                   - border-radius: 10px
-            #                   - padding: 10px 4px
-            #                 icon:
-            #                   - width: 26px
-            #                   - height: 26px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Standby'
-            #                           ? '#fff' : '#757575';
-            #                       ]]]
-            #                 name:
-            #                   - font-size: 0.68rem
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Standby'
-            #                           ? '#fff' : 'var(--secondary-text-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: call-service
-            #                 service: select.select_option
-            #                 service_data:
-            #                   entity_id: select.miner2_workmode_set
-            #                   option: Standby
-            #             - type: custom:button-card
-            #               entity: select.miner2_workmode_set
-            #               name: Eco
-            #               icon: mdi:leaf
-            #               show_state: false
-            #               styles:
-            #                 card:
-            #                   - background: >
-            #                       [[[
-            #                         return entity.state === 'Eco'
-            #                           ? '#4CAF50' : 'var(--secondary-background-color)';
-            #                       ]]]
-            #                   - border-radius: 10px
-            #                   - padding: 10px 4px
-            #                 icon:
-            #                   - width: 26px
-            #                   - height: 26px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Eco'
-            #                           ? '#fff' : '#4CAF50';
-            #                       ]]]
-            #                 name:
-            #                   - font-size: 0.68rem
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Eco'
-            #                           ? '#fff' : 'var(--secondary-text-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: call-service
-            #                 service: select.select_option
-            #                 service_data:
-            #                   entity_id: select.miner2_workmode_set
-            #                   option: Eco
-            #             - type: custom:button-card
-            #               entity: select.miner2_workmode_set
-            #               name: Standard
-            #               icon: mdi:gauge
-            #               show_state: false
-            #               styles:
-            #                 card:
-            #                   - background: >
-            #                       [[[
-            #                         return entity.state === 'Standard'
-            #                           ? '#26C6DA' : 'var(--secondary-background-color)';
-            #                       ]]]
-            #                   - border-radius: 10px
-            #                   - padding: 10px 4px
-            #                 icon:
-            #                   - width: 26px
-            #                   - height: 26px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Standard'
-            #                           ? '#fff' : '#26C6DA';
-            #                       ]]]
-            #                 name:
-            #                   - font-size: 0.68rem
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Standard'
-            #                           ? '#fff' : 'var(--secondary-text-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: call-service
-            #                 service: select.select_option
-            #                 service_data:
-            #                   entity_id: select.miner2_workmode_set
-            #                   option: Standard
-            #             - type: custom:button-card
-            #               entity: select.miner2_workmode_set
-            #               name: Super
-            #               icon: mdi:rocket-launch
-            #               show_state: false
-            #               styles:
-            #                 card:
-            #                   - background: >
-            #                       [[[
-            #                         return entity.state === 'Super'
-            #                           ? '#F7931A' : 'var(--secondary-background-color)';
-            #                       ]]]
-            #                   - border-radius: 10px
-            #                   - padding: 10px 4px
-            #                 icon:
-            #                   - width: 26px
-            #                   - height: 26px
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Super'
-            #                           ? '#fff' : '#F7931A';
-            #                       ]]]
-            #                 name:
-            #                   - font-size: 0.68rem
-            #                   - color: >
-            #                       [[[
-            #                         return entity.state === 'Super'
-            #                           ? '#fff' : 'var(--secondary-text-color)';
-            #                       ]]]
-            #               tap_action:
-            #                 action: call-service
-            #                 service: select.select_option
-            #                 service_data:
-            #                   entity_id: select.miner2_workmode_set
-            #                   option: Super
-
-            #         - type: custom:button-card
-            #           show_name: false
-            #           show_icon: false
-            #           show_state: false
-            #           styles:
-            #             card:
-            #               - padding: 12px 8px
-            #             custom_fields:
-            #               stats:
-            #                 - width: 100%
-            #                 - justify-self: stretch
-            #                 - box-sizing: border-box
-            #           custom_fields:
-            #             stats: >
-            #               [[[
-            #                 const ths = states['sensor.miner2_thsspd']?.state ?? '—';
-            #                 const jth = states['sensor.miner2_energy_per_th']?.state ?? '—';
-            #                 const sw  = states['sensor.shellyplugsg3_d0cf13d86254_leistung']?.state ?? '—';
-            #                 const fan = states['sensor.miner2_fanr']?.state ?? '—';
-            #                 const tmax = states['sensor.miner2_tmax']?.state ?? '—';
-            #                 const tavg = states['sensor.miner2_tavg']?.state ?? '—';
-            #                 const hbi  = states['sensor.miner2_hbitemp']?.state ?? '—';
-            #                 const hbo  = states['sensor.miner2_hbotemp']?.state ?? '—';
-            #                 const statusEnt = states['sensor.miner2_workmode_status'];
-            #                 const mode = statusEnt?.state ?? '—';
-            #                 const parseIdt = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
-            #                   ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
-            #                 const sinceTs  = Math.max(
-            #                   parseIdt(states['input_datetime.mvp_miner2_last_upgrade']?.state),
-            #                   parseIdt(states['input_datetime.mvp_miner2_last_downgrade']?.state)
-            #                 );
-            #                 const since    = sinceTs > 0
-            #                   ? new Date(sinceTs * 1000).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
-            #                   : '—';
-            #                 const cd = states['sensor.miner_2_cooldown_status']?.state ?? '—';
-            #                 const cdActive = cd !== '—' && cd !== 'unavailable' && cd !== 'unknown';
-            #                 const cdColor = cdActive ? '#f59e0b' : 'var(--secondary-text-color)';
-            #                 const cdTag = cdActive
-            #                   ? `<span style="margin-left:8px;font-size:0.78rem;color:#f59e0b;font-weight:600;">${cd}</span>`
-            #                   : '';
-            #                 const tempColor = (v) => {
-            #                   if (v === '—') return 'var(--secondary-text-color)';
-            #                   const t = parseFloat(v);
-            #                   if (mode === 'Standby' || mode === 'Idle' || mode === 'Off' || t < 45) return 'var(--secondary-text-color)';
-            #                   if (mode === 'Eco')
-            #                     return t >= 80 ? '#F44336' : t >= 70 ? '#f59e0b' : t >= 60 ? '#26C6DA' : '#4CAF50';
-            #                   if (mode === 'Standard')
-            #                     return t >= 100 ? '#F44336' : t >= 90 ? '#FF7043' : t >= 80 ? '#f59e0b' : t >= 70 ? '#26C6DA' : '#4CAF50';
-            #                   return t >= 108 ? '#F44336' : t >= 100 ? '#FF7043' : t >= 90 ? '#f59e0b' : t >= 80 ? '#26C6DA' : '#4CAF50';
-            #                 };
-            #                 const tmaxColor = tempColor(tmax);
-            #                 const tavgColor = tempColor(tavg);
-            #                 const hbiColor  = tempColor(hbi);
-            #                 const hboColor  = tempColor(hbo);
-            #                 const row = (icon, label, val, color) =>
-            #                   `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-            #                     <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color ?? 'var(--secondary-text-color)'};"></ha-icon>
-            #                     <span style="color:${color ?? 'var(--secondary-text-color)'};font-size:0.85rem;">${label}:</span>
-            #                     <span style="font-size:1rem;font-weight:600;margin-left:8px;color:${color ?? 'inherit'};">${val}</span>
-            #                   </div>`;
-            #                 return `<div style="width:100%;padding:4px 0;text-align:left;">
-            #                   ${row('mdi:speedometer','TH/s',ths)}
-            #                   ${row('mdi:lightning-bolt','J/TH',jth)}
-            #                   ${row('mdi:power-plug','Shelly W', sw !== '—' ? sw + ' W' : '—')}
-            #                   ${row('mdi:fan','Fan %',fan)}
-            #                   ${row('mdi:thermometer-high','TMax', tmax !== '—' ? tmax + ' °C' : '—', tmaxColor)}
-            #                   ${row('mdi:thermometer-auto','TAvg', tavg !== '—' ? tavg + ' °C' : '—', tavgColor)}
-            #                   ${row('mdi:thermometer-chevron-down','HBI', hbi !== '—' ? hbi + ' °C' : '—', hbiColor)}
-            #                   ${row('mdi:thermometer-chevron-up','HBO', hbo !== '—' ? hbo + ' °C' : '—', hboColor)}
-            #                   <div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-            #                     <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:16px;color:${cdColor};"></ha-icon>
-            #                     <span style="color:${cdColor};font-size:0.85rem;">Seit:</span>
-            #                     <span style="font-size:1rem;font-weight:600;margin-left:8px;">${since}  ${mode}</span>
-            #                     ${cdTag}
-            #                   </div>
-            #                 </div>`;
-            #               ]]]
-
-        - type: vertical-stack
-          cards:
-
-            # ── Wetter-Zeitstrahl ───────────────────────────────────────────────────    
-            - type: weather-forecast
-              entity: weather.forecast_home
-              forecast_type: hourly
-              show_current: true
-              show_forecast: true
-              card_mod:
-                style: |
-                  ha-card {
-                    height: 175px;
-                    overflow: hidden;
-                  }
-
-
+            # ── Power Flow ──────────────────────────────────────────────────────────
+            - type: custom:power-flow-card-plus
+              entities:
+                grid:
+                  entity:
+                    consumption: sensor.grid_import_w
+                    production: sensor.grid_export_w
+                  color:
+                    consumption: "#5C6BC0"
+                    production: "#4CAF50"
+                solar:
+                  entity: sensor.pv_power_w
+                  color: "#FFC107"
+                battery:
+                  entity: sensor.battery_power_flowchart_w
+                  state_of_charge: sensor.battery_soc_pct
+                  color:
+                    consumption: "#26A69A"
+                    production: "#4CAF50"
+                home:
+                  entity: sensor.house_load_w
+                  color: "#EF9A9A"
+                individual:
+                  - entity: sensor.miner_total_power_w
+                    name: Miner
+                    icon: mdi:pickaxe
+                    color: "#F7931A"
+                    display_zero: false
+                    display_zero_tolerance: 25
+                  - entity: sensor.ac_elwa_2_192_168_178_58_power1_solar
+                    name: Heizstab
+                    icon: mdi:water-boiler
+                    color: "#2196F3"
 
             # ── Energie-Status ──────────────────────────────────────────────────────
             - type: horizontal-stack
@@ -1454,6 +756,857 @@ views:
                     action: more-info
 
                 - type: custom:button-card
+                  entity: sensor.ac_elwa_2_192_168_178_58_power1_solar
+                  name: Heizstab
+                  icon: mdi:water-boiler
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v = parseFloat(entity.state);
+                            if (!v || v === 0) return 'var(--secondary-text-color)';
+                            return '#2196F3';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+            # ── Miner links | Heizstab rechts ──────────────────────────────
+
+            - type: custom:button-card
+              show_name: false
+              show_icon: false
+              show_state: false
+              styles:
+                card:
+                  - background: transparent
+                  - box-shadow: none
+                  - height: 8px
+                  - padding: 0
+
+            # ── Miner Spalten ────────────────────────────────────────────────────────
+            - type: horizontal-stack
+              cards:
+
+                # ─────────────────────────────────────────────
+                # MINER 1
+                # ─────────────────────────────────────────────
+                - type: vertical-stack
+                  cards:
+
+                    - type: custom:button-card
+                      template: miner_header
+                      entity: binary_sensor.miner1_available
+                      name: "Miner Avalon Q 01  ›"
+                      icon: mdi:memory
+
+                    - type: horizontal-stack
+                      cards:
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: sensor.miner1_workmode_status
+                          name: Power
+                          icon: mdi:power
+                          state_display: >
+                            [[[
+                              const on = ['Eco','Standard','Super'].includes(entity.state);
+                              return on ? 'Ein' : 'Aus';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    const on = ['Eco','Standard','Super'].includes(entity.state);
+                                    return on ? '#4CAF50' : 'var(--disabled-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: >
+                              [[[
+                                const on = ['Eco','Standard','Super'].includes(entity.state);
+                                return on
+                                  ? 'shell_command.miner1_set_softoff'
+                                  : 'shell_command.miner1_set_softon';
+                              ]]]
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: input_boolean.miner1_auto_load_management
+                          name: Auto
+                          icon: mdi:refresh-auto
+                          state_display: >
+                            [[[
+                              return entity.state === 'on' ? 'Ein' : 'Aus';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'on'
+                                      ? '#4CAF50' : 'var(--disabled-color)';
+                                  ]]]
+                          tap_action:
+                            action: toggle
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: switch.miner1_lcdonoff_switch
+                          name: Display
+                          icon: mdi:fit-to-screen
+                          state_display: >
+                            [[[
+                              return entity.state === 'on' ? 'Ein' : 'Aus';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'on'
+                                      ? '#26C6DA' : 'var(--disabled-color)';
+                                  ]]]
+                          tap_action:
+                            action: toggle
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          name: Reboot
+                          icon: mdi:restart
+                          show_state: false
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: "var(--secondary-text-color)"
+                          tap_action:
+                            action: call-service
+                            service: shell_command.miner1_reboot
+
+                    - type: horizontal-stack
+                      cards:
+                        - type: custom:button-card
+                          entity: select.miner1_workmode_set
+                          name: Standby
+                          icon: mdi:power-sleep
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Standby'
+                                      ? '#757575' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standby'
+                                      ? '#fff' : '#757575';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standby'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner1_workmode_set
+                              option: Standby
+                        - type: custom:button-card
+                          entity: select.miner1_workmode_set
+                          name: Eco
+                          icon: mdi:leaf
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#4CAF50' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#fff' : '#4CAF50';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner1_workmode_set
+                              option: Eco
+                        - type: custom:button-card
+                          entity: select.miner1_workmode_set
+                          name: Standard
+                          icon: mdi:gauge
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#26C6DA' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#fff' : '#26C6DA';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner1_workmode_set
+                              option: Standard
+                        - type: custom:button-card
+                          entity: select.miner1_workmode_set
+                          name: Super
+                          icon: mdi:rocket-launch
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#F7931A' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#fff' : '#F7931A';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner1_workmode_set
+                              option: Super
+
+                    - type: custom:button-card
+                      show_name: false
+                      show_icon: false
+                      show_state: false
+                      styles:
+                        card:
+                          - padding: 12px 8px
+                        custom_fields:
+                          stats:
+                            - width: 100%
+                            - justify-self: stretch
+                            - box-sizing: border-box
+                      custom_fields:
+                        stats: >
+                          [[[
+                            const ths = states['sensor.miner1_thsspd']?.state ?? '—';
+                            const jth = states['sensor.miner1_energy_per_th']?.state ?? '—';
+                            const sw  = states['sensor.shellyplugsg3_dcb4d9c5567c_leistung']?.state ?? '—';
+                            const fan = states['sensor.miner1_fanr']?.state ?? '—';
+                            const tmax = states['sensor.miner1_tmax']?.state ?? '—';
+                            const tavg = states['sensor.miner1_tavg']?.state ?? '—';
+                            const hbi  = states['sensor.miner1_hbitemp']?.state ?? '—';
+                            const hbo  = states['sensor.miner1_hbotemp']?.state ?? '—';
+                            const statusEnt = states['sensor.miner1_workmode_status'];
+                            const mode = statusEnt?.state ?? '—';
+                            const parseIdt = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
+                              ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
+                            const sinceTs  = Math.max(
+                              parseIdt(states['input_datetime.mvp_miner1_last_upgrade']?.state),
+                              parseIdt(states['input_datetime.mvp_miner1_last_downgrade']?.state)
+                            );
+                            const since    = sinceTs > 0
+                              ? new Date(sinceTs * 1000).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
+                              : '—';
+                            const cd = states['sensor.miner_1_cooldown_status']?.state ?? '—';
+                            const cdActive = cd !== '—' && cd !== 'unavailable' && cd !== 'unknown';
+                            const cdColor = cdActive ? '#f59e0b' : 'var(--secondary-text-color)';
+                            const cdTag = cdActive
+                              ? `<span style="margin-left:8px;font-size:0.78rem;color:#f59e0b;font-weight:600;">${cd}</span>`
+                              : '';
+                            const tempColor = (v) => {
+                              if (v === '—') return 'var(--secondary-text-color)';
+                              const t = parseFloat(v);
+                              if (mode === 'Standby' || mode === 'Idle' || mode === 'Off' || t < 45) return 'var(--secondary-text-color)';
+                              if (mode === 'Eco')
+                                return t >= 80 ? '#F44336' : t >= 70 ? '#f59e0b' : t >= 60 ? '#26C6DA' : '#4CAF50';
+                              if (mode === 'Standard')
+                                return t >= 100 ? '#F44336' : t >= 90 ? '#FF7043' : t >= 80 ? '#f59e0b' : t >= 70 ? '#26C6DA' : '#4CAF50';
+                              return t >= 108 ? '#F44336' : t >= 100 ? '#FF7043' : t >= 90 ? '#f59e0b' : t >= 80 ? '#26C6DA' : '#4CAF50';
+                            };
+                            const tmaxColor = tempColor(tmax);
+                            const tavgColor = tempColor(tavg);
+                            const hbiColor  = tempColor(hbi);
+                            const hboColor  = tempColor(hbo);
+                            const row = (icon, label, val, color) =>
+                              `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                                <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color ?? 'var(--secondary-text-color)'};"></ha-icon>
+                                <span style="color:${color ?? 'var(--secondary-text-color)'};font-size:0.85rem;">${label}:</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;color:${color ?? 'inherit'};">${val}</span>
+                              </div>`;
+                            return `<div style="width:100%;padding:4px 0;text-align:left;">
+                              ${row('mdi:speedometer','TH/s',ths)}
+                              ${row('mdi:lightning-bolt','J/TH',jth)}
+                              ${row('mdi:power-plug','Shelly W', sw !== '—' ? sw + ' W' : '—')}
+                              ${row('mdi:fan','Fan %',fan)}
+                              ${row('mdi:thermometer-high','TMax', tmax !== '—' ? tmax + ' °C' : '—', tmaxColor)}
+                              ${row('mdi:thermometer-auto','TAvg', tavg !== '—' ? tavg + ' °C' : '—', tavgColor)}
+                              ${row('mdi:thermometer-chevron-down','HBI', hbi !== '—' ? hbi + ' °C' : '—', hbiColor)}
+                              ${row('mdi:thermometer-chevron-up','HBO', hbo !== '—' ? hbo + ' °C' : '—', hboColor)}
+                              <div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                                <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:16px;color:${cdColor};"></ha-icon>
+                                <span style="color:${cdColor};font-size:0.85rem;">Seit:</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${since}  ${mode}</span>
+                                ${cdTag}
+                              </div>
+                            </div>`;
+                          ]]]
+
+                # ─────────────────────────────────────────────
+                # 8px Spacer
+                # ─────────────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - background: transparent
+                      - box-shadow: none
+                      - width: 8px
+                      - min-width: 8px
+                      - max-width: 8px
+                      - padding: 0
+
+                # ─────────────────────────────────────────────
+                # MINER 2
+                # ─────────────────────────────────────────────
+                - type: vertical-stack
+                  cards:
+
+                    - type: custom:button-card
+                      template: miner_header
+                      entity: binary_sensor.miner2_available
+                      name: "Miner Avalon Q 02  ›"
+                      icon: mdi:memory
+
+                    - type: horizontal-stack
+                      cards:
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: sensor.miner2_workmode_status
+                          name: Power
+                          icon: mdi:power
+                          state_display: >
+                            [[[
+                              const on = ['Eco','Standard','Super'].includes(entity.state);
+                              return on ? 'Ein' : 'Aus';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    const on = ['Eco','Standard','Super'].includes(entity.state);
+                                    return on ? '#4CAF50' : 'var(--disabled-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: >
+                              [[[
+                                const on = ['Eco','Standard','Super'].includes(entity.state);
+                                return on
+                                  ? 'shell_command.miner2_set_softoff'
+                                  : 'shell_command.miner2_set_softon';
+                              ]]]
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: input_boolean.miner2_auto_load_management
+                          name: Auto
+                          icon: mdi:refresh-auto
+                          state_display: >
+                            [[[
+                              return entity.state === 'on' ? 'Ein' : 'Aus';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'on'
+                                      ? '#4CAF50' : 'var(--disabled-color)';
+                                  ]]]
+                          tap_action:
+                            action: toggle
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          entity: switch.miner2_lcdonoff_switch
+                          name: Display
+                          icon: mdi:fit-to-screen
+                          state_display: >
+                            [[[
+                              return entity.state === 'on' ? 'Ein' : 'Aus';
+                            ]]]
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'on'
+                                      ? '#26C6DA' : 'var(--disabled-color)';
+                                  ]]]
+                          tap_action:
+                            action: toggle
+
+                        - type: custom:button-card
+                          template: miner_btn
+                          name: Reboot
+                          icon: mdi:restart
+                          show_state: false
+                          styles:
+                            icon:
+                              - width: 44px
+                              - height: 44px
+                              - color: "var(--secondary-text-color)"
+                          tap_action:
+                            action: call-service
+                            service: shell_command.miner2_reboot
+
+                    - type: horizontal-stack
+                      cards:
+                        - type: custom:button-card
+                          entity: select.miner2_workmode_set
+                          name: Standby
+                          icon: mdi:power-sleep
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Standby'
+                                      ? '#757575' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standby'
+                                      ? '#fff' : '#757575';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standby'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner2_workmode_set
+                              option: Standby
+                        - type: custom:button-card
+                          entity: select.miner2_workmode_set
+                          name: Eco
+                          icon: mdi:leaf
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#4CAF50' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#fff' : '#4CAF50';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Eco'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner2_workmode_set
+                              option: Eco
+                        - type: custom:button-card
+                          entity: select.miner2_workmode_set
+                          name: Standard
+                          icon: mdi:gauge
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#26C6DA' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#fff' : '#26C6DA';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Standard'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner2_workmode_set
+                              option: Standard
+                        - type: custom:button-card
+                          entity: select.miner2_workmode_set
+                          name: Super
+                          icon: mdi:rocket-launch
+                          show_state: false
+                          styles:
+                            card:
+                              - background: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#F7931A' : 'var(--secondary-background-color)';
+                                  ]]]
+                              - border-radius: 10px
+                              - padding: 10px 4px
+                            icon:
+                              - width: 26px
+                              - height: 26px
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#fff' : '#F7931A';
+                                  ]]]
+                            name:
+                              - font-size: 0.68rem
+                              - color: >
+                                  [[[
+                                    return entity.state === 'Super'
+                                      ? '#fff' : 'var(--secondary-text-color)';
+                                  ]]]
+                          tap_action:
+                            action: call-service
+                            service: select.select_option
+                            service_data:
+                              entity_id: select.miner2_workmode_set
+                              option: Super
+
+                    - type: custom:button-card
+                      show_name: false
+                      show_icon: false
+                      show_state: false
+                      styles:
+                        card:
+                          - padding: 12px 8px
+                        custom_fields:
+                          stats:
+                            - width: 100%
+                            - justify-self: stretch
+                            - box-sizing: border-box
+                      custom_fields:
+                        stats: >
+                          [[[
+                            const ths = states['sensor.miner2_thsspd']?.state ?? '—';
+                            const jth = states['sensor.miner2_energy_per_th']?.state ?? '—';
+                            const sw  = states['sensor.shellyplugsg3_d0cf13d86254_leistung']?.state ?? '—';
+                            const fan = states['sensor.miner2_fanr']?.state ?? '—';
+                            const tmax = states['sensor.miner2_tmax']?.state ?? '—';
+                            const tavg = states['sensor.miner2_tavg']?.state ?? '—';
+                            const hbi  = states['sensor.miner2_hbitemp']?.state ?? '—';
+                            const hbo  = states['sensor.miner2_hbotemp']?.state ?? '—';
+                            const statusEnt = states['sensor.miner2_workmode_status'];
+                            const mode = statusEnt?.state ?? '—';
+                            const parseIdt = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
+                              ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
+                            const sinceTs  = Math.max(
+                              parseIdt(states['input_datetime.mvp_miner2_last_upgrade']?.state),
+                              parseIdt(states['input_datetime.mvp_miner2_last_downgrade']?.state)
+                            );
+                            const since    = sinceTs > 0
+                              ? new Date(sinceTs * 1000).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
+                              : '—';
+                            const cd = states['sensor.miner_2_cooldown_status']?.state ?? '—';
+                            const cdActive = cd !== '—' && cd !== 'unavailable' && cd !== 'unknown';
+                            const cdColor = cdActive ? '#f59e0b' : 'var(--secondary-text-color)';
+                            const cdTag = cdActive
+                              ? `<span style="margin-left:8px;font-size:0.78rem;color:#f59e0b;font-weight:600;">${cd}</span>`
+                              : '';
+                            const tempColor = (v) => {
+                              if (v === '—') return 'var(--secondary-text-color)';
+                              const t = parseFloat(v);
+                              if (mode === 'Standby' || mode === 'Idle' || mode === 'Off' || t < 45) return 'var(--secondary-text-color)';
+                              if (mode === 'Eco')
+                                return t >= 80 ? '#F44336' : t >= 70 ? '#f59e0b' : t >= 60 ? '#26C6DA' : '#4CAF50';
+                              if (mode === 'Standard')
+                                return t >= 100 ? '#F44336' : t >= 90 ? '#FF7043' : t >= 80 ? '#f59e0b' : t >= 70 ? '#26C6DA' : '#4CAF50';
+                              return t >= 108 ? '#F44336' : t >= 100 ? '#FF7043' : t >= 90 ? '#f59e0b' : t >= 80 ? '#26C6DA' : '#4CAF50';
+                            };
+                            const tmaxColor = tempColor(tmax);
+                            const tavgColor = tempColor(tavg);
+                            const hbiColor  = tempColor(hbi);
+                            const hboColor  = tempColor(hbo);
+                            const row = (icon, label, val, color) =>
+                              `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                                <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color ?? 'var(--secondary-text-color)'};"></ha-icon>
+                                <span style="color:${color ?? 'var(--secondary-text-color)'};font-size:0.85rem;">${label}:</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;color:${color ?? 'inherit'};">${val}</span>
+                              </div>`;
+                            return `<div style="width:100%;padding:4px 0;text-align:left;">
+                              ${row('mdi:speedometer','TH/s',ths)}
+                              ${row('mdi:lightning-bolt','J/TH',jth)}
+                              ${row('mdi:power-plug','Shelly W', sw !== '—' ? sw + ' W' : '—')}
+                              ${row('mdi:fan','Fan %',fan)}
+                              ${row('mdi:thermometer-high','TMax', tmax !== '—' ? tmax + ' °C' : '—', tmaxColor)}
+                              ${row('mdi:thermometer-auto','TAvg', tavg !== '—' ? tavg + ' °C' : '—', tavgColor)}
+                              ${row('mdi:thermometer-chevron-down','HBI', hbi !== '—' ? hbi + ' °C' : '—', hbiColor)}
+                              ${row('mdi:thermometer-chevron-up','HBO', hbo !== '—' ? hbo + ' °C' : '—', hboColor)}
+                              <div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                                <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:16px;color:${cdColor};"></ha-icon>
+                                <span style="color:${cdColor};font-size:0.85rem;">Seit:</span>
+                                <span style="font-size:1rem;font-weight:600;margin-left:8px;">${since}  ${mode}</span>
+                                ${cdTag}
+                              </div>
+                            </div>`;
+                          ]]]
+
+
+
+        - type: vertical-stack
+          cards:
+
+            # ── Wetter-Zeitstrahl ───────────────────────────────────────────────────
+            - type: weather-forecast
+              entity: weather.forecast_home
+              forecast_type: hourly
+              show_current: true
+              show_forecast: true
+              card_mod:
+                style: |
+                  ha-card {
+                    height: 175px;
+                    overflow: hidden;
+                  }
+
+            - type: horizontal-stack
+              cards:
+                - type: custom:button-card
+                  entity: sensor.house_load_mean_7d
+                  name: "Ø Last 7d"
+                  icon: mdi:chart-bell-curve
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: '#4CAF50'
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.house_load_forecast_w
+                  name: "Prognose"
+                  icon: mdi:home-clock
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v=parseFloat(entity.state); if(!v||v===0) return 'var(--secondary-text-color)'; if(v<=2000) return '#4CAF50'; if(v<=4000) return '#f59e0b'; return '#F44336';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.mining_window_free_w
+                  name: "Frei f. Mining"
+                  icon: mdi:lightning-bolt
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v=parseFloat(entity.state); if(v>=1200) return '#4CAF50'; if(v>=600) return '#f59e0b'; return 'var(--disabled-color)';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: binary_sensor.mining_window_open
+                  name: "Fenster"
+                  icon: mdi:pickaxe
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            return entity.state==='on' ? '#4CAF50' : 'var(--disabled-color)';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
+                  entity: sensor.mining_window_used_pct
+                  name: "Ausnutzung"
+                  icon: mdi:gauge
+                  show_state: true
+                  styles:
+                    card:
+                      - background: var(--secondary-background-color)
+                      - border-radius: 12px
+                      - padding: 12px 4px
+                    icon:
+                      - width: 36px
+                      - height: 36px
+                      - color: >
+                          [[[
+                            const v=parseFloat(entity.state); if(v>=75) return '#00C853'; if(v>=50) return '#4CAF50'; if(v>0) return '#f59e0b'; return 'var(--secondary-text-color)';
+                          ]]]
+                    name:
+                      - font-size: 0.8rem
+                      - color: var(--secondary-text-color)
+                    state:
+                      - font-size: 0.9rem
+                      - font-weight: 600
+                      - color: var(--primary-text-color)
+                  tap_action:
+                    action: more-info
+
+                - type: custom:button-card
                   entity: sensor.luftung_status
                   name: "Lüftung"
                   icon: mdi:fan
@@ -1491,175 +1644,6 @@ views:
                     entity: switch.shellyplugsg3_dcb4d9c6b46c
 
 
-
-            # - type: horizontal-stack
-            #   cards:
-            #     - type: custom:button-card
-            #       entity: sensor.house_load_mean_7d
-            #       name: "Ø Last 7d"
-            #       icon: mdi:chart-bell-curve
-            #       show_state: true
-            #       styles:
-            #         card:
-            #           - background: var(--secondary-background-color)
-            #           - border-radius: 12px
-            #           - padding: 12px 4px
-            #         icon:
-            #           - width: 36px
-            #           - height: 36px
-            #           - color: '#4CAF50'
-            #         name:
-            #           - font-size: 0.8rem
-            #           - color: var(--secondary-text-color)
-            #         state:
-            #           - font-size: 0.9rem
-            #           - font-weight: 600
-            #       tap_action:
-            #         action: more-info
-
-            #     - type: custom:button-card
-            #       entity: sensor.house_load_forecast_w
-            #       name: "Prognose"
-            #       icon: mdi:home-clock
-            #       show_state: true
-            #       styles:
-            #         card:
-            #           - background: var(--secondary-background-color)
-            #           - border-radius: 12px
-            #           - padding: 12px 4px
-            #         icon:
-            #           - width: 36px
-            #           - height: 36px
-            #           - color: >
-            #               [[[
-            #                 const v=parseFloat(entity.state); if(!v||v===0) return 'var(--secondary-text-color)'; if(v<=2000) return '#4CAF50'; if(v<=4000) return '#f59e0b'; return '#F44336';
-            #               ]]]
-            #         name:
-            #           - font-size: 0.8rem
-            #           - color: var(--secondary-text-color)
-            #         state:
-            #           - font-size: 0.9rem
-            #           - font-weight: 600
-            #       tap_action:
-            #         action: more-info
-
-            #     - type: custom:button-card
-            #       entity: sensor.mining_window_free_w
-            #       name: "Frei f. Mining"
-            #       icon: mdi:lightning-bolt
-            #       show_state: true
-            #       styles:
-            #         card:
-            #           - background: var(--secondary-background-color)
-            #           - border-radius: 12px
-            #           - padding: 12px 4px
-            #         icon:
-            #           - width: 36px
-            #           - height: 36px
-            #           - color: >
-            #               [[[
-            #                 const v=parseFloat(entity.state); if(v>=1200) return '#4CAF50'; if(v>=600) return '#f59e0b'; return 'var(--disabled-color)';
-            #               ]]]
-            #         name:
-            #           - font-size: 0.8rem
-            #           - color: var(--secondary-text-color)
-            #         state:
-            #           - font-size: 0.9rem
-            #           - font-weight: 600
-            #       tap_action:
-            #         action: more-info
-
-            #     - type: custom:button-card
-            #       entity: binary_sensor.mining_window_open
-            #       name: "Fenster"
-            #       icon: mdi:pickaxe
-            #       show_state: true
-            #       styles:
-            #         card:
-            #           - background: var(--secondary-background-color)
-            #           - border-radius: 12px
-            #           - padding: 12px 4px
-            #         icon:
-            #           - width: 36px
-            #           - height: 36px
-            #           - color: >
-            #               [[[
-            #                 return entity.state==='on' ? '#4CAF50' : 'var(--disabled-color)';
-            #               ]]]
-            #         name:
-            #           - font-size: 0.8rem
-            #           - color: var(--secondary-text-color)
-            #         state:
-            #           - font-size: 0.9rem
-            #           - font-weight: 600
-            #       tap_action:
-            #         action: more-info
-
-            #     - type: custom:button-card
-            #       entity: sensor.mining_window_used_pct
-            #       name: "Ausnutzung"
-            #       icon: mdi:gauge
-            #       show_state: true
-            #       styles:
-            #         card:
-            #           - background: var(--secondary-background-color)
-            #           - border-radius: 12px
-            #           - padding: 12px 4px
-            #         icon:
-            #           - width: 36px
-            #           - height: 36px
-            #           - color: >
-            #               [[[
-            #                 const v=parseFloat(entity.state); if(v>=75) return '#00C853'; if(v>=50) return '#4CAF50'; if(v>0) return '#f59e0b'; return 'var(--secondary-text-color)';
-            #               ]]]
-            #         name:
-            #           - font-size: 0.8rem
-            #           - color: var(--secondary-text-color)
-            #         state:
-            #           - font-size: 0.9rem
-            #           - font-weight: 600
-            #           - color: var(--primary-text-color)
-            #       tap_action:
-            #         action: more-info
-
-            #     - type: custom:button-card
-            #       entity: sensor.luftung_status
-            #       name: "Lüftung"
-            #       icon: mdi:fan
-            #       show_state: true
-            #       styles:
-            #         card:
-            #           - background: var(--secondary-background-color)
-            #           - border-radius: 12px
-            #           - padding: 12px 4px
-            #         icon:
-            #           - width: 36px
-            #           - height: 36px
-            #           - color: >
-            #               [[[
-            #                 const s = entity.state;
-            #                 if (s === 'Aktiv') return '#4CAF50';
-            #                 if (s === 'Aus' || !s) return 'var(--disabled-color)';
-            #                 return '#f59e0b';
-            #               ]]]
-            #         name:
-            #           - font-size: 0.8rem
-            #           - color: var(--secondary-text-color)
-            #         state:
-            #           - font-size: 0.9rem
-            #           - font-weight: 600
-            #           - color: >
-            #               [[[
-            #                 const s = entity.state;
-            #                 if (s === 'Aktiv') return '#4CAF50';
-            #                 if (s === 'Aus' || !s) return 'var(--secondary-text-color)';
-            #                 return '#f59e0b';
-            #               ]]]
-            #       tap_action:
-            #         action: more-info
-            #         entity: switch.shellyplugsg3_dcb4d9c6b46c
-
-            # ── Spacer ──────────────────────────────────────────────────────────
             - type: custom:button-card
               show_name: false
               show_icon: false
@@ -1672,153 +1656,153 @@ views:
                   - padding: 0
 
             # ── Heizstab + Keller + Miner 1 nebeneinander ──────────────────────────
-            # - type: horizontal-stack
-            #   cards:
+            - type: horizontal-stack
+              cards:
 
-            #     - type: custom:button-card
-            #       show_name: false
-            #       show_icon: false
-            #       show_state: false
-            #       styles:
-            #         card:
-            #           - padding: 10px 16px
-            #         custom_fields:
-            #           heizstab:
-            #             - width: 100%
-            #             - justify-self: stretch
-            #             - box-sizing: border-box
-            #       custom_fields:
-            #         heizstab: >
-            #           [[[
-            #             const pfx = 'sensor.ac_elwa_2_192_168_178_58_';
-            #             const mode   = states[pfx + 'screen_mode']?.state ?? '—';
-            #             const t1     = states[pfx + 'temperatur_1']?.state ?? '—';
-            #             const psolar = states[pfx + 'power1_solar']?.state ?? '—';
-            #             const modeColor = mode === 'Standby' ? 'var(--secondary-text-color)' : '#4CAF50';
-            #             const row = (icon, label, val, unit='', color=null) => {
-            #               const c = color ? `color:${color};` : '';
-            #               return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-            #                 <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
-            #                 <span style="color:var(--secondary-text-color);font-size:0.85rem;flex:1;">${label}:</span>
-            #                 <span style="font-size:1rem;font-weight:600;${c}">${val === '—' ? '—' : val + (unit ? ' ' + unit : '')}</span>
-            #               </div>`;
-            #             };
-            #             const modeEl =
-            #               `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-            #                 <ha-icon icon="mdi:information-outline" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
-            #                 <span style="color:var(--secondary-text-color);font-size:0.85rem;flex:1;">Zustand:</span>
-            #                 <span style="font-size:1rem;font-weight:600;color:${modeColor};">${mode}</span>
-            #               </div>`;
-            #             return `<div style="width:100%;padding:2px 0;">
-            #               <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Heizstab</div>
-            #               ${modeEl}
-            #               ${row('mdi:thermometer-water','Temperatur',t1,'°C')}
-            #               ${row('mdi:solar-power','Leistung',psolar,'W', parseFloat(psolar) > 0 ? '#2196F3' : null)}
-            #             </div>`;
-            #           ]]]
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 10px 16px
+                    custom_fields:
+                      heizstab:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    heizstab: >
+                      [[[
+                        const pfx = 'sensor.ac_elwa_2_192_168_178_58_';
+                        const mode   = states[pfx + 'screen_mode']?.state ?? '—';
+                        const t1     = states[pfx + 'temperatur_1']?.state ?? '—';
+                        const psolar = states[pfx + 'power1_solar']?.state ?? '—';
+                        const modeColor = mode === 'Standby' ? 'var(--secondary-text-color)' : '#4CAF50';
+                        const row = (icon, label, val, unit='', color=null) => {
+                          const c = color ? `color:${color};` : '';
+                          return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.85rem;flex:1;">${label}:</span>
+                            <span style="font-size:1rem;font-weight:600;${c}">${val === '—' ? '—' : val + (unit ? ' ' + unit : '')}</span>
+                          </div>`;
+                        };
+                        const modeEl =
+                          `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                            <ha-icon icon="mdi:information-outline" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.85rem;flex:1;">Zustand:</span>
+                            <span style="font-size:1rem;font-weight:600;color:${modeColor};">${mode}</span>
+                          </div>`;
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Heizstab</div>
+                          ${modeEl}
+                          ${row('mdi:thermometer-water','Temperatur',t1,'°C')}
+                          ${row('mdi:solar-power','Leistung',psolar,'W', parseFloat(psolar) > 0 ? '#2196F3' : null)}
+                        </div>`;
+                      ]]]
 
-            #     # ── Raumklima ───────────────────────────────────────────────────────
-            #     - type: custom:button-card
-            #       show_name: false
-            #       show_icon: false
-            #       show_state: false
-            #       styles:
-            #         card:
-            #           - padding: 10px 16px
-            #         custom_fields:
-            #           env:
-            #             - width: 100%
-            #             - justify-self: stretch
-            #             - box-sizing: border-box
-            #       custom_fields:
-            #         env: >
-            #           [[[
-            #             const raw = (id) => states[id];
-            #             const val = (id) => {
-            #               const s = raw(id)?.state;
-            #               return (!s || s === 'unknown' || s === 'unavailable') ? null : s;
-            #             };
-            #             const t_keller = val('sensor.ewelink_snzb_02p_temperatur_2');
-            #             const h_keller = val('sensor.ewelink_snzb_02p_luftfeuchtigkeit_2');
-            #             const b_keller = val('sensor.ewelink_snzb_02p_batterie_2');
-            #             const roomTempColor = (v) => {
-            #               if (v === null) return null;
-            #               const t = parseFloat(v);
-            #               if (t < 16) return '#26C6DA';
-            #               if (t < 25) return '#4CAF50';
-            #               if (t < 29) return '#f59e0b';
-            #               if (t < 33) return '#FF7043';
-            #               return '#F44336';
-            #             };
-            #             const roomHumColor = (v) => {
-            #               if (v === null) return null;
-            #               const h = parseFloat(v);
-            #               if (h < 40) return '#26C6DA';
-            #               if (h < 61) return '#4CAF50';
-            #               if (h < 71) return '#f59e0b';
-            #               if (h < 81) return '#FF7043';
-            #               return '#F44336';
-            #             };
-            #             const row = (icon, label, v, unit, color) => {
-            #               const c = color ?? 'var(--secondary-text-color)';
-            #               const display = v !== null
-            #                 ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;color:${c};">${v} ${unit}</span>`
-            #                 : `<span style="font-size:0.8rem;font-weight:600;margin-left:8px;color:#ef5350;background:rgba(239,83,80,0.12);padding:1px 6px;border-radius:4px;">✕ unknown</span>`;
-            #               return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-            #                 <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
-            #                 <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-            #                 ${display}
-            #               </div>`;
-            #             };
-            #             return `<div style="width:100%;padding:2px 0;">
-            #               <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Raumklima</div>
-            #               ${row('mdi:thermometer','Temperatur',t_keller,'°C',roomTempColor(t_keller))}
-            #               ${row('mdi:water-percent','Feuchte',h_keller,'%','var(--primary-text-color)')}
-            #               ${row('mdi:battery','Akku',b_keller,'%')}
-            #             </div>`;
-            #           ]]]
+                # ── Raumklima ───────────────────────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 10px 16px
+                    custom_fields:
+                      env:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    env: >
+                      [[[
+                        const raw = (id) => states[id];
+                        const val = (id) => {
+                          const s = raw(id)?.state;
+                          return (!s || s === 'unknown' || s === 'unavailable') ? null : s;
+                        };
+                        const t_keller = val('sensor.ewelink_snzb_02p_temperatur_2');
+                        const h_keller = val('sensor.ewelink_snzb_02p_luftfeuchtigkeit_2');
+                        const b_keller = val('sensor.ewelink_snzb_02p_batterie_2');
+                        const roomTempColor = (v) => {
+                          if (v === null) return null;
+                          const t = parseFloat(v);
+                          if (t < 16) return '#26C6DA';
+                          if (t < 25) return '#4CAF50';
+                          if (t < 29) return '#f59e0b';
+                          if (t < 33) return '#FF7043';
+                          return '#F44336';
+                        };
+                        const roomHumColor = (v) => {
+                          if (v === null) return null;
+                          const h = parseFloat(v);
+                          if (h < 40) return '#26C6DA';
+                          if (h < 61) return '#4CAF50';
+                          if (h < 71) return '#f59e0b';
+                          if (h < 81) return '#FF7043';
+                          return '#F44336';
+                        };
+                        const row = (icon, label, v, unit, color) => {
+                          const c = color ?? 'var(--secondary-text-color)';
+                          const display = v !== null
+                            ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;color:${c};">${v} ${unit}</span>`
+                            : `<span style="font-size:0.8rem;font-weight:600;margin-left:8px;color:#ef5350;background:rgba(239,83,80,0.12);padding:1px 6px;border-radius:4px;">✕ unknown</span>`;
+                          return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
+                            ${display}
+                          </div>`;
+                        };
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Raumklima</div>
+                          ${row('mdi:thermometer','Temperatur',t_keller,'°C',roomTempColor(t_keller))}
+                          ${row('mdi:water-percent','Feuchte',h_keller,'%','var(--primary-text-color)')}
+                          ${row('mdi:battery','Akku',b_keller,'%')}
+                        </div>`;
+                      ]]]
 
-            #     # ── Miner 1 Klima ───────────────────────────────────────────────────
-            #     - type: custom:button-card
-            #       show_name: false
-            #       show_icon: false
-            #       show_state: false
-            #       styles:
-            #         card:
-            #           - padding: 10px 16px
-            #         custom_fields:
-            #           env:
-            #             - width: 100%
-            #             - justify-self: stretch
-            #             - box-sizing: border-box
-            #       custom_fields:
-            #         env: >
-            #           [[[
-            #             const raw = (id) => states[id];
-            #             const val = (id) => {
-            #               const s = raw(id)?.state;
-            #               return (!s || s === 'unknown' || s === 'unavailable') ? null : s;
-            #             };
-            #             const t_m1 = val('sensor.ewelink_snzb_01p_temperatur');
-            #             const h_m1 = val('sensor.ewelink_snzb_01p_luftfeuchtigkeit');
-            #             const b_m1 = val('sensor.ewelink_snzb_01p_batterie');
-            #             const row = (icon, label, v, unit) => {
-            #               const display = v !== null
-            #                 ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;">${v} ${unit}</span>`
-            #                 : `<span style="font-size:0.8rem;font-weight:600;margin-left:8px;color:#ef5350;background:rgba(239,83,80,0.12);padding:1px 6px;border-radius:4px;">✕ unknown</span>`;
-            #               return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
-            #                 <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
-            #                 <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
-            #                 ${display}
-            #               </div>`;
-            #             };
-            #             return `<div style="width:100%;padding:2px 0;">
-            #               <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Miner-Rack</div>
-            #               ${row('mdi:thermometer-alert','Temperatur',t_m1,'°C')}
-            #               ${row('mdi:water-percent','Feuchte',h_m1,'%')}
-            #               ${row('mdi:battery','Akku',b_m1,'%')}
-            #             </div>`;
-            #           ]]]
+                # ── Miner 1 Klima ───────────────────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 10px 16px
+                    custom_fields:
+                      env:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    env: >
+                      [[[
+                        const raw = (id) => states[id];
+                        const val = (id) => {
+                          const s = raw(id)?.state;
+                          return (!s || s === 'unknown' || s === 'unavailable') ? null : s;
+                        };
+                        const t_m1 = val('sensor.ewelink_snzb_01p_temperatur');
+                        const h_m1 = val('sensor.ewelink_snzb_01p_luftfeuchtigkeit');
+                        const b_m1 = val('sensor.ewelink_snzb_01p_batterie');
+                        const row = (icon, label, v, unit) => {
+                          const display = v !== null
+                            ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;">${v} ${unit}</span>`
+                            : `<span style="font-size:0.8rem;font-weight:600;margin-left:8px;color:#ef5350;background:rgba(239,83,80,0.12);padding:1px 6px;border-radius:4px;">✕ unknown</span>`;
+                          return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
+                            ${display}
+                          </div>`;
+                        };
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Miner-Rack</div>
+                          ${row('mdi:thermometer-alert','Temperatur',t_m1,'°C')}
+                          ${row('mdi:water-percent','Feuchte',h_m1,'%')}
+                          ${row('mdi:battery','Akku',b_m1,'%')}
+                        </div>`;
+                      ]]]
 
             # ── Spacer ──────────────────────────────────────────────────────────
             - type: custom:button-card
@@ -1833,381 +1817,383 @@ views:
                   - padding: 0
 
             # ── Statistik: 2026 YTD | Monat | Heute nebeneinander ───────────────
-            # - type: horizontal-stack
-            #   cards:
+            - type: horizontal-stack
+              cards:
 
-            #     # ── links: Statistik Heute ──────────────────────────────────────
-            #     - type: custom:button-card
-            #       show_name: false
-            #       show_icon: false
-            #       show_state: false
-            #       styles:
-            #         card:
-            #           - padding: 12px 16px
-            #         custom_fields:
-            #           stats_heute:
-            #             - width: 100%
-            #             - justify-self: stretch
-            #             - box-sizing: border-box
-            #       custom_fields:
-            #         stats_heute: >
-            #           [[[
-            #             const pvKwh      = states['sensor.pv_energy_daily']?.state ?? '—';
-            #             const pvExpKwh   = states['sensor.grid_export_daily']?.state ?? '—';
-            #             const gridImpKwh = states['sensor.grid_import_daily']?.state ?? '—';
-            #             const pvN        = parseFloat(pvKwh);
-            #             const pvExpN     = parseFloat(pvExpKwh);
-            #             const pvSelfUse  = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0) ? Math.max(0, pvN - pvExpN) : null;
-            #             const hausKwh    = states['sensor.house_energy_daily']?.state ?? '—';
-            #             const hzKwh      = states['sensor.heizstab_energy_daily']?.state ?? '—';
-            #             const mineKwh    = states['sensor.mining_energy_daily']?.state ?? '—';
-            #             const upFmt      = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
-            #             const ecoH       = states['sensor.miner_eco_hours_today']?.state ?? '—';
-            #             const stdH       = states['sensor.miner_standard_hours_today']?.state ?? '—';
-            #             const supH       = states['sensor.miner_super_hours_today']?.state ?? '—';
-            #             const fmtKwh = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(2) + ' kWh'; };
-            #             const fmtH   = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(1) + ' h'; };
-            #             const row = (icon, label, val, iconColor) =>
-            #               `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
-            #                 <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
-            #                 <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
-            #                 <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
-            #               </div>`;
-            #             const modeBox = (label, val, color) =>
-            #               `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
-            #                 <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
-            #                 <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
-            #               </div>`;
-            #             return `<div style="width:100%;padding:2px 0;">
-            #               <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 <ha-icon icon="mdi:chart-bar" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
-            #                 <span style="font-size:0.88rem;font-weight:700;">Statistik Heute</span>
-            #               </div>
-            #               <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 ${row('mdi:solar-power','PV erzeugt',fmtKwh(pvKwh),'#4CAF50')}
-            #                 ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
-            #                 ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(pvExpKwh),'#8BC34A')}
-            #                 ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(gridImpKwh),'#5C6BC0')}
-            #               </div>
-            #               <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(hausKwh),'#f59e0b')}
-            #                 ${row('mdi:water-boiler','Heizstab',fmtKwh(hzKwh),'#2196F3')}
-            #                 ${row('mdi:pickaxe','Miner',fmtKwh(mineKwh),'#f59e0b')}
-            #               </div>
-            #               <div>
-            #                 ${row('mdi:timer-outline','Mining Uptime',upFmt,'var(--secondary-text-color)')}
-            #               </div>
-            #               <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--divider-color);">
-            #                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
-            #                   ${modeBox('Eco',fmtH(ecoH),'#4CAF50')}
-            #                   ${modeBox('Standard',fmtH(stdH),'#26C6DA')}
-            #                   ${modeBox('Super',fmtH(supH),'#F7931A')}
-            #                 </div>
-            #               </div>
-            #             </div>`;
-            #           ]]]
+                # ── links: Statistik Heute ──────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 12px 16px
+                    custom_fields:
+                      stats_heute:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    stats_heute: >
+                      [[[
+                        const pvKwh      = states['sensor.pv_energy_daily']?.state ?? '—';
+                        const pvExpKwh   = states['sensor.grid_export_daily']?.state ?? '—';
+                        const gridImpKwh = states['sensor.grid_import_daily']?.state ?? '—';
+                        const pvN        = parseFloat(pvKwh);
+                        const pvExpN     = parseFloat(pvExpKwh);
+                        const pvSelfUse  = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0) ? Math.max(0, pvN - pvExpN) : null;
+                        const hausKwh    = states['sensor.house_energy_daily']?.state ?? '—';
+                        const hzKwh      = states['sensor.heizstab_energy_daily']?.state ?? '—';
+                        const mineKwh    = states['sensor.mining_energy_daily']?.state ?? '—';
+                        const upFmt      = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
+                        const ecoH       = states['sensor.miner_eco_hours_today']?.state ?? '—';
+                        const stdH       = states['sensor.miner_standard_hours_today']?.state ?? '—';
+                        const supH       = states['sensor.miner_super_hours_today']?.state ?? '—';
+                        const fmtKwh = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(2) + ' kWh'; };
+                        const fmtH   = (v) => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(1) + ' h'; };
+                        const row = (icon, label, val, iconColor) =>
+                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                            <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+                          </div>`;
+                        const modeBox = (label, val, color) =>
+                          `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                            <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                            <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                          </div>`;
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            <ha-icon icon="mdi:chart-bar" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                            <span style="font-size:0.88rem;font-weight:700;">Statistik Heute</span>
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:solar-power','PV erzeugt',fmtKwh(pvKwh),'#4CAF50')}
+                            ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
+                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(pvExpKwh),'#8BC34A')}
+                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(gridImpKwh),'#5C6BC0')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(hausKwh),'#f59e0b')}
+                            ${row('mdi:water-boiler','Heizstab',fmtKwh(hzKwh),'#2196F3')}
+                            ${row('mdi:pickaxe','Miner',fmtKwh(mineKwh),'#f59e0b')}
+                          </div>
+                          <div>
+                            ${row('mdi:timer-outline','Mining Uptime',upFmt,'var(--secondary-text-color)')}
+                          </div>
+                          <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--divider-color);">
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                              ${modeBox('Eco',fmtH(ecoH),'#4CAF50')}
+                              ${modeBox('Standard',fmtH(stdH),'#26C6DA')}
+                              ${modeBox('Super',fmtH(supH),'#F7931A')}
+                            </div>
+                          </div>
+                        </div>`;
+                      ]]]
 
-            #     # ── mitte: Monatsstatistik ──────────────────────────────────────
-            #     - type: custom:button-card
-            #       show_name: false
-            #       show_icon: false
-            #       show_state: false
-            #       styles:
-            #         card:
-            #           - padding: 12px 16px
-            #         custom_fields:
-            #           stats_monat:
-            #             - width: 100%
-            #             - justify-self: stretch
-            #             - box-sizing: border-box
-            #       custom_fields:
-            #         stats_monat: >
-            #           [[[
-            #             const pv   = (parseFloat(states['input_number.pv_kwh_mtd']?.state ?? '0')   + parseFloat(states['sensor.pv_energy_daily']?.state ?? '0')).toFixed(3);
-            #             const exp  = (parseFloat(states['input_number.grid_export_mtd']?.state ?? '0') + parseFloat(states['sensor.grid_export_daily']?.state ?? '0')).toFixed(3);
-            #             const imp  = (parseFloat(states['input_number.grid_import_mtd']?.state ?? '0') + parseFloat(states['sensor.grid_import_daily']?.state ?? '0')).toFixed(3);
-            #             const house= (parseFloat(states['input_number.house_kwh_mtd']?.state ?? '0')   + parseFloat(states['sensor.house_energy_daily']?.state ?? '0')).toFixed(3);
-            #             const hz   = (parseFloat(states['input_number.heizstab_kwh_mtd']?.state ?? '0')+ parseFloat(states['sensor.heizstab_energy_daily']?.state ?? '0')).toFixed(3);
-            #             const mine = (parseFloat(states['input_number.mining_kwh_mtd']?.state ?? '0')  + parseFloat(states['sensor.mining_energy_daily']?.state ?? '0')).toFixed(3);
-            #             const up   = (parseFloat(states['input_number.mining_uptime_mtd_h']?.state ?? '0') + parseFloat(states['sensor.miner_uptime_today_h']?.state ?? '0')).toFixed(2);
-            #             const ecoM = (parseFloat(states['input_number.miner_eco_mtd_h']?.state ?? '0')      + parseFloat(states['sensor.miner_eco_hours_today']?.state ?? '0')).toFixed(2);
-            #             const stdM = (parseFloat(states['input_number.miner_standard_mtd_h']?.state ?? '0') + parseFloat(states['sensor.miner_standard_hours_today']?.state ?? '0')).toFixed(2);
-            #             const supM = (parseFloat(states['input_number.miner_super_mtd_h']?.state ?? '0')    + parseFloat(states['sensor.miner_super_hours_today']?.state ?? '0')).toFixed(2);
-            #             const pvN = parseFloat(pv), expN = parseFloat(exp);
-            #             const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
-            #             const fmtKwh = (v) => { const n = parseFloat(v); if (isNaN(n)) return '—'; return n >= 1000 ? (n/1000).toFixed(2)+' MWh' : n.toFixed(1)+' kWh'; };
-            #             const fmtUptime = (v) => { const n = parseFloat(v); if (isNaN(n) || n <= 0) return '0 h'; const d = Math.floor(n/24), h = Math.floor(n%24); return d > 0 ? `${d}d ${h}h` : `${h} h`; };
-            #             const row = (icon, label, val, iconColor) =>
-            #               `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
-            #                 <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
-            #                 <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
-            #                 <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
-            #               </div>`;
-            #             const modeBox = (label, val, color) =>
-            #               `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
-            #                 <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
-            #                 <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
-            #               </div>`;
-            #             const month = new Date().toLocaleString('de-DE',{month:'long'});
-            #             return `<div style="width:100%;padding:2px 0;">
-            #               <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 <ha-icon icon="mdi:calendar-month" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
-            #                 <span style="font-size:0.88rem;font-weight:700;">${month}</span>
-            #               </div>
-            #               <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 ${row('mdi:solar-power','PV erzeugt',fmtKwh(pv),'#4CAF50')}
-            #                 ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
-            #                 ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(exp),'#8BC34A')}
-            #                 ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(imp),'#5C6BC0')}
-            #               </div>
-            #               <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(house),'#f59e0b')}
-            #                 ${row('mdi:water-boiler','Heizstab',fmtKwh(hz),'#2196F3')}
-            #                 ${row('mdi:pickaxe','Miner',fmtKwh(mine),'#f59e0b')}
-            #               </div>
-            #               <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 ${row('mdi:timer-outline','Mining Uptime',fmtUptime(up),'var(--secondary-text-color)')}
-            #               </div>
-            #               <div style="margin-top:2px;">
-            #                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
-            #                   ${modeBox('Eco',     fmtUptime(ecoM), '#4CAF50')}
-            #                   ${modeBox('Standard',fmtUptime(stdM), '#26C6DA')}
-            #                   ${modeBox('Super',   fmtUptime(supM), '#F7931A')}
-            #                 </div>
-            #               </div>
-            #             </div>`;
-            #           ]]]
+                # ── mitte: Monatsstatistik ──────────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 12px 16px
+                    custom_fields:
+                      stats_monat:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    stats_monat: >
+                      [[[
+                        const pv   = (parseFloat(states['input_number.pv_kwh_mtd']?.state ?? '0')   + parseFloat(states['sensor.pv_energy_daily']?.state ?? '0')).toFixed(3);
+                        const exp  = (parseFloat(states['input_number.grid_export_mtd']?.state ?? '0') + parseFloat(states['sensor.grid_export_daily']?.state ?? '0')).toFixed(3);
+                        const imp  = (parseFloat(states['input_number.grid_import_mtd']?.state ?? '0') + parseFloat(states['sensor.grid_import_daily']?.state ?? '0')).toFixed(3);
+                        const house= (parseFloat(states['input_number.house_kwh_mtd']?.state ?? '0')   + parseFloat(states['sensor.house_energy_daily']?.state ?? '0')).toFixed(3);
+                        const hz   = (parseFloat(states['input_number.heizstab_kwh_mtd']?.state ?? '0')+ parseFloat(states['sensor.heizstab_energy_daily']?.state ?? '0')).toFixed(3);
+                        const mine = (parseFloat(states['input_number.mining_kwh_mtd']?.state ?? '0')  + parseFloat(states['sensor.mining_energy_daily']?.state ?? '0')).toFixed(3);
+                        const up   = (parseFloat(states['input_number.mining_uptime_mtd_h']?.state ?? '0') + parseFloat(states['sensor.miner_uptime_today_h']?.state ?? '0')).toFixed(2);
+                        const ecoM = (parseFloat(states['input_number.miner_eco_mtd_h']?.state ?? '0')      + parseFloat(states['sensor.miner_eco_hours_today']?.state ?? '0')).toFixed(2);
+                        const stdM = (parseFloat(states['input_number.miner_standard_mtd_h']?.state ?? '0') + parseFloat(states['sensor.miner_standard_hours_today']?.state ?? '0')).toFixed(2);
+                        const supM = (parseFloat(states['input_number.miner_super_mtd_h']?.state ?? '0')    + parseFloat(states['sensor.miner_super_hours_today']?.state ?? '0')).toFixed(2);
+                        const pvN = parseFloat(pv), expN = parseFloat(exp);
+                        const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
+                        const fmtKwh = (v) => { const n = parseFloat(v); if (isNaN(n)) return '—'; return n >= 1000 ? (n/1000).toFixed(2)+' MWh' : n.toFixed(1)+' kWh'; };
+                        const fmtUptime = (v) => { const n = parseFloat(v); if (isNaN(n) || n <= 0) return '0 h'; const d = Math.floor(n/24), h = Math.floor(n%24); return d > 0 ? `${d}d ${h}h` : `${h} h`; };
+                        const row = (icon, label, val, iconColor) =>
+                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                            <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+                          </div>`;
+                        const modeBox = (label, val, color) =>
+                          `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                            <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                            <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                          </div>`;
+                        const month = new Date().toLocaleString('de-DE',{month:'long'});
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            <ha-icon icon="mdi:calendar-month" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                            <span style="font-size:0.88rem;font-weight:700;">${month}</span>
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:solar-power','PV erzeugt',fmtKwh(pv),'#4CAF50')}
+                            ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
+                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(exp),'#8BC34A')}
+                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(imp),'#5C6BC0')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(house),'#f59e0b')}
+                            ${row('mdi:water-boiler','Heizstab',fmtKwh(hz),'#2196F3')}
+                            ${row('mdi:pickaxe','Miner',fmtKwh(mine),'#f59e0b')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:timer-outline','Mining Uptime',fmtUptime(up),'var(--secondary-text-color)')}
+                          </div>
+                          <div style="margin-top:2px;">
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                              ${modeBox('Eco',     fmtUptime(ecoM), '#4CAF50')}
+                              ${modeBox('Standard',fmtUptime(stdM), '#26C6DA')}
+                              ${modeBox('Super',   fmtUptime(supM), '#F7931A')}
+                            </div>
+                          </div>
+                        </div>`;
+                      ]]]
 
-            #     # ── rechts: 2026 Gesamtstatistik ─────────────────────────────────
-            #     - type: custom:button-card
-            #       show_name: false
-            #       show_icon: false
-            #       show_state: false
-            #       styles:
-            #         card:
-            #           - padding: 12px 16px
-            #         custom_fields:
-            #           stats_ytd:
-            #             - width: 100%
-            #             - justify-self: stretch
-            #             - box-sizing: border-box
-            #       custom_fields:
-            #         stats_ytd: >
-            #           [[[
-            #             const fmtKwh = (v) => {
-            #               const n = parseFloat(v);
-            #               if (isNaN(n)) return '—';
-            #               return n >= 1000
-            #                 ? (n / 1000).toFixed(2) + ' MWh'
-            #                 : n.toFixed(1) + ' kWh';
-            #             };
-            #             const fmtUptime = (v) => {
-            #               const n = parseFloat(v);
-            #               if (isNaN(n) || n <= 0) return '0 h';
-            #               const d = Math.floor(n / 24);
-            #               const h = Math.floor(n % 24);
-            #               return d > 0 ? `${d}d ${h}h` : `${h} h`;
-            #             };
-            #             const row = (icon, label, val, iconColor) =>
-            #               `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
-            #                 <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
-            #                 <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
-            #                 <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
-            #               </div>`;
-            #             const modeBox = (label, val, color) =>
-            #               `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
-            #                 <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
-            #                 <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
-            #               </div>`;
-            #             const pv     = states['input_number.pv_kwh_ytd']?.state ?? '0';
-            #             const mine   = states['input_number.mining_kwh_ytd']?.state ?? '0';
-            #             const imp    = states['input_number.grid_import_ytd']?.state ?? '0';
-            #             const exp    = states['input_number.grid_export_ytd']?.state ?? '0';
-            #             const house  = states['input_number.house_kwh_ytd']?.state ?? '0';
-            #             const hz     = states['input_number.heizstab_kwh_ytd']?.state ?? '0';
-            #             const up     = states['input_number.mining_uptime_ytd_h']?.state ?? '0';
-            #             const ecoY   = states['input_number.miner_eco_ytd_h']?.state ?? '0';
-            #             const stdY   = states['input_number.miner_standard_ytd_h']?.state ?? '0';
-            #             const supY   = states['input_number.miner_super_ytd_h']?.state ?? '0';
-            #             const pvN    = parseFloat(pv);
-            #             const expN   = parseFloat(exp);
-            #             const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
-            #             return `<div style="width:100%;padding:2px 0;">
-            #               <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 <ha-icon icon="mdi:calendar-today" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
-            #                 <span style="font-size:0.88rem;font-weight:700;">2026 gesamt</span>
-            #               </div>
-            #               <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 ${row('mdi:solar-power','PV erzeugt',fmtKwh(pv),'#4CAF50')}
-            #                 ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
-            #                 ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(exp),'#8BC34A')}
-            #                 ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(imp),'#5C6BC0')}
-            #               </div>
-            #               <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(house),'#f59e0b')}
-            #                 ${row('mdi:water-boiler','Heizstab',fmtKwh(hz),'#2196F3')}
-            #                 ${row('mdi:pickaxe','Miner',fmtKwh(mine),'#f59e0b')}
-            #               </div>
-            #               <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #                 ${row('mdi:timer-outline','Mining Uptime',fmtUptime(up),'var(--secondary-text-color)')}
-            #               </div>
-            #               <div style="margin-top:2px;">
-            #                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
-            #                   ${modeBox('Eco',     fmtUptime(ecoY), '#4CAF50')}
-            #                   ${modeBox('Standard',fmtUptime(stdY), '#26C6DA')}
-            #                   ${modeBox('Super',   fmtUptime(supY), '#F7931A')}
-            #                 </div>
-            #               </div>
-            #             </div>`;
-            #           ]]]
+                # ── rechts: 2026 Gesamtstatistik ─────────────────────────────────
+                - type: custom:button-card
+                  show_name: false
+                  show_icon: false
+                  show_state: false
+                  styles:
+                    card:
+                      - padding: 12px 16px
+                    custom_fields:
+                      stats_ytd:
+                        - width: 100%
+                        - justify-self: stretch
+                        - box-sizing: border-box
+                  custom_fields:
+                    stats_ytd: >
+                      [[[
+                        const fmtKwh = (v) => {
+                          const n = parseFloat(v);
+                          if (isNaN(n)) return '—';
+                          return n >= 1000
+                            ? (n / 1000).toFixed(2) + ' MWh'
+                            : n.toFixed(1) + ' kWh';
+                        };
+                        const fmtUptime = (v) => {
+                          const n = parseFloat(v);
+                          if (isNaN(n) || n <= 0) return '0 h';
+                          const d = Math.floor(n / 24);
+                          const h = Math.floor(n % 24);
+                          return d > 0 ? `${d}d ${h}h` : `${h} h`;
+                        };
+                        const row = (icon, label, val, iconColor) =>
+                          `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                            <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                            <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+                          </div>`;
+                        const modeBox = (label, val, color) =>
+                          `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                            <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                            <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                          </div>`;
+                        const pv     = states['input_number.pv_kwh_ytd']?.state ?? '0';
+                        const mine   = states['input_number.mining_kwh_ytd']?.state ?? '0';
+                        const imp    = states['input_number.grid_import_ytd']?.state ?? '0';
+                        const exp    = states['input_number.grid_export_ytd']?.state ?? '0';
+                        const house  = states['input_number.house_kwh_ytd']?.state ?? '0';
+                        const hz     = states['input_number.heizstab_kwh_ytd']?.state ?? '0';
+                        const up     = states['input_number.mining_uptime_ytd_h']?.state ?? '0';
+                        const ecoY   = states['input_number.miner_eco_ytd_h']?.state ?? '0';
+                        const stdY   = states['input_number.miner_standard_ytd_h']?.state ?? '0';
+                        const supY   = states['input_number.miner_super_ytd_h']?.state ?? '0';
+                        const pvN    = parseFloat(pv);
+                        const expN   = parseFloat(exp);
+                        const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
+                        return `<div style="width:100%;padding:2px 0;">
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            <ha-icon icon="mdi:calendar-today" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                            <span style="font-size:0.88rem;font-weight:700;">2026 gesamt</span>
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:solar-power','PV erzeugt',fmtKwh(pv),'#4CAF50')}
+                            ${row('mdi:home-lightning-bolt-outline','PV Eigenverbrauch',pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—','#f59e0b')}
+                            ${row('mdi:transmission-tower-export','Eingespeist',fmtKwh(exp),'#8BC34A')}
+                            ${row('mdi:transmission-tower-import','Netzbezug',fmtKwh(imp),'#5C6BC0')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:home-lightning-bolt','Hausverbrauch',fmtKwh(house),'#f59e0b')}
+                            ${row('mdi:water-boiler','Heizstab',fmtKwh(hz),'#2196F3')}
+                            ${row('mdi:pickaxe','Miner',fmtKwh(mine),'#f59e0b')}
+                          </div>
+                          <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                            ${row('mdi:timer-outline','Mining Uptime',fmtUptime(up),'var(--secondary-text-color)')}
+                          </div>
+                          <div style="margin-top:2px;">
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                              ${modeBox('Eco',     fmtUptime(ecoY), '#4CAF50')}
+                              ${modeBox('Standard',fmtUptime(stdY), '#26C6DA')}
+                              ${modeBox('Super',   fmtUptime(supY), '#F7931A')}
+                            </div>
+                          </div>
+                        </div>`;
+                      ]]]
 
             # ── Mining Verlauf (volle Breite) ─────────────────────────────────────
-            # - type: custom:button-card
-            #   show_name: false
-            #   show_icon: false
-            #   show_state: false
-            #   styles:
-            #     card:
-            #       - padding: 12px 16px
-            #     custom_fields:
-            #       mining_log:
-            #         - width: 100%
-            #         - justify-self: stretch
-            #         - box-sizing: border-box
-            #   custom_fields:
-            #     mining_log: >
-            #       [[[
-            #         const parseLog = (raw) => (raw && raw !== 'unknown' && raw !== 'unavailable') ? raw.split('|').filter(e => e.includes(',')) : [];
-            #         const recentLog = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
-            #         const csvLog = parseLog(states['sensor.mining_log_history']?.attributes?.rows ?? '');
-            #         const seenDates = new Set(recentLog.map(e => e.split(',')[0]));
-            #         const logEntries = [...recentLog, ...csvLog.filter(e => !seenDates.has(e.split(',')[0]))].sort((a,b) => b.split(',')[0].localeCompare(a.split(',')[0]));
-            #         const btcMap = {};
-            #         const settleThs = {};
-            #         (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {
-            #           const hr = tx.mining_extra?.hash_rate;
-            #           const md = tx.mining_extra?.mining_date;
-            #           if (!hr || !md) return;
-            #           const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
-            #           const d = sd.toISOString().slice(0, 10);
-            #           settleThs[d] = (hr / 1e12).toFixed(2);
-            #           const btcVal = parseFloat(tx.changed_balance);
-            #           if (btcVal > 0) btcMap[d] = btcVal;
-            #         });
-            #         (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
-            #           if (!e[0] || !e[2]) return;
-            #           const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
-            #           const d = sd.toISOString().slice(0, 10);
-            #           if (!btcMap[d]) btcMap[d] = e[2];
-            #         });
-            #         parseLog(states['input_text.pool_btc_daily_log']?.state ?? '').forEach(e => {
-            #           const [d, b] = e.split(','); if (d && !btcMap[d]) btcMap[d] = parseFloat(b) || 0;
-            #         });
-            #         const thsYest = parseFloat(states['sensor.pool_ths_yesterday']?.state) || 0;
-            #         const phArr   = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
-            #         const thsApi  = {};
-            #         if (thsYest > 0 && phArr.length > 0) {
-            #           const sd = new Date(phArr[0][0]); sd.setUTCDate(sd.getUTCDate() - 1);
-            #           thsApi[sd.toISOString().slice(0, 10)] = thsYest.toFixed(1);
-            #         }
-            #         const thsLog  = {};
-            #         parseLog(states['input_text.pool_ths_daily_log']?.state ?? '').forEach(e => {
-            #           const [d, t] = e.split(','); if (d && t) thsLog[d] = t;
-            #         });
-            #         const csvThs = {
-            #           '2026-05-03':'51.46','2026-05-02':'54.36','2026-05-01':'57.62',
-            #           '2026-04-30':'61.47','2026-04-29':'54.91','2026-04-28':'56.54',
-            #           '2026-04-27':'62.04','2026-04-26':'52.91','2026-04-25':'58.40',
-            #           '2026-04-24':'64.92','2026-04-23':'65.03','2026-04-22':'64.86',
-            #           '2026-04-21':'14.59','2026-04-20':'50.26','2026-04-19':'25.12',
-            #           '2026-04-18':'36.90','2026-04-17':'50.09','2026-04-16':'49.84',
-            #           '2026-04-15':'58.32','2026-04-14':'44.94','2026-04-12':'14.36',
-            #           '2026-04-11':'36.88','2026-04-10':'10.14','2026-04-09':'52.46',
-            #           '2026-04-08':'45.44','2026-04-07':'50.52','2026-04-06':'55.23',
-            #           '2026-04-05':'23.90','2026-04-04':'12.39','2026-04-03':'11.26',
-            #           '2026-04-02':'56.48','2026-04-01':'32.51','2026-03-31':'20.18',
-            #           '2026-03-30':'18.85','2026-03-29':'15.74','2026-03-28':'19.06'
-            #         };
-            #         const btcEur    = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
-            #         const STROM_EUR = 0.078;
-            #         const parseEntry = (e) => {
-            #           const p = e.split(',');
-            #           return { d: p[0]??'', on: p[1]??'–', off: p[2]??'–',
-            #             tot: parseFloat(p[3])||0, ec: parseFloat(p[4])||0,
-            #             st: parseFloat(p[5])||0, sp: parseFloat(p[6])||0, kw: parseFloat(p[7])||0 };
-            #         };
-            #         const fmtDt  = (iso) => (iso && iso.length >= 10) ? iso.slice(8,10)+'.'+iso.slice(5,7) : '—';
-            #         const fmtT   = (dt)  => (!dt || !dt.includes(' ')) ? '–' : dt.split(' ')[1].slice(0,5);
-            #         const fmtHm  = (v)   => { const n=parseFloat(v); if(!n||n<=0) return '0h'; const h=Math.floor(n),m=Math.round((n-h)*60); return m>0?`${h}h${m}m`:`${h}h`; };
-            #         const fmtH1  = (v)   => { const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(1); };
-            #         const fmtSat = (btc) => (!btc || btc <= 0) ? '—' : Math.round(btc * 1e8);
-            #         const _d = new Date(); const todayIso = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
-            #         const startDt  = states['input_datetime.last_start_at']?.state ?? '';
-            #         const stopDt   = states['input_datetime.last_stop_at']?.state ?? '';
-            #         const startTime = startDt.startsWith(todayIso) ? fmtT(startDt) : '–';
-            #         const stopTime  = stopDt.startsWith(todayIso)  ? fmtT(stopDt)  : '–';
-            #         const todayRow = {
-            #           d: todayIso, on: startTime, off: stopTime,
-            #           tot: parseFloat(states['sensor.miner_uptime_today_h']?.state)||0,
-            #           ec:  parseFloat(states['sensor.miner_eco_hours_today']?.state)||0,
-            #           st:  parseFloat(states['sensor.miner_standard_hours_today']?.state)||0,
-            #           sp:  parseFloat(states['sensor.miner_super_hours_today']?.state)||0,
-            #           kw:  parseFloat(states['sensor.mining_energy_daily']?.state)||0,
-            #           live: true
-            #         };
-            #         const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
-            #         const cutoffIso = cutoff.toISOString().slice(0, 10);
-            #         const allRows = [todayRow, ...logEntries.map(parseEntry).filter(r => r.d >= cutoffIso)];
-            #         const cols = '50px 42px 42px 54px 36px 36px 40px 44px 44px 44px 50px 46px';
-            #         const th = (t,r) => `<div style="font-size:0.62rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
-            #         const headers = `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;border-bottom:1px solid var(--divider-color);margin-bottom:2px;">
-            #           ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Ges.',1)}${th('Eco',1)}${th('Std',1)}${th('Sup',1)}${th('kWh',1)}${th('TH/s',1)}${th('SATs',1)}${th('S/kWh',1)}${th('€/kWh',1)}
-            #         </div>`;
-            #         const rowHtml = (r) => {
-            #           const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
-            #           const dc = r.live ? 'var(--primary-text-color)' : 'var(--secondary-text-color)';
-            #           const fw = r.live ? '600' : '400';
-            #           const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
-            #           const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
-            #           const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? '—';
-            #           const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
-            #           const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';
-            #           const earnedEur = (satNum !== null && r.kw > 0 && btcEur > 0)
-            #             ? satNum * btcEur / 1e8 / r.kw : null;
-            #           const eurStr   = earnedEur !== null ? earnedEur.toFixed(3) : '—';
-            #           const eurColor = earnedEur === null ? 'var(--secondary-text-color)'
-            #             : earnedEur >= 0.156 ? '#F7931A'
-            #             : earnedEur >= 0.125 ? '#26C6DA'
-            #             : earnedEur >= 0.100 ? '#4CAF50'
-            #             : earnedEur >= 0.078 ? '#FFFFFF'
-            #             : '#9E9E9E';
-            #           return `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;${hl}">
-            #             <div style="font-size:0.82rem;color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
-            #             ${c(r.on,'inherit')}${c(r.off,'inherit')}
-            #             ${c(fmtHm(r.tot),'var(--primary-text-color)')}
-            #             ${c(fmtH1(r.ec)+'h','#4CAF50')}
-            #             ${c(fmtH1(r.st)+'h','#26C6DA')}
-            #             ${c(fmtH1(r.sp)+'h','#F7931A')}
-            #             ${c(r.kw.toFixed(2),'white')}
-            #             ${c(ths,'#FFFFFF')}
-            #             ${c(sat,'#F7931A')}
-            #             ${c(sPerKwh,'#F7931A')}
-            #             ${c(eurStr,eurColor)}
-            #           </div>`;
-            #         };
-            #         return `<div style="width:100%;overflow-x:auto;">
-            #           <div style="min-width:620px;">
-            #             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            #               <ha-icon icon="mdi:calendar-clock" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
-            #               <span style="font-size:0.88rem;font-weight:700;">Mining Verlauf</span>
-            #             </div>
-            #             ${headers}
-            #             <div style="max-height:560px;overflow-y:auto;scrollbar-width:thin;">
-            #               ${allRows.map(rowHtml).join('')}
-            #             </div>
-            #           </div>
-            #         </div>`;
-            #       ]]]
+            - type: custom:button-card
+              show_name: false
+              show_icon: false
+              show_state: false
+              styles:
+                card:
+                  - padding: 12px 16px
+                custom_fields:
+                  mining_log:
+                    - width: 100%
+                    - justify-self: stretch
+                    - box-sizing: border-box
+              custom_fields:
+                mining_log: >
+                  [[[
+                    const parseLog = (raw) => (raw && raw !== 'unknown' && raw !== 'unavailable') ? raw.split('|').filter(e => e.includes(',')) : [];
+                    const recentLog = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
+                    const csvLog = parseLog(states['sensor.mining_log_history']?.attributes?.rows ?? '');
+                    const seenDates = new Set(recentLog.map(e => e.split(',')[0]));
+                    const deduped = [];
+                    csvLog.forEach(e => { const d = e.split(',')[0]; if (!seenDates.has(d)) { seenDates.add(d); deduped.push(e); } });
+                    const logEntries = [...recentLog, ...deduped].sort((a,b) => b.split(',')[0].localeCompare(a.split(',')[0]));
+                    const btcMap = {};
+                    const settleThs = {};
+                    (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {
+                      const hr = tx.mining_extra?.hash_rate;
+                      const md = tx.mining_extra?.mining_date;
+                      if (!hr || !md) return;
+                      const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
+                      const d = sd.toISOString().slice(0, 10);
+                      settleThs[d] = (hr / 1e12).toFixed(2);
+                      const btcVal = parseFloat(tx.changed_balance);
+                      if (btcVal > 0) btcMap[d] = btcVal;
+                    });
+                    (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
+                      if (!e[0] || !e[2]) return;
+                      const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
+                      const d = sd.toISOString().slice(0, 10);
+                      if (!btcMap[d]) btcMap[d] = e[2];
+                    });
+                    parseLog(states['input_text.pool_btc_daily_log']?.state ?? '').forEach(e => {
+                      const [d, b] = e.split(','); if (d && !btcMap[d]) btcMap[d] = parseFloat(b) || 0;
+                    });
+                    const thsYest = parseFloat(states['sensor.pool_ths_yesterday']?.state) || 0;
+                    const phArr   = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
+                    const thsApi  = {};
+                    if (thsYest > 0 && phArr.length > 0) {
+                      const sd = new Date(phArr[0][0]); sd.setUTCDate(sd.getUTCDate() - 1);
+                      thsApi[sd.toISOString().slice(0, 10)] = thsYest.toFixed(1);
+                    }
+                    const thsLog  = {};
+                    parseLog(states['input_text.pool_ths_daily_log']?.state ?? '').forEach(e => {
+                      const [d, t] = e.split(','); if (d && t) thsLog[d] = t;
+                    });
+                    const csvThs = {
+                      '2026-05-03':'51.46','2026-05-02':'54.36','2026-05-01':'57.62',
+                      '2026-04-30':'61.47','2026-04-29':'54.91','2026-04-28':'56.54',
+                      '2026-04-27':'62.04','2026-04-26':'52.91','2026-04-25':'58.40',
+                      '2026-04-24':'64.92','2026-04-23':'65.03','2026-04-22':'64.86',
+                      '2026-04-21':'14.59','2026-04-20':'50.26','2026-04-19':'25.12',
+                      '2026-04-18':'36.90','2026-04-17':'50.09','2026-04-16':'49.84',
+                      '2026-04-15':'58.32','2026-04-14':'44.94','2026-04-12':'14.36',
+                      '2026-04-11':'36.88','2026-04-10':'10.14','2026-04-09':'52.46',
+                      '2026-04-08':'45.44','2026-04-07':'50.52','2026-04-06':'55.23',
+                      '2026-04-05':'23.90','2026-04-04':'12.39','2026-04-03':'11.26',
+                      '2026-04-02':'56.48','2026-04-01':'32.51','2026-03-31':'20.18',
+                      '2026-03-30':'18.85','2026-03-29':'15.74','2026-03-28':'19.06'
+                    };
+                    const btcEur    = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+                    const STROM_EUR = 0.078;
+                    const parseEntry = (e) => {
+                      const p = e.split(',');
+                      return { d: p[0]??'', on: p[1]??'–', off: p[2]??'–',
+                        tot: parseFloat(p[3])||0, ec: parseFloat(p[4])||0,
+                        st: parseFloat(p[5])||0, sp: parseFloat(p[6])||0, kw: parseFloat(p[7])||0 };
+                    };
+                    const fmtDt  = (iso) => (iso && iso.length >= 10) ? iso.slice(8,10)+'.'+iso.slice(5,7) : '—';
+                    const fmtT   = (dt)  => (!dt || !dt.includes(' ')) ? '–' : dt.split(' ')[1].slice(0,5);
+                    const fmtHm  = (v)   => { const n=parseFloat(v); if(!n||n<=0) return '0h'; const h=Math.floor(n),m=Math.round((n-h)*60); return m>0?`${h}h${m}m`:`${h}h`; };
+                    const fmtH1  = (v)   => { const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(1); };
+                    const fmtSat = (btc) => (!btc || btc <= 0) ? '—' : Math.round(btc * 1e8);
+                    const _d = new Date(); const todayIso = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
+                    const startDt  = states['input_datetime.last_start_at']?.state ?? '';
+                    const stopDt   = states['input_datetime.last_stop_at']?.state ?? '';
+                    const startTime = startDt.startsWith(todayIso) ? fmtT(startDt) : '–';
+                    const stopTime  = stopDt.startsWith(todayIso)  ? fmtT(stopDt)  : '–';
+                    const todayRow = {
+                      d: todayIso, on: startTime, off: stopTime,
+                      tot: parseFloat(states['sensor.miner_uptime_today_h']?.state)||0,
+                      ec:  parseFloat(states['sensor.miner_eco_hours_today']?.state)||0,
+                      st:  parseFloat(states['sensor.miner_standard_hours_today']?.state)||0,
+                      sp:  parseFloat(states['sensor.miner_super_hours_today']?.state)||0,
+                      kw:  parseFloat(states['sensor.mining_energy_daily']?.state)||0,
+                      live: true
+                    };
+                    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
+                    const cutoffIso = cutoff.toISOString().slice(0, 10);
+                    const allRows = [todayRow, ...logEntries.map(parseEntry).filter(r => r.d >= cutoffIso)];
+                    const cols = '50px 42px 42px 54px 36px 36px 40px 44px 44px 44px 50px 46px';
+                    const th = (t,r) => `<div style="font-size:0.62rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
+                    const headers = `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;border-bottom:1px solid var(--divider-color);margin-bottom:2px;">
+                      ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Ges.',1)}${th('Eco',1)}${th('Std',1)}${th('Sup',1)}${th('kWh',1)}${th('TH/s',1)}${th('SATs',1)}${th('S/kWh',1)}${th('€/kWh',1)}
+                    </div>`;
+                    const rowHtml = (r) => {
+                      const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
+                      const dc = r.live ? 'var(--primary-text-color)' : 'var(--secondary-text-color)';
+                      const fw = r.live ? '600' : '400';
+                      const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
+                      const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
+                      const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? '—';
+                      const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
+                      const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';
+                      const earnedEur = (satNum !== null && r.kw > 0 && btcEur > 0)
+                        ? satNum * btcEur / 1e8 / r.kw : null;
+                      const eurStr   = earnedEur !== null ? earnedEur.toFixed(3) : '—';
+                      const eurColor = earnedEur === null ? 'var(--secondary-text-color)'
+                        : earnedEur >= 0.156 ? '#F7931A'
+                        : earnedEur >= 0.125 ? '#26C6DA'
+                        : earnedEur >= 0.100 ? '#4CAF50'
+                        : earnedEur >= 0.078 ? '#FFFFFF'
+                        : '#9E9E9E';
+                      return `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;${hl}">
+                        <div style="font-size:0.82rem;color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
+                        ${c(r.on,'inherit')}${c(r.off,'inherit')}
+                        ${c(fmtHm(r.tot),'var(--primary-text-color)')}
+                        ${c(fmtH1(r.ec)+'h','#4CAF50')}
+                        ${c(fmtH1(r.st)+'h','#26C6DA')}
+                        ${c(fmtH1(r.sp)+'h','#F7931A')}
+                        ${c(r.kw.toFixed(2),'white')}
+                        ${c(ths,'#FFFFFF')}
+                        ${c(sat,'#F7931A')}
+                        ${c(sPerKwh,'#F7931A')}
+                        ${c(eurStr,eurColor)}
+                      </div>`;
+                    };
+                    return `<div style="width:100%;overflow-x:auto;">
+                      <div style="min-width:620px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                          <ha-icon icon="mdi:calendar-clock" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                          <span style="font-size:0.88rem;font-weight:700;">Mining Verlauf</span>
+                        </div>
+                        ${headers}
+                        <div style="max-height:560px;overflow-y:auto;scrollbar-width:thin;">
+                          ${allRows.map(rowHtml).join('')}
+                        </div>
+                      </div>
+                    </div>`;
+                  ]]]
 
 
       # ═══════════════════════════════════════════════════════

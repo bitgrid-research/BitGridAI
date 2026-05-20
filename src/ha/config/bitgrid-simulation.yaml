@@ -1,18 +1,176 @@
 title: BitGridAI Simulation
-views:
 
+# ═══════════════════════════════════════════════════════
+# Shared Button-Card Templates
+# ═══════════════════════════════════════════════════════
+button_card_templates:
+  sim_slider:
+    show_icon: true
+    show_state: true
+    show_name: true
+    styles:
+      card:
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+        - padding: 16px
+      icon:
+        - width: 32px
+        - height: 32px
+      name:
+        - font-size: 0.85rem
+        - font-weight: 600
+        - color: var(--primary-text-color)
+      state:
+        - font-size: 0.75rem
+        - color: var(--secondary-text-color)
+        - margin-top: 4px
+      img_cell:
+        - width: 40px
+        - height: 40px
+      grid:
+        - grid-template-areas: '"i n" "i s"'
+        - grid-template-columns: 40px 1fr
+        - grid-template-rows: auto auto
+    tap_action:
+      action: none
+
+views:
   # ═══════════════════════════════════════════════════════
-  # Test
+  # BITGRIDAI SIMULATION  —  Simulation Controls
   # ═══════════════════════════════════════════════════════
-  - title: Test
-    path: test
-    icon: mdi:pickaxe
+  - title: Simulation
+    path: simulation
+    icon: mdi:flask
     panel: true
     cards:
-      - type: markdown
-        content: |
-          # Free your mind.
+      - type: vertical-stack
+        cards:
+          # ── Header ──────────────────────────────────────────────────────────
+          - type: markdown
+            content: |
+              # 🎛️ Simulation Controls
 
-          This entire dashboard is a simulation. The rules you see here are just code.
-          Just like the Matrix, it looks real, but behind the scenes it's all deterministic logic.
-          Welcome to the real world.
+              Adjust the sliders below to simulate different energy scenarios.
+              The **power-flow-card** on the main dashboard will display these simulated values.
+
+              *Note: Production sensors remain unchanged and continue to show real data.*
+
+          # ── PV Generation ───────────────────────────────────────────────────
+          - type: entities
+            title: ☀️ PV Generation
+            show_header_toggle: false
+            entities:
+              - entity: input_number.sim_pv_power_w
+                name: PV Output (W)
+                icon: mdi:solar-power
+
+          # ── House Load ──────────────────────────────────────────────────────
+          - type: entities
+            title: 🏠 House Load
+            show_header_toggle: false
+            entities:
+              - entity: input_number.sim_house_load_w
+                name: House Load (W)
+                icon: mdi:home-lightning-bolt
+
+          # ── Grid Flow ───────────────────────────────────────────────────────
+          - type: entities
+            title: 🔌 Grid Flow
+            show_header_toggle: false
+            entities:
+              - entity: input_number.sim_grid_import_w
+                name: Grid Import (W)
+                icon: mdi:transmission-tower-import
+              - entity: input_number.sim_grid_export_w
+                name: Grid Export (W)
+                icon: mdi:transmission-tower-export
+
+          # ── Battery ─────────────────────────────────────────────────────────
+          - type: entities
+            title: 🔋 Battery
+            show_header_toggle: false
+            entities:
+              - entity: input_number.sim_battery_soc_pct
+                name: State of Charge (%)
+                icon: mdi:battery
+              - entity: input_number.sim_battery_power_w
+                name: Battery Power (W) (+ = Charging, - = Discharging)
+                icon: mdi:battery-charging
+
+          # ── Flexible Loads ──────────────────────────────────────────────────
+          - type: entities
+            title: 🔨 Flexible Loads
+            show_header_toggle: false
+            entities:
+              - entity: input_number.sim_miner_power_w
+                name: Miner Power (W)
+                icon: mdi:pickaxe
+              - entity: input_number.sim_heizstab_power_w
+                name: Heizstab Power (W)
+                icon: mdi:water-boiler
+
+          # ── Spacer ──────────────────────────────────────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            styles:
+              card:
+                - background: transparent
+                - box-shadow: none
+                - height: 16px
+                - padding: 0
+
+          # ── Real-Time Simulation Values (Read-only Sensors) ─────────────────
+          - type: entities
+            title: 📊 Simulated Sensor Values (Live)
+            show_header_toggle: false
+            entities:
+              - entity: sensor.sim_pv_power_w
+                name: Sim PV Power
+              - entity: sensor.sim_house_load_w
+                name: Sim House Load
+              - entity: sensor.sim_grid_import_w
+                name: Sim Grid Import
+              - entity: sensor.sim_grid_export_w
+                name: Sim Grid Export
+              - entity: sensor.sim_battery_soc_pct
+                name: Sim Battery SoC
+              - entity: sensor.sim_battery_power_w
+                name: Sim Battery Power
+              - entity: sensor.sim_battery_power_flowchart_w
+                name: Sim Battery Power (Flowchart)
+              - entity: sensor.sim_miner_power_w
+                name: Sim Miner Power
+              - entity: sensor.sim_heizstab_power_w
+                name: Sim Heizstab Power
+              - entity: sensor.sim_surplus_kw
+                name: Sim Surplus (kW)
+
+          # ── Reset Button ────────────────────────────────────────────────────
+          - type: custom:button-card
+            show_icon: true
+            show_name: true
+            show_state: false
+            icon: mdi:restart
+            name: Reset All Sliders to Default
+            tap_action:
+              action: call-service
+              service: script.sim_reset
+            styles:
+              card:
+                - background: var(--secondary-background-color)
+                - border-radius: 12px
+                - padding: 16px
+                - margin: 16px 0
+              icon:
+                - width: 32px
+                - height: 32px
+                - color: var(--secondary-text-color)
+              name:
+                - font-size: 0.85rem
+                - font-weight: 600
+                - color: var(--primary-text-color)
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: 32px 1fr

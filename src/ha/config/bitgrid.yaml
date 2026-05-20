@@ -1,0 +1,408 @@
+﻿title: BitGridAI
+
+# ═══════════════════════════════════════════════════════
+# Shared Button-Card Templates
+# ═══════════════════════════════════════════════════════
+button_card_templates:
+  miner_header:
+    show_state: false
+    show_icon: true
+    tap_action:
+      action: none
+    custom_fields:
+      status: >
+        [[[
+          const on = entity.state === 'on';
+          return `<ha-icon icon="${on ? 'mdi:check-circle' : 'mdi:alert-circle'}"
+            style="color:${on ? '#4CAF50' : '#F44336'}; --mdc-icon-size:22px;"></ha-icon>`;
+        ]]]
+    styles:
+      grid:
+        - grid-template-areas: '"n status i"'
+        - grid-template-columns: 1fr auto auto
+        - grid-template-rows: 1fr
+      card:
+        - padding: 12px 16px
+        - height: 56px
+      name:
+        - font-size: 1.1rem
+        - font-weight: bold
+        - text-align: left
+        - justify-self: start
+        - padding-right: 8px
+      icon:
+        - color: var(--primary-text-color)
+        - width: 22px
+        - height: 22px
+        - margin-left: 6px
+      custom_fields:
+        status:
+          - display: flex
+          - align-items: center
+
+  miner_btn:
+    show_state: true
+    styles:
+      card:
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+        - padding: 20px 6px
+        - height: 110px
+      icon:
+        - width: 44px
+        - height: 44px
+      name:
+        - font-size: 0.9rem
+        - font-weight: 600
+        - color: var(--primary-text-color)
+        - white-space: unset
+        - text-overflow: unset
+        - overflow: visible
+        - margin-top: 6px
+      state:
+        - font-size: 0.78rem
+        - color: var(--secondary-text-color)
+        - margin-top: 2px
+
+  weather_forecast_6h:
+    entity: sensor.weather_forecast_6h
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    custom_fields:
+      row: >
+        [[[
+          const f = entity?.attributes?.forecast ?? [];
+          const icons = {
+            'clear-night':     'mdi:weather-night',
+            'sunny':           'mdi:weather-sunny',
+            'partlycloudy':    'mdi:weather-partly-cloudy',
+            'cloudy':          'mdi:weather-cloudy',
+            'fog':             'mdi:weather-fog',
+            'rainy':           'mdi:weather-rainy',
+            'pouring':         'mdi:weather-pouring',
+            'lightning':       'mdi:weather-lightning',
+            'lightning-rainy': 'mdi:weather-lightning-rainy',
+            'snowy':           'mdi:weather-snowy',
+            'snowy-rainy':     'mdi:weather-snowy-rainy',
+            'windy':           'mdi:weather-windy',
+            'windy-variant':   'mdi:weather-windy-variant',
+            'hail':            'mdi:weather-hail',
+            'exceptional':     'mdi:alert-circle-outline',
+          };
+          const blocks = f.map(h => {
+            const dt   = new Date(h.datetime);
+            const time = dt.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+            const icon = icons[h.condition] ?? 'mdi:weather-partly-cloudy';
+            const temp = Math.round(h.temperature);
+            return `
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex:1">
+                <span style="font-size:.75rem;color:var(--secondary-text-color);font-weight:500">${time}</span>
+                <ha-icon icon="${icon}" style="--mdc-icon-size:28px;color:var(--primary-text-color)"></ha-icon>
+                <span style="font-size:.95rem;font-weight:600">${temp}°C</span>
+              </div>`;
+          }).join('');
+          return `<div style="display:flex;width:100%;padding:4px 0">${blocks}</div>`;
+        ]]]
+    styles:
+      card:
+        - padding: 12px 16px
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+      grid:
+        - grid-template-areas: '"row"'
+        - grid-template-columns: 1fr
+      custom_fields:
+        row:
+          - width: 100%
+          - overflow: hidden
+
+views:
+  # ═══════════════════════════════════════════════════════
+  # BITGRIDAI SIMULATION  —  Simulation Controls
+  # ═══════════════════════════════════════════════════════
+  - title: BitGridAi Simulation
+    path: bitgrid-simulation
+    icon: mdi:view-dashboard
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 1fr 1fr
+          grid-template-rows: auto
+          margin: 8px
+          row-gap: 16px
+          column-gap: 40px
+        cards:
+          - type: vertical-stack
+            cards:
+              # ── Power Flow ──────────────────────────────────────────────────────────
+              - type: custom:power-flow-card-plus
+                entities:
+                  grid:
+                    entity:
+                      consumption: sensor.sim_grid_import_w
+                      production: sensor.sim_grid_export_w
+                    color:
+                      consumption: "#5C6BC0"
+                      production: "#4CAF50"
+                  solar:
+                    entity: sensor.sim_pv_power_w
+                    color: "#FFC107"
+                  battery:
+                    entity: sensor.sim_battery_power_flowchart_w
+                    state_of_charge: sensor.sim_battery_soc_pct
+                    color:
+                      consumption: "#26A69A"
+                      production: "#4CAF50"
+                  home:
+                    entity: sensor.sim_house_load_w
+                    color: "#EF9A9A"
+                  individual:
+                    - entity: sensor.sim_miner_power_w
+                      name: Miner
+                      icon: mdi:pickaxe
+                      color: "#F7931A"
+                      display_zero: false
+                      display_zero_tolerance: 25
+                    - entity: sensor.sim_heizstab_power_w
+                      name: Heizstab
+                      icon: mdi:water-boiler
+                      color: "#2196F3"
+
+          - type: vertical-stack
+            cards:
+              # ── Wetter-Zeitstrahl ───────────────────────────────────────────────────
+              - type: weather-forecast
+                entity: weather.forecast_home
+                forecast_type: hourly
+                show_current: true
+                show_forecast: true
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 175px;
+                      overflow: hidden;
+                    }
+
+              # ── Energie-Status ──────────────────────────────────────────────────────
+              - type: horizontal-stack
+                cards:
+                  - type: custom:button-card
+                    entity: sensor.battery_soc_pct
+                    name: Akku
+                    icon: mdi:battery-charging
+                    show_state: true
+                    styles:
+                      card:
+                        - background: var(--secondary-background-color)
+                        - border-radius: 12px
+                        - padding: 12px 4px
+                      icon:
+                        - width: 36px
+                        - height: 36px
+                        - color: >
+                            [[[
+                              const v = parseFloat(entity.state);
+                              if (v <= 20) return '#F44336';
+                              if (v <= 40) return '#f59e0b';
+                              if (v <= 90) return '#4CAF50';
+                              return '#26A69A';
+                            ]]]
+                      name:
+                        - font-size: 0.8rem
+                        - color: var(--secondary-text-color)
+                      state:
+                        - font-size: 0.9rem
+                        - font-weight: 600
+                    tap_action:
+                      action: more-info
+
+                  - type: custom:button-card
+                    entity: sensor.pv_power_w
+                    name: PV
+                    icon: mdi:solar-power
+                    show_state: true
+                    styles:
+                      card:
+                        - background: var(--secondary-background-color)
+                        - border-radius: 12px
+                        - padding: 12px 4px
+                      icon:
+                        - width: 36px
+                        - height: 36px
+                        - color: >
+                            [[[
+                              const v = parseFloat(entity.state);
+                              if (!v || v === 0) return 'var(--secondary-text-color)';
+                              if (v < 800)  return '#f59e0b';
+                              if (v < 1600) return '#8BC34A';
+                              if (v < 3400) return '#4CAF50';
+                              return '#FFD600';
+                            ]]]
+                      name:
+                        - font-size: 0.8rem
+                        - color: var(--secondary-text-color)
+                      state:
+                        - font-size: 0.9rem
+                        - font-weight: 600
+                    tap_action:
+                      action: more-info
+
+                  - type: custom:button-card
+                    entity: sensor.grid_export_w
+                    name: Überschuss
+                    icon: mdi:transmission-tower-export
+                    show_state: true
+                    styles:
+                      card:
+                        - background: var(--secondary-background-color)
+                        - border-radius: 12px
+                        - padding: 12px 4px
+                      icon:
+                        - width: 36px
+                        - height: 36px
+                        - color: >
+                            [[[
+                              const v = parseFloat(entity.state);
+                              if (!v || v === 0) return 'var(--secondary-text-color)';
+                              if (v <= 500) return '#8BC34A';
+                              return '#4CAF50';
+                            ]]]
+                      name:
+                        - font-size: 0.8rem
+                        - color: var(--secondary-text-color)
+                      state:
+                        - font-size: 0.9rem
+                        - font-weight: 600
+                    tap_action:
+                      action: more-info
+
+                  - type: custom:button-card
+                    entity: sensor.grid_import_w
+                    name: Netzbezug
+                    icon: mdi:transmission-tower-import
+                    show_state: true
+                    styles:
+                      card:
+                        - background: var(--secondary-background-color)
+                        - border-radius: 12px
+                        - padding: 12px 4px
+                      icon:
+                        - width: 36px
+                        - height: 36px
+                        - color: >
+                            [[[
+                              const v = parseFloat(entity.state);
+                              if (!v || v === 0) return 'var(--secondary-text-color)';
+                              if (v <= 100) return '#4CAF50';
+                              if (v <= 500) return '#f59e0b';
+                              return '#5C6BC0';
+                            ]]]
+                      name:
+                        - font-size: 0.8rem
+                        - color: var(--secondary-text-color)
+                      state:
+                        - font-size: 0.9rem
+                        - font-weight: 600
+                    tap_action:
+                      action: more-info
+
+                  - type: custom:button-card
+                    entity: sensor.house_load_w
+                    name: Haus
+                    icon: mdi:home-lightning-bolt
+                    show_state: true
+                    styles:
+                      card:
+                        - background: var(--secondary-background-color)
+                        - border-radius: 12px
+                        - padding: 12px 4px
+                      icon:
+                        - width: 36px
+                        - height: 36px
+                        - color: >
+                            [[[
+                              const v = parseFloat(entity.state);
+                              if (!v || v === 0) return 'var(--secondary-text-color)';
+                              if (v <= 2500) return '#80DEEA';
+                              if (v <= 4000) return '#26C6DA';
+                              return '#00838F';
+                            ]]]
+                      name:
+                        - font-size: 0.8rem
+                        - color: var(--secondary-text-color)
+                      state:
+                        - font-size: 0.9rem
+                        - font-weight: 600
+                    tap_action:
+                      action: more-info
+
+                  - type: custom:button-card
+                    entity: sensor.miner_total_power_w
+                    name: Miner
+                    icon: mdi:pickaxe
+                    show_state: true
+                    styles:
+                      card:
+                        - background: var(--secondary-background-color)
+                        - border-radius: 12px
+                        - padding: 12px 4px
+                      icon:
+                        - width: 36px
+                        - height: 36px
+                        - color: >
+                            [[[
+                              const v = parseFloat(entity.state);
+                              if (!v || v < 30) return 'var(--secondary-text-color)';
+                              if (v < 400)  return '#f59e0b';
+                              return '#4CAF50';
+                            ]]]
+                      name:
+                        - font-size: 0.8rem
+                        - color: var(--secondary-text-color)
+                      state:
+                        - font-size: 0.9rem
+                        - font-weight: 600
+                    tap_action:
+                      action: more-info
+
+                  - type: custom:button-card
+                    entity: sensor.luftung_status
+                    name: "Lüftung"
+                    icon: mdi:fan
+                    show_state: true
+                    styles:
+                      card:
+                        - background: var(--secondary-background-color)
+                        - border-radius: 12px
+                        - padding: 12px 4px
+                      icon:
+                        - width: 36px
+                        - height: 36px
+                        - color: >
+                            [[[
+                              const s = entity.state;
+                              if (s === 'Aktiv') return '#4CAF50';
+                              if (s === 'Aus' || !s) return 'var(--disabled-color)';
+                              return '#f59e0b';
+                            ]]]
+                      name:
+                        - font-size: 0.8rem
+                        - color: var(--secondary-text-color)
+                      state:
+                        - font-size: 0.9rem
+                        - font-weight: 600
+                        - color: >
+                            [[[
+                              const s = entity.state;
+                              if (s === 'Aktiv') return '#4CAF50';
+                              if (s === 'Aus' || !s) return 'var(--secondary-text-color)';
+                              return '#f59e0b';
+                            ]]]
+                    tap_action:
+                      action: more-info
+                      entity: switch.shellyplugsg3_dcb4d9c6b46c
