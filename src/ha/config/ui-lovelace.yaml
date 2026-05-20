@@ -2077,7 +2077,7 @@ views:
                       const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
                       const d = sd.toISOString().slice(0, 10);
                       settleThs[d] = (hr / 1e12).toFixed(2);
-                      const btcVal = parseFloat(tx.changed_balance);
+                      const btcVal = parseFloat(tx.amount ?? tx.changed_balance);
                       if (btcVal > 0) btcMap[d] = btcVal;
                     });
                     (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
