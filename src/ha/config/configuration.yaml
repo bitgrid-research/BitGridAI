@@ -24,6 +24,12 @@ lovelace:
       title: BitGridAI
       icon: mdi:view-dashboard
       show_in_sidebar: true
+    bitgrid-ai-simulation:
+      mode: yaml
+      filename: bitgrid-simulation.yaml
+      title: BitGridAI Simulation
+      icon: mdi:clipboard-text-clock-outline
+      show_in_sidebar: true
 
 automation: !include automations.yaml
 script: !include scripts.yaml

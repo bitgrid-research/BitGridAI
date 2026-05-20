@@ -1,0 +1,18 @@
+title: BitGridAI Simulation
+views:
+
+  # ═══════════════════════════════════════════════════════
+  # Test
+  # ═══════════════════════════════════════════════════════
+  - title: Test
+    path: test
+    icon: mdi:pickaxe
+    panel: true
+    cards:
+      - type: markdown
+        content: |
+          # Free your mind.
+
+          This entire dashboard is a simulation. The rules you see here are just code.
+          Just like the Matrix, it looks real, but behind the scenes it's all deterministic logic.
+          Welcome to the real world.
