@@ -102,12 +102,42 @@ views:
             title: 🔨 Flexible Loads
             show_header_toggle: false
             entities:
-              - entity: input_number.sim_miner_power_w
-                name: Miner Power (W)
-                icon: mdi:pickaxe
               - entity: input_number.sim_heizstab_power_w
                 name: Heizstab Power (W)
                 icon: mdi:water-boiler
+
+          # ── Simulation Rule Engine (Mode Power Configuration) ───────────────
+          - type: entities
+            title: ⚙️ Miner Mode Power Configuration
+            show_header_toggle: false
+            entities:
+              - entity: input_number.sim_miner_eco_power_w
+                name: Eco Mode Power (W)
+                icon: mdi:leaf
+              - entity: input_number.sim_miner_standard_power_w
+                name: Standard Mode Power (W)
+                icon: mdi:gauge
+              - entity: input_number.sim_miner_super_power_w
+                name: Super Mode Power (W)
+                icon: mdi:rocket-launch
+              - entity: input_number.sim_miner_chip_temp_c
+                name: Miner Chip Temp (°C)
+                icon: mdi:thermometer
+
+          # ── Simulation Rule Engine (Mode Status - Read Only) ────────────────
+          - type: entities
+            title: 🎮 Miner Mode Status (Auto-Calculated from Rule Engine)
+            show_header_toggle: false
+            entities:
+              - entity: sensor.sim_miner1_workmode_status
+                name: Miner 1 Mode
+                icon: mdi:pickaxe
+              - entity: sensor.sim_miner2_workmode_status
+                name: Miner 2 Mode
+                icon: mdi:pickaxe
+              - entity: sensor.sim_miner_total_power_w
+                name: Total Miner Power
+                icon: mdi:lightning-bolt
 
           # ── Spacer ──────────────────────────────────────────────────────────
           - type: custom:button-card
@@ -146,6 +176,29 @@ views:
                 name: Sim Heizstab Power
               - entity: sensor.sim_surplus_kw
                 name: Sim Surplus (kW)
+
+          - type: entities
+            title: 🧠 Simulated Decision Logic (Live)
+            show_header_toggle: false
+            entities:
+              - entity: sensor.sim_miner_chip_temp_c
+                name: Sim Chip Temp
+              - entity: binary_sensor.sim_miners_any_running
+                name: Sim Miner Running
+              - entity: binary_sensor.sim_r1_surplus_ok
+                name: Sim R1 Surplus OK
+              - entity: binary_sensor.sim_r2_soc_soft
+                name: Sim R2 SoC Soft OK
+              - entity: binary_sensor.sim_r2_soc_hard
+                name: Sim R2 SoC Hard OK
+              - entity: binary_sensor.sim_r2_grid_import_ok
+                name: Sim R2 Grid OK
+              - entity: binary_sensor.sim_r3_overtemp
+                name: Sim R3 Overtemp
+              - entity: sensor.sim_bg_decision_code
+                name: Sim Decision Code
+              - entity: sensor.sim_bg_decision_priority
+                name: Sim Decision Priority
 
           # ── Reset Button ────────────────────────────────────────────────────
           - type: custom:button-card

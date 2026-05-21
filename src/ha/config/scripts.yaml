@@ -433,36 +433,38 @@ sim_reset:
   mode: single
   sequence:
     # Reset simulation input sliders to defaults
+    # Default values optimized for "miner starts automatically" test scenario:
+    # Surplus = (8000 - 2000 - 100) / 1000 = 5.9 kW >= 2.0 kW threshold → START
     - service: input_number.set_value
       target:
         entity_id: input_number.sim_pv_power_w
       data:
-        value: 0
+        value: 8000
     - service: input_number.set_value
       target:
         entity_id: input_number.sim_house_load_w
       data:
-        value: 0
+        value: 2000
     - service: input_number.set_value
       target:
         entity_id: input_number.sim_grid_import_w
       data:
-        value: 0
+        value: 100
     - service: input_number.set_value
       target:
         entity_id: input_number.sim_grid_export_w
       data:
-        value: 0
+        value: 1000
     - service: input_number.set_value
       target:
         entity_id: input_number.sim_battery_soc_pct
       data:
-        value: 50
+        value: 90
     - service: input_number.set_value
       target:
         entity_id: input_number.sim_battery_power_w
       data:
-        value: 0
+        value: 500
     - service: input_number.set_value
       target:
         entity_id: input_number.sim_miner_power_w
@@ -472,7 +474,7 @@ sim_reset:
       target:
         entity_id: input_number.sim_heizstab_power_w
       data:
-        value: 0
+        value: 25
     - service: input_boolean.turn_off
       target:
         entity_id:

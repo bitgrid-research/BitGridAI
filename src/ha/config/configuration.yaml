@@ -119,7 +119,32 @@ input_boolean:
     name: replay_mode
     icon: mdi:play-box-multiple
 
+  sim_miner_running:
+    name: Sim Miner Running
+    icon: mdi:crane
+    initial: false
+
 input_select:
+  # ── Simulation Miner Workmode Select (mirrors production select.miner*_workmode_set) ───
+  # These entities control the simulated miner modes and are read by the template sensors
+  sim_miner1_workmode_set:
+    name: Sim Miner 1 Workmode Set
+    options:
+      - Standby
+      - Eco
+      - Standard
+      - Super
+    initial: Standby
+  sim_miner2_workmode_set:
+    name: Sim Miner 2 Workmode Set
+    options:
+      - Standby
+      - Eco
+      - Standard
+      - Super
+    initial: Standby
+
+  # ── System State Select (legacy) ───────────────────────────────────────────
   system_state:
     name: system_state
     options:
@@ -167,27 +192,29 @@ input_select:
 
 input_number:
   # ── Simulation-Inputs (Slider) ───────────────────────────────────────────
+  # Default values optimized for "miner starts automatically" test scenario:
+  # Surplus = (8000 - 2000 - 100) / 1000 = 5.9 kW >= 2.0 kW threshold → START
   sim_pv_power_w:
     name: Sim PV Power (W)
     min: 0
     max: 20000
     step: 50
     mode: box
-    initial: 5000
+    initial: 8000
   sim_house_load_w:
     name: Sim House Load (W)
     min: 0
     max: 20000
     step: 50
     mode: box
-    initial: 2500
+    initial: 2000
   sim_grid_import_w:
     name: Sim Grid Import (W)
     min: 0
     max: 20000
     step: 50
     mode: box
-    initial: 200
+    initial: 100
   sim_grid_export_w:
     name: Sim Grid Export (W)
     min: 0
@@ -201,7 +228,7 @@ input_number:
     max: 100
     step: 1
     mode: box
-    initial: 50
+    initial: 90
   sim_battery_power_w:
     name: Sim Battery Power (W)
     min: -10000
@@ -209,8 +236,33 @@ input_number:
     step: 50
     mode: box
     initial: 500
+  # ── Simulation Mode Power Configuration (user-configurable power per mode) ─
+  sim_miner_eco_power_w:
+    name: Sim Miner Eco Power (W)
+    min: 0
+    max: 10000
+    step: 10
+    mode: box
+    initial: 300
+  sim_miner_standard_power_w:
+    name: Sim Miner Standard Power (W)
+    min: 0
+    max: 10000
+    step: 10
+    mode: box
+    initial: 600
+  sim_miner_super_power_w:
+    name: Sim Miner Super Power (W)
+    min: 0
+    max: 10000
+    step: 10
+    mode: box
+    initial: 1200
+
+  # ── Legacy (deprecated, kept for compatibility) ───────────────────────────
+  # This is now auto-calculated, not user input
   sim_miner_power_w:
-    name: Sim Miner Power (W)
+    name: Sim Miner Power (W) - Auto-Calculated
     min: 0
     max: 10000
     step: 10
@@ -224,7 +276,104 @@ input_number:
     mode: box
     initial: 25
 
-  # ── Regelparameter ───────────────────────────────────────────────────────
+  # ── Simulation Additional Inputs ──────────────────────────────────────────
+  sim_miner_chip_temp_c:
+    name: Sim Miner Chip Temp (°C)
+    min: 40
+    max: 120
+    step: 1
+    mode: box
+    initial: 75
+
+  # ── Simulation Rule Thresholds (separate from production) ─────────────────
+  sim_r1_surplus_min_kw:
+    name: Sim R1 Min Surplus (kW)
+    min: 0
+    max: 20
+    step: 0.1
+    mode: box
+    initial: 2.0
+  sim_r2_soc_soft_min_pct:
+    name: Sim R2 SoC Soft Min (%)
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 65
+  sim_r2_soc_hard_min_pct:
+    name: Sim R2 SoC Hard Min (%)
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 20
+  sim_r2_max_grid_import_w:
+    name: Sim R2 Max Grid Import (W)
+    min: 0
+    max: 20000
+    step: 50
+    mode: box
+    initial: 300
+  sim_r3_max_chip_temp_c:
+    name: Sim R3 Max Chip Temp (°C)
+    min: 0
+    max: 120
+    step: 1
+    mode: box
+    initial: 90
+
+  # ── Simulation MVP Thresholds ─────────────────────────────────────────────
+  sim_mvp_soc_eco_start_pct:
+    name: Sim MVP SoC Eco Start (%)
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 65
+  sim_mvp_soc_std_pct:
+    name: Sim MVP SoC Standard On (%)
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 80
+  sim_mvp_soc_std_stop_pct:
+    name: Sim MVP SoC Standard Off (%)
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 75
+  sim_mvp_soc_super_pct:
+    name: Sim MVP SoC Super On (%)
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 90
+  sim_mvp_soc_super_stop_pct:
+    name: Sim MVP SoC Super Off (%)
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 85
+  sim_mvp_soc_stop_pct:
+    name: Sim MVP SoC Stop (%)
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+    initial: 50
+  sim_mvp_pv_start_w:
+    name: Sim MVP PV Start (W)
+    min: 0
+    max: 20000
+    step: 100
+    mode: box
+    initial: 6000
+
+  # ── Production Regelparameter ─────────────────────────────────────────────
   r1_surplus_min_kw:
     name: r1_surplus_min_kw
     min: 0
@@ -519,6 +668,14 @@ template:
         state_class: measurement
         state: "{{ states('input_number.sim_heizstab_power_w') | float(0) }}"
 
+      # Miner Chip Temperature Simulation
+      - name: sim_miner_chip_temp_c
+        unique_id: sim_miner_chip_temp_c
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "{{ states('input_number.sim_miner_chip_temp_c') | float(0) }}"
+
       # Simulated Surplus (for simulation rule testing)
       - name: sim_surplus_kw
         unique_id: sim_surplus_kw
@@ -762,6 +919,152 @@ template:
             {% set block_minutes = states('input_number.block_minutes') | int(10) %}
             {{ as_timestamp(now()) < (stop_ts + (hold_blocks * block_minutes * 60)) }}
           {% endif %}
+
+      # ── Simulation Binary Sensors ───────────────────────────────────────────
+      # R1: Überschuss vorhanden (Simulation)
+      - name: sim_r1_surplus_ok
+        unique_id: sim_r1_surplus_ok
+        state: >-
+          {{ (states('sensor.sim_surplus_kw') | float(0)) >=
+             (states('input_number.sim_r1_surplus_min_kw') | float(0)) }}
+
+      # R2: SoC-Schutz (weich) (Simulation)
+      - name: sim_r2_soc_soft
+        unique_id: sim_r2_soc_soft
+        state: >-
+          {{ (states('sensor.sim_battery_soc_pct') | float(0)) >=
+             (states('input_number.sim_r2_soc_soft_min_pct') | float(0)) }}
+
+      # R2: SoC-Schutz (hart) (Simulation)
+      - name: sim_r2_soc_hard
+        unique_id: sim_r2_soc_hard
+        state: >-
+          {{ (states('sensor.sim_battery_soc_pct') | float(0)) >=
+             (states('input_number.sim_r2_soc_hard_min_pct') | float(0)) }}
+
+      # R2: Netzimport-Schutz (Simulation)
+      - name: sim_r2_grid_import_ok
+        unique_id: sim_r2_grid_import_ok
+        state: >-
+          {{ (states('sensor.sim_grid_import_w') | float(0)) <=
+             (states('input_number.sim_r2_max_grid_import_w') | float(0)) }}
+
+      # R3: Übertemperatur (Simulation)
+      - name: sim_r3_overtemp
+        unique_id: sim_r3_overtemp
+        state: >-
+          {{ (states('sensor.sim_miner_chip_temp_c') | float(0)) >=
+             (states('input_number.sim_r3_max_chip_temp_c') | float(0)) }}
+
+      # R3: Safety-Override (Simulation)
+      - name: sim_r3_safety_override
+        unique_id: sim_r3_safety_override
+        state: >-
+          {{ is_state('binary_sensor.sim_r3_overtemp', 'on') or
+             is_state('input_boolean.r3_emergency_stop', 'on') }}
+
+  # ── Simulation Mode Sensors (mirrors Production: reads from input_select entity) ───
+  - sensor:
+      # Sim Miner 1 Mode Status - reads directly from input_select (mirrors production reading from miner API)
+      - name: sim_miner1_workmode_status
+        unique_id: sim_miner1_workmode_status
+        state: "{{ states('input_select.sim_miner1_workmode_set') | default('Standby') }}"
+        icon: mdi:pickaxe
+
+      # Sim Miner 2 Mode Status - reads directly from input_select (mirrors production reading from miner API)
+      - name: sim_miner2_workmode_status
+        unique_id: sim_miner2_workmode_status
+        state: "{{ states('input_select.sim_miner2_workmode_set') | default('Standby') }}"
+        icon: mdi:pickaxe
+
+      # Sim Miner 1 Mode Power - auto-calculated based on mode
+      - name: sim_miner1_mode_power_w
+        unique_id: sim_miner1_mode_power_w
+        unit_of_measurement: "W"
+        device_class: power
+        state: >-
+          {% set mode = states('sensor.sim_miner1_workmode_status') %}
+          {% if mode == 'Eco' %}
+            {{ states('input_number.sim_miner_eco_power_w') | float(300) }}
+          {% elif mode == 'Standard' %}
+            {{ states('input_number.sim_miner_standard_power_w') | float(600) }}
+          {% elif mode == 'Super' %}
+            {{ states('input_number.sim_miner_super_power_w') | float(1200) }}
+          {% else %}
+            0
+          {% endif %}
+
+      # Sim Miner Total Power - both miners combined
+      - name: sim_miner_total_power_w
+        unique_id: sim_miner_total_power_w
+        unit_of_measurement: "W"
+        device_class: power
+        state: >-
+          {% set m1 = states('sensor.sim_miner1_mode_power_w') | float(0) %}
+          {% set m2 = states('sensor.sim_miner2_workmode_status') %}
+          {% set m2_power = 0 %}
+          {% if m2 == 'Eco' %}
+            {% set m2_power = states('input_number.sim_miner_eco_power_w') | float(300) %}
+          {% elif m2 == 'Standard' %}
+            {% set m2_power = states('input_number.sim_miner_standard_power_w') | float(600) %}
+          {% elif m2 == 'Super' %}
+            {% set m2_power = states('input_number.sim_miner_super_power_w') | float(1200) %}
+          {% endif %}
+          {{ (m1 + m2_power) | round(0) }}
+
+      # Miner läuft (Simulation) - based on auto-calculated mode
+      - name: sim_miners_any_running
+        unique_id: sim_miners_any_running
+        state: >-
+          {{ states('sensor.sim_miner1_workmode_status') in ['Eco', 'Standard', 'Super'] or
+             states('sensor.sim_miner2_workmode_status') in ['Eco', 'Standard', 'Super'] }}
+
+  # ── Simulation Entscheidungs-Sensoren ───────────────────────────────────────
+  - sensor:
+      # Simulierte Entscheidungs-Action
+      - name: sim_bg_decision_action
+        unique_id: sim_bg_decision_action
+        state: >-
+          {% set safety = is_state('binary_sensor.sim_r3_safety_override', 'on') %}
+          {% set r2_hard = is_state('binary_sensor.sim_r2_soc_hard', 'on') %}
+          {% set r2_grid = is_state('binary_sensor.sim_r2_grid_import_ok', 'on') %}
+          {% set r1 = is_state('binary_sensor.sim_r1_surplus_ok', 'on') %}
+          {% set r2_soft = is_state('binary_sensor.sim_r2_soc_soft', 'on') %}
+          {% set miners_on = is_state('binary_sensor.sim_miners_any_running', 'on') %}
+          {% if safety %}
+            STOP
+          {% elif (not r2_hard) or (not r2_grid) %}
+            STOP
+          {% elif miners_on %}
+            {% if not r2_soft %}THROTTLE
+            {% elif not r1 %}THROTTLE
+            {% else %}NOOP
+            {% endif %}
+          {% else %}
+            {% if r1 and r2_soft and r2_grid %}START
+            {% else %}NOOP
+            {% endif %}
+          {% endif %}
+
+      # Simulierte Entscheidungs-Priority
+      - name: sim_bg_decision_priority
+        unique_id: sim_bg_decision_priority
+        state: >-
+          {% set safety = is_state('binary_sensor.sim_r3_safety_override', 'on') %}
+          {% set r2_hard = is_state('binary_sensor.sim_r2_soc_hard', 'on') %}
+          {% set r2_grid = is_state('binary_sensor.sim_r2_grid_import_ok', 'on') %}
+          {% set r1 = is_state('binary_sensor.sim_r1_surplus_ok', 'on') %}
+          {% if safety %}R3_SAFETY
+          {% elif (not r2_hard) or (not r2_grid) %}R2_AUTARKY
+          {% elif r1 %}R1_SURPLUS
+          {% else %}IDLE
+          {% endif %}
+
+      # Simulierte Entscheidungs-Code
+      - name: sim_bg_decision_code
+        unique_id: sim_bg_decision_code
+        state: >-
+          {{ states('sensor.sim_bg_decision_action') ~ '_' ~ states('sensor.sim_bg_decision_priority') }}
 
 # ── Energie-Integration (W → kWh, Riemann-Summe) ─────────────────────────────
 # Liefert kumulative kWh-Werte als Tagesbasis (Midnight-Delta in stats.yaml)
