@@ -29,23 +29,59 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
-# ── Recorder: kurze DB-Aufbewahrung, da Langzeit-Daten in JSON-Logs liegen ───
-# Block-Logs (10 min) + Daily-KPI + Monthly-Rollup ersetzen die lange DB-History.
+# ── Recorder: 1 Jahr Rohdaten für Forschung und Szenario-Builder ─────────────
+# Was gespeichert wird:
+#   - Alle physischen Messungen (PV, Last, Netz, SoC, Miner, Heizstab)
+#   - Systementscheidungen (bg_decision_*, R1-R5 Binärsensoren)
+#   - Integral-Sensoren (für Midnight-Baseline-System)
+# Was NICHT gespeichert wird:
+#   - input_* Domains (Konfiguration, keine Messdaten)
+#   - Abgeleitete Tages-Summen (stehen in mining_log.csv / stats_monthly.csv)
+#   - Prognose- und Hilfssensoren (aus Rohdaten rekonstruierbar)
 recorder:
-  purge_keep_days: 14
+  purge_keep_days: 365
   exclude:
-    entity_globs:
-      # Energie-Rohdaten: stündlich in Block-Logs, kein langer DB-Verlauf nötig
-      - sensor.pv_power_w
-      - sensor.house_load_w
-      - sensor.grid_import_w
-      - sensor.grid_export_w
-      - sensor.battery_power_w
+    domains:
+      - input_number
+      - input_boolean
+      - input_select
+      - input_datetime
+      - input_text
+    entities:
+      # Aus Rohdaten rekonstruierbar
       - sensor.surplus_kw
-      # Prognose-Sensoren: werden nicht historisch ausgewertet
+      - sensor.battery_power_w
+      - sensor.battery_power_flowchart_w
+      - sensor.block_id
+      - sensor.block_window_start
+      - sensor.bg_decision_priority
+      # Prognose — kein historischer Wert
       - sensor.house_load_forecast_w
       - sensor.mining_window_free_w
+      # 7d-Mittelwert — nur für Live-Prognose
       - sensor.house_load_mean_7d
+      # Tages-Summen — stehen bereits in mining_log.csv und stats_monthly.csv
+      - sensor.pv_energy_daily
+      - sensor.mining_energy_daily
+      - sensor.grid_import_daily
+      - sensor.grid_export_daily
+      - sensor.house_energy_daily
+      - sensor.heizstab_energy_daily
+      - sensor.solar_coverage_pct
+      - sensor.deadband_hit_rate_pct
+      - sensor.efficiency_kwh_per_h_live
+      - sensor.mining_window_used_pct
+      - sensor.miner_uptime_today_fmt
+      # History-Stats — Tages-Summen, kein Zeitreihenwert
+      - sensor.miner_uptime_today_h
+      - sensor.miner_super_hours_today
+      - sensor.miner_eco_hours_today
+      - sensor.miner_standard_hours_today
+      - sensor.miner_standard_hours_today
+      - sensor.mining_window_hours_today
+      - sensor.miner_deadband_hours_today
+      # Shell-Command Sensor — liest nur CSV, kein Messwert
+      - sensor.mining_log_history
 
 # ── MQTT ──────────────────────────────────────────────────────────────────────
 # Broker wird über HA-UI konfiguriert: Einstellungen → Integrationen → MQTT
