@@ -13,8 +13,12 @@ from typing import Any
 
 import pytest
 
-from src.sim.scenario_builder import ScenarioBuilder, classify, compute_kpis, compute_meta
-
+from src.sim.scenario_builder import (
+    ScenarioBuilder,
+    classify,
+    compute_kpis,
+    compute_meta,
+)
 
 # ---------------------------------------------------------------------------
 # Hilfsfunktionen
@@ -115,7 +119,9 @@ def test_classify_grid_heavy() -> None:
 def test_classify_no_duplicate_primary_tags() -> None:
     rows = _rows(pv_w=8000.0)
     tags = classify(rows)
-    primary = [t for t in tags if t in ("night_only", "sunny_high", "sunny_low", "cloudy")]
+    primary = [
+        t for t in tags if t in ("night_only", "sunny_high", "sunny_low", "cloudy")
+    ]
     assert len(primary) == 1
 
 
@@ -155,7 +161,9 @@ def test_compute_meta_grid_import_kwh() -> None:
 
 
 def test_write_csv_creates_file(tmp_path: Path) -> None:
-    builder = ScenarioBuilder(scenarios_dir=tmp_path, library_path=tmp_path / "library.json")
+    builder = ScenarioBuilder(
+        scenarios_dir=tmp_path, library_path=tmp_path / "library.json"
+    )
     rows = _rows(pv_w=6000.0, soc=70.0)
     meta = compute_meta(rows, "2026-05-10", ["sunny_low"])
     path = builder._write_csv(rows, meta)
@@ -170,7 +178,9 @@ def test_write_csv_creates_file(tmp_path: Path) -> None:
 def test_write_csv_readable_by_loader(tmp_path: Path) -> None:
     from src.sim.scenario_loader import load_csv_scenario
 
-    builder = ScenarioBuilder(scenarios_dir=tmp_path, library_path=tmp_path / "library.json")
+    builder = ScenarioBuilder(
+        scenarios_dir=tmp_path, library_path=tmp_path / "library.json"
+    )
     rows = _rows(pv_w=4000.0, soc=80.0, n=6)
     meta = compute_meta(rows, "2026-05-11", ["sunny_low"])
     path = builder._write_csv(rows, meta)
@@ -212,7 +222,9 @@ def test_update_library_replaces_existing(tmp_path: Path) -> None:
 
 
 def test_list_scenarios_empty(tmp_path: Path) -> None:
-    builder = ScenarioBuilder(scenarios_dir=tmp_path, library_path=tmp_path / "library.json")
+    builder = ScenarioBuilder(
+        scenarios_dir=tmp_path, library_path=tmp_path / "library.json"
+    )
     assert builder.list_scenarios() == []
 
 
@@ -227,7 +239,9 @@ def _make_replay_result(action: str, decision_code: str = "") -> dict[str, Any]:
 
 def test_kpi_perfect_utilization() -> None:
     # Miner läuft immer wenn Überschuss vorhanden
-    rows = _rows(pv_w=3000.0, export_w=500.0)  # surplus = 3000-600 = 2400W = 2.4kW ≥ 1.5
+    rows = _rows(
+        pv_w=3000.0, export_w=500.0
+    )  # surplus = 3000-600 = 2400W = 2.4kW ≥ 1.5
     replay = [_make_replay_result("START", "START_R1_SURPLUS_OK")] * 144
     kpis = compute_kpis(rows, replay, surplus_min_kw=1.5)
     assert kpis["window_utilization_pct"] == pytest.approx(100.0)
@@ -256,10 +270,9 @@ def test_kpi_lost_surplus_when_stopped() -> None:
 def test_kpi_r5_hit_rate() -> None:
     # 48 von 144 Blöcken sind NOOP_R5 → 33.3%
     rows = _rows(pv_w=3000.0)
-    replay = (
-        [_make_replay_result("START", "START_R1_SURPLUS_OK")] * 96
-        + [_make_replay_result("NOOP", "NOOP_R5_DEADBAND_ACTIVE")] * 48
-    )
+    replay = [_make_replay_result("START", "START_R1_SURPLUS_OK")] * 96 + [
+        _make_replay_result("NOOP", "NOOP_R5_DEADBAND_ACTIVE")
+    ] * 48
     kpis = compute_kpis(rows, replay, surplus_min_kw=1.5)
     assert kpis["r5_hits"] == 48
     assert kpis["r5_hit_rate_pct"] == pytest.approx(33.3, abs=0.1)
@@ -275,16 +288,17 @@ def test_kpi_noop_continues_running() -> None:
     )
     kpis = compute_kpis(rows, replay, surplus_min_kw=1.5)
     assert kpis["mining_in_window_blocks"] == 20  # START + NOOP beide laufen
-    assert kpis["lost_surplus_kwh"] == pytest.approx(124 * 200.0 * 10 / 60_000, rel=0.01)
+    assert kpis["lost_surplus_kwh"] == pytest.approx(
+        124 * 200.0 * 10 / 60_000, rel=0.01
+    )
 
 
 def test_kpi_partial_window() -> None:
     # Nur erste 72 Blöcke haben Überschuss, Rest nicht
     rows = _rows(pv_w=3000.0, n=72) + _rows(pv_w=0.0, n=72, offset_start=720)
-    replay = (
-        [_make_replay_result("START", "START_R1_SURPLUS_OK")] * 72
-        + [_make_replay_result("STOP")] * 72
-    )
+    replay = [_make_replay_result("START", "START_R1_SURPLUS_OK")] * 72 + [
+        _make_replay_result("STOP")
+    ] * 72
     kpis = compute_kpis(rows, replay, surplus_min_kw=1.5)
     assert kpis["surplus_window_blocks"] == 72
     assert kpis["mining_in_window_blocks"] == 72

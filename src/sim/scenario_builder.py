@@ -72,7 +72,9 @@ _DEFAULT_SCENARIOS_DIR = Path("src/sim/scenarios")
 def classify(rows: list[dict[str, Any]]) -> list[str]:
     """Bestimmt Tag-Typen anhand der Messwerte eines Tages."""
     pv_values = [r["pv_power_w"] for r in rows if r.get("pv_power_w") is not None]
-    soc_values = [r["battery_soc_pct"] for r in rows if r.get("battery_soc_pct") is not None]
+    soc_values = [
+        r["battery_soc_pct"] for r in rows if r.get("battery_soc_pct") is not None
+    ]
     temp_values = [r["miner_temp_c"] for r in rows if r.get("miner_temp_c") is not None]
     import_kwh = sum(r.get("grid_import_w") or 0.0 for r in rows) * _BLOCK_MIN / 60_000
 
@@ -99,15 +101,20 @@ def classify(rows: list[dict[str, Any]]) -> list[str]:
     return tags
 
 
-def compute_meta(rows: list[dict[str, Any]], date: str, tags: list[str]) -> dict[str, Any]:
+def compute_meta(
+    rows: list[dict[str, Any]], date: str, tags: list[str]
+) -> dict[str, Any]:
     """Berechnet aggregierte Kennzahlen für einen Tag."""
     pv_values = [r["pv_power_w"] for r in rows if r.get("pv_power_w") is not None]
-    soc_values = [r["battery_soc_pct"] for r in rows if r.get("battery_soc_pct") is not None]
+    soc_values = [
+        r["battery_soc_pct"] for r in rows if r.get("battery_soc_pct") is not None
+    ]
     temp_values = [r["miner_temp_c"] for r in rows if r.get("miner_temp_c") is not None]
     import_sum = sum(r.get("grid_import_w") or 0.0 for r in rows)
     export_sum = sum(r.get("grid_export_w") or 0.0 for r in rows)
     filled = sum(
-        1 for r in rows
+        1
+        for r in rows
         if r.get("pv_power_w") is not None and r.get("battery_soc_pct") is not None
     )
     return {
@@ -206,7 +213,9 @@ def compute_kpis(
 
 
 def _detect_schema(conn: sqlite3.Connection) -> str:
-    tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    tables = {
+        r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    }
     return "new" if "states_meta" in tables else "old"
 
 
@@ -217,7 +226,9 @@ def _fetch_raw(
     start_ts: float,
     end_ts: float,
 ) -> dict[str, list[tuple[datetime, float]]]:
-    results: dict[str, list[tuple[datetime, float]]] = {col: [] for col in _ENTITIES.values()}
+    results: dict[str, list[tuple[datetime, float]]] = {
+        col: [] for col in _ENTITIES.values()
+    }
 
     if schema == "new":
         meta_q = "SELECT metadata_id, entity_id FROM states_meta WHERE entity_id IN ({})".format(
@@ -244,7 +255,9 @@ def _fetch_raw(
             entity_id = meta[mid]
             col = _ENTITIES.get(entity_id)
             if col:
-                results[col].append((datetime.fromtimestamp(ts_float, tz=timezone.utc), value))
+                results[col].append(
+                    (datetime.fromtimestamp(ts_float, tz=timezone.utc), value)
+                )
     else:
         q = """
             SELECT entity_id, state, last_updated
@@ -254,23 +267,33 @@ def _fetch_raw(
               AND state NOT IN ('unknown', 'unavailable', '')
         """.format(",".join("?" * len(entity_ids)))
 
-        start_str = datetime.fromtimestamp(start_ts, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-        end_str = datetime.fromtimestamp(end_ts, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-        for entity_id, raw_state, ts_str in conn.execute(q, entity_ids + [start_str, end_str]):
+        start_str = datetime.fromtimestamp(start_ts, tz=timezone.utc).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        end_str = datetime.fromtimestamp(end_ts, tz=timezone.utc).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        for entity_id, raw_state, ts_str in conn.execute(
+            q, entity_ids + [start_str, end_str]
+        ):
             try:
                 value = float(raw_state)
             except (ValueError, TypeError):
                 continue
             col = _ENTITIES.get(entity_id)
             if col:
-                dt = datetime.fromisoformat(ts_str.replace(" ", "T")).replace(tzinfo=timezone.utc)
+                dt = datetime.fromisoformat(ts_str.replace(" ", "T")).replace(
+                    tzinfo=timezone.utc
+                )
                 results[col].append((dt, value))
 
     return results
 
 
 def _floor_to_block(ts: datetime) -> datetime:
-    return ts.replace(minute=(ts.minute // _BLOCK_MIN) * _BLOCK_MIN, second=0, microsecond=0)
+    return ts.replace(
+        minute=(ts.minute // _BLOCK_MIN) * _BLOCK_MIN, second=0, microsecond=0
+    )
 
 
 def _resample(
@@ -427,7 +450,9 @@ class ScenarioBuilder:
         conn = sqlite3.connect(db_path)
         try:
             schema = _detect_schema(conn)
-            raw = _fetch_raw(conn, schema, list(_ENTITIES.keys()), start.timestamp(), end.timestamp())
+            raw = _fetch_raw(
+                conn, schema, list(_ENTITIES.keys()), start.timestamp(), end.timestamp()
+            )
         finally:
             conn.close()
         return _resample(raw, start, end)
@@ -457,7 +482,9 @@ class ScenarioBuilder:
                 if val is not None:
                     out[col] = f"{val:.2f}"
             if not out["miner_heartbeat_age_sec"]:
-                out["miner_heartbeat_age_sec"] = "5.0" if row.get("miner_temp_c") is not None else ""
+                out["miner_heartbeat_age_sec"] = (
+                    "5.0" if row.get("miner_temp_c") is not None else ""
+                )
             lines.append(",".join(out[col] for col in _CSV_COLUMNS))
         path.write_text("\n".join(lines) + "\n", encoding="utf-8")
         return path
@@ -510,13 +537,17 @@ def main() -> None:
     build_p.add_argument("--date", help="Einzelner Tag YYYY-MM-DD")
     build_p.add_argument("--start", help="Startdatum YYYY-MM-DD (Bereich)")
     build_p.add_argument("--end", help="Enddatum YYYY-MM-DD (exklusiv)")
-    build_p.add_argument("--out", help="Ausgabeverzeichnis (default: src/sim/scenarios)")
+    build_p.add_argument(
+        "--out", help="Ausgabeverzeichnis (default: src/sim/scenarios)"
+    )
 
     list_p = sub.add_parser("list", help="Bibliothek anzeigen")
     list_p.add_argument("--tag", help="Nach Tag-Typ filtern")
     list_p.add_argument("--lib", help="Pfad zu library.json")
 
-    replay_p = sub.add_parser("replay", help="Alle Szenarien eines Tags replayer + KPIs berechnen")
+    replay_p = sub.add_parser(
+        "replay", help="Alle Szenarien eines Tags replayer + KPIs berechnen"
+    )
     replay_p.add_argument("--tag", required=True, help="Tag-Typ (z.B. sunny_high)")
     replay_p.add_argument("--lib", help="Pfad zu library.json")
     replay_p.add_argument(
@@ -599,13 +630,21 @@ def main() -> None:
             csv_path = Path(args.csv)
             csv_path.parent.mkdir(parents=True, exist_ok=True)
             fieldnames = [
-                "date", "tags", "replay_uptime_h",
-                "window_utilization_pct", "surplus_window_blocks",
-                "mining_in_window_blocks", "lost_surplus_kwh",
-                "r5_hit_rate_pct", "r5_hits", "total_blocks",
+                "date",
+                "tags",
+                "replay_uptime_h",
+                "window_utilization_pct",
+                "surplus_window_blocks",
+                "mining_in_window_blocks",
+                "lost_surplus_kwh",
+                "r5_hit_rate_pct",
+                "r5_hits",
+                "total_blocks",
             ]
             with csv_path.open("w", newline="", encoding="utf-8") as f:
-                writer = csv_mod.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+                writer = csv_mod.DictWriter(
+                    f, fieldnames=fieldnames, extrasaction="ignore"
+                )
                 writer.writeheader()
                 for r in results:
                     row = {**r, "tags": "|".join(r.get("tags", []))}
