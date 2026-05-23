@@ -49,9 +49,32 @@ CREATE TABLE IF NOT EXISTS kpi_log (
     thermal_incidents        INTEGER,
     flapping_rate            REAL,
     grid_import_wh           REAL,
-    explainability_coverage  REAL
+    explainability_coverage  REAL,
+    self_consumption_wh      REAL,
+    battery_soc_pct          REAL,
+    miner_runtime_blocks     INTEGER,
+    override_active          INTEGER
 );
 """
+
+
+_KPI_MIGRATIONS: list[tuple[str, str]] = [
+    ("self_consumption_wh", "ALTER TABLE kpi_log ADD COLUMN self_consumption_wh  REAL"),
+    ("battery_soc_pct", "ALTER TABLE kpi_log ADD COLUMN battery_soc_pct      REAL"),
+    (
+        "miner_runtime_blocks",
+        "ALTER TABLE kpi_log ADD COLUMN miner_runtime_blocks INTEGER",
+    ),
+    ("override_active", "ALTER TABLE kpi_log ADD COLUMN override_active      INTEGER"),
+]
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(kpi_log)").fetchall()}
+    for col, ddl in _KPI_MIGRATIONS:
+        if col not in existing:
+            conn.execute(ddl)
+    conn.commit()
 
 
 def get_connection(db_path: str | Path = "data/bitgrid.db") -> sqlite3.Connection:
@@ -62,5 +85,5 @@ def get_connection(db_path: str | Path = "data/bitgrid.db") -> sqlite3.Connectio
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
     conn.executescript(_SCHEMA)
-    conn.commit()
+    _migrate(conn)
     return conn

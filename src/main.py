@@ -37,7 +37,7 @@ def _load_env() -> None:
 
 def main(rules_path: str, db_path: str) -> None:
     from src.adapters.actuation_writer import ActuationWriter
-    from src.adapters.forecast_adapter import ForecastAdapter
+    from src.adapters.openmeteo_forecast_adapter import OpenMeteoForecastAdapter
     from src.adapters.modbus_adapter import ModbusAdapter
     from src.adapters.mqtt_client import MqttClient
     from src.adapters.mqtt_inverter_adapter import MqttInverterAdapter
@@ -95,8 +95,8 @@ def main(rules_path: str, db_path: str) -> None:
     price = PriceAdapter(ingest=ingest)
     price.start()
 
-    # PV-Prognose (forecast.solar)
-    forecast = ForecastAdapter(ingest=ingest)
+    # PV-Prognose (Open-Meteo — kein API-Key, kein Rate-Limit)
+    forecast = OpenMeteoForecastAdapter(ingest=ingest, publish_fn=mqtt.publish)
     forecast.start()
 
     # Miner-Adapter: Canaan Avalon Q (Standard) — alternativ BitaxeAdapter
@@ -143,6 +143,7 @@ def main(rules_path: str, db_path: str) -> None:
         relay_topic=relay_topic,
         event_store=event_store,
         state_store=state_store,
+        kpi_conn=conn,
     )
 
     log.info("Alle Adapter bereit — starte Block-Tick-Loop")

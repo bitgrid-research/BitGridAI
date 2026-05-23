@@ -110,7 +110,13 @@ class _Missing:
 
 
 class _SafeDict(dict[str, Any]):
-    """Gibt _Missing zurück für fehlende Keys — safe für alle Format-Specs."""
+    """Gibt _Missing zurück für fehlende oder None-Keys — safe für alle Format-Specs."""
 
     def __missing__(self, key: str) -> _Missing:
         return _Missing()
+
+    def __getitem__(self, key: str) -> Any:
+        value = super().__getitem__(key) if key in self else None
+        if value is None:
+            return _Missing()
+        return value

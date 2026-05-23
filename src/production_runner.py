@@ -3,7 +3,7 @@ ProductionRunner — orchestriert den 10-Minuten Block-Tick im Echtbetrieb.
 
 Verbindet alle Schichten:
   TelemetryIngest → RawMeasurements → EnergyState → RuleEngine
-  → ActuationWriter → EventStore + StateStore
+  → ActuationWriter → EventStore + StateStore + KpiLog
 
 run_once() ist die testbare Einheit — kein I/O, nur Orchestrierung.
 run_loop() ist der blockierende Produktions-Loop.
@@ -12,6 +12,7 @@ run_loop() ist der blockierende Produktions-Loop.
 from __future__ import annotations
 
 import logging
+import sqlite3
 import time
 from datetime import datetime, timezone
 from typing import Callable, Literal
@@ -24,6 +25,7 @@ from src.core.models import DecisionEvent
 from src.core.override_handler import OverrideHandler
 from src.core.rule_engine import RuleEngineConfig
 from src.data.event_store import EventStore
+from src.data.kpi import write_kpi
 from src.data.state_store import StateStore
 
 log = logging.getLogger(__name__)
@@ -47,6 +49,7 @@ class ProductionRunner:
         state_store: StateStore,
         override_handler: OverrideHandler | None = None,
         explainer: Callable[[DecisionEvent], str] | None = None,
+        kpi_conn: sqlite3.Connection | None = None,
     ) -> None:
         self._config = config
         self._ingest = ingest
@@ -56,8 +59,10 @@ class ProductionRunner:
         self._state_store = state_store
         self._override = override_handler or OverrideHandler()
         self._explainer = explainer
+        self._kpi_conn = kpi_conn
         self._last_action: str | None = None
         self._blocks_since_change: int = 0
+        self._miner_runtime_blocks: int = 0
 
     # ------------------------------------------------------------------
     # Testbare Einheit — ein Block-Tick
@@ -81,6 +86,7 @@ class ProductionRunner:
         raw = raw_from_ingest(self._ingest)
         state = build_energy_state(block_id, window_start, window_end, raw)
 
+        t0 = time.monotonic()
         event = rule_engine.evaluate(
             state,
             config=self._config,
@@ -88,6 +94,7 @@ class ProductionRunner:
             blocks_since_last_change=self._blocks_since_change,
             now=now,
         )
+        decision_latency_ms = (time.monotonic() - t0) * 1000
 
         # Override: manuelle Eingriffe, aber nie gegen R3
         active_override = self._override.get_active(now)
@@ -103,12 +110,17 @@ class ProductionRunner:
         else:
             effective_action = event.decision.action
 
-        # Deadband-Zähler aktualisieren
-        if effective_action != self._last_action:
+        action_changed = effective_action != self._last_action
+
+        # Deadband-Zähler und Miner-Laufzeit aktualisieren
+        if action_changed:
             self._blocks_since_change = 0
             self._last_action = effective_action
         else:
             self._blocks_since_change += 1
+
+        if effective_action == "START":
+            self._miner_runtime_blocks += 1
 
         # Relay-Kommando senden
         cmd = self._writer.decision_to_command(
@@ -118,9 +130,34 @@ class ProductionRunner:
             self._writer.write(cmd, self._relay_topic)
 
         # Persistenz
+        t1 = time.monotonic()
         explain_short = self._explainer(event) if self._explainer else ""
+        explanation_latency_ms = (
+            (time.monotonic() - t1) * 1000 if self._explainer else None
+        )
+
         self._event_store.write(event, explain_short=explain_short)
         self._state_store.write(state)
+
+        if self._kpi_conn is not None:
+            pv = state.pv_power_w or 0.0
+            export = state.grid_export_w or 0.0
+            write_kpi(
+                self._kpi_conn,
+                block_id=block_id,
+                decision_latency_ms=decision_latency_ms,
+                explanation_latency_ms=explanation_latency_ms,
+                thermal_incidents=(
+                    1 if event.decision_code.startswith("STOP_R3_") else 0
+                ),
+                flapping_rate=1.0 if action_changed else 0.0,
+                grid_import_wh=(state.grid_import_w or 0.0) / 6.0,
+                explainability_coverage=100.0 if explain_short else 0.0,
+                self_consumption_wh=max(0.0, pv - export) / 6.0,
+                battery_soc_pct=state.battery_soc_pct,
+                miner_runtime_blocks=self._miner_runtime_blocks,
+                override_active=1 if active_override else 0,
+            )
 
         log.info(
             "[%s] %s | quality=%s surplus=%.1f kW temp=%.0f°C soc=%.0f%%",

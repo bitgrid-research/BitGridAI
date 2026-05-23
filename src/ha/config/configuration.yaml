@@ -126,6 +126,14 @@ mqtt:
       state_class: measurement
       expire_after: 300
 
+    - name: pv_forecast_kw
+      unique_id: pv_forecast_kw
+      state_topic: "bitgrid/forecast/pv_kw"
+      value_template: "{{ value | float | round(2) }}"
+      unit_of_measurement: "kW"
+      state_class: measurement
+      expire_after: 7200
+
 # ── BitGridAI Entscheidungs-Logik ─────────────────────────────────────────────
 # Alle Regelparameter als editierbare Helper
 input_boolean:
