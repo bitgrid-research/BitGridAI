@@ -2003,16 +2003,16 @@ views:
                             <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
                             <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
                           </div>`;
-                        const pv     = states['input_number.pv_kwh_ytd']?.state ?? '0';
-                        const mine   = states['input_number.mining_kwh_ytd']?.state ?? '0';
-                        const imp    = states['input_number.grid_import_ytd']?.state ?? '0';
-                        const exp    = states['input_number.grid_export_ytd']?.state ?? '0';
-                        const house  = states['input_number.house_kwh_ytd']?.state ?? '0';
-                        const hz     = states['input_number.heizstab_kwh_ytd']?.state ?? '0';
-                        const up     = states['input_number.mining_uptime_ytd_h']?.state ?? '0';
-                        const ecoY   = states['input_number.miner_eco_ytd_h']?.state ?? '0';
-                        const stdY   = states['input_number.miner_standard_ytd_h']?.state ?? '0';
-                        const supY   = states['input_number.miner_super_ytd_h']?.state ?? '0';
+                        const pv     = (parseFloat(states['input_number.pv_kwh_ytd']?.state ?? '0')    + parseFloat(states['sensor.pv_energy_daily']?.state ?? '0')).toFixed(3);
+                        const mine   = (parseFloat(states['input_number.mining_kwh_ytd']?.state ?? '0') + parseFloat(states['sensor.mining_energy_daily']?.state ?? '0')).toFixed(3);
+                        const imp    = (parseFloat(states['input_number.grid_import_ytd']?.state ?? '0')+ parseFloat(states['sensor.grid_import_daily']?.state ?? '0')).toFixed(3);
+                        const exp    = (parseFloat(states['input_number.grid_export_ytd']?.state ?? '0')+ parseFloat(states['sensor.grid_export_daily']?.state ?? '0')).toFixed(3);
+                        const house  = (parseFloat(states['input_number.house_kwh_ytd']?.state ?? '0') + parseFloat(states['sensor.house_energy_daily']?.state ?? '0')).toFixed(3);
+                        const hz     = (parseFloat(states['input_number.heizstab_kwh_ytd']?.state ?? '0') + parseFloat(states['sensor.heizstab_energy_daily']?.state ?? '0')).toFixed(3);
+                        const up     = (parseFloat(states['input_number.mining_uptime_ytd_h']?.state ?? '0') + parseFloat(states['sensor.miner_uptime_today_h']?.state ?? '0')).toFixed(2);
+                        const ecoY   = (parseFloat(states['input_number.miner_eco_ytd_h']?.state ?? '0')      + parseFloat(states['sensor.miner_eco_hours_today']?.state ?? '0')).toFixed(2);
+                        const stdY   = (parseFloat(states['input_number.miner_standard_ytd_h']?.state ?? '0') + parseFloat(states['sensor.miner_standard_hours_today']?.state ?? '0')).toFixed(2);
+                        const supY   = (parseFloat(states['input_number.miner_super_ytd_h']?.state ?? '0')    + parseFloat(states['sensor.miner_super_hours_today']?.state ?? '0')).toFixed(2);
                         const pvN    = parseFloat(pv);
                         const expN   = parseFloat(exp);
                         const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
