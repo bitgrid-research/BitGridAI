@@ -12,7 +12,13 @@ from datetime import datetime, timezone
 from typing import Literal
 
 from src.core import block_scheduler
-from src.core.models import AutonomyLevel, Decision, DecisionEvent, EnergyState, RuleVote
+from src.core.models import (
+    AutonomyLevel,
+    Decision,
+    DecisionEvent,
+    EnergyState,
+    RuleVote,
+)
 from src.core.rules import (
     r1_profitability,
     r2_autarky,

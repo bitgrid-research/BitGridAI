@@ -246,7 +246,9 @@ def test_all_personas_have_instruction_text() -> None:
 
 def test_persona_instructions_differ() -> None:
     instructions = list(_PERSONA_INSTRUCTIONS.values())
-    assert len(set(instructions)) == len(instructions), "Persona-Anweisungen sind nicht eindeutig"
+    assert len(set(instructions)) == len(
+        instructions
+    ), "Persona-Anweisungen sind nicht eindeutig"
 
 
 def test_energie_persona_avoids_mining_vocab(monkeypatch: pytest.MonkeyPatch) -> None:

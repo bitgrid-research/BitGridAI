@@ -80,7 +80,8 @@ class ExplainAgent:
         raw_persona = os.getenv("OLLAMA_PERSONA", "energie").strip().lower()
         if raw_persona not in _VALID_PERSONAS:
             log.warning(
-                "Unbekannte OLLAMA_PERSONA=%r — verwende 'energie' als Fallback", raw_persona
+                "Unbekannte OLLAMA_PERSONA=%r — verwende 'energie' als Fallback",
+                raw_persona,
             )
             raw_persona = "energie"
         self._persona: str = raw_persona
