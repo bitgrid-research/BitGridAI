@@ -141,6 +141,10 @@ class TestStateDecision:
 
 
 class TestOverride:
+    @pytest.fixture(autouse=True)
+    def inject_handler(self) -> None:
+        api_module.set_override_handler(OverrideHandler())
+
     def test_valid_override_accepted(self, client: TestClient) -> None:
         r = client.post("/override", json={"action": "START", "duration_min": 30})
         assert r.status_code == 200

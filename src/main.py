@@ -18,11 +18,12 @@ from pathlib import Path
 log = logging.getLogger(__name__)
 
 
-def _setup_logging() -> None:
-    level = os.getenv("LOG_LEVEL", "INFO").upper()
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s %(name)-30s %(levelname)s %(message)s",
+def _setup_logging(log_dir: str | None) -> None:
+    from src.ops.log_setup import setup_logging
+
+    setup_logging(
+        log_dir=log_dir,
+        console_level=os.getenv("LOG_LEVEL", "INFO"),
     )
 
 
@@ -50,6 +51,8 @@ def main(rules_path: str, db_path: str) -> None:
     from src.data.event_store import EventStore
     from src.data.state_store import StateStore
     from src.ops.config_loader import ConfigLoader, rules_to_engine_config
+    from src.ops.log_setup import get_log_file
+    from src.ui import api as _api
 
     # ------------------------------------------------------------------
     # Config
@@ -57,6 +60,10 @@ def main(rules_path: str, db_path: str) -> None:
     rules_data = ConfigLoader(rules_path).load()
     engine_config = rules_to_engine_config(rules_data)
     log.info("Rules geladen: %s", rules_path)
+
+    if (lf := get_log_file()) is not None:
+        _api.set_log_file(lf)
+        log.info("Log-Datei: %s", lf)
 
     # ------------------------------------------------------------------
     # MQTT
@@ -157,7 +164,6 @@ def main(rules_path: str, db_path: str) -> None:
 
 if __name__ == "__main__":
     _load_env()
-    _setup_logging()
 
     parser = argparse.ArgumentParser(description="BitGridAI Production Runner")
     parser.add_argument(
@@ -170,6 +176,13 @@ if __name__ == "__main__":
         default=os.getenv("DB_PATH", "data/bitgrid.db"),
         help="Pfad zur SQLite-Datenbank",
     )
+    parser.add_argument(
+        "--log-dir",
+        default=os.getenv("LOG_DIR", "data/logs"),
+        help="Verzeichnis für rotierende Log-Dateien (default: data/logs)",
+    )
     args = parser.parse_args()
+
+    _setup_logging(log_dir=args.log_dir)
 
     main(rules_path=args.rules, db_path=args.db)

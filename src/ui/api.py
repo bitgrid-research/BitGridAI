@@ -21,9 +21,10 @@ import json
 import time
 import uuid
 import zipfile
-from collections import defaultdict
+from collections import defaultdict, deque
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -54,6 +55,7 @@ _engine_config: RuleEngineConfig | None = None
 _health_monitor: HealthMonitor | None = None
 _api_token: str = ""
 _auth_enabled: bool = False
+_log_file: Path | None = None
 
 
 def set_state(state: dict[str, Any]) -> None:
@@ -91,6 +93,11 @@ def set_auth(enabled: bool, token: str) -> None:
     global _auth_enabled, _api_token
     _auth_enabled = enabled
     _api_token = token
+
+
+def set_log_file(path: Path) -> None:
+    global _log_file
+    _log_file = path
 
 
 # ---------------------------------------------------------------------------
@@ -211,6 +218,7 @@ def get_explain(decision_id: str) -> dict[str, Any]:
 class OverrideRequest(BaseModel):
     action: str
     duration_min: int
+    user_reason: str = ""
 
 
 @app.post("/override")
@@ -230,22 +238,66 @@ def post_override(req: OverrideRequest, request: Request) -> dict[str, Any]:
             status_code=400, detail="duration_min muss zwischen 1 und 120 liegen"
         )
 
+    if _override_handler is None:
+        raise HTTPException(status_code=503, detail="Override-Handler nicht verfügbar")
+
+    now = datetime.now(timezone.utc)
+    command_id = str(uuid.uuid4())
+
     if _current_decision and _current_decision.get("decision_code", "").startswith(
         "STOP_R3_"
     ):
+        _override_handler.log_attempt(
+            action=req.action,
+            duration_min=req.duration_min,
+            command_id=command_id,
+            accepted=False,
+            reject_reason="R3_SAFETY_ACTIVE",
+            user_reason=req.user_reason,
+            now=now,
+        )
         return {
             "accepted": False,
             "reason": "R3_SAFETY_ACTIVE — Override nicht erlaubt",
         }
 
-    command_id = str(uuid.uuid4())
+    accepted, message = _override_handler.request(
+        action=cast(Literal["START", "STOP", "NOOP"], req.action),
+        duration_min=req.duration_min,
+        command_id=command_id,
+        now=now,
+    )
+    _override_handler.log_attempt(
+        action=req.action,
+        duration_min=req.duration_min,
+        command_id=command_id,
+        accepted=accepted,
+        user_reason=req.user_reason,
+        now=now,
+    )
     return {
-        "accepted": True,
+        "accepted": accepted,
         "command_id": command_id,
         "action": req.action,
         "duration_min": req.duration_min,
-        "message": f"Override akzeptiert für {req.duration_min} Minuten",
+        "message": message,
     }
+
+
+# ---------------------------------------------------------------------------
+# Debug Log (H6) — letzte N Zeilen der rotierenden Log-Datei
+# ---------------------------------------------------------------------------
+
+
+@app.get("/debug/log")
+def get_debug_log(n: int = Query(default=100, ge=1, le=5000)) -> dict[str, Any]:
+    """Gibt die letzten N Zeilen der Log-Datei zurück."""
+    if _log_file is None or not _log_file.exists():
+        return {"lines": [], "count": 0, "log_file": str(_log_file)}
+    with _log_file.open("r", encoding="utf-8", errors="replace") as fh:
+        lines = list(deque(fh, maxlen=n))
+    stripped = [line.rstrip("\n") for line in lines]
+    return {"lines": stripped, "count": len(stripped), "log_file": str(_log_file)}
 
 
 # ---------------------------------------------------------------------------

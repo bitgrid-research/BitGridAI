@@ -160,14 +160,42 @@ class ProductionRunner:
             )
 
         log.info(
-            "[%s] %s | quality=%s surplus=%.1f kW temp=%.0f°C soc=%.0f%%",
+            "[%s] %s → %s | soc=%.0f%% surplus=%.1fkW override=%s",
             block_id,
             event.decision_code,
-            state.quality,
+            effective_action,
+            state.battery_soc_pct or 0.0,
             state.surplus_kw,
-            state.miner_temp_c,
-            state.battery_soc_pct,
+            active_override.action if active_override else "—",
         )
+        log.debug(
+            "[%s] pv=%.1fkW load=%.1fkW soc=%.0f%% surplus=%.1fkW temp=%.0f°C "
+            "grid_in=%.1fkW grid_ex=%.1fkW forecast=%.1fkW "
+            "action=%s code=%s override=%s quality=%s missing=%s "
+            "dec_lat=%.0fms exp_lat=%s",
+            block_id,
+            (state.pv_power_w or 0.0) / 1000.0,
+            (state.house_load_w or 0.0) / 1000.0,
+            state.battery_soc_pct or 0.0,
+            state.surplus_kw,
+            state.miner_temp_c or 0.0,
+            (state.grid_import_w or 0.0) / 1000.0,
+            (state.grid_export_w or 0.0) / 1000.0,
+            state.pv_forecast_kw or 0.0,
+            effective_action,
+            event.decision_code,
+            active_override.action if active_override else "—",
+            state.quality,
+            ",".join(state.missing_signals) if state.missing_signals else "—",
+            decision_latency_ms,
+            f"{explanation_latency_ms:.0f}ms" if explanation_latency_ms else "—",
+        )
+        if state.missing_signals:
+            log.warning(
+                "[%s] Fehlende Signale: %s",
+                block_id,
+                ", ".join(state.missing_signals),
+            )
         return event
 
     # ------------------------------------------------------------------

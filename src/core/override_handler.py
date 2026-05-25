@@ -121,6 +121,37 @@ class OverrideHandler:
             self._active = None
         return self._active
 
+    def log_attempt(
+        self,
+        action: str,
+        duration_min: int,
+        command_id: str,
+        accepted: bool,
+        reject_reason: str = "",
+        user_reason: str = "",
+        now: datetime | None = None,
+    ) -> None:
+        """Schreibt einen Override-Versuch in override_log (append-only, nie DELETE)."""
+        if self._conn is None:
+            return
+        if now is None:
+            now = datetime.now(tz=timezone.utc)
+        self._conn.execute(
+            "INSERT INTO override_log "
+            "(timestamp, action, duration_min, command_id, accepted, reject_reason, user_reason) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (
+                now.isoformat(),
+                action,
+                duration_min,
+                command_id,
+                int(accepted),
+                reject_reason,
+                user_reason,
+            ),
+        )
+        self._conn.commit()
+
     def clear(self) -> None:
         if self._active is not None and self._conn is not None:
             self._conn.execute(
