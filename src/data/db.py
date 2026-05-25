@@ -40,6 +40,14 @@ CREATE TABLE IF NOT EXISTS energy_states (
     pv_forecast_kw          REAL
 );
 
+CREATE TABLE IF NOT EXISTS active_overrides (
+    command_id    TEXT PRIMARY KEY,
+    action        TEXT NOT NULL,
+    valid_until   TEXT NOT NULL,
+    requested_by  TEXT NOT NULL DEFAULT 'operator',
+    created_at    TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS kpi_log (
     id                       INTEGER PRIMARY KEY AUTOINCREMENT,
     block_id                 TEXT NOT NULL,

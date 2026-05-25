@@ -61,10 +61,56 @@ class ConfigLoader:
             )
 
     def _validate(self, data: dict[str, Any]) -> list[str]:
-        """Einfache Strukturvalidierung — gibt Fehlerliste zurück."""
+        """Strukturvalidierung für rules.yaml — gibt Fehlerliste zurück."""
         errors: list[str] = []
         if not isinstance(data, dict):
             errors.append("Config muss ein YAML-Mapping sein")
+            return errors
+
+        rules = data.get("rules")
+        if not isinstance(rules, dict):
+            errors.append(
+                "rules.yaml: Pflichtschlüssel 'rules' fehlt oder ist kein Mapping"
+            )
+            return errors
+
+        required_rules = {"r1", "r2", "r3", "r4", "r5"}
+        missing_rules = required_rules - set(rules.keys())
+        if missing_rules:
+            errors.append(
+                f"rules.yaml: Fehlende Regelabschnitte: {sorted(missing_rules)}"
+            )
+
+        r2 = rules.get("r2", {})
+        if not isinstance(r2, dict):
+            errors.append("rules.yaml: r2 muss ein Mapping sein")
+        else:
+            for key in ("soc_soft_min_pct", "soc_hard_min_pct"):
+                if key in r2 and not isinstance(r2[key], (int, float)):
+                    errors.append(f"rules.yaml: r2.{key} muss eine Zahl sein")
+            soc_soft = r2.get("soc_soft_min_pct", 20.0)
+            soc_hard = r2.get("soc_hard_min_pct", 10.0)
+            if isinstance(soc_soft, (int, float)) and isinstance(
+                soc_hard, (int, float)
+            ):
+                if soc_hard >= soc_soft:
+                    errors.append(
+                        f"rules.yaml: r2.soc_hard_min_pct ({soc_hard}) muss kleiner sein als soc_soft_min_pct ({soc_soft})"
+                    )
+
+        r3 = rules.get("r3", {})
+        if isinstance(r3, dict):
+            for key in ("max_chip_temp_c", "t_resume_c"):
+                if key in r3 and not isinstance(r3[key], (int, float)):
+                    errors.append(f"rules.yaml: r3.{key} muss eine Zahl sein")
+            t_max = r3.get("max_chip_temp_c", 85.0)
+            t_resume = r3.get("t_resume_c", 75.0)
+            if isinstance(t_max, (int, float)) and isinstance(t_resume, (int, float)):
+                if t_resume >= t_max:
+                    errors.append(
+                        f"rules.yaml: r3.t_resume_c ({t_resume}) muss kleiner sein als max_chip_temp_c ({t_max})"
+                    )
+
         return errors
 
     @property

@@ -65,13 +65,17 @@ class TestLoad:
 
 
 class TestHotReload:
+    _FULL_RULES = "rules:\n  r1: {}\n  r2: {}\n  r3: {}\n  r4: {}\n  r5: {}\n"
+
     def test_hot_reload_success_updates_data(self, tmp_path: Path) -> None:
         f = tmp_path / "rules.yaml"
-        f.write_text("rules:\n  r1:\n    surplus_min_kw: 1.5\n", encoding="utf-8")
+        initial = "rules:\n  r1:\n    surplus_min_kw: 1.5\n  r2: {}\n  r3: {}\n  r4: {}\n  r5: {}\n"
+        updated = "rules:\n  r1:\n    surplus_min_kw: 3.0\n  r2: {}\n  r3: {}\n  r4: {}\n  r5: {}\n"
+        f.write_text(initial, encoding="utf-8")
         loader = ConfigLoader(f)
         loader.load()
 
-        f.write_text("rules:\n  r1:\n    surplus_min_kw: 3.0\n", encoding="utf-8")
+        f.write_text(updated, encoding="utf-8")
         result = loader.hot_reload()
 
         assert result.success is True
@@ -80,12 +84,13 @@ class TestHotReload:
 
     def test_hot_reload_version_changes_on_new_content(self, tmp_path: Path) -> None:
         f = tmp_path / "rules.yaml"
-        f.write_text("rules: {}\n", encoding="utf-8")
+        f.write_text(self._FULL_RULES, encoding="utf-8")
         loader = ConfigLoader(f)
         loader.load()
         old_version = loader.version
 
-        f.write_text("rules:\n  r1:\n    surplus_min_kw: 9.9\n", encoding="utf-8")
+        updated = "rules:\n  r1:\n    surplus_min_kw: 9.9\n  r2: {}\n  r3: {}\n  r4: {}\n  r5: {}\n"
+        f.write_text(updated, encoding="utf-8")
         loader.hot_reload()
 
         assert loader.version != old_version
