@@ -58,6 +58,7 @@ def main(rules_path: str, db_path: str) -> None:
     from src.data.db import get_connection
     from src.data.event_store import EventStore
     from src.data.state_store import StateStore
+    from src.explain.explain_agent import ExplainAgent
     from src.ops.config_loader import ConfigLoader, rules_to_engine_config
     from src.ops.log_setup import get_log_file
     from src.ui import api as _api
@@ -206,6 +207,22 @@ def main(rules_path: str, db_path: str) -> None:
     log.info("API-Server gestartet auf Port %d", api_port)
 
     # ------------------------------------------------------------------
+    # ExplainAgent (opt-in — nur wenn OLLAMA_HOST gesetzt)
+    # ------------------------------------------------------------------
+    explainer = None
+    if os.getenv("OLLAMA_HOST"):
+        explain_agent = ExplainAgent()
+        explainer = explain_agent.explain_short
+        log.info(
+            "ExplainAgent aktiv — %s model=%s persona=%s",
+            os.getenv("OLLAMA_HOST"),
+            explain_agent._ollama_model,
+            explain_agent.persona,
+        )
+    else:
+        log.debug("ExplainAgent nicht gestartet — OLLAMA_HOST fehlt")
+
+    # ------------------------------------------------------------------
     # ProductionRunner starten
     # ------------------------------------------------------------------
     runner = ProductionRunner(
@@ -216,6 +233,7 @@ def main(rules_path: str, db_path: str) -> None:
         event_store=event_store,
         state_store=state_store,
         override_handler=override_handler,
+        explainer=explainer,
         kpi_conn=conn,
         on_tick=_on_tick,
     )
