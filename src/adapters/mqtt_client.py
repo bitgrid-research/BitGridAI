@@ -64,7 +64,7 @@ class MqttClient:
     ) -> None:
         if rc == 0:
             log.info("MQTT verbunden mit %s:%s", self._host, self._port)
-            for topic in self._subscriptions:
+            for topic in list(self._subscriptions):
                 client.subscribe(topic)
             if self._on_connect_cb is not None:
                 self._on_connect_cb()
