@@ -93,20 +93,23 @@ class ModbusAdapter:
                 pass
 
     def _loop(self) -> None:
+        backoff = self._poll_interval_sec
         while self._running:
             try:
                 self._poll_once()
+                backoff = self._poll_interval_sec
             except Exception as exc:
                 log.warning("Modbus-Poll fehlgeschlagen: %s", exc)
                 self._client = None
-            time.sleep(self._poll_interval_sec)
+                backoff = min(backoff * 2, 300.0)
+            time.sleep(backoff)
 
     def _poll_once(self) -> None:
         client = self._get_client()
         result = client.read_holding_registers(
             address=self._soc_register,
             count=1,
-            slave=self._unit_id,
+            device_id=self._unit_id,
         )
         if result.isError():
             raise RuntimeError(f"Modbus-Fehler: {result}")

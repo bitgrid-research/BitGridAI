@@ -102,9 +102,10 @@ def main(rules_path: str, db_path: str) -> None:
     shelly_em = ShellyEMAdapter(mqtt=mqtt, ingest=ingest)
     shelly_em.register()
 
-    # Batterie-BMS via Modbus TCP
-    modbus = ModbusAdapter(ingest=ingest)
-    modbus.start()
+    # Batterie-BMS via Modbus TCP (opt-in — nur wenn MODBUS_HOST gesetzt)
+    if os.getenv("MODBUS_HOST"):
+        modbus = ModbusAdapter(ingest=ingest)
+        modbus.start()
 
     # Strompreis (aWATTar oder ENTSO-E)
     price = PriceAdapter(ingest=ingest)
@@ -113,6 +114,22 @@ def main(rules_path: str, db_path: str) -> None:
     # PV-Prognose (Open-Meteo — kein API-Key, kein Rate-Limit)
     forecast = OpenMeteoForecastAdapter(ingest=ingest, publish_fn=mqtt.publish)
     forecast.start()
+
+    # HA-Telemetrie (opt-in via HA_URL + HA_TOKEN in .env)
+    ha_url = os.getenv("HA_URL", "")
+    ha_token = os.getenv("HA_TOKEN", "")
+    if ha_url and ha_token:
+        from src.adapters.ha_telemetry_adapter import HaTelemetryAdapter
+
+        ha_adapter = HaTelemetryAdapter(
+            ha_url=ha_url,
+            ha_token=ha_token,
+            ingest=ingest,
+            poll_interval_sec=float(os.getenv("HA_POLL_INTERVAL_SEC", "30")),
+        )
+        ha_adapter.start()
+    else:
+        log.debug("HaTelemetryAdapter nicht gestartet — HA_URL oder HA_TOKEN fehlt")
 
     # Miner-Adapter: Canaan Avalon Q (Standard) — alternativ BitaxeAdapter
     # Auskommentieren/ersetzen je nach Hardware:
