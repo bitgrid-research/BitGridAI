@@ -14,6 +14,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Literal, NamedTuple
 
+AutonomyLevel = Literal["FULL", "SEMI", "MANUAL"]
+
 # ---------------------------------------------------------------------------
 # EnergyState
 # ---------------------------------------------------------------------------

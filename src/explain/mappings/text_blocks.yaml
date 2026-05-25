@@ -103,6 +103,14 @@ de:
     effect: "Pause gehalten — Mindestpause"
     options: "Neustart erst nach {min_pause_blocks} Blöcken erlaubt"
 
+  NOOP_MANUAL_MODE:
+    short: "Manueller Modus — System wartet auf Eingriff"
+    long: "Das System ist im manuellen Modus. Automatische Start- und Stopp-Entscheidungen sind deaktiviert."
+    trigger: "Autonomiestufe: Manuell"
+    data_basis: "Autonomiemodus: MANUAL"
+    effect: "Keine automatische Aktion — Nutzer entscheidet"
+    options: "Automatik aktivieren: Autonomiestufe auf FULL oder SEMI setzen"
+
 en:
   START_R1_SURPLUS_OK:
     short: "Surplus available — miner running"

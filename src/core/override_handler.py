@@ -12,10 +12,10 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Literal
 
+from src.core.models import AutonomyLevel
+
 if TYPE_CHECKING:
     pass
-
-AutonomyLevel = Literal["FULL", "SEMI", "MANUAL"]
 
 
 @dataclass

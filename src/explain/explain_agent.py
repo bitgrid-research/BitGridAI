@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import yaml
 
@@ -23,6 +23,34 @@ if TYPE_CHECKING:
 
 _TEXT_BLOCKS_PATH = Path(__file__).parent / "mappings" / "text_blocks.yaml"
 _DEFAULT_LANG = "de"
+
+Persona = Literal["energie", "waerme", "tech"]
+_VALID_PERSONAS: set[str] = {"energie", "waerme", "tech"}
+
+# Persona-spezifische Systemanweisungen für den LLM-Prompt.
+# "energie" ist der Default — breiteste Zielgruppe, kein Mining-Vokabular.
+_PERSONA_INSTRUCTIONS: dict[str, str] = {
+    "energie": (
+        "Du bist ein freundlicher Assistent für eine Heimsolar-App. "
+        "Sprich den Nutzer direkt an ('du'). Verwende einfache Sprache: "
+        "'dein Solarstrom', 'du sparst', 'Stromnetz' statt technische Abkürzungen. "
+        "Vermeide alle Bitcoin- und Mining-Begriffe. "
+        "Erkläre was das System macht und was das konkret für den Nutzer bedeutet."
+    ),
+    "waerme": (
+        "Du bist ein Assistent für ein Heimsystem mit Solarpanel und einem Gerät, "
+        "das gleichzeitig Wärme erzeugt. Betone den Wärmegewinn: "
+        "'dein Gerät heizt gerade', 'kostenlose Wärme aus deinem Solarüberschuss'. "
+        "Das Gerät (Miner) ist Mittel zum Zweck — der Fokus liegt auf der "
+        "gewonnenen Wärme für Raumheizung oder Warmwasser, nicht auf Bitcoin."
+    ),
+    "tech": (
+        "Du bist ein technischer Assistent für ein deterministisches "
+        "Energiemanagementsystem. Der Nutzer kennt Regelkern, Hashrate, Pool, "
+        "SoC und decision_code. Gib volle Transparenz: nenne decision_code, "
+        "welche Regel ausgelöst hat (R1–R5) und konkrete Messwerte mit Einheiten."
+    ),
+}
 
 log = logging.getLogger(__name__)
 
@@ -49,6 +77,17 @@ class ExplainAgent:
         self._ollama_host: str = os.getenv("OLLAMA_HOST", "").rstrip("/")
         self._ollama_model: str = os.getenv("OLLAMA_MODEL", "qwen3:4b")
         self._ollama_timeout: int = int(os.getenv("OLLAMA_TIMEOUT_SEC", "5"))
+        raw_persona = os.getenv("OLLAMA_PERSONA", "energie").strip().lower()
+        if raw_persona not in _VALID_PERSONAS:
+            log.warning(
+                "Unbekannte OLLAMA_PERSONA=%r — verwende 'energie' als Fallback", raw_persona
+            )
+            raw_persona = "energie"
+        self._persona: str = raw_persona
+
+    @property
+    def persona(self) -> str:
+        return self._persona
 
     def _load_blocks(self) -> dict[str, Any]:
         with open(_TEXT_BLOCKS_PATH, encoding="utf-8") as f:
@@ -116,10 +155,13 @@ class ExplainAgent:
         Gibt None zurück bei Timeout, Verbindungsfehler oder leerem Response.
         Template-Wert bleibt als Fallback erhalten.
         """
+        persona_instruction = _PERSONA_INSTRUCTIONS.get(
+            self._persona, _PERSONA_INSTRUCTIONS["energie"]
+        )
         prompt = (
-            "Du bist ein Assistent für ein Heimenergiesystem. "
+            f"{persona_instruction}\n\n"
             "Erkläre die folgende Systementscheidung in einem einzigen natürlichen "
-            "deutschen Satz für einen Laien. Keine Einleitung, kein Bullet-Point:\n\n"
+            "deutschen Satz. Keine Einleitung, kein Bullet-Point:\n\n"
             f"Entscheidung: {code}\n"
             f"Wirkung: {effect}\n"
             f"Auslöser: {trigger}\n"

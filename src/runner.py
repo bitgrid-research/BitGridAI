@@ -176,6 +176,7 @@ class ProductionRunner:
             config=engine_config,
             last_action=self._last_action,
             blocks_since_last_change=self._blocks_since_change,
+            autonomy_level=self._overrides.autonomy_level,
         )
         decision_latency_ms = (time.perf_counter() - t_start) * 1000
 
