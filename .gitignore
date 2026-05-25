@@ -19,6 +19,7 @@ data/*.db-journal
 data/logs/
 data/kpi/
 data/exports/
+data/study/
 data/*.parquet
 data/*.zip
 data/mqtt/
