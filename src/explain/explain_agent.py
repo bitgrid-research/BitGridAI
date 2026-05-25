@@ -173,7 +173,8 @@ class ExplainAgent:
                 "model": self._ollama_model,
                 "prompt": prompt,
                 "stream": False,
-                "options": {"num_predict": 100, "temperature": 0.3},
+                "think": False,  # disable qwen3 thinking-mode so output goes to "response"
+                "options": {"num_predict": 60, "temperature": 0.3},
             }
         ).encode()
         try:
