@@ -50,7 +50,7 @@ class ProductionRunner:
         override_handler: OverrideHandler | None = None,
         explainer: Callable[[DecisionEvent], str] | None = None,
         kpi_conn: sqlite3.Connection | None = None,
-        on_tick: Callable[[DecisionEvent, Any], None] | None = None,
+        on_tick: Callable[[DecisionEvent, Any, str], None] | None = None,
     ) -> None:
         self._config = config
         self._ingest = ingest
@@ -199,7 +199,7 @@ class ProductionRunner:
                 ", ".join(state.missing_signals),
             )
         if self._on_tick is not None:
-            self._on_tick(event, state)
+            self._on_tick(event, state, explain_short)
         return event
 
     # ------------------------------------------------------------------

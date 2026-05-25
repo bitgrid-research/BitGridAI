@@ -171,7 +171,9 @@ def main(rules_path: str, db_path: str) -> None:
     # ------------------------------------------------------------------
     override_handler = OverrideHandler(conn)
 
-    def _on_tick(event: DecisionEvent, state: EnergyState) -> None:
+    def _on_tick(
+        event: DecisionEvent, state: EnergyState, explain_short: str = ""
+    ) -> None:
         d = dataclasses.asdict(state)
         d["window_start"] = state.window_start.isoformat()
         d["window_end"] = state.window_end.isoformat()
@@ -182,6 +184,7 @@ def main(rules_path: str, db_path: str) -> None:
                 "action": event.decision.action,
                 "reason": event.reason,
                 "params": event.params,
+                "explain_short": explain_short,
             }
         )
 
