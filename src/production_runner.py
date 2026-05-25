@@ -15,7 +15,7 @@ import logging
 import sqlite3
 import time
 from datetime import datetime, timezone
-from typing import Callable, Literal
+from typing import Any, Callable, Literal
 
 from src.adapters.actuation_writer import ActuationWriter
 from src.adapters.telemetry_ingest import TelemetryIngest, raw_from_ingest
@@ -50,6 +50,7 @@ class ProductionRunner:
         override_handler: OverrideHandler | None = None,
         explainer: Callable[[DecisionEvent], str] | None = None,
         kpi_conn: sqlite3.Connection | None = None,
+        on_tick: Callable[[DecisionEvent, Any], None] | None = None,
     ) -> None:
         self._config = config
         self._ingest = ingest
@@ -60,6 +61,7 @@ class ProductionRunner:
         self._override = override_handler or OverrideHandler()
         self._explainer = explainer
         self._kpi_conn = kpi_conn
+        self._on_tick = on_tick
         self._last_action: str | None = None
         self._blocks_since_change: int = 0
         self._miner_runtime_blocks: int = 0
@@ -196,6 +198,8 @@ class ProductionRunner:
                 block_id,
                 ", ".join(state.missing_signals),
             )
+        if self._on_tick is not None:
+            self._on_tick(event, state)
         return event
 
     # ------------------------------------------------------------------

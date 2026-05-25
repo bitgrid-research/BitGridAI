@@ -11,8 +11,10 @@ Verwendung:
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import logging
 import os
+import threading
 from pathlib import Path
 
 log = logging.getLogger(__name__)
@@ -37,6 +39,10 @@ def _load_env() -> None:
 
 
 def main(rules_path: str, db_path: str) -> None:
+    from typing import Any
+
+    import uvicorn
+
     from src.adapters.actuation_writer import ActuationWriter
     from src.adapters.openmeteo_forecast_adapter import OpenMeteoForecastAdapter
     from src.adapters.modbus_adapter import ModbusAdapter
@@ -46,6 +52,8 @@ def main(rules_path: str, db_path: str) -> None:
     from src.adapters.shelly_adapter import ShellyAdapter
     from src.adapters.shelly_em_adapter import ShellyEMAdapter
     from src.adapters.telemetry_ingest import TelemetryIngest
+    from src.core.models import DecisionEvent, EnergyState
+    from src.core.override_handler import OverrideHandler
     from src.production_runner import ProductionRunner
     from src.data.db import get_connection
     from src.data.event_store import EventStore
@@ -141,6 +149,46 @@ def main(rules_path: str, db_path: str) -> None:
     state_store = StateStore(conn)
 
     # ------------------------------------------------------------------
+    # Override-Handler + API-Wiring
+    # ------------------------------------------------------------------
+    override_handler = OverrideHandler(conn)
+
+    def _on_tick(event: DecisionEvent, state: EnergyState) -> None:
+        d = dataclasses.asdict(state)
+        d["window_start"] = state.window_start.isoformat()
+        d["window_end"] = state.window_end.isoformat()
+        _api.set_state(d)
+        _api.set_decision(
+            {
+                "decision_code": event.decision_code,
+                "action": event.decision.action,
+                "reason": event.reason,
+                "params": event.params,
+            }
+        )
+
+    _api.set_engine_config(engine_config)
+    _api.set_override_handler(override_handler)
+    _api.set_stores(event_store, None)  # type: ignore[arg-type]
+
+    # ------------------------------------------------------------------
+    # API-Server im Hintergrund-Thread starten
+    # ------------------------------------------------------------------
+    api_port = int(os.getenv("API_PORT", "8080"))
+    api_thread = threading.Thread(
+        target=lambda: uvicorn.run(
+            _api.app,
+            host="0.0.0.0",
+            port=api_port,
+            log_level="warning",
+        ),
+        daemon=True,
+        name="bitgrid-api",
+    )
+    api_thread.start()
+    log.info("API-Server gestartet auf Port %d", api_port)
+
+    # ------------------------------------------------------------------
     # ProductionRunner starten
     # ------------------------------------------------------------------
     runner = ProductionRunner(
@@ -150,7 +198,9 @@ def main(rules_path: str, db_path: str) -> None:
         relay_topic=relay_topic,
         event_store=event_store,
         state_store=state_store,
+        override_handler=override_handler,
         kpi_conn=conn,
+        on_tick=_on_tick,
     )
 
     log.info("Alle Adapter bereit — starte Block-Tick-Loop")

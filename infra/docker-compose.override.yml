@@ -1,0 +1,15 @@
+name: bitgridai
+
+# Umbrel-Deployment:
+# - bitgrid-mqtt startet auf Port 11883 (1883 belegt durch mosquitto_broker_1)
+# - bitgrid-core verbindet sich zur externen Broker-IP (MQTT_HOST in .env)
+# - bitgrid-ui auf Port 8765 (8080 intern durch zigbee2mqtt belegt)
+
+services:
+  bitgrid-mqtt:
+    ports:
+      - "127.0.0.1:11883:1883"
+
+  bitgrid-ui:
+    ports:
+      - "0.0.0.0:8765:8080"

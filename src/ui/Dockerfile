@@ -5,8 +5,7 @@ WORKDIR /app
 COPY pyproject.toml .
 RUN pip install --no-cache-dir .
 
-COPY src/__init__.py ./src/
-COPY src/ui/ ./src/ui/
+COPY src/ ./src/
 
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
