@@ -239,6 +239,7 @@ def main(rules_path: str, db_path: str) -> None:
         explainer=explainer,
         kpi_conn=conn,
         on_tick=_on_tick,
+        mqtt_publish_fn=mqtt.publish,
     )
 
     log.info("Alle Adapter bereit — starte Block-Tick-Loop")

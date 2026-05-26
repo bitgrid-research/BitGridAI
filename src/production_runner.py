@@ -51,6 +51,7 @@ class ProductionRunner:
         explainer: Callable[[DecisionEvent], str] | None = None,
         kpi_conn: sqlite3.Connection | None = None,
         on_tick: Callable[[DecisionEvent, Any, str], None] | None = None,
+        mqtt_publish_fn: Callable[[str, str], None] | None = None,
     ) -> None:
         self._config = config
         self._ingest = ingest
@@ -62,6 +63,7 @@ class ProductionRunner:
         self._explainer = explainer
         self._kpi_conn = kpi_conn
         self._on_tick = on_tick
+        self._mqtt_publish = mqtt_publish_fn
         self._last_action: str | None = None
         self._blocks_since_change: int = 0
         self._miner_runtime_blocks: int = 0
@@ -140,6 +142,18 @@ class ProductionRunner:
 
         self._event_store.write(event, explain_short=explain_short)
         self._state_store.write(state)
+
+        if self._mqtt_publish is not None:
+            for _topic, _payload in [
+                ("bitgrid/explain/short", explain_short),
+                ("bitgrid/explain/code", event.decision_code),
+                ("bitgrid/explain/action", event.decision.action),
+                ("bitgrid/explain/block_id", state.block_id),
+            ]:
+                try:
+                    self._mqtt_publish(_topic, _payload)
+                except Exception:
+                    log.debug("MQTT-Publish fehlgeschlagen: %s", _topic)
 
         if self._kpi_conn is not None:
             pv = state.pv_power_w or 0.0

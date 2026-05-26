@@ -480,6 +480,18 @@ views:
                                         margin-top:8px;font-style:italic">
                               Block&nbsp;${blockDisplay}${blockTime ? ' &middot; ' + blockTime : ''} &middot; 10-min Fenster
                             </div>` : ''}
+                            ${(() => {
+                              const llm = states['sensor.bg_runner_explain_short']?.state;
+                              if (!llm || llm === 'unavailable' || llm === 'unknown') return '';
+                              return `<div style="margin-top:10px;padding-top:8px;
+                                                  border-top:1px solid var(--divider-color)">
+                                <div style="font-size:0.55rem;color:var(--secondary-text-color);opacity:0.45;
+                                            text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px">
+                                  LLM Output</div>
+                                <div style="font-size:0.82rem;color:var(--secondary-text-color);
+                                            line-height:1.4;font-style:italic">${llm}</div>
+                              </div>`;
+                            })()}
                           </div>
                         </div>
                       </div>`;
