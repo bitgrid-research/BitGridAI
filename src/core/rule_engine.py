@@ -185,6 +185,8 @@ def evaluate(
             params={
                 "blocks_since_last_change": blocks_since_last_change,
                 "deadband_hold_blocks": config.deadband_hold_blocks,
+                "min_runtime_blocks": config.min_runtime_blocks,
+                "min_pause_blocks": config.min_pause_blocks,
                 "last_action": last_action,
             },
             state_snapshot=state,
