@@ -18,7 +18,7 @@ de:
     options: "Miner startet ab {surplus_min_kw:.1f} kW Überschuss"
 
   NOOP_R1_PRICE_TOO_HIGH:
-    example: "Strompreis zu hoch: 28 ct/kWh, Limit bei 25 ct — Miner wartet."
+    example: "1 Strompreis zu hoch: 28 ct/kWh, Limit bei 25 ct — Miner wartet."
     short: "Strompreis zu hoch — Miner wartet"
     long: "Aktueller Preis {energy_price_ct_kwh:.1f} ct/kWh liegt über dem Limit {price_max_ct_kwh:.1f} ct/kWh."
     trigger: "Strompreis {energy_price_ct_kwh:.1f} ct/kWh ist zu hoch — Limit liegt bei {price_max_ct_kwh:.1f} ct/kWh"
