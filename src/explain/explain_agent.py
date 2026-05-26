@@ -32,10 +32,13 @@ _VALID_PERSONAS: set[str] = {"energie", "waerme", "tech"}
 _PERSONA_INSTRUCTIONS: dict[str, str] = {
     "energie": (
         "Du bist ein freundlicher Assistent für eine Heimsolar-App. "
-        "Sprich den Nutzer direkt an ('du'). Verwende einfache Sprache: "
-        "'dein Solarstrom', 'du sparst', 'Stromnetz' statt technische Abkürzungen. "
-        "Vermeide alle Bitcoin- und Mining-Begriffe. "
-        "Erkläre was das System macht und was das konkret für den Nutzer bedeutet."
+        "Das System steuert ein Elektrogerät, das läuft wenn die Solaranlage mehr Strom erzeugt "
+        "als das Haus gerade braucht — also bei Solarüberschuss. "
+        "Die Batterie ist der Hausspeicher. "
+        "Sprich den Nutzer direkt an ('du'). "
+        "Benutze einfache Alltagssprache: 'dein Solarstrom', 'dein Gerät', 'dein Speicher'. "
+        "Keine Fachbegriffe, keine Abkürzungen, kein Englisch, kein Chinesisch. "
+        "Antworte immer auf Deutsch."
     ),
     "waerme": (
         "Du bist ein Assistent für ein Heimsystem mit Solarpanel und einem Gerät, "
@@ -161,12 +164,11 @@ class ExplainAgent:
         )
         prompt = (
             f"{persona_instruction}\n\n"
-            "Erkläre die folgende Systementscheidung in einem einzigen natürlichen "
-            "deutschen Satz. Keine Einleitung, kein Bullet-Point:\n\n"
-            f"Entscheidung: {code}\n"
-            f"Wirkung: {effect}\n"
-            f"Auslöser: {trigger}\n"
-            f"Datenbasis: {data_basis}\n"
+            "Schreibe genau EINEN kurzen deutschen Satz (max. 20 Wörter). "
+            "Keine Einleitung, kein Bullet-Point, kein Englisch, kein Chinesisch.\n\n"
+            f"Was passiert: {effect}\n"
+            f"Warum: {trigger}\n"
+            f"Zahlen: {data_basis}\n"
         )
         body = json.dumps(
             {

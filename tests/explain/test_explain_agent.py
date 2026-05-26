@@ -129,7 +129,7 @@ def test_all_codes_have_options_str(agent: ExplainAgent, code: str) -> None:
 
 def test_stop_r2_soc_hard_min_effect(agent: ExplainAgent) -> None:
     result = agent.explain(dc.STOP_R2_SOC_HARD_MIN, {})
-    assert "Batteriesicherheit" in result.effect
+    assert "Batterie" in result.effect
 
 
 def test_stop_r3_overtemp_effect(agent: ExplainAgent) -> None:
@@ -139,7 +139,7 @@ def test_stop_r3_overtemp_effect(agent: ExplainAgent) -> None:
 
 def test_stop_r3_comm_timeout_options(agent: ExplainAgent) -> None:
     result = agent.explain(dc.STOP_R3_COMM_TIMEOUT, {})
-    assert "MQTT" in result.options
+    assert "Wiederverbindung" in result.options
 
 
 def test_noop_r5_deadband_options_contains_valid_until(agent: ExplainAgent) -> None:

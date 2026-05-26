@@ -26,42 +26,42 @@ de:
   STOP_R2_SOC_HARD_MIN:
     short: "Batterie kritisch — Sicherheitsstopp"
     long: "Batterieladung {battery_soc_pct:.0f} % liegt unter dem Sicherheitsminimum {soc_hard_min_pct:.0f} %."
-    trigger: "R2 Hard-Stop"
+    trigger: "Batterie unter Sicherheitsminimum"
     data_basis: "Batterie {battery_soc_pct:.0f} % · Minimum {soc_hard_min_pct:.0f} %"
-    effect: "Miner gestoppt — Batteriesicherheit"
-    options: "Neustart erst ab {soc_soft_min_pct:.0f} % · Prognose: {pv_forecast_kw:.1f} kW"
+    effect: "Gerät gestoppt — Batterie schützen"
+    options: "Start erst ab {soc_soft_min_pct:.0f} % · Prognose: {pv_forecast_kw:.1f} kW"
 
   NOOP_R2_SOC_SOFT_MIN:
-    short: "Batterie zu niedrig — kein Neustart"
+    short: "Batterie lädt — Gerät wartet"
     long: "Batterieladung {battery_soc_pct:.0f} % liegt unter dem Soft-Minimum {soc_soft_min_pct:.0f} %."
-    trigger: "R2 Soft-Limit"
-    data_basis: "Batterie {battery_soc_pct:.0f} % · Eco-Start {soc_soft_min_pct:.0f} % · Prognose: {pv_forecast_kw:.1f} kW"
-    effect: "Kein Neustart — Speicherreserve"
+    trigger: "Batterie unter Mindestschwelle"
+    data_basis: "Batterie {battery_soc_pct:.0f} % · Startschwelle {soc_soft_min_pct:.0f} %"
+    effect: "Gerät bleibt aus — Batterie lädt zuerst auf"
     options: "Start ab {soc_soft_min_pct:.0f} % Ladezustand"
 
   STOP_R2_GRID_IMPORT_EXCEEDED:
-    short: "Zu viel Netzbezug — Miner gestoppt"
+    short: "Zu viel Netzbezug — Gerät gestoppt"
     long: "Netzbezug {grid_import_w:.0f} W überschreitet Limit {max_grid_import_w:.0f} W."
-    trigger: "R2 Grid-Import-Limit"
-    data_basis: "Netzbezug {grid_import_w:.0f} W · Limit {max_grid_import_w:.0f} W · Prognose: {pv_forecast_kw:.1f} kW"
-    effect: "Miner gestoppt — Netz entlasten"
-    options: "Neustart wenn Netzbezug unter {max_grid_import_w:.0f} W sinkt"
+    trigger: "Netzbezug überschreitet Limit"
+    data_basis: "Netzbezug {grid_import_w:.0f} W · Limit {max_grid_import_w:.0f} W"
+    effect: "Gerät gestoppt — Stromnetz entlasten"
+    options: "Start wenn Netzbezug unter {max_grid_import_w:.0f} W sinkt"
 
   STOP_R3_OVERTEMP:
     short: "Sicherheitsstopp: Übertemperatur"
     long: "Miner-Temperatur {miner_temp_c:.0f}°C überschreitet Sicherheitsgrenze {max_chip_temp_c:.0f}°C."
-    trigger: "R3 Safety-Override (asynchron)"
-    data_basis: "Chip-Temp {miner_temp_c:.0f}°C · Limit {max_chip_temp_c:.0f}°C"
-    effect: "Sicherheitsstopp — Überhitzung"
-    options: "Neustart nach Abkühlung unter {max_chip_temp_c:.0f}°C"
+    trigger: "Übertemperatur erkannt"
+    data_basis: "Temperatur {miner_temp_c:.0f}°C · Limit {max_chip_temp_c:.0f}°C"
+    effect: "Gerät gestoppt — Sicherheitsabschaltung wegen Überhitzung"
+    options: "Start nach Abkühlung unter {max_chip_temp_c:.0f}°C"
 
   STOP_R3_COMM_TIMEOUT:
     short: "Sicherheitsstopp: Kommunikationsausfall"
     long: "Kein Heartbeat seit {miner_heartbeat_age_sec:.0f} s (Limit: {comm_timeout_sec:.0f} s)."
-    trigger: "R3 Comm-Timeout"
-    data_basis: "Heartbeat seit {miner_heartbeat_age_sec:.0f} s überfällig · Limit {comm_timeout_sec:.0f} s"
-    effect: "Sicherheitsstopp — Verbindungsausfall"
-    options: "Neustart nach MQTT-Reconnect"
+    trigger: "Gerät nicht erreichbar"
+    data_basis: "Kein Signal seit {miner_heartbeat_age_sec:.0f} s · Limit {comm_timeout_sec:.0f} s"
+    effect: "Gerät gestoppt — Verbindung unterbrochen"
+    options: "Start nach Wiederverbindung"
 
   NOOP_R4_FORECAST_PV_INSUFFICIENT:
     short: "PV-Einbruch erwartet"
@@ -98,10 +98,10 @@ de:
   NOOP_R5_MIN_PAUSE_NOT_REACHED:
     short: "Mindestpause nicht erreicht"
     long: "Miner ist seit {blocks_since_last_change} Blöcken gestoppt. Mindestpause: {min_pause_blocks} Blöcke."
-    trigger: "R5 Mindestpause"
+    trigger: "Mindestpause noch nicht abgelaufen"
     data_basis: "Gestoppt seit {blocks_since_last_change} / {min_pause_blocks} Blöcken"
-    effect: "Pause gehalten — Mindestpause"
-    options: "Neustart erst nach {min_pause_blocks} Blöcken erlaubt"
+    effect: "Gerät bleibt aus — Mindestpause läuft noch"
+    options: "Start erst nach {min_pause_blocks} Blöcken erlaubt"
 
   NOOP_MANUAL_MODE:
     short: "Manueller Modus — System wartet auf Eingriff"
