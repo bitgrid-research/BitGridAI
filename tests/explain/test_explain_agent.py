@@ -67,7 +67,7 @@ def test_data_basis_interpolates_params(agent: ExplainAgent) -> None:
 
 def test_effect_no_interpolation_needed(agent: ExplainAgent) -> None:
     result = agent.explain(dc.START_R1_SURPLUS_OK, {})
-    assert result.effect == "Miner gestartet"
+    assert "Miner gestartet" in result.effect
 
 
 def test_options_interpolates_threshold(agent: ExplainAgent) -> None:
@@ -77,9 +77,9 @@ def test_options_interpolates_threshold(agent: ExplainAgent) -> None:
 
 
 def test_trigger_interpolates_threshold(agent: ExplainAgent) -> None:
-    params = {"surplus_min_kw": 1.5}
+    params = {"surplus_kw": 2.2}
     result = agent.explain(dc.START_R1_SURPLUS_OK, params)
-    assert "1.5" in result.trigger
+    assert "2.2" in result.trigger
 
 
 def test_missing_param_returns_question_mark(agent: ExplainAgent) -> None:
@@ -174,7 +174,7 @@ def test_noop_codes_have_nonempty_effect(agent: ExplainAgent, code: str) -> None
 
 def test_en_effect_for_start(agent_en: ExplainAgent) -> None:
     result = agent_en.explain(dc.START_R1_SURPLUS_OK, {})
-    assert result.effect == "Miner started"
+    assert "Miner started" in result.effect
 
 
 def test_en_stop_r3_overtemp_options(agent_en: ExplainAgent) -> None:

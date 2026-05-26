@@ -164,8 +164,9 @@ class ExplainAgent:
         )
         prompt = (
             f"{persona_instruction}\n\n"
-            "Schreibe genau EINEN kurzen deutschen Satz (max. 20 Wörter). "
-            "Keine Einleitung, kein Bullet-Point, kein Englisch, kein Chinesisch.\n\n"
+            "Schreibe genau EINEN vollständigen deutschen Satz (max. 20 Wörter). "
+            "Keine Einleitung, kein Bullet-Point, kein Englisch, kein Chinesisch.\n"
+            "Gutes Beispiel: 'Der Miner läuft — deine Solaranlage erzeugt 1,5 kW mehr als dein Haus verbraucht.'\n\n"
             f"Was passiert: {effect}\n"
             f"Warum: {trigger}\n"
             f"Zahlen: {data_basis}\n"
