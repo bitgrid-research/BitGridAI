@@ -1,5 +1,6 @@
 de:
   START_R1_SURPLUS_OK:
+    example: "Miner läuft — deine Anlage erzeugt 2,1 kW mehr als du gerade verbrauchst."
     short: "PV-Überschuss vorhanden — Miner läuft"
     long: "PV-Leistung übersteigt Hausverbrauch um {surplus_kw:.1f} kW. Miner gestartet."
     trigger: "Deine Solaranlage erzeugt {surplus_kw:.1f} kW mehr als dein Haus gerade verbraucht"
@@ -8,6 +9,7 @@ de:
     options: ""
 
   NOOP_R1_INSUFFICIENT_SURPLUS:
+    example: "Miner wartet: 0,8 kW Überschuss — noch 0,7 kW bis zur Startschwelle von 1,5 kW."
     short: "Zu wenig PV-Überschuss — Miner wartet"
     long: "Aktueller Überschuss {surplus_kw:.1f} kW liegt unter der Startschwelle {surplus_min_kw:.1f} kW."
     trigger: "Deine Solaranlage erzeugt nur {surplus_kw:.1f} kW Überschuss — mindestens {surplus_min_kw:.1f} kW wären nötig"
@@ -16,6 +18,7 @@ de:
     options: "Miner startet ab {surplus_min_kw:.1f} kW Überschuss"
 
   NOOP_R1_PRICE_TOO_HIGH:
+    example: "Strompreis zu hoch: 28 ct/kWh, Limit bei 25 ct — Miner wartet."
     short: "Strompreis zu hoch — Miner wartet"
     long: "Aktueller Preis {energy_price_ct_kwh:.1f} ct/kWh liegt über dem Limit {price_max_ct_kwh:.1f} ct/kWh."
     trigger: "Strompreis {energy_price_ct_kwh:.1f} ct/kWh ist zu hoch — Limit liegt bei {price_max_ct_kwh:.1f} ct/kWh"
@@ -24,6 +27,7 @@ de:
     options: "Miner startet wenn Preis unter {price_max_ct_kwh:.1f} ct/kWh sinkt"
 
   STOP_R2_SOC_HARD_MIN:
+    example: "Miner gestoppt — Batterie nur noch 8 %, Schutzgrenze liegt bei 10 %."
     short: "Batterie kritisch — Miner gestoppt"
     long: "Batterieladung {battery_soc_pct:.0f} % liegt unter dem Sicherheitsminimum {soc_hard_min_pct:.0f} %."
     trigger: "Batterie ist nur noch {battery_soc_pct:.0f} % geladen — unter dem Sicherheitsminimum {soc_hard_min_pct:.0f} %"
@@ -32,6 +36,7 @@ de:
     options: "Miner startet wieder ab {soc_soft_min_pct:.0f} % · Prognose {pv_forecast_kw:.1f} kW"
 
   NOOP_R2_SOC_SOFT_MIN:
+    example: "Miner wartet: Batterie lädt erst auf 20 % auf — aktuell 17 %."
     short: "Batterie lädt — Miner wartet"
     long: "Batterieladung {battery_soc_pct:.0f} % liegt unter der Mindestschwelle {soc_soft_min_pct:.0f} %."
     trigger: "Batterie lädt erst auf {soc_soft_min_pct:.0f} % auf, bevor der Miner starten darf — aktuell {battery_soc_pct:.0f} %"
@@ -40,6 +45,7 @@ de:
     options: "Miner startet ab {soc_soft_min_pct:.0f} % Ladezustand"
 
   STOP_R2_GRID_IMPORT_EXCEEDED:
+    example: "Miner gestoppt — 620 W Netzbezug, Limit ist 500 W."
     short: "Zu viel Netzbezug — Miner gestoppt"
     long: "Netzbezug {grid_import_w:.0f} W überschreitet das erlaubte Limit {max_grid_import_w:.0f} W."
     trigger: "Das System bezieht {grid_import_w:.0f} W aus dem Stromnetz — erlaubt sind {max_grid_import_w:.0f} W"
@@ -48,6 +54,7 @@ de:
     options: "Miner startet wenn Netzbezug unter {max_grid_import_w:.0f} W sinkt"
 
   STOP_R3_OVERTEMP:
+    example: "Zu heiß — Miner gestoppt bei 89 °C, Sicherheitsgrenze ist 85 °C."
     short: "Übertemperatur — Miner gestoppt"
     long: "Chip-Temperatur {miner_temp_c:.0f}°C überschreitet die Sicherheitsgrenze {max_chip_temp_c:.0f}°C."
     trigger: "Chip-Temperatur {miner_temp_c:.0f}°C liegt über dem Sicherheitslimit von {max_chip_temp_c:.0f}°C"
@@ -56,6 +63,7 @@ de:
     options: "Miner startet nach Abkühlung unter {max_chip_temp_c:.0f}°C"
 
   STOP_R3_COMM_TIMEOUT:
+    example: "Miner nicht erreichbar — kein Signal seit 90 Sekunden, Timeout-Limit ist 60 s."
     short: "Miner nicht erreichbar — gestoppt"
     long: "Kein Heartbeat vom Miner seit {miner_heartbeat_age_sec:.0f} s (Limit: {comm_timeout_sec:.0f} s)."
     trigger: "Der Miner antwortet seit {miner_heartbeat_age_sec:.0f} Sekunden nicht mehr"
@@ -64,6 +72,7 @@ de:
     options: "Miner startet nach Wiederverbindung"
 
   NOOP_R4_FORECAST_PV_INSUFFICIENT:
+    example: "Prognose zu schwach: nur 1,2 kW erwartet — mindestens 2,0 kW wären nötig."
     short: "PV-Prognose zu schwach — Miner wartet"
     long: "Vorhergesagte PV-Leistung {pv_forecast_kw:.1f} kW reicht nicht für den Mindestüberschuss {min_predicted_surplus_kw:.1f} kW."
     trigger: "In den nächsten Stunden werden nur {pv_forecast_kw:.1f} kW PV erwartet — mindestens {min_predicted_surplus_kw:.1f} kW wären nötig"
@@ -72,6 +81,7 @@ de:
     options: "Miner startet wenn Prognose ≥ {min_predicted_surplus_kw:.1f} kW"
 
   NOOP_R4_FORECAST_PRICE_SPIKE:
+    example: "Miner wartet — Strompreis steigt laut Prognose über 30 ct/kWh, Starten lohnt sich nicht."
     short: "Strompreis-Anstieg erwartet — Miner wartet"
     long: "Hoher Strompreis in den nächsten Stunden erwartet. Kein Start, um Netzbezug zu vermeiden."
     trigger: "Für die nächsten Stunden ist ein Strompreis-Anstieg vorhergesagt"
@@ -80,6 +90,7 @@ de:
     options: "Miner startet wenn kein Preisanstieg erwartet wird"
 
   NOOP_R5_DEADBAND_ACTIVE:
+    example: "Entscheidung stabil gehalten — letzte Änderung war vor 10 Minuten."
     short: "Stabilisierungsphase — Entscheidung gehalten"
     long: "Entscheidung bleibt stabil bis {valid_until}. Schnelles Schalten wird vermieden."
     trigger: "Die letzte Entscheidung liegt erst {blocks_since_last_change} Intervalle zurück — häufiges Schalten wird vermieden"
@@ -88,6 +99,7 @@ de:
     options: "Nächste Entscheidung ab {valid_until}"
 
   NOOP_R5_MIN_RUNTIME_NOT_REACHED:
+    example: "Miner läuft weiter — Mindestlaufzeit: noch 20 Minuten bis zum frühesten Stopp."
     short: "Mindestlaufzeit läuft — Miner bleibt an"
     long: "Miner läuft seit {blocks_since_last_change} Intervallen. Mindestlaufzeit: {min_runtime_blocks} Intervalle."
     trigger: "Miner läuft erst seit {blocks_since_last_change} von {min_runtime_blocks} Pflicht-Intervallen"
@@ -96,6 +108,7 @@ de:
     options: "Stopp frühestens nach {min_runtime_blocks} Intervallen"
 
   NOOP_R5_MIN_PAUSE_NOT_REACHED:
+    example: "Miner bleibt aus — Mindestpause: noch 10 Minuten bis zum frühesten Start."
     short: "Mindestpause läuft — Miner bleibt aus"
     long: "Miner ist seit {blocks_since_last_change} Intervallen gestoppt. Mindestpause: {min_pause_blocks} Intervalle."
     trigger: "Miner ist erst seit {blocks_since_last_change} von {min_pause_blocks} Pflicht-Pausen-Intervallen gestoppt"
@@ -104,6 +117,7 @@ de:
     options: "Miner startet frühestens nach {min_pause_blocks} Intervallen"
 
   NOOP_MANUAL_MODE:
+    example: "Manueller Modus aktiv — das System trifft keine automatischen Entscheidungen."
     short: "Manueller Modus aktiv"
     long: "Das System ist im manuellen Modus. Automatische Start- und Stopp-Entscheidungen sind deaktiviert."
     trigger: "Du hast den manuellen Modus aktiviert"

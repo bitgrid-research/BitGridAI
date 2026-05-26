@@ -119,9 +119,12 @@ class ExplainAgent:
         data_basis = self._interpolate(block.get("data_basis", ""), params)
         effect = self._interpolate(block.get("effect", ""), params)
         options = self._interpolate(block.get("options", ""), params)
+        example = block.get("example", "")
 
         if self._ollama_host:
-            llm_short = self._call_ollama(decision_code, trigger, effect, data_basis)
+            llm_short = self._call_ollama(
+                decision_code, trigger, effect, data_basis, example
+            )
             if llm_short:
                 short = llm_short
 
@@ -153,6 +156,7 @@ class ExplainAgent:
         trigger: str,
         effect: str,
         data_basis: str,
+        example: str = "",
     ) -> str | None:
         """Ruft Ollama auf und gibt einen natürlichsprachlichen Satz zurück.
 
@@ -162,14 +166,19 @@ class ExplainAgent:
         persona_instruction = _PERSONA_INSTRUCTIONS.get(
             self._persona, _PERSONA_INSTRUCTIONS["energie"]
         )
+        example_line = (
+            example
+            or "Der Miner läuft — deine Anlage erzeugt 1,5 kW mehr als du verbrauchst."
+        )
         prompt = (
             f"{persona_instruction}\n\n"
-            "Schreibe genau EINEN vollständigen deutschen Satz (max. 20 Wörter). "
+            "Schreibe genau EINEN vollständigen deutschen Satz (max. 25 Wörter). "
+            "Nenne mindestens EINE konkrete Zahl aus den Messwerten. "
             "Keine Einleitung, kein Bullet-Point, kein Englisch, kein Chinesisch.\n"
-            "Gutes Beispiel: 'Der Miner läuft — deine Solaranlage erzeugt 1,5 kW mehr als dein Haus verbraucht.'\n\n"
+            f"Beispiel für diese Situation: '{example_line}'\n\n"
             f"Was passiert: {effect}\n"
             f"Warum: {trigger}\n"
-            f"Zahlen: {data_basis}\n"
+            f"Messwerte: {data_basis}\n"
         )
         body = json.dumps(
             {

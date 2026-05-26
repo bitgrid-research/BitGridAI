@@ -194,6 +194,27 @@ def test_unknown_code_returns_code_as_short(agent: ExplainAgent) -> None:
     assert result.options == ""
 
 
+# ── Jeder DE-Block hat ein example-Feld mit mind. einer Zahl ─────────────────
+
+
+_CODES_WITHOUT_SENSOR_VALUES = {dc.NOOP_MANUAL_MODE}
+
+
+@pytest.mark.parametrize("code", sorted(dc.ALL_CODES))
+def test_all_de_blocks_have_example_with_digit(agent: ExplainAgent, code: str) -> None:
+    blocks = agent._load_blocks()
+    de_blocks = blocks.get("de", {})
+    if code not in de_blocks:
+        pytest.skip(f"{code}: kein DE-Block vorhanden")
+    example = de_blocks[code].get("example", "")
+    assert example != "", f"{code}: example-Feld fehlt oder ist leer"
+    if code in _CODES_WITHOUT_SENSOR_VALUES:
+        return
+    assert any(
+        c.isdigit() for c in example
+    ), f"{code}: example enthält keine Zahl: {example!r}"
+
+
 # ── rule_states und energy_state_ref werden durchgereicht ────────────────────
 
 
