@@ -77,3 +77,58 @@ def test_deadband_keeps_decision_stable(nominal_state: EnergyState) -> None:
     )
     assert e1.decision.action == "NOOP"
     assert "R5" in e1.decision_code
+
+
+# ── Autonomie-Modi ────────────────────────────────────────────────────────────
+
+
+def test_manual_mode_produces_noop_when_surplus(nominal_state: EnergyState) -> None:
+    """MANUAL-Modus: kein automatischer Start trotz Überschuss."""
+    event = rule_engine.evaluate(nominal_state, autonomy_level="MANUAL")
+    assert event.decision.action == "NOOP"
+    assert event.decision_code == "NOOP_MANUAL_MODE"
+    assert event.reason == "MANUAL_MODE"
+
+
+def test_manual_mode_produces_noop_when_low_soc(low_soc_state: EnergyState) -> None:
+    """MANUAL-Modus: kein automatischer Stop durch R2 (außer R3)."""
+    event = rule_engine.evaluate(low_soc_state, autonomy_level="MANUAL")
+    assert event.decision.action == "NOOP"
+    assert event.decision_code == "NOOP_MANUAL_MODE"
+
+
+def test_manual_mode_r3_safety_still_fires(overtemp_state: EnergyState) -> None:
+    """MANUAL-Modus: R3 Safety bleibt in allen Modi aktiv."""
+    event = rule_engine.evaluate(overtemp_state, autonomy_level="MANUAL")
+    assert event.decision.action == "STOP"
+    assert "R3" in event.decision_code
+
+
+def test_semi_mode_blocks_r2_stop(low_soc_state: EnergyState) -> None:
+    """SEMI-Modus: R2-STOP wird zu NOOP — nur R3 darf stoppen."""
+    event = rule_engine.evaluate(low_soc_state, autonomy_level="SEMI")
+    assert event.decision.action == "NOOP"
+    assert "R2" in event.decision_code
+
+
+def test_semi_mode_r3_safety_still_fires(overtemp_state: EnergyState) -> None:
+    """SEMI-Modus: R3 Safety bleibt aktiv."""
+    event = rule_engine.evaluate(overtemp_state, autonomy_level="SEMI")
+    assert event.decision.action == "STOP"
+    assert "R3" in event.decision_code
+
+
+def test_full_mode_is_default_behavior(nominal_state: EnergyState) -> None:
+    """FULL-Modus verhält sich identisch zum Default."""
+    event_default = rule_engine.evaluate(nominal_state)
+    event_full = rule_engine.evaluate(nominal_state, autonomy_level="FULL")
+    assert event_default.decision.action == event_full.decision.action
+    assert event_default.decision_code == event_full.decision_code
+
+
+def test_manual_mode_noop_contains_autonomy_level_param(
+    nominal_state: EnergyState,
+) -> None:
+    """NOOP_MANUAL_MODE trägt autonomy_level im params-Dict."""
+    event = rule_engine.evaluate(nominal_state, autonomy_level="MANUAL")
+    assert event.params.get("autonomy_level") == "MANUAL"

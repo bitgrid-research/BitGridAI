@@ -7,9 +7,14 @@ Read-only: verändert nie EnergyState oder Decision.
 
 from __future__ import annotations
 
+import json
+import logging
+import os
+import urllib.error
+import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import yaml
 
@@ -18,6 +23,39 @@ if TYPE_CHECKING:
 
 _TEXT_BLOCKS_PATH = Path(__file__).parent / "mappings" / "text_blocks.yaml"
 _DEFAULT_LANG = "de"
+
+Persona = Literal["energie", "waerme", "tech"]
+_VALID_PERSONAS: set[str] = {"energie", "waerme", "tech"}
+
+# Persona-spezifische Systemanweisungen für den LLM-Prompt.
+# "energie" ist der Default — breiteste Zielgruppe, kein Mining-Vokabular.
+_PERSONA_INSTRUCTIONS: dict[str, str] = {
+    "energie": (
+        "Du bist ein freundlicher Assistent für eine Heimsolar-App. "
+        "Das System steuert einen Miner, der läuft wenn die Solaranlage mehr Strom erzeugt "
+        "als das Haus gerade braucht — also bei Solarüberschuss. "
+        "Die Batterie ist der Hausspeicher. "
+        "Sprich den Nutzer direkt an ('du'). "
+        "Benutze einfache Alltagssprache: 'dein Solarstrom', 'der Miner', 'dein Speicher'. "
+        "Keine Abkürzungen, kein Englisch, kein Chinesisch. "
+        "Antworte immer auf Deutsch."
+    ),
+    "waerme": (
+        "Du bist ein Assistent für ein Heimsystem mit Solarpanel und einem Gerät, "
+        "das gleichzeitig Wärme erzeugt. Betone den Wärmegewinn: "
+        "'dein Gerät heizt gerade', 'kostenlose Wärme aus deinem Solarüberschuss'. "
+        "Das Gerät (Miner) ist Mittel zum Zweck — der Fokus liegt auf der "
+        "gewonnenen Wärme für Raumheizung oder Warmwasser, nicht auf Bitcoin."
+    ),
+    "tech": (
+        "Du bist ein technischer Assistent für ein deterministisches "
+        "Energiemanagementsystem. Der Nutzer kennt Regelkern, Hashrate, Pool, "
+        "SoC und decision_code. Gib volle Transparenz: nenne decision_code, "
+        "welche Regel ausgelöst hat (R1–R5) und konkrete Messwerte mit Einheiten."
+    ),
+}
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -39,6 +77,21 @@ class ExplainAgent:
     def __init__(self, lang: str = _DEFAULT_LANG) -> None:
         self._lang = lang
         self._blocks: dict[str, Any] = self._load_blocks()
+        self._ollama_host: str = os.getenv("OLLAMA_HOST", "").rstrip("/")
+        self._ollama_model: str = os.getenv("OLLAMA_MODEL", "qwen3:4b")
+        self._ollama_timeout: int = int(os.getenv("OLLAMA_TIMEOUT_SEC", "30"))
+        raw_persona = os.getenv("OLLAMA_PERSONA", "energie").strip().lower()
+        if raw_persona not in _VALID_PERSONAS:
+            log.warning(
+                "Unbekannte OLLAMA_PERSONA=%r — verwende 'energie' als Fallback",
+                raw_persona,
+            )
+            raw_persona = "energie"
+        self._persona: str = raw_persona
+
+    @property
+    def persona(self) -> str:
+        return self._persona
 
     def _load_blocks(self) -> dict[str, Any]:
         with open(_TEXT_BLOCKS_PATH, encoding="utf-8") as f:
@@ -66,6 +119,14 @@ class ExplainAgent:
         data_basis = self._interpolate(block.get("data_basis", ""), params)
         effect = self._interpolate(block.get("effect", ""), params)
         options = self._interpolate(block.get("options", ""), params)
+        example = block.get("example", "")
+
+        if self._ollama_host:
+            llm_short = self._call_ollama(
+                decision_code, trigger, effect, data_basis, example
+            )
+            if llm_short:
+                short = llm_short
 
         return ExplainResult(
             decision_code=decision_code,
@@ -89,6 +150,60 @@ class ExplainAgent:
             energy_state_ref=event.state_snapshot.block_id,
         ).short
 
+    def _call_ollama(
+        self,
+        code: str,
+        trigger: str,
+        effect: str,
+        data_basis: str,
+        example: str = "",
+    ) -> str | None:
+        """Ruft Ollama auf und gibt einen natürlichsprachlichen Satz zurück.
+
+        Gibt None zurück bei Timeout, Verbindungsfehler oder leerem Response.
+        Template-Wert bleibt als Fallback erhalten.
+        """
+        persona_instruction = _PERSONA_INSTRUCTIONS.get(
+            self._persona, _PERSONA_INSTRUCTIONS["energie"]
+        )
+        example_line = (
+            example
+            or "Der Miner läuft — deine Anlage erzeugt 1,5 kW mehr als du verbrauchst."
+        )
+        prompt = (
+            f"{persona_instruction}\n\n"
+            "Schreibe genau EINEN vollständigen deutschen Satz (max. 25 Wörter). "
+            "Nenne mindestens EINE konkrete Zahl aus den Messwerten. "
+            "Keine Einleitung, kein Bullet-Point, kein Englisch, kein Chinesisch.\n"
+            f"Beispiel für diese Situation: '{example_line}'\n\n"
+            f"Was passiert: {effect}\n"
+            f"Warum: {trigger}\n"
+            f"Messwerte: {data_basis}\n"
+        )
+        body = json.dumps(
+            {
+                "model": self._ollama_model,
+                "prompt": prompt,
+                "stream": False,
+                "think": False,  # disable qwen3 thinking-mode so output goes to "response"
+                "options": {"num_predict": 60, "temperature": 0.3},
+            }
+        ).encode()
+        try:
+            req = urllib.request.Request(
+                f"{self._ollama_host}/api/generate",
+                data=body,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=self._ollama_timeout) as resp:
+                data: dict[str, Any] = json.loads(resp.read())
+            text = (data.get("response") or "").strip()
+            return text if text else None
+        except Exception as exc:
+            log.debug("Ollama nicht erreichbar (%s) — Template-Fallback", exc)
+            return None
+
     def _interpolate(self, template: str, params: dict[str, Any]) -> str:
         """Interpoliert {key} und {key:.nf} — fehlende Keys → '?'."""
         if not template:
@@ -110,7 +225,13 @@ class _Missing:
 
 
 class _SafeDict(dict[str, Any]):
-    """Gibt _Missing zurück für fehlende Keys — safe für alle Format-Specs."""
+    """Gibt _Missing zurück für fehlende oder None-Keys — safe für alle Format-Specs."""
 
     def __missing__(self, key: str) -> _Missing:
         return _Missing()
+
+    def __getitem__(self, key: str) -> Any:
+        value = super().__getitem__(key) if key in self else None
+        if value is None:
+            return _Missing()
+        return value

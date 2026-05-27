@@ -57,13 +57,13 @@ def in_memory_stores():
     from src.data.db import _SCHEMA
 
     conn.executescript(_SCHEMA)
-    return EventStore(conn), StateStore(conn)
+    return EventStore(conn), StateStore(conn), conn
 
 
 @pytest.fixture
 def runner(ingest, capture_writer, in_memory_stores) -> tuple[ProductionRunner, list]:
     writer, sent = capture_writer
-    event_store, state_store = in_memory_stores
+    event_store, state_store, conn = in_memory_stores
     r = ProductionRunner(
         config=RuleEngineConfig(),
         ingest=ingest,
@@ -71,6 +71,7 @@ def runner(ingest, capture_writer, in_memory_stores) -> tuple[ProductionRunner, 
         relay_topic="test/miner/relay/command",
         event_store=event_store,
         state_store=state_store,
+        kpi_conn=conn,
     )
     return r, sent
 
@@ -123,7 +124,7 @@ class TestSurplusStartsPipeline:
     def test_decision_persisted(self, runner, ingest, in_memory_stores) -> None:
         """DecisionEvent und EnergyState werden in DB geschrieben."""
         prod, _ = runner
-        event_store, state_store = in_memory_stores
+        event_store, state_store, conn = in_memory_stores
         _feed(
             ingest,
             pv_power_w=4000,
@@ -290,7 +291,7 @@ class TestExplainerIntegration:
     ) -> None:
         """explain_short landet in der DB wenn explainer injiziert wird."""
         writer, _ = capture_writer
-        event_store, state_store = in_memory_stores
+        event_store, state_store, conn = in_memory_stores
 
         prod = ProductionRunner(
             config=RuleEngineConfig(),
@@ -322,7 +323,7 @@ class TestExplainerIntegration:
     ) -> None:
         """Ohne explainer bleibt explain_short leer — kein Fehler."""
         prod, _ = runner
-        event_store, _ = in_memory_stores
+        event_store, _, _conn = in_memory_stores
         _feed(
             ingest,
             pv_power_w=4000,
@@ -364,3 +365,75 @@ class TestDeduplication:
 
         assert result is False  # Duplikat erkannt
         assert len(sent) == 1  # Nur einmal wirklich gesendet
+
+
+class TestKpiLogging:
+    def test_kpi_row_written_after_run_once(
+        self, ingest, capture_writer, in_memory_stores
+    ) -> None:
+        """Nach run_once landet genau eine KPI-Zeile in der DB."""
+        writer, _ = capture_writer
+        event_store, state_store, conn = in_memory_stores
+
+        prod = ProductionRunner(
+            config=RuleEngineConfig(),
+            ingest=ingest,
+            writer=writer,
+            relay_topic="test/miner/relay/command",
+            event_store=event_store,
+            state_store=state_store,
+            kpi_conn=conn,
+        )
+        _feed(
+            ingest,
+            pv_power_w=4000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_temp_c=65,
+            miner_heartbeat_age_sec=5,
+        )
+
+        prod.run_once(now=datetime(2024, 6, 15, 12, 0, tzinfo=timezone.utc))
+
+        rows = conn.execute("SELECT * FROM kpi_log").fetchall()
+        assert len(rows) == 1
+        row = rows[0]
+        # Spalten: id, block_id, timestamp, decision_latency_ms, explanation_latency_ms,
+        #          thermal_incidents, flapping_rate, grid_import_wh, explainability_coverage
+        assert row[1] is not None  # block_id
+        assert row[3] >= 0  # decision_latency_ms
+        assert row[5] == 0  # thermal_incidents (kein Overtemp)
+        assert row[7] >= 0  # grid_import_wh
+
+    def test_kpi_thermal_incident_on_overtemp(
+        self, ingest, capture_writer, in_memory_stores
+    ) -> None:
+        """Overtemp-Entscheidung erzeugt thermal_incidents=1 im KPI-Log."""
+        writer, _ = capture_writer
+        event_store, state_store, conn = in_memory_stores
+
+        prod = ProductionRunner(
+            config=RuleEngineConfig(),
+            ingest=ingest,
+            writer=writer,
+            relay_topic="test/miner/relay/command",
+            event_store=event_store,
+            state_store=state_store,
+            kpi_conn=conn,
+        )
+        _feed(
+            ingest,
+            pv_power_w=4000,
+            house_load_w=600,
+            grid_import_w=0,
+            battery_soc_pct=80,
+            miner_temp_c=95,  # Overtemp → R3
+            miner_heartbeat_age_sec=5,
+        )
+
+        prod.run_once(now=datetime(2024, 6, 15, 12, 0, tzinfo=timezone.utc))
+
+        row = conn.execute("SELECT thermal_incidents FROM kpi_log").fetchone()
+        assert row is not None
+        assert row[0] == 1

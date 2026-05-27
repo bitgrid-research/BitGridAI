@@ -21,23 +21,12 @@ services:
     container_name: bitgrid-core
     depends_on:
       - bitgrid-mqtt
+    ports:
+      - "0.0.0.0:8080:8080"
     volumes:
       - ../config:/app/config
       - ../data:/app/data
       - ../logs:/app/logs
-    env_file: ../.env
-    restart: unless-stopped
-
-  bitgrid-ui:
-    build:
-      context: ..
-      dockerfile: src/ui/Dockerfile
-    image: bitgrid-ui:latest
-    container_name: bitgrid-ui
-    depends_on:
-      - bitgrid-core
-    ports:
-      - "127.0.0.1:8080:8080"
     env_file: ../.env
     restart: unless-stopped
 

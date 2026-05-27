@@ -36,8 +36,18 @@ CREATE TABLE IF NOT EXISTS energy_states (
     quality                 TEXT,
     missing_signals_json    TEXT,
     grid_export_w           REAL,
+    miner_power_w           REAL,
+    heizstab_power_w        REAL,
     energy_price_ct_kwh     REAL,
     pv_forecast_kw          REAL
+);
+
+CREATE TABLE IF NOT EXISTS active_overrides (
+    command_id    TEXT PRIMARY KEY,
+    action        TEXT NOT NULL,
+    valid_until   TEXT NOT NULL,
+    requested_by  TEXT NOT NULL DEFAULT 'operator',
+    created_at    TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS kpi_log (
@@ -49,9 +59,58 @@ CREATE TABLE IF NOT EXISTS kpi_log (
     thermal_incidents        INTEGER,
     flapping_rate            REAL,
     grid_import_wh           REAL,
-    explainability_coverage  REAL
+    explainability_coverage  REAL,
+    self_consumption_wh      REAL,
+    battery_soc_pct          REAL,
+    miner_runtime_blocks     INTEGER,
+    override_active          INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS override_log (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp     TEXT NOT NULL,
+    action        TEXT NOT NULL,
+    duration_min  INTEGER,
+    command_id    TEXT,
+    accepted      INTEGER NOT NULL,
+    reject_reason TEXT,
+    user_reason   TEXT
 );
 """
+
+
+_KPI_MIGRATIONS: list[tuple[str, str]] = [
+    ("self_consumption_wh", "ALTER TABLE kpi_log ADD COLUMN self_consumption_wh  REAL"),
+    ("battery_soc_pct", "ALTER TABLE kpi_log ADD COLUMN battery_soc_pct      REAL"),
+    (
+        "miner_runtime_blocks",
+        "ALTER TABLE kpi_log ADD COLUMN miner_runtime_blocks INTEGER",
+    ),
+    ("override_active", "ALTER TABLE kpi_log ADD COLUMN override_active      INTEGER"),
+]
+
+_ENERGY_STATE_MIGRATIONS: list[tuple[str, str]] = [
+    ("miner_power_w", "ALTER TABLE energy_states ADD COLUMN miner_power_w    REAL"),
+    ("heizstab_power_w", "ALTER TABLE energy_states ADD COLUMN heizstab_power_w REAL"),
+]
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    existing_kpi = {
+        row[1] for row in conn.execute("PRAGMA table_info(kpi_log)").fetchall()
+    }
+    for col, ddl in _KPI_MIGRATIONS:
+        if col not in existing_kpi:
+            conn.execute(ddl)
+
+    existing_es = {
+        row[1] for row in conn.execute("PRAGMA table_info(energy_states)").fetchall()
+    }
+    for col, ddl in _ENERGY_STATE_MIGRATIONS:
+        if col not in existing_es:
+            conn.execute(ddl)
+
+    conn.commit()
 
 
 def get_connection(db_path: str | Path = "data/bitgrid.db") -> sqlite3.Connection:
@@ -62,5 +121,5 @@ def get_connection(db_path: str | Path = "data/bitgrid.db") -> sqlite3.Connectio
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
     conn.executescript(_SCHEMA)
-    conn.commit()
+    _migrate(conn)
     return conn

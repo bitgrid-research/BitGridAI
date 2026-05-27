@@ -1,0 +1,56 @@
+bitgridai:
+
+  # ── BitGridAI Runner — MQTT-Sensoren ─────────────────────────────────────────
+  # Der ProductionRunner publiziert nach jedem 10-Minuten-Block auf diese Topics.
+  # expire_after: 700 s = etwas mehr als ein Block-Zyklus (600 s).
+  # Bei Verbindungsabbruch zeigen die Sensoren "unavailable".
+
+  mqtt:
+    sensor:
+      - name: "bg_runner_code"
+        unique_id: bg_runner_code
+        state_topic: "bitgrid/explain/code"
+        expire_after: 700
+        icon: mdi:state-machine
+
+      - name: "bg_runner_action"
+        unique_id: bg_runner_action
+        state_topic: "bitgrid/explain/action"
+        expire_after: 700
+        icon: mdi:play-pause
+
+      - name: "bg_runner_block_id"
+        unique_id: bg_runner_block_id
+        state_topic: "bitgrid/explain/block_id"
+        expire_after: 700
+        icon: mdi:clock-outline
+
+      - name: "bg_runner_trigger"
+        unique_id: bg_runner_trigger
+        state_topic: "bitgrid/explain/trigger"
+        expire_after: 700
+        icon: mdi:lightning-bolt
+
+      - name: "bg_runner_effect"
+        unique_id: bg_runner_effect
+        state_topic: "bitgrid/explain/effect"
+        expire_after: 700
+        icon: mdi:arrow-right-circle
+
+      - name: "bg_runner_data_basis"
+        unique_id: bg_runner_data_basis
+        state_topic: "bitgrid/explain/data_basis"
+        expire_after: 700
+        icon: mdi:database-outline
+
+      - name: "bg_runner_options"
+        unique_id: bg_runner_options
+        state_topic: "bitgrid/explain/options"
+        expire_after: 700
+        icon: mdi:format-list-bulleted
+
+      - name: "bg_runner_explain_short"
+        unique_id: bg_runner_explain_short
+        state_topic: "bitgrid/explain/short"
+        expire_after: 700
+        icon: mdi:text-box-outline

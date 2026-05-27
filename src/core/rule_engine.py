@@ -12,7 +12,13 @@ from datetime import datetime, timezone
 from typing import Literal
 
 from src.core import block_scheduler
-from src.core.models import Decision, DecisionEvent, EnergyState, RuleVote
+from src.core.models import (
+    AutonomyLevel,
+    Decision,
+    DecisionEvent,
+    EnergyState,
+    RuleVote,
+)
 from src.core.rules import (
     r1_profitability,
     r2_autarky,
@@ -68,11 +74,14 @@ def evaluate(
     blocks_since_last_change: int = 0,
     trigger: Literal["BLOCK_TICK", "SAFETY_ASYNC", "OVERRIDE"] = "BLOCK_TICK",
     now: datetime | None = None,
+    autonomy_level: AutonomyLevel = "FULL",
 ) -> DecisionEvent:
     """
     Pure Funktion: EnergyState → DecisionEvent.
 
     Gleicher Input → gleicher Output. Kein I/O, kein globaler State.
+    autonomy_level: FULL = alle Regeln, SEMI = kein Auto-Stop (außer R3),
+                    MANUAL = nur R3-Safety, Rest NOOP.
     """
     if config is None:
         config = RuleEngineConfig()
@@ -82,7 +91,7 @@ def evaluate(
     valid_until = block_scheduler.get_valid_until(now)
     votes: list[RuleVote] = []
 
-    # --- R3 Safety (höchste Priorität, bricht sofort ab) ---
+    # --- R3 Safety (höchste Priorität, bricht sofort ab — in allen Modi) ---
     r3_vote = r3_safety.evaluate(
         state,
         max_chip_temp_c=config.max_chip_temp_c,
@@ -106,6 +115,17 @@ def evaluate(
             decision_code=decision_code,
         )
 
+    # --- MANUAL-Modus: Nur R3 läuft — alle anderen Regeln = NOOP ---
+    if autonomy_level == "MANUAL":
+        return DecisionEvent(
+            decision=Decision(action="NOOP", valid_until=valid_until),
+            reason="MANUAL_MODE",
+            trigger=trigger,
+            params={"autonomy_level": autonomy_level},
+            state_snapshot=state,
+            decision_code="NOOP_MANUAL_MODE",
+        )
+
     # --- R2 Autarkie ---
     r2_vote = r2_autarky.evaluate(
         state,
@@ -115,8 +135,14 @@ def evaluate(
     )
     if r2_vote is not None:
         votes.append(r2_vote)
+        # SEMI-Modus: R2-STOP-Entscheidungen werden blockiert (nur R3 darf stoppen)
+        effective_action = (
+            "NOOP"
+            if autonomy_level == "SEMI" and r2_vote.action == "STOP"
+            else r2_vote.action
+        )
         return DecisionEvent(
-            decision=Decision(action=r2_vote.action, valid_until=valid_until),
+            decision=Decision(action=effective_action, valid_until=valid_until),
             reason=r2_vote.reason,
             trigger=trigger,
             params={
@@ -124,9 +150,12 @@ def evaluate(
                 "soc_soft_min_pct": config.soc_soft_min_pct,
                 "soc_hard_min_pct": config.soc_hard_min_pct,
                 "grid_import_w": state.grid_import_w,
+                "max_grid_import_w": config.max_grid_import_w,
+                "pv_forecast_kw": state.pv_forecast_kw,
+                "autonomy_level": autonomy_level,
             },
             state_snapshot=state,
-            decision_code=f"{r2_vote.action}_R2_{r2_vote.reason}",
+            decision_code=f"{effective_action}_R2_{r2_vote.reason}",
         )
 
     # --- R4 Forecast ---
@@ -156,6 +185,8 @@ def evaluate(
             params={
                 "blocks_since_last_change": blocks_since_last_change,
                 "deadband_hold_blocks": config.deadband_hold_blocks,
+                "min_runtime_blocks": config.min_runtime_blocks,
+                "min_pause_blocks": config.min_pause_blocks,
                 "last_action": last_action,
             },
             state_snapshot=state,
@@ -189,6 +220,10 @@ def evaluate(
             "surplus_kw": state.surplus_kw,
             "surplus_min_kw": config.surplus_min_kw,
             "energy_price_ct_kwh": state.energy_price_ct_kwh,
+            "pv_forecast_kw": state.pv_forecast_kw,
+            "pv_power_w": state.pv_power_w,
+            "house_load_w": state.house_load_w,
+            "battery_soc_pct": state.battery_soc_pct,
         },
         state_snapshot=state,
         decision_code=f"{r1_vote.action}_R1_{r1_vote.reason}",

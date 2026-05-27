@@ -238,11 +238,13 @@ rule_lab:
             {% set temp_max    = states('input_number.lab_max_chip_temp_c') | float(85) %}
             {% set grid        = states('input_number.lab_grid_import_w') | float(0) %}
             {% set max_grid    = states('input_number.lab_max_grid_import_w') | float(500) %}
-            {% if   code == 'START_R1_SURPLUS_OK'          %} Überschuss {{ surplus | round(1) }} kW · Schwelle {{ surplus_min | round(1) }} kW
-            {% elif code == 'NOOP_R1_INSUFFICIENT_SURPLUS' %} Überschuss {{ surplus | round(1) }} kW · Schwelle {{ surplus_min | round(1) }} kW
-            {% elif code == 'STOP_R2_SOC_HARD_MIN'         %} Batterie {{ soc | round(0) }}% · Minimum {{ soc_hard | round(0) }}%
-            {% elif code == 'NOOP_R2_SOC_SOFT_MIN'         %} Batterie {{ soc | round(0) }}% · Eco-Start {{ soc_soft | round(0) }}%
-            {% elif code == 'STOP_R2_GRID_IMPORT_EXCEEDED' %} Netzbezug {{ grid | round(0) }} W · Limit {{ max_grid | round(0) }} W
+            {% set forecast    = states('sensor.pv_forecast_kw') | float(-1) %}
+            {% set fc_str      = '· Prognose: ' ~ forecast | round(1) ~ ' kW' if forecast >= 0 else '' %}
+            {% if   code == 'START_R1_SURPLUS_OK'          %} Überschuss {{ surplus | round(1) }} kW · Schwelle {{ surplus_min | round(1) }} kW {{ fc_str }}
+            {% elif code == 'NOOP_R1_INSUFFICIENT_SURPLUS' %} Überschuss {{ surplus | round(1) }} kW · Schwelle {{ surplus_min | round(1) }} kW {{ fc_str }}
+            {% elif code == 'STOP_R2_SOC_HARD_MIN'         %} Batterie {{ soc | round(0) }}% · Minimum {{ soc_hard | round(0) }}% {{ fc_str }}
+            {% elif code == 'NOOP_R2_SOC_SOFT_MIN'         %} Batterie {{ soc | round(0) }}% · Eco-Start {{ soc_soft | round(0) }}% {{ fc_str }}
+            {% elif code == 'STOP_R2_GRID_IMPORT_EXCEEDED' %} Netzbezug {{ grid | round(0) }} W · Limit {{ max_grid | round(0) }} W {{ fc_str }}
             {% elif code == 'STOP_R3_OVERTEMP'             %} Chip-Temp {{ temp | round(0) }}°C · Limit {{ temp_max | round(0) }}°C
             {% elif code == 'STOP_R3_COMM_TIMEOUT'         %} Heartbeat überfällig
             {% else                                        %} —

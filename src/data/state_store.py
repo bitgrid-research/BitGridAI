@@ -25,8 +25,9 @@ class StateStore:
             (block_id, window_start, window_end, pv_power_w, house_load_w,
              grid_import_w, battery_soc_pct, miner_temp_c, miner_heartbeat_age_sec,
              surplus_kw, quality, missing_signals_json,
-             grid_export_w, energy_price_ct_kwh, pv_forecast_kw)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             grid_export_w, miner_power_w, heizstab_power_w,
+             energy_price_ct_kwh, pv_forecast_kw)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 state.block_id,
@@ -42,6 +43,8 @@ class StateStore:
                 state.quality,
                 json.dumps(list(state.missing_signals)),
                 state.grid_export_w,
+                state.miner_power_w,
+                state.heizstab_power_w,
                 state.energy_price_ct_kwh,
                 state.pv_forecast_kw,
             ),
@@ -80,6 +83,8 @@ class StateStore:
             quality=row["quality"],
             missing_signals=tuple(json.loads(row["missing_signals_json"] or "[]")),
             grid_export_w=row.get("grid_export_w"),
+            miner_power_w=row.get("miner_power_w"),
+            heizstab_power_w=row.get("heizstab_power_w"),
             energy_price_ct_kwh=row.get("energy_price_ct_kwh"),
             pv_forecast_kw=row.get("pv_forecast_kw"),
         )

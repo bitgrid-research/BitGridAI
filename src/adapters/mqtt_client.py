@@ -25,9 +25,13 @@ class MqttClient:
         port: int = 1883,
         user: str = "",
         password: str = "",
+        on_connect_cb: Callable[[], None] | None = None,
+        on_disconnect_cb: Callable[[str | None], None] | None = None,
     ) -> None:
         self._host = host
         self._port = port
+        self._on_connect_cb = on_connect_cb
+        self._on_disconnect_cb = on_disconnect_cb
         self._client = mqtt.Client()
         if user:
             self._client.username_pw_set(user, password)
@@ -60,13 +64,18 @@ class MqttClient:
     ) -> None:
         if rc == 0:
             log.info("MQTT verbunden mit %s:%s", self._host, self._port)
-            for topic in self._subscriptions:
+            for topic in list(self._subscriptions):
                 client.subscribe(topic)
+            if self._on_connect_cb is not None:
+                self._on_connect_cb()
         else:
             log.error("MQTT Verbindungsfehler: rc=%s", rc)
 
     def _on_disconnect(self, client: mqtt.Client, userdata: object, rc: int) -> None:
+        reason = f"rc={rc}" if rc != 0 else None
         log.warning("MQTT getrennt (rc=%s)", rc)
+        if self._on_disconnect_cb is not None:
+            self._on_disconnect_cb(reason)
 
     def _on_message(
         self, client: mqtt.Client, userdata: object, msg: mqtt.MQTTMessage

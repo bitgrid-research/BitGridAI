@@ -480,6 +480,18 @@ views:
                                         margin-top:8px;font-style:italic">
                               Block&nbsp;${blockDisplay}${blockTime ? ' &middot; ' + blockTime : ''} &middot; 10-min Fenster
                             </div>` : ''}
+                            ${(() => {
+                              const llm = states['sensor.bg_runner_explain_short']?.state;
+                              if (!llm || llm === 'unavailable' || llm === 'unknown') return '';
+                              return `<div style="margin-top:10px;padding-top:8px;
+                                                  border-top:1px solid var(--divider-color)">
+                                <div style="font-size:0.55rem;color:var(--secondary-text-color);opacity:0.45;
+                                            text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px">
+                                  LLM Output</div>
+                                <div style="font-size:0.82rem;color:var(--secondary-text-color);
+                                            line-height:1.4;font-style:italic">${llm}</div>
+                              </div>`;
+                            })()}
                           </div>
                         </div>
                       </div>`;
@@ -2003,16 +2015,16 @@ views:
                             <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
                             <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
                           </div>`;
-                        const pv     = states['input_number.pv_kwh_ytd']?.state ?? '0';
-                        const mine   = states['input_number.mining_kwh_ytd']?.state ?? '0';
-                        const imp    = states['input_number.grid_import_ytd']?.state ?? '0';
-                        const exp    = states['input_number.grid_export_ytd']?.state ?? '0';
-                        const house  = states['input_number.house_kwh_ytd']?.state ?? '0';
-                        const hz     = states['input_number.heizstab_kwh_ytd']?.state ?? '0';
-                        const up     = states['input_number.mining_uptime_ytd_h']?.state ?? '0';
-                        const ecoY   = states['input_number.miner_eco_ytd_h']?.state ?? '0';
-                        const stdY   = states['input_number.miner_standard_ytd_h']?.state ?? '0';
-                        const supY   = states['input_number.miner_super_ytd_h']?.state ?? '0';
+                        const pv     = (parseFloat(states['input_number.pv_kwh_ytd']?.state ?? '0')    + parseFloat(states['sensor.pv_energy_daily']?.state ?? '0')).toFixed(3);
+                        const mine   = (parseFloat(states['input_number.mining_kwh_ytd']?.state ?? '0') + parseFloat(states['sensor.mining_energy_daily']?.state ?? '0')).toFixed(3);
+                        const imp    = (parseFloat(states['input_number.grid_import_ytd']?.state ?? '0')+ parseFloat(states['sensor.grid_import_daily']?.state ?? '0')).toFixed(3);
+                        const exp    = (parseFloat(states['input_number.grid_export_ytd']?.state ?? '0')+ parseFloat(states['sensor.grid_export_daily']?.state ?? '0')).toFixed(3);
+                        const house  = (parseFloat(states['input_number.house_kwh_ytd']?.state ?? '0') + parseFloat(states['sensor.house_energy_daily']?.state ?? '0')).toFixed(3);
+                        const hz     = (parseFloat(states['input_number.heizstab_kwh_ytd']?.state ?? '0') + parseFloat(states['sensor.heizstab_energy_daily']?.state ?? '0')).toFixed(3);
+                        const up     = (parseFloat(states['input_number.mining_uptime_ytd_h']?.state ?? '0') + parseFloat(states['sensor.miner_uptime_today_h']?.state ?? '0')).toFixed(2);
+                        const ecoY   = (parseFloat(states['input_number.miner_eco_ytd_h']?.state ?? '0')      + parseFloat(states['sensor.miner_eco_hours_today']?.state ?? '0')).toFixed(2);
+                        const stdY   = (parseFloat(states['input_number.miner_standard_ytd_h']?.state ?? '0') + parseFloat(states['sensor.miner_standard_hours_today']?.state ?? '0')).toFixed(2);
+                        const supY   = (parseFloat(states['input_number.miner_super_ytd_h']?.state ?? '0')    + parseFloat(states['sensor.miner_super_hours_today']?.state ?? '0')).toFixed(2);
                         const pvN    = parseFloat(pv);
                         const expN   = parseFloat(exp);
                         const pvSelfUse = (!isNaN(pvN) && !isNaN(expN) && pvN > 0) ? Math.max(0, pvN - expN) : null;
@@ -2077,7 +2089,7 @@ views:
                       const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
                       const d = sd.toISOString().slice(0, 10);
                       settleThs[d] = (hr / 1e12).toFixed(2);
-                      const btcVal = parseFloat(tx.changed_balance);
+                      const btcVal = parseFloat(tx.amount ?? tx.changed_balance);
                       if (btcVal > 0) btcMap[d] = btcVal;
                     });
                     (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
@@ -2692,3 +2704,463 @@ views:
                   - entity: input_boolean.recording_active
                     name: "Aufnahme (10-Min Snapshots auf MQTT)"
                     icon: mdi:record-circle
+
+  # ═══════════════════════════════════════════════════════
+  # STUDIE B — Baseline (Gruppe B)
+  # Zeigt das aufgeschlüsselte DecisionEvent: Wirkung,
+  # Datenbasis, Optionen — deterministischer ExplainAgent,
+  # kein LLM-Text.
+  # ═══════════════════════════════════════════════════════
+  - title: Studie B
+    path: studie-baseline
+    icon: mdi:clipboard-list-outline
+    cards:
+      - type: vertical-stack
+        cards:
+
+          # ── Hamster + strukturiertes Decision-Event ──────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            tap_action:
+              action: none
+            custom_fields:
+              status: >
+                [[[
+                  const code      = states['sensor.bg_runner_code']?.state       || '—';
+                  const effect    = states['sensor.bg_runner_effect']?.state     || '—';
+                  const dataBasis = states['sensor.bg_runner_data_basis']?.state  || '—';
+                  const options   = states['sensor.bg_runner_options']?.state    || '—';
+                  const blockId   = states['sensor.bg_runner_block_id']?.state   || '';
+                  const pv        = parseFloat(states['sensor.pv_power_w']?.state || 0);
+
+                  let weather, wColor;
+                  if      (pv > 4000) { weather = '☀️ Volle Sonne';       wColor = '#FFC107'; }
+                  else if (pv > 2000) { weather = '⛅ Teilweise bewölkt'; wColor = '#90A4AE'; }
+                  else if (pv > 500)  { weather = '☁️ Bewölkt';           wColor = '#78909C'; }
+                  else                { weather = '🌙 Kein PV';            wColor = '#5C6BC0'; }
+
+                  const isStart  = code.startsWith('START');
+                  const isSafety = code.startsWith('STOP_R3');
+                  const imgSrc   = isSafety ? 'bithamster_sleep.png'
+                                 : isStart  ? 'bithamster_eco.png'
+                                 :             'bithamster_wait.png';
+
+                  const h = new Date().getHours();
+                  const greeting = h < 5  ? 'Gute Nacht'
+                                 : h < 11 ? 'Guten Morgen'
+                                 : h < 14 ? 'Guten Mittag'
+                                 : h < 18 ? 'Guten Nachmittag'
+                                 : h < 22 ? 'Guten Abend'
+                                 :          'Gute Nacht';
+
+                  const blockTime = blockId.length >= 16 ? blockId.slice(11, 16) : '';
+
+                  const sec = (label, text) =>
+                    (text && text !== '—' && text !== '')
+                    ? `<div style="margin-top:6px;">
+                        <div style="font-size:0.55rem;color:var(--secondary-text-color);
+                                    opacity:0.45;text-transform:uppercase;
+                                    letter-spacing:0.05em;margin-bottom:2px;">${label}</div>
+                        <div style="font-size:0.88rem;color:var(--secondary-text-color);
+                                    line-height:1.4;">${text}</div>
+                      </div>`
+                    : '';
+
+                  return `<div style="padding:4px 0">
+                    <div style="font-size:0.8rem;font-weight:700;
+                                color:var(--primary-text-color);margin-bottom:10px;">
+                      BitGridAI &nbsp;·&nbsp;
+                      <span style="color:var(--secondary-text-color);font-weight:400;">${greeting}</span>
+                    </div>
+                    <div style="display:flex;gap:12px;align-items:flex-start">
+                      <img src="/local/${imgSrc}?v=20260426"
+                           style="width:120px;height:120px;border-radius:50%;flex-shrink:0;
+                                  object-fit:cover;border:2px solid var(--divider-color)">
+                      <div style="flex:1">
+                        <div style="font-size:1rem;font-weight:700;
+                                    color:${wColor};margin-bottom:8px;">${weather}</div>
+                        <div style="font-size:0.55rem;color:var(--secondary-text-color);
+                                    opacity:0.45;text-transform:uppercase;
+                                    letter-spacing:0.05em;margin-bottom:2px;">Wirkung</div>
+                        <div style="font-size:0.95rem;font-weight:500;
+                                    color:var(--primary-text-color);line-height:1.4;">${effect}</div>
+                        ${sec('Datenbasis', dataBasis)}
+                        ${sec('Optionen', options)}
+                        ${blockId
+                          ? `<div style="font-size:0.65rem;color:var(--disabled-text-color);
+                                         margin-top:10px;font-style:italic;">
+                               Block ${blockId.slice(0,10)} · ${blockTime} · 10-min Fenster
+                             </div>`
+                          : ''}
+                      </div>
+                    </div>
+                  </div>`;
+                ]]]
+            styles:
+              card:
+                - background: >
+                    [[[
+                      const code = states['sensor.bg_runner_code']?.state || '';
+                      if (code.startsWith('STOP_R3')) return '#0c0f18';
+                      if (code.startsWith('START'))   return '#091410';
+                      return '#10141f';
+                    ]]]
+                - border-radius: 12px
+                - padding: 12px 16px
+                - border: >
+                    [[[
+                      const code = states['sensor.bg_runner_code']?.state || '';
+                      if (code.startsWith('STOP_R3')) return '1px solid rgba(244,67,54,0.4)';
+                      if (code.startsWith('START'))   return '1px solid #4CAF50';
+                      return '1px solid #757575';
+                    ]]]
+                - text-align: left
+              grid:
+                - grid-template-areas: '"status"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                status:
+                  - width: 100%
+                  - text-align: left
+                  - justify-self: start
+
+          # ── Energie-Status ───────────────────────────────────────────────────
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.battery_soc_pct
+                name: Akku
+                icon: mdi:battery-charging
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (v <= 20) return '#F44336';
+                          if (v <= 40) return '#f59e0b';
+                          return '#4CAF50';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+              - type: custom:button-card
+                entity: sensor.pv_power_w
+                name: PV
+                icon: mdi:solar-power
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (!v || v === 0) return 'var(--secondary-text-color)';
+                          if (v < 800)  return '#f59e0b';
+                          if (v < 1600) return '#8BC34A';
+                          return '#4CAF50';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+              - type: custom:button-card
+                entity: sensor.grid_export_w
+                name: Überschuss
+                icon: mdi:transmission-tower-export
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (!v || v === 0) return 'var(--secondary-text-color)';
+                          return '#4CAF50';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+              - type: custom:button-card
+                entity: sensor.grid_import_w
+                name: Netzbezug
+                icon: mdi:transmission-tower-import
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (!v || v === 0) return 'var(--secondary-text-color)';
+                          if (v <= 100) return '#4CAF50';
+                          if (v <= 500) return '#f59e0b';
+                          return '#5C6BC0';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+
+          # ── Decision-Verlauf (24h) ────────────────────────────────────────────
+          - type: history-graph
+            title: "Entscheidungsverlauf (24h)"
+            hours_to_show: 24
+            refresh_interval: 120
+            entities:
+              - entity: sensor.bg_runner_code
+                name: Entscheidung
+
+  # ═══════════════════════════════════════════════════════
+  # STUDIE E — Experimental (Gruppe E)
+  # Gleiche Struktur wie Studie B, aber im Hamster-Block
+  # erscheint der LLM-Text (bg_runner_explain_short) statt
+  # der aufgeschlüsselten Felder.
+  # ═══════════════════════════════════════════════════════
+  - title: Studie E
+    path: studie-experimental
+    icon: mdi:text-box-check-outline
+    cards:
+      - type: vertical-stack
+        cards:
+
+          # ── Hamster + LLM-Erklärung ─────────────────────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            tap_action:
+              action: none
+            custom_fields:
+              status: >
+                [[[
+                  const code        = states['sensor.bg_runner_code']?.state          || '—';
+                  const explainText = states['sensor.bg_runner_explain_short']?.state || '—';
+                  const blockId     = states['sensor.bg_runner_block_id']?.state      || '';
+                  const pv          = parseFloat(states['sensor.pv_power_w']?.state   || 0);
+
+                  let weather, wColor;
+                  if      (pv > 4000) { weather = '☀️ Volle Sonne';       wColor = '#FFC107'; }
+                  else if (pv > 2000) { weather = '⛅ Teilweise bewölkt'; wColor = '#90A4AE'; }
+                  else if (pv > 500)  { weather = '☁️ Bewölkt';           wColor = '#78909C'; }
+                  else                { weather = '🌙 Kein PV';            wColor = '#5C6BC0'; }
+
+                  const isStart  = code.startsWith('START');
+                  const isSafety = code.startsWith('STOP_R3');
+                  const imgSrc   = isSafety ? 'bithamster_sleep.png'
+                                 : isStart  ? 'bithamster_eco.png'
+                                 :             'bithamster_wait.png';
+
+                  const h = new Date().getHours();
+                  const greeting = h < 5  ? 'Gute Nacht'
+                                 : h < 11 ? 'Guten Morgen'
+                                 : h < 14 ? 'Guten Mittag'
+                                 : h < 18 ? 'Guten Nachmittag'
+                                 : h < 22 ? 'Guten Abend'
+                                 :          'Gute Nacht';
+
+                  const blockTime = blockId.length >= 16 ? blockId.slice(11, 16) : '';
+
+                  return `<div style="padding:4px 0">
+                    <div style="font-size:0.8rem;font-weight:700;
+                                color:var(--primary-text-color);margin-bottom:10px;">
+                      BitGridAI &nbsp;·&nbsp;
+                      <span style="color:var(--secondary-text-color);font-weight:400;">${greeting}</span>
+                    </div>
+                    <div style="display:flex;gap:12px;align-items:flex-start">
+                      <img src="/local/${imgSrc}?v=20260426"
+                           style="width:120px;height:120px;border-radius:50%;flex-shrink:0;
+                                  object-fit:cover;border:2px solid var(--divider-color)">
+                      <div style="flex:1">
+                        <div style="font-size:1rem;font-weight:700;
+                                    color:${wColor};margin-bottom:10px;">${weather}</div>
+                        <div style="font-size:0.95rem;color:var(--primary-text-color);
+                                    line-height:1.6;font-weight:400;">${explainText}</div>
+                        ${blockId
+                          ? `<div style="font-size:0.65rem;color:var(--disabled-text-color);
+                                         margin-top:12px;font-style:italic;">
+                               Block ${blockId.slice(0,10)} · ${blockTime} · 10-min Fenster
+                             </div>`
+                          : ''}
+                      </div>
+                    </div>
+                  </div>`;
+                ]]]
+            styles:
+              card:
+                - background: >
+                    [[[
+                      const code = states['sensor.bg_runner_code']?.state || '';
+                      if (code.startsWith('STOP_R3')) return '#0c0f18';
+                      if (code.startsWith('START'))   return '#091410';
+                      return '#10141f';
+                    ]]]
+                - border-radius: 12px
+                - padding: 12px 16px
+                - border: >
+                    [[[
+                      const code = states['sensor.bg_runner_code']?.state || '';
+                      if (code.startsWith('STOP_R3')) return '1px solid rgba(244,67,54,0.4)';
+                      if (code.startsWith('START'))   return '1px solid #4CAF50';
+                      return '1px solid #757575';
+                    ]]]
+                - text-align: left
+              grid:
+                - grid-template-areas: '"status"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                status:
+                  - width: 100%
+                  - text-align: left
+                  - justify-self: start
+
+          # ── Energie-Status ───────────────────────────────────────────────────
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.battery_soc_pct
+                name: Akku
+                icon: mdi:battery-charging
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (v <= 20) return '#F44336';
+                          if (v <= 40) return '#f59e0b';
+                          return '#4CAF50';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+              - type: custom:button-card
+                entity: sensor.pv_power_w
+                name: PV
+                icon: mdi:solar-power
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (!v || v === 0) return 'var(--secondary-text-color)';
+                          if (v < 800)  return '#f59e0b';
+                          if (v < 1600) return '#8BC34A';
+                          return '#4CAF50';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+              - type: custom:button-card
+                entity: sensor.grid_export_w
+                name: Überschuss
+                icon: mdi:transmission-tower-export
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (!v || v === 0) return 'var(--secondary-text-color)';
+                          return '#4CAF50';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+              - type: custom:button-card
+                entity: sensor.grid_import_w
+                name: Netzbezug
+                icon: mdi:transmission-tower-import
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (!v || v === 0) return 'var(--secondary-text-color)';
+                          if (v <= 100) return '#4CAF50';
+                          if (v <= 500) return '#f59e0b';
+                          return '#5C6BC0';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+
+          # ── Decision-Verlauf (24h) ────────────────────────────────────────────
+          - type: history-graph
+            title: "Entscheidungsverlauf (24h)"
+            hours_to_show: 24
+            refresh_interval: 120
+            entities:
+              - entity: sensor.bg_runner_code
+                name: Entscheidung

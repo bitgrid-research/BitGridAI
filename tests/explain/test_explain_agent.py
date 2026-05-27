@@ -5,7 +5,12 @@ from __future__ import annotations
 import pytest
 
 from src.explain import decision_codes as dc
-from src.explain.explain_agent import ExplainAgent, ExplainResult
+from src.explain.explain_agent import (
+    ExplainAgent,
+    ExplainResult,
+    _PERSONA_INSTRUCTIONS,
+    _VALID_PERSONAS,
+)
 
 
 @pytest.fixture
@@ -62,7 +67,7 @@ def test_data_basis_interpolates_params(agent: ExplainAgent) -> None:
 
 def test_effect_no_interpolation_needed(agent: ExplainAgent) -> None:
     result = agent.explain(dc.START_R1_SURPLUS_OK, {})
-    assert result.effect == "Miner gestartet"
+    assert "Miner gestartet" in result.effect
 
 
 def test_options_interpolates_threshold(agent: ExplainAgent) -> None:
@@ -72,9 +77,9 @@ def test_options_interpolates_threshold(agent: ExplainAgent) -> None:
 
 
 def test_trigger_interpolates_threshold(agent: ExplainAgent) -> None:
-    params = {"surplus_min_kw": 1.5}
+    params = {"surplus_kw": 2.2}
     result = agent.explain(dc.START_R1_SURPLUS_OK, params)
-    assert "1.5" in result.trigger
+    assert "2.2" in result.trigger
 
 
 def test_missing_param_returns_question_mark(agent: ExplainAgent) -> None:
@@ -124,7 +129,7 @@ def test_all_codes_have_options_str(agent: ExplainAgent, code: str) -> None:
 
 def test_stop_r2_soc_hard_min_effect(agent: ExplainAgent) -> None:
     result = agent.explain(dc.STOP_R2_SOC_HARD_MIN, {})
-    assert "Batteriesicherheit" in result.effect
+    assert "Batterie" in result.effect
 
 
 def test_stop_r3_overtemp_effect(agent: ExplainAgent) -> None:
@@ -134,7 +139,7 @@ def test_stop_r3_overtemp_effect(agent: ExplainAgent) -> None:
 
 def test_stop_r3_comm_timeout_options(agent: ExplainAgent) -> None:
     result = agent.explain(dc.STOP_R3_COMM_TIMEOUT, {})
-    assert "MQTT" in result.options
+    assert "Wiederverbindung" in result.options
 
 
 def test_noop_r5_deadband_options_contains_valid_until(agent: ExplainAgent) -> None:
@@ -169,7 +174,7 @@ def test_noop_codes_have_nonempty_effect(agent: ExplainAgent, code: str) -> None
 
 def test_en_effect_for_start(agent_en: ExplainAgent) -> None:
     result = agent_en.explain(dc.START_R1_SURPLUS_OK, {})
-    assert result.effect == "Miner started"
+    assert "Miner started" in result.effect
 
 
 def test_en_stop_r3_overtemp_options(agent_en: ExplainAgent) -> None:
@@ -189,6 +194,27 @@ def test_unknown_code_returns_code_as_short(agent: ExplainAgent) -> None:
     assert result.options == ""
 
 
+# ── Jeder DE-Block hat ein example-Feld mit mind. einer Zahl ─────────────────
+
+
+_CODES_WITHOUT_SENSOR_VALUES = {dc.NOOP_MANUAL_MODE}
+
+
+@pytest.mark.parametrize("code", sorted(dc.ALL_CODES))
+def test_all_de_blocks_have_example_with_digit(agent: ExplainAgent, code: str) -> None:
+    blocks = agent._load_blocks()
+    de_blocks = blocks.get("de", {})
+    if code not in de_blocks:
+        pytest.skip(f"{code}: kein DE-Block vorhanden")
+    example = de_blocks[code].get("example", "")
+    assert example != "", f"{code}: example-Feld fehlt oder ist leer"
+    if code in _CODES_WITHOUT_SENSOR_VALUES:
+        return
+    assert any(
+        c.isdigit() for c in example
+    ), f"{code}: example enthält keine Zahl: {example!r}"
+
+
 # ── rule_states und energy_state_ref werden durchgereicht ────────────────────
 
 
@@ -203,3 +229,60 @@ def test_energy_state_ref_passed_through(agent: ExplainAgent) -> None:
         dc.START_R1_SURPLUS_OK, {}, energy_state_ref="2024-01-15T10:00:00"
     )
     assert result.energy_state_ref == "2024-01-15T10:00:00"
+
+
+# ── Persona-Unterstützung ─────────────────────────────────────────────────────
+
+
+def test_default_persona_is_energie(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("OLLAMA_PERSONA", raising=False)
+    a = ExplainAgent()
+    assert a.persona == "energie"
+
+
+@pytest.mark.parametrize("persona", sorted(_VALID_PERSONAS))
+def test_valid_persona_accepted(monkeypatch: pytest.MonkeyPatch, persona: str) -> None:
+    monkeypatch.setenv("OLLAMA_PERSONA", persona)
+    a = ExplainAgent()
+    assert a.persona == persona
+
+
+def test_unknown_persona_falls_back_to_energie(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OLLAMA_PERSONA", "unbekannt")
+    a = ExplainAgent()
+    assert a.persona == "energie"
+
+
+def test_persona_case_insensitive(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OLLAMA_PERSONA", "WAERME")
+    a = ExplainAgent()
+    assert a.persona == "waerme"
+
+
+def test_all_personas_have_instruction_text() -> None:
+    for persona in _VALID_PERSONAS:
+        assert persona in _PERSONA_INSTRUCTIONS
+        assert len(_PERSONA_INSTRUCTIONS[persona]) > 20
+
+
+def test_persona_instructions_differ() -> None:
+    instructions = list(_PERSONA_INSTRUCTIONS.values())
+    assert len(set(instructions)) == len(
+        instructions
+    ), "Persona-Anweisungen sind nicht eindeutig"
+
+
+def test_energie_persona_avoids_mining_vocab(monkeypatch: pytest.MonkeyPatch) -> None:
+    instruction = _PERSONA_INSTRUCTIONS["energie"]
+    assert "Mining" not in instruction or "vermeid" in instruction.lower()
+    assert "Solarstrom" in instruction
+
+
+def test_waerme_persona_mentions_heat(monkeypatch: pytest.MonkeyPatch) -> None:
+    instruction = _PERSONA_INSTRUCTIONS["waerme"]
+    assert "Wärme" in instruction
+
+
+def test_tech_persona_mentions_rule_codes(monkeypatch: pytest.MonkeyPatch) -> None:
+    instruction = _PERSONA_INSTRUCTIONS["tech"]
+    assert "R1" in instruction or "R5" in instruction

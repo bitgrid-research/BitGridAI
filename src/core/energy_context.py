@@ -73,13 +73,21 @@ def build_energy_state(
     3. Füllt fehlende Werte mit sicheren Defaults (hohe Temp → R3 greift).
     4. Bewertet Datenqualität: ok / warn / error.
     """
-    # house_load_w ableiten wenn nicht direkt gemessen
-    if raw.house_load_w is None:
-        raw.house_load_w = _derive_house_load(raw)
+    # house_load_w ableiten wenn nicht direkt gemessen (raw nicht mutieren)
+    house_load_w = (
+        raw.house_load_w if raw.house_load_w is not None else _derive_house_load(raw)
+    )
 
     # Fehlende Pflichtfelder bestimmen (via Signal-Enum, keine Magic Strings)
     missing: list[str] = [
-        sig.value for sig in REQUIRED_SIGNALS if getattr(raw, sig.value, None) is None
+        sig.value
+        for sig in REQUIRED_SIGNALS
+        if (
+            house_load_w
+            if sig == Signal.HOUSE_LOAD_W
+            else getattr(raw, sig.value, None)
+        )
+        is None
     ]
 
     if missing:
@@ -87,7 +95,7 @@ def build_energy_state(
             "error" if len(missing) > 2 else "warn"
         )
         pv = raw.pv_power_w or 0.0
-        load = raw.house_load_w or 0.0
+        load = house_load_w or 0.0
         grid = raw.grid_import_w or 0.0
         soc = raw.battery_soc_pct or 0.0
         temp = raw.miner_temp_c or 999.0  # hohe Temp → R3 greift sicher
@@ -95,7 +103,7 @@ def build_energy_state(
     else:
         quality = "ok"
         pv = raw.pv_power_w  # type: ignore[assignment]
-        load = raw.house_load_w  # type: ignore[assignment]
+        load = house_load_w  # type: ignore[assignment]
         grid = raw.grid_import_w  # type: ignore[assignment]
         soc = raw.battery_soc_pct  # type: ignore[assignment]
         temp = raw.miner_temp_c  # type: ignore[assignment]
