@@ -157,7 +157,7 @@ Ziel: Das komplette System in Home Assistant ohne physische Hardware abbilden.
   - reaktive Neuberechnung bei Input-Änderungen
   - sofortiger Safety-Stop
   - Override-Lifecycle (aktivieren, ablaufen, deaktivieren)
-- `src/ha/config/ui-lovelace.yaml`
+- `src/ha/config/bitgrid-dashboard.yaml`
   - Decision/State um Explainability erweitert
   - Override-Control-Card integriert
   - Simulation-Action-Card für manuelle Tests und SH-Szenarien

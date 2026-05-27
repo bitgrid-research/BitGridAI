@@ -347,3 +347,5 @@ recordings/
 *.csv
 reports/
 scripts/deploy_ha_paramiko.py
+temp_data
+.github/copilot-instructions.md

@@ -21,7 +21,7 @@
 | # | Aufgabe | Status | Datei(en) | Notiz |
 |---|---|---|---|---|
 | K1 | **ProductionRunner** — Orchestriert Adapter, BlockScheduler, RuleEngine, ExplainAgent, EventStore, API in einem Entrypoint | ✅ | `src/runner.py` | asyncio Block-Loop + uvicorn FastAPI |
-| K2 | **Dashboard Frontend** — Studie-Dashboards in HA Lovelace | ✅ | `src/ha/config/ui-lovelace.yaml`, `src/ha/config/packages/bitgridai.yaml` | 2 neue Views: Studie B (strukturiert) + Studie E (LLM-Text); Runner publiziert Explain-Felder via MQTT |
+| K2 | **Dashboard Frontend** — Studie-Dashboards in HA Lovelace | ✅ | `src/ha/config/bitgrid-dashboard.yml`, `src/ha/config/packages/bitgridai.yaml` | 2 neue Views: Studie B (strukturiert) + Studie E (LLM-Text); Runner publiziert Explain-Felder via MQTT |
 | K3 | **LLM-Integration** — ExplainAgent ist rein YAML-template-basiert; Thesis beschreibt Ollama-Inferenz | ✅ | `src/explain/explain_agent.py` | Ollama-Fallback via urllib; `OLLAMA_HOST` env-var; 5s Timeout; Template-Fallback |
 
 ---
@@ -89,7 +89,7 @@
 | 2026-05-24 | H1 `GET /timeline`, H2 `GET /explain/{id}` in api.py ergänzt | Claude Code |
 | 2026-05-24 | M2 Config-Validation in config_loader.py implementiert | Claude Code |
 | 2026-05-24 | N2 `.env.example` mit Runner-Variablen erweitert | Claude Code |
-| 2026-05-24 | K2 HA-Dashboards Studie B + E in `ui-lovelace.yaml` ergänzt; `packages/bitgridai.yaml` neu; Runner publiziert Explain-MQTT | Claude Code |
+| 2026-05-24 | K2 HA-Dashboards Studie B + E in `bitgrid-dashboard.yaml` ergänzt; `packages/bitgridai.yaml` neu; Runner publiziert Explain-MQTT | Claude Code |
 | 2026-05-24 | K3 Ollama-Fallback in ExplainAgent; H3/H4/H5 in api.py | Claude Code |
 | 2026-05-24 | M1 Override-Persistence; M3 POST /preview; M4 GET+POST /autonomy | Claude Code |
 | 2026-05-24 | N1 HealthMonitor ConnState-Tracking; MqttClient on_connect/disconnect callbacks; /health Adapter-Status | Claude Code |

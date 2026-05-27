@@ -1,4 +1,3 @@
-
 # Loads default set of integrations. Do not remove.
 default_config:
 
@@ -20,7 +19,7 @@ lovelace:
   dashboards:
     bitgrid-ai:
       mode: yaml
-      filename: ui-lovelace.yaml
+      filename: bitgrid-dashboard.yaml
       title: BitGridAI
       icon: mdi:view-dashboard
       show_in_sidebar: true
