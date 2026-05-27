@@ -200,7 +200,7 @@ Home Assistant ist ein **Peer im LAN**, kein Kontrollzentrum.
 |-------|--------|
 | `docker-compose.yml` | HA-Stack lokal starten |
 | `config/configuration.yaml` | HA-Hauptkonfiguration |
-| `config/ui-lovelace.yaml` | Dashboard-Definition |
+| `config/bitgrid-dashboard.yaml` | Dashboard-Definition |
 
 HA kommuniziert ausschließlich über **MQTT** (lesen) und **REST** (begrenzte Schreibzugriffe auf `/override`).
 

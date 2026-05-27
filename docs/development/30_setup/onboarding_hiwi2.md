@@ -13,7 +13,7 @@ src/
 │   └──             ← Liest DecisionEvents, schreibt keine Entscheidungen
 └── ha/
     └── config/
-        └── ui-lovelace.yaml   ← HA-Dashboard (Lovelace)
+        └── bitgrid-dashboard.yaml   ← HA-Dashboard (Lovelace)
 ```
 
 **Kernprinzip das du verstehen musst:**
@@ -44,7 +44,7 @@ cd src/ha && docker compose up -d
 
 ## Erste Aufgaben (Vorschlag)
 
-1. **HA-Dashboard verstehen** — `src/ha/config/ui-lovelace.yaml` lesen, Dashboard im Browser erkunden
+1. **HA-Dashboard verstehen** — `src/ha/config/bitgrid-dashboard.yaml` lesen, Dashboard im Browser erkunden
 2. **DecisionEvent verstehen** — `src/core/models.py` lesen: was steckt in einem Event?
 3. **Explain-Schicht erkunden** — `src/explain/` lesen: wie werden Events in Text übersetzt?
 4. **Persona-Anforderungen ableiten** — Welche Infos braucht ein Heimnutzer vs. ein Forscher? (`₿itsy-Home` vs. `₿itsy-Study`)
