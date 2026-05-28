@@ -1,5 +1,109 @@
 bitcoin:
 
+  # ── Systemstatus: externe Datenquellen + CSV-Log ─────────────────────────────
+  template:
+    - binary_sensor:
+        - name: "bitcoin_data_healthy"
+          unique_id: bitcoin_data_healthy
+          device_class: connectivity
+          icon: mdi:bitcoin
+          state: >-
+            {{ states('sensor.bitcoin_block_height') not in ['unknown', 'unavailable']
+               and states('sensor.bitcoin_block_height') | int(0) > 0 }}
+
+        - name: "shelly_miner1_healthy"
+          unique_id: shelly_miner1_healthy
+          device_class: connectivity
+          icon: mdi:power-plug
+          state: >-
+            {{ states('switch.shellyplugsg3_dcb4d9c5567c') not in ['unknown', 'unavailable'] }}
+
+        - name: "shelly_miner2_healthy"
+          unique_id: shelly_miner2_healthy
+          device_class: connectivity
+          icon: mdi:power-plug
+          state: >-
+            {{ states('switch.shellyplugsg3_d0cf13d86254') not in ['unknown', 'unavailable'] }}
+
+        - name: "shelly_fan_healthy"
+          unique_id: shelly_fan_healthy
+          device_class: connectivity
+          icon: mdi:fan
+          state: >-
+            {{ states('switch.shellyplugsg3_dcb4d9c6b46c') not in ['unknown', 'unavailable'] }}
+
+        - name: "sma_healthy"
+          unique_id: sma_healthy
+          device_class: connectivity
+          icon: mdi:solar-panel
+          state: >-
+            {{ states('sensor.sn_3012953672_pv_power') not in ['unknown', 'unavailable'] }}
+
+    - sensor:
+        - name: "bitcoin_data_status"
+          unique_id: bitcoin_data_status
+          icon: mdi:bitcoin
+          state: >-
+            {% if states('sensor.bitcoin_block_height') in ['unknown', 'unavailable'] %}
+              Keine Verbindung
+            {% elif states('sensor.bitcoin_block_height') | int(0) == 0 %}
+              Kein Wert
+            {% else %}
+              OK
+            {% endif %}
+
+        - name: "mining_log_status"
+          unique_id: mining_log_status
+          icon: mdi:database-clock
+          state: >-
+            {% set today = now().strftime('%Y-%m-%d') %}
+            {% set log = states('input_text.mining_daily_log') %}
+            {% if log in ['unknown', 'unavailable', ''] %}
+              Leer
+            {% elif log.startswith(today) %}
+              Heute OK
+            {% else %}
+              {% set top_date = log.split(',')[0] %}
+              Letzter: {{ top_date[5:] }}
+            {% endif %}
+
+        - name: "shelly_miner1_status"
+          unique_id: shelly_miner1_status
+          icon: mdi:power-plug
+          state: >-
+            {% set s = states('switch.shellyplugsg3_dcb4d9c5567c') %}
+            {% if s in ['unknown', 'unavailable'] %}
+              Offline
+            {% elif s == 'on' %}
+              AN
+            {% else %}
+              AUS
+            {% endif %}
+
+        - name: "shelly_miner2_status"
+          unique_id: shelly_miner2_status
+          icon: mdi:power-plug
+          state: >-
+            {% set s = states('switch.shellyplugsg3_d0cf13d86254') %}
+            {% if s in ['unknown', 'unavailable'] %}
+              Offline
+            {% elif s == 'on' %}
+              AN
+            {% else %}
+              AUS
+            {% endif %}
+
+        - name: "sma_status"
+          unique_id: sma_status
+          icon: mdi:solar-panel
+          state: >-
+            {% set s = states('sensor.sn_3012953672_pv_power') %}
+            {% if s in ['unknown', 'unavailable'] %}
+              Offline
+            {% else %}
+              {{ s | float(0) | int }} W
+            {% endif %}
+
   # ── Bitcoin Network Difficulty ────────────────────────────────────────────────
   # Unabhängig vom Miner-Status — pollt direkt von blockchain.info.
   # Wert in T (Trillion = 1e12). Beispiel: 135.59 T

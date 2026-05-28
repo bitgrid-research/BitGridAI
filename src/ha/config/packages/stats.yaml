@@ -878,20 +878,14 @@ stats:
             datetime: "{{ states('input_datetime.last_stop_at') }}"
 
   # ── CSV-History-Sensor: liest mining_log.csv für UI (>10 Einträge) ──────────────
+  # Einzeiliges Python: YAML >- würde Newlines zu Leerzeichen falten → IndentationError
   command_line:
     - sensor:
         name: "mining_log_history"
         unique_id: mining_log_history
         scan_interval: 3600
         command: >-
-          python3 -c "
-          import json
-          try:
-              with open('/config/mining_log.csv') as f:
-                  lines = [l.strip() for l in f if l.strip() and not l.startswith('date')]
-              print(json.dumps({'rows': '|'.join(lines[-60:])}))
-          except Exception as e:
-              print(json.dumps({'rows': '', 'error': str(e)}))"
+          python3 -c "import json; f=open('/config/mining_log.csv'); lines=[l.strip() for l in f if l.strip() and not l.startswith('date')]; f.close(); print(json.dumps({'rows': '|'.join(lines[-60:])}))"
         value_template: "OK"
         json_attributes:
           - rows
@@ -899,19 +893,20 @@ stats:
   # ── Langzeit-Archiv: täglich in CSV schreiben ─────────────────────────────────
   # Datei: /config/mining_log.csv (auf dem HA-Host, nie von Deploy überschrieben)
   # Format: date,start,stop,total_h,eco_h,std_h,speed_h,kwh,diff
-  # Variablen aus dem Service-Call werden als Umgebungsvariablen übergeben ($ENTRY).
+  # HA 2026.x: shell_command data-Variablen nur als Jinja2 {{ ENTRY }} nutzbar,
+  # nicht mehr als Shell-Env-Variablen ($ENTRY).
   shell_command:
     mining_log_append: >-
       bash -c 'f=/config/mining_log.csv;
       [ ! -f "$f" ] && echo "date,start,stop,total_h,eco_h,std_h,speed_h,kwh,diff" > "$f";
-      d=$(echo "$ENTRY" | cut -d, -f1);
-      grep -q "^$d," "$f" || printf "%s\n" "$ENTRY" >> "$f"'
+      d=$(echo "{{ ENTRY }}" | cut -d, -f1);
+      grep -q "^$d," "$f" || printf "%s\n" "{{ ENTRY }}" >> "$f"'
     stats_monthly_log_append: >-
       bash -c 'f=/config/stats_monthly.csv;
       [ ! -f "$f" ] && echo "year,month,pv_kwh,pv_selfuse_kwh,export_kwh,import_kwh,house_kwh,heizstab_kwh,miner_kwh,uptime_h,eco_h,standard_h,speed_h" > "$f";
-      printf "%s\n" "$ENTRY" >> "$f"'
+      printf "%s\n" "{{ ENTRY }}" >> "$f"'
     stats_yearly_log_append: >-
       bash -c 'f=/config/stats_yearly.csv;
       [ ! -f "$f" ] && echo "year,pv_kwh,pv_selfuse_kwh,export_kwh,import_kwh,house_kwh,heizstab_kwh,miner_kwh,uptime_h,eco_h,standard_h,speed_h" > "$f";
-      printf "%s\n" "$ENTRY" >> "$f"'
+      printf "%s\n" "{{ ENTRY }}" >> "$f"'
 
