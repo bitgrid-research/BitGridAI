@@ -1,5 +1,7 @@
 # 27 – Evaluationsrahmen
 
+[TODO: Studiendesign ausarbeiten]
+
 Dieses Kapitel beschreibt den **Evaluationsrahmen**, mit dem BitGridAI im Rahmen einer empirischen Studie untersucht wird.
 Ziel ist es, die Wirkung eines **Explainability-Layers** im Vergleich zu einer **Baseline-UI** systematisch zu bewerten.
 
