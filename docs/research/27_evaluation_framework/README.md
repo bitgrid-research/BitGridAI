@@ -1,76 +1,70 @@
-# 27 – Evaluationsrahmen
+# 27 – Evaluationsrahmen (v2)
 
-[TODO: Studiendesign ausarbeiten]
+Dieses Kapitel beschreibt den **Evaluationsrahmen**, mit dem BitGridAI in einer empirischen Studie untersucht wird.
+Ziel ist es, die Wirkung des **Erklärformats** auf das **Regelverständnis** von Laiennutzern zu bewerten: Eine **adaptive, persona-basierte LLM-Erklärung** wird mit einem **statischen, regelbasierten Erklärtext** verglichen.
 
-Dieses Kapitel beschreibt den **Evaluationsrahmen**, mit dem BitGridAI im Rahmen einer empirischen Studie untersucht wird.
-Ziel ist es, die Wirkung eines **Explainability-Layers** im Vergleich zu einer **Baseline-UI** systematisch zu bewerten.
-
-Der Fokus liegt auf dem **Verständnis der Entscheidungslogik**, dem **Vertrauen der Nutzer**, der **wahrgenommenen Kontrolle**, der **kognitiven Belastung** sowie auf **energiebezogenen Effekten**.
+Der Fokus liegt auf dem **Verständnis der Entscheidungslogik** (mentales Modell), insbesondere auf dem zentralen Lernziel **energiebewusstes Steuern statt Einspeisen**. Ergänzend werden die **Angemessenheit manueller Eingriffe** (Override) und optional **Vertrauen** betrachtet.
 
 &nbsp;
 
 ## Überblick
 
-Die Evaluation ist als **Between-Subjects-Studie** angelegt, in der zwei Systemvarianten verglichen werden:
+Die Evaluation ist als **Between-Subjects-Studie** in einer **Einzelsitzung** angelegt, in der zwei Erklärformate verglichen werden. Beide Varianten zeigen einen Erklärbereich — der Unterschied liegt allein in der *Art* der Erklärung:
 
-* **Baseline-Variante**: Anzeige von Zuständen und Aktionen ohne erklärenden Layer
-* **Explainability-Variante**: Anzeige von Zuständen inklusive erklärender Begründungen gemäß Kapitel 24
+* **Gruppe A – statisch**: regelbasiert erzeugte, für alle Probanden wortgleiche Erklärtexte (kein Sprachmodell).
+* **Gruppe B – adaptiv**: natürlichsprachliche Erklärung eines lokalen LLM, deren **Persona automatisch an das Vorwissensniveau** des Probanden angepasst wird (Laie → technisch versiert), gemäß Kapitel 24.
 
-Die Studie kombiniert **technische Messungen** mit **nutzerzentrierten Erhebungsmethoden**.
+Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score) mit **qualitativen Erhebungen** (offene Fragen, Override-Aufgabe).
 
 &nbsp;
 
 ## Evaluationsziele
 
-Die Evaluation verfolgt fünf zentrale Ziele:
-
-1. **Erklärbarkeit messen**
-   Verstehen Nutzer die Gründe für Start-, Stop- und NOOP-Entscheidungen?
-2. **Vertrauen und Kontrolle bewerten**
-   Fühlen sich Nutzer informiert und handlungsfähig?
-3. **Kognitive Belastung erfassen**
-   Erhöhen erklärende Informationen die mentale Belastung?
-4. **Energiebezogene Effekte analysieren**
-   Unterscheiden sich Energieverbrauch und Schaltverhalten zwischen den Varianten?
-5. **Transparenz validieren**
-   Sind UI-Begründungen und Systemlogs konsistent?
+1. **Regelverständnis messen (primär)**
+   Verstehen Nutzer die Regeln (R1–R5) und ihr Zusammenspiel — und erkennen sie, dass das System Eigenverbrauch dem Einspeisen vorzieht?
+2. **Override-Angemessenheit bewerten (sekundär)**
+   Greifen Nutzer mit besserem Verständnis angemessener in die Automatik ein (kein vorschnelles Disuse, kein blindes Misuse)?
+3. **Vertrauen erfassen (optional)**
+   Unterscheidet sich das Vertrauen in die Automatisierung zwischen den Bedingungen?
+4. **Transparenz validieren (Systemcheck)**
+   Sind UI-Begründungen und Systemlogs (DecisionEvents) konsistent?
 
 &nbsp;
 
 ## Studiendesign
 
-* **Design:** Between-Subjects (Baseline vs. Explainability)
-* **Stichprobe:** N = 10, heterogener technischer Hintergrund
-* **Dauer:** 10 Tage
-* **Täglicher Aufwand:** ca. 10–15 Minuten
-* **Methodischer Ansatz:** Daily Diary Method kombiniert mit Abschlussinterviews
+* **Design:** Between-Subjects (Gruppe A statisch vs. Gruppe B adaptiv)
+* **Stichprobe:** N ≥ 20 (≈ 10 je Gruppe), randomisiert, heterogener Hintergrund; Ausschluss von Domänen-Experten (Energie-/Regelungstechnik, Informatik) zur Vermeidung eines Ceiling-Effekts
+* **Format:** Einzelsitzung, ca. 60–90 Minuten pro Proband (kein Längsschnitt)
+* **Statistik:** t-Test für unabhängige Stichproben (einseitig) auf den Regelverständnis-Score; berichtet mit Cohen's *d* und 95 %-KI
+* **Standardisierung:** identische, gescriptete Szenario-Abfolge für alle Probanden — eingespielt per **Replay** des deterministischen Regelkerns
 
-### Aufgaben
+### Sitzungsablauf
 
-Die Teilnehmenden bearbeiten wiederkehrende Aufgaben, u. a.:
-
-* Prüfung von PV- und Speicherzuständen
-* Einordnung von Start- und Stop-Entscheidungen
-* Bewertung von NOOP-Situationen
-* Test manueller Overrides
+1. Einwilligung
+2. Demographie + **Vorwissens-Einstufung** (bestimmt in Gruppe B die Persona-Stufe)
+3. Erwartungs-Vorfrage (naives Ausgangsmodell, qualitativ)
+4. Lern-/Szenariophase am Dashboard (gescriptete Sequenz: R2-START bei Überschuss, R3-STOP, R4-Prognose, R5-Hysterese, Prioritätskonflikt)
+5. **Offene Verständnisfragen** (primäre Erhebung, audioaufgezeichnet)
+6. Override-Aufgabe + Abschluss (optional Trust, Verständlichkeits-Feedback)
 
 ### Setting
 
 * Smart-Home-Laborumgebung
-* Simulierte PV- und Batterieprofile
-* Reale, steuerbare Lasten
+* Simulierte PV- und Batterieprofile (Szenario-Fixtures via Replay)
+* Reale, steuerbare Last (ASIC-Miner als synthetisches Testobjekt)
 
 &nbsp;
 
 ## Methodik
 
-| Ebene                    | Methode                                     | Ziel                                            |
-| ------------------------ | ------------------------------------------- | ----------------------------------------------- |
-| **Systemebene**          | Logging, Energiemessung, Variantenvergleich | Analyse von Schaltverhalten und Energieeffekten |
-| **Nutzerebene**          | Daily Diary, Leitfaden-Interviews           | Verständnis, Vertrauen, mentale Modelle         |
-| **Interaktionsebene**    | Task-basierte Tests, Override-Szenarien     | Klarheit, Task-Zeit, Fehlannahmen               |
-| **Qualitative Analyse**  | Inhaltsanalyse                              | Muster in Wahrnehmung und Vertrauen             |
-| **Quantitative Analyse** | Standardisierte Skalen und Metriken         | Vergleichbarkeit der Bedingungen                |
+| Ebene                    | Methode                                      | Ziel                                              |
+| ------------------------ | -------------------------------------------- | ------------------------------------------------- |
+| **Nutzerebene**          | Offene Verständnisfragen (Rater-kodiert)     | Regelverständnis / mentales Modell (primäre AV)   |
+| **Interaktionsebene**    | Override-Aufgabe, Verhaltensspur im Log      | Angemessenheit manueller Eingriffe                |
+| **Qualitative Analyse**  | Thematische Analyse (Braun & Clarke)         | Muster und Fehlvorstellungen im Verständnis       |
+| **Quantitative Analyse** | t-Test (Cohen's *d*, KI), Interrater-κ       | Gruppenvergleich des Regelverständnis-Scores      |
+| **Systemebene**          | Logging, Log↔UI-Abgleich                     | Transparenz-/Konsistenzprüfung                    |
 
 &nbsp;
 
@@ -80,65 +74,62 @@ Die Teilnehmenden bearbeiten wiederkehrende Aufgaben, u. a.:
 
 * x86 Mini-PC mit lokalem System (z. B. UmbrelOS)
 * Tablet als Smart-Home-Dashboard
-* Steuerbare ASIC-Lasten (z. B. Bitaxe Gamma, NerdQaxe++)
+* Steuerbare ASIC-Last (z. B. Bitaxe Gamma, NerdQaxe++)
 * Messsteckdosen (z. B. Shelly Plug S Gen3)
 
 ### Software & KI
 
-* Lokales Dashboard in zwei UI-Varianten
-* Lokales LLM via Ollama
-* Quantisierte Modelle (z. B. Phi-3 Mini, Mistral 7B)
+* Lokales Dashboard in zwei UI-Varianten (statisch / adaptiv)
+* Lokales LLM via Ollama (**Qwen3:8b**), persona-adaptiver Prompt
+* Deterministisches Template-Fallback bei LLM-Nichtverfügbarkeit
 
 ### Datenbasis
 
-* Simulierte PV- und Batterieprofile
-* Reale Telemetriedaten der Lasten
-* Strukturierte JSON-Logs (Entscheidungen, Gründe, Overrides)
+* Gescriptete PV-/Batterie-Szenarien (Replay-Fixtures, für alle Probanden identisch)
+* Reale Telemetriedaten der Last
+* Strukturierte Logs (DecisionEvents: Entscheidungen, Gründe, Overrides)
 
 &nbsp;
 
 ## Erhebungsinstrumente
 
-* **Daily Diary**: kurze tägliche Einträge über Wahrnehmung und Verständnis
-* **Leitfaden-Interviews**: Vertiefung von Vertrauen und mentalen Modellen
-* **Fragebögen**:
-
-  * SUS (Usability)
-  * NASA-TLX (kognitive Belastung)
-* **Systemlogs**: Entscheidungen, Regelzustände, Energieflüsse
+* **Offene Verständnisfragen** (primär): „Wie funktioniert das System? · Erwartungen? · wichtigste Einflussregeln? · Warum Steuern statt Einspeisen?“ — audioaufgezeichnet, transkribiert
+* **Demographie + Vorwissens-Einstufung**: Technikaffinität, Energie-/EMS-Vorwissen, Bitcoin-Vorwissen, Wärme-Nutzungsabsicht (steuert zugleich die Persona in Gruppe B)
+* **Override-Aufgabe**: beobachtetes Eingriffsverhalten + mündliche Begründung
+* **Optionale Skalen (einmalig)**: Automation Trust Scale; ergänzend SUS, Raw NASA-TLX
+* **Systemlogs**: DecisionEvents, Override-Ereignisse, Template-Fallback-Vorkommen
 
 &nbsp;
 
 ## Bewertungsmetriken
 
-| Kategorie            | Metrik                            | Beschreibung                                 |
-| -------------------- | --------------------------------- | -------------------------------------------- |
-| **Explainability**   | Verständnisrate (%)               | Anteil korrekt erklärter Entscheidungen      |
-| **Trust & Control**  | Vertrauen (Likert), Override-Rate | Subjektives Vertrauen und Eingriffsverhalten |
-| **Cognitive Load**   | NASA-TLX Score                    | Mentale Belastung pro Sitzung                |
-| **Usability**        | SUS, Task-Zeit                    | Subjektive Usability und objektive Dauer     |
-| **Energy Behaviour** | Schaltungen/Tag, Laufzeiten       | Systemruhe und Steuerungsverhalten           |
-| **Transparency**     | Log-Konsistenz                    | Übereinstimmung Log ↔ UI                     |
+| Kategorie             | Metrik                                  | Beschreibung                                                        |
+| --------------------- | --------------------------------------- | ------------------------------------------------------------------ |
+| **Regelverständnis**  | Score 0–12 (Rubrik, 2 Rater, κ)         | Korrektheit der erklärten Regeln + Konzept „Steuern statt Einspeisen“ (primäre AV) |
+| **Override**          | Angemessenheit (kategorial)             | angemessen / Disuse-Tendenz / Misuse-Tendenz; Verständnis der R3-Sperre |
+| **Vertrauen (opt.)**  | Automation Trust Scale (Likert)         | subjektives Vertrauen, einmalig                                    |
+| **Usability (opt.)**  | SUS, NASA-TLX                           | Usability bzw. kognitive Belastung, einmalig                       |
+| **Transparenz**       | Log-Konsistenz                          | Übereinstimmung DecisionEvent ↔ UI-Begründung                      |
 
 &nbsp;
 
 ## Auswertung & Dokumentation
 
-* Vergleich der beiden UI-Varianten über alle Metriken
-* Triangulation aus Logs, Diaries, Interviews und Fragebögen
-* Dokumentation der Ergebnisse in internen Dashboards oder Notebooks
+* Primäranalyse: t-Test (Gruppe A vs. B) auf den Regelverständnis-Score; Voraussetzungsprüfung (Shapiro-Wilk, Levene → Welch/Mann-Whitney als Fallback)
+* **p-Werte nie isoliert** — stets mit Effektgröße (Cohen's *d*), 95 %-KI und N
+* Qualitativ: thematische Analyse der offenen Antworten und Override-Begründungen
+* Triangulation aus Verständnis-Score, qualitativen Themen und Verhaltensspur
+* Dokumentation in internen Notebooks; Rohdaten- und Log-Export für Auditierbarkeit
 
-Der Schwerpunkt liegt auf der **Erklärqualität** und deren Einfluss auf Vertrauen, Verständnis und Nutzung.
+Der Schwerpunkt liegt auf der **Erklärqualität** und ihrem Einfluss auf das **Regelverständnis**.
 
 &nbsp;
 
 ## Zusammenfassung
 
-Der Evaluationsrahmen verbindet **technische Systemdaten** mit **nutzerzentrierter Evaluation**, um die Wirkung eines erklärenden KI-Layers empirisch zu untersuchen.
+Der Evaluationsrahmen vergleicht in einer Einzelsitzung ein **statisches** mit einem **persona-adaptiven** Erklärformat und misst primär das **Regelverständnis** von Laiennutzern. Er verbindet die quantitative Hauptmessung mit qualitativen Erhebungen und einer beobachteten Override-Aufgabe — und liefert damit eine fundierte Grundlage für die Bewertung transparenter, lokal ausgeführter Energiemanagementsysteme.
 
-Er liefert damit eine fundierte Grundlage für die Bewertung transparenter, lokal ausgeführter Energiemanagementsysteme.
-
-
+&nbsp;
 
 ---
 
