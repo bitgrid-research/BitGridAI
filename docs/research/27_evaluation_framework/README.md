@@ -1,4 +1,4 @@
-# 27 – Evaluationsrahmen (v2)
+# 27 – Evaluationsrahmen (v1)
 
 Dieses Kapitel beschreibt den **Evaluationsrahmen**, mit dem BitGridAI in einer empirischen Studie untersucht wird.
 Ziel ist es, die Wirkung des **Erklärformats** auf das **Regelverständnis** von Laiennutzern zu bewerten: Eine **adaptive, persona-basierte LLM-Erklärung** wird mit einem **statischen, regelbasierten Erklärtext** verglichen.
@@ -11,8 +11,8 @@ Der Fokus liegt auf dem **Verständnis der Entscheidungslogik** (mentales Modell
 
 Die Evaluation ist als **Between-Subjects-Studie** in einer **Einzelsitzung** angelegt, in der zwei Erklärformate verglichen werden. Beide Varianten zeigen einen Erklärbereich — der Unterschied liegt allein in der *Art* der Erklärung:
 
-* **Gruppe A – statisch**: regelbasiert erzeugte, für alle Probanden wortgleiche Erklärtexte (kein Sprachmodell).
-* **Gruppe B – adaptiv**: natürlichsprachliche Erklärung eines lokalen LLM, deren **Persona automatisch an das Vorwissensniveau** des Probanden angepasst wird (Laie → technisch versiert), gemäß Kapitel 24.
+* **Gruppe A – statisch** (n = 5): regelbasiert erzeugte, für alle Probanden wortgleiche Erklärtexte (kein Sprachmodell).
+* **Gruppe B – adaptiv** (n = 15): natürlichsprachliche LLM-Erklärung in einer von **drei Persona-Stufen** (Laie → technisch versiert), je n = 5, gemäß Kapitel 24.
 
 Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score) mit **qualitativen Erhebungen** (offene Fragen, Override-Aufgabe).
 
@@ -34,9 +34,9 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 ## Studiendesign
 
 * **Design:** Between-Subjects (Gruppe A statisch vs. Gruppe B adaptiv)
-* **Stichprobe:** N ≥ 20 (≈ 10 je Gruppe), randomisiert, heterogener Hintergrund; Ausschluss von Domänen-Experten (Energie-/Regelungstechnik, Informatik) zur Vermeidung eines Ceiling-Effekts
+* **Stichprobe:** N = 20 — Gruppe A (statisch) n = 5, Gruppe B (adaptiv) n = 15 in 3 Persona-Stufen à n = 5; heterogener Hintergrund; Ausschluss von Domänen-Experten (Energie-/Regelungstechnik, Informatik) zur Vermeidung eines Ceiling-Effekts
 * **Format:** Einzelsitzung, ca. 60–90 Minuten pro Proband (kein Längsschnitt)
-* **Statistik:** t-Test für unabhängige Stichproben (einseitig) auf den Regelverständnis-Score; berichtet mit Cohen's *d* und 95 %-KI
+* **Statistik:** t-Test für unabhängige Stichproben (einseitig) auf den Regelverständnis-Score; Primärvergleich Gruppe A vs. **gepoolte** Gruppe B (Cohen's *d*, 95 %-KI). Der Persona-Vergleich (n = 5 je Stufe) bleibt **explorativ/deskriptiv**.
 * **Standardisierung:** identische, gescriptete Szenario-Abfolge für alle Probanden — eingespielt per **Replay** des deterministischen Regelkerns
 
 ### Sitzungsablauf
