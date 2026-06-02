@@ -1,10 +1,25 @@
 # 20.2.4.3 - SD-WQ3 - Ethik, Datenschutz und Analyseplan
 
-Diese Seite sichert die methodische Qualität und Nachvollziehbarkeit ab.
+## Ethik & Datenschutz
 
-## TODO
+- **Laboraufbau mit synthetischer Last** — es werden keine realen Energieverbrauchsdaten der Probanden erhoben.
+- **Einwilligung:** schriftlich vor Sitzungsbeginn; jederzeitiges Rücktrittsrecht ohne Angabe von Gründen; Aufwandsentschädigung.
+- **Audioaufnahmen** der offenen Fragen werden transkribiert und anschließend gelöscht; alle Daten vor der Auswertung pseudonymisiert.
+- Ethikantrag-Status vor Rekrutierungsbeginn klären.
 
-- Datenschutzkonzept und Einwilligungsprozess beschreiben.
-- Risiken, Abbruchkriterien und Schutzmassnahmen dokumentieren.
-- Qualitative und quantitative Auswertungsstrategie definieren.
-- Kriterien für Ergebnisqualität und Limitationen vorab festlegen.
+## Analyseplan
+
+- **Quantitativ:** t-Test auf den Regelverständnis-Score (s. 2024b), stets mit Effektgröße (Cohen's *d*), 95 %-KI und N — **p-Werte nie isoliert**.
+- **Qualitativ:** thematische Analyse (Braun & Clarke) der offenen Antworten und Override-Begründungen.
+- **Triangulation:** Verständnis-Score, qualitative Themen, Verhaltensspur aus den Logs.
+
+## Ergebnisqualität & Limitationen (vorab)
+
+- Bei N ≈ 20 ist die Power begrenzt — zuverlässig nur **große** Effekte (d ≈ 0,8 → Power ~55 %; 80 % erst ab d ≈ 1,1). Nicht-signifikante Befunde sind nicht als Effektgleichheit zu deuten.
+- Auditierbarkeit durch vollständigen Rohdaten- und Log-Export; blinde Doppelbewertung (Interrater-κ).
+
+---
+
+> **Nächster Schritt:** Zurück zu **[20.2.4 - SD-CONTEXT](./README.md)**
+>
+> Zurück zur **[Hauptübersicht](../../../../README.md)**
