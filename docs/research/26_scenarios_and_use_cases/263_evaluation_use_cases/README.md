@@ -15,8 +15,8 @@ Die Use Cases verfolgen drei Ziele:
    Abstrakte Szenarien werden in überprüfbare Aufgaben übersetzt.
 2. **Vergleichbarkeit der Evaluation**
    Alle Teilnehmenden bearbeiten identische Aufgaben.
-3. **Messbarkeit von Explainability-Effekten**
-   Unterschiede zwischen erklärendem und nicht erklärendem System werden sichtbar.
+3. **Messbarkeit des Erklärformat-Effekts**
+   Unterschiede zwischen statischem und adaptivem (persona-basiertem) Erklärformat werden sichtbar.
 
 &nbsp;
 
@@ -93,39 +93,39 @@ Teilnehmende lösen einen manuellen Override aus.
 
 &nbsp;
 
-## Diary- und Interview-Prompts
+## Offene Verständnisfragen und Override-Aufgabe
 
-Zur qualitativen Erfassung von Wahrnehmung und mentalen Modellen werden begleitende Methoden eingesetzt.
+Zur qualitativen Erfassung des mentalen Modells werden in der Einzelsitzung offene Fragen gestellt und eine Override-Aufgabe beobachtet.
 
-### Diary-Prompts (Beispiele)
+### Offene Verständnisfragen (primäre Erhebung)
 
-* „Gab es einen Moment, in dem du nicht verstanden hast, warum das System nichts getan hat?“
-* „Wann hattest du das Gefühl, dem System vertrauen zu können?“
-* „Welche Information hat dir gefehlt?“
+* „Wie funktioniert das System – was tut es und wozu?“
+* „Was hattest du erwartet, und was hat dich überrascht?“
+* „Erkläre die wichtigsten Regeln, nach denen das System entscheidet.“
+* „Warum lässt das System die Last bei Sonnenüberschuss laufen, statt einzuspeisen?“
 
-### Interview-Prompts (Beispiele)
+### Override-Aufgabe (sekundär)
 
-* „Wie würdest du das Entscheidungsverhalten des Systems jemand anderem erklären?“
-* „Wann hättest du dir mehr Kontrolle gewünscht – und warum?“
-* „Welche Entscheidung erschien dir besonders nachvollziehbar oder unklar?“
+* Beobachtung des Eingriffsverhaltens in einer gescripteten Situation (inklusive einer nicht überschreibbaren R3-Sicherheitsentscheidung).
+* Mündliche Begründung des Eingriffs bzw. Nicht-Eingriffs.
 
 &nbsp;
 
-## Vergleich: Baseline vs. Explainability
+## Vergleich: statisch (Gruppe A) vs. adaptiv (Gruppe B)
 
-Die Use Cases werden in zwei Varianten geprüft:
+Die Use Cases werden in zwei Erklärformaten geprüft — beide zeigen einen Erklärbereich, der Unterschied liegt allein in der Art der Erklärung:
 
-* **Baseline-System**
-  Anzeige von Zuständen und Aktionen ohne strukturierte Begründung.
-* **Explainability-System**
-  Anzeige von Zuständen **inklusive erklärender Bausteine** gemäß Kapitel 24.
+* **Gruppe A – statisch**
+  regelbasiert erzeugte, für alle Probanden wortgleiche Erklärtexte (kein Sprachmodell).
+* **Gruppe B – adaptiv**
+  persona-basierte LLM-Erklärung, an das Vorwissensniveau angepasst, gemäß Kapitel 24.
 
 Verglichen werden u. a.:
 
-* Verständnisgrad,
-* wahrgenommene Sicherheit,
-* Vertrauen in Systementscheidungen,
-* Interventionsbedarf.
+* Regelverständnis (primär),
+* Angemessenheit manueller Eingriffe (Override),
+* optional Vertrauen,
+* Log↔UI-Konsistenz.
 
 &nbsp;
 
