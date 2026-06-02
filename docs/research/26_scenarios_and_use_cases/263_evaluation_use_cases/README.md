@@ -1,4 +1,4 @@
-# 26.3 – Use Cases für Tests & Evaluation
+# 26.3 – Use Cases für Tests & Evaluation (v1)
 
 Dieses Unterkapitel beschreibt **konkrete Use Cases**, die im Rahmen der Evaluation systematisch geprüft werden.
 Die Use Cases sind direkt aus den Szenarien der Kapitel **26.1 (Smart Home)** und **26.2 (Automotive)** abgeleitet und dienen als **Brücke zwischen Nutzungssituation, Interface und Messkriterien**.
