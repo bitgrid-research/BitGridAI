@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -32,6 +33,10 @@ from typing import Any
 
 from src.sim.replay import replay_scenario
 from src.sim.scenario_loader import load_csv_scenario
+
+# Heizstab-Entity (AC ELWA 2) enthält die lokale Geräte-IP → nicht hardcoden.
+# Lokal über BITGRID_HEIZSTAB_ENTITY (in .env) setzen; leer → Heizstab übersprungen.
+_HEIZSTAB_ENTITY = os.environ.get("BITGRID_HEIZSTAB_ENTITY", "").strip()
 
 _ENTITIES: dict[str, str] = {
     "sensor.pv_power_w": "pv_power_w",
@@ -41,8 +46,9 @@ _ENTITIES: dict[str, str] = {
     "sensor.battery_soc_pct": "battery_soc_pct",
     "sensor.miner_total_power_w": "miner_power_w",
     "sensor.miner_max_chip_temp_c": "miner_temp_c",
-    "sensor.ac_elwa_2_192_168_178_58_power1_solar": "heizstab_power_w",
 }
+if _HEIZSTAB_ENTITY:
+    _ENTITIES[_HEIZSTAB_ENTITY] = "heizstab_power_w"
 
 _BLOCK_MIN = 10
 

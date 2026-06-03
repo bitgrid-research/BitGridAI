@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import os
 import sqlite3
 import sys
 from datetime import datetime, timedelta, timezone
@@ -32,16 +33,22 @@ from typing import Any
 # Entity-ID → Spaltenname
 # ---------------------------------------------------------------------------
 
+# Die Heizstab-Entity (AC ELWA 2) enthält die lokale Geräte-IP im Entity-Namen
+# → nicht hardcoden. Lokal über BITGRID_HEIZSTAB_ENTITY (in .env) setzen.
+# Leer gelassen: Heizstab wird beim Export übersprungen (optionales Feld).
+_HEIZSTAB_ENTITY = os.environ.get("BITGRID_HEIZSTAB_ENTITY", "").strip()
+
 ENTITIES: dict[str, str] = {
-    "sensor.pv_power_w":                              "pv_power_w",
-    "sensor.house_load_w":                            "house_load_w",
-    "sensor.grid_import_w":                           "grid_import_w",
-    "sensor.grid_export_w":                           "grid_export_w",
-    "sensor.battery_soc_pct":                         "battery_soc_pct",
-    "sensor.miner_total_power_w":                     "miner_power_w",
-    "sensor.miner_max_chip_temp_c":                   "miner_temp_c",
-    "sensor.ac_elwa_2_192_168_178_58_power1_solar":   "heizstab_power_w",
+    "sensor.pv_power_w": "pv_power_w",
+    "sensor.house_load_w": "house_load_w",
+    "sensor.grid_import_w": "grid_import_w",
+    "sensor.grid_export_w": "grid_export_w",
+    "sensor.battery_soc_pct": "battery_soc_pct",
+    "sensor.miner_total_power_w": "miner_power_w",
+    "sensor.miner_max_chip_temp_c": "miner_temp_c",
 }
+if _HEIZSTAB_ENTITY:
+    ENTITIES[_HEIZSTAB_ENTITY] = "heizstab_power_w"
 
 BLOCK_MIN = 10  # Blockgröße in Minuten
 
@@ -52,12 +59,16 @@ BLOCK_MIN = 10  # Blockgröße in Minuten
 
 def floor_to_block(ts: datetime) -> datetime:
     """Rundet einen Zeitstempel auf den nächsten 10-Minuten-Block ab."""
-    return ts.replace(minute=(ts.minute // BLOCK_MIN) * BLOCK_MIN, second=0, microsecond=0)
+    return ts.replace(
+        minute=(ts.minute // BLOCK_MIN) * BLOCK_MIN, second=0, microsecond=0
+    )
 
 
 def detect_schema(conn: sqlite3.Connection) -> str:
     """Gibt 'new' zurück wenn states_meta existiert, sonst 'old'."""
-    tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    tables = {
+        r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    }
     return "new" if "states_meta" in tables else "old"
 
 
@@ -69,7 +80,9 @@ def fetch_raw(
     end_ts: float,
 ) -> dict[str, list[tuple[datetime, float]]]:
     """Lädt Rohwerte für alle Entities als {col_name: [(ts, value), ...]}."""
-    results: dict[str, list[tuple[datetime, float]]] = {col: [] for col in ENTITIES.values()}
+    results: dict[str, list[tuple[datetime, float]]] = {
+        col: [] for col in ENTITIES.values()
+    }
 
     if schema == "new":
         # HA >= 2023: states_meta trennt entity_id von states
@@ -110,8 +123,12 @@ def fetch_raw(
               AND state NOT IN ('unknown', 'unavailable', '')
         """.format(",".join("?" * len(entity_ids)))
 
-        start_str = datetime.fromtimestamp(start_ts, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-        end_str = datetime.fromtimestamp(end_ts, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        start_str = datetime.fromtimestamp(start_ts, tz=timezone.utc).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        end_str = datetime.fromtimestamp(end_ts, tz=timezone.utc).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         params = entity_ids + [start_str, end_str]
 
         for entity_id, raw_state, ts_str in conn.execute(q, params):
@@ -121,7 +138,9 @@ def fetch_raw(
                 continue
             col = ENTITIES.get(entity_id)
             if col:
-                dt = datetime.fromisoformat(ts_str.replace(" ", "T")).replace(tzinfo=timezone.utc)
+                dt = datetime.fromisoformat(ts_str.replace(" ", "T")).replace(
+                    tzinfo=timezone.utc
+                )
                 results[col].append((dt, value))
 
     return results
@@ -198,16 +217,23 @@ CSV_COLUMNS = [
 ]
 
 
-def write_csv(rows: list[dict[str, Any]], out_path: Path, start: datetime, end: datetime) -> None:
+def write_csv(
+    rows: list[dict[str, Any]], out_path: Path, start: datetime, end: datetime
+) -> None:
     filled = sum(
-        1 for r in rows
+        1
+        for r in rows
         if r.get("pv_power_w") is not None and r.get("battery_soc_pct") is not None
     )
     with open(out_path, "w", newline="", encoding="utf-8") as f:
-        f.write(f"# Exportiert aus HA-History: {start.date()} – {(end - timedelta(seconds=1)).date()}\n")
+        f.write(
+            f"# Exportiert aus HA-History: {start.date()} – {(end - timedelta(seconds=1)).date()}\n"
+        )
         f.write(f"# Blöcke gesamt: {len(rows)}  davon befüllt: {filled}\n")
         f.write("# " + ", ".join(CSV_COLUMNS) + "\n")
-        writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS, extrasaction="ignore", lineterminator="\n")
+        writer = csv.DictWriter(
+            f, fieldnames=CSV_COLUMNS, extrasaction="ignore", lineterminator="\n"
+        )
         for row in rows:
             out = {col: "" for col in CSV_COLUMNS}
             out["timestamp_offset_min"] = row["timestamp_offset_min"]
@@ -217,7 +243,9 @@ def write_csv(rows: list[dict[str, Any]], out_path: Path, start: datetime, end: 
                     out[col] = f"{val:.2f}"
             # Heartbeat default: 5 sec (gesund) wenn Miner-Daten vorhanden
             if not out["miner_heartbeat_age_sec"]:
-                out["miner_heartbeat_age_sec"] = "5.0" if row.get("miner_temp_c") is not None else ""
+                out["miner_heartbeat_age_sec"] = (
+                    "5.0" if row.get("miner_temp_c") is not None else ""
+                )
             writer.writerow(out)
 
 
@@ -230,7 +258,9 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="HA → Szenario-CSV Export")
     p.add_argument("--db", required=True, help="Pfad zur home-assistant_v2.db")
     p.add_argument("--start", required=True, help="Startdatum YYYY-MM-DD")
-    p.add_argument("--end", help="Enddatum YYYY-MM-DD (exklusiv). Standard: start + 1 Tag")
+    p.add_argument(
+        "--end", help="Enddatum YYYY-MM-DD (exklusiv). Standard: start + 1 Tag"
+    )
     p.add_argument(
         "--out",
         help="Ausgabedatei. Standard: src/sim/scenarios/real_<start>.csv",
@@ -245,7 +275,10 @@ def main() -> None:
     if not db_path.exists():
         print(f"Fehler: DB nicht gefunden: {db_path}", file=sys.stderr)
         print("  DB vom Umbrel holen:", file=sys.stderr)
-        print("  scp umbrel@umbrel.local:~/umbrel/app-data/home-assistant/data/home-assistant_v2.db /tmp/ha.db", file=sys.stderr)
+        print(
+            "  scp umbrel@umbrel.local:~/umbrel/app-data/home-assistant/data/home-assistant_v2.db /tmp/ha.db",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     start = datetime.strptime(args.start, "%Y-%m-%d").replace(tzinfo=timezone.utc)
@@ -255,7 +288,9 @@ def main() -> None:
         else start + timedelta(days=1)
     )
 
-    out_path = Path(args.out) if args.out else Path(f"src/sim/scenarios/real_{args.start}.csv")
+    out_path = (
+        Path(args.out) if args.out else Path(f"src/sim/scenarios/real_{args.start}.csv")
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     print(f"→ DB:      {db_path}")

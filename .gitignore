@@ -26,6 +26,15 @@ data/mqtt/
 data/mqtt-logs/
 logs/
 
+# Aus HA gezogene Datenbank + lokales Scratch-Verzeichnis (enthält reale Messdaten/IPs)
+tmp/
+home-assistant_v2.db*
+*.sqlite
+*.sqlite3
+
+# Reale Haushalts-Energiedaten aus HA-Export (regenerierbar via ha_history_export.py)
+src/sim/scenarios/real_*.csv
+
 # BitGridAI — Credentials & Secrets (NIEMALS einchecken)
 # MQTT Passwort-Datei (Mosquitto Auth)
 infra/mosquitto/passwd

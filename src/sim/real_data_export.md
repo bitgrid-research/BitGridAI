@@ -79,16 +79,54 @@ head -5 src/sim/scenarios/real_2026-04-20.csv
 | `pv_forecast_kw` | Forecast ist in HA nicht historisch gespeichert |
 | Lücken bei Sensorausfall | Werden per Forward-Fill geschlossen |
 
-## Schritt 4: Szenario in der Simulation ausführen
+## Schritt 4: Fehlende Signale ergänzen (Augment)
+
+Drei Signale speichert HA **nicht** historisch (`energy_price_ct_kwh`,
+`pv_forecast_kw`, und `miner_heartbeat_age_sec` → Default 5.0). Für die
+preis-/forecast-abhängigen Szenarien werden Preis und Forecast deterministisch
+und dokumentiert ergänzt:
+
+- **Preis:** dokumentiertes Tarifmodell (Tageszeit-Bänder, günstiger PV-Mittag,
+  teure Abend-Spitze) — siehe `src/sim/augment.py`.
+- **Forecast:** Perfect-Foresight — Mittelwert der tatsächlich gemessenen PV der
+  nächsten Blöcke (Standard-Horizont 1 h).
 
 ```bash
-python -m src.sim.runner src/sim/scenarios/real_2026-04-20.csv
+python -m src.sim.augment src/sim/scenarios/real_2026-04-20.csv \
+  --out src/sim/scenarios/real_2026-04-20_augmented.csv
+```
+
+> Beide Verfahren sind reine Funktionen der Realdaten → der Replay bleibt
+> deterministisch. Was real gemessen vs. augmentiert ist, bleibt nachvollziehbar.
+
+## Schritt 5: Studien-Szenarien aus Realdaten minen
+
+Findet je Studien-Szenario (S1–S10) einen repräsentativen realen Block mit
+Herkunftsangabe und friert optional das Studien-Set ein (Block + Vorblöcke für
+den realen R5-Kontext):
+
+```bash
+# Einzelner Tag, nur Report
+python -m src.sim.scenario_miner src/sim/scenarios/real_2026-04-20_augmented.csv
+
+# Mehrere Tage + Studien-Set einfrieren (4 Vorblöcke Kontext)
+python -m src.sim.scenario_miner src/sim/scenarios/*_augmented.csv \
+  --window 4 --freeze-dir docs/research/.../study_set
+```
+
+Fault-Szenarien (S4 Übertemperatur, S5 Comm-Timeout) treten in normalen Daten
+nicht auf → werden als „INJEKTION NÖTIG" gemeldet und separat überlagert.
+
+## Schritt 6: Szenario in der Simulation ausführen
+
+```bash
+python -m src.sim.runner src/sim/scenarios/real_2026-04-20_augmented.csv
 ```
 
 Oder im Replay-Modus (deterministisch, ohne Seiteneffekte):
 
 ```bash
-python -m src.sim.replay src/sim/scenarios/real_2026-04-20.csv
+python -m src.sim.replay src/sim/scenarios/real_2026-04-20_augmented.csv
 ```
 
 ## Spaltenformat (vollständig)

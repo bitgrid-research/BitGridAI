@@ -579,7 +579,7 @@ views:
                     color: "#F7931A"
                     display_zero: false
                     display_zero_tolerance: 25
-                  - entity: sensor.ac_elwa_2_192_168_178_58_power1_solar
+                  - entity: sensor.ac_elwa_2_power1_solar
                     name: Heizstab
                     icon: mdi:water-boiler
                     color: "#2196F3"
@@ -768,7 +768,7 @@ views:
                     action: more-info
 
                 - type: custom:button-card
-                  entity: sensor.ac_elwa_2_192_168_178_58_power1_solar
+                  entity: sensor.ac_elwa_2_power1_solar
                   name: Heizstab
                   icon: mdi:water-boiler
                   show_state: true
@@ -1686,7 +1686,7 @@ views:
                   custom_fields:
                     heizstab: >
                       [[[
-                        const pfx = 'sensor.ac_elwa_2_192_168_178_58_';
+                        const pfx = 'sensor.ac_elwa_2_';
                         const mode   = states[pfx + 'screen_mode']?.state ?? '—';
                         const t1     = states[pfx + 'temperatur_1']?.state ?? '—';
                         const psolar = states[pfx + 'power1_solar']?.state ?? '—';

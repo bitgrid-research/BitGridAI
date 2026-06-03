@@ -37,7 +37,7 @@ bitcoin:
           device_class: connectivity
           icon: mdi:solar-panel
           state: >-
-            {{ states('sensor.sn_3012953672_pv_power') not in ['unknown', 'unavailable'] }}
+            {{ states('sensor.sma_tripower_pv_power') not in ['unknown', 'unavailable'] }}
 
     - sensor:
         - name: "bitcoin_data_status"
@@ -97,7 +97,7 @@ bitcoin:
           unique_id: sma_status
           icon: mdi:solar-panel
           state: >-
-            {% set s = states('sensor.sn_3012953672_pv_power') %}
+            {% set s = states('sensor.sma_tripower_pv_power') %}
             {% if s in ['unknown', 'unavailable'] %}
               Offline
             {% else %}

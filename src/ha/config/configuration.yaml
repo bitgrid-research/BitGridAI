@@ -375,7 +375,7 @@ input_text:
 template:
   # ── Energie-Signale ───────────────────────────────────────────────────────
   - sensor:
-      # PV-Leistung: SMA Wechselrichter SN 3012953672
+      # PV-Leistung: SMA Wechselrichter (Sunny Tripower)
       - name: pv_power_w
         unique_id: pv_power_w
         unit_of_measurement: "W"
@@ -386,7 +386,7 @@ template:
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.pv_power_w') | float(0) }}
           {% else %}
-            {{ states('sensor.sn_3012953672_pv_power') | float(0) }}
+            {{ states('sensor.sma_tripower_pv_power') | float(0) }}
           {% endif %}
 
       # Hauslast: PV + Batterie-Entladung + Netzbezug - Netzeinspeisung - Miner
@@ -399,16 +399,16 @@ template:
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.house_load_w') | float(0) }}
           {% else %}
-            {% set pv    = states('sensor.sn_3012953672_pv_power') | float(0) %}
-            {% set bat_d = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
-            {% set bat_c = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
-            {% set grid_in  = states('sensor.sn_3015995559_metering_power_absorbed') | float(0) %}
-            {% set grid_out = states('sensor.sn_3015995559_metering_power_supplied') | float(0) %}
+            {% set pv    = states('sensor.sma_tripower_pv_power') | float(0) %}
+            {% set bat_d = states('sensor.sma_storage_battery_power_discharge_total') | float(0) %}
+            {% set bat_c = states('sensor.sma_storage_battery_power_charge_total') | float(0) %}
+            {% set grid_in  = states('sensor.sma_storage_metering_power_absorbed') | float(0) %}
+            {% set grid_out = states('sensor.sma_storage_metering_power_supplied') | float(0) %}
             {% set miner = states('sensor.miner_total_power_w') | float(0) %}
             {{ ([pv + bat_d - bat_c + grid_in - grid_out - miner, 0] | max) | round(0) }}
           {% endif %}
 
-      # Netzbezug: SMA Batterie-Wechselrichter SN 3015995559
+      # Netzbezug: SMA Batterie-Wechselrichter (Sunny Boy Storage)
       - name: grid_import_w
         unique_id: grid_import_w
         unit_of_measurement: "W"
@@ -418,10 +418,10 @@ template:
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.grid_import_w') | float(0) }}
           {% else %}
-            {{ states('sensor.sn_3015995559_metering_power_absorbed') | float(0) }}
+            {{ states('sensor.sma_storage_metering_power_absorbed') | float(0) }}
           {% endif %}
 
-      # Batterie-SoC: SMA Batterie-Wechselrichter SN 3015995559
+      # Batterie-SoC: SMA Batterie-Wechselrichter (Sunny Boy Storage)
       - name: battery_soc_pct
         unique_id: battery_soc_pct
         unit_of_measurement: "%"
@@ -431,7 +431,7 @@ template:
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.battery_soc_pct') | float(0) }}
           {% else %}
-            {{ states('sensor.sn_3015995559_battery_soc_total') | float(0) }}
+            {{ states('sensor.sma_storage_battery_soc_total') | float(0) }}
           {% endif %}
 
       # Batterie-Leistung: positiv = laden, negativ = entladen
@@ -444,8 +444,8 @@ template:
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.battery_power_w') | float(0) }}
           {% else %}
-            {% set charge    = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
-            {% set discharge = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
+            {% set charge    = states('sensor.sma_storage_battery_power_charge_total') | float(0) %}
+            {% set discharge = states('sensor.sma_storage_battery_power_discharge_total') | float(0) %}
             {{ (charge - discharge) | round(0) }}
           {% endif %}
 
@@ -460,8 +460,8 @@ template:
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ -(states('input_number.battery_power_w') | float(0)) | round(0) }}
           {% else %}
-            {% set charge    = states('sensor.sn_3015995559_battery_power_charge_total') | float(0) %}
-            {% set discharge = states('sensor.sn_3015995559_battery_power_discharge_total') | float(0) %}
+            {% set charge    = states('sensor.sma_storage_battery_power_charge_total') | float(0) %}
+            {% set discharge = states('sensor.sma_storage_battery_power_discharge_total') | float(0) %}
             {{ (discharge - charge) | round(0) }}
           {% endif %}
 
@@ -486,7 +486,7 @@ template:
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             0
           {% else %}
-            {{ states('sensor.sn_3015995559_metering_power_supplied') | float(0) }}
+            {{ states('sensor.sma_storage_metering_power_supplied') | float(0) }}
           {% endif %}
 
       # Miner-Gesamtleistung (Shelly Plug S Gen 3 — realer Wandverbrauch AC)
@@ -750,7 +750,7 @@ sensor:
     method: trapezoidal
 
   - platform: integration
-    source: sensor.ac_elwa_2_192_168_178_58_power1_solar
+    source: sensor.ac_elwa_2_power1_solar
     name: heizstab_energy_integral
     unique_id: heizstab_energy_integral
     unit_prefix: k
