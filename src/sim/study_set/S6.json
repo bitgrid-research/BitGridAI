@@ -1,0 +1,55 @@
+{
+  "sid": "S6",
+  "title": "Batterie-Schutz (soft)",
+  "expected_code": "NOOP_R2_SOC_SOFT_MIN",
+  "actual_code": "NOOP_R2_SOC_SOFT_MIN",
+  "verified": true,
+  "decision": {
+    "action": "NOOP",
+    "code": "NOOP_R2_SOC_SOFT_MIN",
+    "base_code": "NOOP_R2_SOC_SOFT_MIN",
+    "reason": "SOC_SOFT_MIN"
+  },
+  "engine_input": {
+    "last_action": null,
+    "blocks_since_change": 0
+  },
+  "state": {
+    "block_id": "2026-06-15T0900",
+    "pv_power_w": 3800,
+    "house_load_w": 1300,
+    "surplus_kw": 2.5,
+    "grid_import_w": 0.0,
+    "grid_export_w": null,
+    "battery_soc_pct": 18,
+    "miner_temp_c": 30,
+    "miner_heartbeat_age_sec": 5,
+    "energy_price_ct_kwh": 14,
+    "pv_forecast_kw": 3.5,
+    "quality": "ok"
+  },
+  "params": {
+    "battery_soc_pct": 18,
+    "soc_soft_min_pct": 20.0,
+    "soc_hard_min_pct": 10.0,
+    "grid_import_w": 0.0,
+    "max_grid_import_w": 500.0,
+    "pv_forecast_kw": 3.5,
+    "autonomy_level": "FULL"
+  },
+  "explanation": {
+    "group_a": {
+      "short": "Batterie lädt — Miner wartet",
+      "long": "Batterieladung 18 % liegt unter der Mindestschwelle 20 %.",
+      "trigger": "Batterie lädt erst auf 20 % auf, bevor der Miner starten darf — aktuell 18 %",
+      "data_basis": "Batterie 18 % · Mindestschwelle 20 %",
+      "effect": "Miner bleibt aus — Batterie lädt zuerst",
+      "options": "Miner startet ab 20 % Ladezustand"
+    },
+    "group_b": {
+      "energie": null,
+      "waerme": null,
+      "tech": null
+    }
+  }
+}

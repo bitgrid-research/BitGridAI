@@ -1,0 +1,28 @@
+# Audit-Spiegel: Override- und Entscheidungs-Reason in die 365-Tage-DB bringen.
+# Override/Reason/Explanation liegen in input_*-Entities, die der Recorder
+# ausschließt (recorder.exclude.domains: input_*). Diese sensor.-Spiegel werden
+# aufgezeichnet → historisch auswertbar für die Override-Angemessenheit (Studie).
+
+audit_mirrors:
+  template:
+    - sensor:
+        - name: override_active_log
+          unique_id: override_active_log
+          icon: mdi:hand-back-right
+          state: >-
+            {{ 'aktiv' if is_state('input_boolean.override_active', 'on') else 'inaktiv' }}
+
+        - name: override_action_log
+          unique_id: override_action_log
+          icon: mdi:gesture-tap-button
+          state: "{{ states('input_select.override_action') }}"
+
+        - name: decision_reason_log
+          unique_id: decision_reason_log
+          icon: mdi:text-search
+          state: "{{ states('input_text.decision_reason')[:250] }}"
+
+        - name: decision_explanation_log
+          unique_id: decision_explanation_log
+          icon: mdi:comment-text-outline
+          state: "{{ states('input_text.decision_explanation')[:250] }}"

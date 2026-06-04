@@ -1,0 +1,118 @@
+# Ökonomie: Mining-Wert pro kWh + Break-Even gegen die Einspeisevergütung.
+# Speist die R1-Break-Even-Entscheidung (Python-Kern: mining_value_ct_kwh) und
+# die Einspeisung-vs-Mining-Anzeige.
+#
+# Formel (erwarteter Wert, auch bei Standby gültig):
+#   TH/kWh  = 3,6e6 J / Effizienz[J/TH]
+#   BTC/kWh = TH/kWh · 1e12 · Block-Reward / (Difficulty[abs] · 2^32)
+#   ct/kWh  = BTC/kWh · BTC-Preis · 100
+# Difficulty-Sensor ist in T (×1e12).
+
+economics:
+  input_number:
+    miner_efficiency_j_th:
+      name: "Miner-Effizienz (J/TH)"
+      min: 10
+      max: 60
+      step: 0.1
+      unit_of_measurement: "J/TH"
+      mode: box
+      icon: mdi:speedometer
+      # Default: Canaan Avalon Q (~90 TH/s @ ~1674 W). Bei Eco-Modus höher.
+
+    block_reward_btc:
+      name: "Block-Reward (BTC)"
+      min: 0
+      max: 50
+      step: 0.0625
+      unit_of_measurement: "BTC"
+      mode: box
+      icon: mdi:bitcoin
+      # 3,125 BTC seit Halving 2024 (bis ~2028).
+
+    feed_in_tariff_ct_kwh:
+      name: "Einspeisevergütung (ct/kWh)"
+      min: 0
+      max: 30
+      step: 0.1
+      unit_of_measurement: "ct/kWh"
+      mode: box
+      icon: mdi:transmission-tower-export
+      # 7,8 ct = Break-Even / Opportunitätskosten je kWh Überschuss.
+
+  template:
+    - sensor:
+        # Erwarteter Mining-Ertrag pro kWh (ct) — Basis der Break-Even-Entscheidung
+        - name: mining_value_ct_kwh
+          unique_id: mining_value_ct_kwh
+          unit_of_measurement: "ct/kWh"
+          state_class: measurement
+          icon: mdi:cash
+          state: >-
+            {% set eff   = states('input_number.miner_efficiency_j_th') | float(18.6) %}
+            {% set diff  = states('sensor.bitcoin_network_difficulty') | float(0) %}
+            {% set price = states('sensor.btc_eur_price') | float(0) %}
+            {% set rew   = states('input_number.block_reward_btc') | float(3.125) %}
+            {% if eff > 0 and diff > 0 and price > 0 %}
+              {% set th_per_kwh = 3.6e6 / eff %}
+              {% set btc_per_kwh = (th_per_kwh * 1e12 * rew) / (diff * 1e12 * 4294967296) %}
+              {{ (btc_per_kwh * price * 100) | round(2) }}
+            {% else %}
+              unavailable
+            {% endif %}
+
+        # Vorteil Mining gegenüber Einspeisung (ct/kWh): positiv = Mining lohnt
+        - name: mining_vs_feedin_ct_kwh
+          unique_id: mining_vs_feedin_ct_kwh
+          unit_of_measurement: "ct/kWh"
+          state_class: measurement
+          icon: mdi:scale-balance
+          state: >-
+            {% set mv = states('sensor.mining_value_ct_kwh') | float(none) %}
+            {% set fit = states('input_number.feed_in_tariff_ct_kwh') | float(7.8) %}
+            {% if mv is not none %}
+              {{ (mv - fit) | round(2) }}
+            {% else %}
+              unavailable
+            {% endif %}
+
+        # Rentabilität jetzt? (reine Anzeige — steuert NICHTS)
+        - name: mining_recommendation
+          unique_id: mining_recommendation
+          icon: mdi:lightbulb-on
+          state: >-
+            {% set adv = states('sensor.mining_vs_feedin_ct_kwh') | float(none) %}
+            {% if adv is none %} unbekannt
+            {% elif adv >= 0 %} rentabel
+            {% else %} unrentabel
+            {% endif %}
+
+        # Mining-Ertrag heute (erwartet) = Mining-kWh × Mining-Wert
+        - name: mining_revenue_today_eur
+          unique_id: mining_revenue_today_eur
+          unit_of_measurement: "€"
+          icon: mdi:cash-plus
+          state: >-
+            {% set kwh = states('sensor.mining_energy_daily') | float(0) %}
+            {% set mv  = states('sensor.mining_value_ct_kwh') | float(0) %}
+            {{ (kwh * mv / 100) | round(2) }}
+
+        # Dieselben Mining-kWh, hätte man sie eingespeist
+        - name: mining_energy_as_feedin_eur
+          unique_id: mining_energy_as_feedin_eur
+          unit_of_measurement: "€"
+          icon: mdi:transmission-tower-export
+          state: >-
+            {% set kwh = states('sensor.mining_energy_daily') | float(0) %}
+            {% set fit = states('input_number.feed_in_tariff_ct_kwh') | float(7.8) %}
+            {{ (kwh * fit / 100) | round(2) }}
+
+        # Tatsächlicher Einspeise-Ertrag heute = Export-kWh × Vergütung
+        - name: feed_in_revenue_today_eur
+          unique_id: feed_in_revenue_today_eur
+          unit_of_measurement: "€"
+          icon: mdi:transmission-tower
+          state: >-
+            {% set kwh = states('sensor.grid_export_daily') | float(0) %}
+            {% set fit = states('input_number.feed_in_tariff_ct_kwh') | float(7.8) %}
+            {{ (kwh * fit / 100) | round(2) }}

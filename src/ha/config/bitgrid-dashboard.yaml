@@ -2653,27 +2653,17 @@ views:
         title: Test Protocol
         show_header_toggle: false
         entities:
-          - entity: sensor.bg_test_status
-            name: Suite Status
-          - entity: sensor.bg_test_totals
-            name: Totals
           - entity: input_number.test_pass_count
             name: Pass Count
           - entity: input_number.test_fail_count
             name: Fail Count
-          - entity: input_text.last_test_case
-            name: Last Test Case
-          - entity: input_text.last_test_result
-            name: Last Test Result
-          - entity: input_text.test_summary
-            name: Summary
 
       - type: entities
         title: Simulated PV Generation
         entities:
           - entity: input_number.pv_power_w
             name: PV Output (W)
-          - entity: sensor.pv_generation_w
+          - entity: sensor.pv_power_w
             name: PV Generation (Sensor)
 
       - type: entities
@@ -2699,14 +2689,94 @@ views:
         hours_to_show: 8
         refresh_interval: 60
         entities:
-          - entity: sensor.pv_generation_w
+          - entity: sensor.pv_power_w
           - entity: sensor.house_load_w
           - entity: sensor.grid_import_w
           - entity: sensor.battery_soc_pct
           - entity: sensor.battery_power_w
-          - entity: sensor.miner_power_w
-          - entity: sensor.miner_temp_c
+          - entity: sensor.miner_total_power_w
+          - entity: sensor.miner_max_chip_temp_c
           - entity: sensor.miner_heartbeat_age_sec
+
+  # ═══════════════════════════════════════════════════════
+  # STUDIEN-SZENARIEN S1–S10 (Rule Lab)
+  # ═══════════════════════════════════════════════════════
+  - title: Szenarien
+    path: szenarien
+    icon: mdi:script-text-play-outline
+    cards:
+      - type: entities
+        title: Mining-Rentabilität (Anzeige — steuert nichts)
+        show_header_toggle: false
+        entities:
+          - entity: input_number.miner_efficiency_j_th
+            name: Miner-Effizienz (J/TH)
+          - entity: sensor.mining_value_ct_kwh
+            name: Mining-Wert
+          - entity: input_number.feed_in_tariff_ct_kwh
+            name: Einspeisevergütung
+          - entity: sensor.mining_vs_feedin_ct_kwh
+            name: Vorteil Mining
+          - entity: sensor.mining_recommendation
+            name: Rentabel jetzt?
+          - type: divider
+          - entity: sensor.mining_revenue_today_eur
+            name: Mining heute (€)
+          - entity: sensor.mining_energy_as_feedin_eur
+            name: … dieselbe Energie eingespeist (€)
+          - entity: sensor.feed_in_revenue_today_eur
+            name: Einspeisung heute gesamt (€)
+
+      - type: entities
+        title: Studien-Szenarien S1–S10
+        show_header_toggle: false
+        entities:
+          - entity: script.scenario_s1
+            name: S1 — Klarer Start
+          - entity: script.scenario_s2
+            name: S2 — Kein Überschuss
+          - entity: script.scenario_s3
+            name: S3 — Unter Break-Even
+          - entity: script.scenario_s4
+            name: S4 — Übertemperatur
+          - entity: script.scenario_s5
+            name: S5 — Kommunikationsausfall
+          - entity: script.scenario_s6
+            name: S6 — Batterie-Schutz (soft)
+          - entity: script.scenario_s7
+            name: S7 — Batterie-Notstopp (hard)
+          - entity: script.scenario_s8
+            name: S8 — Netzbezug-Limit
+          - entity: script.scenario_s9
+            name: S9 — Forecast-Block
+          - entity: script.scenario_s10
+            name: S10 — Anti-Flapping
+          - type: divider
+          - entity: script.scenario_set_defaults
+            name: Schwellen auf Default zurücksetzen
+
+      - type: entities
+        title: Lab-Entscheidung (live)
+        show_header_toggle: false
+        entities:
+          - entity: sensor.lab_final_decision
+            name: Entscheidung
+          - entity: sensor.lab_explain_short
+            name: Erklärung
+          - entity: sensor.lab_explain_data_basis
+            name: Datenbasis
+          - entity: sensor.lab_explain_effect
+            name: Wirkung
+          - entity: sensor.lab_surplus_kw
+            name: Überschuss
+
+      - type: markdown
+        content: >
+          **Hinweis Engine-Divergenz:** Das Rule Lab rechnet **R1–R3**.
+          **S3** (Break-Even), **S9** (Forecast) und **S10** (Anti-Flapping)
+          zeigen hier `START_R1_SURPLUS_OK` — die Regeln R4/R5 und die
+          Break-Even-Logik existieren nur im **Python-Kern**. Genau diese
+          drei Fälle machen die Divergenz sichtbar (siehe Roadmap Phase 4/5).
 
   # ═══════════════════════════════════════════════════════
   # RULE LAB — isoliertes Sandbox für Regelexperimente

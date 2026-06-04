@@ -1,0 +1,52 @@
+{
+  "sid": "S5",
+  "title": "Kommunikationsausfall",
+  "expected_code": "STOP_R3_COMM_TIMEOUT_AGE75",
+  "actual_code": "STOP_R3_COMM_TIMEOUT_AGE75",
+  "verified": true,
+  "decision": {
+    "action": "STOP",
+    "code": "STOP_R3_COMM_TIMEOUT_AGE75",
+    "base_code": "STOP_R3_COMM_TIMEOUT",
+    "reason": "COMM_TIMEOUT_AGE75"
+  },
+  "engine_input": {
+    "last_action": "START",
+    "blocks_since_change": 2
+  },
+  "state": {
+    "block_id": "2026-06-15T1500",
+    "pv_power_w": 4200,
+    "house_load_w": 1500,
+    "surplus_kw": 2.7,
+    "grid_import_w": 0.0,
+    "grid_export_w": null,
+    "battery_soc_pct": 72,
+    "miner_temp_c": 50,
+    "miner_heartbeat_age_sec": 75,
+    "energy_price_ct_kwh": 13,
+    "pv_forecast_kw": 3.5,
+    "quality": "warn"
+  },
+  "params": {
+    "miner_temp_c": 50,
+    "max_chip_temp_c": 85.0,
+    "miner_heartbeat_age_sec": 75,
+    "comm_timeout_sec": 60.0
+  },
+  "explanation": {
+    "group_a": {
+      "short": "Miner nicht erreichbar — gestoppt",
+      "long": "Kein Heartbeat vom Miner seit 75 s (Limit: 60 s).",
+      "trigger": "Der Miner antwortet seit 75 Sekunden nicht mehr",
+      "data_basis": "Kein Signal seit 75 s · Timeout-Limit 60 s",
+      "effect": "Miner gestoppt — Verbindung unterbrochen",
+      "options": "Miner startet nach Wiederverbindung"
+    },
+    "group_b": {
+      "energie": null,
+      "waerme": null,
+      "tech": null
+    }
+  }
+}

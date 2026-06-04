@@ -20,6 +20,58 @@
 
 <!-- Befunde hier eintragen -->
 
+### [2026-06-03] [CORE] R2 Netzbezug-Veto bei 3-Phasen-Schieflage (Fehlauslösung)
+**Datei:** `src/core/rules/r2_autarky.py` (max_grid_import_w) + Quelle `sensor.sma_storage_metering_power_absorbed`
+**Problem:** R2 stoppt den Miner, obwohl das Haus **netto stark einspeist**. In allen
+12 realen S8-Blöcken (24.–31.05.) lief gleichzeitig Bezug **und** Einspeisung
+(z. B. 31.05. 13:20: PV 7439 W, Bezug 1057 W, **Einspeisung 4981 W**, SoC 99 %).
+`metering_power_absorbed` zählt phasenweisen Bezug → bei 3-Phasen-Schieflage >500 W
+trotz Netto-Einspeisung. R2 stoppt das Mining damit **mitten in der Mittagssonne**.
+**Schwere:** Mittel–Kritisch (unnötige Mining-Ausfälle bei maximalem Überschuss)
+**Empfehlung:** R2-Netzkriterium auf **Netto-Bezug** umstellen (`absorbed - supplied`,
+bzw. `grid_import_w - grid_export_w`) statt rohem `metering_power_absorbed`.
+**Status:** Erledigt — Core (`r2_autarky.py`: Netto-Bezug + Test) und HA-Template
+(`r2_grid_import_ok`: import − export) gefixt; reale S8-Blöcke lösen R2 nicht mehr
+fälschlich aus (Claude Code, 2026-06-03)
+
+### [2026-06-03] [ADAPTER] R4-Forecast inaktiv in Produktion
+**Datei:** `sensor.pv_forecast_kw` (forecast.solar) → `src/core/rules/r4_forecast.py`
+**Problem:** `sensor.pv_forecast_kw` ist live **`unavailable`** → R4 erhält keinen
+Forecast → legt **nie** ein Veto ein. S9 (Forecast-Block) tritt real nie auf; es
+existiert nur im Replay über den Perfect-Foresight-Proxy. forecast.solar-Integration
+offline/fehlkonfiguriert.
+**Schwere:** Mittel
+**Empfehlung:** forecast.solar-Integration prüfen (Lat/Lon/kWp aus `.env`), Sensor
+wieder verfügbar machen; dann historisch aufzeichnen (für reale S9-Belege).
+**Status:** Erledigt — HA-nativ via Open-Meteo (`packages/forecast.yaml`: command_line-Sensor
++ Publish-Automation → `bitgrid/forecast/pv_kw`), kein externer Adapter-Prozess (ADR 020).
+`sensor.pv_forecast_kw` wieder verfügbar (live verifiziert); aktualisiert stündlich,
+Standort als Helper (raus aus Git) (Claude Code, 2026-06-03)
+
+### [2026-06-03] [ADAPTER] Kein Strompreis-Feed (R1-Preisprüfung inert)
+**Datei:** R1 `price_max_ct_kwh` — keine `energy_price`-Entity in HA
+**Problem:** Es existiert kein Strompreis-Sensor (nur `sensor.btc_eur_price`). R1
+erhält `energy_price = None` → Preisprüfung nie aktiv. S1/S3 ruhen rein auf dem
+modellierten Tarif; **S3 ist real unmöglich**.
+**Schwere:** Mittel
+**Empfehlung:** aWATTar-Preissensor anlegen (`.env`: `PRICE_SOURCE=awattar`, kein Key)
+→ R1-Preislogik real + aufzeichenbar.
+**Status:** Offen
+
+### [2026-06-03] [DATA] Override- & Entscheidungs-Reason nicht aufgezeichnet
+**Datei:** `src/ha/config/configuration.yaml` (recorder.exclude.domains: input_*)
+**Problem:** Override-State und Decision-Reason/-Explanation liegen in `input_*`-Entities,
+die der Recorder ausschließt → **keine Historie** für Override-Angemessenheit (Studien-AV)
+oder Erklärungstexte. `sensor.bg_decision_code` selbst wird aufgezeichnet.
+**Schwere:** Mittel
+**Empfehlung:** Teilweise adressiert — Recording-Snapshot (`recording.yaml`) um
+`decision`/`reason`/`override` erweitert (forward-looking JSONL). Für die Haupt-DB
+ggf. `sensor.`-Spiegel der Override-/Reason-Entities anlegen.
+**Status:** Erledigt — `sensor.`-Spiegel (`packages/audit_mirrors.yaml`:
+`override_active_log`, `override_action_log`, `decision_reason_log`,
+`decision_explanation_log`) landen in der 365-Tage-DB; zusätzlich im Recording-Snapshot.
+Override-Angemessenheit damit historisch auswertbar (Claude Code, 2026-06-03)
+
 ### [2026-06-03] [SECURITY] Reale lokale IP / Geräte-Identifier in Git
 **Datei:** mehrere (siehe unten)
 **Problem:** Der Heizstab-Entity-Name (AC ELWA 2) enthielt die lokale Geräte-IP
@@ -53,6 +105,9 @@ ein Determinismus-/Reproduzierbarkeitsproblem (betrifft auch die Studie, die lau
 2024a den Kern repliziert).
 **Schwere:** Mittel
 **Empfehlung:** Kern und HA angleichen — entweder `THROTTLE` als echte Regel-Aktion
-im Kern implementieren **oder** aus dem HA-Template entfernen. Bis dahin ist kein
-THROTTLE-Studienszenario zulässig.
-**Status:** Offen
+im Kern implementieren **oder** aus dem HA-Template entfernen.
+**Status:** Großteils erledigt — THROTTLE ist im **Kern** erstklassig (R1-Drei-Band:
+marginaler Überschuss → Eco-Modus, `THROTTLE_R1_SURPLUS_THROTTLE`, 3 Tests) und im
+**Rule Lab** gespiegelt (live verifiziert). **Offen:** Prod-Template `bg_decision_action`
+erzeugt THROTTLE noch mit anderer Semantik (laufender Miner unter Soft-Limit) →
+Reconciliation als separate Live-Änderung; residual in arc42 Kap. 11 (Claude Code, 2026-06-03)

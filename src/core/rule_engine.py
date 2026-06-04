@@ -36,6 +36,7 @@ class RuleEngineConfig:
         # R1
         surplus_min_kw: float = 1.5,
         price_max_ct_kwh: float | None = 25.0,
+        surplus_throttle_min_kw: float = 0.8,
         # R2
         soc_soft_min_pct: float = 20.0,
         soc_hard_min_pct: float = 10.0,
@@ -54,6 +55,7 @@ class RuleEngineConfig:
     ) -> None:
         self.surplus_min_kw = surplus_min_kw
         self.price_max_ct_kwh = price_max_ct_kwh
+        self.surplus_throttle_min_kw = surplus_throttle_min_kw
         self.soc_soft_min_pct = soc_soft_min_pct
         self.soc_hard_min_pct = soc_hard_min_pct
         self.max_grid_import_w = max_grid_import_w
@@ -209,6 +211,7 @@ def evaluate(
         state,
         surplus_min_kw=config.surplus_min_kw,
         price_max_ct_kwh=config.price_max_ct_kwh,
+        surplus_throttle_min_kw=config.surplus_throttle_min_kw,
     )
     votes.append(r1_vote)
 
@@ -220,6 +223,7 @@ def evaluate(
             "surplus_kw": state.surplus_kw,
             "surplus_min_kw": config.surplus_min_kw,
             "energy_price_ct_kwh": state.energy_price_ct_kwh,
+            "mining_value_ct_kwh": state.mining_value_ct_kwh,
             "pv_forecast_kw": state.pv_forecast_kw,
             "pv_power_w": state.pv_power_w,
             "house_load_w": state.house_load_w,

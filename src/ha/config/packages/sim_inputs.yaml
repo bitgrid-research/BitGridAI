@@ -1,0 +1,47 @@
+# Fehlende Simulations-Inputs für die Prod-Simulation-Seite.
+# Ergänzen die bereits in configuration.yaml definierten Sim-Inputs
+# (pv_power_w, house_load_w, grid_import_w, battery_soc_pct).
+# Wirken nur bei input_boolean.simulation_mode = on (Template-Sensoren lesen sie).
+
+sim_inputs:
+  input_number:
+    miner_temp_c:
+      name: "Sim: Miner Temperatur"
+      min: 20
+      max: 120
+      step: 1
+      unit_of_measurement: "°C"
+      mode: slider
+      icon: mdi:thermometer
+
+    miner_heartbeat_age_sec:
+      name: "Sim: Heartbeat-Alter"
+      min: 0
+      max: 600
+      step: 5
+      unit_of_measurement: s
+      mode: slider
+      icon: mdi:heart-pulse
+
+    miner_power_w:
+      name: "Sim: Miner-Leistung"
+      min: 0
+      max: 5000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:server
+
+    battery_power_w:
+      name: "Sim: Batterie-Leistung (+ laden / − entladen)"
+      min: -10000
+      max: 10000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:battery-charging
+
+  input_boolean:
+    miner_relay_sim:
+      name: "Sim: Miner-Relais"
+      icon: mdi:electric-switch

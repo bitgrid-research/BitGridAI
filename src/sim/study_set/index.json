@@ -1,0 +1,72 @@
+[
+  {
+    "sid": "S1",
+    "title": "Klarer Start",
+    "code": "START_R1_SURPLUS_OK",
+    "verified": true,
+    "group_b_filled": false
+  },
+  {
+    "sid": "S2",
+    "title": "Kein Überschuss",
+    "code": "NOOP_R1_INSUFFICIENT_SURPLUS",
+    "verified": true,
+    "group_b_filled": false
+  },
+  {
+    "sid": "S3",
+    "title": "Sonne, aber Preis zu hoch",
+    "code": "NOOP_R1_PRICE_TOO_HIGH",
+    "verified": true,
+    "group_b_filled": false
+  },
+  {
+    "sid": "S4",
+    "title": "Übertemperatur",
+    "code": "STOP_R3_OVERTEMP_T90",
+    "verified": true,
+    "group_b_filled": false
+  },
+  {
+    "sid": "S5",
+    "title": "Kommunikationsausfall",
+    "code": "STOP_R3_COMM_TIMEOUT_AGE75",
+    "verified": true,
+    "group_b_filled": false
+  },
+  {
+    "sid": "S6",
+    "title": "Batterie-Schutz (soft)",
+    "code": "NOOP_R2_SOC_SOFT_MIN",
+    "verified": true,
+    "group_b_filled": false
+  },
+  {
+    "sid": "S7",
+    "title": "Batterie-Notstopp (hard)",
+    "code": "STOP_R2_SOC_HARD_MIN",
+    "verified": true,
+    "group_b_filled": false
+  },
+  {
+    "sid": "S8",
+    "title": "Wolke → Netzbezug",
+    "code": "STOP_R2_GRID_IMPORT_EXCEEDED",
+    "verified": true,
+    "group_b_filled": false
+  },
+  {
+    "sid": "S9",
+    "title": "Forecast blockiert",
+    "code": "NOOP_R4_FORECAST_PV_INSUFFICIENT",
+    "verified": true,
+    "group_b_filled": false
+  },
+  {
+    "sid": "S10",
+    "title": "Anti-Flapping",
+    "code": "NOOP_R5_MIN_RUNTIME_NOT_REACHED",
+    "verified": true,
+    "group_b_filled": false
+  }
+]

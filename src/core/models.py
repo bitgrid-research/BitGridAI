@@ -50,6 +50,9 @@ class EnergyState:
     heizstab_power_w: float | None = None
     energy_price_ct_kwh: float | None = None
     pv_forecast_kw: float | None = None
+    # Dynamischer Mining-Ertrag pro kWh (ct) — für R1-Break-Even gegen die
+    # Einspeisevergütung. None = Break-Even-Prüfung inaktiv (rückwärtskompatibel).
+    mining_value_ct_kwh: float | None = None
 
 
 # ---------------------------------------------------------------------------

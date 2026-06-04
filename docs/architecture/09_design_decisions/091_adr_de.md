@@ -35,6 +35,35 @@ Diese Tabelle fasst die wichtigsten, das System prägenden strategischen Entsche
 | **017 KPIs als Ziele** | Die Systemwirkung wird über lokal gemessene KPIs (Grid Import ↓, Flapping Rate ↓) evaluiert. | **Evidenz** der Wirksamkeit statt Behauptung. | Testbarkeit, UI |
 | **018 Energy-Path-Policies** | Die Opportunitätskosten (Export/Heat/Hodl) werden transparent geloggt. | Transparenz über die ökonomische Entscheidungsgrundlage. | Regeln, Logging |
 | **019 PoW Telemetrie & Hash-Proof** | Pflichtwerte/Proben (Hash-Proof) werden vom Miner erfasst. | Sicherheit, Compliance und Forschung an der Effizienz. | Domain Models, Logging |
+| **020 Engine-Strategie** | Der Python-Kern ist das **deterministische Entscheidungs-Modell** (per Replay studiert); **HA steuert live** und spiegelt den Kern eng. Keine zweite Voll-Engine pflegen. | Studie ist replay-basiert → Kern-Korrektheit zählt, nicht Live-Steuerung. Ein Live-Kern-Service würde die reale Anlage ohne XAI-Nutzen riskieren. | Whitebox, Determinismus, Studien-Validität |
+
+---
+
+## ADR 020 — Engine-Strategie (Detail)
+
+**Kontext.** Es existieren faktisch **zwei** Entscheidungs-Implementierungen: der
+Python-Kern (`src/core/`, R1–R5, deterministisch, replay-fähig) und eine
+**HA-Template-Nachbildung** (`configuration.yaml`: `bg_decision_*`, `r2_grid_import_ok`,
+…). Der `ProductionRunner` (Kern live) ist gebaut, läuft aber nicht (`bg_runner_*`
+unavailable) — gesteuert wird **live durch die HA-Templates**.
+
+**Geprüfte Optionen.**
+- **A — Voller Runner 24/7:** eigene Telemetrie-Topics, HA nur Aktuator. Hoher Aufwand + Risiko an der Live-Anlage.
+- **B — Snapshot-Bridge:** HA-Snapshot (`bitgrid/rec/snapshot`) → kleiner Kern-Service → Entscheidung zurück → HA aktuiert; Template als Fallback. Elegant, mittleres Risiko.
+- **C — Kern = Modell, HA steuert (gewählt):** Der Kern ist das *studierte* Artefakt; HA steuert live und spiegelt ihn eng. Gratuite Divergenz wird beseitigt, Rest dokumentiert.
+
+**Entscheidung: Option C.** Begründung: Die Anwenderstudie läuft **per Replay des
+Kerns** (offline, deterministisch) — entscheidend ist die **Korrektheit/Erklärbarkeit
+des Kerns**, nicht dass er die reale Anlage steuert. Einen Live-Kern-Service
+einzuführen, fügt der echten Energieanlage Ausfallrisiko hinzu, **ohne** den
+XAI-Beitrag der Arbeit zu stärken.
+
+**Konsequenzen.**
+- Kern bleibt Single Source of Truth für **Entscheidungslogik** (Studie, Analyse, Replay).
+- HA-Templates spiegeln den Kern **so eng wie möglich**; bei Regeländerungen werden beide angepasst (zuletzt: R2-Netto-Bezug in beiden).
+- **Gratuite Divergenz wird beseitigt** (z. B. THROTTLE — wird als Eco-Modus *im Kern* erstklassig gemacht, damit beide Engines übereinstimmen; siehe Roadmap Phase 4).
+- **Residuale Divergenz** (R4 Forecast, R5 Deadband sind im HA-Template nicht abgebildet) wird als **bekannte Limitation** dokumentiert (Kapitel 11 Risiken, FINDINGS).
+- **B bleibt das spätere Upgrade**, falls die Arbeit „Kern steuert reale Anlage" behaupten soll.
 
 ---
 > **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die wichtigsten Qualitätsanforderungen im Detail.

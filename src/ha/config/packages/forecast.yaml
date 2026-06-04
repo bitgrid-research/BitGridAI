@@ -1,0 +1,56 @@
+# PV-Forecast HA-nativ via Open-Meteo (kein API-Key, kein externer Adapter-Prozess).
+# Ersetzt den nicht laufenden openmeteo_forecast_adapter.py — gemäß ADR 020 (HA-zentrisch).
+# Standort (lat/lon/kWp) als Helper → reale Koordinaten bleiben aus dem Git (Runtime-State).
+# Formel wie im Adapter: pv_kw = GTI[W/m²]/1000 · kWp · 0,75 (Performance Ratio).
+# Publiziert auf bitgrid/forecast/pv_kw → der bestehende MQTT-Sensor sensor.pv_forecast_kw.
+
+forecast_openmeteo:
+  input_number:
+    forecast_lat:
+      name: "Forecast: Breitengrad"
+      min: -90
+      max: 90
+      step: 0.001
+      mode: box
+      icon: mdi:latitude
+    forecast_lon:
+      name: "Forecast: Längengrad"
+      min: -180
+      max: 180
+      step: 0.001
+      mode: box
+      icon: mdi:longitude
+    forecast_kwp:
+      name: "Forecast: Anlagengröße (kWp)"
+      min: 0
+      max: 50
+      step: 0.1
+      mode: box
+      icon: mdi:solar-power
+
+  command_line:
+    - sensor:
+        name: pv_forecast_openmeteo_kw
+        unique_id: pv_forecast_openmeteo_kw
+        unit_of_measurement: kW
+        scan_interval: 3600
+        command: >-
+          python3 -c "import json,urllib.request,urllib.parse;from datetime import datetime,timedelta,timezone;lat={{ states('input_number.forecast_lat')|float(48.1) }};lon={{ states('input_number.forecast_lon')|float(11.6) }};kwp={{ states('input_number.forecast_kwp')|float(10.0) }};q=urllib.parse.urlencode({'latitude':lat,'longitude':lon,'hourly':'global_tilted_irradiance','tilt':35,'azimuth':0,'timezone':'UTC','forecast_days':1});d=json.load(urllib.request.urlopen('https://api.open-meteo.com/v1/forecast?'+q,timeout=10));t=d['hourly']['time'];g=d['hourly']['global_tilted_irradiance'];tg=datetime.now(timezone.utc)+timedelta(minutes=60);i=min(range(len(t)),key=lambda k:abs((datetime.fromisoformat(t[k]).replace(tzinfo=timezone.utc)-tg).total_seconds()));print(round((g[i] or 0)/1000.0*kwp*0.75,2))"
+
+  automation:
+    - id: forecast_publish_pv_kw
+      alias: "Forecast: pv_kw auf MQTT publizieren"
+      trigger:
+        - platform: state
+          entity_id: sensor.pv_forecast_openmeteo_kw
+        - platform: time_pattern
+          minutes: "/30"
+      condition:
+        - condition: template
+          value_template: >-
+            {{ states('sensor.pv_forecast_openmeteo_kw') not in ['unknown', 'unavailable'] }}
+      action:
+        - action: mqtt.publish
+          data:
+            topic: bitgrid/forecast/pv_kw
+            payload: "{{ states('sensor.pv_forecast_openmeteo_kw') }}"

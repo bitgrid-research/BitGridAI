@@ -11,7 +11,7 @@ Stichprobe, Aufgaben, Instrumente, Ethik und Auswertung.
 - **[20.2.4.1 - SD-WQ1 - Studiendesign und Stichprobe](./2024a_study_design_sampling.md)**
 - **[20.2.4.2 - SD-WQ2 - Aufgaben, Instrumente und Messlogik](./2024b_tasks_instruments_metrics.md)**
 - **[20.2.4.3 - SD-WQ3 - Ethik, Datenschutz und Analyseplan](./2024c_ethics_privacy_analysis.md)**
-- **[20.2.4.4 - SD-WQ4 - Szenarien für Simulation und Studie](./2024d_scenarios.md)**
+- **[20.2.4.4 - SD-WQ4 - Szenarien für Simulation und Studie](./2024d_scenarios/README.md)**
 
 ---
 

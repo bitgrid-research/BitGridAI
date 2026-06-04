@@ -20,7 +20,7 @@
 
 ---
 
-> **Nächster Schritt:** [20.2.4.4 - SD-WQ4 - Szenarien für Simulation und Studie](./2024d_scenarios.md)
+> **Nächster Schritt:** [20.2.4.4 - SD-WQ4 - Szenarien für Simulation und Studie](./2024d_scenarios/README.md)
 >
 > Zurück zu **[20.2.4 - SD-CONTEXT](./README.md)**
 >

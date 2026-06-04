@@ -1,0 +1,52 @@
+{
+  "sid": "S4",
+  "title": "Übertemperatur",
+  "expected_code": "STOP_R3_OVERTEMP_T90",
+  "actual_code": "STOP_R3_OVERTEMP_T90",
+  "verified": true,
+  "decision": {
+    "action": "STOP",
+    "code": "STOP_R3_OVERTEMP_T90",
+    "base_code": "STOP_R3_OVERTEMP",
+    "reason": "OVERTEMP_T90"
+  },
+  "engine_input": {
+    "last_action": "START",
+    "blocks_since_change": 6
+  },
+  "state": {
+    "block_id": "2026-06-15T1430",
+    "pv_power_w": 4500,
+    "house_load_w": 1500,
+    "surplus_kw": 3.0,
+    "grid_import_w": 0.0,
+    "grid_export_w": null,
+    "battery_soc_pct": 75,
+    "miner_temp_c": 90,
+    "miner_heartbeat_age_sec": 5,
+    "energy_price_ct_kwh": 12,
+    "pv_forecast_kw": 4.0,
+    "quality": "ok"
+  },
+  "params": {
+    "miner_temp_c": 90,
+    "max_chip_temp_c": 85.0,
+    "miner_heartbeat_age_sec": 5,
+    "comm_timeout_sec": 60.0
+  },
+  "explanation": {
+    "group_a": {
+      "short": "Übertemperatur — Miner gestoppt",
+      "long": "Chip-Temperatur 90°C überschreitet die Sicherheitsgrenze 85°C.",
+      "trigger": "Chip-Temperatur 90°C liegt über dem Sicherheitslimit von 85°C",
+      "data_basis": "Chip-Temperatur 90°C · Limit 85°C",
+      "effect": "Miner gestoppt — Überhitzungsschutz",
+      "options": "Miner startet nach Abkühlung unter 85°C"
+    },
+    "group_b": {
+      "energie": null,
+      "waerme": null,
+      "tech": null
+    }
+  }
+}

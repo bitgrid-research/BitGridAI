@@ -34,6 +34,20 @@ def test_grid_import_exceeded_triggers_stop(nominal_state: EnergyState) -> None:
     assert vote.action == "STOP"
 
 
+def test_net_export_does_not_trigger_grid_stop(nominal_state: EnergyState) -> None:
+    """3-Phasen-Schieflage: phasenweiser Bezug, aber netto Einspeisung → kein Stopp."""
+    imbalanced = EnergyState(
+        **{
+            **nominal_state.__dict__,
+            "grid_import_w": 1057.0,
+            "grid_export_w": 4981.0,  # netto −3924 W → Einspeisung
+            "battery_soc_pct": 99.0,
+        }
+    )
+    vote = r2_autarky.evaluate(imbalanced, max_grid_import_w=500.0)
+    assert vote is None  # R2 stoppt nicht bei Netto-Einspeisung
+
+
 def test_healthy_battery_returns_none(nominal_state: EnergyState) -> None:
     vote = r2_autarky.evaluate(nominal_state)
     assert vote is None

@@ -3,6 +3,10 @@ R2 Autarkie — Schützt Batteriespeicher und begrenzt Grid-Import.
 
 Soft-Min: NOOP (kein neuer Start)
 Hard-Min: STOP (laufenden Miner sofort stoppen)
+
+Netzbezug: bewertet den **Netto-Bezug** (grid_import − grid_export). Bei
+3-Phasen-Schieflage kann phasenweiser Bezug >0 sein, obwohl netto eingespeist
+wird — dann darf R2 nicht fälschlich stoppen (siehe FINDINGS, reale S8-Blöcke).
 """
 
 from __future__ import annotations
@@ -35,7 +39,8 @@ def evaluate(
             reason="SOC_SOFT_MIN",
         )
 
-    if state.grid_import_w > max_grid_import_w:
+    net_import_w = state.grid_import_w - (state.grid_export_w or 0.0)
+    if net_import_w > max_grid_import_w:
         return RuleVote(
             rule="R2",
             action="STOP",

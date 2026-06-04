@@ -30,6 +30,7 @@ Die folgenden Risiken wurden bewertet, ihre Auswirkung als mindestens **Mittel**
 
 Diese Punkte sind Design-Kompromisse oder Bereiche, die aufgrund von Ressourcenknappheit noch nicht vollständig optimiert wurden. Sie müssen in zukünftigen Sprints adressiert werden, um die Wartbarkeit nicht zu gefährden.
 
+* **Engine-Divergenz (HA-Template ↔ Python-Kern):** Gemäß **ADR 020** ist der Python-Kern das deterministische Entscheidungs-Modell, **HA steuert live** über eine Template-Nachbildung. Beide werden bei Regeländerungen synchron gehalten (zuletzt R2-Netto-Bezug). **Residual:** R4 (Forecast) und R5 (Deadband) sind im HA-Template **nicht** abgebildet. THROTTLE ist im **Kern + Rule Lab** als Eco-Modus implementiert (marginaler Überschuss, Drei-Band-R1), das **Prod-Template** erzeugt THROTTLE aber noch mit *anderer* Semantik (laufender Miner unter Soft-Limit) → Reconciliation offen. Bekannte, akzeptierte Limitation — relevant für die ökologische Validität der Studie (Live-Verhalten ≠ Replay in diesen Punkten).
 * **Adapter-Modularität:** Die Adapter-Schnittstelle muss noch strikter definiert werden (Port-Definitionen, Plugin-Standard).
 * **Logging-Schema:** Das Schema für `DecisionEvent` und `EnergyStateChangedEvent` muss versioniert und im Code zentralisiert werden, um die Konsistenz zu gewährleisten.
 * **Integrationstests:** Die Test-Coverage für die MQTT/Rule-Integration und den Forecast-Evaluator muss ergänzt werden.

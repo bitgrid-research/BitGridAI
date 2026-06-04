@@ -1,0 +1,113 @@
+# Studien-Szenarien S1–S10 für das Rule Lab (isoliert, lab_*-Inputs).
+# Jedes Skript setzt die Lab-Messwerte auf einen realen Repräsentanten (aus den
+# HA-Realdaten gemined) bzw. einen injizierten Fault. Erwartete Lab-Entscheidung
+# in der Alias-Klammer. S3/S9/S10 fallen im Lab durch (R4/R5/Break-Even nur im
+# Python-Kern) → macht die Engine-Divergenz sichtbar.
+#
+# Schwellen: Lab-Defaults (surplus_min 1,5 · soft 20 · hard 10 · max_grid 500 ·
+# max_temp 85 · comm_timeout 60). Bei abweichenden Slidern vorher zurücksetzen.
+
+sim_scenarios:
+  script:
+
+    scenario_set_defaults:
+      alias: "Szenario: Lab-Schwellen auf Core-Default"
+      icon: mdi:restore
+      sequence:
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_surplus_min_kw }
+          data: { value: 1.5 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_soc_soft_min_pct }
+          data: { value: 20 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_soc_hard_min_pct }
+          data: { value: 10 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_max_grid_import_w }
+          data: { value: 500 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_max_chip_temp_c }
+          data: { value: 85 }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_comm_timeout_sec }
+          data: { value: 60 }
+
+    scenario_s1:
+      alias: "S1 Klarer Start (→ START_R1)"
+      icon: mdi:play-circle
+      sequence: &_set
+        - action: script.scenario_set_defaults
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_pv_power_w }
+          data: { value: "{{ pv }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_house_load_w }
+          data: { value: "{{ load }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_grid_import_w }
+          data: { value: "{{ grid }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_battery_soc_pct }
+          data: { value: "{{ soc }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_miner_temp_c }
+          data: { value: "{{ temp }}" }
+        - action: input_number.set_value
+          target: { entity_id: input_number.lab_heartbeat_age_sec }
+          data: { value: "{{ hb }}" }
+      variables: { pv: 8925, load: 1109, grid: 173, soc: 98, temp: 45, hb: 5 }
+
+    scenario_s2:
+      alias: "S2 Kein Überschuss (→ NOOP_R1_INSUFFICIENT)"
+      icon: mdi:weather-sunset-down
+      sequence: *_set
+      variables: { pv: 2093, load: 610, grid: 6, soc: 22, temp: 40, hb: 5 }
+
+    scenario_s3:
+      alias: "S3 Unter Break-Even (Lab: START — Core: BELOW_BREAKEVEN)"
+      icon: mdi:cash-minus
+      sequence: *_set
+      variables: { pv: 4000, load: 1500, grid: 0, soc: 70, temp: 40, hb: 5 }
+
+    scenario_s4:
+      alias: "S4 Übertemperatur (→ STOP_R3_OVERTEMP)"
+      icon: mdi:thermometer-alert
+      sequence: *_set
+      variables: { pv: 4500, load: 1500, grid: 0, soc: 75, temp: 90, hb: 5 }
+
+    scenario_s5:
+      alias: "S5 Kommunikationsausfall (→ STOP_R3_COMM_TIMEOUT)"
+      icon: mdi:wifi-alert
+      sequence: *_set
+      variables: { pv: 4200, load: 1500, grid: 0, soc: 72, temp: 50, hb: 75 }
+
+    scenario_s6:
+      alias: "S6 Batterie-Schutz soft (→ NOOP_R2_SOC_SOFT_MIN)"
+      icon: mdi:battery-low
+      sequence: *_set
+      variables: { pv: 3129, load: 433, grid: 17, soc: 14, temp: 30, hb: 5 }
+
+    scenario_s7:
+      alias: "S7 Batterie-Notstopp hard (→ STOP_R2_SOC_HARD_MIN)"
+      icon: mdi:battery-alert
+      sequence: *_set
+      variables: { pv: 247, load: 707, grid: 7, soc: 5, temp: 55, hb: 5 }
+
+    scenario_s8:
+      alias: "S8 Netzbezug-Limit (→ STOP_R2_GRID_IMPORT_EXCEEDED)"
+      icon: mdi:transmission-tower
+      sequence: *_set
+      variables: { pv: 5362, load: 906, grid: 1057, soc: 99, temp: 50, hb: 5 }
+
+    scenario_s9:
+      alias: "S9 Forecast-Block (Lab: START — Core: NOOP_R4)"
+      icon: mdi:weather-cloudy-clock
+      sequence: *_set
+      variables: { pv: 4092, load: 368, grid: 27, soc: 98, temp: 45, hb: 5 }
+
+    scenario_s10:
+      alias: "S10 Anti-Flapping (Lab: START — Core: NOOP_R5)"
+      icon: mdi:swap-horizontal
+      sequence: *_set
+      variables: { pv: 4449, load: 1367, grid: 21, soc: 57, temp: 48, hb: 5 }

@@ -40,6 +40,9 @@ Hier bringen wir zusammen, was Architektur und Forschung vorbereitet haben: konk
 &nbsp;
 
 * [37 - Troubleshooting & FAQ](./37_troubleshooting/README.md)
+&nbsp;
+
+* [38 - Umsetzungs-Roadmap](./38_roadmap/README.md) — Reihenfolge: Ökonomie, Engine-Konsistenz & Studienreife
 
 ---
 > **Nächster Schritt:** Bevor du tief in Module und Workflows eintauchst, lohnt sich der Blick auf den Schnelleinstieg.

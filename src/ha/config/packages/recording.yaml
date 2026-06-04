@@ -36,14 +36,21 @@ recording:
                "pv_w":{{ states('sensor.pv_power_w') | float(0) | round(1) }},
                "load_w":{{ states('sensor.house_load_w') | float(0) | round(1) }},
                "grid_w":{{ states('sensor.grid_import_w') | float(0) | round(1) }},
+               "grid_export_w":{{ states('sensor.grid_export_w') | float(0) | round(1) }},
                "soc":{{ states('sensor.battery_soc_pct') | float(0) | round(1) }},
                "temp_c":{{ states('sensor.miner_max_chip_temp_c') | float(0) | round(1) }},
                "hb_ok":{{ (is_state('binary_sensor.miner1_available', 'on') and is_state('binary_sensor.miner2_available', 'on')) | lower }},
                "miner_w":{{ states('sensor.miner_total_power_w') | float(0) | round(1) }},
-               "surplus_kw":{{ states('sensor.surplus_kw') | float(0) | round(3) }}}
+               "surplus_kw":{{ states('sensor.surplus_kw') | float(0) | round(3) }},
+               "forecast_kw":{{ states('sensor.pv_forecast_kw') | float(0) | round(2) }},
+               "price_ct":{{ states('sensor.energy_price_ct_kwh') | float(0) | round(2) }},
+               "decision":"{{ states('sensor.bg_decision_code') }}",
+               "reason":"{{ states('input_text.decision_reason') }}",
+               "override":{{ is_state('input_boolean.override_active', 'on') | lower }},
+               "override_action":"{{ states('input_select.override_action') }}"}
 
   input_boolean:
     recording_active:
       name: "Recording: Aktiv"
       icon: mdi:record-circle
-      initial: off
+      initial: on

@@ -1,0 +1,56 @@
+{
+  "sid": "S2",
+  "title": "Kein Überschuss",
+  "expected_code": "NOOP_R1_INSUFFICIENT_SURPLUS",
+  "actual_code": "NOOP_R1_INSUFFICIENT_SURPLUS",
+  "verified": true,
+  "decision": {
+    "action": "NOOP",
+    "code": "NOOP_R1_INSUFFICIENT_SURPLUS",
+    "base_code": "NOOP_R1_INSUFFICIENT_SURPLUS",
+    "reason": "INSUFFICIENT_SURPLUS"
+  },
+  "engine_input": {
+    "last_action": null,
+    "blocks_since_change": 0
+  },
+  "state": {
+    "block_id": "2026-06-15T0700",
+    "pv_power_w": 1700,
+    "house_load_w": 1300,
+    "surplus_kw": 0.4,
+    "grid_import_w": 0.0,
+    "grid_export_w": null,
+    "battery_soc_pct": 30,
+    "miner_temp_c": 30,
+    "miner_heartbeat_age_sec": 5,
+    "energy_price_ct_kwh": 18,
+    "pv_forecast_kw": 3.0,
+    "quality": "ok"
+  },
+  "params": {
+    "surplus_kw": 0.4,
+    "surplus_min_kw": 1.5,
+    "energy_price_ct_kwh": 18,
+    "mining_value_ct_kwh": null,
+    "pv_forecast_kw": 3.0,
+    "pv_power_w": 1700,
+    "house_load_w": 1300,
+    "battery_soc_pct": 30
+  },
+  "explanation": {
+    "group_a": {
+      "short": "Zu wenig PV-Überschuss — Miner wartet",
+      "long": "Aktueller Überschuss 0.4 kW liegt unter der Startschwelle 1.5 kW.",
+      "trigger": "Deine Solaranlage erzeugt nur 0.4 kW Überschuss — mindestens 1.5 kW wären nötig",
+      "data_basis": "PV-Überschuss 0.4 kW · Startschwelle 1.5 kW · Prognose 3.0 kW",
+      "effect": "Miner bleibt gestoppt — zu wenig Solarstrom",
+      "options": "Miner startet ab 1.5 kW Überschuss"
+    },
+    "group_b": {
+      "energie": null,
+      "waerme": null,
+      "tech": null
+    }
+  }
+}

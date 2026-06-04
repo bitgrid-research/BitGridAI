@@ -162,14 +162,17 @@ rule_lab:
               PASS
             {% endif %}
 
-        # R1 Profitabilität — letzte Instanz
+        # R1 Profitabilität — Drei-Band (spiegelt src/core/rules/r1_profitability.py)
         - name: "lab_r1_result"
           unique_id: lab_r1_result
           state: >-
             {% set surplus     = states('sensor.lab_surplus_kw') | float(0) %}
             {% set surplus_min = states('input_number.lab_surplus_min_kw') | float(1.5) %}
+            {% set throttle_min = 0.8 %}
             {% if surplus >= surplus_min %}
               START_R1_SURPLUS_OK
+            {% elif surplus >= throttle_min %}
+              THROTTLE_R1_SURPLUS_THROTTLE
             {% else %}
               NOOP_R1_INSUFFICIENT_SURPLUS
             {% endif %}
@@ -199,6 +202,7 @@ rule_lab:
             {% set temp    = states('input_number.lab_miner_temp_c') | float(0) %}
             {% set grid    = states('input_number.lab_grid_import_w') | float(0) %}
             {% if   code == 'START_R1_SURPLUS_OK'          %} Überschuss {{ surplus | round(1) }} kW — Miner würde starten
+            {% elif code == 'THROTTLE_R1_SURPLUS_THROTTLE' %} Marginaler Überschuss {{ surplus | round(1) }} kW — Miner im Eco-Modus
             {% elif code == 'NOOP_R1_INSUFFICIENT_SURPLUS' %} Zu wenig Überschuss ({{ surplus | round(1) }} kW)
             {% elif code == 'STOP_R2_SOC_HARD_MIN'         %} Batterie kritisch {{ soc | round(0) }}% — Sicherheitsstopp
             {% elif code == 'NOOP_R2_SOC_SOFT_MIN'         %} Batterie {{ soc | round(0) }}% — kein Neustart

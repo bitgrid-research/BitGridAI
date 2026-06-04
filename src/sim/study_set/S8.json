@@ -1,0 +1,55 @@
+{
+  "sid": "S8",
+  "title": "Wolke → Netzbezug",
+  "expected_code": "STOP_R2_GRID_IMPORT_EXCEEDED",
+  "actual_code": "STOP_R2_GRID_IMPORT_EXCEEDED",
+  "verified": true,
+  "decision": {
+    "action": "STOP",
+    "code": "STOP_R2_GRID_IMPORT_EXCEEDED",
+    "base_code": "STOP_R2_GRID_IMPORT_EXCEEDED",
+    "reason": "GRID_IMPORT_EXCEEDED"
+  },
+  "engine_input": {
+    "last_action": "START",
+    "blocks_since_change": 5
+  },
+  "state": {
+    "block_id": "2026-06-15T1230",
+    "pv_power_w": 800,
+    "house_load_w": 1500,
+    "surplus_kw": -0.7,
+    "grid_import_w": 700,
+    "grid_export_w": null,
+    "battery_soc_pct": 55,
+    "miner_temp_c": 50,
+    "miner_heartbeat_age_sec": 5,
+    "energy_price_ct_kwh": 15,
+    "pv_forecast_kw": 3.0,
+    "quality": "ok"
+  },
+  "params": {
+    "battery_soc_pct": 55,
+    "soc_soft_min_pct": 20.0,
+    "soc_hard_min_pct": 10.0,
+    "grid_import_w": 700,
+    "max_grid_import_w": 500.0,
+    "pv_forecast_kw": 3.0,
+    "autonomy_level": "FULL"
+  },
+  "explanation": {
+    "group_a": {
+      "short": "Zu viel Netzbezug — Miner gestoppt",
+      "long": "Netzbezug 700 W überschreitet das erlaubte Limit 500 W.",
+      "trigger": "Das System bezieht 700 W aus dem Stromnetz — erlaubt sind 500 W",
+      "data_basis": "Netzbezug 700 W · Limit 500 W",
+      "effect": "Miner gestoppt — Stromnetz entlasten",
+      "options": "Miner startet wenn Netzbezug unter 500 W sinkt"
+    },
+    "group_b": {
+      "energie": null,
+      "waerme": null,
+      "tech": null
+    }
+  }
+}

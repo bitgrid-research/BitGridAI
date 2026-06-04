@@ -507,9 +507,26 @@ template:
         device_class: temperature
         state_class: measurement
         state: >-
-          {% set t1 = states('sensor.miner1_tmax') | float(0) %}
-          {% set t2 = states('sensor.miner2_tmax') | float(0) %}
-          {{ [t1, t2] | max }}
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.miner_temp_c') | float(0) }}
+          {% else %}
+            {% set t1 = states('sensor.miner1_tmax') | float(0) %}
+            {% set t2 = states('sensor.miner2_tmax') | float(0) %}
+            {{ [t1, t2] | max }}
+          {% endif %}
+
+      # Heartbeat-Alter (Sim: aus Slider; sonst aus Miner-Verfügbarkeit abgeleitet)
+      - name: miner_heartbeat_age_sec
+        unique_id: miner_heartbeat_age_sec
+        unit_of_measurement: s
+        state_class: measurement
+        state: >-
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.miner_heartbeat_age_sec') | float(0) }}
+          {% else %}
+            {{ 5 if (is_state('binary_sensor.miner1_available', 'on') and
+                     is_state('binary_sensor.miner2_available', 'on')) else 120 }}
+          {% endif %}
 
       # Block-Fenster
       - name: block_id
@@ -607,10 +624,12 @@ template:
              (states('input_number.r2_soc_hard_min_pct') | float(0)) }}
 
       # R2: Netzimport-Schutz
+      # Netto-Bezug (import − export): verhindert Fehlauslösung bei 3-Phasen-Schieflage
       - name: r2_grid_import_ok
         unique_id: r2_grid_import_ok
         state: >-
-          {{ (states('sensor.grid_import_w') | float(0)) <=
+          {{ ((states('sensor.grid_import_w') | float(0)) -
+              (states('sensor.grid_export_w') | float(0))) <=
              (states('input_number.r2_max_grid_import_w') | float(0)) }}
 
       # R3: Übertemperatur (max beider Miner)
