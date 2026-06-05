@@ -15,14 +15,25 @@ sauber aufsetzen kann.
 
 ## Status
 
-- ✅ **Phase 1 — Ökonomie als ANZEIGE (nicht als Gate):** Mining-Wert-Sensoren live (`sensor.mining_value_ct_kwh`, `mining_vs_feedin_ct_kwh`, `mining_recommendation`) im `economics`-Package; konfigurierbare Effizienz/Reward/Tarif. **R1-Gate bewusst zurückgebaut** (`mining_value` ist nur geloggte Anzeige) → Strategie **Eigenverbrauch vor Einspeisung**: Überschuss wird gemint, auch wenn marginal unrentabel.
-- ✅ **Phase 5 (vorgezogen) — S1–S10 in HA:** Szenario-Package `packages/sim_scenarios.yaml` (10 Skripte auf den isolierten `lab_*`-Inputs) + Dashboard-View „Szenarien" (Buttons + Live-Lab-Entscheidung + Erklärung). **7/10 live verifiziert** identisch zum Kern; **S3/S9/S10 fallen durch** (R4/R5/Break-Even nur im Kern) → Engine-Divergenz im Dashboard sichtbar.
-- ✅ **Prod-Simulation-Seite repariert:** fehlende Sim-Inputs (`miner_temp_c`, `heartbeat_age_sec`, `miner_power_w`, `battery_power_w`, `miner_relay_sim`) als `packages/sim_inputs.yaml`; Sim-Branches für `miner_max_chip_temp_c` + neuer `sensor.miner_heartbeat_age_sec`; falsche Dashboard-Sensornamen korrigiert, defektes Test-Protokoll getrimmt. Kein „Entität nicht gefunden" mehr.
-- ✅ **Phase 2 — R2 Netto-Bezug-Fix:** Core + HA-Template auf `import − export`; behebt die S8-Fehlauslösung (Miner-Stopp bei Mittagssonne). 314 Tests grün, Live verifiziert.
-- ✅ **Architektur-Weiche entschieden — Option C (ADR 020):** Kern = studiertes Entscheidungs-Modell, HA steuert live + spiegelt. Residuale Divergenz (R4/R5) als Limitation in arc42 Kap. 11.
-- ✅ **Phase 4 — THROTTLE = Eco-Modus (Kern + Lab):** R1-Drei-Band (`<0,8` NOOP · `0,8–1,5` THROTTLE · `≥1,5` START); Lab gespiegelt + live verifiziert. 317 Tests grün. Prod-Template-Abgleich offen.
-- ✅ **Phase 3 — Echte Signale:** Forecast HA-nativ via Open-Meteo (`pv_forecast_kw` wieder verfügbar, stündlich, kein externer Prozess); Override/Reason als `sensor.`-Spiegel in der 365-Tage-DB.
-- ✅ Datenpipeline (API-Export, Augment, Mine), 11 Tage Detail + 23 Tage Tageslog, Recording erweitert & dauerhaft an.
+**Erledigt (327 Tests grün, alles deployt ohne Restart):**
+
+- ✅ **Phase 1 — Ökonomie als Anzeige (kein Gate):** Mining-Wert-Sensoren (`economics`-Package) + Rentabilitäts-Karte; R1-Gate bewusst zurückgebaut → Strategie *Eigenverbrauch vor Einspeisung*.
+- ✅ **Phase 2 — R2 Netto-Bezug-Fix** (Core + HA `import − export`): behebt die S8-Fehlauslösung (Miner-Stopp bei Mittagssonne).
+- ✅ **Phase 3 — Echte Signale:** Forecast HA-nativ via Open-Meteo (`pv_forecast_kw` wieder verfügbar); Override/Reason als `sensor.`-Spiegel in der 365-Tage-DB.
+- ✅ **Phase 4 — THROTTLE = Eco-Modus** (Kern + Lab): R1-Drei-Band (`<0,8` NOOP · `0,8–1,5` THROTTLE · `≥1,5` START). Prod-Template-Abgleich offen.
+- ✅ **Architektur-Weiche — Option C (ADR 020):** Kern = studiertes Modell, HA steuert + spiegelt; Residual-Divergenz (R4/R5) als Limitation (Kap. 11).
+- ✅ **Phase 5 — S1–S10 in HA** (Rule Lab) + Dashboard-View „Szenarien" + Divergenz-Test (7/10 == Kern); **Prod-Simulation-Seite repariert** (`sim_inputs.yaml`).
+- ✅ **Phase 6 — Synthetische 4-Jahreszeiten-Profile** (`synth_seasons.py`): Saison-Gradient Winter START=0 … Sommer START=14.
+- ✅ **Phase 7 (Werkzeuge):** **Freeze-Gerüst** (`study_freeze.py` → `study_set/`, 10/10 verifiziert), **Faithfulness-Vorprüfung** (`study_faithfulness.py`, Gruppe A 10/10), **Pre-Registration/Rubrik/Override-Ground-Truth** ([2024e](../../research/20_research_questions/202_working_questions/2024_study_design_context/2024e_erkenntnisziele_prereg.md)).
+- ✅ **Datenpipeline** (API-Export → Augment → Mine → Replay), 11 Tage Detail + 23 Tage Tageslog, Recording erweitert & dauerhaft an.
+- ✅ **Kern-Strategie SoC-Band (additiv):** `RuleEngineConfig(strategy="soc_band")` (`src/core/rules/r1_soc_band.py`) bildet das Produktiv-Schema im Kern nach (Reserve-Stop 50 % · Eco 58 % · Standard 80 % · Super 90 %; Eco→THROTTLE, Standard/Super→START, Modus in `params["mode"]`). **Default bleibt `surplus`** → Studie/Frozen-Set unberührt; ADR 020 + Kap. 11 aktualisiert. Tests grün (`test_soc_band_strategy.py`).
+
+**Offen — hängt an Nutzer/Betreuer:**
+
+- ⏳ **Gruppe B (A/B-Kontrast):** externen **Ollama-Rechner** anbinden → `OLLAMA_HOST=… python -m src.sim.study_freeze` füllt + friert die Persona-Texte ein → Faithfulness über A **und** B.
+- ⏳ **Hypothesen 🟦 + Ethikantrag** mit Betreuer; **Rubrik im Pilot** kalibrieren (Interrater-κ).
+- ⏳ **Reststand klein:** Prod-Template-THROTTLE-Abgleich; S3-Tarifentscheidung.
+- ⏳ **(Optional, bewusste Entscheidung) Studien-Umstieg auf `strategy="soc_band"`:** Nur falls die Studie das Produktiv-Verhalten (statt der Surplus-kW-Logik) zeigen soll. Voraussetzung: **Re-Freeze S1–S10** + **Faithfulness-Neuprüfung** + Anpassung **Thesis Kap. 5 (Szenarien/Rubrik)** + neue `decision_code`-Erwartungen. Default bleibt sonst `surplus`; kein Confound, da Faithfulness auf dem gewählten Kern-Pfad gemessen wird. *Erst nach Betreuer-Abstimmung — destabilisiert sonst das laufende Studiendesign.*
 
 > **Ökonomischer IST-Befund:** Bei Difficulty 138,96 T und BTC 53.435 € bringt der
 > Avalon Q (18,6 J/TH) nur **~5,42 ct/kWh** — **unter** der Einspeisevergütung (7,8 ct).
@@ -101,12 +112,12 @@ liefert zugleich den Konsistenz-Check HA ↔ Kern.
 - [x] **Prod-Simulation-Seite repariert** (`sim_inputs.yaml` + Sim-Branches Temp/Heartbeat + Dashboard-Refs) — keine „Entität nicht gefunden" mehr.
 - **DoF:** ✅ S1–S10 in HA auslösbar; Dashboard intakt; Lab = Kern (7/10), Rest dokumentiert.
 
-### Phase 6 — Saison gegen den Bias
+### Phase 6 — Saison gegen den Bias ✅
 *Warum hier:* Forward-Record läuft bereits; Synthetik blockiert frühere Phasen nicht.
 
-- [ ] Synthetische 4-Jahreszeiten-Profile (PV/Last/SoC) im SIM-Track, klar markiert.
-- [ ] Forward-Record-Monitoring (Recorder 365 d, Snapshot aktiv).
-- **DoF:** je Jahreszeit ein repräsentatives Profil; Saison-Bias in `2024d` adressiert.
+- [x] **Synthetische 4-Jahreszeiten-Profile** (`src/sim/synth_seasons.py`): deterministische PV-Glockenkurve + Last + Batteriemodell → `synth_<saison>.csv` (Pipeline-Format, klar „SYNTHETISCH" markiert). Replay zeigt klaren Gradient: **Winter START=0 … Sommer START=14**, Herbst mit THROTTLE. Tests grün.
+- [x] **Forward-Record läuft** (Recorder 365 d, Snapshot aktiv) — echte Saisons akkumulieren vorwärts.
+- **DoF:** ✅ je Jahreszeit ein Profil; Saison-Bias überbrückt (real folgt über Monate).
 
 ### Phase 7 — Studienreife (Forschungsschicht)
 *Warum zuletzt:* Setzt korrektes System + reale Signale + finale Szenarien voraus.
@@ -119,10 +130,10 @@ liefert zugleich den Konsistenz-Check HA ↔ Kern.
 **Noch offen:**
 - [x] **Freeze-Gerüst gebaut:** `src/sim/study_freeze.py` + `study_scenarios.py` → `src/sim/study_set/S<n>.json` (State + Kern-Entscheidung + Gruppe-A-Text + Gruppe-B-Slots je Persona). **10/10 verifiziert** (Kern == erwarteter Code), Tests grün.
 - [ ] **Gruppe B anbinden:** `OLLAMA_HOST` auf den **externen Ollama-Rechner** setzen (Nutzer) → `python -m src.sim.study_freeze` füllt die Persona-Slots **und friert sie ein** (ausfallsicher + reproduzierbar). **Ohne das kein A/B-Kontrast.**
-- [ ] **LLM-Faithfulness-Check** (unabhängig vom Nutzer) — sonst Confound Stil↔Korrektheit. **Zentraler Validitäts-Hebel.**
+- [x] **Faithfulness-Vorprüfung gebaut** (`src/sim/study_faithfulness.py`): automatische Konsistenz-Prüfung (Erklärung darf der Entscheidung nicht widersprechen) + Erdung (Zahlenwert). **Gruppe A 10/10 konsistent**, bereit für Gruppe B. *Automatische Vorstufe — manuelle Bewertung bleibt nötig.*
 - [ ] **Text-Bausteine ergänzen** (THROTTLE neu) für volle Code-Abdeckung Gruppe A.
-- [ ] **Rubrik (0–12) + Interrater-κ** im Pilot kalibrieren; **Override-Ground-Truth** je Szenario (inkl. korrigiertem S8).
-- [ ] **Erkenntnisziele + Hypothesen + Pre-Registration**; **Ethikantrag**.
+- [x] **Erkenntnisziele + Hypothesen + Pre-Registration + Rubrik + Override-Ground-Truth** dokumentiert ([2024e](../../research/20_research_questions/202_working_questions/2024_study_design_context/2024e_erkenntnisziele_prereg.md)) — Hypothesen-Spezifika 🟦 mit Betreuer.
+- [ ] **Rubrik im Pilot kalibrieren** (2–3 Durchläufe) + Interrater-κ; **Ethikantrag** final.
 - **DoF:** Gruppe B live (externes Ollama); eingefrorenes 10er-Set; faithfulnessgeprüfte Erklärungen; vorregistrierte Hypothesen; reliable Rubrik.
 
 ### Phase 8 — Produktisierung (Ausblick: von der Forschung zum Unternehmen)
@@ -164,8 +175,9 @@ Phase 1 ✅ Ökonomie-Anzeige (Break-Even = Monitor, kein Gate)
 Phase 2 ✅ R2 Netto-Fix          ─▶ S8-Override-Ground-Truth sauber (7)
 Phase 3 ✅ Forecast + Audit      ─▶ S9 real, Override historisch (7)
 ADR 020 ✅ ─▶ Phase 4 ✅ THROTTLE ─▶ Phase 5 ✅ HA-Szenarien + Divergenz-Test
-Phase 6 ⏳ Saisons (forward + synthetisch)
-Phase 7 ⏳ Studienreife: externes Ollama (Gruppe B) + Set einfrieren + Faithfulness + Rubrik
+Phase 6 ✅ Synthetische Saisons (Winter…Sommer-Gradient) + Forward-Record
+Phase 7 ✅ Werkzeuge: Freeze + Faithfulness + Pre-Registration/Rubrik
+        ⏳ Rest: externes Ollama (Gruppe B) · Hypothesen🟦/Ethik · Rubrik-Pilot
 Phase 8 🔭 Produktisierung (Ausblick)
 ```
 

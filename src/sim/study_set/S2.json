@@ -21,7 +21,7 @@
     "surplus_kw": 0.4,
     "grid_import_w": 0.0,
     "grid_export_w": null,
-    "battery_soc_pct": 30,
+    "battery_soc_pct": 70,
     "miner_temp_c": 30,
     "miner_heartbeat_age_sec": 5,
     "energy_price_ct_kwh": 18,
@@ -36,7 +36,7 @@
     "pv_forecast_kw": 3.0,
     "pv_power_w": 1700,
     "house_load_w": 1300,
-    "battery_soc_pct": 30
+    "battery_soc_pct": 70
   },
   "explanation": {
     "group_a": {

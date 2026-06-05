@@ -65,6 +65,25 @@ XAI-Beitrag der Arbeit zu stärken.
 - **Residuale Divergenz** (R4 Forecast, R5 Deadband sind im HA-Template nicht abgebildet) wird als **bekannte Limitation** dokumentiert (Kapitel 11 Risiken, FINDINGS).
 - **B bleibt das spätere Upgrade**, falls die Arbeit „Kern steuert reale Anlage" behaupten soll.
 
+**Update (Juni 2026) — Spiegelrichtung invertiert.** Die produktive Live-Steuerung läuft
+faktisch über die SoC-Band-Automation `mvp_auto.yaml` (Betriebsmodi Eco/Standard/Super; Stop 50 % ·
+Eco-Start 58 % · Standard 80–75 % · Super 90–85 %), **nicht** über die `bg_decision_*`-Core-Spiegel-Templates.
+Diese Produktiv-Logik spiegelt den Kern (kW-Überschuss-R1) also *nicht*. Daraus folgt eine
+Richtungsumkehr gegenüber der ursprünglichen Entscheidung:
+
+- **Referenz ist künftig der Produktivbetrieb:** Das Energielabor (Bitaxe Gamma + NerdQaxe++) bildet
+  die Avalon-Q-Steuerung **maßstabsgetreu** nach — SoC-Schwellen identisch (dimensionslos), nur die
+  Leistung wird per Dreisatz auf die kleinen Miner skaliert. Das ist **keine** Divergenz, sondern ein
+  verkleinertes Abbild (Skalierungstabelle: Thesis §4.6.7, Studie 2024d).
+- **Kern-Angleichung (umgesetzt, additiv):** Der Kern unterstützt nun neben der Surplus-kW-Logik
+  eine wählbare **SoC-Band-Strategie** (`RuleEngineConfig(strategy="soc_band")`, Modul
+  `src/core/rules/r1_soc_band.py`), die das Produktiv-Schema nachbildet (Reserve-Stop 50 % · Eco 58 % ·
+  Standard 80 % · Super 90 %; Mapping Eco→THROTTLE, Standard/Super→START, Modus in `params["mode"]`).
+  **Default bleibt `"surplus"`** → die Studie läuft unverändert replay-basiert auf der Surplus-Logik,
+  das eingefrorene Set S1–S10 bleibt unberührt. Tests: `tests/core/test_soc_band_strategy.py`.
+- Die ursprüngliche Konsequenz „HA spiegelt den Kern" gilt damit nur noch für die `bg_decision_*`-Templates,
+  nicht für die produktive SoC-Band-Automation. Die residuale R4/R5-Divergenz bleibt bis zur Kern-Angleichung bestehen.
+
 ---
 > **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die wichtigsten Qualitätsanforderungen im Detail.
 >

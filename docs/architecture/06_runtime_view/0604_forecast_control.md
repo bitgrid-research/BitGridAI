@@ -77,11 +77,11 @@ sequenceDiagram
 
 Damit R4 nicht zu übervorsichtig agiert, müssen wir den Horizont definieren:
 
-| Parameter | Wert (Beispiel) | Beschreibung |
+| Parameter | Wert (Default) | Beschreibung |
 | :--- | :--- | :--- |
-| `forecast_lookahead_min`| **30 Min** | Wie weit schauen wir in die Zukunft? Alles, was danach passiert, ist uns für den aktuellen Block egal. |
-| `price_spike_threshold` | **30 ct** | Wenn der Preis innerhalb des `lookahead` hierüber steigt, fahren wir jetzt schon runter (Pre-emptive Stop). |
-| `min_predicted_surplus` | **1.0 kW** | Wenn die Prognose für den Zeitraum unter diesen Wert fällt, wird der Start verweigert. |
+| `min_predicted_surplus_kw` | **2.0 kW** | Wenn die PV-Prognose unter diesen Wert fällt, wird der Start per NOOP-Veto verweigert. |
+| `price_spike_threshold_ct` | **30 ct** | Wenn ein Preis-Peak hierüber erwartet wird, legt R4 ein NOOP-Veto ein (Pre-emptive Stop). |
+| `forecast_lookahead_min` | **30 Min** | Konzeptioneller Prognose-Horizont. *Hinweis:* im deterministischen Kern aktuell **kein** eigener Parameter — R4 wertet die bereitgestellte `pv_forecast_kw` aus. |
 
 ---
 > **Nächster Schritt:** Wir haben viele Regeln, die sich widersprechen könnten. Damit das System nicht nervös hin und her schaltet, brauchen wir einen Dämpfer.

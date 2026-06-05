@@ -58,8 +58,8 @@ rules:
     price_max_ct_kwh: 25.0       # null = deaktiviert
 
   r2:
-    soc_soft_min_pct: 20.0
-    soc_hard_min_pct: 10.0
+    soc_soft_min_pct: 58.0
+    soc_hard_min_pct: 50.0
     max_grid_import_w: 500.0
 
   r3:

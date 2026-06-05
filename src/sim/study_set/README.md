@@ -19,7 +19,7 @@ deterministischer Kern-Entscheidung und Erklärungen. Erzeugt von
 ## Gruppe B befüllen (wenn der externe Ollama-Rechner steht)
 
 ```bash
-OLLAMA_HOST=http://<dein-rechner>:11434 OLLAMA_MODEL=qwen3:4b \
+OLLAMA_HOST=http://<dein-rechner>:11434 OLLAMA_MODEL=qwen3:8b \
   python -m src.sim.study_freeze
 ```
 

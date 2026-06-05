@@ -39,8 +39,7 @@ Heimnetz / LAN (kein WAN)
 Edge Host (Docker / Compose)
 
 - bitgrid-mqtt (Mosquitto)
-- bitgrid-core (Rules, Scheduler, Adapter, API)
-- bitgrid-ui (Explain- & Control-UI)
+- bitgrid-core (Rules, Scheduler, Adapter, API + UI im selben Prozess)
 
 
 --> MQTT Topics (state/#, cmd/#, explain/#)
@@ -67,8 +66,8 @@ Das Deployment verfolgt folgende Leitziele:
   Alle Daten, Modelle und Entscheidungen verbleiben auf dem Host.
 
 - **Einfaches Rollout:**  
-  Ein Docker-Compose-Bundle mit drei Kerndiensten:
-  `mqtt`, `core`, `ui`.
+  Ein Docker-Compose-Bundle mit zwei Kerndiensten:
+  `mqtt`, `core` (REST-API und UI laufen im selben Prozess wie das Regelwerk).
 
 - **Packaging ohne Umbau:**  
   Umbrel nutzt exakt dieselben Container und Volumes.
@@ -91,7 +90,7 @@ Das Deployment verfolgt folgende Leitziele:
 |------------------|---------------------|--------|------------|
 | Core / Rules     | `bitgrid-core`      | Edge Host | `./config`, `./data`, `./logs` |
 | Adapter / Module | Teil von `core`     | Edge Host | `./config` |
-| UI / Explain     | `bitgrid-ui`        | Edge Host | build-/cache-basiert |
+| UI / Explain     | Teil von `core` (gemeinsamer Prozess) | Edge Host | build-/cache-basiert |
 | Datenhaltung     | gemountet in `core` | Edge Host | SQLite / Parquet |
 | MQTT-Bus         | `bitgrid-mqtt`      | Edge Host | `./mqtt/*` |
 
@@ -107,11 +106,10 @@ Optional (Umbrel):
 | Service | Aufgabe | Exponierung |
 |-------|--------|-------------|
 | `bitgrid-mqtt` | Messaging (State, Commands, Explain) | intern; optional LAN |
-| `bitgrid-core` | Regelwerk R1–R5, Scheduler, API | intern |
-| `bitgrid-ui` | Visualisierung & Kontrolle | über Proxy |
+| `bitgrid-core` | Regelwerk R1–R5, Scheduler, REST-API **und UI** (ein Prozess) | API/UI über Port 8080 |
 
 **Netz:** internes Docker-Netz (`bitgrid_net`)  
-**Startreihenfolge:** MQTT → Core → UI  
+**Startreihenfolge:** MQTT → Core  
 **Ressourcen:** Ziel ≥ 4 vCPU / 4 GB RAM (LLM quantisiert, edge-tauglich)
 
 &nbsp;

@@ -71,11 +71,13 @@ sequenceDiagram
 
 Wie träge soll das System sein?
 
-| Parameter | Wert (Beispiel) | Beschreibung |
+| Parameter | Wert (Default) | Beschreibung |
 | :--- | :--- | :--- |
+| `min_runtime_blocks` | **3 Blöcke** | (30 Min) Mindestlaufzeit nach einem Start, bevor wieder gestoppt werden darf. |
+| `min_pause_blocks` | **2 Blöcke** | (20 Min) Mindestpause nach einem Stopp, bevor wieder gestartet werden darf. |
 | `deadband_hold_blocks` | **2 Blöcke** | (20 Min) Standard-Haltezeit nach jedem Schaltvorgang (Start oder Stop). Verhindert, dass wir öfter als 3x pro Stunde schalten. |
 | `force_unlock_rules` | **R2, R3** | Welche Regeln dürfen das Totband brechen? Nur **Autarkie** (R2, Akku leer) und **Sicherheit** (R3, Feuer). R1 (Geld) und R4 (Prognose) müssen warten. |
-| `max_grid_import_deadband`| **2000 W** | Wenn der Bezug *während* des Totbands diesen Wert übersteigt, wird trotzdem abgebrochen (Notbremse für den Geldbeutel). |
+| `max_grid_import_deadband`| **2000 W** | Konzeptionelle Notbremse für anhaltenden Netzbezug während des Totbands. *Hinweis:* aktuell **kein** Parameter des deterministischen Kerns — R5 wertet nur die Block-Zähler (Mindestlaufzeit/-pause/Deadband) aus. |
 
 ---
 > **Nächster Schritt:** Damit haben wir den Automatik-Betrieb (R1-R5) komplett abgedeckt. Aber manchmal weiß der Mensch es besser und will eingreifen.

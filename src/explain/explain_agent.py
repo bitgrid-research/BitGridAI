@@ -78,7 +78,7 @@ class ExplainAgent:
         self._lang = lang
         self._blocks: dict[str, Any] = self._load_blocks()
         self._ollama_host: str = os.getenv("OLLAMA_HOST", "").rstrip("/")
-        self._ollama_model: str = os.getenv("OLLAMA_MODEL", "qwen3:4b")
+        self._ollama_model: str = os.getenv("OLLAMA_MODEL", "qwen3:8b")
         self._ollama_timeout: int = int(os.getenv("OLLAMA_TIMEOUT_SEC", "30"))
         raw_persona = os.getenv("OLLAMA_PERSONA", "energie").strip().lower()
         if raw_persona not in _VALID_PERSONAS:

@@ -34,7 +34,58 @@ sodass der Entscheidungskern per **Replay** exakt reproduzierbar denselben
 5. **Zentralkonzept „Steuern statt Einspeisen"** wird mehrfach berührt (S1, S3, S8).
 
 Alle Werte beziehen sich auf die Default-Schwellen der `RuleEngineConfig`:
-`surplus_min 1,5 kW · price_max 25 ct · soc_soft 20 % · soc_hard 10 % · max_grid_import 500 W · max_temp 85 °C · comm_timeout 60 s · min_predicted_surplus 2,0 kW · price_spike 30 ct · deadband 2 · min_runtime 3 · min_pause 2`.
+`surplus_min 1,5 kW · price_max 25 ct · soc_soft 58 % · soc_hard 50 % · max_grid_import 500 W · max_temp 85 °C · comm_timeout 60 s · min_predicted_surplus 2,0 kW · price_spike 30 ct · deadband 2 · min_runtime 3 · min_pause 2`.
+
+### Realbetrieb → Energielabor (maßstabsgetreue Nachbildung) + Kern (offen)
+
+**Ziel:** Das **Energielabor** bildet den **Realbetrieb maßstabsgetreu** nach — die kleinen
+Labor-Miner (**Bitaxe Gamma, NerdQaxe++**) ahmen die Steuerung der **2× Avalon Q** nach:
+dasselbe **SoC-Band-Schema** mit denselben **Betriebsmodi** (Eco/Standard/Super). Die
+**SoC-Schwellen (50/58/80/90 %) bleiben identisch** (dimensionslos); nur die **Leistungswerte**
+werden vom kW-Bereich der Avalon Q auf den Watt-Bereich der Lab-Miner **heruntergerechnet** —
+stufenweise über die drei Modi.
+
+Der **deterministische Kern** (`RuleEngineConfig`, identisch im HA-„Rule Lab" `rule_lab.yaml`)
+nutzt für die Studie weiterhin die **kW-Überschuss-Logik** (R1, Default `strategy="surplus"`);
+die **Hausreserve** ist dabei auf die Produktivwerte vereinheitlicht (R2: `soc_hard` 50 % /
+`soc_soft` 58 %), weil 10–20 % nicht über die Nacht reichen. Eine wählbare **SoC-Band-Strategie**
+(`strategy="soc_band"`, `r1_soc_band.py`) bildet das Produktiv-Schema zusätzlich nach (ADR 020).
+Gegenüberstellung der Werte:
+
+| Parameter | **Realbetrieb** (`mvp_auto`) | Core/Studie (`RuleEngineConfig`) |
+|---|---|---|
+| Stop-/Standby-SoC | **50 %** (Hausreserve) | `soc_hard` 50 % |
+| Eco-Start-SoC | **58 %** | `soc_soft` 58 % (kein-Neustart-Veto) |
+| Standard-Start/-Stop | **80 / 75 %** | — |
+| Super-Start/-Stop | **90 / 85 %** | — |
+| Start-Trigger | **SoC ≥ 58 % UND PV ≥ 6000 W** | Überschuss ≥ 1,5 kW (R1) |
+| Throttle/Eco | Modus „Eco" (Std+Super derzeit Testmodus gesperrt) | THROTTLE 0,8–1,5 kW |
+| Temp-Drosselung | **112 °C** (→Standard), Lockout 95 °C, Raum 31 °C | `max_temp` 85 °C (R3) |
+| Netz-/Akku-Veto | Akku-Abgabe < **−800 W** / 5 min → Super→Eco | `max_grid_import` 500 W netto |
+| Takt / Cooldown | **2 min** / **1 h**; PV-Bypass ab 15 min | Block 10 min, min_runtime/pause 3/2 |
+| Nacht-Sperre | **22:00–06:00** | — |
+| Batterie | **10 kWh** | — |
+
+> **Einordnung:** Lab und Realbetrieb sollen **strukturgleich** sein (gleiche Steuerung, nur
+> leistungsskaliert) — keine bewusste Divergenz, sondern ein verkleinertes Abbild. Die
+> SoC-Schwellen sind **1:1** übernommen, die Leistungs- und PV-Schwellen sind der **einzige**
+> skalierte Anteil. Der **Kern** unterstützt das SoC-Band-Schema inzwischen **additiv** als wählbare
+> Strategie (`RuleEngineConfig(strategy="soc_band")`); Default bleibt die Surplus-kW-Logik, daher läuft
+> die Studie weiterhin replay-basiert darauf (Frozen-Set S1–S10 unberührt).
+
+**Stufen-Skalierung (Dreisatz — Avalon-Q-Modi als Anteil vom Maximum):**
+
+| Modus | Anteil | Avalon Q | Bitaxe Gamma | NerdQaxe++ |
+|---|---|---|---|---|
+| Eco | 47,8 % | 800 W | ~8,6 W | ~36 W |
+| Standard | 77,7 % | 1300 W | ~14,0 W | ~59 W |
+| Super | 100 % | 1674 W | ~18 W | ~76 W |
+| *Hashrate (Super)* | — | 90 TH/s | 1,2 TH/s | 4,8 TH/s |
+
+> **TODO (nach Realtest):** Sobald die drei Stufen auf Bitaxe/NerdQaxe programmiert und getestet
+> sind, die **real gemessenen Werte je Stufe** eintragen — **Hashrate (TH/s)** und **Spannung (V)**
+> sowie die tatsächliche Leistung (W). Die Lab-Maxima 18 W / 76 W sind nur Stock-Referenz; Eco/Standard
+> sind daraus per Dreisatz abgeleitet und nach der Messung zu ersetzen.
 
 ---
 
@@ -174,7 +225,7 @@ durchgängige Batteriesimulation.
 - [x] **Override/Reason aufgezeichnet:** `sensor.`-Spiegel in der 365-Tage-DB (`audit_mirrors.yaml`).
 - [ ] **Residuale Engine-Divergenz** (R4/R5 nicht im HA-Template) — bekannte Limitation (arc42 Kap. 11, ADR 020).
 
-> **Saison-Bias (Validität):** Alle 11 Detail-Tage sind Spätfrühling. Häufigkeiten (S9 822×, S2 20×) sommer-spezifisch → über Monate/Saisons nachrecorden.
+> **Saison-Bias (Validität):** Alle 11 Detail-Tage sind Spätfrühling. Häufigkeiten (S9 822×, S2 20×) sommer-spezifisch. **Überbrückt** durch synthetische 4-Jahreszeiten-Profile (`src/sim/synth_seasons.py` — Winter START=0 … Sommer START=14); reale Saisons folgen über Monate (Forward-Record läuft).
 
 ### Studiendurchführung (aus 2024a–c)
 

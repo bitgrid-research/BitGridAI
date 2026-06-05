@@ -21,7 +21,7 @@
     "surplus_kw": -0.7,
     "grid_import_w": 700,
     "grid_export_w": null,
-    "battery_soc_pct": 55,
+    "battery_soc_pct": 65,
     "miner_temp_c": 50,
     "miner_heartbeat_age_sec": 5,
     "energy_price_ct_kwh": 15,
@@ -29,9 +29,9 @@
     "quality": "ok"
   },
   "params": {
-    "battery_soc_pct": 55,
-    "soc_soft_min_pct": 20.0,
-    "soc_hard_min_pct": 10.0,
+    "battery_soc_pct": 65,
+    "soc_soft_min_pct": 58.0,
+    "soc_hard_min_pct": 50.0,
     "grid_import_w": 700,
     "max_grid_import_w": 500.0,
     "pv_forecast_kw": 3.0,

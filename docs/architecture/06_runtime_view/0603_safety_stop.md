@@ -32,11 +32,11 @@ sequenceDiagram
     participant UI as 🖥️ UI/User
 
     Note over Hardware, Watchdog: Asynchrone Überwachung
-    Hardware->>Watchdog: Temp = 82°C (Critical!)
+    Hardware->>Watchdog: Temp = 87°C (Critical!)
     
     critical R3 INTERRUPT
         Note over Watchdog, Actuator: R3 umgeht den Scheduler!
-        Watchdog->>Watchdog: Check: 82°C > 80°C Limit?
+        Watchdog->>Watchdog: Check: 87°C > 85°C Limit?
         Watchdog->>Actuator: IMMEDIATE STOP COMMAND
         Actuator->>Hardware: Power OFF
     end
@@ -83,11 +83,13 @@ Nach dem Crash ist vor dem Start – aber nicht sofort.
 
 Sicherheit ist nicht verhandelbar, aber konfigurierbar. Diese Werte schützen die Investition:
 
-| Parameter | Wert (Beispiel) | Beschreibung |
+| Parameter | Wert (Default) | Beschreibung |
 | :--- | :--- | :--- |
-| `max_chip_temp_c` | **80°C** | Absolute Obergrenze. Ein Grad mehr, und der Miner steht. |
+| `max_chip_temp_c` | **85°C** | Konfigurierbare Obergrenze. Ein Grad mehr, und der Miner steht. |
+| `t_resume_c` | **75°C** | Resume-Schwelle (10-K-Hysterese). *Hinweis:* im Kern aktuell als Parameter vorgesehen, aber noch nicht aktiv genutzt — in der Produktiv-Automation (HA) wirksam. |
 | `comm_timeout_sec` | **60 Sek** | "Dead Man's Switch". Wenn wir solange nichts vom Gerät hören, gehen wir vom Schlimmsten aus (Lüfterausfall/Absturz) $\rightarrow$ Stop. |
-| `safety_lockout_min` | **60 Min** | Mindest-Wartezeit nach einem Not-Stopp ("Abkühlphase"), bevor ein automatischer Neustart überhaupt erst wieder versucht wird. |
+| *Compile-Time-Hardlimits* | **95°C / 300 Sek** | Fest verdrahtete absolute Grenzen (`_ABSOLUTE_MAX_TEMP_C` / `_ABSOLUTE_MAX_HEARTBEAT_SEC`), unabhängig von der Config. |
+| `safety_lockout_min` | **60 Min** | Mindest-Wartezeit nach einem Not-Stopp ("Abkühlphase"). *Hinweis:* in der Produktiv-/HA-Automation umgesetzt, **kein** Parameter des deterministischen Kerns. |
 
 ---
 > **Nächster Schritt:** Sicherheit ist gewährleistet. Jetzt machen wir das System schlau. Wir schauen nicht nur auf das "Jetzt", sondern auch in die Zukunft.

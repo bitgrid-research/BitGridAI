@@ -16,8 +16,8 @@ from src.core.models import EnergyState, RuleVote
 
 def evaluate(
     state: EnergyState,
-    soc_soft_min_pct: float = 20.0,
-    soc_hard_min_pct: float = 10.0,
+    soc_soft_min_pct: float = 58.0,
+    soc_hard_min_pct: float = 50.0,
     max_grid_import_w: float = 500.0,
 ) -> RuleVote | None:
     """

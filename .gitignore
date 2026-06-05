@@ -35,6 +35,9 @@ home-assistant_v2.db*
 # Reale Haushalts-Energiedaten aus HA-Export (regenerierbar via ha_history_export.py)
 src/sim/scenarios/real_*.csv
 
+# Synthetische Saison-Profile (regenerierbar via synth_seasons.py)
+src/sim/scenarios/synth_*.csv
+
 # BitGridAI — Credentials & Secrets (NIEMALS einchecken)
 # MQTT Passwort-Datei (Mosquitto Auth)
 infra/mosquitto/passwd

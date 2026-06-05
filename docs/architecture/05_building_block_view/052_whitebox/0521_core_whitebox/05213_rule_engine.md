@@ -27,7 +27,7 @@ Keine Statistik. Kein Raten. Keine Magie.
 
 - **Priorizer**  
   Ordnet Ergebnisse nach fester Reihenfolge:  
-  **Safety > Autarkie > Stabilität > Optimierung**.
+  **Safety (R3) > Autarkie (R2) > Prognose (R4) > Stabilität (R5) > Optimierung (R1)**.
 
 - **Conflict Resolver**  
   Kombiniert oder neutralisiert konkurrierende Vorschläge und setzt sichere Fallbacks.

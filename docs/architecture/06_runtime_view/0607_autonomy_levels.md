@@ -25,13 +25,16 @@ Unabhängig von der gewählten Stufe gilt:
 
 &nbsp;
 
-## Die vier Autonomie-Stufen
+## Die drei Autonomie-Stufen
 
-### Stufe 0 — Manuell  
+Der Kern implementiert drei benannte Stufen (`AutonomyLevel = "FULL" | "SEMI" | "MANUAL"`,
+`src/core/models.py`). Der Standardwert ist **FULL** (Studien-Default).
+
+### MANUAL — Manuell  
 **Der Nutzer entscheidet immer.**
 
-- Mining wird ausschließlich manuell über das UI gestartet oder gestoppt.
-- Das System macht keine Vorschläge und trifft keine eigenen Entscheidungen.
+- Nach R3 werden alle weiteren Regeln übersprungen; der Kern gibt `NOOP_MANUAL_MODE` zurück.
+- Start und Stop erfolgen ausschließlich manuell über den Override-Button.
 - Sicherheitsprüfungen (R3) werden weiterhin ausgeführt und können Aktionen blockieren.
 
 **Typischer Anwendungsfall:**  
@@ -39,39 +42,26 @@ Tests, Debugging, maximale Kontrolle.
 
 &nbsp;
 
-### Stufe 1 — Assistiert  
-**Das System denkt mit, entscheidet aber nicht.**
-
-- BitGridAI analysiert Kontext, Prognosen und Regeln.
-- Es formuliert Vorschläge („Jetzt starten wäre sinnvoll“).
-- Jede Aktion erfordert eine explizite Bestätigung durch den Nutzer („Anwenden“).
-
-**Typischer Anwendungsfall:**  
-Vertrauensaufbau, Transparenz, lernende Nutzung.
-
-&nbsp;
-
-### Stufe 2 — Halb-automatisch  
-**Das System darf starten, aber nicht stoppen.**
+### SEMI — Halb-automatisch  
+**Das System darf starten, aber nicht selbstständig stoppen.**
 
 - BitGridAI darf Mining automatisch starten, wenn alle Bedingungen erfüllt sind.
-- Ein Stoppen des Minings ist ausschließlich manuell möglich.
-- Sicherheitsmechanismen (R3) dürfen jederzeit eingreifen und den Betrieb unterbrechen.
+- Automatische Stopp-Entscheidungen (z. B. R2) werden zu `NOOP` umgewandelt — nur **R3** darf noch automatisch abschalten.
+- Ein reguläres Stoppen ist sonst nur manuell möglich.
 
 **Typischer Anwendungsfall:**  
 Komfort beim Start, volle Kontrolle beim Stoppen.
 
 &nbsp;
 
-### Stufe 3 — Vollautomatisch  
+### FULL — Vollautomatisch (Standard)  
 **Das System kontrolliert Start und Stopp vollständig.**
 
 - Start und Stop werden autonom durch die Regeln R1–R5 gesteuert.
-- Der Nutzer definiert nur noch Rahmenparameter und Präferenzen.
-- Manuelle Eingriffe bleiben über zeitlich begrenzte Overrides möglich.
+- Der Nutzer definiert nur noch Rahmenparameter; manuelle Eingriffe bleiben über zeitlich begrenzte Overrides möglich.
 
 **Typischer Anwendungsfall:**  
-Maximaler Komfort, kontinuierlich optimierter Betrieb.
+Maximaler Komfort, kontinuierlich optimierter Betrieb; Standard während der Studie.
 
 &nbsp;
 
@@ -79,20 +69,17 @@ Maximaler Komfort, kontinuierlich optimierter Betrieb.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Manuell
-    Manuell --> Assistiert
-    Assistiert --> HalbAuto
-    HalbAuto --> VollAuto
+    [*] --> MANUAL
+    MANUAL --> SEMI
+    SEMI --> FULL
 
-    VollAuto --> HalbAuto
-    HalbAuto --> Assistiert
-    Assistiert --> Manuell
+    FULL --> SEMI
+    SEMI --> MANUAL
 
     state "Safety (R3)" as Safety
-    Manuell --> Safety
-    Assistiert --> Safety
-    HalbAuto --> Safety
-    VollAuto --> Safety
+    MANUAL --> Safety
+    SEMI --> Safety
+    FULL --> Safety
 ```
 &nbsp;
 
@@ -102,7 +89,7 @@ stateDiagram-v2
    Der Nutzer wählt im UI explizit eine Autonomie-Stufe. Der aktuell aktive Modus ist jederzeit sichtbar.
 
 2. **Zustandsablage (The Mode):**  
-   Die gewählte Stufe wird zentral im `EnergyState` als `autonomy_level` gespeichert.
+   Die gewählte Stufe wird im `OverrideHandler` als `autonomy_level` persistiert und bei jedem Block-Tick an die Rule Engine übergeben.
 
 3. **Regelverarbeitung (The Authority):**  
    Bei jedem Auswertungszyklus berücksichtigt die Rule Engine:
@@ -116,12 +103,14 @@ stateDiagram-v2
 
 ## Konfiguration
 
-| Parameter | Wert (Beispiel) | Beschreibung |
+| Parameter | Wert | Beschreibung |
 | --- | --- | --- |
-| `default_autonomy_level` | **1 (Assistiert)** | Sicherer und transparenter Startmodus |
-| `allow_level_change_runtime` | **TRUE** | Wechsel der Stufe ohne Neustart |
-| `min_autonomy_level` | **0** | Manuelle Kontrolle immer verfügbar |
-| `max_autonomy_level` | **3** | Vollautomatik als maximale Autonomie |
+| `autonomy_level` (Default) | **FULL** | Studien-Default; alle Regeln R1–R5 aktiv |
+| Mögliche Werte | **FULL · SEMI · MANUAL** | benannte Stufen (`src/core/models.py`) |
+| Laufzeit-Wechsel | **ja** | über `POST /autonomy`, ohne Neustart |
+| Persistenz | **OverrideHandler** | Stufe überlebt Container-Neustart |
+
+> **Hinweis:** R3 (Safety) bleibt in allen drei Stufen aktiv und kann nicht deaktiviert werden.
 
 ---
 > **Nächster Schritt:** Die Kontrolllogik ist definiert.  

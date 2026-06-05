@@ -88,8 +88,8 @@ class ConfigLoader:
             for key in ("soc_soft_min_pct", "soc_hard_min_pct"):
                 if key in r2 and not isinstance(r2[key], (int, float)):
                     errors.append(f"rules.yaml: r2.{key} muss eine Zahl sein")
-            soc_soft = r2.get("soc_soft_min_pct", 20.0)
-            soc_hard = r2.get("soc_hard_min_pct", 10.0)
+            soc_soft = r2.get("soc_soft_min_pct", 58.0)
+            soc_hard = r2.get("soc_hard_min_pct", 50.0)
             if isinstance(soc_soft, (int, float)) and isinstance(
                 soc_hard, (int, float)
             ):
@@ -140,8 +140,8 @@ def rules_to_engine_config(data: dict[str, Any]) -> "RuleEngineConfig":
     return RuleEngineConfig(
         surplus_min_kw=r1.get("surplus_min_kw", 1.5),
         price_max_ct_kwh=r1.get("price_max_ct_kwh", 25.0),
-        soc_soft_min_pct=r2.get("soc_soft_min_pct", 20.0),
-        soc_hard_min_pct=r2.get("soc_hard_min_pct", 10.0),
+        soc_soft_min_pct=r2.get("soc_soft_min_pct", 58.0),
+        soc_hard_min_pct=r2.get("soc_hard_min_pct", 50.0),
         max_grid_import_w=r2.get("max_grid_import_w", 500.0),
         max_chip_temp_c=r3.get("max_chip_temp_c", 85.0),
         t_resume_c=r3.get("t_resume_c", 75.0),

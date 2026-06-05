@@ -82,7 +82,7 @@ STUDY_SCENARIOS: tuple[StudyScenario, ...] = (
         "S2",
         "Kein Überschuss",
         _state(
-            "0700", pv=1700, load=1300, soc=30, temp=30, hb=5, price=18, forecast=3.0
+            "0700", pv=1700, load=1300, soc=70, temp=30, hb=5, price=18, forecast=3.0
         ),
         last_action=None,
         blocks_since_change=0,
@@ -131,7 +131,7 @@ STUDY_SCENARIOS: tuple[StudyScenario, ...] = (
         "S6",
         "Batterie-Schutz (soft)",
         _state(
-            "0900", pv=3800, load=1300, soc=18, temp=30, hb=5, price=14, forecast=3.5
+            "0900", pv=3800, load=1300, soc=55, temp=30, hb=5, price=14, forecast=3.5
         ),
         last_action=None,
         blocks_since_change=0,
@@ -144,7 +144,7 @@ STUDY_SCENARIOS: tuple[StudyScenario, ...] = (
             "1630",
             pv=1200,
             load=1400,
-            soc=9,
+            soc=45,
             temp=55,
             hb=5,
             grid_in=200,
@@ -162,7 +162,7 @@ STUDY_SCENARIOS: tuple[StudyScenario, ...] = (
             "1230",
             pv=800,
             load=1500,
-            soc=55,
+            soc=65,
             temp=50,
             hb=5,
             grid_in=700,

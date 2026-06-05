@@ -241,14 +241,14 @@ input_number:
     max: 100
     step: 1
     mode: box
-    initial: 65
+    initial: 58
   r2_soc_hard_min_pct:
     name: r2_soc_hard_min_pct
     min: 0
     max: 100
     step: 1
     mode: box
-    initial: 20
+    initial: 50
   r2_max_grid_import_w:
     name: r2_max_grid_import_w
     min: 0

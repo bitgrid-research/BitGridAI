@@ -35,7 +35,7 @@ sequenceDiagram
 
     Note over Rules: 3. Decision (R1)
     Rules->>SSoT: Get State (Surplus & Price)
-    Rules->>Rules: Check: Surplus > 1.5kW AND Price < 18ct?
+    Rules->>Rules: Check: Surplus >= 1.5kW AND Price < 25ct?
     Rules-->>Rules: YES -> Action: START
 
     Note over Rules, Miner: 4. Actuation & Explanation
@@ -53,11 +53,16 @@ sequenceDiagram
 
 Damit dieser Ablauf funktioniert, sind folgende Schwellenwerte im System hinterlegt:
 
-| Parameter | Wert (Beispiel) | Beschreibung |
+R1 arbeitet als **Drei-Band-Logik** über den PV-Überschuss: unter `surplus_throttle_min_kw`
+bleibt der Miner aus (NOOP), zwischen Throttle- und Start-Schwelle läuft er gedrosselt
+im Eco-Modus (THROTTLE), ab `surplus_min_kw` unter Voll-Last (START).
+
+| Parameter | Wert (Default) | Beschreibung |
 | :--- | :--- | :--- |
-| `surplus_min_kw` | **1.5 kW** | Mindest-Überschuss (gleitender Durchschnitt), damit R1 feuert. |
-| `price_max_ct_kwh` | **18 ct/kWh** | Die "Schmerzgrenze" beim Strompreis. Darüber bleibt der Miner aus. |
-| `min_runtime_blocks` | **2 Blöcke** | (20 Min) Mindestlaufzeit nach Start, um die Hardware zu schonen (Short-Cycling-Schutz). |
+| `surplus_throttle_min_kw` | **0.8 kW** | Unter diesem Überschuss bleibt der Miner aus (NOOP). |
+| `surplus_min_kw` | **1.5 kW** | Ab diesem Überschuss (gleitender Durchschnitt) startet R1 unter Voll-Last (START); dazwischen THROTTLE. |
+| `price_max_ct_kwh` | **25 ct/kWh** | Die "Schmerzgrenze" beim Strompreis. Darüber unterbleibt der Start. |
+| `min_runtime_blocks` | **3 Blöcke** | (30 Min) Mindestlaufzeit nach Start, um die Hardware zu schonen (Short-Cycling-Schutz). |
 | `deadband_hold_blocks` | **2 Blöcke** | (20 Min) Nach dem Einschalten wird dieser Zustand "festgehalten" (siehe Regel R5), um Flapping zu verhindern. |
 
 &nbsp;

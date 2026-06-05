@@ -70,7 +70,7 @@ rule_lab:
     lab_soc_soft_min_pct:
       name: "Lab: SoC Soft-Min (R2)"
       min: 0
-      max: 50
+      max: 100
       step: 1
       unit_of_measurement: "%"
       mode: slider
@@ -79,7 +79,7 @@ rule_lab:
     lab_soc_hard_min_pct:
       name: "Lab: SoC Hard-Min (R2)"
       min: 0
-      max: 30
+      max: 100
       step: 1
       unit_of_measurement: "%"
       mode: slider
@@ -148,8 +148,8 @@ rule_lab:
           unique_id: lab_r2_result
           state: >-
             {% set soc      = states('input_number.lab_battery_soc_pct') | float(0) %}
-            {% set hard_min = states('input_number.lab_soc_hard_min_pct') | float(10) %}
-            {% set soft_min = states('input_number.lab_soc_soft_min_pct') | float(20) %}
+            {% set hard_min = states('input_number.lab_soc_hard_min_pct') | float(50) %}
+            {% set soft_min = states('input_number.lab_soc_soft_min_pct') | float(58) %}
             {% set grid     = states('input_number.lab_grid_import_w') | float(0) %}
             {% set max_grid = states('input_number.lab_max_grid_import_w') | float(500) %}
             {% if soc <= hard_min %}
@@ -236,8 +236,8 @@ rule_lab:
             {% set surplus     = states('sensor.lab_surplus_kw') | float(0) %}
             {% set surplus_min = states('input_number.lab_surplus_min_kw') | float(1.5) %}
             {% set soc         = states('input_number.lab_battery_soc_pct') | float(0) %}
-            {% set soc_hard    = states('input_number.lab_soc_hard_min_pct') | float(10) %}
-            {% set soc_soft    = states('input_number.lab_soc_soft_min_pct') | float(20) %}
+            {% set soc_hard    = states('input_number.lab_soc_hard_min_pct') | float(50) %}
+            {% set soc_soft    = states('input_number.lab_soc_soft_min_pct') | float(58) %}
             {% set temp        = states('input_number.lab_miner_temp_c') | float(0) %}
             {% set temp_max    = states('input_number.lab_max_chip_temp_c') | float(85) %}
             {% set grid        = states('input_number.lab_grid_import_w') | float(0) %}
@@ -275,7 +275,7 @@ rule_lab:
           state: >-
             {% set code        = states('sensor.lab_final_decision') %}
             {% set surplus_min = states('input_number.lab_surplus_min_kw') | float(1.5) %}
-            {% set soc_soft    = states('input_number.lab_soc_soft_min_pct') | float(20) %}
+            {% set soc_soft    = states('input_number.lab_soc_soft_min_pct') | float(58) %}
             {% set max_grid    = states('input_number.lab_max_grid_import_w') | float(500) %}
             {% set temp_max    = states('input_number.lab_max_chip_temp_c') | float(85) %}
             {% if   code == 'START_R1_SURPLUS_OK'          %} —
@@ -300,10 +300,10 @@ rule_lab:
           data: { value: "{{ states('input_number.r1_surplus_min_kw') | float(1.5) }}" }
         - action: input_number.set_value
           target: { entity_id: input_number.lab_soc_soft_min_pct }
-          data: { value: "{{ states('input_number.r2_soc_soft_min_pct') | float(20) }}" }
+          data: { value: "{{ states('input_number.r2_soc_soft_min_pct') | float(58) }}" }
         - action: input_number.set_value
           target: { entity_id: input_number.lab_soc_hard_min_pct }
-          data: { value: "{{ states('input_number.r2_soc_hard_min_pct') | float(10) }}" }
+          data: { value: "{{ states('input_number.r2_soc_hard_min_pct') | float(50) }}" }
         - action: input_number.set_value
           target: { entity_id: input_number.lab_max_grid_import_w }
           data: { value: "{{ states('input_number.r2_max_grid_import_w') | float(500) }}" }
