@@ -37,7 +37,7 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 * **Stichprobe:** N = 20 — Gruppe A (statisch) n = 5, Gruppe B (adaptiv) n = 15 in 3 Persona-Stufen à n = 5; heterogener Hintergrund; Ausschluss von Domänen-Experten (Energie-/Regelungstechnik, Informatik) zur Vermeidung eines Ceiling-Effekts
 * **Format:** Einzelsitzung, ca. 60–90 Minuten pro Proband (kein Längsschnitt)
 * **Statistik:** t-Test für unabhängige Stichproben (einseitig) auf den Regelverständnis-Score; Primärvergleich Gruppe A vs. **gepoolte** Gruppe B (Cohen's *d*, 95 %-KI). Der Persona-Vergleich (n = 5 je Stufe) bleibt **explorativ/deskriptiv**.
-* **Standardisierung:** identische, gescriptete Szenario-Abfolge für alle Probanden — eingespielt per **Replay** des deterministischen Regelkerns
+* **Standardisierung:** identische, gescriptete Szenario-Abfolge für alle Probanden — eingespielt per **Replay** des deterministischen Regelkerns (die zehn Szenarien S01–S10: [Übersicht in Kapitel 26](../26_scenarios_and_use_cases/README.md#deterministische-studienszenarien-s01s10), kanonische Spezifikation in [20.2.4.4](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/README.md))
 
 ### Sitzungsablauf
 
@@ -85,7 +85,7 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 
 ### Datenbasis
 
-* Gescriptete PV-/Batterie-Szenarien (Replay-Fixtures, für alle Probanden identisch)
+* Gescriptete PV-/Batterie-Szenarien ([S01–S10](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/README.md), Replay-Fixtures, für alle Probanden identisch)
 * Reale Telemetriedaten der Last
 * Strukturierte Logs (DecisionEvents: Entscheidungen, Gründe, Overrides)
 

@@ -117,6 +117,38 @@ Nach Abschluss einer Fahrt wird das Systemverhalten rückblickend betrachtet.
 
 &nbsp;
 
+## Deterministische Studienszenarien (S01–S10)
+
+Die obigen Szenarien sind **illustrativ**. Für Simulation und Evaluation werden sie
+zu **zehn deterministischen Szenarien** verdichtet, eingebettet in einen
+zusammenhängenden Mining-Tag. Jedes Szenario ist ein 10-Minuten-Block mit vollständig
+spezifiziertem `EnergyState`, sodass der Entscheidungskern per **Replay** exakt
+reproduzierbar denselben `decision_code` erzeugt — identisch für alle Probanden
+(vgl. Kapitel 27).
+
+Die kanonische Spezifikation (Datengrundlage, IST-Belegung aus Realdaten, Methodik)
+liegt im Studiendesign-Kontext:
+**[20.2.4.4 - Szenarien für Simulation und Studie](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/README.md)**.
+
+| ID | Szenario | Regel | Erwartete Entscheidung | Datei |
+|---|---|---|---|---|
+| **S1** | Klarer Start | R1 | `START_R1_SURPLUS_OK` | [S01](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S01_klarer_start.md) |
+| **S2** | Kein Überschuss | R1 | `NOOP_R1_INSUFFICIENT_SURPLUS` | [S02](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S02_kein_ueberschuss.md) |
+| **S3** ⚑ | Sonne, aber Preis hoch | R1 | `NOOP_R1_PRICE_TOO_HIGH` | [S03](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S03_preis_zu_hoch.md) |
+| **S4** ⚑ | Übertemperatur | R3 | `STOP_R3_OVERTEMP_T90` | [S04](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S04_uebertemperatur.md) |
+| **S5** | Kommunikationsausfall | R3 | `STOP_R3_COMM_TIMEOUT_AGE75` | [S05](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S05_kommunikationsausfall.md) |
+| **S6** ⚑ | Batterie-Schutz (soft) | R2 | `NOOP_R2_SOC_SOFT_MIN` | [S06](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S06_batterie_soft.md) |
+| **S7** | Batterie-Notstopp (hard) | R2 | `STOP_R2_SOC_HARD_MIN` | [S07](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S07_batterie_hard.md) |
+| **S8** ⚑ | Wolke → Netzbezug | R2 | `STOP_R2_GRID_IMPORT_EXCEEDED` | [S08](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S08_netzbezug.md) |
+| **S9** ⚑ | Forecast blockiert | R4 | `NOOP_R4_FORECAST_PV_INSUFFICIENT` | [S09](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S09_forecast.md) |
+| **S10** | Anti-Flapping | R5 | `NOOP_R5_MIN_RUNTIME_NOT_REACHED` | [S10](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S10_anti_flapping.md) |
+
+⚑ = diskriminierende Items (kontraintuitiv) — sie trennen die statische von der
+persona-adaptiven Erklärung. Die Szenarien decken alle Regeln R1–R5 und die
+Prioritätskette R3 > R2 > R4 > R5 > R1 ab.
+
+&nbsp;
+
 ## Ableitung von Use Cases
 
 Aus den Szenarien lassen sich konkrete **Use Cases** ableiten, die für Tests und Evaluation genutzt werden.
