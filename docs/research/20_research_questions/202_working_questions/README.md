@@ -70,7 +70,9 @@ Systemlogik basierenden Kontexten betrachtet:
 
   - [20.2.4.1 - Studiendesign und Stichprobe](./2024_study_design_context/2024a_study_design_sampling.md)  
   - [20.2.4.2 - Aufgaben, Instrumente und Messlogik](./2024_study_design_context/2024b_tasks_instruments_metrics.md)  
-  - [20.2.4.3 - Ethik, Datenschutz und Analyseplan](./2024_study_design_context/2024c_ethics_privacy_analysis.md)
+  - [20.2.4.3 - Ethik, Datenschutz und Analyseplan](./2024_study_design_context/2024c_ethics_privacy_analysis.md)  
+  - [20.2.4.4 - Szenarien für Simulation und Studie](./2024_study_design_context/2024d_scenarios/README.md)  
+  - [20.2.4.5 - Erkenntnisziele, Hypothesen & Pre-Registration](./2024_study_design_context/2024e_erkenntnisziele_prereg.md)
 
 
 &nbsp;
