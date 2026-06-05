@@ -30,7 +30,7 @@ Nur Zustand, Zeit und Regeln.
 | --- | --- | --- |
 | **Block-Scheduler** | Erzwingt 10-Minuten-Blockfenster, vergibt `valid_until` (Deadbands). | Entkoppelt Flapping, gibt den Systemtakt vor. |
 | **Energy Context** | Konsolidiert Messwerte und Forecasts zum `EnergyState`. | Validiert Einheiten, Zeitstempel und Vollständigkeit. |
-| **Rule Engine** | Bewertet R1–R5, erzeugt `Decision` und `DecisionEvent`. | Priorisierung: Safety > Autarkie > Stabilität > Optimierung. |
+| **Rule Engine** | Bewertet R1–R5, erzeugt `Decision` und `DecisionEvent`. | Priorisierung: Safety > Autarkie > Prognose > Stabilität > Optimierung. |
 | **Override Handler** | Verarbeitet manuelle Eingriffe mit TTL und Scope. | Konfliktprüfung gegen Safety- und Autarkie-Regeln. |
 
 &nbsp;

@@ -46,13 +46,13 @@ Das Glossar enthält zentrale Begriffe, Konzepte und Abkürzungen, die in der Bi
 | **R1 Startregel** | Start bei Überschuss + ggf. Preisgrenzen. |
 | **R2 Autarkie‑Schutz** | Stop/Block bei niedrigem SoC zum Schutz der Eigenversorgung. |
 | **R3 Thermo‑Schutz** | Sofort‑Stop bei Übertemperatur; Wiederaufnahme mit Hysterese. |
-| **R4 Prognose‑Start** | Frühstart bei stabiler lokaler Überschussprognose. |
+| **R4 Prognose‑Veto** | NOOP-Veto bei zu geringer PV-Prognose oder erwartetem Preis-Peak; löst nie selbst einen Start aus. |
 | **R5 Deadband / Anti‑Flapping** | Stabilisierung zur Vermeidung häufiger Start/Stop‑Wechsel. |
 | **Replay Runner** | Tool, das Parquet/SQLite-Logs deterministisch abspielt (1x–20x) und KPIs vergleicht. |
 | **Research Service** | Lokaler Dienst/CLI für `/research/toggle`, `/research/export`, `/replay` inkl. Audit-Logs. |
 | **Research Toggle** | Opt-in/Opt-out-Schalter für Forschung, steuert Export/Replay und UI-Hinweise. |
 | **REST / WebSocket** | Lokale HTTP‑/WS‑Schnittstellen für State, Timeline, Events. |
-| **Rule Engine (R1–R5)** | Deterministische Kernlogik: Start (R1), Autarkie‑Schutz (R2), Thermo‑Schutz (R3), Prognose‑Start (R4), Deadband (R5). |
+| **Rule Engine (R1–R5)** | Deterministische Kernlogik: Start (R1), Autarkie‑Schutz (R2), Thermo‑Schutz (R3), Prognose‑Veto (R4), Deadband (R5). |
 | **SoC (State of Charge)** | Ladezustand des Speichers (0…1); Schutz via R2. |
 | **SQLite / Parquet** | Lokale Speicherung (Online‑DB / Langzeit‑Logs & Replay). |
 | **Stop → Safe** | Der definierte Fail-Safe-Zustand, der bei kritischen Safety-Regeln (R2/R3) oder unbehebbaren Fehlern erzwungen wird. |
