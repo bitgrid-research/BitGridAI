@@ -62,7 +62,7 @@ def test_data_basis_interpolates_params(agent: ExplainAgent) -> None:
     result = agent.explain(dc.START_R1_SURPLUS_OK, params)
     assert "4200" in result.data_basis
     assert "800" in result.data_basis
-    assert "3.4" in result.data_basis
+    assert "3,4" in result.data_basis  # deutsches Dezimalkomma
 
 
 def test_effect_no_interpolation_needed(agent: ExplainAgent) -> None:
@@ -73,13 +73,13 @@ def test_effect_no_interpolation_needed(agent: ExplainAgent) -> None:
 def test_options_interpolates_threshold(agent: ExplainAgent) -> None:
     params = {"surplus_min_kw": 2.0}
     result = agent.explain(dc.NOOP_R1_INSUFFICIENT_SURPLUS, params)
-    assert "2.0" in result.options
+    assert "2,0" in result.options  # deutsches Dezimalkomma
 
 
 def test_trigger_interpolates_threshold(agent: ExplainAgent) -> None:
     params = {"surplus_kw": 2.2}
     result = agent.explain(dc.START_R1_SURPLUS_OK, params)
-    assert "2.2" in result.trigger
+    assert "2,2" in result.trigger  # deutsches Dezimalkomma
 
 
 def test_missing_param_returns_question_mark(agent: ExplainAgent) -> None:
@@ -151,8 +151,8 @@ def test_noop_r5_deadband_options_contains_valid_until(agent: ExplainAgent) -> N
 def test_noop_r4_forecast_pv_data_basis(agent: ExplainAgent) -> None:
     params = {"pv_forecast_kw": 0.8, "min_predicted_surplus_kw": 1.5}
     result = agent.explain(dc.NOOP_R4_FORECAST_PV_INSUFFICIENT, params)
-    assert "0.8" in result.data_basis
-    assert "1.5" in result.data_basis
+    assert "0,8" in result.data_basis  # deutsches Dezimalkomma
+    assert "1,5" in result.data_basis
 
 
 def test_start_r1_options_is_empty(agent: ExplainAgent) -> None:

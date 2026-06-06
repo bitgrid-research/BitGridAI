@@ -7,6 +7,14 @@ und das Szenario-Set [2024d](./2024d_scenarios/README.md).
 
 > **Markierung:** 🟦 = mit Betreuer final bestätigen (Studien-Design-Entscheidung).
 
+> **Design-Änderung (2026-06-05, vor Datenerhebung):** Die Persona-Achse in Gruppe B
+> wurde von **Vorwissens-Stufen** (Laie → Experte) auf **Interesse-Typen**
+> (`energie`/`waerme`/`tech`) umgestellt — zur Konsistenz mit der Implementierung
+> (`ExplainAgent`, `study_freeze.py`), die diese Typen bereits nutzt. Folge: **H3**
+> ist nun **ungerichtet** (Persona-Typen statt Novize>Experte); Vorwissen wird als
+> deskriptive Kovariate weitergeführt. Änderung erfolgt **vor** jeder Erhebung (kein
+> HARKing) und ist 🟦 mit dem Betreuer zu bestätigen.
+
 ## Kernfrage
 
 > Verbessert **persona-adaptive LLM-Erklärung** (Gruppe B) gegenüber **statischem
@@ -24,7 +32,7 @@ nicht „LLM erklärt schöner".
 |---|---|---|
 | **H1** (primär) | Gruppe B erzielt einen höheren **Regelverständnis-Score (0–12)** als Gruppe A. | gerichtet, einseitig |
 | **H2** | Gruppe B zeigt häufiger **angemessene** Override-Reaktionen (S4 akzeptieren, S9 begründet). | gerichtet |
-| **H3** (explorativ) | Der Effekt ist bei Novizen größer als bei Vorgebildeten (Persona-Stufen). | explorativ, n=5/Stufe |
+| **H3** (explorativ) 🟦 | Das Regelverständnis in Gruppe B unterscheidet sich zwischen den drei **Persona-Typen** (energie/waerme/tech). Vorwissen wird zusätzlich deskriptiv als Kovariate betrachtet. | explorativ, ungerichtet, n=5/Typ |
 | **H0** | Kein Unterschied im Verständnis-Score zwischen A und B. | Nullhypothese |
 
 ## Operationalisierung
@@ -67,7 +75,7 @@ Misuse/Disuse-Coding):
 
 - **Test:** Mann-Whitney-U (einseitig) auf den Verständnis-Score, A (n=5) vs. gepoolt B (n=15); Welch-/t-Test bei erfüllten Voraussetzungen (Shapiro-Wilk, Levene). Implementiert in `src/sim/study_analysis.py`.
 - **Immer berichten:** Effektgröße **r** (bzw. Cohen's *d*), **95 %-KI**, **N** — **p nie isoliert**.
-- **Persona-Stufen:** rein explorativ/deskriptiv (n=5/Zelle).
+- **Persona-Typen:** rein explorativ/deskriptiv (n=5/Zelle, energie/waerme/tech); ungerichtet, da Interesse-Personas keine a-priori-Ordnung des Verständnisses begründen.
 - **Qualitativ:** thematische Analyse (Braun & Clarke) der offenen Antworten + Override-Begründungen.
 - **Triangulation:** Score × Themen × Verhaltensspur (Logs).
 

@@ -15,8 +15,8 @@ sodass der Entscheidungskern per **Replay** exakt reproduzierbar denselben
 | **S1** | Klarer Start | R1 | `START_R1_SURPLUS_OK` | ✅ 123× | [S01](./S01_klarer_start.md) |
 | **S2** | Kein Überschuss | R1 | `NOOP_R1_INSUFFICIENT_SURPLUS` | ✅ 20× | [S02](./S02_kein_ueberschuss.md) |
 | **S3** ⚑ | Sonne, aber Preis hoch | R1 | `NOOP_R1_PRICE_TOO_HIGH` | ⚠ konstruieren | [S03](./S03_preis_zu_hoch.md) |
-| **S4** ⚑ | Übertemperatur | R3 | `STOP_R3_OVERTEMP_T90` | 🔧 Injektion | [S04](./S04_uebertemperatur.md) |
-| **S5** | Kommunikationsausfall | R3 | `STOP_R3_COMM_TIMEOUT_AGE75` | 🔧 Injektion | [S05](./S05_kommunikationsausfall.md) |
+| **S4** ⚑ | Übertemperatur | R3 | `STOP_R3_OVERTEMP` | 🔧 Injektion | [S04](./S04_uebertemperatur.md) |
+| **S5** | Kommunikationsausfall | R3 | `STOP_R3_COMM_TIMEOUT` | 🔧 Injektion | [S05](./S05_kommunikationsausfall.md) |
 | **S6** ⚑ | Batterie-Schutz (soft) | R2 | `NOOP_R2_SOC_SOFT_MIN` | ✅ 184× | [S06](./S06_batterie_soft.md) |
 | **S7** | Batterie-Notstopp (hard) | R2 | `STOP_R2_SOC_HARD_MIN` | ✅ 32× | [S07](./S07_batterie_hard.md) |
 | **S8** ⚑ | Wolke → Netzbezug | R2 | `STOP_R2_GRID_IMPORT_EXCEEDED` | 🔧 Injektion ¹ | [S08](./S08_netzbezug.md) |
@@ -156,8 +156,8 @@ zu verzerren. Live-Sensoren: `mining_value_ct_kwh`, `mining_vs_feedin_ct_kwh`,
 | B4 | 11:00 | S10 Anti-Flapping | R5 | `NOOP_R5_MIN_RUNTIME_NOT_REACHED` |
 | B5 | 12:30 | S8 Wolke → Netzbezug | R2 | `STOP_R2_GRID_IMPORT_EXCEEDED` |
 | B6 | 13:30 | S9 Forecast blockiert | R4 | `NOOP_R4_FORECAST_PV_INSUFFICIENT` |
-| B7 | 14:30 | S4 Übertemperatur | R3 | `STOP_R3_OVERTEMP_T90` |
-| B8 | 15:00 | S5 Kommunikationsausfall | R3 | `STOP_R3_COMM_TIMEOUT_AGE75` |
+| B7 | 14:30 | S4 Übertemperatur | R3 | `STOP_R3_OVERTEMP` |
+| B8 | 15:00 | S5 Kommunikationsausfall | R3 | `STOP_R3_COMM_TIMEOUT` |
 | B9 | 16:30 | S7 Batterie-Notstopp (hard) | R2 | `STOP_R2_SOC_HARD_MIN` |
 | B10 | 17:30 | S3 Sonne, aber Preis hoch | R1 | `NOOP_R1_PRICE_TOO_HIGH` |
 

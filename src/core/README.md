@@ -61,7 +61,7 @@ class DecisionEvent:
     trigger: str                   # "BLOCK_TICK" | "SAFETY_ASYNC" | "OVERRIDE"
     params: dict                   # relevante Schwellen-Werte zum Zeitpunkt
     state_snapshot: EnergyState
-    decision_code: str             # z.B. "STOP_R3_OVERTEMP_T92"
+    decision_code: str             # z.B. "STOP_R3_OVERTEMP" (Messwert in params)
 
 class RuleVote(NamedTuple):
     rule: str                      # "R1" .. "R5"

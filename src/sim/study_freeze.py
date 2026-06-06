@@ -25,11 +25,19 @@ from typing import Any
 from src.core import rule_engine
 from src.core.rule_engine import RuleEngineConfig
 from src.explain.decision_codes import ALL_CODES
-from src.explain.explain_agent import ExplainAgent
+from src.explain.explain_agent import (
+    ExplainAgent,
+    load_hamster_states,
+    load_persona_examples,
+)
 from src.sim.study_scenarios import STUDY_SCENARIOS, StudyScenario
 
 _PERSONAS = ("energie", "waerme", "tech")
 _DEFAULT_OUT = Path("src/sim/study_set")
+
+# Few-Shot-Gold-Referenzen je Persona + Hamster-Anzeige je Aktion (einmalig geladen).
+_PERSONA_EXAMPLES = load_persona_examples()
+_HAMSTER_STATES = load_hamster_states()
 
 
 def base_code(code: str) -> str:
@@ -101,6 +109,8 @@ def freeze_one(
         blocks_since_last_change=sc.blocks_since_change,
     )
     code = event.decision_code
+    action = event.decision.action
+    ref = _PERSONA_EXAMPLES.get(base_code(code), {})
     return {
         "sid": sc.sid,
         "title": sc.title,
@@ -108,11 +118,12 @@ def freeze_one(
         "actual_code": code,
         "verified": code == sc.expected_code,
         "decision": {
-            "action": event.decision.action,
+            "action": action,
             "code": code,
             "base_code": base_code(code),
             "reason": event.reason,
         },
+        "hamster": _HAMSTER_STATES.get(action, {}),
         "engine_input": {
             "last_action": sc.last_action,
             "blocks_since_change": sc.blocks_since_change,
@@ -121,6 +132,9 @@ def freeze_one(
         "params": event.params,
         "explanation": {
             "group_a": _group_a(agent_a, code, event.params),
+            # Gold-Referenz je Persona (Few-Shot-Anker; Vergleichsziel für group_b).
+            "group_b_reference": {p: ref.get(p) for p in _PERSONAS},
+            # Echter LLM-Output je Persona (None bis Ollama verkabelt).
             "group_b": _group_b(code, event.params, ollama_host),
         },
     }

@@ -10,6 +10,11 @@
     "base_code": "NOOP_R4_FORECAST_PV_INSUFFICIENT",
     "reason": "FORECAST_PV_INSUFFICIENT"
   },
+  "hamster": {
+    "zustand": "wartend",
+    "anzeige": "🐹 sitzt und wartet — Miner pausiert",
+    "stimmung": "geduldig"
+  },
   "engine_input": {
     "last_action": "STOP",
     "blocks_since_change": 4
@@ -29,16 +34,22 @@
     "quality": "ok"
   },
   "params": {
-    "pv_forecast_kw": 1.2
+    "pv_forecast_kw": 1.2,
+    "min_predicted_surplus_kw": 2.0
   },
   "explanation": {
     "group_a": {
       "short": "PV-Prognose zu schwach — Miner wartet",
-      "long": "Vorhergesagte PV-Leistung 1.2 kW reicht nicht für den Mindestüberschuss ? kW.",
-      "trigger": "In den nächsten Stunden werden nur 1.2 kW PV erwartet — mindestens ? kW wären nötig",
-      "data_basis": "PV-Prognose 1.2 kW · Mindestüberschuss ? kW",
+      "long": "Vorhergesagte PV-Leistung 1,2 kW reicht nicht für den Mindestüberschuss 2,0 kW.",
+      "trigger": "In den nächsten Stunden werden nur 1,2 kW PV erwartet — mindestens 2,0 kW wären nötig",
+      "data_basis": "PV-Prognose 1,2 kW · Mindestüberschuss 2,0 kW",
       "effect": "Miner startet nicht — Prognose zu schwach",
-      "options": "Miner startet wenn Prognose ≥ ? kW"
+      "options": "Miner startet wenn Prognose ≥ 2,0 kW"
+    },
+    "group_b_reference": {
+      "energie": "Der Miner startet nicht — die Vorhersage erwartet nur 1,2 kW Sonne, für einen Start wären 2,0 kW nötig.",
+      "waerme": "Noch kein Heizen: Die Prognose sagt nur 1,2 kW Solarleistung voraus, dein Gerät startet erst ab 2,0 kW.",
+      "tech": "NOOP_R4_FORECAST_PV_INSUFFICIENT: R4-Veto, PV-Prognose 1,2 kW < min_predicted_surplus 2,0 kW."
     },
     "group_b": {
       "energie": null,

@@ -10,6 +10,11 @@
     "base_code": "NOOP_R5_MIN_RUNTIME_NOT_REACHED",
     "reason": "MIN_RUNTIME_NOT_REACHED"
   },
+  "hamster": {
+    "zustand": "wartend",
+    "anzeige": "🐹 sitzt und wartet — Miner pausiert",
+    "stimmung": "geduldig"
+  },
   "engine_input": {
     "last_action": "START",
     "blocks_since_change": 1
@@ -43,6 +48,11 @@
       "data_basis": "Läuft seit 1 / 3 Intervallen (je 10 min)",
       "effect": "Miner läuft weiter — Mindestlaufzeit einhalten",
       "options": "Stopp frühestens nach 3 Intervallen"
+    },
+    "group_b_reference": {
+      "energie": "Der Miner bleibt an — er läuft erst seit einem von drei Pflicht-Intervallen, so vermeiden wir ständiges Ein- und Ausschalten.",
+      "waerme": "Dein Gerät heizt weiter: Erst eines von drei Intervallen ist um — kurzes An-Aus würde nur die Wärme stören.",
+      "tech": "NOOP_R5_MIN_RUNTIME_NOT_REACHED: R5-Stabilität, 1 von 3 min_runtime-Blöcken (je 10 min), kein Stop."
     },
     "group_b": {
       "energie": null,

@@ -23,14 +23,14 @@
   {
     "sid": "S4",
     "title": "Übertemperatur",
-    "code": "STOP_R3_OVERTEMP_T90",
+    "code": "STOP_R3_OVERTEMP",
     "verified": true,
     "group_b_filled": false
   },
   {
     "sid": "S5",
     "title": "Kommunikationsausfall",
-    "code": "STOP_R3_COMM_TIMEOUT_AGE75",
+    "code": "STOP_R3_COMM_TIMEOUT",
     "verified": true,
     "group_b_filled": false
   },

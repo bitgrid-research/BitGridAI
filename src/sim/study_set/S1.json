@@ -10,6 +10,11 @@
     "base_code": "START_R1_SURPLUS_OK",
     "reason": "SURPLUS_OK"
   },
+  "hamster": {
+    "zustand": "aktiv",
+    "anzeige": "🐹 rennt im Rad — Miner läuft",
+    "stimmung": "munter"
+  },
   "engine_input": {
     "last_action": "STOP",
     "blocks_since_change": 5
@@ -31,6 +36,7 @@
   "params": {
     "surplus_kw": 3.0,
     "surplus_min_kw": 1.5,
+    "price_max_ct_kwh": 25.0,
     "energy_price_ct_kwh": 12,
     "mining_value_ct_kwh": null,
     "pv_forecast_kw": 4.0,
@@ -41,11 +47,16 @@
   "explanation": {
     "group_a": {
       "short": "PV-Überschuss vorhanden — Miner läuft",
-      "long": "PV-Leistung übersteigt Hausverbrauch um 3.0 kW. Miner gestartet.",
-      "trigger": "Deine Solaranlage erzeugt 3.0 kW mehr als dein Haus gerade verbraucht",
-      "data_basis": "PV 4500 W · Haus 1500 W · Überschuss 3.0 kW · Prognose 4.0 kW",
+      "long": "PV-Leistung übersteigt Hausverbrauch um 3,0 kW. Miner gestartet.",
+      "trigger": "Deine Solaranlage erzeugt 3,0 kW mehr als dein Haus gerade verbraucht",
+      "data_basis": "PV 4500 W · Haus 1500 W · Überschuss 3,0 kW · Prognose 4,0 kW",
       "effect": "Miner gestartet — nutzt deinen Solarüberschuss",
       "options": ""
+    },
+    "group_b_reference": {
+      "energie": "Der Miner läuft — deine Solaranlage erzeugt 3,0 kW mehr, als dein Haus braucht, und nutzt diesen Überschuss selbst statt ihn einzuspeisen.",
+      "waerme": "Dein Gerät heizt jetzt mit 3,0 kW Solarüberschuss — kostenlose Wärme aus der Sonne, statt den Strom ungenutzt einzuspeisen.",
+      "tech": "START_R1_SURPLUS_OK: R1 startet bei 3,0 kW Überschuss (PV 4500 W − Haus 1500 W), über der Schwelle 1,5 kW."
     },
     "group_b": {
       "energie": null,

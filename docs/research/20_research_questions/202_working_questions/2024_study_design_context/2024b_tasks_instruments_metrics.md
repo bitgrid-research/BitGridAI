@@ -9,13 +9,13 @@
 
 ## Instrumente
 
-- Demographie + **Vorwissens-Einstufung** (steuert zugleich die Persona in Gruppe B).
+- Demographie + **Nutzertyp-Einstufung** (steuert in Gruppe B den Persona-Typ energie/waerme/tech); Vorwissen separat als deskriptive Kovariate.
 - Offener Frageleitfaden: „Wie funktioniert das System? · Erwartungen? · wichtigste Einflussregeln? · Warum Steuern statt Einspeisen?“ (audioaufgezeichnet).
 - Systemlogs (DecisionEvents, Override-Ereignisse, Template-Fallbacks).
 
 ## Messlogik
 
-- **Statistik:** t-Test für unabhängige Stichproben (einseitig) auf den Regelverständnis-Score; Cohen's *d* + 95 %-KI. Primärvergleich Gruppe A (n = 5) vs. gepoolte Gruppe B (n = 15); der Vergleich der 3 Persona-Stufen (n = 5 je Stufe) ist explorativ/deskriptiv.
+- **Statistik:** t-Test für unabhängige Stichproben (einseitig) auf den Regelverständnis-Score; Cohen's *d* + 95 %-KI. Primärvergleich Gruppe A (n = 5) vs. gepoolte Gruppe B (n = 15); der Vergleich der 3 Persona-Typen (energie/waerme/tech, n = 5 je Typ) ist explorativ/deskriptiv (ungerichtet).
 - **Voraussetzungsprüfung:** Shapiro-Wilk (Normalverteilung), Levene (Varianzhomogenität) → Welch- bzw. Mann-Whitney-U-Test als Fallback.
 - **Pilot:** 2–3 Probedurchläufe zur Kalibrierung von Rubrik und Szenario-Timing.
 

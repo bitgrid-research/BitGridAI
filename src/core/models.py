@@ -83,7 +83,9 @@ class DecisionEvent:
     trigger: Literal["BLOCK_TICK", "SAFETY_ASYNC", "OVERRIDE"]
     params: dict[str, Any]  # verwendete Schwellenwerte zum Zeitpunkt der Entscheidung
     state_snapshot: EnergyState
-    decision_code: str  # z.B. "STOP_R3_OVERTEMP_T92"
+    decision_code: (
+        str  # z.B. "STOP_R3_OVERTEMP" (Messwerte stehen in params/state_snapshot)
+    )
 
 
 # ---------------------------------------------------------------------------

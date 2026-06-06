@@ -37,7 +37,7 @@ def evaluate(
             rule="R3",
             action="STOP",
             confidence=1.0,
-            reason=f"OVERTEMP_T{int(state.miner_temp_c)}",
+            reason="OVERTEMP",
         )
 
     if state.miner_heartbeat_age_sec > effective_timeout:
@@ -45,7 +45,7 @@ def evaluate(
             rule="R3",
             action="STOP",
             confidence=1.0,
-            reason=f"COMM_TIMEOUT_AGE{int(state.miner_heartbeat_age_sec)}",
+            reason="COMM_TIMEOUT",
         )
 
     return None

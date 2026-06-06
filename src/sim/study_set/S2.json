@@ -10,6 +10,11 @@
     "base_code": "NOOP_R1_INSUFFICIENT_SURPLUS",
     "reason": "INSUFFICIENT_SURPLUS"
   },
+  "hamster": {
+    "zustand": "wartend",
+    "anzeige": "🐹 sitzt und wartet — Miner pausiert",
+    "stimmung": "geduldig"
+  },
   "engine_input": {
     "last_action": null,
     "blocks_since_change": 0
@@ -31,6 +36,7 @@
   "params": {
     "surplus_kw": 0.4,
     "surplus_min_kw": 1.5,
+    "price_max_ct_kwh": 25.0,
     "energy_price_ct_kwh": 18,
     "mining_value_ct_kwh": null,
     "pv_forecast_kw": 3.0,
@@ -41,11 +47,16 @@
   "explanation": {
     "group_a": {
       "short": "Zu wenig PV-Überschuss — Miner wartet",
-      "long": "Aktueller Überschuss 0.4 kW liegt unter der Startschwelle 1.5 kW.",
-      "trigger": "Deine Solaranlage erzeugt nur 0.4 kW Überschuss — mindestens 1.5 kW wären nötig",
-      "data_basis": "PV-Überschuss 0.4 kW · Startschwelle 1.5 kW · Prognose 3.0 kW",
+      "long": "Aktueller Überschuss 0,4 kW liegt unter der Startschwelle 1,5 kW.",
+      "trigger": "Deine Solaranlage erzeugt nur 0,4 kW Überschuss — mindestens 1,5 kW wären nötig",
+      "data_basis": "PV-Überschuss 0,4 kW · Startschwelle 1,5 kW · Prognose 3,0 kW",
       "effect": "Miner bleibt gestoppt — zu wenig Solarstrom",
-      "options": "Miner startet ab 1.5 kW Überschuss"
+      "options": "Miner startet ab 1,5 kW Überschuss"
+    },
+    "group_b_reference": {
+      "energie": "Der Miner wartet — aktuell sind nur 0,4 kW Solarüberschuss da, für den Start braucht es mindestens 1,5 kW.",
+      "waerme": "Noch keine Wärme: Mit 0,4 kW Überschuss reicht die Sonne nicht, dein Gerät startet erst ab 1,5 kW.",
+      "tech": "NOOP_R1_INSUFFICIENT_SURPLUS: R1 hält, Überschuss 0,4 kW < Startschwelle 1,5 kW."
     },
     "group_b": {
       "energie": null,

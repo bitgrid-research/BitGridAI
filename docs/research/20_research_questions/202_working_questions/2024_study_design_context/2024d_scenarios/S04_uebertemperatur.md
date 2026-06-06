@@ -12,7 +12,7 @@ EnergyState(
 # Engine-Input: last_action="START", blocks_since_last_change=6, autonomy="FULL"
 ```
 
-- **Entscheidung:** `STOP_R3_OVERTEMP_T90` — obwohl R1 starten **würde**.
+- **Entscheidung:** `STOP_R3_OVERTEMP` (90 °C > 85 °C) — obwohl R1 starten **würde**.
 - **Lehrziel:** Sicherheit hat höchste Priorität und ist **nicht überstimmbar** (`allow_unsafe_override = False`).
 - **Verständnisfrage:** „Bedingungen sind ideal — warum stoppt das System?"
 - **Override-Aufgabe (Kandidat A):** Proband darf Erzwingen versuchen → korrektes Verhalten = akzeptieren. Forcierter Weiterlauf = **Misuse-Tendenz**.

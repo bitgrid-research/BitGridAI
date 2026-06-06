@@ -118,7 +118,7 @@ Die Use Cases werden in zwei Erklärformaten geprüft — beide zeigen einen Erk
 * **Gruppe A – statisch**
   regelbasiert erzeugte, für alle Probanden wortgleiche Erklärtexte (kein Sprachmodell).
 * **Gruppe B – adaptiv**
-  persona-basierte LLM-Erklärung, an das Vorwissensniveau angepasst, gemäß Kapitel 24.
+  persona-basierte LLM-Erklärung, an den Nutzertyp (energie/waerme/tech) angepasst, gemäß Kapitel 24.
 
 Verglichen werden u. a.:
 

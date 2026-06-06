@@ -1,14 +1,19 @@
 {
   "sid": "S5",
   "title": "Kommunikationsausfall",
-  "expected_code": "STOP_R3_COMM_TIMEOUT_AGE75",
-  "actual_code": "STOP_R3_COMM_TIMEOUT_AGE75",
+  "expected_code": "STOP_R3_COMM_TIMEOUT",
+  "actual_code": "STOP_R3_COMM_TIMEOUT",
   "verified": true,
   "decision": {
     "action": "STOP",
-    "code": "STOP_R3_COMM_TIMEOUT_AGE75",
+    "code": "STOP_R3_COMM_TIMEOUT",
     "base_code": "STOP_R3_COMM_TIMEOUT",
-    "reason": "COMM_TIMEOUT_AGE75"
+    "reason": "COMM_TIMEOUT"
+  },
+  "hamster": {
+    "zustand": "schlafend",
+    "anzeige": "🐹 schläft — Miner gestoppt",
+    "stimmung": "ruhend"
   },
   "engine_input": {
     "last_action": "START",
@@ -42,6 +47,11 @@
       "data_basis": "Kein Signal seit 75 s · Timeout-Limit 60 s",
       "effect": "Miner gestoppt — Verbindung unterbrochen",
       "options": "Miner startet nach Wiederverbindung"
+    },
+    "group_b_reference": {
+      "energie": "Sicherheitsstopp — der Miner meldet sich seit 75 Sekunden nicht mehr (Grenze 60 s) und wurde abgeschaltet.",
+      "waerme": "Dein Gerät wurde sicherheitshalber gestoppt — seit 75 Sekunden kommt kein Signal mehr (Grenze 60 s).",
+      "tech": "STOP_R3_COMM_TIMEOUT: R3-Safety, Heartbeat-Alter 75 s > comm_timeout 60 s, nicht überstimmbar."
     },
     "group_b": {
       "energie": null,

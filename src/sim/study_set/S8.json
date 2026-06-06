@@ -10,6 +10,11 @@
     "base_code": "STOP_R2_GRID_IMPORT_EXCEEDED",
     "reason": "GRID_IMPORT_EXCEEDED"
   },
+  "hamster": {
+    "zustand": "schlafend",
+    "anzeige": "🐹 schläft — Miner gestoppt",
+    "stimmung": "ruhend"
+  },
   "engine_input": {
     "last_action": "START",
     "blocks_since_change": 5
@@ -45,6 +50,11 @@
       "data_basis": "Netzbezug 700 W · Limit 500 W",
       "effect": "Miner gestoppt — Stromnetz entlasten",
       "options": "Miner startet wenn Netzbezug unter 500 W sinkt"
+    },
+    "group_b_reference": {
+      "energie": "Der Miner wurde gestoppt — er hätte 700 W aus dem Netz gezogen, erlaubt sind nur 500 W; Netzstrom wird nicht vermint.",
+      "waerme": "Wärme aus, Netzschutz an: Es flossen 700 W aus dem Netz (Grenze 500 W) — dein Gerät heizt nur mit Solarstrom.",
+      "tech": "STOP_R2_GRID_IMPORT_EXCEEDED: R2-Veto, Netto-Netzbezug 700 W > max_grid_import 500 W."
     },
     "group_b": {
       "energie": null,

@@ -26,8 +26,17 @@ de:
     effect: "Miner bleibt gestoppt — Preisschutz aktiv"
     options: "Miner startet wenn Preis unter {price_max_ct_kwh:.1f} ct/kWh sinkt"
 
+  THROTTLE_R1_SURPLUS_THROTTLE:
+    example: "Miner läuft gedrosselt — 1,0 kW Überschuss reicht für Eco-Betrieb, Voll-Last erst ab 1,5 kW."
+    short: "Wenig Überschuss — Miner läuft gedrosselt (Eco)"
+    long: "PV-Überschuss {surplus_kw:.1f} kW liegt im Eco-Band — Miner läuft gedrosselt, volle Last erst ab {surplus_min_kw:.1f} kW."
+    trigger: "Deine Solaranlage erzeugt {surplus_kw:.1f} kW Überschuss — genug für gedrosselten Betrieb, aber nicht für Voll-Last ({surplus_min_kw:.1f} kW)"
+    data_basis: "PV-Überschuss {surplus_kw:.1f} kW · Voll-Last-Schwelle {surplus_min_kw:.1f} kW · PV {pv_power_w:.0f} W · Prognose {pv_forecast_kw:.1f} kW"
+    effect: "Miner läuft gedrosselt — fängt deinen Solarüberschuss ab, statt ihn einzuspeisen"
+    options: "Voll-Last ab {surplus_min_kw:.1f} kW Überschuss"
+
   STOP_R2_SOC_HARD_MIN:
-    example: "Miner gestoppt — Batterie nur noch 8 %, Schutzgrenze liegt bei 10 %."
+    example: "Miner gestoppt — Batterie nur noch 45 %, Hausreserve liegt bei 50 %."
     short: "Batterie kritisch — Miner gestoppt"
     long: "Batterieladung {battery_soc_pct:.0f} % liegt unter dem Sicherheitsminimum {soc_hard_min_pct:.0f} %."
     trigger: "Batterie ist nur noch {battery_soc_pct:.0f} % geladen — unter dem Sicherheitsminimum {soc_hard_min_pct:.0f} %"
@@ -36,7 +45,7 @@ de:
     options: "Miner startet wieder ab {soc_soft_min_pct:.0f} % · Prognose {pv_forecast_kw:.1f} kW"
 
   NOOP_R2_SOC_SOFT_MIN:
-    example: "Miner wartet: Batterie lädt erst auf 20 % auf — aktuell 17 %."
+    example: "Miner wartet — Batterie erst bei 55 %, Start erst ab 58 %."
     short: "Batterie lädt — Miner wartet"
     long: "Batterieladung {battery_soc_pct:.0f} % liegt unter der Mindestschwelle {soc_soft_min_pct:.0f} %."
     trigger: "Batterie lädt erst auf {soc_soft_min_pct:.0f} % auf, bevor der Miner starten darf — aktuell {battery_soc_pct:.0f} %"

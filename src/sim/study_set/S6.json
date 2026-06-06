@@ -10,6 +10,11 @@
     "base_code": "NOOP_R2_SOC_SOFT_MIN",
     "reason": "SOC_SOFT_MIN"
   },
+  "hamster": {
+    "zustand": "wartend",
+    "anzeige": "🐹 sitzt und wartet — Miner pausiert",
+    "stimmung": "geduldig"
+  },
   "engine_input": {
     "last_action": null,
     "blocks_since_change": 0
@@ -45,6 +50,11 @@
       "data_basis": "Batterie 55 % · Mindestschwelle 58 %",
       "effect": "Miner bleibt aus — Batterie lädt zuerst",
       "options": "Miner startet ab 58 % Ladezustand"
+    },
+    "group_b_reference": {
+      "energie": "Der Miner wartet — dein Speicher ist erst zu 55 % geladen und startet, sobald 58 % erreicht sind.",
+      "waerme": "Noch keine Wärme: Dein Speicher lädt erst auf 58 % (aktuell 55 %), bevor das Gerät anläuft.",
+      "tech": "NOOP_R2_SOC_SOFT_MIN: R2-Veto, SoC 55 % ≤ soft_min 58 %, kein Neustart."
     },
     "group_b": {
       "energie": null,

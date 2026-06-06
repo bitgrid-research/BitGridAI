@@ -135,8 +135,8 @@ liegt im Studiendesign-Kontext:
 | **S1** | Klarer Start | R1 | `START_R1_SURPLUS_OK` | [S01](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S01_klarer_start.md) |
 | **S2** | Kein Überschuss | R1 | `NOOP_R1_INSUFFICIENT_SURPLUS` | [S02](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S02_kein_ueberschuss.md) |
 | **S3** ⚑ | Sonne, aber Preis hoch | R1 | `NOOP_R1_PRICE_TOO_HIGH` | [S03](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S03_preis_zu_hoch.md) |
-| **S4** ⚑ | Übertemperatur | R3 | `STOP_R3_OVERTEMP_T90` | [S04](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S04_uebertemperatur.md) |
-| **S5** | Kommunikationsausfall | R3 | `STOP_R3_COMM_TIMEOUT_AGE75` | [S05](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S05_kommunikationsausfall.md) |
+| **S4** ⚑ | Übertemperatur | R3 | `STOP_R3_OVERTEMP` | [S04](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S04_uebertemperatur.md) |
+| **S5** | Kommunikationsausfall | R3 | `STOP_R3_COMM_TIMEOUT` | [S05](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S05_kommunikationsausfall.md) |
 | **S6** ⚑ | Batterie-Schutz (soft) | R2 | `NOOP_R2_SOC_SOFT_MIN` | [S06](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S06_batterie_soft.md) |
 | **S7** | Batterie-Notstopp (hard) | R2 | `STOP_R2_SOC_HARD_MIN` | [S07](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S07_batterie_hard.md) |
 | **S8** ⚑ | Wolke → Netzbezug | R2 | `STOP_R2_GRID_IMPORT_EXCEEDED` | [S08](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S08_netzbezug.md) |

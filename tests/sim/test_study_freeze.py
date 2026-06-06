@@ -36,3 +36,15 @@ def test_freeze_all_writes_verified_items(tmp_path) -> None:  # type: ignore[no-
         assert all(v is None for v in it["explanation"]["group_b"].values())
     assert (tmp_path / "index.json").exists()
     assert (tmp_path / "S1.json").exists()
+
+
+def test_freeze_includes_hamster_and_references(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    """Jedes Szenario trägt eine Hamster-Anzeige und je-Persona Gold-Referenzen."""
+    items = freeze_all(tmp_path, ollama_host="")
+    for it in items:
+        # Hamster-Anzeige spiegelt die Aktion (persona-unabhängig).
+        assert it["hamster"]["anzeige"], it["sid"]
+        # Gold-Referenz für alle drei Personas vorhanden und nicht leer.
+        ref = it["explanation"]["group_b_reference"]
+        assert set(ref) == {"energie", "waerme", "tech"}, it["sid"]
+        assert all(ref[p] for p in ref), it["sid"]

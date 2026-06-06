@@ -10,6 +10,11 @@
     "base_code": "STOP_R2_SOC_HARD_MIN",
     "reason": "SOC_HARD_MIN"
   },
+  "hamster": {
+    "zustand": "schlafend",
+    "anzeige": "🐹 schläft — Miner gestoppt",
+    "stimmung": "ruhend"
+  },
   "engine_input": {
     "last_action": "START",
     "blocks_since_change": 6
@@ -44,7 +49,12 @@
       "trigger": "Batterie ist nur noch 45 % geladen — unter dem Sicherheitsminimum 50 %",
       "data_basis": "Batterie 45 % · Sicherheitsminimum 50 %",
       "effect": "Miner gestoppt — Batterie schützen",
-      "options": "Miner startet wieder ab 58 % · Prognose 1.5 kW"
+      "options": "Miner startet wieder ab 58 % · Prognose 1,5 kW"
+    },
+    "group_b_reference": {
+      "energie": "Der Miner wurde gestoppt, um deinen Hausspeicher zu schützen — er ist auf 45 % gefallen, die Reserve liegt bei 50 %.",
+      "waerme": "Heizen vorerst beendet: Der Speicher ist auf 45 % gesunken, unter die Reserve von 50 % — Schutz geht vor.",
+      "tech": "STOP_R2_SOC_HARD_MIN: R2-Hard-Stop, SoC 45 % ≤ hard_min 50 % (Hausreserve)."
     },
     "group_b": {
       "energie": null,

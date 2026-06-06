@@ -13,7 +13,7 @@ EnergyState(
 # Engine-Input: last_action="START", blocks_since_last_change=2, autonomy="FULL"
 ```
 
-- **Entscheidung:** `STOP_R3_COMM_TIMEOUT_AGE75` (75 s > 60 s)
+- **Entscheidung:** `STOP_R3_COMM_TIMEOUT` (75 s > 60 s)
 - **Lehrziel:** Bei Verbindungsverlust wird sicherheitshalber gestoppt — kein Steuern „blind".
 - **Verständnisfrage:** „Was bedeutet es, wenn das System den Miner nicht mehr ‚hört'?"
 - **Belegung:** **0×** real (Fault) → **Injektion** (`heartbeat_age > 60 s`).

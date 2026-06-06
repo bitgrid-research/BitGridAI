@@ -270,7 +270,10 @@ def evaluate(
             decision=Decision(action="NOOP", valid_until=valid_until),
             reason=r4_vote.reason,
             trigger=trigger,
-            params={"pv_forecast_kw": state.pv_forecast_kw},
+            params={
+                "pv_forecast_kw": state.pv_forecast_kw,
+                "min_predicted_surplus_kw": config.min_predicted_surplus_kw,
+            },
             state_snapshot=state,
             decision_code=f"NOOP_R4_{r4_vote.reason}",
         )
@@ -300,6 +303,7 @@ def evaluate(
         params = {
             "surplus_kw": state.surplus_kw,
             "surplus_min_kw": config.surplus_min_kw,
+            "price_max_ct_kwh": config.price_max_ct_kwh,
             "energy_price_ct_kwh": state.energy_price_ct_kwh,
             "mining_value_ct_kwh": state.mining_value_ct_kwh,
             "pv_forecast_kw": state.pv_forecast_kw,

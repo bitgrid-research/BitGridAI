@@ -10,6 +10,11 @@
     "base_code": "NOOP_R1_PRICE_TOO_HIGH",
     "reason": "PRICE_TOO_HIGH"
   },
+  "hamster": {
+    "zustand": "wartend",
+    "anzeige": "🐹 sitzt und wartet — Miner pausiert",
+    "stimmung": "geduldig"
+  },
   "engine_input": {
     "last_action": "STOP",
     "blocks_since_change": 5
@@ -31,6 +36,7 @@
   "params": {
     "surplus_kw": 2.5,
     "surplus_min_kw": 1.5,
+    "price_max_ct_kwh": 25.0,
     "energy_price_ct_kwh": 28,
     "mining_value_ct_kwh": null,
     "pv_forecast_kw": 2.5,
@@ -41,11 +47,16 @@
   "explanation": {
     "group_a": {
       "short": "Strompreis zu hoch — Miner wartet",
-      "long": "Aktueller Preis 28.0 ct/kWh liegt über dem Limit ? ct/kWh.",
-      "trigger": "Strompreis 28.0 ct/kWh ist zu hoch — Limit liegt bei ? ct/kWh",
-      "data_basis": "Strompreis 28.0 ct/kWh · Preislimit ? ct/kWh · Prognose 2.5 kW",
+      "long": "Aktueller Preis 28,0 ct/kWh liegt über dem Limit 25,0 ct/kWh.",
+      "trigger": "Strompreis 28,0 ct/kWh ist zu hoch — Limit liegt bei 25,0 ct/kWh",
+      "data_basis": "Strompreis 28,0 ct/kWh · Preislimit 25,0 ct/kWh · Prognose 2,5 kW",
       "effect": "Miner bleibt gestoppt — Preisschutz aktiv",
-      "options": "Miner startet wenn Preis unter ? ct/kWh sinkt"
+      "options": "Miner startet wenn Preis unter 25,0 ct/kWh sinkt"
+    },
+    "group_b_reference": {
+      "energie": "Der Miner wartet trotz Sonne — der Strompreis liegt mit 28,0 ct/kWh über deinem Limit von 25,0 ct.",
+      "waerme": "Keine Wärme jetzt: Trotz 2,5 kW Überschuss ist der Strompreis mit 28,0 ct/kWh über der Grenze von 25,0 ct.",
+      "tech": "NOOP_R1_PRICE_TOO_HIGH: R1-Preisschranke greift, 28,0 ct/kWh > price_max 25,0 ct/kWh, trotz Überschuss 2,5 kW."
     },
     "group_b": {
       "energie": null,

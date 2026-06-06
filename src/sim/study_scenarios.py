@@ -106,7 +106,7 @@ STUDY_SCENARIOS: tuple[StudyScenario, ...] = (
         ),
         last_action="START",
         blocks_since_change=6,
-        expected_code="STOP_R3_OVERTEMP_T90",
+        expected_code="STOP_R3_OVERTEMP",
     ),
     StudyScenario(
         "S5",
@@ -125,7 +125,7 @@ STUDY_SCENARIOS: tuple[StudyScenario, ...] = (
         ),
         last_action="START",
         blocks_since_change=2,
-        expected_code="STOP_R3_COMM_TIMEOUT_AGE75",
+        expected_code="STOP_R3_COMM_TIMEOUT",
     ),
     StudyScenario(
         "S6",

@@ -1,0 +1,27 @@
+# Hamster-Anzeigezustand je Entscheidungs-Aktion (BitHamster im Dashboard).
+#
+# Die Anzeige spiegelt die Systementscheidung des 10-Minuten-Blocks und ist
+# persona-UNABHÄNGIG — variiert wird nur der Erklärtext (Gruppe B, je Persona).
+# Keyed nach decision.action (START / THROTTLE / NOOP / STOP).
+#
+# Felder:
+#   zustand — interner Zustandsname (für UI-Animation/Asset)
+#   anzeige — kurze sichtbare Statuszeile am Maskottchen
+#   stimmung — Mood-Tag für die Animationsauswahl
+de:
+  START:
+    zustand: "aktiv"
+    anzeige: "🐹 rennt im Rad — Miner läuft"
+    stimmung: "munter"
+  THROTTLE:
+    zustand: "gedrosselt"
+    anzeige: "🐹 trabt gemütlich — Miner gedrosselt (Eco)"
+    stimmung: "entspannt"
+  NOOP:
+    zustand: "wartend"
+    anzeige: "🐹 sitzt und wartet — Miner pausiert"
+    stimmung: "geduldig"
+  STOP:
+    zustand: "schlafend"
+    anzeige: "🐹 schläft — Miner gestoppt"
+    stimmung: "ruhend"

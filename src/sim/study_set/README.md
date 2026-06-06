@@ -11,10 +11,15 @@ deterministischer Kern-Entscheidung und Erklärungen. Erzeugt von
 | `sid`, `title` | Szenario-ID + Kurztitel |
 | `actual_code` / `verified` | Kern-Output + ob == erwartetem Code |
 | `decision` | action, code, **base_code** (für Text-Lookup), reason |
+| `hamster` | **Hamster-Anzeige** des 10-Min-Blocks je Aktion (zustand/anzeige/stimmung) — persona-unabhängig ([`hamster_states.yaml`](../../explain/mappings/hamster_states.yaml)) |
 | `engine_input` | last_action, blocks_since_change (R5-Kontext) |
 | `state`, `params` | Eingangs-`EnergyState` + verwendete Schwellen |
 | `explanation.group_a` | **statische** Bausteine (short/long/trigger/data_basis/effect/options) |
-| `explanation.group_b` | **LLM persona-adaptiv** je Persona (energie/waerme/tech) — `null` = Platzhalter |
+| `explanation.group_b_reference` | **Gold-Referenz** je Persona — handgeschriebener Idealsatz ([`persona_examples.yaml`](../../explain/mappings/persona_examples.yaml)); dient als Few-Shot-Anker **und** Vergleichsziel für `group_b` |
+| `explanation.group_b` | **echter LLM-Output** persona-adaptiv (energie/waerme/tech) — `null` = Platzhalter bis Ollama verkabelt |
+
+Beim späteren Test mit echtem LLM steht damit pro 10-Min-Block alles für den Vergleich
+bereit: die Hamster-Anzeige, die Gold-Referenz je Persona und der generierte `group_b`-Satz.
 
 ## Gruppe B befüllen (wenn der externe Ollama-Rechner steht)
 
