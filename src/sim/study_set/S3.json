@@ -59,9 +59,9 @@
       "tech": "NOOP_R1_PRICE_TOO_HIGH: R1-Preisschranke greift, 28,0 ct/kWh > price_max 25,0 ct/kWh, trotz Überschuss 2,5 kW."
     },
     "group_b": {
-      "energie": null,
-      "waerme": null,
-      "tech": null
+      "energie": "Der Miner bleibt gestoppt, da der aktuelle Strompreis von 28,0 ct/kWh dein Limit von 25,0 ct/kWh überschreitet.",
+      "waerme": "Bei aktuellem Preisschutz von 28,0 ct/kWh wird kein Überschuss genutzt und keine kostenlose Wärme erzeugt.",
+      "tech": "NOOP_R1_PRICE_TOO_HIGH: R1-Preisschranke greift bei 28,0 ct/kWh Strompreis trotz 2,5 kW Überschuss."
     }
   }
 }

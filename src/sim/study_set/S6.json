@@ -57,9 +57,9 @@
       "tech": "NOOP_R2_SOC_SOFT_MIN: R2-Veto, SoC 55 % ≤ soft_min 58 %, kein Neustart."
     },
     "group_b": {
-      "energie": null,
-      "waerme": null,
-      "tech": null
+      "energie": "Der Miner läuft noch nicht, da deine Batterie bei 55 Prozent erst nach Erreichen von 58 Prozent laden muss.",
+      "waerme": "Dein Speicher lädt noch auf 58 %, bis dann kostenlose Wärme aus deinem Solarüberschuss fließt.",
+      "tech": "NOOP_R2_SOC_SOFT_MIN: R2-Veto aktiviert bei SoC 55 %, da Wert unter Soft-Min von 58 %."
     }
   }
 }

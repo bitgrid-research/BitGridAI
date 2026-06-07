@@ -55,9 +55,9 @@
       "tech": "NOOP_R5_MIN_RUNTIME_NOT_REACHED: R5-Stabilität, 1 von 3 min_runtime-Blöcken (je 10 min), kein Stop."
     },
     "group_b": {
-      "energie": null,
-      "waerme": null,
-      "tech": null
+      "energie": "Der Miner bleibt an, da er erst eines der drei erforderlichen Intervalle gelaufen hat.",
+      "waerme": "Dein Gerät heizt gerade mit kostenloser Wärme aus deinem Solarüberschuss, da die Mindestlaufzeit von einem Drittel der Zeit erfüllt ist.",
+      "tech": "NOOP_R5_MIN_RUNTIME_NOT_REACHED: R5-Stabilität, da nur ein Drittel der erforderlichen Laufzeit erreicht wurde."
     }
   }
 }

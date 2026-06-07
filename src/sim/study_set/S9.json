@@ -52,9 +52,9 @@
       "tech": "NOOP_R4_FORECAST_PV_INSUFFICIENT: R4-Veto, PV-Prognose 1,2 kW < min_predicted_surplus 2,0 kW."
     },
     "group_b": {
-      "energie": null,
-      "waerme": null,
-      "tech": null
+      "energie": "Der Miner startet nicht, da die Prognose von 1,2 kW zu wenig für das nötige Minimum von 2,0 kW ist.",
+      "waerme": "Die Solarprognose von 1,2 kW reicht nicht für den Start; dein Gerät heizt erst ab einem Überschuss von 2,0 kW.",
+      "tech": "NOOP_R4_FORECAST_PV_INSUFFICIENT: R4-Veto ausgelöst durch PV-Prognose von 1,2 kW unter dem Minimum von 2,0 kW."
     }
   }
 }

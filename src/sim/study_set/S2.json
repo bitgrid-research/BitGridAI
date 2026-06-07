@@ -59,9 +59,9 @@
       "tech": "NOOP_R1_INSUFFICIENT_SURPLUS: R1 hält, Überschuss 0,4 kW < Startschwelle 1,5 kW."
     },
     "group_b": {
-      "energie": null,
-      "waerme": null,
-      "tech": null
+      "energie": "Der Miner bleibt gestoppt, da nur 0,4 kW Solarüberschuss verfügbar sind und mindestens 1,5 kW nötig wären.",
+      "waerme": "Mit nur 0,4 kW Solarüberschuss ist dein Gerät noch gestoppt, da mindestens 1,5 kW für kostenlose Wärme nötig sind.",
+      "tech": "NOOP_R1_INSUFFICIENT_SURPLUS: R1 hält, Überschuss 0,4 kW < Startschwelle 1,5 kW."
     }
   }
 }

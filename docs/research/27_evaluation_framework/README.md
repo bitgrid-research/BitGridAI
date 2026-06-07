@@ -80,7 +80,7 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 ### Software & KI
 
 * Lokales Dashboard in zwei UI-Varianten (statisch / adaptiv)
-* Lokales LLM via Ollama (**Qwen3:8b**), persona-adaptiver Prompt
+* Lokales LLM via Ollama (**qwen3.5:9b**), persona-adaptiver Prompt
 * Deterministisches Template-Fallback bei LLM-Nichtverfügbarkeit
 
 ### Datenbasis

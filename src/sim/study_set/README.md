@@ -24,7 +24,7 @@ bereit: die Hamster-Anzeige, die Gold-Referenz je Persona und der generierte `gr
 ## Gruppe B befüllen (wenn der externe Ollama-Rechner steht)
 
 ```bash
-OLLAMA_HOST=http://<dein-rechner>:11434 OLLAMA_MODEL=qwen3:8b \
+OLLAMA_HOST=http://<dein-rechner>:11434 OLLAMA_MODEL=qwen3.5:9b \
   python -m src.sim.study_freeze
 ```
 

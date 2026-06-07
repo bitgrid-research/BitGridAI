@@ -57,9 +57,9 @@
       "tech": "STOP_R2_GRID_IMPORT_EXCEEDED: R2-Veto, Netto-Netzbezug 700 W > max_grid_import 500 W."
     },
     "group_b": {
-      "energie": null,
-      "waerme": null,
-      "tech": null
+      "energie": "Der Miner wurde gestoppt, da der Netzbezug von 700 Watt das erlaubte Limit von 500 Watt überschreitet.",
+      "waerme": "Miner gestoppt, da der Netzbezug von 700 Watt das Limit von 500 Watt überschreitet – dein Gerät heizt nur mit kostenlosem Solarüberschuss.",
+      "tech": "STOP_R2_GRID_IMPORT_EXCEEDED: R2-Veto, Netto-Netzbezug 700 W überschreitet das Limit von 500 W."
     }
   }
 }

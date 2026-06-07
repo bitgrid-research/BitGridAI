@@ -57,9 +57,9 @@
       "tech": "STOP_R2_SOC_HARD_MIN: R2-Hard-Stop, SoC 45 % ≤ hard_min 50 % (Hausreserve)."
     },
     "group_b": {
-      "energie": null,
-      "waerme": null,
-      "tech": null
+      "energie": "Der Miner wurde gestoppt, um deinen Speicher zu schonen, da er bei 45 % unter der sicheren Grenze von 50 % liegt.",
+      "waerme": "Heizen eingestellt, da die Batterie bei 45 % unter das Sicherheitsminimum von 50 % gefallen ist.",
+      "tech": "STOP_R2_SOC_HARD_MIN wurde ausgelöst, da SoC bei 45 % das Minimum von 50 % unterschritt."
     }
   }
 }

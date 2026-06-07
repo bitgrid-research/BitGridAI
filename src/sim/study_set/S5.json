@@ -54,9 +54,9 @@
       "tech": "STOP_R3_COMM_TIMEOUT: R3-Safety, Heartbeat-Alter 75 s > comm_timeout 60 s, nicht überstimmbar."
     },
     "group_b": {
-      "energie": null,
-      "waerme": null,
-      "tech": null
+      "energie": "Der Miner ist wegen fehlendem Signal seit 75 Sekunden, obwohl das Limit bei nur 60 Sekunden liegt.",
+      "waerme": "Dein Gerät wurde wegen fehlendem Signal seit 75 Sekunden gestoppt, wodurch die kostenlose Wärme aus deinem Solarüberschuss unterbrochen wird.",
+      "tech": "STOP_R3_COMM_TIMEOUT wurde ausgelöst, da Heartbeat-Alter von 75 s das Limit von 60 s überschritt."
     }
   }
 }
