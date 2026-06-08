@@ -500,16 +500,20 @@ template:
           {% set m2 = states('sensor.shellyplugsg3_d0cf13d86254_leistung') | float(0) %}
           {{ (m1 + m2) | round(0) }}
 
-      # Maximale Chip-Temp beider Miner
+      # Maximale Chip-Temp beider Miner - schaltet zwischen Sim/Production
       - name: miner_max_chip_temp_c
         unique_id: miner_max_chip_temp_c
         unit_of_measurement: "°C"
         device_class: temperature
         state_class: measurement
         state: >-
-          {% set t1 = states('sensor.miner1_tmax') | float(0) %}
-          {% set t2 = states('sensor.miner2_tmax') | float(0) %}
-          {{ [t1, t2] | max }}
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.miner_chip_temp_c') | float(0) }}
+          {% else %}
+            {% set t1 = states('sensor.miner1_tmax') | float(0) %}
+            {% set t2 = states('sensor.miner2_tmax') | float(0) %}
+            {{ [t1, t2] | max }}
+          {% endif %}
 
       # Block-Fenster
       - name: block_id

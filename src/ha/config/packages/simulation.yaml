@@ -1,0 +1,482 @@
+simulation:
+  # ── Simulation Mode Toggle ──────────────────────────────────────────────────
+  # When enabled, all simulated sensor values from input_number.* are used
+  # instead of production sensors. This allows testing dashboard behavior
+  # without affecting real hardware.
+  input_boolean:
+    simulation_mode:
+      icon: mdi:flask-outline
+      initial: off
+
+  # ── Simulated Sensor Values (Sliders) ───────────────────────────────────────
+  # These input_number entities hold the simulated values when simulation_mode is on
+  input_number:
+    pv_power_w:
+      name: "Sim: PV Power"
+      min: 0
+      max: 15000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:solar-power
+      initial: 5000
+
+    house_load_w:
+      name: "Sim: House Load"
+      min: 0
+      max: 10000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:home-lightning-bolt
+      initial: 300
+
+    grid_import_w:
+      name: "Sim: Grid Import"
+      min: 0
+      max: 5000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:transmission-tower-import
+      initial: 0
+
+    grid_export_w:
+      name: "Sim: Grid Export"
+      min: 0
+      max: 5000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:transmission-tower-export
+      initial: 4700
+
+    battery_soc_pct:
+      name: "Sim: Battery SoC"
+      min: 0
+      max: 100
+      step: 1
+      unit_of_measurement: "%"
+      mode: slider
+      icon: mdi:battery
+      initial: 70
+
+    battery_power_w:
+      name: "Sim: Battery Power"
+      min: -5000
+      max: 5000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:battery-charging
+      initial: 100
+
+    battery_power_flowchart_w:
+      name: "Sim: Battery Power (Flowchart)"
+      min: -5000
+      max: 5000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:battery-arrow-up
+      initial: 100
+
+    miner_power_w:
+      name: "Sim: Miner Power"
+      min: 0
+      max: 8000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:pickaxe
+      initial: 90
+
+    miner_total_power_w:
+      name: "Sim: Total Miner Power"
+      min: 0
+      max: 16000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:lightning-bolt
+      initial: 0
+
+    heizstab_power_w:
+      name: "Sim: Heizstab Power"
+      min: 0
+      max: 6000
+      step: 100
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:water-boiler
+      initial: 0
+
+    miner_chip_temp_c:
+      name: "Sim: Miner Chip Temp"
+      min: 20
+      max: 130
+      step: 1
+      unit_of_measurement: "°C"
+      mode: slider
+      icon: mdi:thermometer
+      initial: 65
+
+    # ── Miner Mode Power Configuration ────────────────────────────────────────
+    miner_eco_power_w:
+      name: "Sim: Miner Eco Power"
+      min: 0
+      max: 3000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:leaf
+      initial: 300
+
+    miner_standard_power_w:
+      name: "Sim: Miner Standard Power"
+      min: 0
+      max: 6000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:gauge
+      initial: 1400
+
+    miner_super_power_w:
+      name: "Sim: Miner Super Power"
+      min: 0
+      max: 8000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:rocket-launch
+      initial: 2800
+
+  # ── Template Sensors: Simulated or Production Values ────────────────────────
+  # These sensors return simulated values when simulation_mode is on,
+  # otherwise they return production values.
+  template:
+    - sensor:
+        # PV Power - used in power-flow-card and miner overview
+        - name: "PV Power Simulated"
+          unique_id: pv_power_w_sim
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+              {{ states('input_number.pv_power_w') | float(0) }}
+            {% else %}
+              {{ states('sensor.pv_power_w') }}
+            {% endif %}
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:solar-power
+
+        # House Load - used in power-flow-card
+        - name: "House Load Simulated"
+          unique_id: house_load_w_sim
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+              {{ states('input_number.house_load_w') | float(0) }}
+            {% else %}
+              {{ states('sensor.house_load_w') }}
+            {% endif %}
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:home-lightning-bolt
+
+        # Grid Import - used in power-flow-card
+        - name: "Grid Import Simulated"
+          unique_id: grid_import_w_sim
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+              {{ states('input_number.grid_import_w') | float(0) }}
+            {% else %}
+              {{ states('sensor.grid_import_w') }}
+            {% endif %}
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:transmission-tower-import
+
+        # Grid Export - used in power-flow-card
+        - name: "Grid Export Simulated"
+          unique_id: grid_export_w_sim
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+              {{ states('input_number.grid_export_w') | float(0) }}
+            {% else %}
+              {{ states('sensor.grid_export_w') }}
+            {% endif %}
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:transmission-tower-export
+
+        # Battery SoC - used in power-flow-card and status displays
+        - name: "Battery SoC Simulated"
+          unique_id: battery_soc_pct_sim
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+              {{ states('input_number.battery_soc_pct') | float(0) }}
+            {% else %}
+              {{ states('sensor.battery_soc_pct') }}
+            {% endif %}
+          unit_of_measurement: "%"
+          device_class: battery
+          state_class: measurement
+          icon: mdi:battery
+
+        # Battery Power - raw value for calculations
+        - name: "Battery Power Simulated"
+          unique_id: battery_power_w_sim
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+              {{ states('input_number.battery_power_w') | float(0) }}
+            {% else %}
+              {{ states('sensor.battery_power_w') }}
+            {% endif %}
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:battery-charging
+
+        # Battery Power Flowchart - for power-flow-card (inverted convention)
+        - name: "Battery Power Flowchart Simulated"
+          unique_id: battery_power_flowchart_w_sim
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+              {{ states('input_number.battery_power_flowchart_w') | float(0) }}
+            {% else %}
+              {{ states('sensor.battery_power_flowchart_w') }}
+            {% endif %}
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:battery-arrow-up
+
+        # Miner Total Power - used in power-flow-card
+        - name: "Miner Total Power Simulated"
+          unique_id: miner_total_power_w_sim
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+              {{ states('input_number.miner_total_power_w') | float(0) }}
+            {% else %}
+              {{ states('sensor.miner_total_power_w') }}
+            {% endif %}
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:pickaxe
+
+        # Heizstab Power - used in power-flow-card
+        - name: "Heizstab Power Simulated"
+          unique_id: heizstab_power_w_sim
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+              {{ states('input_number.heizstab_power_w') | float(0) }}
+            {% else %}
+              {{ states('sensor.heizstab_power_w') }}
+            {% endif %}
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:water-boiler
+
+        # Surplus Calculation - derived from simulated/production values
+        - name: "Surplus Simulated"
+          unique_id: surplus_kw_sim
+          state: >-
+            {% set pv = states('sensor.pv_power_w_sim') | float(0) %}
+            {% set load = states('sensor.house_load_w_sim') | float(0) %}
+            {{ ((pv - load) / 1000) | round(3) }}
+          unit_of_measurement: kW
+          device_class: power
+          state_class: measurement
+          icon: mdi:flash
+
+        # Miner Chip Temperature - used in decision logic displays
+        - name: "Miner Chip Temp Simulated"
+          unique_id: miner_max_chip_temp_c_sim
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+              {{ states('input_number.miner_chip_temp_c') | float(0) }}
+            {% else %}
+              {{ states('sensor.miner_max_chip_temp_c') }}
+            {% endif %}
+          unit_of_measurement: "°C"
+          device_class: temperature
+          state_class: measurement
+          icon: mdi:thermometer
+
+        # ── Alias Sensors for Simulation Tab Display ──────────────────────────
+        # These provide the non-suffixed names expected by the Simulation tab
+        - name: "miner_power_w"
+          unique_id: miner_power_w_alias
+          state: "{{ states('sensor.miner_total_power_w_sim') }}"
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:pickaxe
+
+        - name: "heizstab_power_w"
+          unique_id: heizstab_power_w_alias
+          state: "{{ states('sensor.heizstab_power_w_sim') }}"
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:water-boiler
+
+        - name: "miner_chip_temp_c"
+          unique_id: miner_chip_temp_c_alias
+          state: "{{ states('sensor.miner_max_chip_temp_c_sim') }}"
+          unit_of_measurement: "°C"
+          device_class: temperature
+          state_class: measurement
+          icon: mdi:thermometer
+
+        # ── Miner Mode Power Configuration Display Sensors ────────────────────
+        - name: "Miner Eco Power Simulated"
+          unique_id: miner_eco_power_w_sim
+          state: "{{ states('input_number.miner_eco_power_w') | float(0) }}"
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:leaf
+
+        - name: "Miner Standard Power Simulated"
+          unique_id: miner_standard_power_w_sim
+          state: "{{ states('input_number.miner_standard_power_w') | float(0) }}"
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:gauge
+
+        - name: "Miner Super Power Simulated"
+          unique_id: miner_super_power_w_sim
+          state: "{{ states('input_number.miner_super_power_w') | float(0) }}"
+          unit_of_measurement: W
+          device_class: power
+          state_class: measurement
+          icon: mdi:rocket-launch
+
+    # ── Binary Sensors for Simulation Status ──────────────────────────────────
+    - binary_sensor:
+        - name: "Simulation Active"
+          unique_id: simulation_active
+          device_class: running
+          icon: mdi:flask
+          state: "{{ is_state('input_boolean.simulation_mode', 'on') }}"
+
+  # ── Scripts for Simulation Control ──────────────────────────────────────────
+  script:
+    sim_toggle_mode:
+      alias: "Simulation: Toggle Mode"
+      icon: mdi:flask-outline
+      sequence:
+        - service: input_boolean.toggle
+          target:
+            entity_id: input_boolean.simulation_mode
+        - service: system_log.write
+          data:
+            message: >-
+              [Simulation] Mode changed to: {{ states('input_boolean.simulation_mode') }}
+            level: info
+
+    sim_reset:
+      alias: "Simulation: Reset All Sliders"
+      icon: mdi:restart
+      sequence:
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.pv_power_w
+          data:
+            value: 5000
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.house_load_w
+          data:
+            value: 300
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.grid_import_w
+          data:
+            value: 0
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.grid_export_w
+          data:
+            value: 4700
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.battery_soc_pct
+          data:
+            value: 70
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.battery_power_w
+          data:
+            value: 100
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.battery_power_flowchart_w
+          data:
+            value: 100
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.miner_total_power_w
+          data:
+            value: 0
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.heizstab_power_w
+          data:
+            value: 0
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.miner_chip_temp_c
+          data:
+            value: 65
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.miner_eco_power_w
+          data:
+            value: 300
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.miner_standard_power_w
+          data:
+            value: 1400
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.miner_super_power_w
+          data:
+            value: 2800
+        - service: system_log.write
+          data:
+            message: "[Simulation] All sliders reset to defaults (START_R1_SURPLUS_OK scenario)"
+            level: info
+
+    sim_enable:
+      alias: "Simulation: Enable Mode"
+      icon: mdi:flask
+      sequence:
+        - service: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.simulation_mode
+        - service: system_log.write
+          data:
+            message: "[Simulation] Mode ENABLED - using simulated sensor values"
+            level: warning
+
+    sim_disable:
+      alias: "Simulation: Disable Mode"
+      icon: mdi:flask-off
+      sequence:
+        - service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.simulation_mode
+        - service: system_log.write
+          data:
+            message: "[Simulation] Mode DISABLED - returning to production sensor values"
+            level: info
