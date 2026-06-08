@@ -2965,13 +2965,15 @@ views:
                     icon: mdi:record-circle
 
   # ═══════════════════════════════════════════════════════
-  # STUDIE B — Baseline (Gruppe B)
-  # Zeigt das aufgeschlüsselte DecisionEvent: Wirkung,
-  # Datenbasis, Optionen — deterministischer ExplainAgent,
-  # kein LLM-Text.
+  # VARIANTE A — Statische Erklärung (Studie Gruppe A)
+  # Festes Studien-Stimulus-Material: Wirkung, Datenbasis,
+  # Optionen sind HARTKODIERT (kein Sensor, kein LLM).
+  # Dargestelltes Szenario: S1 „Klarer Start" (START_R1_SURPLUS_OK).
+  # Zum Wechseln des Szenarios die Konstanten im status-Feld
+  # sowie die Energie-Kacheln unten anpassen.
   # ═══════════════════════════════════════════════════════
-  - title: Studie B
-    path: studie-baseline
+  - title: Variante A
+    path: studie-variante-a
     icon: mdi:clipboard-list-outline
     cards:
       - type: vertical-stack
@@ -2987,12 +2989,15 @@ views:
             custom_fields:
               status: >
                 [[[
-                  const code      = states['sensor.bg_runner_code']?.state       || '—';
-                  const effect    = states['sensor.bg_runner_effect']?.state     || '—';
-                  const dataBasis = states['sensor.bg_runner_data_basis']?.state  || '—';
-                  const options   = states['sensor.bg_runner_options']?.state    || '—';
-                  const blockId   = states['sensor.bg_runner_block_id']?.state   || '';
-                  const pv        = parseFloat(states['sensor.pv_power_w']?.state || 0);
+                  // ── VARIANTE A (statisch) — festes Studien-Stimulus, Szenario S1 ──
+                  // Diese Werte sind bewusst hartkodiert (kein Sensor-Read).
+                  // Zum Wechseln des Szenarios hier anpassen.
+                  const code      = 'START_R1_SURPLUS_OK';
+                  const effect    = 'Miner gestartet — überschüssige PV-Leistung wird in die flexible Last gesteuert, statt sie einzuspeisen.';
+                  const dataBasis = 'Überschuss 3,0 kW · Akku 80 % · PV 4500 W · Strompreis 12 ct/kWh';
+                  const options   = 'Starten ✓ · Warten · Einspeisen';
+                  const blockId   = '2026-06-15T1030';
+                  const pv        = 4500;
 
                   let weather, wColor;
                   if      (pv > 4000) { weather = '☀️ Volle Sonne';       wColor = '#FFC107'; }
@@ -3006,13 +3011,7 @@ views:
                                  : isStart  ? 'bithamster_eco.png'
                                  :             'bithamster_wait.png';
 
-                  const h = new Date().getHours();
-                  const greeting = h < 5  ? 'Gute Nacht'
-                                 : h < 11 ? 'Guten Morgen'
-                                 : h < 14 ? 'Guten Mittag'
-                                 : h < 18 ? 'Guten Nachmittag'
-                                 : h < 22 ? 'Guten Abend'
-                                 :          'Gute Nacht';
+                  const greeting = 'Guten Morgen';
 
                   const blockTime = blockId.length >= 16 ? blockId.slice(11, 16) : '';
 
@@ -3059,22 +3058,10 @@ views:
                 ]]]
             styles:
               card:
-                - background: >
-                    [[[
-                      const code = states['sensor.bg_runner_code']?.state || '';
-                      if (code.startsWith('STOP_R3')) return '#0c0f18';
-                      if (code.startsWith('START'))   return '#091410';
-                      return '#10141f';
-                    ]]]
+                - background: "#091410"
                 - border-radius: 12px
                 - padding: 12px 16px
-                - border: >
-                    [[[
-                      const code = states['sensor.bg_runner_code']?.state || '';
-                      if (code.startsWith('STOP_R3')) return '1px solid rgba(244,67,54,0.4)';
-                      if (code.startsWith('START'))   return '1px solid #4CAF50';
-                      return '1px solid #757575';
-                    ]]]
+                - border: 1px solid #4CAF50
                 - text-align: left
               grid:
                 - grid-template-areas: '"status"'
@@ -3085,14 +3072,17 @@ views:
                   - text-align: left
                   - justify-self: start
 
-          # ── Energie-Status ───────────────────────────────────────────────────
+          # ── Energie-Status (statisch — Werte aus Szenario S1) ────────────────
           - type: horizontal-stack
             cards:
               - type: custom:button-card
-                entity: sensor.battery_soc_pct
                 name: Akku
+                label: "80,0 %"
                 icon: mdi:battery-charging
-                show_state: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
                 styles:
                   card:
                     - background: var(--secondary-background-color)
@@ -3101,24 +3091,22 @@ views:
                   icon:
                     - width: 36px
                     - height: 36px
-                    - color: >
-                        [[[
-                          const v = parseFloat(entity.state);
-                          if (v <= 20) return '#F44336';
-                          if (v <= 40) return '#f59e0b';
-                          return '#4CAF50';
-                        ]]]
+                    - color: "#4CAF50"
                   name:
                     - font-size: 0.8rem
                     - color: var(--secondary-text-color)
-                  state:
+                  label:
                     - font-size: 0.9rem
                     - font-weight: 600
+                    - color: var(--primary-text-color)
               - type: custom:button-card
-                entity: sensor.pv_power_w
                 name: PV
+                label: "4500 W"
                 icon: mdi:solar-power
-                show_state: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
                 styles:
                   card:
                     - background: var(--secondary-background-color)
@@ -3127,25 +3115,22 @@ views:
                   icon:
                     - width: 36px
                     - height: 36px
-                    - color: >
-                        [[[
-                          const v = parseFloat(entity.state);
-                          if (!v || v === 0) return 'var(--secondary-text-color)';
-                          if (v < 800)  return '#f59e0b';
-                          if (v < 1600) return '#8BC34A';
-                          return '#4CAF50';
-                        ]]]
+                    - color: "#4CAF50"
                   name:
                     - font-size: 0.8rem
                     - color: var(--secondary-text-color)
-                  state:
+                  label:
                     - font-size: 0.9rem
                     - font-weight: 600
+                    - color: var(--primary-text-color)
               - type: custom:button-card
-                entity: sensor.grid_export_w
                 name: Überschuss
+                label: "3000 W"
                 icon: mdi:transmission-tower-export
-                show_state: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
                 styles:
                   card:
                     - background: var(--secondary-background-color)
@@ -3154,23 +3139,22 @@ views:
                   icon:
                     - width: 36px
                     - height: 36px
-                    - color: >
-                        [[[
-                          const v = parseFloat(entity.state);
-                          if (!v || v === 0) return 'var(--secondary-text-color)';
-                          return '#4CAF50';
-                        ]]]
+                    - color: "#4CAF50"
                   name:
                     - font-size: 0.8rem
                     - color: var(--secondary-text-color)
-                  state:
+                  label:
                     - font-size: 0.9rem
                     - font-weight: 600
+                    - color: var(--primary-text-color)
               - type: custom:button-card
-                entity: sensor.grid_import_w
                 name: Netzbezug
+                label: "0 W"
                 icon: mdi:transmission-tower-import
-                show_state: true
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
                 styles:
                   card:
                     - background: var(--secondary-background-color)
@@ -3179,29 +3163,23 @@ views:
                   icon:
                     - width: 36px
                     - height: 36px
-                    - color: >
-                        [[[
-                          const v = parseFloat(entity.state);
-                          if (!v || v === 0) return 'var(--secondary-text-color)';
-                          if (v <= 100) return '#4CAF50';
-                          if (v <= 500) return '#f59e0b';
-                          return '#5C6BC0';
-                        ]]]
+                    - color: var(--secondary-text-color)
                   name:
                     - font-size: 0.8rem
                     - color: var(--secondary-text-color)
-                  state:
+                  label:
                     - font-size: 0.9rem
                     - font-weight: 600
+                    - color: var(--primary-text-color)
 
-          # ── Decision-Verlauf (24h) ────────────────────────────────────────────
-          - type: history-graph
-            title: "Entscheidungsverlauf (24h)"
-            hours_to_show: 24
-            refresh_interval: 120
-            entities:
-              - entity: sensor.bg_runner_code
-                name: Entscheidung
+          # ── Decision-Verlauf (statisch) ──────────────────────────────────────
+          - type: markdown
+            content: >
+              #### Entscheidungsverlauf (24h)
+
+
+              Statischer Studien-Snapshot — die Entscheidung bleibt im
+              dargestellten Block konstant **`START_R1_SURPLUS_OK`**.
 
   # ═══════════════════════════════════════════════════════
   # STUDIE E — Experimental (Gruppe E)
