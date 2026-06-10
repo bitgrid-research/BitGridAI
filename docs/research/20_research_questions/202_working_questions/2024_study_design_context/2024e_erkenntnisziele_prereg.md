@@ -15,6 +15,17 @@ und das Szenario-Set [2024d](./2024d_scenarios/README.md).
 > deskriptive Kovariate weitergeführt. Änderung erfolgt **vor** jeder Erhebung (kein
 > HARKing) und ist 🟦 mit dem Betreuer zu bestätigen.
 
+> **Design-Änderung (2026-06-10, vor Datenerhebung):** Auf Empfehlung des Betreuers
+> wird die Stichprobe von **N = 20 auf N = 16** verkleinert und auf **zwei** Persona-Typen
+> reduziert: **Gruppe A n = 8** (statisch) vs. **Gruppe B n = 8** (adaptiv, je n = 4 für
+> `energie` und `waerme`). Der Persona-Typ **`tech` entfällt im Sampling** (das System
+> unterstützt ihn unverändert weiter). Begründung: Fokus auf die Kernfrage (A vs. B),
+> **balancierte** Gruppen (8/8) verbessern die Power des Primärtests gegenüber der
+> früheren 5/15-Aufteilung, geringeres Erhebungsrisiko bei 60–90-Min-Sitzungen und
+> Reserve für etwaige Nacherhebungen. **H3** bleibt rein explorativ, nun mit **zwei**
+> Persona-Typen (energie/waerme, n = 4/Zelle). Änderung erfolgt **vor** jeder Erhebung
+> (kein HARKing) und ist 🟦 mit dem Betreuer abgestimmt.
+
 ## Kernfrage
 
 > Verbessert **persona-adaptive LLM-Erklärung** (Gruppe B) gegenüber **statischem
@@ -32,7 +43,7 @@ nicht „LLM erklärt schöner".
 |---|---|---|
 | **H1** (primär) | Gruppe B erzielt einen höheren **Regelverständnis-Score (0–12)** als Gruppe A. | gerichtet, einseitig |
 | **H2** | Gruppe B zeigt häufiger **angemessene** Override-Reaktionen (S4 akzeptieren, S9 begründet). | gerichtet |
-| **H3** (explorativ) 🟦 | Das Regelverständnis in Gruppe B unterscheidet sich zwischen den drei **Persona-Typen** (energie/waerme/tech). Vorwissen wird zusätzlich deskriptiv als Kovariate betrachtet. | explorativ, ungerichtet, n=5/Typ |
+| **H3** (explorativ) 🟦 | Das Regelverständnis in Gruppe B unterscheidet sich zwischen den zwei **Persona-Typen** (energie/waerme). Vorwissen wird zusätzlich deskriptiv als Kovariate betrachtet. | explorativ, ungerichtet, n=4/Typ |
 | **H0** | Kein Unterschied im Verständnis-Score zwischen A und B. | Nullhypothese |
 
 ## Operationalisierung
@@ -73,9 +84,9 @@ Misuse/Disuse-Coding):
 
 ## Analyseplan (festgeschrieben)
 
-- **Test:** Mann-Whitney-U (einseitig) auf den Verständnis-Score, A (n=5) vs. gepoolt B (n=15); Welch-/t-Test bei erfüllten Voraussetzungen (Shapiro-Wilk, Levene). Implementiert in `src/sim/study_analysis.py`.
+- **Test:** Mann-Whitney-U (einseitig) auf den Verständnis-Score, A (n=8) vs. gepoolt B (n=8); Welch-/t-Test bei erfüllten Voraussetzungen (Shapiro-Wilk, Levene). Implementiert in `src/sim/study_analysis.py`.
 - **Immer berichten:** Effektgröße **r** (bzw. Cohen's *d*), **95 %-KI**, **N** — **p nie isoliert**.
-- **Persona-Typen:** rein explorativ/deskriptiv (n=5/Zelle, energie/waerme/tech); ungerichtet, da Interesse-Personas keine a-priori-Ordnung des Verständnisses begründen.
+- **Persona-Typen:** rein explorativ/deskriptiv (n=4/Zelle, energie/waerme); ungerichtet, da Interesse-Personas keine a-priori-Ordnung des Verständnisses begründen.
 - **Qualitativ:** thematische Analyse (Braun & Clarke) der offenen Antworten + Override-Begründungen.
 - **Triangulation:** Score × Themen × Verhaltensspur (Logs).
 
@@ -89,7 +100,7 @@ Misuse/Disuse-Coding):
 
 ## Limitationen (vorab, ehrlich)
 
-- **N = 20** → nur **große** Effekte detektierbar (d ≈ 0,8 → Power ~55 %). Studie **hypothesen-generierend**, Triangulation > p-Wert.
+- **N = 16** (balanciert 8 vs. 8) → nur **große** Effekte detektierbar (d ≈ 0,8 → Power ~45 %, einseitig). Die balancierte 8/8-Aufteilung hält die Power des Primärtests (A vs. gepoolt B) etwa auf dem Niveau der früheren 5/15-Variante, da die effektive Gruppengröße vergleichbar bleibt (harmonisches Mittel ≈ 8 vs. ≈ 7,5). Studie **hypothesen-generierend**, Triangulation > p-Wert.
 - **Saison-Bias:** Szenarien aus Spätfrühlings-Daten; Häufigkeiten sommer-spezifisch.
 - **Kern-Angleichung (offen):** Das **Energielabor** bildet den Realbetrieb (2× Avalon Q) **maßstabsgetreu** nach — gleiches SoC-Band-Schema, gleiche Modi (Eco/Std/Super), nur **leistungsskaliert** auf die kleinen Miner (Bitaxe/NerdQaxe); die SoC-Schwellen (50/58/80/90 %) sind **identisch**. Offen bleibt allein die Angleichung des **deterministischen Kerns** (`RuleEngineConfig`, kW-Überschuss-Logik R1; R4/R5 nicht im HA-Template) an dieses Schema → spätere Arbeit (ADR 020). Werte-Gegenüberstellung: [2024d](./2024d_scenarios/README.md).
 - **Faithfulness automatisch nur Vorstufe** — manuelle Bewertung bleibt nötig.

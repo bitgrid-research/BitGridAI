@@ -187,7 +187,7 @@ Phase 8 🔭 Produktisierung (Ausblick)
 - **S8-Override-Coding** kippt, wenn R2-Fix (Phase 2) nicht vor der Studie steht.
 - **Faithfulness** der LLM-Erklärung ist die zentrale unkontrollierte Variable — ohne unabhängigen Check ist der A/B-Vergleich konfundiert.
 - **Gruppe B hängt am externen Ollama-Rechner** (`OLLAMA_HOST`) — Erreichbarkeit/Latenz/Modell-Konsistenz sicherstellen; bei Ausfall fällt `ExplainAgent` auf Template zurück → A/B-Kontrast verschwindet. Für die Studie: Erklärungen **vorab generieren + einfrieren** (nicht live je Proband), das eliminiert Ausfall- *und* Determinismus-Risiko.
-- **N = 20** → nur große Effekte; Studie primär hypothesen-generierend, Triangulation > p-Wert.
+- **N = 16** (8 vs. 8, 2 Personas) → nur große Effekte; Studie primär hypothesen-generierend, Triangulation > p-Wert.
 
 ## Bezug zur Studie
 

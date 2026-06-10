@@ -4,6 +4,15 @@ Dieses Dokument beschreibt den Datenexport aus dem BitGridAI-System für die
 statistische Auswertung der Nutzerstudie. Es richtet sich an die auswertende Person
 an der Universität und an den Studienleiter.
 
+> ⚠️ **Beispiele veraltet (Stand 2026-06-10):** Die Konsolen-/Auswertungsbeispiele
+> unten zeigen das frühere **Diary-Design** (Gruppen B/E, Prä→Post, N = 10, n = 5/Gruppe).
+> Das **aktuelle** Design ist eine **Einzelsitzung** (Gruppe A statisch vs. Gruppe B
+> adaptiv, **N = 16**, 8 vs. 8, 2 Personas `energie`/`waerme`) — maßgeblich ist der
+> [Evaluationsrahmen Kap. 27](../../docs/research/27_evaluation_framework/README.md)
+> bzw. [2024e](../../docs/research/20_research_questions/202_working_questions/2024_study_design_context/2024e_erkenntnisziele_prereg.md).
+> Das Export-/Prüfsummen-Verfahren selbst bleibt gültig; nur Gruppen, N und die
+> Power-Beispiele sind anzupassen.
+
 ---
 
 ## 1. Export abrufen

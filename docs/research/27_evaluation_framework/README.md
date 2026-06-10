@@ -11,8 +11,8 @@ Der Fokus liegt auf dem **Verständnis der Entscheidungslogik** (mentales Modell
 
 Die Evaluation ist als **Between-Subjects-Studie** in einer **Einzelsitzung** angelegt, in der zwei Erklärformate verglichen werden. Beide Varianten zeigen einen Erklärbereich — der Unterschied liegt allein in der *Art* der Erklärung:
 
-* **Gruppe A – statisch** (n = 5): regelbasiert erzeugte, für alle Probanden wortgleiche Erklärtexte (kein Sprachmodell).
-* **Gruppe B – adaptiv** (n = 15): natürlichsprachliche LLM-Erklärung in einem von **drei Persona-Typen** (`energie` Eigenverbrauch · `waerme` Wärmegewinn · `tech` technische Transparenz), je n = 5, zugewiesen nach dem im Intake erhobenen Nutzertyp, gemäß Kapitel 24. 🟦
+* **Gruppe A – statisch** (n = 8): regelbasiert erzeugte, für alle Probanden wortgleiche Erklärtexte (kein Sprachmodell).
+* **Gruppe B – adaptiv** (n = 8): natürlichsprachliche LLM-Erklärung in einem von **zwei Persona-Typen** (`energie` Eigenverbrauch · `waerme` Wärmegewinn), je n = 4, zugewiesen nach dem im Intake erhobenen Nutzertyp, gemäß Kapitel 24. Der vom System ebenfalls unterstützte Typ `tech` (technische Transparenz) wird in dieser Studie nicht erhoben. 🟦
 
 Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score) mit **qualitativen Erhebungen** (offene Fragen, Override-Aufgabe).
 
@@ -34,9 +34,9 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 ## Studiendesign
 
 * **Design:** Between-Subjects (Gruppe A statisch vs. Gruppe B adaptiv)
-* **Stichprobe:** N = 20 — Gruppe A (statisch) n = 5, Gruppe B (adaptiv) n = 15 in 3 Persona-Typen (energie/waerme/tech) à n = 5; heterogener Hintergrund; Ausschluss von Domänen-Experten (Energie-/Regelungstechnik, Informatik) zur Vermeidung eines Ceiling-Effekts
+* **Stichprobe:** N = 16 — Gruppe A (statisch) n = 8, Gruppe B (adaptiv) n = 8 in 2 Persona-Typen (energie/waerme) à n = 4; heterogener Hintergrund; Ausschluss von Domänen-Experten (Energie-/Regelungstechnik, Informatik) zur Vermeidung eines Ceiling-Effekts
 * **Format:** Einzelsitzung, ca. 60–90 Minuten pro Proband (kein Längsschnitt)
-* **Statistik:** t-Test für unabhängige Stichproben (einseitig) auf den Regelverständnis-Score; Primärvergleich Gruppe A vs. **gepoolte** Gruppe B (Cohen's *d*, 95 %-KI). Der Vergleich der drei Persona-Typen (n = 5 je Typ) bleibt **explorativ/deskriptiv** (keine gerichtete Hypothese).
+* **Statistik:** t-Test für unabhängige Stichproben (einseitig) auf den Regelverständnis-Score; Primärvergleich Gruppe A vs. **gepoolte** Gruppe B (Cohen's *d*, 95 %-KI). Der Vergleich der zwei Persona-Typen (n = 4 je Typ) bleibt **explorativ/deskriptiv** (keine gerichtete Hypothese).
 * **Standardisierung:** identische, gescriptete Szenario-Abfolge für alle Probanden — eingespielt per **Replay** des deterministischen Regelkerns (die zehn Szenarien S01–S10: [Übersicht in Kapitel 26](../26_scenarios_and_use_cases/README.md#deterministische-studienszenarien-s01s10), kanonische Spezifikation in [20.2.4.4](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/README.md))
 
 ### Sitzungsablauf
@@ -94,7 +94,7 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 ## Erhebungsinstrumente
 
 * **Offene Verständnisfragen** (primär): „Wie funktioniert das System? · Erwartungen? · wichtigste Einflussregeln? · Warum Steuern statt Einspeisen?“ — audioaufgezeichnet, transkribiert
-* **Demographie + Nutzertyp-/Vorwissens-Einstufung**: Technikaffinität, Energie-/EMS-Vorwissen, Bitcoin-Vorwissen, Wärme-Nutzungsabsicht — daraus wird in Gruppe B der Persona-Typ zugewiesen (`waerme` ← Wärme-Nutzungsabsicht, `tech` ← Technik-/Bitcoin-Affinität, sonst `energie`); Vorwissen bleibt zusätzlich als deskriptive Kovariate
+* **Demographie + Nutzertyp-/Vorwissens-Einstufung**: Technikaffinität, Energie-/EMS-Vorwissen, Bitcoin-Vorwissen, Wärme-Nutzungsabsicht — daraus wird in Gruppe B der Persona-Typ zugewiesen (`waerme` ← Wärme-Nutzungsabsicht, sonst `energie`); stark technik-/Bitcoin-affine Kandidaten werden für diese Studie nicht rekrutiert (Typ `tech` wird nicht erhoben); Vorwissen bleibt zusätzlich als deskriptive Kovariate
 * **Override-Aufgabe**: beobachtetes Eingriffsverhalten + mündliche Begründung
 * **Optionale Skalen (einmalig)**: Automation Trust Scale; ergänzend SUS, Raw NASA-TLX
 * **Systemlogs**: DecisionEvents, Override-Ereignisse, Template-Fallback-Vorkommen
