@@ -1,6 +1,8 @@
-# Onboarding HiWi 2 — UI, Explainability & Personas
+# Onboarding HiWi 2 — UI, Explainability & Studie
 
-Willkommen im BitGridAI-Projekt. Diese Seite führt dich durch den Einstieg in deinen Schwerpunkt: Benutzeroberfläche, erklärbare KI-Ausgaben und persona-basierte Evaluation.
+Willkommen im BitGridAI-Projekt. Diese Seite führt dich durch den Einstieg in deinen Schwerpunkt: Benutzeroberfläche, erklärbare KI-Ausgaben und die zielgruppengerechte Aufbereitung der Erklärungen.
+
+> **Hinweis zur Nutzerstudie:** Die Studie vergleicht nur zwei Erklärformate, **A (statischer Regeltext)** vs. **B (LLM-Erklärung in einer generischen Stimme)** — **ohne Personas**. Gemessen wird primär das **Nutzervertrauen** (FF1) und die **Güte** der LLM-Ausgaben (FF2). Die unten genannten „Zielgruppen" (Heimnutzer vs. Forscher, ₿itsy-Home/₿itsy-Study) betreffen die zielgruppengerechte UI-Gestaltung, **nicht** den Studien-Faktor.
 
 ---
 
@@ -47,20 +49,20 @@ cd src/ha && docker compose up -d
 1. **HA-Dashboard verstehen** — `src/ha/config/bitgrid-dashboard.yaml` lesen, Dashboard im Browser erkunden
 2. **DecisionEvent verstehen** — `src/core/models.py` lesen: was steckt in einem Event?
 3. **Explain-Schicht erkunden** — `src/explain/` lesen: wie werden Events in Text übersetzt?
-4. **Persona-Anforderungen ableiten** — Welche Infos braucht ein Heimnutzer vs. ein Forscher? (`₿itsy-Home` vs. `₿itsy-Study`)
+4. **Zielgruppen-Anforderungen ableiten** — Welche Infos braucht ein Heimnutzer vs. ein Forscher? (`₿itsy-Home` vs. `₿itsy-Study`) — eine UI-Frage, unabhängig vom Studien-A/B-Faktor
 
 ---
 
 ## Wichtige Konzepte
 
-### Synthetische Personas → Erklärungstiefe
+### Zielgruppen → Erklärungstiefe (₿itsy-Agenten)
 
-| Persona | Modell | Erklärungstiefe |
+| Agent / Zielgruppe | Modell | Erklärungstiefe |
 |---|---|---|
-| ₿itsy-Home | Qwen3:4b | einfach, alltagsnah |
-| ₿itsy-Study | Qwen3:14b | technisch, mit Parametern |
+| ₿itsy-Home (Heimnutzer) | Qwen3:4b | einfach, alltagsnah |
+| ₿itsy-Study (Forscher) | Qwen3:14b | technisch, mit Parametern |
 
-Beide lesen `DecisionEvents` read-only. Deine Aufgabe: herausarbeiten was jede Persona braucht und die UI entsprechend gestalten.
+Beide lesen `DecisionEvents` read-only. Deine Aufgabe: herausarbeiten, was jede Zielgruppe braucht, und die UI entsprechend gestalten. Das ist eine Design-/UI-Frage und **getrennt** vom A/B-Vergleich der Studie (die Studie selbst nutzt für Gruppe B eine einzige generische Stimme).
 
 ### DecisionEvent — das zentrale Datenobjekt
 

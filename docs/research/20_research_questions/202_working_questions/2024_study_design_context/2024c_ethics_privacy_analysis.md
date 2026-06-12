@@ -9,9 +9,10 @@
 
 ## Analyseplan
 
-- **Quantitativ:** t-Test auf den Regelverständnis-Score (s. 2024b), stets mit Effektgröße (Cohen's *d*), 95 %-KI und N — **p-Werte nie isoliert**.
-- **Qualitativ:** thematische Analyse (Braun & Clarke) der offenen Antworten und Override-Begründungen.
-- **Triangulation:** Verständnis-Score, qualitative Themen, Verhaltensspur aus den Logs.
+- **Quantitativ:** Mann-Whitney-U auf das Nutzervertrauen (between, s. 2024b) plus Within-Tests (Forced-Choice, Vergleichsrating); stets mit Effektgröße (r bzw. Cohen's *d*), 95 %-KI und N — **p-Werte nie isoliert**.
+- **Güte (FF2):** Faithfulness + Rubrik-Rating (Interrater-κ); Kalibrierung Vertrauen × Güte.
+- **Qualitativ:** thematische Analyse (Braun & Clarke) der offenen Vertrauensbegründungen.
+- **Triangulation:** Trust-Score, Within-Vergleich, Güte, qualitative Themen, Verhaltensspur aus den Logs.
 
 ## Ergebnisqualität & Limitationen (vorab)
 

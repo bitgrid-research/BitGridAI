@@ -46,15 +46,7 @@
       "effect": "Miner startet nicht — Prognose zu schwach",
       "options": "Miner startet wenn Prognose ≥ 2,0 kW"
     },
-    "group_b_reference": {
-      "energie": "Der Miner startet nicht — die Vorhersage erwartet nur 1,2 kW Sonne, für einen Start wären 2,0 kW nötig.",
-      "waerme": "Noch kein Heizen: Die Prognose sagt nur 1,2 kW Solarleistung voraus, dein Gerät startet erst ab 2,0 kW.",
-      "tech": "NOOP_R4_FORECAST_PV_INSUFFICIENT: R4-Veto, PV-Prognose 1,2 kW < min_predicted_surplus 2,0 kW."
-    },
-    "group_b": {
-      "energie": "Der Miner startet nicht, da die Prognose von 1,2 kW zu wenig für das nötige Minimum von 2,0 kW ist.",
-      "waerme": "Die Solarprognose von 1,2 kW reicht nicht für den Start; dein Gerät heizt erst ab einem Überschuss von 2,0 kW.",
-      "tech": "NOOP_R4_FORECAST_PV_INSUFFICIENT: R4-Veto ausgelöst durch PV-Prognose von 1,2 kW unter dem Minimum von 2,0 kW."
-    }
+    "group_b_reference": "Der Miner startet nicht, die Vorhersage erwartet nur 1,2 kW Sonne, für einen Start wären 2,0 kW nötig.",
+    "group_b": null
   }
 }

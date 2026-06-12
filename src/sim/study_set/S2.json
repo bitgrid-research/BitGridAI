@@ -53,15 +53,7 @@
       "effect": "Miner bleibt gestoppt — zu wenig Solarstrom",
       "options": "Miner startet ab 1,5 kW Überschuss"
     },
-    "group_b_reference": {
-      "energie": "Der Miner wartet — aktuell sind nur 0,4 kW Solarüberschuss da, für den Start braucht es mindestens 1,5 kW.",
-      "waerme": "Noch keine Wärme: Mit 0,4 kW Überschuss reicht die Sonne nicht, dein Gerät startet erst ab 1,5 kW.",
-      "tech": "NOOP_R1_INSUFFICIENT_SURPLUS: R1 hält, Überschuss 0,4 kW < Startschwelle 1,5 kW."
-    },
-    "group_b": {
-      "energie": "Der Miner bleibt gestoppt, da nur 0,4 kW Solarüberschuss verfügbar sind und mindestens 1,5 kW nötig wären.",
-      "waerme": "Mit nur 0,4 kW Solarüberschuss ist dein Gerät noch gestoppt, da mindestens 1,5 kW für kostenlose Wärme nötig sind.",
-      "tech": "NOOP_R1_INSUFFICIENT_SURPLUS: R1 hält, Überschuss 0,4 kW < Startschwelle 1,5 kW."
-    }
+    "group_b_reference": "Der Miner wartet, aktuell sind nur 0,4 kW Solarüberschuss da, für den Start braucht es mindestens 1,5 kW.",
+    "group_b": null
   }
 }

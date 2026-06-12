@@ -15,7 +15,7 @@ EnergyState(
 - **Entscheidung:** `NOOP_R1_PRICE_TOO_HIGH` (28 ct > 25 ct; Preis bewusst < 30 ct, damit R4 *nicht* greift)
 - **Lehrziel:** Opportunitätskosten — bei hohem Marktpreis lohnt **Einspeisen mehr als Selbstverbrauch**. Profitabilität ist nicht nur „Sonne da/nicht da".
 - **Verständnisfrage:** „Die Sonne scheint und der Akku ist voll — warum mint das System trotzdem nicht?"
-- **Diskriminierend:** Hier zahlt sich persona-adaptive Erklärung am stärksten aus.
+- **Diskriminierend:** kontraintuitives Item, gut geeignet für den Within-Vergleich des Vertrauens (statisch vs. LLM).
 - **Belegung:** **0×** real — tritt mit aktuellem Tarif nicht auf (Abend-Hochpreis kollidiert mit fallender PV-Prognose → R4 greift vor R1). **Konstruktion nötig.**
 
 ---

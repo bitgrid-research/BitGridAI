@@ -8,8 +8,7 @@ from src.explain import decision_codes as dc
 from src.explain.explain_agent import (
     ExplainAgent,
     ExplainResult,
-    _PERSONA_INSTRUCTIONS,
-    _VALID_PERSONAS,
+    load_b_references,
 )
 
 
@@ -231,58 +230,21 @@ def test_energy_state_ref_passed_through(agent: ExplainAgent) -> None:
     assert result.energy_state_ref == "2024-01-15T10:00:00"
 
 
-# ── Persona-Unterstützung ─────────────────────────────────────────────────────
+# ── Gruppe-B-Gold-Referenz (Few-Shot-Anker, Vergleichsziel der Güte-Bewertung) ─
 
 
-def test_default_persona_is_energie(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("OLLAMA_PERSONA", raising=False)
-    a = ExplainAgent()
-    assert a.persona == "energie"
+def test_b_references_load_as_flat_str_map() -> None:
+    refs = load_b_references("de")
+    assert isinstance(refs, dict)
+    assert all(isinstance(k, str) and isinstance(v, str) for k, v in refs.items())
 
 
-@pytest.mark.parametrize("persona", sorted(_VALID_PERSONAS))
-def test_valid_persona_accepted(monkeypatch: pytest.MonkeyPatch, persona: str) -> None:
-    monkeypatch.setenv("OLLAMA_PERSONA", persona)
-    a = ExplainAgent()
-    assert a.persona == persona
+def test_b_reference_present_for_start_r1() -> None:
+    refs = load_b_references("de")
+    ref = refs.get(dc.START_R1_SURPLUS_OK, "")
+    assert ref, "Gold-Referenz für START_R1_SURPLUS_OK fehlt"
+    assert any(c.isdigit() for c in ref), "Gold-Referenz nennt keine konkrete Zahl"
 
 
-def test_unknown_persona_falls_back_to_energie(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("OLLAMA_PERSONA", "unbekannt")
-    a = ExplainAgent()
-    assert a.persona == "energie"
-
-
-def test_persona_case_insensitive(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("OLLAMA_PERSONA", "WAERME")
-    a = ExplainAgent()
-    assert a.persona == "waerme"
-
-
-def test_all_personas_have_instruction_text() -> None:
-    for persona in _VALID_PERSONAS:
-        assert persona in _PERSONA_INSTRUCTIONS
-        assert len(_PERSONA_INSTRUCTIONS[persona]) > 20
-
-
-def test_persona_instructions_differ() -> None:
-    instructions = list(_PERSONA_INSTRUCTIONS.values())
-    assert len(set(instructions)) == len(
-        instructions
-    ), "Persona-Anweisungen sind nicht eindeutig"
-
-
-def test_energie_persona_avoids_mining_vocab(monkeypatch: pytest.MonkeyPatch) -> None:
-    instruction = _PERSONA_INSTRUCTIONS["energie"]
-    assert "Mining" not in instruction or "vermeid" in instruction.lower()
-    assert "Solarstrom" in instruction
-
-
-def test_waerme_persona_mentions_heat(monkeypatch: pytest.MonkeyPatch) -> None:
-    instruction = _PERSONA_INSTRUCTIONS["waerme"]
-    assert "Wärme" in instruction
-
-
-def test_tech_persona_mentions_rule_codes(monkeypatch: pytest.MonkeyPatch) -> None:
-    instruction = _PERSONA_INSTRUCTIONS["tech"]
-    assert "R1" in instruction or "R5" in instruction
+def test_agent_loads_b_references(agent: ExplainAgent) -> None:
+    assert agent._b_references.get(dc.START_R1_SURPLUS_OK, "")

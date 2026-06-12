@@ -2,9 +2,9 @@
 Studien-Freeze — friert die 10 Szenarien gemeinsam mit ihren Erklärungen ein.
 
 Pro Szenario: Replay durch den deterministischen Kern → DecisionEvent, dann
-Gruppe-A-Erklärung (statische Bausteine) und Gruppe-B-Slots je Persona
-(energie/waerme/tech). Gruppe B wird nur gefüllt, wenn OLLAMA_HOST gesetzt ist
-(externer Ollama-Rechner) — sonst bleiben Platzhalter (None).
+Gruppe-A-Erklärung (statische Bausteine) und ein einzelner Gruppe-B-Text (LLM,
+ohne Persona-Achse). Gruppe B wird nur gefüllt, wenn OLLAMA_HOST gesetzt ist
+(externer Ollama-Rechner), sonst bleibt ein Platzhalter (None).
 
 So entsteht ein **reproduzierbares, ausfallsicheres Studien-Paket**: Stimuli +
 Erklärungen sind eingefroren, unabhängig von der Live-Verfügbarkeit des LLM.
@@ -27,16 +27,15 @@ from src.core.rule_engine import RuleEngineConfig
 from src.explain.decision_codes import ALL_CODES
 from src.explain.explain_agent import (
     ExplainAgent,
+    load_b_references,
     load_hamster_states,
-    load_persona_examples,
 )
 from src.sim.study_scenarios import STUDY_SCENARIOS, StudyScenario
 
-_PERSONAS = ("energie", "waerme", "tech")
 _DEFAULT_OUT = Path("src/sim/study_set")
 
-# Few-Shot-Gold-Referenzen je Persona + Hamster-Anzeige je Aktion (einmalig geladen).
-_PERSONA_EXAMPLES = load_persona_examples()
+# Gruppe-B-Gold-Referenz je Code + Hamster-Anzeige je Aktion (einmalig geladen).
+_B_REFERENCES = load_b_references()
 _HAMSTER_STATES = load_hamster_states()
 
 
@@ -78,25 +77,12 @@ def _group_a(agent: ExplainAgent, code: str, params: dict[str, Any]) -> dict[str
     }
 
 
-def _group_b(
-    code: str, params: dict[str, Any], ollama_host: str
-) -> dict[str, str | None]:
-    """Generiert Gruppe-B-Texte je Persona (wenn Ollama erreichbar), sonst Platzhalter."""
-    out: dict[str, str | None] = {}
+def _group_b(code: str, params: dict[str, Any], ollama_host: str) -> str | None:
+    """Generiert den Gruppe-B-Text (wenn Ollama erreichbar), sonst Platzhalter (None)."""
     if not ollama_host:
-        return {p: None for p in _PERSONAS}
-    saved = os.environ.get("OLLAMA_PERSONA")
-    try:
-        for persona in _PERSONAS:
-            os.environ["OLLAMA_PERSONA"] = persona
-            agent = ExplainAgent()  # liest OLLAMA_HOST + OLLAMA_PERSONA
-            out[persona] = agent.explain(base_code(code), params).short
-    finally:
-        if saved is None:
-            os.environ.pop("OLLAMA_PERSONA", None)
-        else:
-            os.environ["OLLAMA_PERSONA"] = saved
-    return out
+        return None
+    agent = ExplainAgent()  # liest OLLAMA_HOST
+    return agent.explain(base_code(code), params).short
 
 
 def freeze_one(
@@ -110,7 +96,6 @@ def freeze_one(
     )
     code = event.decision_code
     action = event.decision.action
-    ref = _PERSONA_EXAMPLES.get(base_code(code), {})
     return {
         "sid": sc.sid,
         "title": sc.title,
@@ -132,9 +117,9 @@ def freeze_one(
         "params": event.params,
         "explanation": {
             "group_a": _group_a(agent_a, code, event.params),
-            # Gold-Referenz je Persona (Few-Shot-Anker; Vergleichsziel für group_b).
-            "group_b_reference": {p: ref.get(p) for p in _PERSONAS},
-            # Echter LLM-Output je Persona (None bis Ollama verkabelt).
+            # Gold-Referenz (Few-Shot-Anker; Vergleichsziel für die Güte-Bewertung).
+            "group_b_reference": _B_REFERENCES.get(base_code(code), ""),
+            # Echter LLM-Output (None bis Ollama verkabelt).
             "group_b": _group_b(code, event.params, ollama_host),
         },
     }
@@ -167,9 +152,7 @@ def freeze_all(out_dir: Path, ollama_host: str) -> list[dict[str, Any]]:
             "title": it["title"],
             "code": it["actual_code"],
             "verified": it["verified"],
-            "group_b_filled": all(
-                v is not None for v in it["explanation"]["group_b"].values()
-            ),
+            "group_b_filled": it["explanation"]["group_b"] is not None,
         }
         for it in items
     ]
@@ -200,11 +183,7 @@ def main() -> None:
     ok = 0
     for it in items:
         v = "✓" if it["verified"] else "✗ MISMATCH"
-        gb = (
-            "B✓"
-            if all(x is not None for x in it["explanation"]["group_b"].values())
-            else "B–"
-        )
+        gb = "B✓" if it["explanation"]["group_b"] is not None else "B–"
         print(f"  {it['sid']:4s} {v:10s} {gb}  {it['actual_code']}")
         ok += 1 if it["verified"] else 0
     print("-" * 70)

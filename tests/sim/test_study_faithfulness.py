@@ -33,5 +33,5 @@ def test_frozen_group_a_all_consistent(tmp_path: Path) -> None:
     results = check_dir(tmp_path)
     assert len(results) == 10
     assert all(r["group_a"]["action_consistent"] for r in results)
-    # Gruppe B noch leer → Platzhalter
-    assert all(v is None for r in results for v in r["group_b"].values())
+    # Gruppe B noch leer → Platzhalter (None)
+    assert all(r["group_b"] is None for r in results)

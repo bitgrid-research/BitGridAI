@@ -44,15 +44,13 @@ def check_text(text: str, action: str) -> dict[str, bool]:
 def check_item(item: dict[str, Any]) -> dict[str, Any]:
     action = item["decision"]["action"]
     a_short = item["explanation"]["group_a"]["short"]
-    result: dict[str, Any] = {
+    b_text = item["explanation"]["group_b"]
+    return {
         "sid": item["sid"],
         "action": action,
         "group_a": check_text(a_short, action),
-        "group_b": {},
+        "group_b": None if b_text is None else check_text(b_text, action),
     }
-    for persona, text in item["explanation"]["group_b"].items():
-        result["group_b"][persona] = None if text is None else check_text(text, action)
-    return result
 
 
 def check_dir(study_dir: Path) -> list[dict[str, Any]]:
@@ -82,20 +80,17 @@ def main() -> None:
     for r in results:
         ga = r["group_a"]
         a_ok += 1 if ga["action_consistent"] else 0
-        gb_parts = []
-        for persona, chk in r["group_b"].items():
-            if chk is None:
-                gb_parts.append(f"{persona[:3]}:–")
-            else:
-                b_total += 1
-                b_ok += 1 if chk["action_consistent"] else 0
-                gb_parts.append(
-                    f"{persona[:3]}:{'✓' if chk['action_consistent'] else '✗'}"
-                )
+        chk = r["group_b"]
+        if chk is None:
+            gb_str = "–"
+        else:
+            b_total += 1
+            b_ok += 1 if chk["action_consistent"] else 0
+            gb_str = "✓" if chk["action_consistent"] else "✗ WIDERSPRUCH"
         print(
             f"  {r['sid']:4s} {r['action']:9s} "
             f"{'✓' if ga['action_consistent'] else '✗ WIDERSPRUCH':10s} "
-            f"{'✓' if ga['has_number'] else '–':7s}  {' '.join(gb_parts)}"
+            f"{'✓' if ga['has_number'] else '–':7s}  {gb_str}"
         )
     print("-" * 64)
     print(f"Gruppe A konsistent: {a_ok}/{len(results)}")

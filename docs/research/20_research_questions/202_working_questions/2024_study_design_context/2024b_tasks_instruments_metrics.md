@@ -3,21 +3,24 @@
 
 ## Messgrößen
 
-- **Primäre AV — Regelverständnis-Score (0–12):** aus den offenen Fragen, bewertet von zwei Ratern nach Rubrik (R1–R5, Priorisierung, Zentralkonzept „Steuern statt Einspeisen“); Interrater-Reliabilität als Cohen's κ.
-- **Sekundär — Override-Angemessenheit:** kategorial (angemessen / Disuse-Tendenz / Misuse-Tendenz) aus einer beobachteten Override-Aufgabe.
-- **Optional — Vertrauen:** Automation Trust Scale, einmalig; ggf. SUS / Raw NASA-TLX.
+- **Primäre AV — Nutzervertrauen (12–84):** Automation Trust Scale (Jian 2000), auf die gesehene Variante, vor dem Reveal (between).
+- **Within (H2):** Forced-Choice (A/B) + 7-stufiges Vergleichsrating je verglichenem Szenario, nach dem Reveal (alle N = 16).
+- **FF2 — Güte:** objektive Faithfulness (`study_faithfulness.py`) + verblindetes 2-Rater-Rubrik-Rating (Korrektheit, Vollständigkeit, Klarheit, je 0–2; Halluzinations-Flag), Interrater-κ.
+- **Optional/Nebenmaße:** SUS, Raw NASA-TLX; behaviorale Override-/Verhaltensspur.
 
 ## Instrumente
 
-- Demographie + **Nutzertyp-Einstufung** (steuert in Gruppe B den Persona-Typ energie/waerme); Vorwissen separat als deskriptive Kovariate.
-- Offener Frageleitfaden: „Wie funktioniert das System? · Erwartungen? · wichtigste Einflussregeln? · Warum Steuern statt Einspeisen?“ (audioaufgezeichnet).
+- Demographie + Vorwissen (Technikaffinität, BTC-Vorwissen) als deskriptive Kovariate; **keine** Persona-Steuerung.
+- Offener Vertrauens-Frageleitfaden: „Hast du vertraut? · bei welchen Entscheidungen mehr/weniger? · haben die Texte das Vertrauen beeinflusst? · gab es einen unglaubwürdigen Text?“ (audioaufgezeichnet).
+- Within-Vergleichsbogen (Forced-Choice + Rating + offene Begründung).
 - Systemlogs (DecisionEvents, Override-Ereignisse, Template-Fallbacks).
 
 ## Messlogik
 
-- **Statistik:** t-Test für unabhängige Stichproben (einseitig) auf den Regelverständnis-Score; Cohen's *d* + 95 %-KI. Primärvergleich Gruppe A (n = 8) vs. gepoolte Gruppe B (n = 8); der Vergleich der 2 Persona-Typen (energie/waerme, n = 4 je Typ) ist explorativ/deskriptiv (ungerichtet).
-- **Voraussetzungsprüfung:** Shapiro-Wilk (Normalverteilung), Levene (Varianzhomogenität) → Welch- bzw. Mann-Whitney-U-Test als Fallback.
-- **Pilot:** 2–3 Probedurchläufe zur Kalibrierung von Rubrik und Szenario-Timing.
+- **Primärtest (H1, between):** Mann-Whitney-U (einseitig) auf das Vertrauen, Gruppe A (n = 8) vs. B (n = 8); Welch-/t-Test bei erfüllten Voraussetzungen (Shapiro-Wilk, Levene). Effektgröße r (bzw. Cohen's *d*) + 95 %-KI.
+- **Within (H2):** Binomial-/Vorzeichentest auf Forced-Choice; Wilcoxon gegen die Mitte 4.
+- **Güte (FF2):** Faithfulness-Raten + Rubrik-Mittelwerte + Interrater-κ; Kalibrierung Vertrauen × Güte.
+- **Pilot:** 2–3 Probedurchläufe zur Kalibrierung von Trust-/Within-Bogen, Güte-Rubrik und Szenario-Timing.
 
 ---
 

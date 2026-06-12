@@ -30,8 +30,8 @@ sauber aufsetzen kann.
 
 **Offen — hängt an Nutzer/Betreuer:**
 
-- ⏳ **Gruppe B (A/B-Kontrast):** externen **Ollama-Rechner** anbinden → `OLLAMA_HOST=… python -m src.sim.study_freeze` füllt + friert die Persona-Texte ein → Faithfulness über A **und** B.
-- ⏳ **Hypothesen 🟦 + Ethikantrag** mit Betreuer; **Rubrik im Pilot** kalibrieren (Interrater-κ).
+- ⏳ **Gruppe B (A/B-Kontrast):** externen **Ollama-Rechner** anbinden → `OLLAMA_HOST=… python -m src.sim.study_freeze` füllt + friert den Gruppe-B-Text (ohne Personas) ein → Faithfulness über A **und** B.
+- ⏳ **Hypothesen 🟦 + Ethikantrag** mit Betreuer; **Güte-Rubrik im Pilot** kalibrieren (Interrater-κ).
 - ⏳ **Reststand klein:** Prod-Template-THROTTLE-Abgleich; S3-Tarifentscheidung.
 - ⏳ **(Optional, bewusste Entscheidung) Studien-Umstieg auf `strategy="soc_band"`:** Nur falls die Studie das Produktiv-Verhalten (statt der Surplus-kW-Logik) zeigen soll. Voraussetzung: **Re-Freeze S1–S10** + **Faithfulness-Neuprüfung** + Anpassung **Thesis Kap. 5 (Szenarien/Rubrik)** + neue `decision_code`-Erwartungen. Default bleibt sonst `surplus`; kein Confound, da Faithfulness auf dem gewählten Kern-Pfad gemessen wird. *Erst nach Betreuer-Abstimmung — destabilisiert sonst das laufende Studiendesign.*
 
@@ -124,12 +124,12 @@ liefert zugleich den Konsistenz-Check HA ↔ Kern.
 **Scope:** Die **10 Szenarien** (S1–S10) sind das Studien-Set — kein 11. (THROTTLE) nötig.
 
 **Bereits gebaut (vorhandene Infrastruktur):**
-- ✅ **A/B-Erklärungsmotor** `ExplainAgent`: Gruppe A = statische Bausteine (`text_blocks.yaml`), Gruppe B = LLM persona-adaptiv (3 Personas energie/waerme/tech) via `OLLAMA_HOST`.
+- ✅ **A/B-Erklärungsmotor** `ExplainAgent`: Gruppe A = statische Bausteine (`text_blocks.yaml`), Gruppe B = LLM mit einer generischen Stimme (ohne Personas) via `OLLAMA_HOST`.
 - ✅ **Statistik-Auswertung** `study_analysis.py` (Mann-Whitney-U, Effektgröße r, N) + Probanden-Schema (`participants.csv`) + Research-Export (Parquet).
 
 **Noch offen:**
-- [x] **Freeze-Gerüst gebaut:** `src/sim/study_freeze.py` + `study_scenarios.py` → `src/sim/study_set/S<n>.json` (State + Kern-Entscheidung + Gruppe-A-Text + Gruppe-B-Slots je Persona). **10/10 verifiziert** (Kern == erwarteter Code), Tests grün.
-- [ ] **Gruppe B anbinden:** `OLLAMA_HOST` auf den **externen Ollama-Rechner** setzen (Nutzer) → `python -m src.sim.study_freeze` füllt die Persona-Slots **und friert sie ein** (ausfallsicher + reproduzierbar). **Ohne das kein A/B-Kontrast.**
+- [x] **Freeze-Gerüst gebaut:** `src/sim/study_freeze.py` + `study_scenarios.py` → `src/sim/study_set/S<n>.json` (State + Kern-Entscheidung + Gruppe-A-Text + ein Gruppe-B-Text je Szenario). **10/10 verifiziert** (Kern == erwarteter Code), Tests grün.
+- [ ] **Gruppe B anbinden:** `OLLAMA_HOST` auf den **externen Ollama-Rechner** setzen (Nutzer) → `python -m src.sim.study_freeze` füllt den Gruppe-B-Text **und friert ihn ein** (ausfallsicher + reproduzierbar). **Ohne das kein A/B-Kontrast.**
 - [x] **Faithfulness-Vorprüfung gebaut** (`src/sim/study_faithfulness.py`): automatische Konsistenz-Prüfung (Erklärung darf der Entscheidung nicht widersprechen) + Erdung (Zahlenwert). **Gruppe A 10/10 konsistent**, bereit für Gruppe B. *Automatische Vorstufe — manuelle Bewertung bleibt nötig.*
 - [ ] **Text-Bausteine ergänzen** (THROTTLE neu) für volle Code-Abdeckung Gruppe A.
 - [x] **Erkenntnisziele + Hypothesen + Pre-Registration + Rubrik + Override-Ground-Truth** dokumentiert ([2024e](../../research/20_research_questions/202_working_questions/2024_study_design_context/2024e_erkenntnisziele_prereg.md)) — Hypothesen-Spezifika 🟦 mit Betreuer.
@@ -148,7 +148,7 @@ regulierungssensible B2B-Kunden (Energiegenossenschaften, Gewerbe mit flexiblen 
 | Baustein | Heute | Produkt-Template |
 |---|---|---|
 | **Erklär-Bausteine** `text_blocks.yaml` | decision_code → Text (DE) | White-Label-Erklärpakete je Kunde / Sprache |
-| **Persona-Prompts** `_PERSONA_INSTRUCTIONS` | 3 Personas (energie/waerme/tech) | Zielgruppen-Templates, erweiterbar je Segment |
+| **Erklär-Instruktion** `_B_INSTRUCTION` | eine generische Stimme (ohne Personas) | Zielgruppen-Templates, erweiterbar je Segment |
 | **Szenario-Bibliothek** S1–S10 | Studien-Stimuli | **Commissioning-Test:** „verhält sich diese Anlage korrekt?" je Neuinstallation |
 | **Regel-/Config** `RuleEngineConfig` + `.env.example` | ein Standort | **Site-Profile** (Multi-Tenant): je Anlage ein Config-Profil |
 | **HA-Packages** `economics/forecast/audit_mirrors/…` | modulare YAMLs | **Deployment-Module** für neue Standorte |
@@ -156,9 +156,9 @@ regulierungssensible B2B-Kunden (Energiegenossenschaften, Gewerbe mit flexiblen 
 
 **Jetzt schon template-mäßig einplanbar (kostet wenig, zahlt später):**
 
-- [ ] **Site-Profil-Template:** Standort/kWp/Miner-Specs/Schwellen/Persona als *ein* parametrierbares Profil (lat/lon/kWp sind bereits Helper) → Multi-Tenant-Readiness.
-- [ ] **Last-Typ entkoppeln:** „Miner" ist nur ein Beispiel einer flexiblen Last → Template für Last-Typen (Miner/Wärme/EV/Wärmepumpe). Die `waerme`-Persona deutet den breiteren Markt schon an.
-- [ ] **Erklärpaket-Template:** `text_blocks` + Persona + Sprache als austauschbares „Pack" pro Kunde.
+- [ ] **Site-Profil-Template:** Standort/kWp/Miner-Specs/Schwellen/Erklärstil als *ein* parametrierbares Profil (lat/lon/kWp sind bereits Helper) → Multi-Tenant-Readiness.
+- [ ] **Last-Typ entkoppeln:** „Miner" ist nur ein Beispiel einer flexiblen Last → Template für Last-Typen (Miner/Wärme/EV/Wärmepumpe). Die Wärme-Nutzung (Abwärme) deutet den breiteren Markt schon an.
+- [ ] **Erklärpaket-Template:** `text_blocks` + Erklärstil + Sprache als austauschbares „Pack" pro Kunde.
 - [ ] **Onboarding-Replay:** das 10-Szenarien-Set als automatisierter Abnahme-/Selbsttest jeder Installation.
 - [ ] **Auditierbarer Export:** DecisionEvents + KPI als kundenvorzeigbares Report-Artefakt.
 
@@ -187,12 +187,12 @@ Phase 8 🔭 Produktisierung (Ausblick)
 - **S8-Override-Coding** kippt, wenn R2-Fix (Phase 2) nicht vor der Studie steht.
 - **Faithfulness** der LLM-Erklärung ist die zentrale unkontrollierte Variable — ohne unabhängigen Check ist der A/B-Vergleich konfundiert.
 - **Gruppe B hängt am externen Ollama-Rechner** (`OLLAMA_HOST`) — Erreichbarkeit/Latenz/Modell-Konsistenz sicherstellen; bei Ausfall fällt `ExplainAgent` auf Template zurück → A/B-Kontrast verschwindet. Für die Studie: Erklärungen **vorab generieren + einfrieren** (nicht live je Proband), das eliminiert Ausfall- *und* Determinismus-Risiko.
-- **N = 16** (8 vs. 8, 2 Personas) → nur große Effekte; Studie primär hypothesen-generierend, Triangulation > p-Wert.
+- **N = 16** (8 vs. 8, ohne Personas) → nur große Effekte; Studie primär hypothesen-generierend, Triangulation > p-Wert.
 
 ## Bezug zur Studie
 
 Die Phasen 2–5 stellen sicher, dass die Probanden das **echte, konsistente**
 Systemverhalten sehen (kein Engine-Confound, keine Fehlauslösung, reale Signale).
 Phase 7 macht daraus ein **vorregistriertes, faithfulnessgeprüftes** Design. Erst
-dann ist „Verbessert persona-adaptive LLM-Erklärung Verständnis **und** angemessene
-Verlässlichkeit?" sauber beantwortbar.
+dann ist „Erhöht die LLM-Erklärung das **Vertrauen**, und ist dieses Vertrauen durch
+die objektive **Güte** gedeckt (Kalibrierung)?" sauber beantwortbar.

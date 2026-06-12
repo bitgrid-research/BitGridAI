@@ -217,10 +217,9 @@ def main(rules_path: str, db_path: str) -> None:
         explain_agent = ExplainAgent()
         explainer = explain_agent.explain_short
         log.info(
-            "ExplainAgent aktiv — %s model=%s persona=%s",
+            "ExplainAgent aktiv — %s model=%s",
             os.getenv("OLLAMA_HOST"),
             explain_agent._ollama_model,
-            explain_agent.persona,
         )
     else:
         log.debug("ExplainAgent nicht gestartet — OLLAMA_HOST fehlt")

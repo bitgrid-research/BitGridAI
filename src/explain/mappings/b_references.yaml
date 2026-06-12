@@ -1,0 +1,47 @@
+# Gruppe-B-Gold-Referenz je decision_code (LLM-Variante, ein Satz pro Szenario).
+#
+# Zweck:
+#   (a) Few-Shot-Anker im LLM-Prompt — ein idealer Satz, der Tonalität, Länge und
+#       Zahlenbezug vorgibt (vgl. ExplainAgent._B_INSTRUCTION).
+#   (b) Gold-Referenz für die Güte-Bewertung (FF2): der echte LLM-Output (group_b)
+#       wird gegen diesen Satz verglichen (Korrektheit, Vollständigkeit, Klarheit).
+#
+# Keine Persona-Achse: die Studie vergleicht nur A (statisch) vs. B (LLM). Die
+# Referenz ist eine einzige, breit verständliche Laien-Stimme ("du").
+#
+# Regeln pro Satz: genau EIN deutscher Satz, max. ~25 Wörter, mind. eine konkrete Zahl,
+# deutsches Dezimalkomma, kein Englisch/Chinesisch. Zahlen entsprechen dem jeweiligen
+# Studien-Szenario (S1–S10) für konkrete, replay-stabile Anker.
+de:
+  START_R1_SURPLUS_OK:           # S1
+    "Der Miner läuft, deine Solaranlage erzeugt 3,0 kW mehr, als dein Haus braucht, und nutzt diesen Überschuss selbst statt ihn einzuspeisen."
+
+  NOOP_R1_INSUFFICIENT_SURPLUS:  # S2
+    "Der Miner wartet, aktuell sind nur 0,4 kW Solarüberschuss da, für den Start braucht es mindestens 1,5 kW."
+
+  NOOP_R1_PRICE_TOO_HIGH:        # S3
+    "Der Miner wartet trotz Sonne, der Strompreis liegt mit 28,0 ct/kWh über deinem Limit von 25,0 ct."
+
+  STOP_R3_OVERTEMP:              # S4
+    "Sicherheitsstopp: der Miner ist mit 90 °C zu heiß geworden (Grenze 85 °C) und wurde sofort abgeschaltet."
+
+  STOP_R3_COMM_TIMEOUT:          # S5
+    "Sicherheitsstopp: der Miner meldet sich seit 75 Sekunden nicht mehr (Grenze 60 s) und wurde abgeschaltet."
+
+  NOOP_R2_SOC_SOFT_MIN:          # S6
+    "Der Miner wartet, dein Speicher ist erst zu 55 % geladen und startet, sobald 58 % erreicht sind."
+
+  STOP_R2_SOC_HARD_MIN:          # S7
+    "Der Miner wurde gestoppt, um deinen Hausspeicher zu schützen, er ist auf 45 % gefallen, die Reserve liegt bei 50 %."
+
+  STOP_R2_GRID_IMPORT_EXCEEDED:  # S8
+    "Der Miner wurde gestoppt, er hätte 700 W aus dem Netz gezogen, erlaubt sind nur 500 W; Netzstrom wird nicht vermint."
+
+  NOOP_R4_FORECAST_PV_INSUFFICIENT:  # S9
+    "Der Miner startet nicht, die Vorhersage erwartet nur 1,2 kW Sonne, für einen Start wären 2,0 kW nötig."
+
+  NOOP_R5_MIN_RUNTIME_NOT_REACHED:   # S10
+    "Der Miner bleibt an, er läuft erst seit einem von drei Pflicht-Intervallen, so vermeiden wir ständiges Ein- und Ausschalten."
+
+  THROTTLE_R1_SURPLUS_THROTTLE:      # optional (11. Szenario, Eco-Band)
+    "Der Miner läuft gedrosselt, 1,0 kW Überschuss reichen für Sparbetrieb, volle Last gibt es erst ab 1,5 kW."

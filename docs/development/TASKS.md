@@ -21,7 +21,7 @@
 | # | Aufgabe | Status | Datei(en) | Notiz |
 |---|---|---|---|---|
 | K1 | **ProductionRunner** — Orchestriert Adapter, BlockScheduler, RuleEngine, ExplainAgent, EventStore, API in einem Entrypoint | ✅ | `src/runner.py` | asyncio Block-Loop + uvicorn FastAPI |
-| K2 | **Dashboard Frontend** — Studie-Dashboards in HA Lovelace | ✅ | `src/ha/config/bitgrid-dashboard.yml`, `src/ha/config/packages/bitgridai.yaml` | 2 neue Views: Studie B (strukturiert) + Studie E (LLM-Text); Runner publiziert Explain-Felder via MQTT |
+| K2 | **Dashboard Frontend** — Studie-Dashboards in HA Lovelace | ✅ | `src/ha/config/bitgrid-dashboard.yml`, `src/ha/config/packages/bitgridai.yaml` | 2 Views: Variante A (statisch/strukturiert) + Variante B (LLM-Text, ohne Personas); Runner publiziert Explain-Felder via MQTT |
 | K3 | **LLM-Integration** — ExplainAgent ist rein YAML-template-basiert; Thesis beschreibt Ollama-Inferenz | ✅ | `src/explain/explain_agent.py` | Ollama-Fallback via urllib; `OLLAMA_HOST` env-var; 5s Timeout; Template-Fallback |
 
 ---

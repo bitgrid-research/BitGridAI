@@ -1,7 +1,7 @@
 # Hamster-Anzeigezustand je Entscheidungs-Aktion (BitHamster im Dashboard).
 #
-# Die Anzeige spiegelt die Systementscheidung des 10-Minuten-Blocks und ist
-# persona-UNABHÄNGIG — variiert wird nur der Erklärtext (Gruppe B, je Persona).
+# Die Anzeige spiegelt die Systementscheidung des 10-Minuten-Blocks und ist in
+# Gruppe A und B identisch; variiert wird nur der Erklärtext (Gruppe B = LLM).
 # Keyed nach decision.action (START / THROTTLE / NOOP / STOP).
 #
 # Felder:

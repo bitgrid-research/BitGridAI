@@ -3182,13 +3182,13 @@ views:
               dargestellten Block konstant **`START_R1_SURPLUS_OK`**.
 
   # ═══════════════════════════════════════════════════════
-  # STUDIE E — Experimental (Gruppe E)
-  # Gleiche Struktur wie Studie B, aber im Hamster-Block
+  # VARIANTE B — Adaptive LLM-Erklärung (Studie Gruppe B)
+  # Gleiche Struktur wie Variante A, aber im Hamster-Block
   # erscheint der LLM-Text (bg_runner_explain_short) statt
   # der aufgeschlüsselten Felder.
   # ═══════════════════════════════════════════════════════
-  - title: Studie E
-    path: studie-experimental
+  - title: Variante B
+    path: studie-variante-b
     icon: mdi:text-box-check-outline
     cards:
       - type: vertical-stack

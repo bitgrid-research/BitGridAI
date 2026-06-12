@@ -51,15 +51,7 @@
       "effect": "Miner gestoppt — Stromnetz entlasten",
       "options": "Miner startet wenn Netzbezug unter 500 W sinkt"
     },
-    "group_b_reference": {
-      "energie": "Der Miner wurde gestoppt — er hätte 700 W aus dem Netz gezogen, erlaubt sind nur 500 W; Netzstrom wird nicht vermint.",
-      "waerme": "Wärme aus, Netzschutz an: Es flossen 700 W aus dem Netz (Grenze 500 W) — dein Gerät heizt nur mit Solarstrom.",
-      "tech": "STOP_R2_GRID_IMPORT_EXCEEDED: R2-Veto, Netto-Netzbezug 700 W > max_grid_import 500 W."
-    },
-    "group_b": {
-      "energie": "Der Miner wurde gestoppt, da der Netzbezug von 700 Watt das erlaubte Limit von 500 Watt überschreitet.",
-      "waerme": "Miner gestoppt, da der Netzbezug von 700 Watt das Limit von 500 Watt überschreitet – dein Gerät heizt nur mit kostenlosem Solarüberschuss.",
-      "tech": "STOP_R2_GRID_IMPORT_EXCEEDED: R2-Veto, Netto-Netzbezug 700 W überschreitet das Limit von 500 W."
-    }
+    "group_b_reference": "Der Miner wurde gestoppt, er hätte 700 W aus dem Netz gezogen, erlaubt sind nur 500 W; Netzstrom wird nicht vermint.",
+    "group_b": null
   }
 }

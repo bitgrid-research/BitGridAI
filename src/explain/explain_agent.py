@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 
 import yaml
 
@@ -22,64 +22,50 @@ if TYPE_CHECKING:
     from src.core.models import DecisionEvent
 
 _TEXT_BLOCKS_PATH = Path(__file__).parent / "mappings" / "text_blocks.yaml"
-_PERSONA_EXAMPLES_PATH = Path(__file__).parent / "mappings" / "persona_examples.yaml"
+_B_REFERENCES_PATH = Path(__file__).parent / "mappings" / "b_references.yaml"
 _HAMSTER_STATES_PATH = Path(__file__).parent / "mappings" / "hamster_states.yaml"
 _DEFAULT_LANG = "de"
 
-Persona = Literal["energie", "waerme", "tech"]
-_VALID_PERSONAS: set[str] = {"energie", "waerme", "tech"}
-
-# Persona-spezifische Systemanweisungen für den LLM-Prompt.
-# "energie" ist der Default — breiteste Zielgruppe, kein Mining-Vokabular.
-_PERSONA_INSTRUCTIONS: dict[str, str] = {
-    "energie": (
-        "Du bist ein freundlicher Assistent für eine Heimsolar-App. "
-        "Das System steuert einen Miner, der läuft wenn die Solaranlage mehr Strom erzeugt "
-        "als das Haus gerade braucht — also bei Solarüberschuss. "
-        "Die Batterie ist der Hausspeicher. "
-        "Sprich den Nutzer direkt an ('du'). "
-        "Benutze einfache Alltagssprache: 'dein Solarstrom', 'der Miner', 'dein Speicher'. "
-        "Keine Abkürzungen, kein Englisch, kein Chinesisch. "
-        "Antworte immer auf Deutsch."
-    ),
-    "waerme": (
-        "Du bist ein Assistent für ein Heimsystem mit Solarpanel und einem Gerät, "
-        "das gleichzeitig Wärme erzeugt. Betone den Wärmegewinn: "
-        "'dein Gerät heizt gerade', 'kostenlose Wärme aus deinem Solarüberschuss'. "
-        "Das Gerät (Miner) ist Mittel zum Zweck — der Fokus liegt auf der "
-        "gewonnenen Wärme für Raumheizung oder Warmwasser, nicht auf Bitcoin."
-    ),
-    "tech": (
-        "Du bist ein technischer Assistent für ein deterministisches "
-        "Energiemanagementsystem. Der Nutzer kennt Regelkern, Hashrate, Pool, "
-        "SoC und decision_code. Gib volle Transparenz: nenne decision_code, "
-        "welche Regel ausgelöst hat (R1–R5) und konkrete Messwerte mit Einheiten."
-    ),
-}
+# Systemanweisung für den LLM-Prompt (Gruppe B). Eine einzige, generische
+# Laien-Stimme. Keine Persona-Achse: die Studie vergleicht nur A (statisch) vs.
+# B (LLM), ohne nutzertyp-spezifische Frames.
+_B_INSTRUCTION: str = (
+    "Du bist ein freundlicher Assistent für eine Heimsolar-App. "
+    "Das System steuert einen Miner, der läuft wenn die Solaranlage mehr Strom erzeugt "
+    "als das Haus gerade braucht, also bei Solarüberschuss. "
+    "Die Batterie ist der Hausspeicher. "
+    "Sprich den Nutzer direkt an ('du'). "
+    "Benutze einfache Alltagssprache: 'dein Solarstrom', 'der Miner', 'dein Speicher'. "
+    "Keine Abkürzungen, kein Englisch, kein Chinesisch. "
+    "Antworte immer auf Deutsch."
+)
 
 log = logging.getLogger(__name__)
 
 
-def load_persona_examples(lang: str = _DEFAULT_LANG) -> dict[str, dict[str, str]]:
-    """Lädt persona-spezifische Few-Shot-Beispiele: decision_code → persona → Satz.
+def load_b_references(lang: str = _DEFAULT_LANG) -> dict[str, str]:
+    """Lädt die Gruppe-B-Gold-Referenz je decision_code: Code → Idealsatz.
 
-    Dient als Few-Shot-Anker im LLM-Prompt (Gruppe B) und als Gold-Referenz beim
-    späteren Vergleich mit echtem LLM-Output. Fehlt die Datei, wird {} zurückgegeben.
+    Dient als Few-Shot-Anker im LLM-Prompt (Gruppe B) und als Vergleichsziel
+    (Gold-Referenz) bei der Güte-Bewertung des echten LLM-Outputs. Fehlt die
+    Datei, wird {} zurückgegeben.
     """
     try:
-        with open(_PERSONA_EXAMPLES_PATH, encoding="utf-8") as f:
+        with open(_B_REFERENCES_PATH, encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
     except FileNotFoundError:
         return {}
     blocks = data.get(lang, data.get("de", {}))
-    return blocks if isinstance(blocks, dict) else {}
+    if not isinstance(blocks, dict):
+        return {}
+    return {str(k): str(v) for k, v in blocks.items()}
 
 
 def load_hamster_states(lang: str = _DEFAULT_LANG) -> dict[str, dict[str, str]]:
     """Lädt Hamster-Anzeigezustände je Aktion (START/THROTTLE/NOOP/STOP).
 
     Die Anzeige spiegelt die Systementscheidung des 10-Minuten-Blocks und ist
-    persona-unabhängig. Fehlt die Datei, wird {} zurückgegeben.
+    unabhängig von der Formulierung. Fehlt die Datei, wird {} zurückgegeben.
     """
     try:
         with open(_HAMSTER_STATES_PATH, encoding="utf-8") as f:
@@ -109,22 +95,10 @@ class ExplainAgent:
     def __init__(self, lang: str = _DEFAULT_LANG) -> None:
         self._lang = lang
         self._blocks: dict[str, Any] = self._load_blocks()
-        self._persona_examples: dict[str, dict[str, str]] = load_persona_examples(lang)
+        self._b_references: dict[str, str] = load_b_references(lang)
         self._ollama_host: str = os.getenv("OLLAMA_HOST", "").rstrip("/")
         self._ollama_model: str = os.getenv("OLLAMA_MODEL", "qwen3.5:9b")
         self._ollama_timeout: int = int(os.getenv("OLLAMA_TIMEOUT_SEC", "30"))
-        raw_persona = os.getenv("OLLAMA_PERSONA", "energie").strip().lower()
-        if raw_persona not in _VALID_PERSONAS:
-            log.warning(
-                "Unbekannte OLLAMA_PERSONA=%r — verwende 'energie' als Fallback",
-                raw_persona,
-            )
-            raw_persona = "energie"
-        self._persona: str = raw_persona
-
-    @property
-    def persona(self) -> str:
-        return self._persona
 
     def _load_blocks(self) -> dict[str, Any]:
         with open(_TEXT_BLOCKS_PATH, encoding="utf-8") as f:
@@ -152,11 +126,8 @@ class ExplainAgent:
         data_basis = self._interpolate(block.get("data_basis", ""), params)
         effect = self._interpolate(block.get("effect", ""), params)
         options = self._interpolate(block.get("options", ""), params)
-        # Few-Shot-Anker: persona-spezifisches Beispiel bevorzugen, sonst generisch.
-        persona_example = self._persona_examples.get(decision_code, {}).get(
-            self._persona, ""
-        )
-        example = persona_example or block.get("example", "")
+        # Few-Shot-Anker: Gruppe-B-Gold-Referenz bevorzugen, sonst Block-Beispiel.
+        example = self._b_references.get(decision_code, "") or block.get("example", "")
 
         if self._ollama_host:
             llm_short = self._call_ollama(
@@ -200,15 +171,12 @@ class ExplainAgent:
         Gibt None zurück bei Timeout, Verbindungsfehler oder leerem Response.
         Template-Wert bleibt als Fallback erhalten.
         """
-        persona_instruction = _PERSONA_INSTRUCTIONS.get(
-            self._persona, _PERSONA_INSTRUCTIONS["energie"]
-        )
         example_line = (
             example
-            or "Der Miner läuft — deine Anlage erzeugt 1,5 kW mehr als du verbrauchst."
+            or "Der Miner läuft, deine Anlage erzeugt 1,5 kW mehr als du verbrauchst."
         )
         prompt = (
-            f"{persona_instruction}\n\n"
+            f"{_B_INSTRUCTION}\n\n"
             "Schreibe genau EINEN vollständigen deutschen Satz (max. 25 Wörter). "
             "Nenne mindestens EINE konkrete Zahl aus den Messwerten. "
             "Keine Einleitung, kein Bullet-Point, kein Englisch, kein Chinesisch.\n"
