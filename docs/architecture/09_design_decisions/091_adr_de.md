@@ -36,6 +36,7 @@ Diese Tabelle fasst die wichtigsten, das System prägenden strategischen Entsche
 | **018 Energy-Path-Policies** | Die Opportunitätskosten (Export/Heat/Hodl) werden transparent geloggt. | Transparenz über die ökonomische Entscheidungsgrundlage. | Regeln, Logging |
 | **019 PoW Telemetrie & Hash-Proof** | Pflichtwerte/Proben (Hash-Proof) werden vom Miner erfasst. | Sicherheit, Compliance und Forschung an der Effizienz. | Domain Models, Logging |
 | **020 Engine-Strategie** | Der Python-Kern ist das **deterministische Entscheidungs-Modell** (per Replay studiert); **HA steuert live** und spiegelt den Kern eng. Keine zweite Voll-Engine pflegen. | Studie ist replay-basiert → Kern-Korrektheit zählt, nicht Live-Steuerung. Ein Live-Kern-Service würde die reale Anlage ohne XAI-Nutzen riskieren. | Whitebox, Determinismus, Studien-Validität |
+| **021 Determinismus-Invariante erzwungen** | Die Kern-Invarianten (kein ML, kein Zufall, keine Importe aus oberen/seitlichen Layern in `src/core`) werden durch einen ausführbaren Architektur-Test (`tests/core/test_architecture.py`) in `make check` mechanisch geprüft. | Macht den wissenschaftlichen Kernanspruch (Determinismus, ADR 007) zu einem **fallierbaren CI-Gate** statt einer Prosa-Konvention. | Testbarkeit, Determinismus, Reproducibility |
 
 ---
 
@@ -106,6 +107,38 @@ Studien-Set zu berühren:
   (vorher: vorab berechnet, nachgelagert angewandt — gleiches Ergebnis, aber unklare Lesart).
 - Tests: `tests/core/test_soc_band_strategy.py` (Veto/Nicht-Veto/Ordering),
   `tests/adapters/test_solar_forecast.py` (Geometrie/Determinismus).
+
+---
+
+## ADR 021 — Determinismus-Invariante maschinell erzwungen (Detail)
+
+**Kontext.** Die Kern-Invariante „kein ML, kein RL, kein Zufall, keine Blackbox in
+`src/core`" (ADR 007) war bisher nur als Prosa plus manuelles Review
+abgesichert. In langen Agenten-Sessions ist genau das die Stelle, an der ein
+versehentlicher `import torch` oder `from src.explain import …` unbemerkt in den Kern
+leckt und den Determinismus-Anspruch der Arbeit aushöhlt.
+
+**Entscheidung.** Ein ausführbarer AST-Test (`tests/core/test_architecture.py`) prüft
+jede Datei unter `src/core/` und schlägt fehl bei: (1) Import aus
+`explain`/`ui`/`adapters`/`sim`/`ha`, (2) Import eines ML-Frameworks (`sklearn`, `torch`,
+`tensorflow`, `keras`, `xgboost`, `lightgbm`), (3) Nichtdeterminismus-Quelle (`random`,
+`numpy.random`, `secrets`, inkl. aliasiertem `np.random.*`). Der Test läuft als Teil von
+`make check` (CI).
+
+**Verworfene Alternative.** `import-linter` (das NDepend-Pendant): scheidet aus, weil
+sein Graph (grimp) externe Importe auf das Top-Level-Paket kollabiert und damit
+`numpy.random` (verboten) nicht von `numpy` (für deterministische Mathematik erlaubt)
+trennen kann. Der AST-Test ist zusätzlich dependency-frei und selbst inspizierbar (passt
+zum No-Blackbox-Prinzip des Projekts). `import-linter` bliebe erst dann sinnvoll, wenn eine
+volle Contract-Matrix über alle Schichten gebraucht wird.
+
+**Konsequenzen.**
+- Die Invariante ist jetzt **fallierbar**: ein Verstoß bricht CI, nicht erst ein Review.
+- Der Test ist additiv, ändert keinen Produktivcode; `src/core/` ist beim Einführen bereits
+  konform (3 Tests grün, Negativtest bestätigt das Greifen).
+- **Bekannte Grenze:** Der Guard ist import- und zugriffsbasiert, kein Laufzeit-Beweis für
+  Determinismus. `uuid.uuid4()` in `models.py` bleibt bewusst unangetastet (offene Frage:
+  beeinflusst die Event-ID die Replay-Determinismus-Eigenschaft? Falls ja, später ergänzen).
 
 ---
 > **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die wichtigsten Qualitätsanforderungen im Detail.
