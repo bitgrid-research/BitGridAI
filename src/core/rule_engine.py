@@ -1,9 +1,12 @@
 """
 RuleEngine — bewertet R1–R5 und erzeugt eine DecisionEvent.
 
-Priorität: R3 (Safety) > R2 (Autarkie) > R4 (Forecast) > R5 (Stabilität) > R1 (Profitabilität)
+Priorität: R3 (Safety) > R2 (Autarkie) > R5 (Stabilität) > R4 (Forecast) > R1 (Profitabilität)
 
-R3 bricht bei Veto sofort ab — keine andere Regel kann R3 überstimmen.
+R3 bricht bei Veto sofort ab — keine andere Regel kann R3 überstimmen. R5 steht
+vor R4: ein Stabilitäts-Halt (Min-Runtime/-Pause, Deadband) hat Vorrang vor dem
+Prognose-Veto, sonst würde die Prognose ein frisches Anti-Flapping-Fenster
+überstimmen.
 """
 
 from __future__ import annotations
@@ -37,6 +40,17 @@ _SOC_BAND_MODE: dict[str, str] = {
     "SOC_HOLD": "Hold",
     "SOC_HOLD_PV": "Hold",
 }
+
+
+def _is_night_block(now: datetime, start_hour: int, end_hour: int) -> bool:
+    """True, wenn ``now`` im Nachtfenster [start_hour, end_hour) liegt (mit
+    Mitternachts-Umschlag, z. B. 22..6). ``start_hour == end_hour`` deaktiviert."""
+    if start_hour == end_hour:
+        return False
+    hour = now.hour
+    if start_hour > end_hour:  # Fenster über Mitternacht
+        return hour >= start_hour or hour < end_hour
+    return start_hour <= hour < end_hour
 
 
 class RuleEngineConfig:
@@ -73,6 +87,19 @@ class RuleEngineConfig:
         soc_super_pct: float = 90.0,
         soc_super_stop_pct: float = 85.0,
         pv_start_w: float = 6000.0,
+        # Nachtsperre (nur strategy="soc_band"): kein Mining im Nachtfenster.
+        # Default aus (additiv); reale soc_band-Konfig/Studie schaltet sie ein.
+        night_block_enabled: bool = False,
+        night_block_start_hour: int = 22,
+        night_block_end_hour: int = 6,
+        # R4-Forecast-Veto im SoC-Band-Modus (opt-in, additiv). Default aus: die
+        # reale Produktiv-Steuerung (mvp_auto.yaml) nutzt keinen Forecast. Wenn
+        # aktiviert, vetoed R4 nur den PV-abhängigen Eco-Frischstart, sobald die
+        # (lokale, deterministische) Klarhimmel-PV-Prognose am Horizont unter
+        # forecast_sustain_pv_kw liegt — Schutz gegen Abend-/Morgen-Flapping.
+        # Standard/Super speist die Batteriereserve, dort greift R4 nicht.
+        forecast_veto_enabled: bool = False,
+        forecast_sustain_pv_kw: float = 3.0,
     ) -> None:
         self.surplus_min_kw = surplus_min_kw
         self.price_max_ct_kwh = price_max_ct_kwh
@@ -96,6 +123,11 @@ class RuleEngineConfig:
         self.soc_super_pct = soc_super_pct
         self.soc_super_stop_pct = soc_super_stop_pct
         self.pv_start_w = pv_start_w
+        self.night_block_enabled = night_block_enabled
+        self.night_block_start_hour = night_block_start_hour
+        self.night_block_end_hour = night_block_end_hour
+        self.forecast_veto_enabled = forecast_veto_enabled
+        self.forecast_sustain_pv_kw = forecast_sustain_pv_kw
 
 
 def evaluate(
@@ -191,6 +223,27 @@ def evaluate(
                 decision_code=f"{reserve_action}_R1_{soc_band_vote.reason}",
             )
 
+        # Nachtsperre: im Nachtfenster kein Mining (SoC-unabhängig). R3-Safety
+        # und der schützende Reserve-Stop oben behalten Vorrang; verhindert das
+        # Anlaufen (NOOP), ein bereits gestoppter Miner bleibt aus.
+        if config.night_block_enabled and _is_night_block(
+            now, config.night_block_start_hour, config.night_block_end_hour
+        ):
+            return DecisionEvent(
+                decision=Decision(action="NOOP", valid_until=valid_until),
+                reason="NIGHT_BLOCK",
+                trigger=trigger,
+                params={
+                    "hour": now.hour,
+                    "night_start_hour": config.night_block_start_hour,
+                    "night_end_hour": config.night_block_end_hour,
+                    "mode": "Standby",
+                    "strategy": "soc_band",
+                },
+                state_snapshot=state,
+                decision_code="NOOP_NIGHT_BLOCK",
+            )
+
     # --- R2 Autarkie ---
     # Im SoC-Band-Modus besitzt die SoC-Band-Strategie die Hausreserve vollständig
     # (Reserve-Stop, Hold-Band, Eco-Start) — R2 prüft dann nur den Netzbezug, damit
@@ -229,16 +282,7 @@ def evaluate(
             decision_code=f"{effective_action}_R2_{r2_vote.reason}",
         )
 
-    # --- R4 Forecast ---
-    r4_vote = r4_forecast.evaluate(
-        state,
-        min_predicted_surplus_kw=config.min_predicted_surplus_kw,
-        price_spike_threshold_ct=config.price_spike_threshold_ct,
-    )
-    if r4_vote is not None:
-        votes.append(r4_vote)
-
-    # --- R5 Stabilität / Deadband ---
+    # --- R5 Stabilität / Deadband (vor R4: Anti-Flapping schlägt Prognose) ---
     r5_vote = r5_stability.evaluate(
         state,
         last_action=last_action,
@@ -264,19 +308,43 @@ def evaluate(
             decision_code=f"NOOP_R5_{r5_vote.reason}",
         )
 
-    # R4 Veto nach R5 (R4 kann nur NOOP vorschlagen, nicht STOP)
-    if r4_vote is not None and r4_vote.action == "NOOP":
-        return DecisionEvent(
-            decision=Decision(action="NOOP", valid_until=valid_until),
-            reason=r4_vote.reason,
-            trigger=trigger,
-            params={
-                "pv_forecast_kw": state.pv_forecast_kw,
-                "min_predicted_surplus_kw": config.min_predicted_surplus_kw,
-            },
-            state_snapshot=state,
-            decision_code=f"NOOP_R4_{r4_vote.reason}",
+    # --- R4 Forecast (nach R5; R4 kann nur NOOP vorschlagen, nicht STOP) ---
+    # Surplus-Modus: R4 gilt unverändert. SoC-Band-Modus: R4 ist opt-in
+    # (forecast_veto_enabled) und vetoed NUR den PV-abhängigen Eco-Frischstart
+    # (Miner aus → an). Bei Standard/Super trägt die Batteriereserve, die
+    # PV-Prognose ist dann irrelevant; ein laufender Miner wird nicht gestoppt
+    # (R4 kann ohnehin nur NOOP). Ohne Forecast (pv_forecast_kw=None) ist R4 still.
+    r4_active = config.strategy != "soc_band"
+    r4_threshold = config.min_predicted_surplus_kw
+    if config.strategy == "soc_band":
+        assert soc_band_vote is not None  # oben gesetzt
+        fresh_eco_start = soc_band_vote.reason == "ECO" and last_action not in (
+            "START",
+            "THROTTLE",
         )
+        r4_active = config.forecast_veto_enabled and fresh_eco_start
+        r4_threshold = config.forecast_sustain_pv_kw
+
+    if r4_active:
+        r4_vote = r4_forecast.evaluate(
+            state,
+            min_predicted_surplus_kw=r4_threshold,
+            price_spike_threshold_ct=config.price_spike_threshold_ct,
+        )
+        if r4_vote is not None and r4_vote.action == "NOOP":
+            votes.append(r4_vote)
+            return DecisionEvent(
+                decision=Decision(action="NOOP", valid_until=valid_until),
+                reason=r4_vote.reason,
+                trigger=trigger,
+                params={
+                    "pv_forecast_kw": state.pv_forecast_kw,
+                    "min_predicted_surplus_kw": r4_threshold,
+                    "strategy": config.strategy,
+                },
+                state_snapshot=state,
+                decision_code=f"NOOP_R4_{r4_vote.reason}",
+            )
 
     # --- R1-Schritt: strategieabhängig (Surplus-kW oder SoC-Band) ---
     params: dict[str, Any]

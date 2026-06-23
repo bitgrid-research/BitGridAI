@@ -367,13 +367,13 @@ mvp_auto:
                   data:
                     option: Eco
 
-            # P2: Eco-Cap (Super + Standard deaktiviert — Testmodus)
+            # P2: Akku voll → Standard-Cap (Super deaktiviert)
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
               sequence:
                 - condition: template
-                  value_template: "{{ m1_status != 'Eco' }}"
+                  value_template: "{{ m1_status != 'Standard' }}"
                 - condition: template
                   value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -383,13 +383,13 @@ mvp_auto:
                   value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0) }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P2 Eco-Cap: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m1_status }} (Super+Standard gesperrt)"
+                    message: "[mvp-miner1] P2 Standard-Cap: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m1_status }} (Super gesperrt)"
                     level: info
                 - action: select.select_option
                   target:
                     entity_id: select.miner1_workmode_set
                   data:
-                    option: Eco
+                    option: Standard
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.mvp_miner1_last_upgrade
@@ -418,11 +418,32 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P2.5: Eco→Standard-Upgrade gesperrt (Testmodus — nur Eco erlaubt)
+            # P2.5: SoC im Standard-Bereich → Standard (Eco→Standard, blockiert wenn Downgrade-Cooldown aktiv)
             - conditions:
                 - condition: template
-                  value_template: "{{ false }}"
-              sequence: []
+                  value_template: "{{ soc >= soc_std_on and m1_status == 'Eco' }}"
+              sequence:
+                - condition: template
+                  value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
+                - condition: state
+                  entity_id: binary_sensor.raumtemperatur_zu_heiss
+                  state: "off"
+                - condition: template
+                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0) }}"
+                - action: system_log.write
+                  data:
+                    message: "[mvp-miner1] P2.5 Standard: soc={{ soc }}% >= {{ soc_std_on }}% — Eco→Standard"
+                    level: info
+                - action: select.select_option
+                  target:
+                    entity_id: select.miner1_workmode_set
+                  data:
+                    option: Standard
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.mvp_miner1_last_upgrade
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
             # P3.5: Standard-Deadband unterschritten → Eco (blockiert wenn Upgrade-Cooldown aktiv)
             - conditions:
@@ -608,13 +629,13 @@ mvp_auto:
                   data:
                     option: Eco
 
-            # P2: Eco-Cap (Super + Standard deaktiviert — Testmodus)
+            # P2: Akku voll → Standard-Cap (Super deaktiviert)
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
               sequence:
                 - condition: template
-                  value_template: "{{ m2_status != 'Eco' }}"
+                  value_template: "{{ m2_status != 'Standard' }}"
                 - condition: template
                   value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -624,13 +645,13 @@ mvp_auto:
                   value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0) }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P2 Eco-Cap: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }} (Super+Standard gesperrt)"
+                    message: "[mvp-miner2] P2 Standard-Cap: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }} (Super gesperrt)"
                     level: info
                 - action: select.select_option
                   target:
                     entity_id: select.miner2_workmode_set
                   data:
-                    option: Eco
+                    option: Standard
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.mvp_miner2_last_upgrade
@@ -659,11 +680,32 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P2.5: Eco→Standard-Upgrade gesperrt (Testmodus — nur Eco erlaubt)
+            # P2.5: SoC im Standard-Bereich → Standard (Eco→Standard, blockiert wenn Downgrade-Cooldown aktiv)
             - conditions:
                 - condition: template
-                  value_template: "{{ false }}"
-              sequence: []
+                  value_template: "{{ soc >= soc_std_on and m2_status == 'Eco' }}"
+              sequence:
+                - condition: template
+                  value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
+                - condition: state
+                  entity_id: binary_sensor.raumtemperatur_zu_heiss
+                  state: "off"
+                - condition: template
+                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0) }}"
+                - action: system_log.write
+                  data:
+                    message: "[mvp-miner2] P2.5 Standard: soc={{ soc }}% >= {{ soc_std_on }}% — Eco→Standard"
+                    level: info
+                - action: select.select_option
+                  target:
+                    entity_id: select.miner2_workmode_set
+                  data:
+                    option: Standard
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.mvp_miner2_last_upgrade
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
             # P3.5: Standard-Deadband unterschritten → Eco (blockiert wenn Upgrade-Cooldown aktiv)
             - conditions:

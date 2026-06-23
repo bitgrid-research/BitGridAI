@@ -148,6 +148,8 @@ def rules_to_engine_config(data: dict[str, Any]) -> "RuleEngineConfig":
         comm_timeout_sec=r3.get("comm_timeout_sec", 60.0),
         min_predicted_surplus_kw=r4.get("min_predicted_surplus_kw", 2.0),
         price_spike_threshold_ct=r4.get("price_spike_threshold_ct", 30.0),
+        forecast_veto_enabled=r4.get("forecast_veto_enabled", False),
+        forecast_sustain_pv_kw=r4.get("forecast_sustain_pv_kw", 3.0),
         deadband_hold_blocks=r5.get("deadband_hold_blocks", 2),
         min_runtime_blocks=r5.get("min_runtime_blocks", 3),
         min_pause_blocks=r5.get("min_pause_blocks", 2),

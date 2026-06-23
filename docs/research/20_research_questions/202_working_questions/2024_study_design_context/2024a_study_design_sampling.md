@@ -8,7 +8,8 @@
 
 ## Festgelegtes Design
 
-- **Forschungsdesign:** Mixed (between-Faktor Gruppe A/B + Within-Vergleich am Sitzungsende), **Einzelsitzung** (~60–90 Min), Mixed Methods (quantitatives Vertrauen + qualitative Vertrauensbegründungen + objektive Güte-Bewertung der Ausgaben).
+- **Forschungsdesign:** Mixed (between-Faktor Gruppe A/B + Within-Vergleich am Sitzungsende), **Einzelsitzung** (~45 Min), Mixed Methods (quantitatives Vertrauen + qualitative Vertrauensbegründungen + objektive Güte-Bewertung der Ausgaben).
+- **Studientyp:** formative Evaluation im Sinne der **Design Science Research** (Artefakt + Evaluation + Feedback-Schleife) mit konfirmatorischem A/B-Kern; Güte/Qualitatives fließt als Verbesserungs-Input in die Erklärschicht zurück.
 - **Bedingungen:** Gruppe A (statische, regelbasierte Erklärtexte) vs. Gruppe B (LLM-Erklärung, **eine generische Stimme ohne Personas**). Variiert wird nur die Formulierungsebene; die Faktenbasis (R1–R5) ist identisch. Die LLM-Ausgaben werden eingefroren (reproduzierbar, ausfallsicher). 🟦
 - **Forschungsfragen:** FF1 (Vertrauen): Erhöht B gegenüber A das Nutzervertrauen? FF2 (Güte): Wie lässt sich die Güte der LLM-Ausgaben objektiv bewerten, und deckt sie ein etwaiges Vertrauens-Plus (Kalibrierung)?
 - **Stichprobe:** N = 16 - Gruppe A (statisch) n = 8, Gruppe B (LLM) n = 8. Keine Persona-Zellen.

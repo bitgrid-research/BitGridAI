@@ -5,6 +5,8 @@ Ziel ist es, die Wirkung des **Erklärformats** auf das **Nutzervertrauen** zu b
 
 Der Fokus liegt auf zwei Forschungsfragen: **FF1** (Vertrauen, A vs. B) und **FF2** (Güte der Ausgaben). Verbindendes Konzept ist die **Vertrauens-Kalibrierung**: Ist ein etwaiges Vertrauens-Plus der LLM-Variante durch die objektive Güte gedeckt, oder liegt Über-Vertrauen vor?
 
+Methodisch ordnet sich die Arbeit in die **Design Science Research** ein (Artefakt BitGridAI + Evaluation + Feedback-Schleife): Die Studie ist eine **formative Evaluation** mit konfirmatorischem A/B-Kern; die Güte-Befunde (FF2) und die qualitativen Themen fließen als konkreter Verbesserungs-Input in die Erklärschicht (Prompt, Templates, Gold-Referenzen) zurück.
+
 &nbsp;
 
 ## Überblick
@@ -35,19 +37,20 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Nutzervertrauen) mit ei
 
 * **Design:** Mixed (Between-Faktor Gruppe A/B + Within-Direktvergleich)
 * **Stichprobe:** N = 16 — Gruppe A (statisch) n = 8, Gruppe B (LLM) n = 8, **ohne Persona-Untergliederung**; heterogener Hintergrund; Ausschluss von Domänen-Experten (Energie-/Regelungstechnik, Informatik)
-* **Format:** Einzelsitzung, ca. 60–90 Minuten pro Proband (kein Längsschnitt)
+* **Format:** Einzelsitzung, ca. 45 Minuten pro Proband (kein Längsschnitt)
 * **Statistik:** Mann-Whitney-U (einseitig) auf das Vertrauen, Gruppe A (n = 8) vs. B (n = 8); Welch-/t-Test bei erfüllten Voraussetzungen (r bzw. Cohen's *d*, 95 %-KI). Within: Binomial-/Vorzeichentest (Forced-Choice) und Wilcoxon (Vergleichsrating gegen die Mitte).
 * **Standardisierung:** identische, gescriptete Szenario-Abfolge für alle Probanden — eingespielt per **Replay** des deterministischen Regelkerns (die zehn Szenarien S01–S10: [Übersicht in Kapitel 26](../26_scenarios_and_use_cases/README.md#deterministische-studienszenarien-s01s10), kanonische Spezifikation in [20.2.4.4](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/README.md))
 
 ### Sitzungsablauf
 
 1. Einwilligung
-2. Demographie + Vorwissen (Technikaffinität, BTC-Vorwissen; **keine** Persona-Steuerung)
-3. Erwartungs-Vorfrage (naives Ausgangsmodell, qualitativ)
-4. Szenariophase am Dashboard mit der **zugewiesenen** Variante (gescriptete Sequenz S01–S10)
-5. **Trust-Messung (primär)** + offene Vertrauensfragen, audioaufgezeichnet, **vor** dem Reveal
-6. **Reveal** der anderen Variante + **Within-Vergleich** (Forced-Choice + Vergleichsrating)
-7. Abschluss + Debrief
+2. Demographie + Vorwissen (Technikaffinität, BTC-Vorwissen)
+3. Szenariophase am Dashboard mit der **zugewiesenen** Variante (gescriptete Sequenz S01–S10, Schwerpunkt diskriminierende Items)
+4. **Trust-Messung (primär)** + offene Vertrauensfragen, audioaufgezeichnet, **vor** dem Reveal
+5. **Reveal** der anderen Variante + **Within-Vergleich** (2–3 Szenarien; Forced-Choice + Vergleichsrating)
+6. Abschluss + Debrief
+
+> Die frühere Erwartungs-Vorfrage entfällt zugunsten der kompakten 45-Min-Sitzung.
 
 ### Setting
 

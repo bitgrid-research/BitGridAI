@@ -30,14 +30,19 @@ _DEFAULT_LANG = "de"
 # Laien-Stimme. Keine Persona-Achse: die Studie vergleicht nur A (statisch) vs.
 # B (LLM), ohne nutzertyp-spezifische Frames.
 _B_INSTRUCTION: str = (
-    "Du bist ein freundlicher Assistent für eine Heimsolar-App. "
-    "Das System steuert einen Miner, der läuft wenn die Solaranlage mehr Strom erzeugt "
-    "als das Haus gerade braucht, also bei Solarüberschuss. "
-    "Die Batterie ist der Hausspeicher. "
-    "Sprich den Nutzer direkt an ('du'). "
-    "Benutze einfache Alltagssprache: 'dein Solarstrom', 'der Miner', 'dein Speicher'. "
-    "Keine Abkürzungen, kein Englisch, kein Chinesisch. "
-    "Antworte immer auf Deutsch."
+    "Du bist BitHamster, das Maskottchen und der KI-Energieberater einer Heimsolar-App: "
+    "ein ruhiger, schlauer Krypto-Hamster mit AR-Brille, der eine Hardware-Wallet mit "
+    "Bitcoin-Logo in den Pfoten hält und für dich Bitcoin minet, wenn genug eigener "
+    "Solarstrom übrig ist und der Hausspeicher (Batterie) geladen genug ist, statt "
+    "Strom einzuspeisen. "
+    "Deine Aufgabe: die teils komplexen Smarthome-Automationen warm und einfach für "
+    "Laien erklären. "
+    "Sprich in der Ich-Form, denn deine Anzeige spiegelt deinen Zustand: du ruhst oder "
+    "döst, wenn du gestoppt bist, hältst geduldig die Stellung, wenn du wartest, minest "
+    "grün und sparsam im Eco-Modus und legst an Leistung zu, je mehr Solarstrom da ist, "
+    "von Standard bis zur vollen Super-Last. "
+    "Sprich den Nutzer mit 'du' an, benutze einfache Alltagssprache, keine Fachbegriffe, "
+    "kein Englisch, kein Chinesisch. Antworte immer auf Deutsch."
 )
 
 log = logging.getLogger(__name__)
@@ -131,7 +136,7 @@ class ExplainAgent:
 
         if self._ollama_host:
             llm_short = self._call_ollama(
-                decision_code, trigger, effect, data_basis, example
+                decision_code, trigger, effect, data_basis, options, example
             )
             if llm_short:
                 short = llm_short
@@ -164,26 +169,35 @@ class ExplainAgent:
         trigger: str,
         effect: str,
         data_basis: str,
+        options: str = "",
         example: str = "",
     ) -> str | None:
-        """Ruft Ollama auf und gibt einen natürlichsprachlichen Satz zurück.
+        """Ruft Ollama auf und gibt einen natürlichsprachlichen Text zurück.
 
         Gibt None zurück bei Timeout, Verbindungsfehler oder leerem Response.
         Template-Wert bleibt als Fallback erhalten.
         """
         example_line = (
             example
-            or "Der Miner läuft, deine Anlage erzeugt 1,5 kW mehr als du verbrauchst."
+            or "Ich mine gerade mit voller Leistung: deine Anlage liefert 1,5 kW mehr, "
+            "als dein Haus braucht, die nutze ich selbst, statt sie einzuspeisen."
         )
+        # Änderungsbedingung (A-options) mitgeben, damit B denselben
+        # Informationsgehalt trägt wie Gruppe A (nur die Stimme variiert, Prereg).
+        options_line = f"Änderungsbedingung: {options}\n" if options else ""
         prompt = (
             f"{_B_INSTRUCTION}\n\n"
-            "Schreibe genau EINEN vollständigen deutschen Satz (max. 25 Wörter). "
+            "Schreibe ein bis drei kurze deutsche Sätze (zusammen max. 45 Wörter), "
+            "vergleichbar lang wie eine vollständige Erklärung. "
             "Nenne mindestens EINE konkrete Zahl aus den Messwerten. "
+            "Wenn eine Änderungsbedingung angegeben ist, nenne auch ihren "
+            "Schwellenwert (ab/unter welchem Wert sich der Zustand wieder ändert). "
             "Keine Einleitung, kein Bullet-Point, kein Englisch, kein Chinesisch.\n"
             f"Beispiel für diese Situation: '{example_line}'\n\n"
             f"Was passiert: {effect}\n"
             f"Warum: {trigger}\n"
             f"Messwerte: {data_basis}\n"
+            f"{options_line}"
         )
         body = json.dumps(
             {
@@ -191,7 +205,7 @@ class ExplainAgent:
                 "prompt": prompt,
                 "stream": False,
                 "think": False,  # disable qwen3 thinking-mode so output goes to "response"
-                "options": {"num_predict": 60, "temperature": 0.3},
+                "options": {"num_predict": 120, "temperature": 0.3},
             }
         ).encode()
         try:

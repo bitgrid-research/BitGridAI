@@ -84,6 +84,29 @@ Richtungsumkehr gegenüber der ursprünglichen Entscheidung:
 - Die ursprüngliche Konsequenz „HA spiegelt den Kern" gilt damit nur noch für die `bg_decision_*`-Templates,
   nicht für die produktive SoC-Band-Automation. Die residuale R4/R5-Divergenz bleibt bis zur Kern-Angleichung bestehen.
 
+**Update (Juni 2026) — R4 im SoC-Band-Modus + Priorität R5 > R4.** Die residuale
+R4-Lücke (oben) wird additiv geschlossen, ohne den Surplus-Pfad oder das eingefrorene
+Studien-Set zu berühren:
+
+- **R4-Forecast-Veto, opt-in (`forecast_veto_enabled`, Default aus):** Im SoC-Band-Modus
+  vetoed R4 ausschließlich den **PV-abhängigen Eco-Frischstart** (Miner aus → an), wenn die
+  Prognose am Horizont unter `forecast_sustain_pv_kw` (Default 3,0 kW) liegt. Bei Standard/Super
+  trägt die **Batteriereserve**, die PV-Prognose ist dort irrelevant — R4 greift nicht; ein
+  laufender Miner wird nie von R4 gestoppt (R4 kann nur NOOP). Default aus, weil die reale
+  Produktiv-Steuerung (`mvp_auto.yaml`) **keinen** Forecast nutzt; das Flag macht „R4 aktiv"
+  zu einer *bewussten*, auditierbaren Entscheidung statt eines Datenzufalls.
+- **Lokale, deterministische Forecast-Quelle (ADR 011):** `src/adapters/solar_forecast.py`
+  berechnet die Klarhimmel-PV-Obergrenze rein aus der Sonnen-Geometrie (NOAA-Algorithmus),
+  **ohne Netzzugriff** — der ADR-011-konforme Gegenpart zu den Cloud-Adaptern
+  (`forecast.solar`/`open-meteo`). Reine Funktion von (Ort, Zeit, kWp) → der Entscheidungspfad
+  bleibt replay-fähig.
+- **Priorität R5 > R4 nachgezogen:** Reihenfolge ist nun `R3 > R2 > R5 > R4 > R1`. Ein
+  Stabilitäts-Halt (Min-Runtime/-Pause, Deadband) schlägt das Prognose-Veto, sonst überstimmte
+  die Prognose ein frisches Anti-Flapping-Fenster. Der Kern wertet R4 jetzt *nach* R5 aus
+  (vorher: vorab berechnet, nachgelagert angewandt — gleiches Ergebnis, aber unklare Lesart).
+- Tests: `tests/core/test_soc_band_strategy.py` (Veto/Nicht-Veto/Ordering),
+  `tests/adapters/test_solar_forecast.py` (Geometrie/Determinismus).
+
 ---
 > **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die wichtigsten Qualitätsanforderungen im Detail.
 >

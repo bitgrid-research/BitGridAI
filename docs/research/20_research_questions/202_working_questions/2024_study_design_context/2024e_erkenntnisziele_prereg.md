@@ -17,6 +17,12 @@ und das Szenario-Set [2024d](./2024d_scenarios/README.md).
 > plus Within-Direktvergleich am Sitzungsende. Änderung erfolgt **vor** jeder Erhebung
 > (kein HARKing) und ist 🟦 mit dem Betreuer abgestimmt.
 
+> **Design-Änderung (2026-06-12, vor Datenerhebung):** Einordnung als **Design Science
+> Research** (Artefakt BitGridAI + Evaluation + Feedback-Schleife). Die Studie ist
+> formative Evaluation **mit** konfirmatorischem A/B-Kern (H1/H2); die Güte-Befunde (FF2)
+> und qualitativen Themen fließen als Verbesserungs-Input in die Erklärschicht zurück.
+> **Sitzung auf ~45 Min gestrafft** (Erwartungs-Vorfrage entfällt; Within auf 2–3 Szenarien).
+
 ## Kernfrage
 
 > **Wann vertrauen Nutzer den Erklärtexten mehr?** Erhöht eine **LLM-Erklärung**
@@ -58,7 +64,7 @@ nur schöner": ein Vertrauensgewinn ohne Güte-Deckung ist Über-Vertrauen, kein
 
 3 Dimensionen × 0–2 Punkte (Güte-Summe 0–6) + Halluzinations-Flag (0/1); zwei
 verblindete Rater, Interrater-κ (gewichtet). Vollständig in
-[Anhang G](../../../../thesis/kapitel/99_anhang/99g_kodierleitfaden_v1.tex):
+[Anhang G](../../../../thesis/kapitel/99_anhang/99g_kodierleitfaden_v2.tex):
 
 | Dimension | 0 | 2 |
 |---|---|---|
@@ -71,7 +77,7 @@ die Rubrik prüft vor allem, ob B diese Güte **hält**.
 
 ## Within-Vergleich und behaviorale Spur (Szenario-Auswahl)
 
-Für den Within-Direktvergleich werden 3–4 repräsentative Szenarien gezeigt, darunter
+Für den Within-Direktvergleich werden 2–3 repräsentative Szenarien gezeigt, darunter
 die kontraintuitiven Items **S4** (Sicherheitsstopp) und **S9** (Forecast-Veto). Die
 optionale Override-/Verhaltensspur nutzt dieselben Items als objektive Verlässlichkeits-
 Triangulation des Selbstberichts (angemessen / Disuse / Misuse je Szenario):

@@ -25,8 +25,8 @@ Rater-CSV-Schema (eine Zeile je sid × group × rater):
     group          — A | B
     rater          — R1 | R2
     korrektheit    — 0–2 (stimmt die Aussage mit der deterministischen Entscheidung?)
-    vollstaendigkeit — 0–2 (Auslöser + relevanter Messwert genannt?)
-    klarheit       — 0–2 (laienverständlich, ein Satz, keine Fremdwörter?)
+    vollstaendigkeit — 0–2 (Auslöser + relevanter Messwert + Änderungsbedingung genannt?)
+    klarheit       — 0–2 (laienverständlich, knapp, keine Fremdwörter?)
     halluzination  — 0/1 (erfundene Zahl/Aussage? 1 = Penalty)
 """
 

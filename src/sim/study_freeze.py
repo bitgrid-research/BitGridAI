@@ -20,9 +20,11 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any
+from collections.abc import Sequence
+from typing import Any, Protocol
 
 from src.core import rule_engine
+from src.core.models import EnergyState
 from src.core.rule_engine import RuleEngineConfig
 from src.explain.decision_codes import ALL_CODES
 from src.explain.explain_agent import (
@@ -30,9 +32,21 @@ from src.explain.explain_agent import (
     load_b_references,
     load_hamster_states,
 )
-from src.sim.study_scenarios import STUDY_SCENARIOS, StudyScenario
+from src.sim.study_scenarios import STUDY_SCENARIOS
 
 _DEFAULT_OUT = Path("src/sim/study_set")
+
+
+class _FreezeScenario(Protocol):
+    """Strukturelles Minimum, das freeze_one/_all braucht (Surplus + SoC-Band)."""
+
+    sid: str
+    title: str
+    state: EnergyState
+    last_action: str | None
+    blocks_since_change: int
+    expected_code: str
+
 
 # Gruppe-B-Gold-Referenz je Code + Hamster-Anzeige je Aktion (einmalig geladen).
 _B_REFERENCES = load_b_references()
@@ -47,7 +61,7 @@ def base_code(code: str) -> str:
     return code
 
 
-def _state_dict(sc: StudyScenario) -> dict[str, Any]:
+def _state_dict(sc: _FreezeScenario) -> dict[str, Any]:
     s = sc.state
     return {
         "block_id": s.block_id,
@@ -86,13 +100,17 @@ def _group_b(code: str, params: dict[str, Any], ollama_host: str) -> str | None:
 
 
 def freeze_one(
-    sc: StudyScenario, agent_a: ExplainAgent, ollama_host: str
+    sc: _FreezeScenario,
+    agent_a: ExplainAgent,
+    ollama_host: str,
+    config: RuleEngineConfig | None = None,
 ) -> dict[str, Any]:
     event = rule_engine.evaluate(
         sc.state,
-        config=RuleEngineConfig(),
+        config=config if config is not None else RuleEngineConfig(),
         last_action=sc.last_action,
         blocks_since_last_change=sc.blocks_since_change,
+        now=getattr(sc, "now", None),
     )
     code = event.decision_code
     action = event.decision.action
@@ -125,7 +143,12 @@ def freeze_one(
     }
 
 
-def freeze_all(out_dir: Path, ollama_host: str) -> list[dict[str, Any]]:
+def freeze_all(
+    out_dir: Path,
+    ollama_host: str,
+    scenarios: Sequence[Any] = STUDY_SCENARIOS,
+    config: RuleEngineConfig | None = None,
+) -> list[dict[str, Any]]:
     out_dir.mkdir(parents=True, exist_ok=True)
     # Gruppe A immer ohne LLM (reine Templates) — OLLAMA_HOST temporär leeren.
     saved_host = os.environ.get("OLLAMA_HOST")
@@ -139,8 +162,8 @@ def freeze_all(out_dir: Path, ollama_host: str) -> list[dict[str, Any]]:
             os.environ["OLLAMA_HOST"] = saved_host
 
     items: list[dict[str, Any]] = []
-    for sc in STUDY_SCENARIOS:
-        item = freeze_one(sc, agent_a, ollama_host)
+    for sc in scenarios:
+        item = freeze_one(sc, agent_a, ollama_host, config)
         (out_dir / f"{sc.sid}.json").write_text(
             json.dumps(item, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
         )
@@ -170,14 +193,35 @@ def main() -> None:
     p = argparse.ArgumentParser(
         description="Studien-Szenarien + Erklärungen einfrieren"
     )
-    p.add_argument("--out", default=str(_DEFAULT_OUT))
+    p.add_argument("--out", default="")
+    p.add_argument(
+        "--set",
+        dest="scenario_set",
+        choices=["surplus", "soc_band"],
+        default="surplus",
+        help="Szenario-Set (Default: surplus = S1–S10)",
+    )
     args = p.parse_args()
 
     ollama_host = os.environ.get("OLLAMA_HOST", "").rstrip("/")
-    items = freeze_all(Path(args.out), ollama_host)
+    if args.scenario_set == "soc_band":
+        from src.sim.study_scenarios_soc_band import (
+            SOC_BAND_CONFIG,
+            SOC_BAND_SCENARIOS,
+        )
+
+        scenarios: Sequence[Any] = SOC_BAND_SCENARIOS
+        config: RuleEngineConfig | None = SOC_BAND_CONFIG
+        out = Path(args.out or "src/sim/study_set_soc_band")
+    else:
+        scenarios = STUDY_SCENARIOS
+        config = None
+        out = Path(args.out or str(_DEFAULT_OUT))
+    items = freeze_all(out, ollama_host, scenarios, config)
 
     print(
-        f"→ Ausgabe: {args.out}   Gruppe B: {'AKTIV' if ollama_host else 'Platzhalter (kein OLLAMA_HOST)'}"
+        f"→ Ausgabe: {out}   Set: {args.scenario_set}   "
+        f"Gruppe B: {'AKTIV' if ollama_host else 'Platzhalter (kein OLLAMA_HOST)'}"
     )
     print("-" * 70)
     ok = 0

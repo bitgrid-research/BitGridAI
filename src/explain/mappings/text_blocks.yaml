@@ -134,6 +134,78 @@ de:
     effect: "Keine automatische Aktion — du entscheidest"
     options: "Automatik aktivieren: Betriebsmodus auf Automatik setzen"
 
+  STOP_R1_SOC_RESERVE_STOP:
+    example: "Miner gestoppt: Akku nur noch 48 %, Hausreserve liegt bei 50 %."
+    short: "Hausreserve unterschritten, Miner gestoppt"
+    long: "Ladezustand {battery_soc_pct:.0f} % liegt unter der Hausreserve {soc_stop_pct:.0f} %."
+    trigger: "Akku ist auf {battery_soc_pct:.0f} % gefallen, unter der Hausreserve von {soc_stop_pct:.0f} %"
+    data_basis: "Akku {battery_soc_pct:.0f} % · Hausreserve {soc_stop_pct:.0f} %"
+    effect: "Miner gestoppt, Reserve fürs Haus freihalten"
+    options: "Miner startet erst wieder, wenn der Akku die Startschwelle erreicht"
+
+  NOOP_R1_SOC_RESERVE_STOP:
+    example: "Akku bei 48 % unter der Reserve, im Assistenzmodus bleibt es ein Hinweis."
+    short: "Hausreserve unterschritten (Assistenzmodus)"
+    long: "Ladezustand {battery_soc_pct:.0f} % unter Hausreserve {soc_stop_pct:.0f} %. Im Assistenzmodus kein automatischer Stopp."
+    trigger: "Akku {battery_soc_pct:.0f} % liegt unter der Hausreserve {soc_stop_pct:.0f} %"
+    data_basis: "Akku {battery_soc_pct:.0f} % · Hausreserve {soc_stop_pct:.0f} % · Modus Assistenz"
+    effect: "Kein automatischer Stopp, im Assistenzmodus entscheidest du"
+    options: "Im Vollautomatik-Modus würde der Miner hier stoppen"
+
+  NOOP_R1_SOC_HOLD:
+    example: "Miner wartet: Akku 55 %, Startgrenze liegt bei 58 %."
+    short: "Akku im Halteband, Miner wartet"
+    long: "Ladezustand {battery_soc_pct:.0f} % liegt zwischen Reserve und Eco-Start {soc_eco_start_pct:.0f} %. Kein Neustart."
+    trigger: "Akku {battery_soc_pct:.0f} % liegt noch unter der Startgrenze {soc_eco_start_pct:.0f} %"
+    data_basis: "Akku {battery_soc_pct:.0f} % · Eco-Start {soc_eco_start_pct:.0f} %"
+    effect: "Miner bleibt aus, Akku lädt erst weiter"
+    options: "Start ab {soc_eco_start_pct:.0f} % Akku"
+
+  NOOP_R1_SOC_HOLD_PV:
+    example: "Akku bereit (60 %), aber nur 3200 W Sonne, Frischstart braucht 6000 W."
+    short: "Akku reicht, Sonne zu schwach"
+    long: "Akku {battery_soc_pct:.0f} % im Eco-Band, aber PV {pv_power_w:.0f} W unter Frischstart-Schwelle {pv_start_w:.0f} W."
+    trigger: "Akku wäre bereit ({battery_soc_pct:.0f} %), aber PV {pv_power_w:.0f} W liegt unter der Frischstart-Schwelle {pv_start_w:.0f} W"
+    data_basis: "Akku {battery_soc_pct:.0f} % · PV {pv_power_w:.0f} W · Frischstart ab {pv_start_w:.0f} W"
+    effect: "Miner bleibt aus, Kaltstart wartet auf Sonne"
+    options: "Eco-Start ab {pv_start_w:.0f} W PV"
+
+  THROTTLE_R1_ECO:
+    example: "Miner startet sparsam: 6300 W Sonne, Akku 64 %, Eco-Modus."
+    short: "Genug Sonne, Eco-Start"
+    long: "Akku {battery_soc_pct:.0f} % im Eco-Band, PV {pv_power_w:.0f} W über Frischstart {pv_start_w:.0f} W. Miner im Eco."
+    trigger: "Genug Sonne für den Eco-Start: {pv_power_w:.0f} W PV bei {battery_soc_pct:.0f} % Akku"
+    data_basis: "Akku {battery_soc_pct:.0f} % · PV {pv_power_w:.0f} W · Frischstart ab {pv_start_w:.0f} W"
+    effect: "Miner läuft im Eco-Modus, sparsam auf Solarüberschuss"
+    options: "Standard ab {soc_standard_pct:.0f} % Akku"
+
+  START_R1_STANDARD:
+    example: "Miner auf Standard: Akku 80 %, Standard-Band erreicht."
+    short: "Miner läuft auf Standard"
+    long: "Akku {battery_soc_pct:.0f} % erreicht das Standard-Band ({soc_standard_pct:.0f} %). Miner auf Standard."
+    trigger: "Akku ist auf {battery_soc_pct:.0f} % gestiegen, Standard-Band ab {soc_standard_pct:.0f} %"
+    data_basis: "Akku {battery_soc_pct:.0f} % · Standard ab {soc_standard_pct:.0f} % · Super ab {soc_super_pct:.0f} %"
+    effect: "Miner auf Standard-Leistung, mehr Akku trägt mehr Last"
+    options: "Super ab {soc_super_pct:.0f} % Akku"
+
+  START_R1_SUPER:
+    example: "Voll geladen: Akku 91 %, Miner auf Super (volle Last)."
+    short: "Miner läuft auf Super (volle Last)"
+    long: "Akku {battery_soc_pct:.0f} % erreicht das Super-Band ({soc_super_pct:.0f} %). Miner auf volle Last."
+    trigger: "Akku ist über {soc_super_pct:.0f} %, voller Speicher, Miner auf Super"
+    data_basis: "Akku {battery_soc_pct:.0f} % · Super ab {soc_super_pct:.0f} %"
+    effect: "Miner auf volle Leistung im Super-Modus"
+    options: "Läuft auf Super, solange der Akku ≥ {soc_super_pct:.0f} % bleibt"
+
+  NOOP_NIGHT_BLOCK:
+    example: "Nachtruhe: 23 Uhr, Mining pausiert bis 6 Uhr."
+    short: "Nachtsperre, Mining pausiert"
+    long: "Uhrzeit {hour} Uhr liegt im Nachtfenster {night_start_hour} bis {night_end_hour} Uhr. Kein Mining."
+    trigger: "Es ist {hour} Uhr, im Nachtfenster {night_start_hour} bis {night_end_hour} Uhr pausiert das Mining"
+    data_basis: "Uhrzeit {hour} Uhr · Nachtsperre {night_start_hour} bis {night_end_hour} Uhr"
+    effect: "Mining nachts ausgesetzt, unabhängig vom Akkustand"
+    options: "Normalbetrieb wieder ab {night_end_hour} Uhr"
+
 en:
   START_R1_SURPLUS_OK:
     short: "PV surplus available — miner running"
