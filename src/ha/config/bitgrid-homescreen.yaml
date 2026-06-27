@@ -1,0 +1,380 @@
+title: BitGridAI Home
+
+# ═══════════════════════════════════════════════════════════════════════
+# Kiosk-Home-Screen für Wandtablet — Vollbild, zwei Spalten-Gruppen.
+#
+#        ⚡ ENERGIE                  🌤 WETTER
+#   ┌──────────────────────┐   ┌──────────────┐
+#   │       Hamster        │   │   Wetter     │
+#   ├──────────────────────┤   ├──────────────┤
+#   │     Energiefluss     │   │   Horizont   │
+#   └──────────────────────┘   └──────────────┘
+#
+# Designprinzipien:
+#   - 2-Spalten-Grid: links = Energie-Gruppe (Hamster über Energiefluss),
+#     rechts = Wetter-Gruppe (clock-weather-card über horizon-card)
+#   - Titel-Zeile + zwei Karten-Zeilen (1fr) → füllt den Viewport, kein
+#     Scrollen; ein Titel je Spalten-Gruppe
+#   - Wetter = clock-weather-card (HACS), Horizont = horizon-card (HACS);
+#     beide lesen lokale Entities, kein Cloud-Backhaul
+#   - fester Radius 20px, dunkle Glaskarten erben aus dem Theme BitGridAI;
+#     Custom-Cards clippt www/bitgrid_card_shape.js auf den Radius
+#   - NaN-sicher: 'unavailable' → '—' statt 'NaN' (wichtig nach HA-Restart)
+# ═══════════════════════════════════════════════════════════════════════
+
+views:
+
+  # Header-Titel = View-Titel. Basis-Version aus pyproject.toml; deploy_ha.sh
+  # ersetzt den Versionsteil beim Deploy durch einen Build-Stamp
+  # (v<semver>+<datum>.<git-sha>[-dirty], SemVer-Build-Metadata), damit auf
+  # prod sichtbar ist, welcher Stand läuft. Lovelace-View-Titel kennen kein
+  # Templating, daher Injection beim Deploy. Der hier committete Wert ist nur
+  # Fallback fürs direkte Laden ohne Deploy.
+  - title: BitGridAI - v0.1.0
+    path: home
+    icon: mdi:home
+    theme: BitGridAI
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 1fr 1fr
+          # Beide Spalten gleicher Split 40/60, daher gemeinsame Zeilen
+          # (kein Versatz):
+          #   oben  40% (2fr): Hamster (ham) | Wetter (wet)
+          #   unten 60% (3fr): Energiefluss (flu) | Horizont (sun)
+          # Achtung: die clock-weather-card zentriert ihren Inhalt; bei 40%
+          # kann der 5. Vorschautag unten knapp werden. Falls abgeschnitten,
+          # der oberen Zeile (2fr) etwas mehr geben.
+          grid-template-rows: min-content 2fr 3fr
+          grid-template-areas: '"tl tr" "ham wet" "flu sun"'
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+          height: calc(100vh - var(--header-height, 56px))
+        cards:
+
+          # ── Gruppen-Titel links: ENERGIE ────────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tl
+            icon: mdi:lightning-bolt
+            name: Energie
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── Gruppen-Titel rechts: WETTER ────────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tr
+            icon: mdi:weather-partly-cloudy
+            name: Wetter
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ═══════════════════════════════════════════════════════════
+          # HAMSTER  —  Energie-Gruppe oben (ham)
+          # ═══════════════════════════════════════════════════════════
+          - type: custom:button-card
+            view_layout:
+              grid-area: ham
+            show_name: false
+            show_icon: false
+            show_state: false
+            tap_action:
+              action: none
+            custom_fields:
+              hamster: >
+                [[[
+                  const fnum = (id) => {
+                    const v = parseFloat(states[id]?.state);
+                    return isNaN(v) ? null : v;
+                  };
+                  const cfg = (id, fb) => { const v = fnum(id); return v === null ? fb : v; };
+                  const pct = (v) => v.toLocaleString('de-DE', {maximumFractionDigits: 0});
+                  const kw  = (w) => (w / 1000).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+
+                  const h = new Date().getHours();
+                  const night = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
+                    || (h >= 22 || h < 6);
+                  const modeRaw = states['sensor.miner1_workmode_status']?.state
+                              || states['sensor.miner2_workmode_status']?.state || '';
+                  const mode = (modeRaw === 'unavailable' || modeRaw === 'unknown') ? '' : modeRaw;
+                  const running = ['Eco', 'Standard', 'Super'].includes(mode);
+                  const socV   = fnum('sensor.battery_soc_pct');
+                  const pvV    = fnum('sensor.pv_power_w');
+                  const minerV = fnum('sensor.miner_total_power_w');
+                  const chipV  = fnum('sensor.miner_max_chip_temp_c');
+                  const socKnown = socV !== null;
+                  const soc    = socV ?? 0;
+                  const pvW    = pvV ?? 0;
+
+                  // Schwellen aus den HA-Config-Entities (Platzhalter-Legende soc_band_tagesverlauf.md)
+                  const socStop   = cfg('input_number.mvp_soc_stop_pct', 50);
+                  const ecoStart  = cfg('input_number.mvp_soc_eco_start_pct', 58);
+                  const socStd    = cfg('input_number.mvp_soc_std_pct', 80);
+                  const socStdStp = cfg('input_number.mvp_soc_std_stop_pct', 75);
+                  const socSuper  = cfg('input_number.mvp_soc_super_pct', 90);
+                  const socSupStp = cfg('input_number.mvp_soc_super_stop_pct', 85);
+                  const pvStartW  = cfg('input_number.mvp_pv_start_w', 6000);
+                  const maxChip   = cfg('input_number.mvp_tmax_std_threshold_c', 112);
+
+                  // Erklärtext A (statisch/regelbasiert) aus soc_band_tagesverlauf.md,
+                  // Platzhalter live aus den gebundenen Entities ersetzt. Zustand = sichtbare
+                  // Wahrheit (Workmode + Temperatur + SoC), NICHT bg_decision_code (entkoppelt).
+                  let head, sub, img;
+                  if (!socKnown && !running) {
+                    head = 'Verbindung wird aufgebaut';
+                    sub  = 'Die Sensoren melden sich gerade nach einem Neustart.<br>'
+                         + 'Sobald Ladezustand und PV anliegen, zeigt die Karte den Betriebszustand.';
+                    img  = 'bithamster_wait.png';
+                  } else if (night) {
+                    head = 'Nachtsperre aktiv';
+                    sub  = `Es ist ${h}:00 Uhr, Beginn des Nachtfensters von 22:00 bis 06:00 Uhr.<br>`
+                         + 'In dieser Zeit ist das Mining unabhängig vom Ladezustand ausgesetzt.<br>'
+                         + 'Der Normalbetrieb beginnt wieder ab 06:00 Uhr.';
+                    img  = 'bithamster_sleep.png';
+                  } else if (chipV !== null && chipV >= maxChip) {
+                    head = 'Sicherheits-Stopp: zu heiß';
+                    sub  = `Die Chip-Temperatur liegt mit ${pct(chipV)} °C über der Sicherheitsgrenze von ${pct(maxChip)} °C.<br>`
+                         + 'Der Miner wird sofort gestoppt, nicht überstimmbar.<br>'
+                         + 'Ein Wiederanlauf erfolgt erst nach Abkühlung.';
+                    img  = 'bithamster_wait.png';
+                  } else if (mode === 'Eco') {
+                    head = 'Miner läuft sparsam (Eco)';
+                    sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Eco-Band, die PV bei ${kw(pvW)} kW.<br>`
+                         + `Der Miner minet gedrosselt im Eco-Modus${pvW < pvStartW ? ' aus dem Akku weiter' : ''}.<br>`
+                         + `Unter ${pct(socStop)} % greift die Hausreserve, ab ${pct(socStd)} % schaltet er auf Standard.`;
+                    img  = 'bithamster_eco.png';
+                  } else if (mode === 'Standard') {
+                    head = 'Miner läuft in Standard';
+                    sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Standard-Band.<br>`
+                         + 'Der Miner läuft im Standard-Modus.<br>'
+                         + `Ab ${pct(socSuper)} % folgt Super, unter ${pct(socStdStp)} % fällt er auf Eco zurück.`;
+                    img  = 'bithamster_standard.png';
+                  } else if (mode === 'Super') {
+                    head = 'Miner läuft auf Volllast (Super)';
+                    sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Super-Band (ab ${pct(socSuper)} %).<br>`
+                         + 'Der Miner läuft mit voller Last im Super-Modus.<br>'
+                         + `Unter ${pct(socSupStp)} % fällt er auf Standard zurück.`;
+                    img  = 'bithamster_super.png';
+                  } else if (soc < socStop) {
+                    head = 'Akku lädt zuerst';
+                    sub  = `Der Ladezustand ist mit ${pct(soc)} % unter die Hausreserve von ${pct(socStop)} % gefallen.<br>`
+                         + 'Der Miner bleibt aus und lädt zuerst wieder auf.<br>'
+                         + `Ein Start ist erst ab ${pct(ecoStart)} % möglich.`;
+                    img  = 'bithamster_wait.png';
+                  } else if (soc < ecoStart) {
+                    head = 'Akku im Halteband';
+                    sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Halteband (${pct(socStop)}–${pct(ecoStart)} %).<br>`
+                         + 'Ein Neustart ist hier gesperrt, der Miner bleibt aus.<br>'
+                         + `Ein Start ist erst ab ${pct(ecoStart)} % möglich.`;
+                    img  = 'bithamster_wait.png';
+                  } else {
+                    head = 'Warte auf Sonne';
+                    sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Eco-Band, doch die PV reicht mit ${kw(pvW)} kW nicht (nötig ${kw(pvStartW)} kW).<br>`
+                         + 'Der Miner bleibt aus.<br>'
+                         + `Ab ${kw(pvStartW)} kW startet er im Eco-Modus.`;
+                    img  = 'bithamster_wait.png';
+                  }
+
+                  const stat = (label, value, sub) => `
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;
+                                  color:var(--secondary-text-color);opacity:0.65;margin-bottom:3px">${label}</div>
+                      <div style="font-size:1.8rem;font-weight:700;line-height:1;
+                                  white-space:nowrap">${value}</div>
+                      ${sub ? `<div style="font-size:0.85rem;color:var(--secondary-text-color);
+                                  white-space:nowrap;margin-top:3px">${sub}</div>` : ''}
+                    </div>`;
+
+                  // Bitcoin-Fußleiste (wie altes Dashboard): Blockzeit, Kurs, Balance
+                  const blockH   = fnum('sensor.bitcoin_block_height');
+                  const balBtc   = fnum('sensor.pool_balance_btc');
+                  const eurRate  = fnum('sensor.btc_eur_price');
+                  const blockStr = blockH  !== null ? Math.round(blockH).toLocaleString('de-DE')          : '—';
+                  const priceStr = eurRate !== null ? Math.round(eurRate).toLocaleString('de-DE') + ' €'  : '—';
+                  const haveBal  = balBtc !== null && balBtc > 0;
+                  const satsStr  = haveBal ? Math.round(balBtc * 1e8).toLocaleString('de-DE') + ' SATs'    : '—';
+                  const euroSub  = (haveBal && eurRate !== null && eurRate > 0)
+                    ? '≈ ' + (balBtc * eurRate).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €'
+                    : '';
+
+                  return `
+                    <div style="display:flex;flex-direction:column;height:100%;width:100%">
+                      <div style="display:flex;gap:24px;align-items:center;flex:1;min-height:0">
+                        <img src="/local/${img}?v=20260625"
+                             style="width:30%;max-width:170px;aspect-ratio:1;border-radius:50%;flex-shrink:0;
+                                    object-fit:cover;border:2px solid var(--divider-color)">
+                        <div style="flex:1;min-width:0">
+                          <div style="font-size:1.9rem;font-weight:700;line-height:1.15;
+                                      color:var(--primary-text-color);margin-bottom:12px">${head}</div>
+                          <div style="font-size:1.05rem;color:var(--secondary-text-color);line-height:1.55">${sub}</div>
+                        </div>
+                      </div>
+                      <div style="display:flex;gap:20px;padding-top:14px;
+                                  border-top:1px solid var(--divider-color)">
+                        ${stat('Blockzeit', blockStr)}
+                        ${stat('Kurs', priceStr)}
+                        ${stat('Balance', satsStr, euroSub)}
+                      </div>
+                    </div>`;
+                ]]]
+            styles:
+              card:
+                # Neutrales Glas, identisch zu Wetter/Horizont: alle Werte
+                # aus dem Theme (ha-card-*), kein Modus-Tint mehr.
+                - height: 100%
+                - background: var(--ha-card-background)
+                - border-radius: var(--ha-card-border-radius)
+                - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+                - box-shadow: var(--ha-card-box-shadow)
+                - padding: 20px
+              grid:
+                - grid-template-areas: '"hamster"'
+                - grid-template-columns: 1fr
+                - height: 100%
+              custom_fields:
+                hamster:
+                  - height: 100%
+                  - width: 100%
+                  - justify-self: stretch
+                  - align-self: stretch
+
+          # ═══════════════════════════════════════════════════════════
+          # WETTER  —  Wetter-Gruppe oben (wet)
+          # clock-weather-card (HACS: pkissling/clock-weather-card):
+          # Uhr + aktuelle Lage + 5-Tage-Vorschau in EINER Karte, ersetzt
+          # die zwei weather-forecast-Karten (stündlich + täglich).
+          # Runde Ecken: Theme liefert ha-card-border-radius, aber die Karte
+          # clippt ihre Vorschau-Balken nicht selbst darauf — das übernimmt
+          # www/bitgrid_card_shape.js (card-mod ist hier nicht installiert).
+          # fill-Icons statt animiert: farbig wie der Entwurf, aber leichter
+          # für das Wandtablet (Qualitätsziel Nachhaltigkeit/Edge-Schonung).
+          # ═══════════════════════════════════════════════════════════
+          - type: custom:clock-weather-card
+            view_layout:
+              grid-area: wet
+            entity: weather.forecast_home
+            sun_entity: sun.sun
+            # clock-weather-card-i18n kennt nur Kurz-Codes (de, en, …); 'de-DE'
+            # fällt auf Englisch zurück. Luxon (date_pattern) rendert 'de'
+            # ebenfalls deutsch, also deckt 'de' beides ab.
+            locale: de
+            time_format: '24'
+            date_pattern: 'cccc, dd.LL.yyyy'
+            weather_icon_type: fill
+            animated_icon: false
+            forecast_rows: 5
+            hide_today_section: false
+            hide_forecast_section: false
+            hide_clock: false
+            hide_date: false
+
+          # ═══════════════════════════════════════════════════════════
+          # ENERGIEFLUSS  —  Energie-Gruppe unten (flu, volle linke Breite)
+          # ═══════════════════════════════════════════════════════════
+          - type: custom:power-flow-card-plus
+            view_layout:
+              grid-area: flu
+            # Runde Ecken/Hintergrund kommen vom Theme (ha-card-border-radius)
+            # plus www/bitgrid_card_shape.js: PFCP clippt seinen Hintergrund
+            # nicht selbst auf den Theme-Radius, und card-mod ist hier nicht
+            # installiert. Das Modul injiziert den Radius in den Shadow-Root.
+            entities:
+              grid:
+                entity:
+                  consumption: sensor.grid_import_w
+                  production: sensor.grid_export_w
+                color:
+                  consumption: "#5C6BC0"
+                  production: "#4CAF50"
+              solar:
+                entity: sensor.pv_power_w
+                color: "#FFC107"
+              battery:
+                entity: sensor.battery_power_flowchart_w
+                state_of_charge: sensor.battery_soc_pct
+                color:
+                  consumption: "#26A69A"
+                  production: "#4CAF50"
+              home:
+                entity: sensor.house_load_w
+                color: "#EF9A9A"
+              individual:
+                - entity: sensor.miner_total_power_w
+                  name: Miner
+                  icon: mdi:pickaxe
+                  color: "#F7931A"
+                  display_zero: false
+                  display_zero_tolerance: 25
+                - entity: sensor.ac_elwa_2_power1_solar
+                  name: Heizstab
+                  icon: mdi:water-boiler
+                  color: "#2196F3"
+
+          # ═══════════════════════════════════════════════════════════
+          # SONNENSTAND  —  Wetter-Gruppe unten (sun)
+          # horizon-card (HACS: rejuvenate/lovelace-horizon-card): Sonne +
+          # Mond über dem Horizont mit Auf-/Untergängen und Mondphase. Liest
+          # sun.sun (und HA-Standort) automatisch, kein entity nötig.
+          # Runde Ecken: Theme-Radius greift, den Horizont-Gradienten clippt
+          # www/bitgrid_card_shape.js (card-mod ist hier nicht installiert).
+          # ═══════════════════════════════════════════════════════════
+          - type: custom:horizon-card
+            view_layout:
+              grid-area: sun
+            language: de

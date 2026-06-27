@@ -10,8 +10,8 @@ from src.sim.study_scenarios_soc_band import SOC_BAND_CONFIG, SOC_BAND_SCENARIOS
 
 
 def test_all_soc_band_scenarios_trigger_expected_code() -> None:
-    """Jeder Snapshot löst seinen erwarteten decision_code aus (13/13)."""
-    assert len(SOC_BAND_SCENARIOS) == 13
+    """Jeder Snapshot löst seinen erwarteten decision_code aus (12/12)."""
+    assert len(SOC_BAND_SCENARIOS) == 12
     for sc in SOC_BAND_SCENARIOS:
         event = rule_engine.evaluate(
             sc.state,
@@ -34,7 +34,7 @@ def test_soc_band_freeze_group_a(tmp_path: Path) -> None:
         scenarios=SOC_BAND_SCENARIOS,
         config=SOC_BAND_CONFIG,
     )
-    assert len(items) == 13
+    assert len(items) == 12
     assert all(it["verified"] for it in items)
     # Gruppe-A-Erklärung deterministisch gefüllt, Gruppe B noch Platzhalter (kein LLM).
     assert all(it["explanation"]["group_a"]["short"] for it in items)

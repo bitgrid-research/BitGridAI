@@ -38,14 +38,21 @@ FORBIDDEN_ML = (
     "lightgbm",
 )
 
-# Nondeterministic randomness sources.
+# Nondeterministic sources (uuid included: identity/correlation ids are a
+# boundary concern, assigned by the runner, not generated in the kernel).
 FORBIDDEN_RANDOM = (
     "random",
     "numpy.random",
     "secrets",
+    "uuid",
 )
 
-FORBIDDEN_MODULES = FORBIDDEN_LAYERS + FORBIDDEN_ML + FORBIDDEN_RANDOM
+# Persistence / I-O concerns that belong in the data/ or adapters/ layers.
+FORBIDDEN_PERSISTENCE = ("sqlite3",)
+
+FORBIDDEN_MODULES = (
+    FORBIDDEN_LAYERS + FORBIDDEN_ML + FORBIDDEN_RANDOM + FORBIDDEN_PERSISTENCE
+)
 
 
 def _core_files() -> list[Path]:
@@ -119,7 +126,8 @@ def test_core_imports_no_forbidden_modules() -> None:
                 )
     assert not violations, (
         "src/core must stay deterministic and self-contained "
-        "(no ML, no randomness, no higher/side layers):\n" + "\n".join(violations)
+        "(no ML, no randomness/uuid, no persistence, no higher/side layers):\n"
+        + "\n".join(violations)
     )
 
 

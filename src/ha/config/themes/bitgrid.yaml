@@ -1,3 +1,61 @@
+# ═══════════════════════════════════════════════════════════════════════
+# BitGridAI — "Glass"-Theme (iOS-Glassmorphism).
+# Vibranter Farbverlauf als Hintergrund + dunkle, halbtransparente Glas-
+# karten, die den Verlauf durchscheinen lassen. Helle, lesbare Typo.
+#
+# Warum kein card-mod / kein backdrop-filter: Blur verwischt den Hinter-
+# grund, aber ein Farbverlauf ist bereits glatt — nach dem Blur sähe er
+# identisch aus. Über einem Verlauf genügen transluzente Karten für den
+# Glas-Effekt. Jede ha-card (nativ wie custom) erbt das über die Tokens,
+# kein Per-Karte-Styling nötig.
+#
+# Stellschrauben: lovelace-background (der Verlauf), die Alpha-Werte in
+# ha-card-background (wie stark das Glas durchscheint), ha-card-border-radius.
+# ═══════════════════════════════════════════════════════════════════════
 BitGridAI:
+  # ── Marken-Akzente ──────────────────────────────────────────────────
   primary-color: "#4CAF50"
   accent-color: "#f59e0b"
+  text-primary-color: "#ffffff"        # Text auf primary-color (Buttons)
+
+  # ── Vibranter Verlaufs-Hintergrund (iOS-Look, kein Bild nötig) ──────
+  lovelace-background: "linear-gradient(150deg, #21346f 0%, #4b2da0 46%, #9c3a72 100%)"
+  primary-background-color: "#21346f"
+  divider-color: "rgba(255,255,255,0.14)"
+
+  # ── Typo (hell auf dunklem Glas) ────────────────────────────────────
+  primary-text-color: "#f3f5fb"
+  secondary-text-color: "rgba(233,237,247,0.72)"
+  disabled-text-color: "rgba(233,237,247,0.40)"
+  state-icon-color: "rgba(233,237,247,0.82)"
+
+  # ── Typo-Skala (benannte Stufen statt Magic-Numbers in Custom-Cards) ─
+  # Basis: HA-Default-Roboto wie in der clock-weather-card; nur EINE grosse
+  # Stufe (Uhr ~3.5rem). Custom-Cards referenzieren var(--bg-fs-*), damit
+  # Schriftgroessen projektweit aus einer Quelle kommen. Alle Stufen uniform
+  # hochskalieren, falls auf dem Wandtablet aus Distanz zu klein.
+  bg-fs-hero: "3.5rem"        # eine grosse Kennzahl (wie die Uhr)
+  bg-fs-title: "1.75rem"      # Karten-Headline / grosse Stat-Werte
+  bg-fs-body: "1rem"          # Fliesstext (HA-Default)
+  bg-fs-secondary: "0.875rem" # Sekundaertext
+  bg-fs-label: "0.75rem"      # Mini-Labels (UPPERCASE)
+
+  # ── Glaskarten: dunkel-transluzent, EIN Radius, weicher Schatten ────
+  ha-card-background: "linear-gradient(180deg, rgba(38,44,72,0.58) 0%, rgba(24,28,50,0.46) 100%)"
+  card-background-color: "rgba(30,35,60,0.52)"
+  secondary-background-color: "rgba(255,255,255,0.10)"
+  ha-card-border-radius: "20px"
+  ha-card-border-width: "1px"
+  ha-card-border-color: "rgba(255,255,255,0.16)"
+  ha-card-box-shadow: "0 8px 32px rgba(8,10,25,0.30)"
+
+  # ── Kopfleiste (transluzent) ────────────────────────────────────────
+  app-header-background-color: "rgba(20,24,44,0.30)"
+  app-header-text-color: "#f3f5fb"
+
+  # ── Sidebar (dunkel-glasig) ─────────────────────────────────────────
+  sidebar-background-color: "rgba(16,19,36,0.92)"
+  sidebar-text-color: "#c8cdda"
+  sidebar-icon-color: "#9aa0b4"
+  sidebar-selected-text-color: "#4CAF50"
+  sidebar-selected-icon-color: "#4CAF50"

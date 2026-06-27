@@ -465,13 +465,16 @@ views:
                         const minerMode = states['sensor.miner1_workmode_status']?.state || states['sensor.miner2_workmode_status']?.state || '';
                         const minerRunning = ['Eco', 'Standard', 'Super'].includes(minerMode);
                         const waiting = !night && !minerRunning && (code === 'NOOP_R2_SOC_SOFT_MIN' || soc < socSoftMin);
-                        const eco   = !night && !waiting && minerMode === 'Eco';
-                        const speed = !night && !waiting && !eco && minerMode === 'Super';
-                        return night   ? '#0c0f18'
-                             : waiting ? '#10141f'
-                             : eco     ? '#091410'
-                             : speed   ? '#140d00'
-                             :            '#00141a';
+                        const eco      = !night && !waiting && minerMode === 'Eco';
+                        const speed    = !night && !waiting && !eco && minerMode === 'Super';
+                        const standard = !night && !waiting && minerMode === 'Standard';
+                        // Dunkler Glas-Verlauf mit Modus-Tint (identisch zu bitgrid-homescreen.yaml)
+                        const tint = night    ? 'rgba(92,107,192,0.30)'
+                                   : eco      ? 'rgba(76,175,80,0.28)'
+                                   : speed    ? 'rgba(247,147,26,0.26)'
+                                   : standard ? 'rgba(38,198,218,0.26)'
+                                   :            'rgba(40,46,74,0.55)';
+                        return `linear-gradient(160deg, ${tint} 0%, rgba(22,26,46,0.50) 100%)`;
                       ]]]
                   - border-radius: 12px
                   - padding: 12px 16px

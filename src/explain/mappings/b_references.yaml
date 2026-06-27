@@ -52,18 +52,18 @@ de:
   THROTTLE_R1_SURPLUS_THROTTLE:      # optional (11. Szenario, Eco-Band)
     "Ich mine grün und sparsam im Eco-Modus: 1,0 kW Überschuss reichen für Sparbetrieb, volle Leistung gibt es erst ab 1,5 kW."
 
-  # ── SoC-Band-Set (SB01–SB13), BitHamster-Stimme ───────────────────────────────
+  # ── SoC-Band-Set (SB01–SB12), BitHamster-Stimme ───────────────────────────────
   # Werte passend zu study_scenarios_soc_band.SOC_BAND_SCENARIOS, an HA-Recorder
   # geerdet (Sommer 2026-05-24..06-03: SoC real 5-100 %, alle Bänder erreicht).
   # Geteilte Codes (Übertemperatur, Netzbezug, Anti-Flapping) stehen oben und
   # gelten als Stil-Anker; die echten Zahlen kommen aus den Params.
-  NOOP_R1_SOC_HOLD:                  # SB11 (Abend-Halteband)
-    "Am Abend ist dein Speicher auf 55 % gesunken, knapp unter meine Startgrenze von 58 %, also lege ich eine Pause ein; ab 50 % halte ich ohnehin die Reserve fürs Haus frei."
+  NOOP_R1_SOC_HOLD:                  # SB10 (Abend-Halteband, laufender Miner)
+    "Mein Speicher ist abends auf 55 % gefallen, ins Halteband; neu anlaufen würde ich so tief nicht, aber weil ich schon mine, mache ich ruhig weiter; erst bei 50 % höre ich auf und halte die Reserve fürs Haus frei."
 
-  NOOP_R1_SOC_HOLD_PV:               # SB02
+  NOOP_R1_SOC_HOLD_PV:               # SB02 (Morgen-Frischstart, PV reicht nicht)
     "Ich halte geduldig die Stellung: dein Speicher (60 %) wäre bereit, aber zum Loslegen fehlt mir Sonne, 3,2 kW sind da, ich brauche 6,0 kW; ab 6,0 kW lege ich los."
 
-  THROTTLE_R1_ECO:                   # SB03
+  THROTTLE_R1_ECO:                   # SB03 (Frischstart) / SB09 (Nachmittag auf Akku)
     "Genug Sonne (6,3 kW), jetzt mine ich grün und sparsam im Eco-Modus aus deinem Solarüberschuss; steigt dein Speicher über 80 %, schalte ich eine Stufe höher auf Standard."
 
   START_R1_STANDARD:                 # SB04
@@ -72,8 +72,8 @@ de:
   START_R1_SUPER:                    # SB06
     "Voll geladen, dein Speicher ist über 90 %, jetzt mine ich mit voller Leistung im Super-Modus; fällt er unter 85 %, schalte ich zurück auf Standard."
 
-  STOP_R1_SOC_RESERVE_STOP:          # SB01 (Morgentief 21 %) / SB12 (Abend 48 %)
+  STOP_R1_SOC_RESERVE_STOP:          # SB01 (Morgentief 21 %) / SB11 (Abend 48 %)
     "Ich rolle mich zusammen: dein Speicher ist auf 48 % gefallen, ab 50 % halte ich die Reserve fürs Haus frei; erst ab 58 % wache ich wieder auf."
 
-  NOOP_NIGHT_BLOCK:                  # SB13
+  NOOP_NIGHT_BLOCK:                  # SB12
     "Nachtruhe! Zwischen 22 und 6 Uhr rolle ich mich ein und ruhe, egal wie voll dein Speicher ist; ab 6 Uhr bin ich wieder für dich da."

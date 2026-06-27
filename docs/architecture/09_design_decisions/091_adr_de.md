@@ -37,6 +37,8 @@ Diese Tabelle fasst die wichtigsten, das System prägenden strategischen Entsche
 | **019 PoW Telemetrie & Hash-Proof** | Pflichtwerte/Proben (Hash-Proof) werden vom Miner erfasst. | Sicherheit, Compliance und Forschung an der Effizienz. | Domain Models, Logging |
 | **020 Engine-Strategie** | Der Python-Kern ist das **deterministische Entscheidungs-Modell** (per Replay studiert); **HA steuert live** und spiegelt den Kern eng. Keine zweite Voll-Engine pflegen. | Studie ist replay-basiert → Kern-Korrektheit zählt, nicht Live-Steuerung. Ein Live-Kern-Service würde die reale Anlage ohne XAI-Nutzen riskieren. | Whitebox, Determinismus, Studien-Validität |
 | **021 Determinismus-Invariante erzwungen** | Die Kern-Invarianten (kein ML, kein Zufall, keine Importe aus oberen/seitlichen Layern in `src/core`) werden durch einen ausführbaren Architektur-Test (`tests/core/test_architecture.py`) in `make check` mechanisch geprüft. | Macht den wissenschaftlichen Kernanspruch (Determinismus, ADR 007) zu einem **fallierbaren CI-Gate** statt einer Prosa-Konvention. | Testbarkeit, Determinismus, Reproducibility |
+| **022 OverrideStore-Port** | Die SQLite-Persistenz des OverrideHandler liegt hinter einem Port (`OverrideStore`, Protocol im Kern); die Implementierung (`SqliteOverrideStore`) lebt in `data/`. | Hält Persistenz/I-O aus dem deterministischen Kern (Hexagonal, ADR 002); `core/` importiert kein `sqlite3` mehr. | Whitebox, Hexagonal, Determinismus |
+| **023 command_id als Surrogat-ID** | `Decision.command_id` ist Surrogat-/Idempotenz-ID (EventStore-PK + Aktor-Dedup), nicht Teil der Entscheidung; Vergabe an der Boundary (Runner), nicht im Kern. | Präzisiert den Determinismus-Scope: Semantik ist deterministisch, die ID ausgenommen; `uuid` verlässt den Kern. | Determinismus, Reproducibility, Replay |
 
 ---
 
@@ -136,9 +138,57 @@ volle Contract-Matrix über alle Schichten gebraucht wird.
 - Die Invariante ist jetzt **fallierbar**: ein Verstoß bricht CI, nicht erst ein Review.
 - Der Test ist additiv, ändert keinen Produktivcode; `src/core/` ist beim Einführen bereits
   konform (3 Tests grün, Negativtest bestätigt das Greifen).
-- **Bekannte Grenze:** Der Guard ist import- und zugriffsbasiert, kein Laufzeit-Beweis für
-  Determinismus. `uuid.uuid4()` in `models.py` bleibt bewusst unangetastet (offene Frage:
-  beeinflusst die Event-ID die Replay-Determinismus-Eigenschaft? Falls ja, später ergänzen).
+- **Erweitert (ADR 022/023):** Der Guard verbietet in `src/core/` zusätzlich `sqlite3`
+  (Persistenz) und `uuid` (Identität). Die zuvor offene `uuid.uuid4()`-Frage ist mit ADR 023
+  entschieden (Surrogat-ID, an der Boundary vergeben).
+- **Bekannte Grenze:** Der Guard bleibt import- und zugriffsbasiert, kein Laufzeit-Beweis für
+  Determinismus.
+
+---
+
+## ADR 022 — OverrideStore-Port: Persistenz aus dem Kern (Detail)
+
+**Kontext.** Der `OverrideHandler` (`src/core/override_handler.py`) trug rohes SQL,
+Tabellen-Schema-Wissen und `commit()`-Seiteneffekte direkt im Kern. Das widerspricht der
+hexagonalen Architektur (ADR 002) und dem Anspruch eines persistenz-freien, deterministischen
+Kerns: rohes SQL im „deterministischen Kern" ist ein angreifbarer Selbstwiderspruch.
+
+**Entscheidung.** Ein Port `OverrideStore` (Protocol) wird im Kern definiert; der Handler hängt
+nur an dieser Schnittstelle. Die SQLite-Implementierung (`SqliteOverrideStore`) zieht in die
+data-Schicht (`src/data/override_store.py`). Ohne Store arbeitet der Handler rein in-memory
+(deterministisch). Die Expiry/TTL-Logik bleibt Domäne im Kern; der Store ist reines CRUD plus
+append-only-Log.
+
+**Konsequenzen.**
+- `src/core/` importiert kein `sqlite3` mehr; der Architektur-Guard (ADR 021) verbietet es nun.
+- Verdrahtung in `main.py`/`runner.py`: `OverrideHandler(store=SqliteOverrideStore(conn))`. Der
+  testbare `ProductionRunner` läuft per Default store-los (in-memory).
+- Tests bleiben in der Aussage gleich; die DB-Persistenz-Tests injizieren jetzt den Store.
+
+## ADR 023 — command_id als Surrogat-ID, Determinismus-Scope (Detail)
+
+**Kontext.** `Decision.command_id` wurde im eingefrorenen Domänen-Objekt per `uuid.uuid4()`
+erzeugt, die einzige Nichtdeterminismus-Quelle im Kern. Die command_id ist ihrer Funktion nach
+aber eine **Surrogat-/Korrelations-ID**: Primary Key der `decision_events`-Tabelle und
+Idempotenz-Schlüssel beim Aktuieren (`ActuationWriter`). Ihr Zweck ist Eindeutigkeit, nicht
+Reproduzierbarkeit.
+
+**Entscheidung.** command_id ist **nicht** Teil der deterministischen Entscheidung. Die Vergabe
+wandert aus dem Kern an die Boundary (`new_command_id()` im Runner, nach `evaluate()`).
+`Decision.command_id` ist nun `str | None` (Default None); der Kern produziert Entscheidungen
+ohne ID. Der Determinismus-Anspruch wird präzise gefasst: deterministisch sind `action`,
+`decision_code`, `reason`, `params`, `valid_until` (das, was Replay vergleicht); die
+Surrogat-ID ist ausgenommen.
+
+**Verworfene Alternative.** command_id deterministisch ableiten (z. B. aus `block_id`+`trigger`)
+für byte-identisches Replay. Verworfen, weil mehrere `SAFETY_ASYNC`-Entscheidungen pro Block am
+Primary Key kollidieren können; deterministische IDs wären hier riskanter, nicht sauberer, und
+brächten keinen Mehrwert für den semantischen Replay-Vergleich.
+
+**Konsequenzen.**
+- `uuid` verlässt `src/core/`; der Architektur-Guard (ADR 021) verbietet es nun.
+- Replay (`src/sim/replay.py`) ist nachweislich frei von uuid und vergleicht reine Semantik.
+- Boundary-Vergabe in beiden Runnern; `ActuationWriter.new_command_id()` ist die einzige Quelle.
 
 ---
 > **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die wichtigsten Qualitätsanforderungen im Detail.

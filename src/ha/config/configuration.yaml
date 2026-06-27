@@ -6,6 +6,10 @@ homeassistant:
 
 frontend:
   themes: !include_dir_merge_named themes
+  # Frontend-Modul für runde Ecken der power-flow-card-plus (card-mod ist nicht
+  # installiert). Lädt unabhängig vom Lovelace resource_mode auf jeder Seite.
+  extra_module_url:
+    - /local/bitgrid_card_shape.js
 
 lovelace:
   resource_mode: yaml
@@ -16,7 +20,17 @@ lovelace:
       type: module
     - url: /hacsfiles/lovelace-layout-card/layout-card.js
       type: module
+    - url: /hacsfiles/clock-weather-card/clock-weather-card.js
+      type: module
+    - url: /hacsfiles/lovelace-horizon-card/lovelace-horizon-card.js
+      type: module
   dashboards:
+    bitgrid-home:
+      mode: yaml
+      filename: bitgrid-homescreen.yaml
+      title: Home
+      icon: mdi:home
+      show_in_sidebar: true
     bitgrid-ai:
       mode: yaml
       filename: bitgrid-dashboard.yaml

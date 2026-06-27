@@ -1,0 +1,384 @@
+mvp_diagnose:
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # Auto-Diagnose: warum steht ein Miner in dem Modus, in dem er steht?
+  #
+  # Read-only Beobachtungsschicht. Greift NICHT steuernd ein — spiegelt nur die
+  # Regel-Reihenfolge des Watchdogs aus packages/mvp_auto.yaml und macht sichtbar,
+  # WELCHES Gate gerade einen Moduswechsel verhindert. Schliesst den blinden Fleck:
+  # eine `condition:` mitten in einer choose-Sequence bricht lautlos ab und loggt
+  # nichts. Hier wird daraus ein sichtbarer Zustand + Alarm.
+  #
+  # Zustands-Codes (sensor.minerN_auto_diagnose):
+  #   ok            Ist-Modus == Ziel-Modus (alles korrekt)
+  #   cooldown      will wechseln, blockiert durch 1h Up-/Downgrade-Cooldown (erwartet)
+  #   temp_lockout  will hoch, blockiert durch 3h Temperatur-Lockout (erwartet)
+  #   room_hot      will hoch, blockiert weil Raumtemperatur zu heiss (erwartet)
+  #   night_block   Start blockiert durch Nacht-Sperre (erwartet)
+  #   pv_wait       P4 will starten, wartet auf PV-Schwelle oder Cooldown (erwartet)
+  #   auto_off      Auto-Lastmanagement aus → manuelle Steuerung, kein Soll/Ist-Check
+  #   anomaly       Ist != Ziel UND kein Gate erklaert es  → BUG, anschauen!
+  #   unavailable   SoC oder Workmode nicht verfuegbar
+  #
+  # WICHTIG bei Aenderungen: Schwellen (input_number) werden hier live gelesen,
+  # driften also nicht. Aenderst du aber die REIHENFOLGE oder die GATES im
+  # Watchdog (P1..P4 in mvp_auto.yaml), muss dieser Spiegel mitgezogen werden.
+  # ══════════════════════════════════════════════════════════════════════════
+
+  template:
+    - trigger:
+        - platform: time_pattern
+          seconds: "/30"
+        - platform: state
+          entity_id:
+            - sensor.battery_soc_pct
+            - sensor.pv_power_w
+            - sensor.miner1_workmode_status
+            - sensor.miner2_workmode_status
+            - binary_sensor.raumtemperatur_zu_heiss
+            - binary_sensor.mvp_nacht_sperre_aktiv
+            - input_boolean.miner1_auto_load_management
+            - input_boolean.miner2_auto_load_management
+            - input_datetime.mvp_miner1_last_upgrade
+            - input_datetime.mvp_miner1_last_downgrade
+            - input_datetime.mvp_miner1_temp_lockout_until
+            - input_datetime.mvp_miner2_last_upgrade
+            - input_datetime.mvp_miner2_last_downgrade
+            - input_datetime.mvp_miner2_temp_lockout_until
+      sensor:
+        # ── Miner 1 ───────────────────────────────────────────────────────────
+        - name: "Miner 1 Auto-Diagnose"
+          unique_id: mvp_miner1_auto_diagnose
+          icon: mdi:stethoscope
+          state: >
+            {% set soc = states('sensor.battery_soc_pct') | float(-1) %}
+            {% set status = states('sensor.miner1_workmode_status') %}
+            {% set now_ts = now().timestamp() %}
+            {% set dn_rem = state_attr('input_datetime.mvp_miner1_last_downgrade','timestamp') | float(0) + 3600 - now_ts %}
+            {% set up_rem = state_attr('input_datetime.mvp_miner1_last_upgrade','timestamp') | float(0) + 3600 - now_ts %}
+            {% set lock_rem = state_attr('input_datetime.mvp_miner1_temp_lockout_until','timestamp') | float(0) - now_ts %}
+            {% set pv = states('sensor.pv_power_w') | float(0) %}
+            {% set soc_stop = states('input_number.mvp_soc_stop_pct') | float(50) %}
+            {% set soc_start = states('input_number.mvp_soc_eco_start_pct') | float(58) %}
+            {% set soc_std_on = states('input_number.mvp_soc_std_pct') | float(80) %}
+            {% set soc_std_off = states('input_number.mvp_soc_std_stop_pct') | float(75) %}
+            {% set soc_super_on = states('input_number.mvp_soc_super_pct') | float(90) %}
+            {% set soc_super_off = states('input_number.mvp_soc_super_stop_pct') | float(85) %}
+            {% set pv_start = states('input_number.mvp_pv_start_w') | float(6000) %}
+            {% set room_hot = is_state('binary_sensor.raumtemperatur_zu_heiss','on') %}
+            {% set night = is_state('binary_sensor.mvp_nacht_sperre_aktiv','on') %}
+            {% set ns = namespace(code='ok') %}
+            {% if not is_state('input_boolean.miner1_auto_load_management','on') %}
+              {% set ns.code = 'auto_off' %}
+            {% elif soc < 0 or status in ['unknown','unavailable'] %}
+              {% set ns.code = 'unavailable' %}
+            {% elif soc < soc_stop %}
+              {% set ns.code = 'ok' if status in ['Standby','Off'] else 'anomaly' %}
+            {% elif lock_rem > 0 and status in ['Super','Standard'] %}
+              {% set ns.code = 'anomaly' %}
+            {% elif soc >= soc_super_on %}
+              {% if status == 'Standard' %}{% set ns.code = 'ok' %}
+              {% elif room_hot %}{% set ns.code = 'room_hot' %}
+              {% elif lock_rem > 0 %}{% set ns.code = 'temp_lockout' %}
+              {% elif dn_rem > 0 %}{% set ns.code = 'cooldown' %}
+              {% else %}{% set ns.code = 'anomaly' %}{% endif %}
+            {% elif soc < soc_super_off and status == 'Super' %}
+              {% set ns.code = 'cooldown' if up_rem > 0 else 'anomaly' %}
+            {% elif soc >= soc_std_on and status == 'Eco' %}
+              {% if room_hot %}{% set ns.code = 'room_hot' %}
+              {% elif lock_rem > 0 %}{% set ns.code = 'temp_lockout' %}
+              {% elif dn_rem > 0 %}{% set ns.code = 'cooldown' %}
+              {% else %}{% set ns.code = 'anomaly' %}{% endif %}
+            {% elif soc < soc_std_off and status == 'Standard' %}
+              {% set ns.code = 'cooldown' if up_rem > 0 else 'anomaly' %}
+            {% elif status in ['Standby','Idle','Off'] %}
+              {% if night %}{% set ns.code = 'night_block' %}
+              {% elif soc < soc_start %}{% set ns.code = 'ok' %}
+              {% elif lock_rem > 0 %}{% set ns.code = 'temp_lockout' %}
+              {% elif (pv >= pv_start and dn_rem <= 2700) or dn_rem <= 0 %}{% set ns.code = 'anomaly' %}
+              {% else %}{% set ns.code = 'pv_wait' %}{% endif %}
+            {% else %}
+              {% set ns.code = 'ok' %}
+            {% endif %}
+            {{ ns.code }}
+          attributes:
+            summary: >
+              {% set soc = states('sensor.battery_soc_pct') | float(-1) %}
+              {% set status = states('sensor.miner1_workmode_status') %}
+              {% set now_ts = now().timestamp() %}
+              {% set dn_rem = state_attr('input_datetime.mvp_miner1_last_downgrade','timestamp') | float(0) + 3600 - now_ts %}
+              {% set up_rem = state_attr('input_datetime.mvp_miner1_last_upgrade','timestamp') | float(0) + 3600 - now_ts %}
+              {% set lock_rem = state_attr('input_datetime.mvp_miner1_temp_lockout_until','timestamp') | float(0) - now_ts %}
+              {% set pv = states('sensor.pv_power_w') | float(0) %}
+              {% set soc_stop = states('input_number.mvp_soc_stop_pct') | float(50) %}
+              {% set soc_start = states('input_number.mvp_soc_eco_start_pct') | float(58) %}
+              {% set soc_std_on = states('input_number.mvp_soc_std_pct') | float(80) %}
+              {% set soc_std_off = states('input_number.mvp_soc_std_stop_pct') | float(75) %}
+              {% set soc_super_on = states('input_number.mvp_soc_super_pct') | float(90) %}
+              {% set soc_super_off = states('input_number.mvp_soc_super_stop_pct') | float(85) %}
+              {% set pv_start = states('input_number.mvp_pv_start_w') | float(6000) %}
+              {% set room_hot = is_state('binary_sensor.raumtemperatur_zu_heiss','on') %}
+              {% set night = is_state('binary_sensor.mvp_nacht_sperre_aktiv','on') %}
+              {% set ns = namespace(target=status, why='Ist-Modus entspricht Ziel') %}
+              {% if not is_state('input_boolean.miner1_auto_load_management','on') %}
+                {% set ns.target = status %}{% set ns.why = 'Auto-Lastmanagement aus (manuelle Steuerung)' %}
+              {% elif soc < 0 or status in ['unknown','unavailable'] %}
+                {% set ns.target = '?' %}{% set ns.why = 'SoC oder Workmode nicht verfuegbar' %}
+              {% elif soc < soc_stop %}
+                {% set ns.target = 'Standby' %}
+                {% if status in ['Standby','Off'] %}{% set ns.why = 'SoC ' ~ soc ~ '% < Stop ' ~ soc_stop ~ '%, Miner aus (korrekt)' %}
+                {% else %}{% set ns.why = 'SoC ' ~ soc ~ '% < Stop ' ~ soc_stop ~ '% aber Miner laeuft (P1 muesste sofort stoppen)' %}{% endif %}
+              {% elif lock_rem > 0 and status in ['Super','Standard'] %}
+                {% set ns.target = 'Eco' %}{% set ns.why = 'Temp-Lockout aktiv (noch ' ~ (lock_rem // 60) | int ~ ' min) aber noch ' ~ status ~ ' (P1b muesste auf Eco zwingen)' %}
+              {% elif soc >= soc_super_on %}
+                {% set ns.target = 'Standard' %}
+                {% if status == 'Standard' %}{% set ns.why = 'SoC ' ~ soc ~ '% voll, Standard-Cap aktiv (korrekt, Super gesperrt)' %}
+                {% elif room_hot %}{% set ns.why = 'will Standard (P2), blockiert: Raumtemp zu heiss' %}
+                {% elif lock_rem > 0 %}{% set ns.why = 'will Standard (P2), blockiert: Temp-Lockout noch ' ~ (lock_rem // 60) | int ~ ' min' %}
+                {% elif dn_rem > 0 %}{% set ns.why = 'will Standard (P2), blockiert: Downgrade-Cooldown noch ' ~ (dn_rem // 60) | int ~ ' min' %}
+                {% else %}{% set ns.why = 'will Standard (P2), kein Gate aktiv aber Modus ' ~ status %}{% endif %}
+              {% elif soc < soc_super_off and status == 'Super' %}
+                {% set ns.target = 'Standard' %}
+                {% if up_rem > 0 %}{% set ns.why = 'will Standard (P3), blockiert: Upgrade-Cooldown noch ' ~ (up_rem // 60) | int ~ ' min' %}
+                {% else %}{% set ns.why = 'will Standard (P3), kein Gate aktiv aber noch Super' %}{% endif %}
+              {% elif soc >= soc_std_on and status == 'Eco' %}
+                {% set ns.target = 'Standard' %}
+                {% if room_hot %}{% set ns.why = 'will Standard (P2.5), blockiert: Raumtemp zu heiss' %}
+                {% elif lock_rem > 0 %}{% set ns.why = 'will Standard (P2.5), blockiert: Temp-Lockout noch ' ~ (lock_rem // 60) | int ~ ' min' %}
+                {% elif dn_rem > 0 %}{% set ns.why = 'will Standard (P2.5), blockiert: Downgrade-Cooldown noch ' ~ (dn_rem // 60) | int ~ ' min' %}
+                {% else %}{% set ns.why = 'will Standard (P2.5), kein Gate aktiv aber noch Eco' %}{% endif %}
+              {% elif soc < soc_std_off and status == 'Standard' %}
+                {% set ns.target = 'Eco' %}
+                {% if up_rem > 0 %}{% set ns.why = 'will Eco (P3.5), blockiert: Upgrade-Cooldown noch ' ~ (up_rem // 60) | int ~ ' min' %}
+                {% else %}{% set ns.why = 'will Eco (P3.5), kein Gate aktiv aber noch Standard' %}{% endif %}
+              {% elif status in ['Standby','Idle','Off'] %}
+                {% if night %}{% set ns.target = 'Standby' %}{% set ns.why = 'Nacht-Sperre aktiv, Start blockiert (korrekt)' %}
+                {% elif soc < soc_start %}{% set ns.target = 'Standby' %}{% set ns.why = 'SoC ' ~ soc ~ '% < Eco-Start ' ~ soc_start ~ '%, Miner aus (korrekt)' %}
+                {% elif lock_rem > 0 %}{% set ns.target = 'Eco' %}{% set ns.why = 'will starten (P4), blockiert: Temp-Lockout noch ' ~ (lock_rem // 60) | int ~ ' min' %}
+                {% elif (pv >= pv_start and dn_rem <= 2700) or dn_rem <= 0 %}{% set ns.target = 'Eco' %}{% set ns.why = 'will starten (P4), Bedingung erfuellt aber noch ' ~ status %}
+                {% else %}{% set ns.target = 'Eco' %}{% set ns.why = 'will starten (P4), wartet auf PV >= ' ~ pv_start ~ 'W oder Cooldown' %}{% endif %}
+              {% else %}
+                {% set ns.why = 'Modus ' ~ status ~ ' im stabilen Band' %}
+              {% endif %}
+              Ist={{ status }} | Ziel={{ ns.target }} | {{ ns.why }}
+            actual_mode: "{{ states('sensor.miner1_workmode_status') }}"
+            soc_pct: "{{ states('sensor.battery_soc_pct') | float(-1) }}"
+            downgrade_cooldown_min: "{{ [0, (state_attr('input_datetime.mvp_miner1_last_downgrade','timestamp') | float(0) + 3600 - now().timestamp()) // 60] | max | int }}"
+            upgrade_cooldown_min: "{{ [0, (state_attr('input_datetime.mvp_miner1_last_upgrade','timestamp') | float(0) + 3600 - now().timestamp()) // 60] | max | int }}"
+            temp_lockout_min: "{{ [0, (state_attr('input_datetime.mvp_miner1_temp_lockout_until','timestamp') | float(0) - now().timestamp()) // 60] | max | int }}"
+            room_too_hot: "{{ is_state('binary_sensor.raumtemperatur_zu_heiss','on') }}"
+            night_block: "{{ is_state('binary_sensor.mvp_nacht_sperre_aktiv','on') }}"
+
+        # ── Miner 2 ───────────────────────────────────────────────────────────
+        - name: "Miner 2 Auto-Diagnose"
+          unique_id: mvp_miner2_auto_diagnose
+          icon: mdi:stethoscope
+          state: >
+            {% set soc = states('sensor.battery_soc_pct') | float(-1) %}
+            {% set status = states('sensor.miner2_workmode_status') %}
+            {% set now_ts = now().timestamp() %}
+            {% set dn_rem = state_attr('input_datetime.mvp_miner2_last_downgrade','timestamp') | float(0) + 3600 - now_ts %}
+            {% set up_rem = state_attr('input_datetime.mvp_miner2_last_upgrade','timestamp') | float(0) + 3600 - now_ts %}
+            {% set lock_rem = state_attr('input_datetime.mvp_miner2_temp_lockout_until','timestamp') | float(0) - now_ts %}
+            {% set pv = states('sensor.pv_power_w') | float(0) %}
+            {% set soc_stop = states('input_number.mvp_soc_stop_pct') | float(50) %}
+            {% set soc_start = states('input_number.mvp_soc_eco_start_pct') | float(58) %}
+            {% set soc_std_on = states('input_number.mvp_soc_std_pct') | float(80) %}
+            {% set soc_std_off = states('input_number.mvp_soc_std_stop_pct') | float(75) %}
+            {% set soc_super_on = states('input_number.mvp_soc_super_pct') | float(90) %}
+            {% set soc_super_off = states('input_number.mvp_soc_super_stop_pct') | float(85) %}
+            {% set pv_start = states('input_number.mvp_pv_start_w') | float(6000) %}
+            {% set room_hot = is_state('binary_sensor.raumtemperatur_zu_heiss','on') %}
+            {% set night = is_state('binary_sensor.mvp_nacht_sperre_aktiv','on') %}
+            {% set ns = namespace(code='ok') %}
+            {% if not is_state('input_boolean.miner2_auto_load_management','on') %}
+              {% set ns.code = 'auto_off' %}
+            {% elif soc < 0 or status in ['unknown','unavailable'] %}
+              {% set ns.code = 'unavailable' %}
+            {% elif soc < soc_stop %}
+              {% set ns.code = 'ok' if status in ['Standby','Off'] else 'anomaly' %}
+            {% elif lock_rem > 0 and status in ['Super','Standard'] %}
+              {% set ns.code = 'anomaly' %}
+            {% elif soc >= soc_super_on %}
+              {% if status == 'Standard' %}{% set ns.code = 'ok' %}
+              {% elif room_hot %}{% set ns.code = 'room_hot' %}
+              {% elif lock_rem > 0 %}{% set ns.code = 'temp_lockout' %}
+              {% elif dn_rem > 0 %}{% set ns.code = 'cooldown' %}
+              {% else %}{% set ns.code = 'anomaly' %}{% endif %}
+            {% elif soc < soc_super_off and status == 'Super' %}
+              {% set ns.code = 'cooldown' if up_rem > 0 else 'anomaly' %}
+            {% elif soc >= soc_std_on and status == 'Eco' %}
+              {% if room_hot %}{% set ns.code = 'room_hot' %}
+              {% elif lock_rem > 0 %}{% set ns.code = 'temp_lockout' %}
+              {% elif dn_rem > 0 %}{% set ns.code = 'cooldown' %}
+              {% else %}{% set ns.code = 'anomaly' %}{% endif %}
+            {% elif soc < soc_std_off and status == 'Standard' %}
+              {% set ns.code = 'cooldown' if up_rem > 0 else 'anomaly' %}
+            {% elif status in ['Standby','Idle','Off'] %}
+              {% if night %}{% set ns.code = 'night_block' %}
+              {% elif soc < soc_start %}{% set ns.code = 'ok' %}
+              {% elif lock_rem > 0 %}{% set ns.code = 'temp_lockout' %}
+              {% elif (pv >= pv_start and dn_rem <= 2700) or dn_rem <= 0 %}{% set ns.code = 'anomaly' %}
+              {% else %}{% set ns.code = 'pv_wait' %}{% endif %}
+            {% else %}
+              {% set ns.code = 'ok' %}
+            {% endif %}
+            {{ ns.code }}
+          attributes:
+            summary: >
+              {% set soc = states('sensor.battery_soc_pct') | float(-1) %}
+              {% set status = states('sensor.miner2_workmode_status') %}
+              {% set now_ts = now().timestamp() %}
+              {% set dn_rem = state_attr('input_datetime.mvp_miner2_last_downgrade','timestamp') | float(0) + 3600 - now_ts %}
+              {% set up_rem = state_attr('input_datetime.mvp_miner2_last_upgrade','timestamp') | float(0) + 3600 - now_ts %}
+              {% set lock_rem = state_attr('input_datetime.mvp_miner2_temp_lockout_until','timestamp') | float(0) - now_ts %}
+              {% set pv = states('sensor.pv_power_w') | float(0) %}
+              {% set soc_stop = states('input_number.mvp_soc_stop_pct') | float(50) %}
+              {% set soc_start = states('input_number.mvp_soc_eco_start_pct') | float(58) %}
+              {% set soc_std_on = states('input_number.mvp_soc_std_pct') | float(80) %}
+              {% set soc_std_off = states('input_number.mvp_soc_std_stop_pct') | float(75) %}
+              {% set soc_super_on = states('input_number.mvp_soc_super_pct') | float(90) %}
+              {% set soc_super_off = states('input_number.mvp_soc_super_stop_pct') | float(85) %}
+              {% set pv_start = states('input_number.mvp_pv_start_w') | float(6000) %}
+              {% set room_hot = is_state('binary_sensor.raumtemperatur_zu_heiss','on') %}
+              {% set night = is_state('binary_sensor.mvp_nacht_sperre_aktiv','on') %}
+              {% set ns = namespace(target=status, why='Ist-Modus entspricht Ziel') %}
+              {% if not is_state('input_boolean.miner2_auto_load_management','on') %}
+                {% set ns.target = status %}{% set ns.why = 'Auto-Lastmanagement aus (manuelle Steuerung)' %}
+              {% elif soc < 0 or status in ['unknown','unavailable'] %}
+                {% set ns.target = '?' %}{% set ns.why = 'SoC oder Workmode nicht verfuegbar' %}
+              {% elif soc < soc_stop %}
+                {% set ns.target = 'Standby' %}
+                {% if status in ['Standby','Off'] %}{% set ns.why = 'SoC ' ~ soc ~ '% < Stop ' ~ soc_stop ~ '%, Miner aus (korrekt)' %}
+                {% else %}{% set ns.why = 'SoC ' ~ soc ~ '% < Stop ' ~ soc_stop ~ '% aber Miner laeuft (P1 muesste sofort stoppen)' %}{% endif %}
+              {% elif lock_rem > 0 and status in ['Super','Standard'] %}
+                {% set ns.target = 'Eco' %}{% set ns.why = 'Temp-Lockout aktiv (noch ' ~ (lock_rem // 60) | int ~ ' min) aber noch ' ~ status ~ ' (P1b muesste auf Eco zwingen)' %}
+              {% elif soc >= soc_super_on %}
+                {% set ns.target = 'Standard' %}
+                {% if status == 'Standard' %}{% set ns.why = 'SoC ' ~ soc ~ '% voll, Standard-Cap aktiv (korrekt, Super gesperrt)' %}
+                {% elif room_hot %}{% set ns.why = 'will Standard (P2), blockiert: Raumtemp zu heiss' %}
+                {% elif lock_rem > 0 %}{% set ns.why = 'will Standard (P2), blockiert: Temp-Lockout noch ' ~ (lock_rem // 60) | int ~ ' min' %}
+                {% elif dn_rem > 0 %}{% set ns.why = 'will Standard (P2), blockiert: Downgrade-Cooldown noch ' ~ (dn_rem // 60) | int ~ ' min' %}
+                {% else %}{% set ns.why = 'will Standard (P2), kein Gate aktiv aber Modus ' ~ status %}{% endif %}
+              {% elif soc < soc_super_off and status == 'Super' %}
+                {% set ns.target = 'Standard' %}
+                {% if up_rem > 0 %}{% set ns.why = 'will Standard (P3), blockiert: Upgrade-Cooldown noch ' ~ (up_rem // 60) | int ~ ' min' %}
+                {% else %}{% set ns.why = 'will Standard (P3), kein Gate aktiv aber noch Super' %}{% endif %}
+              {% elif soc >= soc_std_on and status == 'Eco' %}
+                {% set ns.target = 'Standard' %}
+                {% if room_hot %}{% set ns.why = 'will Standard (P2.5), blockiert: Raumtemp zu heiss' %}
+                {% elif lock_rem > 0 %}{% set ns.why = 'will Standard (P2.5), blockiert: Temp-Lockout noch ' ~ (lock_rem // 60) | int ~ ' min' %}
+                {% elif dn_rem > 0 %}{% set ns.why = 'will Standard (P2.5), blockiert: Downgrade-Cooldown noch ' ~ (dn_rem // 60) | int ~ ' min' %}
+                {% else %}{% set ns.why = 'will Standard (P2.5), kein Gate aktiv aber noch Eco' %}{% endif %}
+              {% elif soc < soc_std_off and status == 'Standard' %}
+                {% set ns.target = 'Eco' %}
+                {% if up_rem > 0 %}{% set ns.why = 'will Eco (P3.5), blockiert: Upgrade-Cooldown noch ' ~ (up_rem // 60) | int ~ ' min' %}
+                {% else %}{% set ns.why = 'will Eco (P3.5), kein Gate aktiv aber noch Standard' %}{% endif %}
+              {% elif status in ['Standby','Idle','Off'] %}
+                {% if night %}{% set ns.target = 'Standby' %}{% set ns.why = 'Nacht-Sperre aktiv, Start blockiert (korrekt)' %}
+                {% elif soc < soc_start %}{% set ns.target = 'Standby' %}{% set ns.why = 'SoC ' ~ soc ~ '% < Eco-Start ' ~ soc_start ~ '%, Miner aus (korrekt)' %}
+                {% elif lock_rem > 0 %}{% set ns.target = 'Eco' %}{% set ns.why = 'will starten (P4), blockiert: Temp-Lockout noch ' ~ (lock_rem // 60) | int ~ ' min' %}
+                {% elif (pv >= pv_start and dn_rem <= 2700) or dn_rem <= 0 %}{% set ns.target = 'Eco' %}{% set ns.why = 'will starten (P4), Bedingung erfuellt aber noch ' ~ status %}
+                {% else %}{% set ns.target = 'Eco' %}{% set ns.why = 'will starten (P4), wartet auf PV >= ' ~ pv_start ~ 'W oder Cooldown' %}{% endif %}
+              {% else %}
+                {% set ns.why = 'Modus ' ~ status ~ ' im stabilen Band' %}
+              {% endif %}
+              Ist={{ status }} | Ziel={{ ns.target }} | {{ ns.why }}
+            actual_mode: "{{ states('sensor.miner2_workmode_status') }}"
+            soc_pct: "{{ states('sensor.battery_soc_pct') | float(-1) }}"
+            downgrade_cooldown_min: "{{ [0, (state_attr('input_datetime.mvp_miner2_last_downgrade','timestamp') | float(0) + 3600 - now().timestamp()) // 60] | max | int }}"
+            upgrade_cooldown_min: "{{ [0, (state_attr('input_datetime.mvp_miner2_last_upgrade','timestamp') | float(0) + 3600 - now().timestamp()) // 60] | max | int }}"
+            temp_lockout_min: "{{ [0, (state_attr('input_datetime.mvp_miner2_temp_lockout_until','timestamp') | float(0) - now().timestamp()) // 60] | max | int }}"
+            room_too_hot: "{{ is_state('binary_sensor.raumtemperatur_zu_heiss','on') }}"
+            night_block: "{{ is_state('binary_sensor.mvp_nacht_sperre_aktiv','on') }}"
+
+  automation:
+
+    # ── Audit-Trail: jeder Diagnose-Wechsel wird geloggt ──────────────────────
+    # Schliesst die urspruengliche Luecke: bisher gab es keinen Verlauf, warum ein
+    # Miner in seinem Modus haengt. Jetzt steht jeder Zustandswechsel im Log.
+    - id: mvp_diagnose_transition_logger
+      alias: "MVP: Diagnose-Wechsel loggen"
+      mode: queued
+      max: 10
+      trigger:
+        - platform: state
+          entity_id:
+            - sensor.miner1_auto_diagnose
+            - sensor.miner2_auto_diagnose
+      condition:
+        - condition: template
+          value_template: >-
+            {{ trigger.to_state.state != trigger.from_state.state
+               and trigger.from_state.state not in ['unknown', 'unavailable'] }}
+      action:
+        - action: system_log.write
+          data:
+            level: "{{ 'warning' if trigger.to_state.state == 'anomaly' else 'info' }}"
+            message: >
+              [diagnose] {{ trigger.to_state.attributes.friendly_name }}:
+              {{ trigger.from_state.state }} → {{ trigger.to_state.state }}
+              | {{ trigger.to_state.attributes.summary | default('') | trim }}
+
+    # ── Anomalie-Alarm: Ist != Ziel und KEIN Gate erklaert es ─────────────────
+    # 5 min Entprellung, damit normale Uebergangs-Ticks (Watchdog laeuft nur alle
+    # 2 min) keinen Fehlalarm ausloesen. Persistent-Notification, damit es im UI
+    # sichtbar bleibt, nicht nur im Log verschwindet.
+    - id: mvp_diagnose_anomaly_alert
+      alias: "MVP: Diagnose-Anomalie melden"
+      mode: queued
+      max: 10
+      trigger:
+        - platform: state
+          entity_id:
+            - sensor.miner1_auto_diagnose
+            - sensor.miner2_auto_diagnose
+          to: "anomaly"
+          for: "00:05:00"
+      action:
+        - action: system_log.write
+          data:
+            level: error
+            message: >
+              [diagnose] ANOMALIE {{ trigger.to_state.attributes.friendly_name }}:
+              {{ trigger.to_state.attributes.summary | default('') | trim }}
+              — kein Gate erklaert den Modus, bitte pruefen
+        - action: persistent_notification.create
+          data:
+            notification_id: "{{ trigger.entity_id }}"
+            title: "Miner-Auto-Anomalie"
+            message: >
+              **{{ trigger.to_state.attributes.friendly_name }}** haengt unerklaert.
+
+              {{ trigger.to_state.attributes.summary | default('') | trim }}
+
+              SoC: {{ trigger.to_state.attributes.soc_pct }}% ·
+              Downgrade-CD: {{ trigger.to_state.attributes.downgrade_cooldown_min }} min ·
+              Upgrade-CD: {{ trigger.to_state.attributes.upgrade_cooldown_min }} min ·
+              Temp-Lockout: {{ trigger.to_state.attributes.temp_lockout_min }} min ·
+              Raum heiss: {{ trigger.to_state.attributes.room_too_hot }}
+
+    # ── Anomalie aufgeloest: Notification wieder entfernen ────────────────────
+    - id: mvp_diagnose_anomaly_clear
+      alias: "MVP: Diagnose-Anomalie aufgeloest"
+      mode: queued
+      max: 10
+      trigger:
+        - platform: state
+          entity_id:
+            - sensor.miner1_auto_diagnose
+            - sensor.miner2_auto_diagnose
+          from: "anomaly"
+      condition:
+        - condition: template
+          value_template: "{{ trigger.to_state.state not in ['unknown', 'unavailable'] }}"
+      action:
+        - action: persistent_notification.dismiss
+          data:
+            notification_id: "{{ trigger.entity_id }}"
+        - action: system_log.write
+          data:
+            level: info
+            message: >
+              [diagnose] {{ trigger.to_state.attributes.friendly_name }}
+              Anomalie aufgeloest → {{ trigger.to_state.state }}

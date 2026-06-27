@@ -16,12 +16,13 @@ import asyncio
 import logging
 import os
 import time
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
 import uvicorn
 
-from src.adapters.actuation_writer import ActuationWriter
+from src.adapters.actuation_writer import ActuationWriter, new_command_id
 from src.adapters.health_monitor import HealthMonitor
 from src.adapters.mqtt_client import MqttClient
 from src.adapters.telemetry_ingest import TelemetryIngest, raw_from_ingest
@@ -33,6 +34,7 @@ from src.core.signals import Signal
 from src.data.db import get_connection
 from src.data.event_store import EventStore
 from src.data.kpi import write_kpi
+from src.data.override_store import SqliteOverrideStore
 from src.data.state_store import StateStore
 from src.explain.explain_agent import ExplainAgent
 from src.ops.config_loader import ConfigLoader, rules_to_engine_config
@@ -69,7 +71,7 @@ class ProductionRunner:
         self._actuation = ActuationWriter(
             publish_fn=lambda topic, payload: self._mqtt.publish(topic, payload)
         )
-        self._overrides = OverrideHandler(conn=self._conn)
+        self._overrides = OverrideHandler(store=SqliteOverrideStore(self._conn))
         self._explain = ExplainAgent()
 
         ui_api.set_stores(self._event_store, self._explain)
@@ -178,6 +180,10 @@ class ProductionRunner:
             blocks_since_last_change=self._blocks_since_change,
             autonomy_level=self._overrides.autonomy_level,
         )
+        # Boundary: Surrogat-command_id hier vergeben (Idempotenz + EventStore-PK).
+        # Der Kern bleibt rein; die ID ist nicht Teil der replayten Entscheidung.
+        command_id = new_command_id()
+        event = replace(event, decision=replace(event.decision, command_id=command_id))
         decision_latency_ms = (time.perf_counter() - t_start) * 1000
 
         t_explain = time.perf_counter()
@@ -218,7 +224,7 @@ class ProductionRunner:
         )
 
         action = event.decision.action
-        cmd = self._actuation.decision_to_command(action, event.decision.command_id)
+        cmd = self._actuation.decision_to_command(action, command_id)
         if cmd is not None:
             self._actuation.write(cmd, topic=_MINER_CMD_TOPIC)
 
@@ -240,7 +246,7 @@ class ProductionRunner:
                 "decision_code": event.decision_code,
                 "short": explain_short,
                 "valid_until": event.decision.valid_until.isoformat(),
-                "command_id": event.decision.command_id,
+                "command_id": command_id,
             }
         )
 

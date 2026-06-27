@@ -139,15 +139,15 @@ python -m src.sim.study_freeze --set soc_band                # SoC-Band SB01–S
 OLLAMA_HOST=http://host:11434 python -m src.sim.study_freeze # + Gruppe B (LLM)
 ```
 
-Ergebnis: `src/sim/study_set/S*.json` (Surplus) bzw. `src/sim/study_set_soc_band/SB*.json` (SoC-Band) mit `decision`, `params`, `explanation.group_a` (Bausteine), `explanation.group_b_reference` (Gold), `explanation.group_b` (LLM oder `None`). Damit sind Stimuli + Erklärungen **eingefroren**, unabhängig von der Live-Verfügbarkeit des LLM. Das SoC-Band-Set ist in `src/sim/study_scenarios_soc_band.py` modelliert (13 Snapshots, gegen den Kern verifiziert).
+Ergebnis: `src/sim/study_set/S*.json` (Surplus) bzw. `src/sim/study_set_soc_band/SB*.json` (SoC-Band) mit `decision`, `params`, `explanation.group_a` (Bausteine), `explanation.group_b_reference` (Gold), `explanation.group_b` (LLM oder `None`). Damit sind Stimuli + Erklärungen **eingefroren**, unabhängig von der Live-Verfügbarkeit des LLM. Das SoC-Band-Set ist in `src/sim/study_scenarios_soc_band.py` modelliert (12 Snapshots, gegen den Kern verifiziert).
 
 ## 9. Stand der Abgleich-Punkte (2026-06-22 erledigt)
 
 1. **Länge vereinheitlicht.** Prompt, `b_references.yaml`-Kopf und Güte-Rubrik (`study_guete.py`) verlangen nun einheitlich **ein bis drei kurze Sätze, ~45 Wörter** (vergleichbar lang wie die Gruppe-A-Prosa), inklusive Änderungsbedingung. Die Länge ist damit für den A/B-Vergleich realistisch und kein Confound.
-2. **Gold-Referenzen geerdet.** Die Surplus-Anker trugen die Schwellen bereits; ergänzt um SoC-Band-Anker (SB01–SB13) passend zu `study_scenarios_soc_band.py`, Zahlen an den HA-Recorder geerdet (Abschnitt 10).
+2. **Gold-Referenzen geerdet.** Die Surplus-Anker trugen die Schwellen bereits; ergänzt um SoC-Band-Anker (SB01–SB12) passend zu `study_scenarios_soc_band.py`, Zahlen an den HA-Recorder geerdet (Abschnitt 10).
 3. **Modell gepinnt.** Studien-Modell = `OLLAMA_MODEL` (Default `qwen3.5:9b`); beim Freeze fest dokumentieren. Die ₿itsy-Agenten spielen in der Entwicklung keine Rolle mehr und sind hier nicht relevant.
 4. **`_B_INSTRUCTION` strategie-neutral.** Beschreibt den Miner als flexible Last (Solarüberschuss + Hausspeicher-Ladezustand, Eco/Super) und passt zu Surplus- wie SoC-Band-Strategie.
-5. **SoC-Band-Szenarien modelliert + freezebar.** Code-Set `src/sim/study_scenarios_soc_band.py` (13 Snapshots, 13/13 gegen den Kern verifiziert), einfrierbar über `python -m src.sim.study_freeze --set soc_band`.
+5. **SoC-Band-Szenarien modelliert + freezebar.** Code-Set `src/sim/study_scenarios_soc_band.py` (12 Snapshots, 12/12 gegen den Kern verifiziert), einfrierbar über `python -m src.sim.study_freeze --set soc_band`.
 
 Verbleibender Architektur-Punkt (DEV, nicht Studientext): die Modus-Rückfall-Hysterese (75/85 %) liest `r1_soc_band` noch nicht; bis dahin sind die „Rückfall"-Schwellen in Text/Referenz didaktisch (real fällt die Stufe an der Bandgrenze 80/90 %).
 

@@ -54,7 +54,7 @@ de:
     options: "Miner startet ab {soc_soft_min_pct:.0f} % Ladezustand"
 
   STOP_R2_GRID_IMPORT_EXCEEDED:
-    example: "Miner gestoppt — 620 W Netzbezug, Limit ist 500 W."
+    example: "Miner gestoppt — 620 W Netzbezug, Limit ist 300 W."
     short: "Zu viel Netzbezug — Miner gestoppt"
     long: "Netzbezug {grid_import_w:.0f} W überschreitet das erlaubte Limit {max_grid_import_w:.0f} W."
     trigger: "Das System bezieht {grid_import_w:.0f} W aus dem Stromnetz — erlaubt sind {max_grid_import_w:.0f} W"

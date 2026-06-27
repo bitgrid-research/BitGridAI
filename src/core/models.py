@@ -9,7 +9,6 @@ RuleVote     — Stimmabgabe einer einzelnen Regel
 
 from __future__ import annotations
 
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Literal, NamedTuple
@@ -66,7 +65,11 @@ class Decision:
 
     action: Literal["START", "STOP", "THROTTLE", "NOOP"]
     valid_until: datetime
-    command_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    # Surrogat-/Korrelations-ID (Idempotenz beim Aktuieren + PK im EventStore).
+    # Bewusst NICHT Teil der deterministischen Entscheidung: wird an der Boundary
+    # (Runner) vergeben, nicht im Kern. Replay vergleicht action/decision_code,
+    # nicht diese ID. Siehe ADR 021.
+    command_id: str | None = None
 
 
 # ---------------------------------------------------------------------------
