@@ -1,0 +1,411 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Miner-Status + Energiefluss (Kopf der Dev-"Miner"-Spalte) — Hamster-
+# Status-Erklärung (Zustand/Auslöser/Datenbasis/Optionen + Uhr/Block/Kurs)
+# und die Power-Flow-Karte.
+#
+# Aus miner_controls.yaml ausgelagert, weil der Kiosk-"Steuerung"-Tab diese
+# beiden NICHT mehr zeigt (Hamster + Energiefluss stehen schon auf dem
+# Home-Tab). Eingebunden via !include nur in:
+#   - bitgrid_dashboard_v1.yaml   → Kopf der linken Spalte des Dev-"Miner"-Tabs
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+
+  # ── Status-Erklärung ────────────────────────────────────────────────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    custom_fields:
+      status: >
+        [[[
+          const code     = states['sensor.bg_decision_code']?.state     || '—';
+          const priority = states['sensor.bg_decision_priority']?.state || '—';
+          const pv       = parseFloat(states['sensor.pv_power_w']?.state      || 0);
+          const soc      = parseFloat(states['sensor.battery_soc_pct']?.state || 0);
+          const surplus  = parseFloat(states['sensor.surplus_kw']?.state) || 0;
+          const temp     = parseFloat(states['sensor.miner_max_chip_temp_c']?.state || 0);
+          const block    = states['sensor.block_id']?.state || '?';
+          const blockStart = states['sensor.block_window_start']?.state || '';
+          const h = new Date().getHours();
+          const socSoftMin    = parseFloat(states['input_number.r2_soc_soft_min_pct']?.state || 58);
+          const socHardMin    = parseFloat(states['input_number.r2_soc_hard_min_pct']?.state || 50);
+          const gridLimit     = parseFloat(states['input_number.r2_max_grid_import_w']?.state || 500);
+          const maxTemp       = parseFloat(states['input_number.r3_max_chip_temp_c']?.state  || 85);
+          const grid          = parseFloat(states['sensor.grid_import_w']?.state || 0);
+          const roomTempRaw   = parseFloat(states['sensor.ewelink_snzb_02p_temperatur_2']?.state);
+          const roomTemp      = isNaN(roomTempRaw) ? null : roomTempRaw;
+          const roomTempLimit = parseFloat(states['input_number.mvp_room_temp_eco_threshold_c']?.state || 30);
+          const ecoTempLimit  = parseFloat(states['input_number.mvp_tmax_std_threshold_c']?.state || 112);
+          const minerMode     = states['sensor.miner1_workmode_status']?.state
+                            || states['sensor.miner2_workmode_status']?.state || '';
+          const mvpSocStart   = parseFloat(states['input_number.mvp_soc_eco_start_pct']?.state || 58);
+          const mvpPvStartKw  = parseFloat(states['input_number.mvp_pv_start_w']?.state || 6000) / 1000;
+          const socStdOn      = parseFloat(states['input_number.mvp_soc_std_pct']?.state         || 80);
+          const socStdOff     = parseFloat(states['input_number.mvp_soc_std_stop_pct']?.state   || 75);
+          const socSuperOn    = parseFloat(states['input_number.mvp_soc_super_pct']?.state       || 90);
+          const socSuperOff   = parseFloat(states['input_number.mvp_soc_super_stop_pct']?.state  || 85);
+          const socStop       = parseFloat(states['input_number.mvp_soc_stop_pct']?.state        || 50);
+          const batPowerW     = parseFloat(states['sensor.battery_power_w']?.state || 0);
+          const battCapKwh    = parseFloat(states['input_number.battery_capacity_kwh']?.state || 10);
+          const socGap        = Math.max(0, mvpSocStart - soc);
+          const etaMin        = batPowerW > 100
+            ? Math.round(socGap / 100 * battCapKwh * 1000 / batPowerW * 60)
+            : null;
+          const etaStr        = etaMin === null ? null
+            : etaMin < 60   ? `~${etaMin} min`
+            : `~${Math.floor(etaMin / 60)}h ${etaMin % 60}min`;
+          const socSuperGap   = Math.max(0, socSuperOn - soc);
+          const etaSuperMin   = batPowerW > 100
+            ? Math.round(socSuperGap / 100 * battCapKwh * 1000 / batPowerW * 60)
+            : null;
+          const etaSuperStr   = etaSuperMin === null ? null
+            : etaSuperMin < 60 ? `~${etaSuperMin} min`
+            : `~${Math.floor(etaSuperMin / 60)}h ${etaSuperMin % 60}min`;
+          const parseIdt     = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
+            ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
+          const nowTs        = Date.now() / 1000;
+          const cooldownSec  = 3600;
+          const m1DnTs       = parseIdt(states['input_datetime.mvp_miner1_last_downgrade']?.state);
+          const m1UpTs       = parseIdt(states['input_datetime.mvp_miner1_last_upgrade']?.state);
+          const m2DnTs       = parseIdt(states['input_datetime.mvp_miner2_last_downgrade']?.state);
+          const m2UpTs       = parseIdt(states['input_datetime.mvp_miner2_last_upgrade']?.state);
+          const ecoSinceTs   = Math.max(m1UpTs, m1DnTs, m2UpTs, m2DnTs);
+          const ecoStartDate = ecoSinceTs > 0 ? new Date(ecoSinceTs * 1000) : null;
+          const ecoStartStr  = ecoStartDate
+            ? `${String(ecoStartDate.getHours()).padStart(2,'0')}:${String(ecoStartDate.getMinutes()).padStart(2,'0')}`
+            : null;
+          const speedBlockSec = Math.max(0, m1DnTs + cooldownSec - nowTs);
+          const speedBlockMin = Math.ceil(speedBlockSec / 60);
+          const speedBlockStr = speedBlockSec > 0
+            ? (speedBlockMin < 60 ? `${speedBlockMin} min` : `${Math.floor(speedBlockMin / 60)}h ${speedBlockMin % 60}min`)
+            : null;
+          const ecoBlockSec  = Math.max(0, m1UpTs + cooldownSec - nowTs);
+          const ecoBlockMin  = Math.ceil(ecoBlockSec / 60);
+          const ecoBlockStr  = ecoBlockSec > 0
+            ? (ecoBlockMin < 60 ? `${ecoBlockMin} min` : `${Math.floor(ecoBlockMin / 60)}h ${ecoBlockMin % 60}min`)
+            : null;
+          const m1TLRaw = states['input_datetime.mvp_miner1_temp_lockout_until']?.state || '';
+          const m2TLRaw = states['input_datetime.mvp_miner2_temp_lockout_until']?.state || '';
+          const m1TempLockTs = (m1TLRaw && m1TLRaw !== 'unknown' && m1TLRaw !== 'unavailable')
+            ? new Date(m1TLRaw.replace(' ', 'T')).getTime() / 1000 : 0;
+          const m2TempLockTs = (m2TLRaw && m2TLRaw !== 'unknown' && m2TLRaw !== 'unavailable')
+            ? new Date(m2TLRaw.replace(' ', 'T')).getTime() / 1000 : 0;
+          const tempLockTs     = Math.max(m1TempLockTs, m2TempLockTs);
+          const tempLockRemSec = Math.max(0, tempLockTs - nowTs);
+          const tempLockActive = tempLockRemSec > 30;
+          const tempLockRemMin = Math.ceil(tempLockRemSec / 60);
+          const tempLockStr    = tempLockRemMin < 60
+            ? `${tempLockRemMin} min`
+            : `${Math.floor(tempLockRemMin / 60)}h ${tempLockRemMin % 60}min`;
+          const nightBlockActive = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
+            || (h >= 22 || h < 6);
+          const minerRunning = ['Eco', 'Standard', 'Super'].includes(minerMode);
+          const isWaiting = !nightBlockActive && !minerRunning && (code === 'NOOP_R2_SOC_SOFT_MIN' || soc < socSoftMin);
+          const isEco      = !nightBlockActive && !isWaiting && minerMode === 'Eco';
+          const isStandard = !nightBlockActive && !isWaiting && minerMode === 'Standard';
+          const isSpeed    = !nightBlockActive && !isWaiting && minerMode === 'Super';
+          let trigger = '—', dataBasis = '—', effect = '—', options = '—';
+          if (nightBlockActive) {
+            const dischargePowerW = -batPowerW;
+            const socGapStop = Math.max(0, soc - socStop);
+            const etaStopMin = dischargePowerW > 50 && socGapStop > 0
+              ? Math.round(socGapStop / 100 * battCapKwh * 1000 / dischargePowerW * 60)
+              : null;
+            const etaStopStr = etaStopMin === null ? null
+              : etaStopMin < 60 ? `~${etaStopMin} min`
+              : `~${Math.floor(etaStopMin / 60)}h ${etaStopMin % 60}min`;
+            const nowForNight = new Date();
+            const minsTo6 = (6 * 60) - (nowForNight.getHours() * 60 + nowForNight.getMinutes());
+            const minsTo6Adj = minsTo6 <= 0 ? minsTo6 + 24 * 60 : minsTo6;
+            const to6Str = minsTo6Adj < 60 ? `${minsTo6Adj} min`
+              : `${Math.floor(minsTo6Adj / 60)}h ${minsTo6Adj % 60}min`;
+            trigger   = `🌙 Nachtsperre aktiv`;
+            dataBasis = `Akku ${soc.toFixed(0)} % · Standby-Schwelle ${socStop.toFixed(0)} %`
+              + (etaStopStr ? ` · ${dischargePowerW.toFixed(0)} W Entladung` : '');
+            effect    = `Mining nachts ausgesetzt`;
+            options   = `Solar-Mining ab 06:00 (in ${to6Str})`
+              + (etaStopStr ? ` · Standby in ${etaStopStr}` : '');
+          } else if (code === 'STOP_R3_OVERTEMP') {
+            trigger   = `Chip zu heiß`;
+            dataBasis = `Chip ${temp.toFixed(0)} °C · Limit ${maxTemp.toFixed(0)} °C`;
+            effect    = `Sofort-Stopp · Sicherheit, nicht überstimmbar`;
+            options   = `Wiederanlauf nach Abkühlung`;
+          } else if (code === 'STOP_R3_COMM_TIMEOUT') {
+            trigger   = `Kommunikationsausfall`;
+            dataBasis = `Kein Heartbeat vom Miner`;
+            effect    = `Mining gestoppt`;
+            options   = `Neustart nach MQTT-Reconnect`;
+          } else if (code === 'STOP_R2_SOC_HARD_MIN') {
+            trigger   = `Batterie kritisch`;
+            dataBasis = `Akku ${soc.toFixed(0)} % · Sicherheitsminimum ${socHardMin.toFixed(0)} %`;
+            effect    = `Miner gestoppt · Batteriesicherheit`;
+            options   = `Neustart ab ${mvpSocStart.toFixed(0)} % Akku`;
+          } else if (code === 'NOOP_R2_SOC_SOFT_MIN' && !minerRunning) {
+            trigger   = `Akku unter Eco-Start`;
+            dataBasis = `Akku ${soc.toFixed(0)} % · Eco-Start ${mvpSocStart.toFixed(0)} % · Reserve ${socStop.toFixed(0)} % · PV ${(pv/1000).toFixed(1)} kW`;
+            effect    = `Miner aus · Akku lädt zuerst`;
+            options   = etaStr ? `Start ab ${mvpSocStart.toFixed(0)} % Akku · in ${etaStr}` : `Start ab ${mvpSocStart.toFixed(0)} % Akku`;
+          } else if (code === 'STOP_R2_GRID_IMPORT_EXCEEDED') {
+            trigger   = `Netzbezug zu hoch`;
+            dataBasis = `Netzbezug ${grid.toFixed(0)} W · Limit ${gridLimit.toFixed(0)} W · PV ${(pv/1000).toFixed(1)} kW`;
+            effect    = `Miner gestoppt · kein Netzstrom-Mining`;
+            options   = `Start ab Netzbezug unter ${gridLimit.toFixed(0)} W`;
+          } else if (minerMode === 'Eco') {
+            const socStdGap = Math.max(0, socStdOn - soc);
+            const etaStdMin = batPowerW > 100
+              ? Math.round(socStdGap / 100 * battCapKwh * 1000 / batPowerW * 60)
+              : null;
+            const etaStdStr = etaStdMin === null ? null
+              : etaStdMin < 60 ? `~${etaStdMin} min`
+              : `~${Math.floor(etaStdMin / 60)}h ${etaStdMin % 60}min`;
+            trigger   = `Eco-Band · Standard noch nicht erreicht`;
+            dataBasis = `Akku ${soc.toFixed(0)} % · Standard ab ${socStdOn.toFixed(0)} % · Eco seit ${ecoStartStr || '—'}`;
+            effect    = `Miner läuft sparsam in Eco`;
+            options   = soc <= socStop
+              ? `Rückfall Standby unter ${socStop.toFixed(0)} % Akku`
+              : tempLockActive
+                ? `Standard gesperrt (Überhitzung) · Sperre noch ${tempLockStr}`
+                : soc >= socStdOn
+                  ? (speedBlockStr ? `Standard-Upgrade in ${speedBlockStr} freigegeben` : `Standard-Upgrade kommt gleich ₿`)
+                  : etaStdStr
+                    ? `Standard ab ${socStdOn.toFixed(0)} % Akku · in ${etaStdStr}`
+                    : `Standard ab ${socStdOn.toFixed(0)} % Akku`;
+          } else if (minerMode === 'Standard') {
+            trigger   = `Standard-Band erreicht`;
+            dataBasis = `Akku ${soc.toFixed(0)} % · Standard ${socStdOff.toFixed(0)}–${socStdOn.toFixed(0)} % · seit ${ecoStartStr || '—'}`;
+            effect    = `Miner läuft in Standard`;
+            options   = soc <= socStdOff
+              ? (ecoBlockStr ? `Eco-Wechsel in ${ecoBlockStr} freigegeben` : `Rückfall Eco unter ${socStdOff.toFixed(0)} % Akku`)
+              : tempLockActive
+                ? `Eco erzwungen bei Überhitzung · Sperre noch ${tempLockStr}`
+                : `Rückfall Eco unter ${socStdOff.toFixed(0)} % Akku`;
+          } else if (minerMode === 'Super') {
+            trigger   = `Super-Modus aktiv (deaktiviert)`;
+            dataBasis = `Akku ${soc.toFixed(0)} % · Super im Regelwerk gesperrt`;
+            effect    = `Automatik schaltet zurück auf Standard`;
+            options   = `Modus folgt Eco/Standard-Regelwerk`;
+          } else if (code.startsWith('START')) {
+            trigger   = `Überschuss über Schwelle`;
+            dataBasis = `Überschuss ${surplus.toFixed(1)} kW · Akku ${soc.toFixed(0)} % · PV ${(pv / 1000).toFixed(1)} kW`;
+            effect    = `Mining läuft`;
+            options   = `—`;
+          } else if (soc < socSoftMin && !minerRunning) {
+            trigger   = `Akku unter Eco-Start`;
+            dataBasis = `Akku ${soc.toFixed(0)} % · Eco-Start ${mvpSocStart.toFixed(0)} % · Reserve ${socStop.toFixed(0)} % · PV ${(pv/1000).toFixed(1)} kW`;
+            effect    = `Miner aus · Akku lädt zuerst`;
+            options   = etaStr ? `Start ab ${mvpSocStart.toFixed(0)} % Akku · in ${etaStr}` : `Start ab ${mvpSocStart.toFixed(0)} % Akku`;
+          } else {
+            trigger   = `Automatik aktiv · Miner im Standby`;
+            dataBasis = `PV ${(pv/1000).toFixed(1)} kW · Akku ${soc.toFixed(0)} %`;
+            effect    = `Warte auf Startbedingungen`;
+            options   = priority === 'R5_STABILITY'
+              ? `Deadband aktiv · Start nach Ablauf`
+              : `Eco ab ${mvpSocStart.toFixed(0)} % · Standard ab ${socStdOn.toFixed(0)} %`;
+          }
+          const blockTime  = blockStart
+            ? (blockStart.includes(' ') ? blockStart.split(' ')[1].slice(0,5) : blockStart)
+            : '';
+          const greeting  = h < 5  ? 'Gute Nacht'
+                          : h < 11 ? 'Guten Morgen'
+                          : h < 14 ? 'Guten Mittag'
+                          : h < 18 ? 'Guten Nachmittag'
+                          : h < 22 ? 'Guten Abend'
+                          :          'Gute Nacht';
+          const now = new Date();
+          const hh  = String(now.getHours()).padStart(2, '0');
+          const mm  = String(now.getMinutes()).padStart(2, '0');
+          const timeStr  = hh + ':' + mm;
+          const slotMin  = Math.floor(now.getMinutes() / 10) * 10;
+          const slotH    = String(now.getHours()).padStart(2, '0');
+          const slotM    = String(slotMin).padStart(2, '0');
+          const slot     = slotH + slotM + '.json';
+          const blockDisplay = states['sensor.bitcoin_block_height']?.state
+            && states['sensor.bitcoin_block_height'].state !== 'unavailable'
+            ? parseInt(states['sensor.bitcoin_block_height'].state).toLocaleString('de-DE')
+            : '—';
+          const blockKnown = blockDisplay && blockDisplay !== '—';
+          const balanceBtc = parseFloat(states['sensor.pool_balance_btc']?.state);
+          const balanceBtcValid = (!isNaN(balanceBtc) && balanceBtc > 0);
+          const balanceSats = balanceBtcValid
+            ? Math.round(balanceBtc * 1e8).toLocaleString('de-DE') + ' SATs'
+            : '58.122 SATs';
+          const btcEurPrice = parseFloat(states['sensor.btc_eur_price']?.state);
+          const btcEurPriceValid = (!isNaN(btcEurPrice) && btcEurPrice > 0);
+          const btcEurDisplay = btcEurPriceValid
+            ? btcEurPrice.toLocaleString('de-DE') + ' €'
+            : '—';
+          const stackEurDisplay = (balanceBtcValid && btcEurPriceValid)
+            ? '≈ ' + (balanceBtc * btcEurPrice).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €'
+            : '—';
+          const imgSrc = nightBlockActive ? 'bithamster_sleep.png'
+                       : isEco            ? 'bithamster_eco.png'
+                       : isStandard       ? 'bithamster_standard.png'
+                       : isSpeed          ? 'bithamster_super.png'
+                       :                    'bithamster_wait.png';
+          return `
+            <div style="position:relative;padding-right:112px;min-height:165px">
+              <div style="position:absolute;top:0;right:0;
+                          display:flex;flex-direction:column;
+                          padding-left:12px;border-left:1px solid var(--divider-color);
+                          text-align:right;min-height:100%;">
+                <div style="margin-bottom:8px;">
+                  <div style="font-size:0.72rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;">Uhrzeit</div>
+                  <div style="font-size:2.0rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.05;margin-top:1px;">${timeStr}</div>
+                </div>
+                <div style="margin-bottom:12px;">
+                  <div style="font-size:0.72rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;">Datum</div>
+                  <div style="font-size:0.98rem;font-weight:600;margin-top:1px;">${new Date().toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'short'})}</div>
+                </div>
+                <div style="border-top:1px solid var(--divider-color);padding-top:8px;margin-bottom:auto;">
+                  <div style="font-size:0.65rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;">₿ Blockzeit</div>
+                  <div style="font-size:0.85rem;font-weight:600;color:#a8a8a8;margin-top:1px;">${blockDisplay}</div>
+                  <div style="font-size:0.65rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Balance</div>
+                  <div style="font-size:0.78rem;font-weight:600;color:#a8a8a8;margin-top:1px;">${balanceSats}</div>
+                  <div style="font-size:0.78rem;font-weight:700;color:#c9c9c9;margin-top:1px;">${stackEurDisplay}</div>
+                  <div style="font-size:0.65rem;color:var(--secondary-text-color);letter-spacing:0.04em;text-transform:uppercase;margin-top:6px;">₿ Kurs</div>
+                  <div style="font-size:0.78rem;font-weight:600;color:#a8a8a8;margin-top:1px;">${btcEurDisplay}</div>
+                </div>
+                <div style="margin-top:6px;">
+                  <div style="font-size:0.62rem;color:var(--secondary-text-color);opacity:0.5;font-family:monospace;">${slot}</div>
+                </div>
+              </div>
+              <div style="font-size:0.95rem;font-weight:700;
+                          color:var(--primary-text-color);margin-bottom:10px">
+                BitGridAI &nbsp;·&nbsp;
+                <span style="color:var(--secondary-text-color);font-weight:400">${greeting}</span>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <img src="/local/${imgSrc}?v=20260623" style="width:141px;height:141px;border-radius:50%;flex-shrink:0;object-fit:cover;border:2px solid var(--divider-color)">
+                <div style="flex:1">
+                  <div style="display:flex;flex-direction:column;">
+                    ${(() => {
+                      const fld = (label, val, isHead) =>
+                        (val && val !== '—' && val !== '')
+                        ? `<div style="${isHead ? 'margin-bottom:8px' : 'margin-top:4px'}">
+                             <div style="font-size:0.65rem;color:var(--secondary-text-color);opacity:0.45;
+                                         text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1px">${label}</div>
+                             <div style="font-size:${isHead ? '1.25rem' : '1.05rem'};
+                                         color:${isHead ? 'var(--primary-text-color)' : 'var(--secondary-text-color)'};
+                                         line-height:1.4;font-weight:${isHead ? '500' : '400'}">${val}</div>
+                           </div>`
+                        : '';
+                      return fld('Zustand', effect, true)
+                           + fld('Auslöser', trigger, false)
+                           + fld('Datenbasis', dataBasis, false)
+                           + fld('Optionen', options, false);
+                    })()}
+                  </div>
+                  ${blockKnown ? `
+                  <div style="font-size:0.8rem;color:var(--disabled-text-color);
+                              margin-top:8px;font-style:italic">
+                    Block&nbsp;${blockDisplay}${blockTime ? ' &middot; ' + blockTime : ''} &middot; 10-min Fenster
+                  </div>` : ''}
+                  ${(() => {
+                    const llm = states['sensor.bg_runner_explain_short']?.state;
+                    if (!llm || llm === 'unavailable' || llm === 'unknown') return '';
+                    return `<div style="margin-top:10px;padding-top:8px;
+                                        border-top:1px solid var(--divider-color)">
+                      <div style="font-size:0.65rem;color:var(--secondary-text-color);opacity:0.45;
+                                  text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px">
+                        LLM Output</div>
+                      <div style="font-size:0.95rem;color:var(--secondary-text-color);
+                                  line-height:1.4;font-style:italic">${llm}</div>
+                    </div>`;
+                  })()}
+                </div>
+              </div>
+            </div>`;
+        ]]]
+    styles:
+      card:
+        - background: >
+            [[[
+              const h = new Date().getHours();
+              const night = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
+                || (h >= 22 || h < 6);
+              const code  = states['sensor.bg_decision_code']?.state || '';
+              const soc   = parseFloat(states['sensor.battery_soc_pct']?.state || 0);
+              const socSoftMin = parseFloat(states['input_number.r2_soc_soft_min_pct']?.state || 58);
+              const minerMode = states['sensor.miner1_workmode_status']?.state || states['sensor.miner2_workmode_status']?.state || '';
+              const minerRunning = ['Eco', 'Standard', 'Super'].includes(minerMode);
+              const waiting = !night && !minerRunning && (code === 'NOOP_R2_SOC_SOFT_MIN' || soc < socSoftMin);
+              const eco      = !night && !waiting && minerMode === 'Eco';
+              const speed    = !night && !waiting && !eco && minerMode === 'Super';
+              const standard = !night && !waiting && minerMode === 'Standard';
+              // Dunkler Glas-Verlauf mit Modus-Tint (identisch zu bitgrid_dashboard_v2.yaml)
+              const tint = night    ? 'rgba(92,107,192,0.30)'
+                         : eco      ? 'rgba(76,175,80,0.28)'
+                         : speed    ? 'rgba(247,147,26,0.26)'
+                         : standard ? 'rgba(38,198,218,0.26)'
+                         :            'rgba(40,46,74,0.55)';
+              return `linear-gradient(160deg, ${tint} 0%, rgba(22,26,46,0.50) 100%)`;
+            ]]]
+        - border-radius: 12px
+        - padding: 12px 16px
+        - border: >
+            [[[
+              const h = new Date().getHours();
+              const night = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
+                || (h >= 22 || h < 6);
+              const code  = states['sensor.bg_decision_code']?.state || '';
+              const soc   = parseFloat(states['sensor.battery_soc_pct']?.state || 0);
+              const socSoftMin = parseFloat(states['input_number.r2_soc_soft_min_pct']?.state || 58);
+              const minerMode = states['sensor.miner1_workmode_status']?.state || states['sensor.miner2_workmode_status']?.state || '';
+              const minerRunning = ['Eco', 'Standard', 'Super'].includes(minerMode);
+              const waiting = !night && !minerRunning && (code === 'NOOP_R2_SOC_SOFT_MIN' || soc < socSoftMin);
+              const standby = !night && !waiting && minerMode === 'Standby';
+              const eco   = !night && !waiting && minerMode === 'Eco';
+              const speed = !night && !waiting && !eco && minerMode === 'Super';
+              return night   ? '1px solid rgba(247,147,26,0.08)'
+                   : waiting ? '1px solid #757575'
+                   : standby ? '1px solid #757575'
+                   : eco     ? '1px solid #4CAF50'
+                   : speed   ? '1px solid #F7931A'
+                   :            '1px solid #26C6DA';
+            ]]]
+        - text-align: left
+      grid:
+        - grid-template-areas: '"status"'
+        - grid-template-columns: 1fr
+      custom_fields:
+        status:
+          - width: 100%
+          - text-align: left
+          - justify-self: start
+
+  # ── Power Flow ──────────────────────────────────────────────────────────
+  - type: custom:power-flow-card-plus
+    entities:
+      grid:
+        entity:
+          consumption: sensor.grid_import_w
+          production: sensor.grid_export_w
+        color:
+          consumption: "#5C6BC0"
+          production: "#4CAF50"
+      solar:
+        entity: sensor.pv_power_w
+        color: "#FFC107"
+      battery:
+        entity: sensor.battery_power_flowchart_w
+        state_of_charge: sensor.battery_soc_pct
+        color:
+          consumption: "#26A69A"
+          production: "#4CAF50"
+      home:
+        entity: sensor.house_load_w
+        color: "#EF9A9A"
+      individual:
+        - entity: sensor.miner_total_power_w
+          name: Miner
+          icon: mdi:pickaxe
+          color: "#F7931A"
+          display_zero: false
+          display_zero_tolerance: 25
+        - entity: sensor.ac_elwa_2_power1_solar
+          name: Heizstab
+          icon: mdi:water-boiler
+          color: "#2196F3"

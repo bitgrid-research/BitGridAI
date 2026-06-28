@@ -49,6 +49,14 @@ BitGridAI:
   ha-card-border-color: "rgba(255,255,255,0.16)"
   ha-card-box-shadow: "0 8px 32px rgba(8,10,25,0.30)"
 
+  # ── Eingabefelder (input_number/-text/-datetime im "box"-Modus) ─────
+  # Bewusst NICHT über Theme-Tokens gelöst: MWC ignoriert --mdc-text-field-
+  # fill-color im Entity-Row-Kontext (die Box bleibt MWC-Weiß), nur die Ink-
+  # Farbe würde greifen. Das ergäbe hellen Text auf weißer Box (unlesbar) in
+  # JEDEM Eingabefeld (More-Info, Dev-Dashboard). Stattdessen punktuell per
+  # card-mod auf den Regelschwellen-Karten (bitgrid_dashboard_v2.yaml), wo
+  # Füllung UND Schrift zusammen gesetzt werden. Theme bleibt hier neutral.
+
   # ── Kopfleiste (transluzent) ────────────────────────────────────────
   app-header-background-color: "rgba(20,24,44,0.30)"
   app-header-text-color: "#f3f5fb"

@@ -1,0 +1,124 @@
+# ═══════════════════════════════════════════════════════
+# Geteilte custom:button-card-Templates
+# ═══════════════════════════════════════════════════════
+# button_card_templates ist ein Pro-Dashboard-Root-Key. Da views/miner_controls.yaml
+# (single source of truth) sowohl in bitgrid_dashboard_v1.yaml als auch in
+# bitgrid_dashboard_v2.yaml per !include eingebunden ist, müssen seine Templates
+# in BEIDEN Dashboards verfügbar sein. Daher hier zentral, in beiden Dashboards
+# via `button_card_templates: !include button_card_templates.yaml` eingehängt.
+# Fehlt das Include in einem Dashboard, rendert button-card "Konfigurationsfehler".
+
+miner_header:
+  show_state: false
+  show_icon: true
+  tap_action:
+    action: none
+  custom_fields:
+    status: >
+      [[[
+        const on = entity.state === 'on';
+        return `<ha-icon icon="${on ? 'mdi:check-circle' : 'mdi:alert-circle'}"
+          style="color:${on ? '#4CAF50' : '#F44336'}; --mdc-icon-size:22px;"></ha-icon>`;
+      ]]]
+  styles:
+    grid:
+      - grid-template-areas: '"n status i"'
+      - grid-template-columns: 1fr auto auto
+      - grid-template-rows: 1fr
+    card:
+      - padding: 12px 16px
+      - height: 56px
+    name:
+      - font-size: 1.1rem
+      - font-weight: bold
+      - text-align: left
+      - justify-self: start
+      - padding-right: 8px
+    icon:
+      - color: var(--primary-text-color)
+      - width: 22px
+      - height: 22px
+      - margin-left: 6px
+    custom_fields:
+      status:
+        - display: flex
+        - align-items: center
+
+miner_btn:
+  show_state: true
+  styles:
+    card:
+      - background: var(--secondary-background-color)
+      - border-radius: 12px
+      - padding: 20px 6px
+      - height: 110px
+    icon:
+      - width: 44px
+      - height: 44px
+    name:
+      - font-size: 0.9rem
+      - font-weight: 600
+      - color: var(--primary-text-color)
+      - white-space: unset
+      - text-overflow: unset
+      - overflow: visible
+      - margin-top: 6px
+    state:
+      - font-size: 0.78rem
+      - color: var(--secondary-text-color)
+      - margin-top: 2px
+
+weather_forecast_6h:
+  entity: sensor.weather_forecast_6h
+  show_name: false
+  show_icon: false
+  show_state: false
+  tap_action:
+    action: none
+  custom_fields:
+    row: >
+      [[[
+        const f = entity?.attributes?.forecast ?? [];
+        const icons = {
+          'clear-night':     'mdi:weather-night',
+          'sunny':           'mdi:weather-sunny',
+          'partlycloudy':    'mdi:weather-partly-cloudy',
+          'cloudy':          'mdi:weather-cloudy',
+          'fog':             'mdi:weather-fog',
+          'rainy':           'mdi:weather-rainy',
+          'pouring':         'mdi:weather-pouring',
+          'lightning':       'mdi:weather-lightning',
+          'lightning-rainy': 'mdi:weather-lightning-rainy',
+          'snowy':           'mdi:weather-snowy',
+          'snowy-rainy':     'mdi:weather-snowy-rainy',
+          'windy':           'mdi:weather-windy',
+          'windy-variant':   'mdi:weather-windy-variant',
+          'hail':            'mdi:weather-hail',
+          'exceptional':     'mdi:alert-circle-outline',
+        };
+        const blocks = f.map(h => {
+          const dt   = new Date(h.datetime);
+          const time = dt.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+          const icon = icons[h.condition] ?? 'mdi:weather-partly-cloudy';
+          const temp = Math.round(h.temperature);
+          return `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex:1">
+              <span style="font-size:.75rem;color:var(--secondary-text-color);font-weight:500">${time}</span>
+              <ha-icon icon="${icon}" style="--mdc-icon-size:28px;color:var(--primary-text-color)"></ha-icon>
+              <span style="font-size:.95rem;font-weight:600">${temp}°C</span>
+            </div>`;
+        }).join('');
+        return `<div style="display:flex;width:100%;padding:4px 0">${blocks}</div>`;
+      ]]]
+  styles:
+    card:
+      - padding: 12px 16px
+      - background: var(--secondary-background-color)
+      - border-radius: 12px
+    grid:
+      - grid-template-areas: '"row"'
+      - grid-template-columns: 1fr
+    custom_fields:
+      row:
+        - width: 100%
+        - overflow: hidden

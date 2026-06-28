@@ -161,7 +161,7 @@ append-only-Log.
 
 **Konsequenzen.**
 - `src/core/` importiert kein `sqlite3` mehr; der Architektur-Guard (ADR 021) verbietet es nun.
-- Verdrahtung in `main.py`/`runner.py`: `OverrideHandler(store=SqliteOverrideStore(conn))`. Der
+- Verdrahtung in `main.py`/`production_runner.py`: `OverrideHandler(store=SqliteOverrideStore(conn))`. Der
   testbare `ProductionRunner` läuft per Default store-los (in-memory).
 - Tests bleiben in der Aussage gleich; die DB-Persistenz-Tests injizieren jetzt den Store.
 

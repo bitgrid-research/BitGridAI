@@ -9,11 +9,21 @@ frontend:
   # Frontend-Modul für runde Ecken der power-flow-card-plus (card-mod ist nicht
   # installiert). Lädt unabhängig vom Lovelace resource_mode auf jeder Seite.
   extra_module_url:
-    - /local/bitgrid_card_shape.js
+    # ?v= Cache-Bust: bei jeder Änderung an bitgrid_card_shape.js hochzählen,
+    # sonst lädt der Browser bzw. das Wandtablet (Kiosk) die alte gecachte
+    # Version. Datum als Versionsstempel.
+    - /local/bitgrid_card_shape.js?v=20260628b
 
 lovelace:
   resource_mode: yaml
   resources:
+    # card-mod (HACS): CSS-Injektion in den Shadow-DOM von Karten. Zuerst laden,
+    # damit card_mod: auf den folgenden Karten greift. Nötig für lesbare Eingabe-
+    # Boxen im Glas-Look, die das Theme über die MDC-Textfield-Füllung nicht
+    # erreicht. resource_mode: yaml -> HACS trägt die Resource nicht automatisch
+    # ein, daher hier von Hand.
+    - url: /hacsfiles/lovelace-card-mod/card-mod.js
+      type: module
     - url: /hacsfiles/power-flow-card-plus/power-flow-card-plus.js
       type: module
     - url: /hacsfiles/button-card/button-card.js
@@ -27,13 +37,13 @@ lovelace:
   dashboards:
     bitgrid-home:
       mode: yaml
-      filename: bitgrid-homescreen.yaml
+      filename: bitgrid_dashboard_v2.yaml
       title: Home
-      icon: mdi:home
+      icon: mdi:bitcoin
       show_in_sidebar: true
     bitgrid-ai:
       mode: yaml
-      filename: bitgrid-dashboard.yaml
+      filename: bitgrid_dashboard_v1.yaml
       title: BitGridAI
       icon: mdi:view-dashboard
       show_in_sidebar: true

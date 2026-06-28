@@ -84,7 +84,7 @@ in den Kern-Entity-IDs (`sensor.sn_<serial>_*`) quer durch die HA-Config.
 - Python-Tooling: erledigt — Entity über `BITGRID_HEIZSTAB_ENTITY` (.env) konfigurierbar.
 - `2023b_sim.md`: IP, SMA-Seriennummern und Shelly-Geräte-IDs maskiert.
 - HA-Config: IP-Präfix aus der Heizstab-Entity entfernt (→ `ac_elwa_2_*`) in
-  `configuration.yaml` + `bitgrid-dashboard.yaml`.
+  `configuration.yaml` + `bitgrid_dashboard_v1.yaml`.
 - HA-Config: SMA-Serial-Präfixe umbenannt (`sn_<serial>_*` → `sma_tripower_*` /
   `sma_storage_*`) in `configuration.yaml`, `bitcoin.yaml`, `sma_watchdog.yaml`.
 **Live-Migration ausgeführt:** 13 HA-Entities via `scripts/ha_rename_entities.py`

@@ -17,6 +17,20 @@ const CSS = `
   hui-masonry-view, hui-sections-view, hui-panel-view {
     max-width: 100% !important;
   }
+  /* View-Titel (BitGridAI - vX.Y.Z) mittig im Header zentrieren.
+     Absolut ueber die volle Toolbar-Breite, damit echtes Zentrum statt
+     "rechts neben dem Hamburger". pointer-events:none, da nicht klickbar. */
+  .header .toolbar {
+    position: relative;
+  }
+  .header .toolbar .main-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 0 !important;
+    text-align: center;
+    pointer-events: none;
+  }
 `;
 
 function injectIntoRoot(root) {

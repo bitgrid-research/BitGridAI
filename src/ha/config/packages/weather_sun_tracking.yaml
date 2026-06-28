@@ -1,0 +1,62 @@
+# weather_sun_tracking.yaml
+# Zweck: Wetter- und Sonnenstandsdaten als numerische Zeitreihen aufzeichnen, damit
+#        der Recorder sie speichert und die Solar-Mining-Analyse (DEV-BitHamster) sie
+#        nutzen kann. Bisher lagen Wetter nur als Text-Condition/Forecast vor, der
+#        Sonnenstand gar nicht.
+#
+# Takt: alle 10 Minuten (gleicher Takt wie der Block-Scheduler) + bei HA-Start, damit
+#       sich die Samples sauber mit den Blockdaten joinen lassen.
+#
+# WICHTIG vor dem Deploy pruefen (Developer Tools -> States -> weather.forecast_home):
+#   welche Attribute die Wetter-Integration wirklich liefert. Bei Met.no sind das
+#   temperature, humidity, cloud_coverage. Heisst ein Attribut anders, hier anpassen;
+#   fehlt es, bleibt der jeweilige Sensor dank availability einfach "unavailable".
+# sun.sun liefert elevation und azimuth immer.
+#
+# Top-Level-Key = eindeutiger Package-Name (wie mvp_auto.yaml). template: darf NICHT
+# auf Spalte 0 stehen, sonst ist der Package-Name "template" mit Listenwert ungueltig
+# ("expected a dictionary") und kollidiert mit weather.yaml.
+weather_sun_tracking:
+  template:
+    - trigger:
+        - platform: time_pattern
+          minutes: "/10"
+        - platform: homeassistant
+          event: start
+      sensor:
+        - name: sun_elevation
+          unique_id: bg_sun_elevation
+          state: "{{ state_attr('sun.sun', 'elevation') | float(0) | round(2) }}"
+          availability: "{{ state_attr('sun.sun', 'elevation') is not none }}"
+          unit_of_measurement: "°"
+          state_class: measurement
+
+        - name: sun_azimuth
+          unique_id: bg_sun_azimuth
+          state: "{{ state_attr('sun.sun', 'azimuth') | float(0) | round(2) }}"
+          availability: "{{ state_attr('sun.sun', 'azimuth') is not none }}"
+          unit_of_measurement: "°"
+          state_class: measurement
+
+        - name: outdoor_temperature
+          unique_id: bg_outdoor_temperature
+          state: "{{ state_attr('weather.forecast_home', 'temperature') | float(0) | round(1) }}"
+          availability: "{{ state_attr('weather.forecast_home', 'temperature') is not none }}"
+          device_class: temperature
+          unit_of_measurement: "°C"
+          state_class: measurement
+
+        - name: outdoor_humidity
+          unique_id: bg_outdoor_humidity
+          state: "{{ state_attr('weather.forecast_home', 'humidity') | float(0) | round(0) }}"
+          availability: "{{ state_attr('weather.forecast_home', 'humidity') is not none }}"
+          device_class: humidity
+          unit_of_measurement: "%"
+          state_class: measurement
+
+        - name: cloud_coverage
+          unique_id: bg_cloud_coverage
+          state: "{{ state_attr('weather.forecast_home', 'cloud_coverage') | float(0) | round(0) }}"
+          availability: "{{ state_attr('weather.forecast_home', 'cloud_coverage') is not none }}"
+          unit_of_measurement: "%"
+          state_class: measurement

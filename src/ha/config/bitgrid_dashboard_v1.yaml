@@ -1,0 +1,1029 @@
+﻿title: BitGridAI
+
+# ═══════════════════════════════════════════════════════
+# Shared Button-Card Templates
+# ═══════════════════════════════════════════════════════
+# Ausgelagert nach button_card_templates.yaml, weil dieselben Templates auch im
+# Kiosk-Dashboard (bitgrid_dashboard_v2.yaml) gebraucht werden: beide binden
+# views/miner_controls.yaml per !include ein, und button_card_templates ist ein
+# Pro-Dashboard-Root-Key. Single source of truth für miner_header/miner_btn/...
+button_card_templates: !include button_card_templates.yaml
+
+views:
+
+  # ═══════════════════════════════════════════════════════
+  # MINER OVERVIEW  —  Miner 1 + Miner 2 nebeneinander
+  # ═══════════════════════════════════════════════════════
+  - title: Miner
+    path: miner
+    icon: mdi:pickaxe
+    panel: true
+    cards:
+      # 2-Spalten-Grid (früher views/miner_grid.yaml): links Steuerung
+      # (miner_controls.yaml), rechts Umfeld & Statistik (miner_stats.yaml).
+      # Aufgesplittet, damit der Kiosk-"Steuerung"-Tab nur die Steuerungsspalte
+      # einbinden kann; hier bleiben beide Spalten erhalten.
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 1fr 1fr
+          grid-template-rows: auto
+          margin: 8px
+          row-gap: 16px
+          column-gap: 40px
+        cards:
+          # Linke Spalte: Hamster-Status + Energiefluss (nur hier, nicht im
+          # Kiosk-"Steuerung"-Tab) über der eigentlichen Miner-Steuerung.
+          - type: vertical-stack
+            cards:
+              - !include views/miner_status.yaml
+              - !include views/miner_controls.yaml
+          - !include views/miner_stats.yaml
+      # ═══════════════════════════════════════════════════════
+      # STATISTIK — Tages-KPIs + Verlauf
+      # ═══════════════════════════════════════════════════════
+  - title: Statistik
+    path: statistik
+    icon: mdi:chart-line
+    cards:
+      - type: vertical-stack
+        cards:
+
+          # ── KPI-Übersicht Heute ───────────────────────────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            styles:
+              card:
+                - padding: 20px 24px
+              custom_fields:
+                kpis:
+                  - width: 100%
+            custom_fields:
+              kpis: >
+                [[[
+                  const pv     = states['sensor.pv_energy_daily']?.state ?? '—';
+                  const pvExp  = states['sensor.grid_export_daily']?.state ?? '—';
+                  const mine   = states['sensor.mining_energy_daily']?.state ?? '—';
+                  const grid   = states['sensor.grid_import_daily']?.state ?? '—';
+                  const cov    = states['sensor.solar_coverage_pct']?.state ?? '—';
+                  const up     = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
+                  const sup    = states['sensor.miner_super_hours_today']?.state ?? '—';
+                  const eco    = states['sensor.miner_eco_hours_today']?.state ?? '—';
+                  const win    = states['sensor.mining_window_hours_today']?.state ?? '—';
+                  const used   = states['sensor.mining_window_used_pct']?.state ?? '—';
+                  const dead   = states['sensor.deadband_hit_rate_pct']?.state ?? '—';
+
+                  const fmt = (v, unit, color) => {
+                    const n = parseFloat(v);
+                    const c = color ?? 'var(--primary-text-color)';
+                    return `<span style="font-size:1.4rem;font-weight:700;color:${c};">${isNaN(n) ? '—' : n.toFixed(2)} <span style="font-size:0.9rem;font-weight:400;color:var(--secondary-text-color);">${unit}</span></span>`;
+                  };
+                  const fmtH = (v, color) => {
+                    const n = parseFloat(v);
+                    const c = color ?? 'var(--primary-text-color)';
+                    return `<span style="font-size:1.4rem;font-weight:700;color:${c};">${isNaN(n) ? '—' : n.toFixed(1)} <span style="font-size:0.9rem;font-weight:400;color:var(--secondary-text-color);">h</span></span>`;
+                  };
+                  const tile = (icon, label, val) =>
+                    `<div style="display:flex;flex-direction:column;align-items:center;background:var(--secondary-background-color);border-radius:14px;padding:16px 12px;gap:6px;">
+                      <ha-icon icon="${icon}" style="--mdc-icon-size:28px;color:var(--secondary-text-color);"></ha-icon>
+                      <div style="font-size:0.8rem;color:var(--secondary-text-color);text-align:center;">${label}</div>
+                      <div>${val}</div>
+                    </div>`;
+
+                  const covN = parseFloat(cov);
+                  const covColor = covN >= 90 ? '#4CAF50' : covN >= 70 ? '#f59e0b' : '#F44336';
+                  const gridN = parseFloat(grid);
+                  const gridColor = gridN <= 0.1 ? '#4CAF50' : gridN <= 1 ? '#f59e0b' : '#F44336';
+                  const pvN = parseFloat(pv);
+                  const pvExpN = parseFloat(pvExp);
+                  const selfUse = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0)
+                    ? Math.max(0, pvN - pvExpN)
+                    : null;
+
+                  return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;">
+                    ${tile('mdi:solar-power',              'PV erzeugt',        fmt(pv,    'kWh', '#4CAF50'))}
+                    ${tile('mdi:transmission-tower-export','PV eingespeist',     fmt(pvExp, 'kWh', '#26C6DA'))}
+                    ${tile('mdi:home-lightning-bolt',      'PV Eigenverbrauch',  selfUse !== null ? fmt(selfUse.toFixed(2), 'kWh', '#f59e0b') : '—')}
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;margin-top:12px;">
+                    ${tile('mdi:pickaxe',           'Mining verbraucht', fmt(mine,'kWh', '#f59e0b'))}
+                    ${tile('mdi:transmission-tower','Netzbezug',         fmt(grid,'kWh', gridColor))}
+                    ${tile('mdi:leaf-circle',       'Solar-Autarkie',    fmt(cov, '%',   covColor))}
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:100%;margin-top:12px;">
+                    ${tile('mdi:timer-outline',     'Uptime heute',      `<span style="font-size:1.4rem;font-weight:700;">${up}</span>`)}
+                    ${tile('mdi:rocket-launch',     'Super-Modus',       fmtH(sup, '#F44336'))}
+                    ${tile('mdi:leaf',              'Eco-Modus',         fmtH(eco, '#4CAF50'))}
+                    ${tile('mdi:clock-outline',     'Fenster offen',     fmtH(win, '#4CAF50'))}
+                    ${tile('mdi:gauge',             'Fenster-Ausnutzung',fmt(used,'%',   '#4CAF50'))}
+                  </div>`;
+                ]]]
+
+          # ── Verlauf: PV + Mining + Akku (24h) ───────────────────────────────
+          - type: history-graph
+            title: "PV · Mining · Akku (24h)"
+            hours_to_show: 24
+            refresh_interval: 60
+            entities:
+              - entity: sensor.pv_power_w
+                name: PV
+              - entity: sensor.house_load_w
+                name: Haus
+              - entity: sensor.mining_total_load_w
+                name: Mining gesamt
+              - entity: sensor.battery_soc_pct
+                name: "Akku %"
+
+          # ── Verlauf: Grid + Überschuss (24h) ────────────────────────────────
+          - type: history-graph
+            title: "Netz · Überschuss (24h)"
+            hours_to_show: 24
+            refresh_interval: 60
+            entities:
+              - entity: sensor.grid_export_w
+                name: Überschuss
+              - entity: sensor.grid_import_w
+                name: Netzbezug
+
+          # ── Miner-Modus-Verlauf (24h) ────────────────────────────────────────
+          - type: history-graph
+            title: "Miner-Modus Verlauf (24h)"
+            hours_to_show: 24
+            refresh_interval: 60
+            entities:
+              - entity: sensor.miner1_thsspd
+                name: "M1 TH/s"
+              - entity: sensor.miner2_thsspd
+                name: "M2 TH/s"
+              - entity: sensor.shellyplugsg3_dcb4d9c5567c_leistung
+                name: "M1 Shelly W"
+              - entity: sensor.shellyplugsg3_d0cf13d86254_leistung
+                name: "M2 Shelly W"
+
+          # ── Mining-Fenster Analyse: Shelly-Verbrauch vs. PV-Überschuss (24h) ──
+          - type: history-graph
+            title: "Mining-Fenster Analyse (24h)"
+            hours_to_show: 24
+            refresh_interval: 60
+            entities:
+              - entity: sensor.shellyplugsg3_dcb4d9c5567c_leistung
+                name: "M1 Shelly W"
+              - entity: sensor.shellyplugsg3_d0cf13d86254_leistung
+                name: "M2 Shelly W"
+              - entity: sensor.grid_export_w
+                name: "PV-Überschuss W"
+              - entity: sensor.pv_power_w
+                name: "PV gesamt W"
+
+  - title: Tuning
+    path: tuning
+    icon: mdi:tune-vertical
+    cards:
+      - type: entities
+        title: MVP Auto-Regeln
+        entities:
+          - entity: input_number.mvp_soc_eco_start_pct
+            name: Eco-Start SoC (%)
+          - entity: input_number.mvp_pv_start_w
+            name: Eco-Start PV (W)
+          - entity: input_number.mvp_soc_super_pct
+            name: Super-Start SoC (%)
+          - entity: input_number.mvp_soc_super_stop_pct
+            name: Super-Stop SoC (%) — Deadband
+          - entity: input_number.mvp_soc_stop_pct
+            name: Stop SoC (%)
+          - type: divider
+          - entity: input_boolean.mvp_night_block_enabled
+            name: Nacht-Sperre
+          - entity: input_datetime.mvp_night_block_start
+            name: Nacht-Sperre Start
+          - entity: input_datetime.mvp_night_block_end
+            name: Nacht-Sperre Ende
+
+      - type: entities
+        title: R1 Surplus
+        entities:
+          - entity: input_number.r1_surplus_min_kw
+            name: Min Surplus (kW)
+
+      - type: entities
+        title: R2 Battery + Grid
+        entities:
+          - entity: input_number.r2_soc_soft_min_pct
+            name: Soft Min SoC (%)
+          - entity: input_number.r2_soc_hard_min_pct
+            name: Hard Min SoC (%)
+          - entity: input_number.r2_max_grid_import_w
+            name: Max Grid Import (W)
+
+      - type: entities
+        title: R3 Safety
+        entities:
+          - entity: input_number.r3_max_chip_temp_c
+            name: Max Chip Temp (C)
+          - entity: input_number.r3_comm_timeout_sec
+            name: Comm Timeout (s)
+          - entity: input_number.r3_safety_lockout_min
+            name: Safety Lockout (min)
+          - entity: input_boolean.r3_emergency_stop
+            name: E-Stop
+          - entity: input_number.mvp_room_temp_eco_threshold_c
+            name: "Raumtemp → Eco (°C)"
+
+      - type: entities
+        title: R5 Deadband / Runtime
+        entities:
+          - entity: input_number.r5_deadband_hold_blocks
+            name: Deadband Hold (blocks)
+          - entity: input_number.r5_min_runtime_blocks
+            name: Min Runtime (blocks)
+          - entity: input_number.r5_min_pause_blocks
+            name: Min Pause (blocks)
+          - entity: input_number.block_minutes
+            name: Block Minutes
+
+      - type: entities
+        title: Deadband Timing
+        entities:
+          - entity: input_datetime.deadband_valid_until
+            name: Deadband Valid Until
+
+  # ═══════════════════════════════════════════════════════
+  # SIMULATION
+  # ═══════════════════════════════════════════════════════
+  - title: Simulation
+    path: simulation
+    icon: mdi:flask
+    cards:
+      - type: entities
+        title: Simulation Mode
+        show_header_toggle: false
+        entities:
+          - entity: input_boolean.simulation_mode
+            name: Simulation Mode
+          - entity: input_boolean.replay_mode
+            name: Replay Mode
+          - entity: input_boolean.miner_relay_sim
+            name: Miner Relay Sim
+
+      - type: entities
+        title: Simulation Actions
+        show_header_toggle: false
+        entities:
+          - entity: script.sim_run_sh_suite
+            name: Run SH Suite (SH-1..SH-4)
+          - entity: script.sim_tests_reset
+            name: Reset Test Counters
+          - entity: script.bg_decision_cycle
+            name: Decision Cycle Now
+          - entity: script.bg_force_safety_stop
+            name: Force Safety Stop
+          - entity: script.sim_reset
+            name: SIM Reset
+          - entity: script.sim_sh1_stable_surplus
+            name: SH-1 Stable Surplus
+          - entity: script.sim_sh2_variable_pv
+            name: SH-2 Variable PV
+          - entity: script.sim_sh3_soc_critical
+            name: SH-3 SoC Critical
+          - entity: script.sim_sh4_safety_overtemp
+            name: SH-4 Safety Overtemp
+
+      - type: entities
+        title: Test Protocol
+        show_header_toggle: false
+        entities:
+          - entity: input_number.test_pass_count
+            name: Pass Count
+          - entity: input_number.test_fail_count
+            name: Fail Count
+
+      - type: entities
+        title: Simulated PV Generation
+        entities:
+          - entity: input_number.pv_power_w
+            name: PV Output (W)
+          - entity: sensor.pv_power_w
+            name: PV Generation (Sensor)
+
+      - type: entities
+        title: Simulated Inputs
+        entities:
+          - entity: input_number.house_load_w
+            name: House Load (W)
+          - entity: input_number.grid_import_w
+            name: Grid Import (W)
+          - entity: input_number.battery_soc_pct
+            name: Battery SoC (%)
+          - entity: input_number.battery_power_w
+            name: Battery Power (W)
+          - entity: input_number.miner_power_w
+            name: Miner Power (W)
+          - entity: input_number.miner_temp_c
+            name: Miner Temp (C)
+          - entity: input_number.miner_heartbeat_age_sec
+            name: Heartbeat Age (s)
+
+      - type: history-graph
+        title: Simulation History (8h)
+        hours_to_show: 8
+        refresh_interval: 60
+        entities:
+          - entity: sensor.pv_power_w
+          - entity: sensor.house_load_w
+          - entity: sensor.grid_import_w
+          - entity: sensor.battery_soc_pct
+          - entity: sensor.battery_power_w
+          - entity: sensor.miner_total_power_w
+          - entity: sensor.miner_max_chip_temp_c
+          - entity: sensor.miner_heartbeat_age_sec
+
+  # ═══════════════════════════════════════════════════════
+  # STUDIEN-SZENARIEN S1–S10 (Rule Lab)
+  # ═══════════════════════════════════════════════════════
+  - title: Szenarien
+    path: szenarien
+    icon: mdi:script-text-play-outline
+    cards:
+      - type: entities
+        title: Mining-Rentabilität (Anzeige — steuert nichts)
+        show_header_toggle: false
+        entities:
+          - entity: input_number.miner_efficiency_j_th
+            name: Miner-Effizienz (J/TH)
+          - entity: sensor.mining_value_ct_kwh
+            name: Mining-Wert
+          - entity: input_number.feed_in_tariff_ct_kwh
+            name: Einspeisevergütung
+          - entity: sensor.mining_vs_feedin_ct_kwh
+            name: Vorteil Mining
+          - entity: sensor.mining_recommendation
+            name: Rentabel jetzt?
+          - type: divider
+          - entity: sensor.mining_revenue_today_eur
+            name: Mining heute (€)
+          - entity: sensor.mining_energy_as_feedin_eur
+            name: … dieselbe Energie eingespeist (€)
+          - entity: sensor.feed_in_revenue_today_eur
+            name: Einspeisung heute gesamt (€)
+
+      - type: entities
+        title: Studien-Szenarien S1–S10
+        show_header_toggle: false
+        entities:
+          - entity: script.scenario_s1
+            name: S1 — Klarer Start
+          - entity: script.scenario_s2
+            name: S2 — Kein Überschuss
+          - entity: script.scenario_s3
+            name: S3 — Unter Break-Even
+          - entity: script.scenario_s4
+            name: S4 — Übertemperatur
+          - entity: script.scenario_s5
+            name: S5 — Kommunikationsausfall
+          - entity: script.scenario_s6
+            name: S6 — Batterie-Schutz (soft)
+          - entity: script.scenario_s7
+            name: S7 — Batterie-Notstopp (hard)
+          - entity: script.scenario_s8
+            name: S8 — Netzbezug-Limit
+          - entity: script.scenario_s9
+            name: S9 — Forecast-Block
+          - entity: script.scenario_s10
+            name: S10 — Anti-Flapping
+          - type: divider
+          - entity: script.scenario_set_defaults
+            name: Schwellen auf Default zurücksetzen
+
+      - type: entities
+        title: Lab-Entscheidung (live)
+        show_header_toggle: false
+        entities:
+          - entity: sensor.lab_final_decision
+            name: Entscheidung
+          - entity: sensor.lab_explain_short
+            name: Erklärung
+          - entity: sensor.lab_explain_data_basis
+            name: Datenbasis
+          - entity: sensor.lab_explain_effect
+            name: Wirkung
+          - entity: sensor.lab_surplus_kw
+            name: Überschuss
+
+      - type: markdown
+        content: >
+          **Hinweis Engine-Divergenz:** Das Rule Lab rechnet **R1–R3**.
+          **S3** (Break-Even), **S9** (Forecast) und **S10** (Anti-Flapping)
+          zeigen hier `START_R1_SURPLUS_OK` — die Regeln R4/R5 und die
+          Break-Even-Logik existieren nur im **Python-Kern**. Genau diese
+          drei Fälle machen die Divergenz sichtbar (siehe Roadmap Phase 4/5).
+
+  # ═══════════════════════════════════════════════════════
+  # RULE LAB — isoliertes Sandbox für Regelexperimente
+  # Keine Verbindung zu Prod-Entities. Kein Miner-Command.
+  # Schieberegler → R3/R2/R1 Auswertung → Entscheidung live.
+  # ═══════════════════════════════════════════════════════
+  - title: Rule Lab
+    path: rule-lab
+    icon: mdi:test-tube
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: 1fr 1fr
+          grid-template-rows: auto
+          margin: 8px
+          row-gap: 12px
+          column-gap: 40px
+        cards:
+
+          # ── Linke Spalte: Eingaben ─────────────────────────────────────────
+          - type: vertical-stack
+            cards:
+
+              - type: entities
+                title: "Szenario — Messwerte"
+                show_header_toggle: false
+                entities:
+                  - entity: input_number.lab_pv_power_w
+                    name: PV-Leistung
+                  - entity: input_number.lab_house_load_w
+                    name: Hauslast
+                  - entity: input_number.lab_battery_soc_pct
+                    name: Batterie SoC
+                  - entity: input_number.lab_miner_temp_c
+                    name: Miner Temperatur
+                  - entity: input_number.lab_grid_import_w
+                    name: Netzbezug
+                  - entity: input_number.lab_heartbeat_age_sec
+                    name: Heartbeat-Alter
+
+              - type: entities
+                title: "Config — Schwellenwerte"
+                show_header_toggle: false
+                entities:
+                  - entity: input_number.lab_surplus_min_kw
+                    name: Mindest-Überschuss (R1)
+                  - entity: input_number.lab_soc_soft_min_pct
+                    name: SoC Soft-Min (R2)
+                  - entity: input_number.lab_soc_hard_min_pct
+                    name: SoC Hard-Min (R2)
+                  - entity: input_number.lab_max_grid_import_w
+                    name: Max Netzbezug (R2)
+                  - entity: input_number.lab_max_chip_temp_c
+                    name: Max Chip-Temp (R3)
+                  - entity: input_number.lab_comm_timeout_sec
+                    name: Comm-Timeout (R3)
+
+          # ── Rechte Spalte: Auswertung ──────────────────────────────────────
+          - type: vertical-stack
+            cards:
+
+              # Regel-Trace: R3 → R2 → R1 mit Farb-Feedback
+              - type: custom:button-card
+                show_name: false
+                show_icon: false
+                show_state: false
+                tap_action:
+                  action: none
+                custom_fields:
+                  trace: >
+                    [[[
+                      const r3      = states['sensor.lab_r3_result']?.state      || '?';
+                      const r2      = states['sensor.lab_r2_result']?.state      || '?';
+                      const r1      = states['sensor.lab_r1_result']?.state      || '?';
+                      const surplus = parseFloat(states['sensor.lab_surplus_kw']?.state || 0).toFixed(2);
+
+                      function badge(result) {
+                        if (result === 'PASS')          return { icon: '✅', color: '#4CAF50', bg: 'rgba(76,175,80,0.12)'  };
+                        if (result.startsWith('STOP'))  return { icon: '🛑', color: '#F44336', bg: 'rgba(244,67,54,0.12)'  };
+                        if (result.startsWith('NOOP'))  return { icon: '⏸',  color: '#FF9800', bg: 'rgba(255,152,0,0.12)'  };
+                        return                                 { icon: '⏭',  color: '#9E9E9E', bg: 'transparent'           };
+                      }
+
+                      function row(rule, label, result) {
+                        const b   = badge(result);
+                        const tag = result === 'PASS' ? 'OK' : result.replace(/^(?:STOP|NOOP)_R\d+_/, '');
+                        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;
+                                            margin:3px 0;border-radius:8px;background:${b.bg}">
+                          <span style="font-weight:700;color:var(--secondary-text-color);
+                                       font-size:0.8rem;width:22px">${rule}</span>
+                          <span style="flex:1;color:var(--primary-text-color);font-size:0.9rem">${label}</span>
+                          <span style="color:${b.color};font-size:0.75rem;font-family:monospace">
+                            ${b.icon} ${tag}
+                          </span>
+                        </div>`;
+                      }
+
+                      return `<div style="padding:4px 0">
+                        <div style="font-size:0.8rem;color:var(--secondary-text-color);
+                                    margin-bottom:8px;padding:0 4px">
+                          Überschuss: <strong style="color:var(--primary-text-color)">${surplus} kW</strong>
+                        </div>
+                        ${row('R3', 'Safety',        r3)}
+                        ${row('R2', 'Autarkie',       r2)}
+                        <div style="font-size:0.72rem;color:var(--disabled-text-color);
+                                    padding:4px 10px">
+                          R4 Forecast · R5 Deadband — brauchen Zeitreihen-Kontext
+                        </div>
+                        ${row('R1', 'Profitabilität', r1)}
+                      </div>`;
+                    ]]]
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                  custom_fields:
+                    trace:
+                      - width: 100%
+
+              # Finale Entscheidung + strukturierte Bausteine
+              - type: custom:button-card
+                show_name: false
+                show_icon: false
+                show_state: false
+                tap_action:
+                  action: none
+                custom_fields:
+                  decision: >
+                    [[[
+                      const code      = states['sensor.lab_final_decision']?.state         || '—';
+                      const trigger   = states['sensor.lab_explain_trigger']?.state        || '—';
+                      const dataBasis = states['sensor.lab_explain_data_basis']?.state     || '—';
+                      const effect    = states['sensor.lab_explain_effect']?.state         || '—';
+                      const options   = states['sensor.lab_explain_options']?.state        || '—';
+
+                      let bg, icon;
+                      if      (code.startsWith('START')) { bg = '#1B5E20'; icon = '▶'; }
+                      else if (code.startsWith('STOP'))  { bg = '#B71C1C'; icon = '⏹'; }
+                      else if (code.startsWith('NOOP'))  { bg = '#E65100'; icon = '⏸'; }
+                      else                               { bg = 'var(--secondary-background-color)'; icon = '?'; }
+
+                      const row = (label, val) =>
+                        `<div style="display:flex;gap:8px;align-items:baseline;margin-top:6px">
+                          <span style="font-size:0.6rem;color:rgba(255,255,255,0.4);text-transform:uppercase;
+                                       letter-spacing:0.06em;min-width:72px;flex-shrink:0">${label}</span>
+                          <span style="font-size:0.82rem;color:rgba(255,255,255,0.85)">${val}</span>
+                        </div>`;
+
+                      return `<div style="background:${bg};border-radius:8px;padding:14px 16px;
+                                          width:100%;box-sizing:border-box">
+                        <div style="font-size:0.72rem;color:rgba(255,255,255,0.55);margin-bottom:4px">
+                          Entscheidung
+                        </div>
+                        <div style="font-size:1.05rem;font-weight:700;color:white;font-family:monospace">
+                          ${icon} ${code}
+                        </div>
+                        <div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:10px">
+                          ${row('Wirkung',    effect)}
+                          ${row('Auslöser',   trigger)}
+                          ${row('Datenbasis', dataBasis)}
+                          ${row('Optionen',   options)}
+                        </div>
+                      </div>`;
+                    ]]]
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 16px
+                  custom_fields:
+                    decision:
+                      - width: 100%
+
+              # Sync-Button + Recording-Toggle
+              - type: entities
+                show_header_toggle: false
+                entities:
+                  - entity: script.lab_sync_from_prod
+                    name: "Sync von Prod (Parameter + Live-Werte)"
+                    icon: mdi:sync
+                  - entity: input_boolean.recording_active
+                    name: "Aufnahme (10-Min Snapshots auf MQTT)"
+                    icon: mdi:record-circle
+
+  # ═══════════════════════════════════════════════════════
+  # VARIANTE A — Statische Erklärung (Studie Gruppe A)
+  # Festes Studien-Stimulus-Material: Wirkung, Datenbasis,
+  # Optionen sind HARTKODIERT (kein Sensor, kein LLM).
+  # Dargestelltes Szenario: S1 „Klarer Start" (START_R1_SURPLUS_OK).
+  # Zum Wechseln des Szenarios die Konstanten im status-Feld
+  # sowie die Energie-Kacheln unten anpassen.
+  # ═══════════════════════════════════════════════════════
+  - title: Variante A
+    path: studie-variante-a
+    icon: mdi:clipboard-list-outline
+    cards:
+      - type: vertical-stack
+        cards:
+
+          # ── Hamster + strukturiertes Decision-Event ──────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            tap_action:
+              action: none
+            custom_fields:
+              status: >
+                [[[
+                  // ── VARIANTE A (statisch) — festes Studien-Stimulus, Szenario S1 ──
+                  // Diese Werte sind bewusst hartkodiert (kein Sensor-Read).
+                  // Zum Wechseln des Szenarios hier anpassen.
+                  const code      = 'START_R1_SURPLUS_OK';
+                  const effect    = 'Miner gestartet — überschüssige PV-Leistung wird in die flexible Last gesteuert, statt sie einzuspeisen.';
+                  const dataBasis = 'Überschuss 3,0 kW · Akku 80 % · PV 4500 W · Strompreis 12 ct/kWh';
+                  const options   = 'Starten ✓ · Warten · Einspeisen';
+                  const blockId   = '2026-06-15T1030';
+                  const pv        = 4500;
+
+                  const isStart  = code.startsWith('START');
+                  const isSafety = code.startsWith('STOP_R3');
+                  const imgSrc   = isSafety ? 'bithamster_sleep.png'
+                                 : isStart  ? 'bithamster_eco.png'
+                                 :             'bithamster_wait.png';
+
+                  const greeting = 'Guten Morgen';
+
+                  const blockTime = blockId.length >= 16 ? blockId.slice(11, 16) : '';
+
+                  const sec = (label, text) =>
+                    (text && text !== '—' && text !== '')
+                    ? `<div style="margin-top:6px;">
+                        <div style="font-size:0.55rem;color:var(--secondary-text-color);
+                                    opacity:0.45;text-transform:uppercase;
+                                    letter-spacing:0.05em;margin-bottom:2px;">${label}</div>
+                        <div style="font-size:0.88rem;color:var(--secondary-text-color);
+                                    line-height:1.4;">${text}</div>
+                      </div>`
+                    : '';
+
+                  return `<div style="padding:4px 0">
+                    <div style="font-size:0.8rem;font-weight:700;
+                                color:var(--primary-text-color);margin-bottom:10px;">
+                      BitGridAI &nbsp;·&nbsp;
+                      <span style="color:var(--secondary-text-color);font-weight:400;">${greeting}</span>
+                    </div>
+                    <div style="display:flex;gap:12px;align-items:flex-start">
+                      <img src="/local/${imgSrc}?v=20260426"
+                           style="width:120px;height:120px;border-radius:50%;flex-shrink:0;
+                                  object-fit:cover;border:2px solid var(--divider-color)">
+                      <div style="flex:1">
+                        <div style="font-size:0.55rem;color:var(--secondary-text-color);
+                                    opacity:0.45;text-transform:uppercase;
+                                    letter-spacing:0.05em;margin-bottom:2px;">Zustand</div>
+                        <div style="font-size:0.95rem;font-weight:500;
+                                    color:var(--primary-text-color);line-height:1.4;">${effect}</div>
+                        ${sec('Datenbasis', dataBasis)}
+                        ${sec('Optionen', options)}
+                        ${blockId
+                          ? `<div style="font-size:0.65rem;color:var(--disabled-text-color);
+                                         margin-top:10px;font-style:italic;">
+                               Block ${blockId.slice(0,10)} · ${blockTime} · 10-min Fenster
+                             </div>`
+                          : ''}
+                      </div>
+                    </div>
+                  </div>`;
+                ]]]
+            styles:
+              card:
+                - background: "#091410"
+                - border-radius: 12px
+                - padding: 12px 16px
+                - border: 1px solid #4CAF50
+                - text-align: left
+              grid:
+                - grid-template-areas: '"status"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                status:
+                  - width: 100%
+                  - text-align: left
+                  - justify-self: start
+
+          # ── Energie-Status (statisch — Werte aus Szenario S1) ────────────────
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                name: Akku
+                label: "80,0 %"
+                icon: mdi:battery-charging
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: "#4CAF50"
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  label:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+                    - color: var(--primary-text-color)
+              - type: custom:button-card
+                name: PV
+                label: "4500 W"
+                icon: mdi:solar-power
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: "#4CAF50"
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  label:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+                    - color: var(--primary-text-color)
+              - type: custom:button-card
+                name: Überschuss
+                label: "3000 W"
+                icon: mdi:transmission-tower-export
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: "#4CAF50"
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  label:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+                    - color: var(--primary-text-color)
+              - type: custom:button-card
+                name: Netzbezug
+                label: "0 W"
+                icon: mdi:transmission-tower-import
+                show_state: false
+                show_label: true
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: var(--secondary-text-color)
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  label:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+                    - color: var(--primary-text-color)
+
+          # ── Decision-Verlauf (statisch) ──────────────────────────────────────
+          - type: markdown
+            content: >
+              #### Entscheidungsverlauf (24h)
+
+
+              Statischer Studien-Snapshot — die Entscheidung bleibt im
+              dargestellten Block konstant **`START_R1_SURPLUS_OK`**.
+
+  # ═══════════════════════════════════════════════════════
+  # VARIANTE B — Adaptive LLM-Erklärung (Studie Gruppe B)
+  # Gleiche Struktur wie Variante A, aber im Hamster-Block
+  # erscheint der LLM-Text (bg_runner_explain_short) statt
+  # der aufgeschlüsselten Felder.
+  # ═══════════════════════════════════════════════════════
+  - title: Variante B
+    path: studie-variante-b
+    icon: mdi:text-box-check-outline
+    cards:
+      - type: vertical-stack
+        cards:
+
+          # ── Hamster + LLM-Erklärung ─────────────────────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            tap_action:
+              action: none
+            custom_fields:
+              status: >
+                [[[
+                  const code        = states['sensor.bg_runner_code']?.state          || '—';
+                  const explainText = states['sensor.bg_runner_explain_short']?.state || '—';
+                  const blockId     = states['sensor.bg_runner_block_id']?.state      || '';
+                  const pv          = parseFloat(states['sensor.pv_power_w']?.state   || 0);
+
+                  const isStart  = code.startsWith('START');
+                  const isSafety = code.startsWith('STOP_R3');
+                  const imgSrc   = isSafety ? 'bithamster_sleep.png'
+                                 : isStart  ? 'bithamster_eco.png'
+                                 :             'bithamster_wait.png';
+
+                  const h = new Date().getHours();
+                  const greeting = h < 5  ? 'Gute Nacht'
+                                 : h < 11 ? 'Guten Morgen'
+                                 : h < 14 ? 'Guten Mittag'
+                                 : h < 18 ? 'Guten Nachmittag'
+                                 : h < 22 ? 'Guten Abend'
+                                 :          'Gute Nacht';
+
+                  const blockTime = blockId.length >= 16 ? blockId.slice(11, 16) : '';
+
+                  return `<div style="padding:4px 0">
+                    <div style="font-size:0.8rem;font-weight:700;
+                                color:var(--primary-text-color);margin-bottom:10px;">
+                      BitGridAI &nbsp;·&nbsp;
+                      <span style="color:var(--secondary-text-color);font-weight:400;">${greeting}</span>
+                    </div>
+                    <div style="display:flex;gap:12px;align-items:flex-start">
+                      <img src="/local/${imgSrc}?v=20260426"
+                           style="width:120px;height:120px;border-radius:50%;flex-shrink:0;
+                                  object-fit:cover;border:2px solid var(--divider-color)">
+                      <div style="flex:1">
+                        <div style="font-size:0.95rem;color:var(--primary-text-color);
+                                    line-height:1.6;font-weight:400;">${explainText}</div>
+                        ${blockId
+                          ? `<div style="font-size:0.65rem;color:var(--disabled-text-color);
+                                         margin-top:12px;font-style:italic;">
+                               Block ${blockId.slice(0,10)} · ${blockTime} · 10-min Fenster
+                             </div>`
+                          : ''}
+                      </div>
+                    </div>
+                  </div>`;
+                ]]]
+            styles:
+              card:
+                - background: >
+                    [[[
+                      const code = states['sensor.bg_runner_code']?.state || '';
+                      if (code.startsWith('STOP_R3')) return '#0c0f18';
+                      if (code.startsWith('START'))   return '#091410';
+                      return '#10141f';
+                    ]]]
+                - border-radius: 12px
+                - padding: 12px 16px
+                - border: >
+                    [[[
+                      const code = states['sensor.bg_runner_code']?.state || '';
+                      if (code.startsWith('STOP_R3')) return '1px solid rgba(244,67,54,0.4)';
+                      if (code.startsWith('START'))   return '1px solid #4CAF50';
+                      return '1px solid #757575';
+                    ]]]
+                - text-align: left
+              grid:
+                - grid-template-areas: '"status"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                status:
+                  - width: 100%
+                  - text-align: left
+                  - justify-self: start
+
+          # ── Energie-Status ───────────────────────────────────────────────────
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.battery_soc_pct
+                name: Akku
+                icon: mdi:battery-charging
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (v <= 20) return '#F44336';
+                          if (v <= 40) return '#f59e0b';
+                          return '#4CAF50';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+              - type: custom:button-card
+                entity: sensor.pv_power_w
+                name: PV
+                icon: mdi:solar-power
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (!v || v === 0) return 'var(--secondary-text-color)';
+                          if (v < 800)  return '#f59e0b';
+                          if (v < 1600) return '#8BC34A';
+                          return '#4CAF50';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+              - type: custom:button-card
+                entity: sensor.grid_export_w
+                name: Überschuss
+                icon: mdi:transmission-tower-export
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (!v || v === 0) return 'var(--secondary-text-color)';
+                          return '#4CAF50';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+              - type: custom:button-card
+                entity: sensor.grid_import_w
+                name: Netzbezug
+                icon: mdi:transmission-tower-import
+                show_state: true
+                styles:
+                  card:
+                    - background: var(--secondary-background-color)
+                    - border-radius: 12px
+                    - padding: 12px 4px
+                  icon:
+                    - width: 36px
+                    - height: 36px
+                    - color: >
+                        [[[
+                          const v = parseFloat(entity.state);
+                          if (!v || v === 0) return 'var(--secondary-text-color)';
+                          if (v <= 100) return '#4CAF50';
+                          if (v <= 500) return '#f59e0b';
+                          return '#5C6BC0';
+                        ]]]
+                  name:
+                    - font-size: 0.8rem
+                    - color: var(--secondary-text-color)
+                  state:
+                    - font-size: 0.9rem
+                    - font-weight: 600
+
+          # ── Decision-Verlauf (24h) ────────────────────────────────────────────
+          - type: history-graph
+            title: "Entscheidungsverlauf (24h)"
+            hours_to_show: 24
+            refresh_interval: 120
+            entities:
+              - entity: sensor.bg_runner_code
+                name: Entscheidung
