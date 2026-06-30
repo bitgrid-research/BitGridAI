@@ -1,4 +1,4 @@
-title: BitGridAI Home
+title: BitGridAI v2
 
 # Geteilte custom:button-card-Templates (miner_header/miner_btn/...). Nötig,
 # weil der Steuerung-Tab views/miner_controls.yaml per !include einbindet, das
@@ -193,11 +193,11 @@ views:
 
                       // Schwellen aus den HA-Config-Entities (Platzhalter-Legende soc_band_tagesverlauf.md)
                       const socStop   = cfg('input_number.mvp_soc_stop_pct', 50);
-                      const ecoStart  = cfg('input_number.mvp_soc_eco_start_pct', 58);
-                      const socStd    = cfg('input_number.mvp_soc_std_pct', 80);
-                      const socStdStp = cfg('input_number.mvp_soc_std_stop_pct', 75);
+                      const ecoStart  = cfg('input_number.mvp_soc_eco_start_pct', 60);
+                      const socStd    = cfg('input_number.mvp_soc_std_pct', 75);
+                      const socStdStp = ecoStart;
                       const socSuper  = cfg('input_number.mvp_soc_super_pct', 90);
-                      const socSupStp = cfg('input_number.mvp_soc_super_stop_pct', 85);
+                      const socSupStp = socStd;
                       const pvStartW  = cfg('input_number.mvp_pv_start_w', 6000);
                       const maxChip   = cfg('input_number.mvp_tmax_std_threshold_c', 112);
 
@@ -261,7 +261,7 @@ views:
                       }
 
                       const stat = (label, value, sub) => `
-                        <div style="flex:1;min-width:0;text-align:right">
+                        <div style="text-align:center">
                           <div style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
                                       color:var(--secondary-text-color);opacity:0.65;margin-bottom:3px">${label}</div>
                           <div style="font-size:1.5rem;font-weight:700;line-height:1;
@@ -275,7 +275,7 @@ views:
                       const balBtc   = fnum('sensor.pool_balance_btc');
                       const eurRate  = fnum('sensor.btc_eur_price');
                       const blockStr = blockH  !== null ? Math.round(blockH).toLocaleString('de-DE')          : '—';
-                      const priceStr = eurRate !== null ? Math.round(eurRate).toLocaleString('de-DE') + ' €'  : '—';
+                      let priceStr = eurRate !== null ? Math.round(eurRate).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">€</span>' : '—';
                       const haveBal  = balBtc !== null && balBtc > 0;
                       const satsStr  = haveBal ? Math.round(balBtc * 1e8).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:600;opacity:0.8">SATs</span>' : '—';
                       const euroSub  = (haveBal && eurRate !== null && eurRate > 0)
@@ -299,7 +299,7 @@ views:
                         const dp = (eurRate - eurPrev) / eurPrev * 100;
                         const s  = (dp >= 0 ? '+' : '−')
                                  + Math.abs(dp).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                        priceSub = `<span style="font-weight:600;color:${dp >= 0 ? up : down}">(${s} %)</span>`;
+                        priceStr += dchip(`(${s} %)`, dp >= 0 ? up : '#C0504D', 0.5);
                       }
 
                       // Balance: gestern geminte SATs (Tagesertrag). Gleiche Quellen und
@@ -350,7 +350,7 @@ views:
                               <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.55">${sub}</div>
                             </div>
                           </div>
-                          <div style="display:flex;gap:20px;padding-top:14px;
+                          <div style="display:flex;justify-content:space-between;padding-top:14px;
                                       border-top:1px solid var(--divider-color)">
                             <div style="width:24%;max-width:135px;flex-shrink:0;text-align:center">
                               <div style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
@@ -641,10 +641,6 @@ views:
               grid-area: miner
             cards:
               - !include views/miner_controls.yaml
-              # Mining Verlauf unter den Minern (geteilte Karte, single source
-              # of truth mit dem Dev-Dashboard). Breite Tabelle (min. 620px),
-              # scrollt in der 50%-Spalte horizontal.
-              - !include views/mining_log.yaml
 
           # ── Regelschwellen rechts: SoC-Bänder + Start/Sicherheit/Nacht ──
           # Im schmaleren rechten 50%-Streifen vertikal gestapelt (statt
@@ -653,61 +649,408 @@ views:
             view_layout:
               grid-area: regel
             cards:
-              - type: entities
-                title: SoC-Bänder
-                state_color: true
-                # Eingabe-Boxen (input_number, mode: box) lesbar machen: das Theme
-                # erreicht die MDC-Textfield-Füllung nicht (bleibt MWC-weiß), daher
-                # per card-mod Füllung UND Schrift gemeinsam setzen (Glas-Look,
-                # helle Schrift). Geteilter Block via Anker, s. zweite Karte.
-                card_mod: &glass_inputs
-                  style:
-                    hui-input-number-entity-row:
-                      $:
-                        ha-textfield:
-                          $: &glass_tf_css |
-                            .mdc-text-field {
-                              background-color: rgba(255,255,255,0.08) !important;
-                              border-radius: 10px !important;
-                              box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14) !important;
-                            }
-                            .mdc-text-field__input {
-                              color: var(--primary-text-color) !important;
-                              caret-color: var(--primary-text-color) !important;
-                            }
-                            .mdc-line-ripple::before,
-                            .mdc-line-ripple::after { display: none !important; }
-                    hui-input-datetime-entity-row:
-                      $:
-                        ha-textfield:
-                          $: *glass_tf_css
-                entities:
-                  - entity: input_number.mvp_soc_stop_pct
-                    name: Stop SoC (Hausreserve)
-                  - entity: input_number.mvp_soc_eco_start_pct
-                    name: Eco-Start SoC
-                  - entity: input_number.mvp_soc_std_pct
-                    name: Standard-Start SoC
-                  - entity: input_number.mvp_soc_std_stop_pct
-                    name: Standard-Stop SoC (Deadband)
-                  - entity: input_number.mvp_soc_super_pct
-                    name: Super-Start SoC
-                  - entity: input_number.mvp_soc_super_stop_pct
-                    name: Super-Stop SoC (Deadband)
-              - type: entities
-                title: Start, Sicherheit & Nacht-Sperre
-                state_color: true
-                # Gleicher Glas-Look für die Eingabe-Boxen wie SoC-Bänder (Anker).
-                card_mod: *glass_inputs
-                entities:
-                  - entity: input_number.mvp_pv_start_w
-                    name: Eco-Start PV-Leistung
-                  - entity: input_number.mvp_tmax_std_threshold_c
-                    name: Chip-Temp Sicherheitsgrenze
-                  - type: divider
-                  - entity: input_boolean.mvp_night_block_enabled
-                    name: Nacht-Sperre Mining
-                  - entity: input_datetime.mvp_night_block_start
-                    name: Nacht-Sperre Start
-                  - entity: input_datetime.mvp_night_block_end
-                    name: Nacht-Sperre Ende
+              # ── SoC-Bänder: Visualisierung + 4 Schwellwert-Slider ─────────
+              - type: vertical-stack
+                card_mod:
+                  style: |
+                    :host {
+                      background: var(--ha-card-background) !important;
+                      border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color) !important;
+                      border-radius: 20px !important;
+                      box-shadow: var(--ha-card-box-shadow) !important;
+                      overflow: hidden !important;
+                      contain: paint !important;
+                    }
+                    #root {
+                      gap: 0 !important;
+                    }
+                cards:
+                  # SVG-Visualisierung: Sonnenbogen + Schwellwertlinien + Kreise
+                  - type: custom:button-card
+                    show_name: false
+                    show_icon: false
+                    show_state: false
+                    tap_action:
+                      action: none
+                    styles:
+                      card:
+                        - padding: "6px 6px 2px 6px"
+                        - background: "transparent"
+                        - box-shadow: "none"
+                      grid:
+                        - grid-template-areas: '"chart"'
+                        - grid-template-columns: "1fr"
+                        - grid-template-rows: "auto"
+                      custom_fields:
+                        chart:
+                          - width: "100%"
+                          - overflow: "hidden"
+                    custom_fields:
+                      chart: >
+                        [[[
+                          const eco  = parseFloat(states['input_number.mvp_soc_eco_start_pct']?.state || 60);
+                          const std  = parseFloat(states['input_number.mvp_soc_std_pct']?.state || 75);
+                          const sup  = parseFloat(states['input_number.mvp_soc_super_pct']?.state || 90);
+                          const stop = parseFloat(states['input_number.mvp_soc_stop_pct']?.state || 50);
+                          const soc  = parseFloat(states['sensor.battery_soc_pct']?.state);
+                          const W=570, H=290, cL=48, cR=545, cT=30, cB=252;
+                          const yS = s => cB - s*(cB-cT)/100;
+                          const batMin = yS(20);
+                          function tForY(ty) {
+                            let lo=0, hi=1;
+                            for(let i=0;i<60;i++){const m=(lo+hi)/2;const y=batMin*(1-m)*(1-m)*(1+2*m)+cT*m*m*(3-2*m);if(y>ty)lo=m;else hi=m;}
+                            return (lo+hi)/2;
+                          }
+                          // Real sun times from sun.sun (next_* are UTC; if >20h ahead it's tomorrow → -24h)
+                          const sa=states['sun.sun']?.attributes||{};
+                          const nowMs=Date.now();
+                          const sunMs=iso=>{if(!iso)return null;let ms=new Date(iso).getTime();if(ms-nowMs>20*3600000)ms-=86400000;return ms;};
+                          const hrOf=ms=>{if(!ms)return null;const d=new Date(ms);return d.getHours()+d.getMinutes()/60;};
+                          const riseH=hrOf(sunMs(sa.next_rising))??5.47;
+                          const noonH=hrOf(sunMs(sa.next_noon))??13.58;
+                          const setH=hrOf(sunMs(sa.next_setting))??21.68;
+                          // Chart X for decimal hour h, clamped to [cL,cR]
+                          const xH=h=>cL+Math.max(0,Math.min(1,(h-5.5)/17))*(cR-cL);
+                          const xRise=xH(riseH),xNoon=xH(noonH),xSet=xH(setH);
+                          // Battery ascending bezier: flat 20% until sunrise, then charge to 100% at noon
+                          // Y formula: P0y=P1y=batMin, P2y=P3y=cT → tForY binary search valid for any X points
+                          const hw=noonH-riseH; // morning window width in hours
+                          const bP1x=xH(riseH+hw*0.35);
+                          const bP3x=xNoon;
+                          const bP2x=xH(riseH+hw*0.70);
+                          function xForT(t){const u=1-t;return u*u*u*xRise+3*u*u*t*bP1x+3*u*t*t*bP2x+t*t*t*bP3x;}
+                          function posC(s){const y=yS(s);return{x:xForT(tForY(y)),y};}
+                          const ecoC=posC(eco),stdC=posC(std),supC=posC(sup);
+                          const hausY=yS(stop);
+                          const curY=isNaN(soc)?null:yS(Math.min(100,Math.max(0,soc)));
+                          // Battery: flat 20% to sunrise → charge to noon → plateau → discharge to sunset → flat 20% to 23h
+                          const aw=setH-(noonH+1.5); // afternoon window after plateau
+                          const xDstart=xH(noonH+1.5),xDp1=xH(noonH+1.5+aw*0.30),xDp2=xH(noonH+1.5+aw*0.68);
+                          function xForT_desc(t){const u=1-t;return u*u*u*xDstart+3*u*u*t*xDp1+3*u*t*t*xDp2+t*t*t*xSet;}
+                          function posC_desc(s){const y=yS(s);return{x:xForT_desc(1-tForY(y)),y};}
+                          const supEndC=posC_desc(std),stdEndC=posC_desc(eco),ecoEndC=posC_desc(stop);
+                          const batD='M '+cL+','+batMin+' L '+xRise+','+batMin+
+                                     ' C '+bP1x+','+batMin+' '+bP2x+','+cT+' '+xNoon+','+cT+
+                                     ' L '+xDstart+','+cT+
+                                     ' C '+xDp1+','+cT+' '+xDp2+','+batMin+' '+xSet+','+batMin+
+                                     ' L '+cR+','+batMin;
+                          // Sun: real sunrise→noon→sunset from sun.sun, asymmetric halves
+                          const hs1=xNoon-xRise,hs2=xSet-xNoon;
+                          const sunD='M '+xRise+','+cB+
+                                     ' C '+(xRise+hs1*0.55)+','+cB+' '+(xNoon-hs1*0.35)+','+cT+' '+xNoon+','+cT+
+                                     ' S '+(xNoon+hs2*0.55)+','+cB+' '+xSet+','+cB;
+                          function mark(c,col,lbl){
+                            const ly=Math.max(cT+8,c.y-22);
+                            const hasLine=(c.y-6)>(ly+4);
+                            return '<text x="'+c.x+'" y="'+ly+'" fill="'+col+'" font-size="10" font-family="Roboto,sans-serif" font-weight="600" text-anchor="middle">'+lbl+'</text>'+
+                                   (hasLine?'<line x1="'+c.x+'" y1="'+(ly+4)+'" x2="'+c.x+'" y2="'+(c.y-6)+'" stroke="'+col+'" stroke-width="1.5" opacity="0.8"/>':'')+
+                                   '<circle cx="'+c.x+'" cy="'+c.y+'" r="5" fill="'+col+'" stroke="rgba(20,10,50,0.9)" stroke-width="2"/>';
+                          }
+                          let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">';
+                          s+='<circle cx="52" cy="11" r="4" fill="#4caf50"/><text x="59" y="15" fill="rgba(255,255,255,0.65)" font-size="9.5" font-family="Roboto,sans-serif">Schematik</text>';
+                          s+='<line x1="148" y1="11" x2="162" y2="11" stroke="rgba(255,255,255,0.8)" stroke-width="2"/><circle cx="155" cy="11" r="3" fill="white"/><text x="167" y="15" fill="rgba(255,255,255,0.65)" font-size="9.5" font-family="Roboto,sans-serif">Verlauf heute</text>';
+                          s+='<line x1="280" y1="11" x2="292" y2="11" stroke="rgba(255,180,0,0.8)" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="286" cy="11" r="3" fill="rgba(255,180,0,0.7)"/><text x="297" y="15" fill="rgba(255,255,255,0.65)" font-size="9.5" font-family="Roboto,sans-serif">Sonne</text>';
+                          const yTicks=[0,20,40,60,80,100];
+                          for(const p of yTicks){const y=yS(p);s+='<line x1="'+cL+'" y1="'+y+'" x2="'+cR+'" y2="'+y+'" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/><text x="'+(cL-4)+'" y="'+(y+3.5)+'" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Roboto,sans-serif" text-anchor="end">'+p+'%</text>';}
+                          for(let h=6;h<=22;h++){const x=xH(h);const major=(h%3===0);s+='<line x1="'+x+'" y1="'+cT+'" x2="'+x+'" y2="'+cB+'" stroke="rgba(255,255,255,'+(major?'0.07':'0.03')+')" stroke-width="0.8"/><text x="'+x+'" y="'+(cB+13)+'" fill="rgba(255,255,255,'+(major?'0.55':'0.3')+')" font-size="'+(major?'9':'8')+'" font-family="Roboto,sans-serif" text-anchor="middle">'+h+'</text>';}
+                          s+='<text x="'+(cL+(cR-cL)/2)+'" y="'+(cB+25)+'" fill="rgba(255,255,255,0.35)" font-size="9" font-family="Roboto,sans-serif" text-anchor="middle">Uhrzeit</text>';
+                          s+='<line x1="'+cL+'" y1="'+cT+'" x2="'+cL+'" y2="'+cB+'" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>';
+                          s+='<line x1="'+cL+'" y1="'+cB+'" x2="'+cR+'" y2="'+cB+'" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>';
+                          s+='<path d="'+sunD+' V'+cB+' H'+xRise+' Z" fill="rgba(255,165,0,0.12)"/>';
+                          s+='<path d="'+sunD+'" fill="none" stroke="rgba(255,180,0,0.55)" stroke-width="1.5" stroke-dasharray="5 3"/>';
+                          // Fetch today's real SoC history — WebSocket with fallback to input_text
+                          if(!window._bgsocTrace) window._bgsocTrace={date:'',pts:[],status:'idle'};
+                          const today=new Date().toISOString().slice(0,10);
+                          if(window._bgsocTrace.date!==today && window._bgsocTrace.status!=='fetching'){
+                            window._bgsocTrace.status='fetching';
+                            const t0=new Date(); t0.setHours(0,0,0,0);
+                            // Try callWS first, then connection.sendMessagePromise as fallback
+                            const wsFn=hass?.callWS?.bind(hass)||(msg=>hass?.connection?.sendMessagePromise?.(msg));
+                            const wsMsg={type:'history/history_during_period',start_time:t0.toISOString(),
+                              entity_ids:['sensor.battery_soc_pct'],minimal_response:true,no_attributes:true};
+                            const p=wsFn?.(wsMsg);
+                            if(p) p.then(res=>{
+                              const raw=res?.['sensor.battery_soc_pct']||[];
+                              const bkts={};
+                              for(const r of raw){
+                                // lu can be seconds or ms; last_updated as ISO fallback
+                                let ts=r.lu!==undefined?(r.lu>1e10?r.lu:r.lu*1000):(r.last_updated?Date.parse(r.last_updated):null);
+                                if(!ts)continue;
+                                const d=new Date(ts);
+                                const h=d.getHours()+d.getMinutes()/60;
+                                const bk=Math.round(h*6)/6;
+                                const v=parseFloat(r.s??r.state);
+                                if(!isNaN(v))bkts[bk]=v;
+                              }
+                              window._bgsocTrace={date:today,pts:Object.entries(bkts).sort((a,b)=>+a[0]-+b[0]).map(([h,v])=>[+h,v]),status:'ok'};
+                            }).catch(()=>{window._bgsocTrace.status='error';});
+                            else window._bgsocTrace.status='no-ws';
+                          }
+                          // Fallback: input_text.batt_soc_trace (30-min snapshots from automation)
+                          let trace=window._bgsocTrace.pts;
+                          if(trace.length===0){try{const raw=states['input_text.batt_soc_trace']?.state||'';const p=raw.split('|');if(p.length===2&&p[0]===today)trace=JSON.parse(p[1]);}catch(e){}}
+                          const _dbg=window._bgsocTrace.status+'/'+trace.length+'pts';
+                          const hasTrace=trace.length>3;
+                          // Green schematic: full when no data, faded reference when real trace present
+                          s+='<path d="'+batD+' V'+cB+' H'+cL+' Z" fill="rgba(76,175,80,'+(hasTrace?'0.04':'0.12')+')" />';
+                          s+='<path d="'+batD+'" fill="none" stroke="#4caf50" stroke-width="'+(hasTrace?'1':'2')+'" opacity="'+(hasTrace?'0.25':'1')+'"/>';
+                          s+='<line x1="'+cL+'" y1="'+hausY+'" x2="'+cR+'" y2="'+hausY+'" stroke="#ef5350" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.75"/>';
+                          s+='<text x="'+(cL+5)+'" y="'+(hausY-3)+'" fill="#ef5350" font-size="9.5" font-family="Roboto,sans-serif">Haus '+stop+'%</text>';
+                          s+='<line x1="'+cL+'" y1="'+ecoC.y+'" x2="'+cR+'" y2="'+ecoC.y+'" stroke="#4caf50" stroke-width="0.8" stroke-dasharray="4 5" opacity="0.35"/>';
+                          s+='<line x1="'+cL+'" y1="'+stdC.y+'" x2="'+cR+'" y2="'+stdC.y+'" stroke="#29b6f6" stroke-width="0.8" stroke-dasharray="4 5" opacity="0.35"/>';
+                          s+='<line x1="'+cL+'" y1="'+supC.y+'" x2="'+cR+'" y2="'+supC.y+'" stroke="#ff9800" stroke-width="0.8" stroke-dasharray="4 5" opacity="0.35"/>';
+                          s+=mark(ecoC,'#4caf50','Eco '+eco+'%');
+                          s+=mark(stdC,'#29b6f6','Std '+std+'%');
+                          s+=mark(supC,'#ff9800','Super '+sup+'%');
+                          s+='<circle cx="'+supEndC.x+'" cy="'+supEndC.y+'" r="3.5" fill="#ff9800" stroke="rgba(20,10,50,0.85)" stroke-width="1.5" opacity="0.7"/>';
+                          s+='<circle cx="'+stdEndC.x+'" cy="'+stdEndC.y+'" r="3.5" fill="#29b6f6" stroke="rgba(20,10,50,0.85)" stroke-width="1.5" opacity="0.7"/>';
+                          s+='<circle cx="'+ecoEndC.x+'" cy="'+ecoEndC.y+'" r="3.5" fill="#4caf50" stroke="rgba(20,10,50,0.85)" stroke-width="1.5" opacity="0.7"/>';
+                          // Debug status (oben rechts, klein)
+                          s+='<text x="'+(cR-2)+'" y="22" fill="rgba(255,255,255,0.35)" font-size="7.5" font-family="Roboto,sans-serif" text-anchor="end">'+_dbg+'</text>';
+                          // Real trace: white polyline — only points within chart range [5h, 23h]
+                          const visTrace=trace.filter(([h])=>h>=5.5&&h<=22.5);
+                          if(visTrace.length>1){
+                            const pts=visTrace.map(([h,v])=>xH(h).toFixed(1)+','+yS(v).toFixed(1)).join(' ');
+                            s+='<polyline points="'+pts+'" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+                          }
+                          // Current live position dot at (now, soc)
+                          if(curY!==null){
+                            const nowH=new Date().getHours()+new Date().getMinutes()/60;
+                            const nx=xH(nowH);
+                            s+='<line x1="'+nx+'" y1="'+cT+'" x2="'+nx+'" y2="'+cB+'" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="2 3"/>';
+                            s+='<circle cx="'+nx+'" cy="'+curY+'" r="5" fill="white" stroke="rgba(100,200,255,0.7)" stroke-width="2"/>';
+                            s+='<text x="'+(nx+8)+'" y="'+Math.max(curY+4,cT+12)+'" fill="rgba(255,255,255,0.9)" font-size="10" font-family="Roboto,sans-serif" font-weight="600">'+Math.round(soc)+'%</text>';
+                          }
+                          s+='</svg>';
+                          return s;
+                        ]]]
+                  # ── Einstellungen: 3 Zeilen, native tap_action ────────
+                  - type: custom:layout-card
+                    layout_type: custom:grid-layout
+                    layout:
+                      grid-template-columns: repeat(4, minmax(0, 1fr))
+                      grid-template-rows: auto auto auto
+                      grid-gap: 5px
+                      padding: 6px 4px 12px
+                    card_mod:
+                      style: |
+                        ha-card {
+                          background: none !important;
+                          box-shadow: none !important;
+                          border: none !important;
+                          margin: 0 !important;
+                        }
+                    cards:
+                      # Zeile 1: SoC-Schwellen
+                      - type: custom:button-card
+                        template: settings_pill
+                        entity: input_number.mvp_soc_stop_pct
+                        name: Hausreserve
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                        styles:
+                          card:
+                            - border: "1px solid #ef535044"
+                          label:
+                            - color: "#ef5350"
+                      - type: custom:button-card
+                        template: settings_pill
+                        entity: input_number.mvp_soc_eco_start_pct
+                        name: Eco
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                        styles:
+                          card:
+                            - border: "1px solid #4caf5044"
+                          label:
+                            - color: "#4caf50"
+                      - type: custom:button-card
+                        template: settings_pill
+                        entity: input_number.mvp_soc_std_pct
+                        name: Standard
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                        styles:
+                          card:
+                            - border: "1px solid #29b6f644"
+                          label:
+                            - color: "#29b6f6"
+                      - type: custom:button-card
+                        template: settings_pill
+                        entity: input_number.mvp_soc_super_pct
+                        name: Super
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                        styles:
+                          card:
+                            - border: "1px solid #ff980044"
+                          label:
+                            - color: "#ff9800"
+                      # Zeile 2: PV-Kaltstart + Chip-Temp + Raumtemp
+                      - type: custom:button-card
+                        template: settings_pill
+                        entity: input_number.mvp_pv_start_w
+                        name: PV-Kaltstart
+                        label: "[[[ return (parseFloat(entity.state)/1000).toFixed(1) + ' kW'; ]]]"
+                        styles:
+                          card:
+                            - border: "1px solid #fdd83544"
+                          label:
+                            - color: "#fdd835"
+                      - type: custom:button-card
+                        template: settings_pill
+                        entity: input_number.mvp_tmax_std_threshold_c
+                        name: Chip-Temp max
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' °C'; ]]]"
+                        styles:
+                          card:
+                            - border: "1px solid #ff704344"
+                          label:
+                            - color: "#ff7043"
+                      - type: custom:button-card
+                        template: settings_pill
+                        entity: input_number.mvp_room_temp_eco_threshold_c
+                        name: Raumtemp max
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' °C'; ]]]"
+                        styles:
+                          card:
+                            - border: "1px solid #ffb74d44"
+                          label:
+                            - color: "#ffb74d"
+                      - type: custom:button-card
+                        template: settings_spacer
+                      # Zeile 3: Nacht-Sperre
+                      - type: custom:button-card
+                        template: settings_pill
+                        entity: input_boolean.mvp_night_block_enabled
+                        name: Nacht-Sperre
+                        label: "[[[ return entity.state === 'on' ? 'AN' : 'AUS'; ]]]"
+                        styles:
+                          card:
+                            - border: "[[[ return entity.state==='on' ? '1px solid #4caf5044' : '1px solid rgba(255,255,255,.15)'; ]]]"
+                          label:
+                            - color: "[[[ return entity.state==='on' ? '#4caf50' : '#888888'; ]]]"
+                      - type: custom:button-card
+                        template: settings_pill
+                        entity: input_datetime.mvp_night_block_start
+                        name: ab
+                        label: "[[[ return (entity.state || '00:00:00').slice(0,5); ]]]"
+                        styles:
+                          card:
+                            - border: "1px solid #90caf944"
+                          label:
+                            - color: "#90caf9"
+                      - type: custom:button-card
+                        template: settings_pill
+                        entity: input_datetime.mvp_night_block_end
+                        name: bis
+                        label: "[[[ return (entity.state || '00:00:00').slice(0,5); ]]]"
+                        styles:
+                          card:
+                            - border: "1px solid #90caf944"
+                          label:
+                            - color: "#90caf9"
+                      - type: custom:button-card
+                        template: settings_spacer
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB 3: STATISTIK  —  2 Spalten.
+  # Links: F2Pool Live-Daten (stats_pool.yaml)
+  # Rechts: kombinierte Energie+Mining Karten + Verlauf (stats_overview.yaml)
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Statistik
+    path: statistik
+    icon: mdi:chart-bar
+    theme: BitGridAI
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: min-content auto
+          grid-template-areas: '"tl tr" "pool stats"'
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+
+          # ── Gruppen-Titel links: F2POOL ──────────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tl
+            icon: mdi:pickaxe
+            name: F2Pool
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── Gruppen-Titel rechts: ÜBERSICHT ─────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tr
+            icon: mdi:chart-bar
+            name: Übersicht
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── F2Pool links ─────────────────────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: pool
+            cards:
+              - !include views/stats_pool.yaml
+
+          # ── Übersicht rechts ─────────────────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: stats
+            cards:
+              - !include views/stats_overview.yaml

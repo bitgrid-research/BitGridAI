@@ -35,16 +35,16 @@ lovelace:
     - url: /hacsfiles/lovelace-horizon-card/lovelace-horizon-card.js
       type: module
   dashboards:
-    bitgrid-home:
+    bitgridai-v2:
       mode: yaml
       filename: bitgrid_dashboard_v2.yaml
-      title: Home
+      title: BitGridAI v2
       icon: mdi:bitcoin
       show_in_sidebar: true
-    bitgrid-ai:
+    bitgridai-v1:
       mode: yaml
       filename: bitgrid_dashboard_v1.yaml
-      title: BitGridAI
+      title: BitGridAI v1
       icon: mdi:view-dashboard
       show_in_sidebar: true
 

@@ -215,7 +215,12 @@ function styleCard(node) {
   }
   // :host clips the whole element; ha-card rounds the themed background. Both
   // with !important so a card-internal radius reset cannot win.
-  let css = `:host,ha-card{border-radius:${RADIUS}!important;overflow:hidden!important;}`;
+  // button-cards inside a horizontal-stack are mode-selector segments — use a
+  // smaller radius so they fit flush inside the outer pill container (14px).
+  const inHStack = node.tagName === "BUTTON-CARD" &&
+    node.getRootNode()?.host?.tagName === "HUI-HORIZONTAL-STACK-CARD";
+  const r = inHStack ? "10px" : RADIUS;
+  let css = `:host,ha-card{border-radius:${r}!important;overflow:hidden!important;}`;
   // clock-weather-card: zusaetzlich den Heute-Bereich stauchen, damit clk in
   // den flachen Slot passt (nur die clk-Instanz rendert ihn).
   if (node.tagName === "CLOCK-WEATHER-CARD") {

@@ -67,3 +67,14 @@ BitGridAI:
   sidebar-icon-color: "#9aa0b4"
   sidebar-selected-text-color: "#4CAF50"
   sidebar-selected-icon-color: "#4CAF50"
+
+  # ── More-Info-Dialog: opake Oberfläche ──────────────────────────────
+  # ha-dialog nutzt var(--card-background-color) als Surface-Hintergrund.
+  # CSS-Custom-Properties kaskadieren durch Shadow-DOM, daher reicht es,
+  # diese Variable auf ha-more-info-dialog zu setzen, statt Shadow-DOM zu
+  # piercing. Karten auf dem Dashboard bleiben transluzent (Glass-Effekt).
+  card-mod-theme: |
+    ha-more-info-dialog {
+      --card-background-color: rgba(20, 24, 44, 0.97) !important;
+      --secondary-background-color: rgba(255, 255, 255, 0.07) !important;
+    }

@@ -48,7 +48,9 @@ miner_btn:
   show_state: true
   styles:
     card:
-      - background: var(--secondary-background-color)
+      - background: transparent
+      - box-shadow: none
+      - border: none
       - border-radius: 12px
       - padding: 20px 6px
       - height: 110px
@@ -121,4 +123,53 @@ weather_forecast_6h:
     custom_fields:
       row:
         - width: 100%
-        - overflow: hidden
+
+settings_pill:
+  show_name: true
+  show_state: false
+  show_icon: false
+  show_label: true
+  tap_action:
+    action: more-info
+  styles:
+    card:
+      - background: "rgba(255,255,255,0.055)"
+      - border-radius: "9px"
+      - padding: "7px 8px"
+      - cursor: pointer
+      - transition: "background .15s"
+    grid:
+      - grid-template-areas: '"n" "l"'
+      - grid-template-columns: "1fr"
+      - grid-template-rows: "auto auto"
+      - justify-items: center
+    name:
+      - font-size: "8px"
+      - font-weight: "600"
+      - text-transform: "uppercase"
+      - letter-spacing: ".6px"
+      - color: "rgba(255,255,255,.4)"
+      - justify-self: center
+      - white-space: "nowrap"
+      - overflow: "hidden"
+      - text-overflow: "ellipsis"
+      - margin-bottom: "3px"
+    label:
+      - font-size: "15px"
+      - font-weight: "700"
+      - justify-self: center
+      - line-height: "1.1"
+      - white-space: "nowrap"
+
+settings_spacer:
+  show_name: false
+  show_state: false
+  show_icon: false
+  tap_action:
+    action: none
+  styles:
+    card:
+      - background: transparent
+      - box-shadow: none
+      - border: none
+      - pointer-events: none

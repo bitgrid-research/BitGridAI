@@ -1,4 +1,4 @@
-﻿title: BitGridAI
+﻿title: BitGridAI v1
 
 # ═══════════════════════════════════════════════════════
 # Shared Button-Card Templates
@@ -37,6 +37,7 @@ views:
           - type: vertical-stack
             cards:
               - !include views/miner_status.yaml
+              - !include views/energy_status_bar.yaml
               - !include views/miner_controls.yaml
           - !include views/miner_stats.yaml
       # ═══════════════════════════════════════════════════════
@@ -190,8 +191,6 @@ views:
             name: Eco-Start PV (W)
           - entity: input_number.mvp_soc_super_pct
             name: Super-Start SoC (%)
-          - entity: input_number.mvp_soc_super_stop_pct
-            name: Super-Stop SoC (%) — Deadband
           - entity: input_number.mvp_soc_stop_pct
             name: Stop SoC (%)
           - type: divider

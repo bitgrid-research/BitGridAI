@@ -1,0 +1,142 @@
+# ═══════════════════════════════════════════════════════════════════════
+# F2Pool Live-Daten (linke Spalte Statistik-Tab).
+# Entities aus packages/pool.yaml: hashrate, workers, balance, earnings,
+# TH/s-Verlauf (10 Tage aus pool_ths_daily_log).
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+
+  # ── Energie-Status ──────────────────────────────────────────────────────
+  - !include energy_status_bar.yaml
+
+  # ── Miner-Umfeld & Statistik (ohne Wetterzeitstrahl) ────────────────────
+  - !include miner_stats_noweather.yaml
+
+  # ── Live Pool-Status ─────────────────────────────────────────────────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - padding: 16px
+      custom_fields:
+        pool_live:
+          - width: 100%
+          - justify-self: stretch
+          - box-sizing: border-box
+    custom_fields:
+      pool_live: >
+        [[[
+          const apiOk      = states['binary_sensor.pool_api_healthy']?.state === 'on';
+          const apiStatus  = states['sensor.pool_api_status']?.state ?? '—';
+          const hashrate   = parseFloat(states['sensor.pool_hashrate_ths']?.state);
+          const workers    = parseInt(states['sensor.pool_workers_active']?.state ?? '0');
+          const thsYest    = parseFloat(states['sensor.pool_ths_yesterday']?.state);
+          const balBtc     = parseFloat(states['sensor.pool_balance_btc']?.state);
+          const earnedBtc  = parseFloat(states['sensor.pool_earned_today_btc']?.state);
+          const paidBtc    = parseFloat(states['sensor.pool_paid_total_btc']?.state);
+          const eurRate    = parseFloat(states['sensor.btc_eur_price']?.state);
+          const eurPrev    = parseFloat(states['input_number.btc_eur_day_start']?.state);
+
+          const fmt2 = v => isNaN(v) ? '—' : v.toFixed(2);
+          const fmt1 = v => isNaN(v) ? '—' : v.toFixed(1);
+          const sats = v => (!isNaN(v) && v > 0) ? Math.round(v * 1e8).toLocaleString('de-DE') + ' SATs' : '—';
+          const eur  = v => (!isNaN(v) && !isNaN(eurRate) && eurRate > 0)
+            ? (v * eurRate).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €' : '';
+
+          const apiCol = apiOk ? '#4CAF50' : '#ef5350';
+          const apiLbl = apiOk ? '✓ OK' : '✗ ' + apiStatus;
+
+          const workerCol = workers >= 2 ? '#4CAF50' : workers === 1 ? '#f59e0b' : '#ef5350';
+
+          const hsCol = !isNaN(hashrate) && hashrate > 40 ? '#4CAF50'
+            : !isNaN(hashrate) && hashrate > 20 ? '#f59e0b' : '#ef5350';
+
+          let kursLine = '';
+          if (!isNaN(eurRate) && eurRate > 0) {
+            const kursFmt = Math.round(eurRate).toLocaleString('de-DE') + ' €';
+            let delta = '';
+            if (!isNaN(eurPrev) && eurPrev > 0) {
+              const dp = (eurRate - eurPrev) / eurPrev * 100;
+              const sign = dp >= 0 ? '+' : '−';
+              const col  = dp >= 0 ? '#4CAF50' : '#ef5350';
+              delta = ` <span style="font-size:0.75em;font-weight:600;color:${col}">(${sign}${Math.abs(dp).toFixed(2)} %)</span>`;
+            }
+            kursLine = `<div style="display:flex;align-items:center;padding:3px 0;gap:6px;">
+              <ha-icon icon="mdi:currency-eur" style="--mdc-icon-size:14px;color:#f59e0b;flex-shrink:0;"></ha-icon>
+              <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;">BTC Kurs</span>
+              <span style="font-size:0.85rem;font-weight:600;">${kursFmt}${delta}</span>
+            </div>`;
+          }
+
+          // TH/s Verlauf aus pool_ths_daily_log
+          const thsRaw  = states['input_text.pool_ths_daily_log']?.state ?? '';
+          const thsLog  = (thsRaw && thsRaw !== 'unknown' && thsRaw !== 'unavailable')
+            ? thsRaw.split('|').filter(e => e.includes(',')).slice(0, 7) : [];
+          const thsRows = thsLog.map(e => {
+            const [d, v] = e.split(',');
+            const n = parseFloat(v);
+            const col = n > 40 ? '#4CAF50' : n > 20 ? '#f59e0b' : '#ef5350';
+            const day = d ? d.slice(5).replace('-', '.') : '—';
+            return `<div style="display:flex;align-items:center;padding:1px 0;gap:6px;">
+              <span style="color:var(--secondary-text-color);font-size:0.75rem;min-width:36px;">${day}</span>
+              <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+                <div style="height:4px;width:${Math.min(100, n / 60 * 100).toFixed(0)}%;background:${col};border-radius:2px;"></div>
+              </div>
+              <span style="font-size:0.8rem;font-weight:600;color:${col};min-width:52px;text-align:right;">${isNaN(n) ? '—' : n.toFixed(1)} TH/s</span>
+            </div>`;
+          }).join('');
+
+          const sep = `<div style="margin:8px 0;border-top:1px solid var(--divider-color);"></div>`;
+          const row = (icon, label, val, iconColor, sub) =>
+            `<div style="display:flex;align-items:center;padding:3px 0;gap:6px;">
+              <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+              <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;">${label}</span>
+              <div style="text-align:right;">
+                <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</div>
+                ${sub ? `<div style="font-size:0.72rem;color:var(--secondary-text-color);">${sub}</div>` : ''}
+              </div>
+            </div>`;
+
+          return `<div style="width:100%;padding:2px 0;">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--divider-color);">
+              <span style="font-size:0.88rem;font-weight:700;">Live</span>
+              <span style="font-size:0.8rem;font-weight:600;color:${apiCol};">${apiLbl}</span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
+              <div style="background:var(--secondary-background-color);border-radius:8px;padding:8px 6px;text-align:center;">
+                <div style="font-size:0.62rem;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Hashrate</div>
+                <div style="font-size:1.1rem;font-weight:700;color:${hsCol};">${isNaN(hashrate) ? '—' : fmt1(hashrate)}</div>
+                <div style="font-size:0.65rem;color:var(--secondary-text-color);">TH/s</div>
+              </div>
+              <div style="background:var(--secondary-background-color);border-radius:8px;padding:8px 6px;text-align:center;">
+                <div style="font-size:0.62rem;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Workers</div>
+                <div style="font-size:1.1rem;font-weight:700;color:${workerCol};">${workers}</div>
+                <div style="font-size:0.65rem;color:var(--secondary-text-color);">aktiv</div>
+              </div>
+              <div style="background:var(--secondary-background-color);border-radius:8px;padding:8px 6px;text-align:center;">
+                <div style="font-size:0.62rem;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Gestern</div>
+                <div style="font-size:1.1rem;font-weight:700;">${isNaN(thsYest) ? '—' : fmt1(thsYest)}</div>
+                <div style="font-size:0.65rem;color:var(--secondary-text-color);">TH/s Ø</div>
+              </div>
+            </div>
+
+            ${sep}
+            ${row('mdi:bitcoin', 'Heute verdient', sats(earnedBtc), '#F7931A', eur(earnedBtc))}
+            ${row('mdi:wallet', 'Balance', sats(balBtc), '#F7931A', eur(balBtc))}
+            ${row('mdi:check-circle-outline', 'Gesamt ausgezahlt', (!isNaN(paidBtc) && paidBtc > 0) ? fmt2(paidBtc) + ' BTC' : '—', '#4CAF50', eur(paidBtc))}
+            ${sep}
+            ${kursLine}
+
+            ${thsLog.length > 0 ? `
+              ${sep}
+              <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--secondary-text-color);margin-bottom:6px;">TH/s Verlauf</div>
+              ${thsRows}
+            ` : ''}
+          </div>`;
+        ]]]

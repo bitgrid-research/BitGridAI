@@ -310,6 +310,8 @@ src/ha/mosquitto/log/
 # Claude Code
 .claude/
 .mcp.json
+MEMORY.md
+template/
 
 # SQLite WAL-Mode Artefakte (auch außerhalb data/)
 *.db-wal

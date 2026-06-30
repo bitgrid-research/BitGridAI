@@ -1,0 +1,226 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Mining-Statistik (rechte Spalte) — Heute / Monat / 2026 nebeneinander + Verlauf.
+# Eingebunden via !include in:
+#   - bitgrid_dashboard_v2.yaml  → Tab "Statistik", grid-area: mining
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+
+  # ── 3 Mining-Karten nebeneinander ────────────────────────────────────
+  - type: horizontal-stack
+    cards:
+
+      # ── Mining Heute ─────────────────────────────────────────────────
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        styles:
+          card:
+            - padding: 12px 16px
+          custom_fields:
+            stats_mining_heute:
+              - width: 100%
+              - justify-self: stretch
+              - box-sizing: border-box
+        custom_fields:
+          stats_mining_heute: >
+            [[[
+              const mineKwh = states['sensor.mining_energy_daily']?.state ?? '—';
+              const upFmt   = states['sensor.miner_uptime_today_fmt']?.state ?? '—';
+              const ecoH    = states['sensor.miner_eco_hours_today']?.state ?? '—';
+              const stdH    = states['sensor.miner_standard_hours_today']?.state ?? '—';
+              const supH    = states['sensor.miner_super_hours_today']?.state ?? '—';
+              const balBtc  = parseFloat(states['sensor.pool_balance_btc']?.state);
+              const eurRate = parseFloat(states['sensor.btc_eur_price']?.state);
+              const blockH  = parseFloat(states['sensor.bitcoin_block_height']?.state);
+              const fmtKwh = v => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(2) + ' kWh'; };
+              const fmtH   = v => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(1) + ' h'; };
+              const row = (icon, label, val, iconColor) =>
+                `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+                  <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                  <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                  <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+                </div>`;
+              const modeBox = (label, val, color) =>
+                `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                  <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                  <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                </div>`;
+              const haveBal = !isNaN(balBtc) && balBtc > 0;
+              const satsStr = haveBal ? Math.round(balBtc * 1e8).toLocaleString('de-DE') + ' SATs' : '—';
+              const eurStr  = (!isNaN(eurRate) && eurRate > 0) ? Math.round(eurRate).toLocaleString('de-DE') + ' €' : '—';
+              const balEur  = (haveBal && !isNaN(eurRate) && eurRate > 0)
+                ? '≈ ' + (balBtc * eurRate).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €'
+                : '';
+              const blockStr = !isNaN(blockH) ? Math.round(blockH).toLocaleString('de-DE') : '—';
+              return `<div style="width:100%;padding:2px 0;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                  <ha-icon icon="mdi:chart-bar" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                  <span style="font-size:0.88rem;font-weight:700;">Heute</span>
+                </div>
+                <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                  ${row('mdi:pickaxe', 'Mining Energie', fmtKwh(mineKwh), '#f59e0b')}
+                  ${row('mdi:timer-outline', 'Uptime', upFmt, 'var(--secondary-text-color)')}
+                </div>
+                <div style="margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                    ${modeBox('Eco', fmtH(ecoH), '#4CAF50')}
+                    ${modeBox('Standard', fmtH(stdH), '#26C6DA')}
+                    ${modeBox('Super', fmtH(supH), '#F7931A')}
+                  </div>
+                </div>
+                <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                  ${row('mdi:bitcoin', 'Balance', satsStr, '#F7931A')}
+                  ${balEur ? `<div style="padding-left:24px;font-size:0.75rem;color:var(--secondary-text-color);margin-top:-2px;">${balEur}</div>` : ''}
+                  ${row('mdi:currency-eur', 'BTC Kurs', eurStr, '#f59e0b')}
+                </div>
+                <div>
+                  ${row('mdi:cube-outline', 'Block', blockStr, 'var(--secondary-text-color)')}
+                </div>
+              </div>`;
+            ]]]
+
+      # ── Mining Monat ─────────────────────────────────────────────────
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        styles:
+          card:
+            - padding: 12px 16px
+          custom_fields:
+            stats_mining_monat:
+              - width: 100%
+              - justify-self: stretch
+              - box-sizing: border-box
+        custom_fields:
+          stats_mining_monat: >
+            [[[
+              const mine = parseFloat(states['input_number.mining_kwh_mtd']?.state ?? '0')
+                         + parseFloat(states['sensor.mining_energy_daily']?.state ?? '0');
+              const upH  = parseFloat(states['input_number.mining_uptime_mtd_h']?.state ?? '0')
+                         + parseFloat(states['sensor.miner_uptime_today_h']?.state ?? '0');
+              const ecoM = parseFloat(states['input_number.miner_eco_mtd_h']?.state ?? '0')
+                         + parseFloat(states['sensor.miner_eco_hours_today']?.state ?? '0');
+              const stdM = parseFloat(states['input_number.miner_standard_mtd_h']?.state ?? '0')
+                         + parseFloat(states['sensor.miner_standard_hours_today']?.state ?? '0');
+              const supM = parseFloat(states['input_number.miner_super_mtd_h']?.state ?? '0')
+                         + parseFloat(states['sensor.miner_super_hours_today']?.state ?? '0');
+              const fmtKwh = v => {
+                const n = parseFloat(v);
+                if (isNaN(n)) return '—';
+                return n >= 1000 ? (n / 1000).toFixed(2) + ' MWh' : n.toFixed(1) + ' kWh';
+              };
+              const fmtUp = v => {
+                const n = parseFloat(v);
+                if (isNaN(n) || n <= 0) return '0 h';
+                const d = Math.floor(n / 24), h = Math.floor(n % 24);
+                return d > 0 ? `${d}d ${h}h` : `${h} h`;
+              };
+              const row = (icon, label, val, iconColor) =>
+                `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+                  <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                  <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                  <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+                </div>`;
+              const modeBox = (label, val, color) =>
+                `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                  <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                  <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                </div>`;
+              const month = new Date().toLocaleString('de-DE', {month: 'long'});
+              return `<div style="width:100%;padding:2px 0;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                  <ha-icon icon="mdi:calendar-month" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                  <span style="font-size:0.88rem;font-weight:700;">${month}</span>
+                </div>
+                <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                  ${row('mdi:pickaxe', 'Mining Energie', fmtKwh(mine), '#f59e0b')}
+                  ${row('mdi:timer-outline', 'Uptime', fmtUp(upH), 'var(--secondary-text-color)')}
+                </div>
+                <div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                    ${modeBox('Eco', fmtUp(ecoM), '#4CAF50')}
+                    ${modeBox('Standard', fmtUp(stdM), '#26C6DA')}
+                    ${modeBox('Super', fmtUp(supM), '#F7931A')}
+                  </div>
+                </div>
+              </div>`;
+            ]]]
+
+      # ── Mining 2026 gesamt ───────────────────────────────────────────
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        styles:
+          card:
+            - padding: 12px 16px
+          custom_fields:
+            stats_mining_ytd:
+              - width: 100%
+              - justify-self: stretch
+              - box-sizing: border-box
+        custom_fields:
+          stats_mining_ytd: >
+            [[[
+              const mine = parseFloat(states['input_number.mining_kwh_ytd']?.state ?? '0')
+                         + parseFloat(states['sensor.mining_energy_daily']?.state ?? '0');
+              const upH  = parseFloat(states['input_number.mining_uptime_ytd_h']?.state ?? '0')
+                         + parseFloat(states['sensor.miner_uptime_today_h']?.state ?? '0');
+              const ecoY = parseFloat(states['input_number.miner_eco_ytd_h']?.state ?? '0')
+                         + parseFloat(states['sensor.miner_eco_hours_today']?.state ?? '0');
+              const stdY = parseFloat(states['input_number.miner_standard_ytd_h']?.state ?? '0')
+                         + parseFloat(states['sensor.miner_standard_hours_today']?.state ?? '0');
+              const supY = parseFloat(states['input_number.miner_super_ytd_h']?.state ?? '0')
+                         + parseFloat(states['sensor.miner_super_hours_today']?.state ?? '0');
+              const fmtKwh = v => {
+                const n = parseFloat(v);
+                if (isNaN(n)) return '—';
+                return n >= 1000 ? (n / 1000).toFixed(2) + ' MWh' : n.toFixed(1) + ' kWh';
+              };
+              const fmtUp = v => {
+                const n = parseFloat(v);
+                if (isNaN(n) || n <= 0) return '0 h';
+                const d = Math.floor(n / 24), h = Math.floor(n % 24);
+                return d > 0 ? `${d}d ${h}h` : `${h} h`;
+              };
+              const row = (icon, label, val, iconColor) =>
+                `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+                  <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+                  <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+                  <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+                </div>`;
+              const modeBox = (label, val, color) =>
+                `<div style="background:var(--secondary-background-color);border-radius:8px;padding:5px 4px;text-align:center;">
+                  <div style="font-size:0.65rem;color:${color};font-weight:600;">${label}</div>
+                  <div style="font-size:0.85rem;font-weight:700;color:${color};">${val}</div>
+                </div>`;
+              return `<div style="width:100%;padding:2px 0;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                  <ha-icon icon="mdi:calendar-today" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+                  <span style="font-size:0.88rem;font-weight:700;">2026 gesamt</span>
+                </div>
+                <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+                  ${row('mdi:pickaxe', 'Mining Energie', fmtKwh(mine), '#f59e0b')}
+                  ${row('mdi:timer-outline', 'Uptime', fmtUp(upH), 'var(--secondary-text-color)')}
+                </div>
+                <div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
+                    ${modeBox('Eco', fmtUp(ecoY), '#4CAF50')}
+                    ${modeBox('Standard', fmtUp(stdY), '#26C6DA')}
+                    ${modeBox('Super', fmtUp(supY), '#F7931A')}
+                  </div>
+                </div>
+              </div>`;
+            ]]]
+
+  # ── Mining Verlauf (geteilt mit Steuerung-Tab) ───────────────────────
+  - !include mining_log.yaml

@@ -41,12 +41,12 @@ cards:
           const ecoTempLimit  = parseFloat(states['input_number.mvp_tmax_std_threshold_c']?.state || 112);
           const minerMode     = states['sensor.miner1_workmode_status']?.state
                             || states['sensor.miner2_workmode_status']?.state || '';
-          const mvpSocStart   = parseFloat(states['input_number.mvp_soc_eco_start_pct']?.state || 58);
+          const mvpSocStart   = parseFloat(states['input_number.mvp_soc_eco_start_pct']?.state || 60);
           const mvpPvStartKw  = parseFloat(states['input_number.mvp_pv_start_w']?.state || 6000) / 1000;
-          const socStdOn      = parseFloat(states['input_number.mvp_soc_std_pct']?.state         || 80);
-          const socStdOff     = parseFloat(states['input_number.mvp_soc_std_stop_pct']?.state   || 75);
+          const socStdOn      = parseFloat(states['input_number.mvp_soc_std_pct']?.state         || 75);
+          const socStdOff     = parseFloat(states['input_number.mvp_soc_eco_start_pct']?.state   || 60);
           const socSuperOn    = parseFloat(states['input_number.mvp_soc_super_pct']?.state       || 90);
-          const socSuperOff   = parseFloat(states['input_number.mvp_soc_super_stop_pct']?.state  || 85);
+          const socSuperOff   = parseFloat(states['input_number.mvp_soc_std_pct']?.state         || 75);
           const socStop       = parseFloat(states['input_number.mvp_soc_stop_pct']?.state        || 50);
           const batPowerW     = parseFloat(states['sensor.battery_power_w']?.state || 0);
           const battCapKwh    = parseFloat(states['input_number.battery_capacity_kwh']?.state || 10);

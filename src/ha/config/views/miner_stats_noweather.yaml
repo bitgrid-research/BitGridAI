@@ -1,0 +1,529 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Miner-Umfeld & Statistik — identisch zu miner_stats.yaml, jedoch ohne
+# den Wetter-Zeitstrahl (der steht in Tab 3 / F2Pool nicht zur Verfügung).
+# Eingebunden in:
+#   - views/stats_pool.yaml  → Tab 3 Statistik, F2Pool-Spalte (unter Leiste)
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+
+  - type: horizontal-stack
+    cards:
+      - type: custom:button-card
+        entity: sensor.house_load_mean_7d
+        name: "Ø Last 7d"
+        icon: mdi:chart-bell-curve
+        show_state: true
+        styles:
+          card:
+            - background: var(--secondary-background-color)
+            - border-radius: 12px
+            - padding: 12px 4px
+          icon:
+            - width: 36px
+            - height: 36px
+            - color: '#4CAF50'
+          name:
+            - font-size: 0.8rem
+            - color: var(--secondary-text-color)
+          state:
+            - font-size: 0.9rem
+            - font-weight: 600
+        tap_action:
+          action: more-info
+
+      - type: custom:button-card
+        entity: sensor.house_load_forecast_w
+        name: "Prognose"
+        icon: mdi:home-clock
+        show_state: true
+        styles:
+          card:
+            - background: var(--secondary-background-color)
+            - border-radius: 12px
+            - padding: 12px 4px
+          icon:
+            - width: 36px
+            - height: 36px
+            - color: >
+                [[[
+                  const v=parseFloat(entity.state); if(!v||v===0) return 'var(--secondary-text-color)'; if(v<=2000) return '#4CAF50'; if(v<=4000) return '#f59e0b'; return '#F44336';
+                ]]]
+          name:
+            - font-size: 0.8rem
+            - color: var(--secondary-text-color)
+          state:
+            - font-size: 0.9rem
+            - font-weight: 600
+        tap_action:
+          action: more-info
+
+      - type: custom:button-card
+        entity: sensor.mining_window_free_w
+        name: "Frei f. Mining"
+        icon: mdi:lightning-bolt
+        show_state: true
+        styles:
+          card:
+            - background: var(--secondary-background-color)
+            - border-radius: 12px
+            - padding: 12px 4px
+          icon:
+            - width: 36px
+            - height: 36px
+            - color: >
+                [[[
+                  const v=parseFloat(entity.state); if(v>=1200) return '#4CAF50'; if(v>=600) return '#f59e0b'; return 'var(--disabled-color)';
+                ]]]
+          name:
+            - font-size: 0.8rem
+            - color: var(--secondary-text-color)
+          state:
+            - font-size: 0.9rem
+            - font-weight: 600
+        tap_action:
+          action: more-info
+
+      - type: custom:button-card
+        entity: binary_sensor.mining_window_open
+        name: "Fenster"
+        icon: mdi:pickaxe
+        show_state: true
+        styles:
+          card:
+            - background: var(--secondary-background-color)
+            - border-radius: 12px
+            - padding: 12px 4px
+          icon:
+            - width: 36px
+            - height: 36px
+            - color: >
+                [[[
+                  return entity.state==='on' ? '#4CAF50' : 'var(--disabled-color)';
+                ]]]
+          name:
+            - font-size: 0.8rem
+            - color: var(--secondary-text-color)
+          state:
+            - font-size: 0.9rem
+            - font-weight: 600
+        tap_action:
+          action: more-info
+
+      - type: custom:button-card
+        entity: sensor.mining_window_used_pct
+        name: "Ausnutzung"
+        icon: mdi:gauge
+        show_state: true
+        styles:
+          card:
+            - background: var(--secondary-background-color)
+            - border-radius: 12px
+            - padding: 12px 4px
+          icon:
+            - width: 36px
+            - height: 36px
+            - color: >
+                [[[
+                  const v=parseFloat(entity.state); if(v>=75) return '#00C853'; if(v>=50) return '#4CAF50'; if(v>0) return '#f59e0b'; return 'var(--secondary-text-color)';
+                ]]]
+          name:
+            - font-size: 0.8rem
+            - color: var(--secondary-text-color)
+          state:
+            - font-size: 0.9rem
+            - font-weight: 600
+            - color: var(--primary-text-color)
+        tap_action:
+          action: more-info
+
+      - type: custom:button-card
+        entity: sensor.luftung_status
+        name: "Lüftung"
+        icon: mdi:fan
+        show_state: true
+        styles:
+          card:
+            - background: var(--secondary-background-color)
+            - border-radius: 12px
+            - padding: 12px 4px
+          icon:
+            - width: 36px
+            - height: 36px
+            - color: >
+                [[[
+                  const s = entity.state;
+                  if (s === 'Aktiv') return '#4CAF50';
+                  if (s === 'Aus' || !s) return 'var(--disabled-color)';
+                  return '#f59e0b';
+                ]]]
+          name:
+            - font-size: 0.8rem
+            - color: var(--secondary-text-color)
+          state:
+            - font-size: 0.9rem
+            - font-weight: 600
+            - color: >
+                [[[
+                  const s = entity.state;
+                  if (s === 'Aktiv') return '#4CAF50';
+                  if (s === 'Aus' || !s) return 'var(--secondary-text-color)';
+                  return '#f59e0b';
+                ]]]
+        tap_action:
+          action: more-info
+          entity: switch.shellyplugsg3_dcb4d9c6b46c
+
+
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    styles:
+      card:
+        - background: transparent
+        - box-shadow: none
+        - height: 8px
+        - padding: 0
+
+  # ── Heizstab + Keller + Miner 1 nebeneinander ──────────────────────────
+  - type: horizontal-stack
+    cards:
+
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        styles:
+          card:
+            - padding: 10px 16px
+          custom_fields:
+            heizstab:
+              - width: 100%
+              - justify-self: stretch
+              - box-sizing: border-box
+        custom_fields:
+          heizstab: >
+            [[[
+              const pfx = 'sensor.ac_elwa_2_';
+              const mode   = states[pfx + 'screen_mode']?.state ?? '—';
+              const t1     = states[pfx + 'temperatur_1']?.state ?? '—';
+              const psolar = states[pfx + 'power1_solar']?.state ?? '—';
+              const modeColor = mode === 'Standby' ? 'var(--secondary-text-color)' : '#4CAF50';
+              const row = (icon, label, val, unit='', color=null) => {
+                const c = color ? `color:${color};` : '';
+                return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                  <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                  <span style="color:var(--secondary-text-color);font-size:0.85rem;flex:1;">${label}:</span>
+                  <span style="font-size:1rem;font-weight:600;${c}">${val === '—' ? '—' : val + (unit ? ' ' + unit : '')}</span>
+                </div>`;
+              };
+              const modeEl =
+                `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                  <ha-icon icon="mdi:information-outline" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                  <span style="color:var(--secondary-text-color);font-size:0.85rem;flex:1;">Zustand:</span>
+                  <span style="font-size:1rem;font-weight:600;color:${modeColor};">${mode}</span>
+                </div>`;
+              return `<div style="width:100%;padding:2px 0;">
+                <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Heizstab</div>
+                ${modeEl}
+                ${row('mdi:thermometer-water','Temperatur',t1,'°C')}
+                ${row('mdi:solar-power','Leistung',psolar,'W', parseFloat(psolar) > 0 ? '#2196F3' : null)}
+              </div>`;
+            ]]]
+
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        styles:
+          card:
+            - padding: 10px 16px
+          custom_fields:
+            env:
+              - width: 100%
+              - justify-self: stretch
+              - box-sizing: border-box
+        custom_fields:
+          env: >
+            [[[
+              const raw = (id) => states[id];
+              const val = (id) => {
+                const s = raw(id)?.state;
+                return (!s || s === 'unknown' || s === 'unavailable') ? null : s;
+              };
+              const t_keller = val('sensor.ewelink_snzb_02p_temperatur_2');
+              const h_keller = val('sensor.ewelink_snzb_02p_luftfeuchtigkeit_2');
+              const b_keller = val('sensor.ewelink_snzb_02p_batterie_2');
+              const roomTempColor = (v) => {
+                if (v === null) return null;
+                const t = parseFloat(v);
+                if (t < 16) return '#26C6DA';
+                if (t < 25) return '#4CAF50';
+                if (t < 29) return '#f59e0b';
+                if (t < 33) return '#FF7043';
+                return '#F44336';
+              };
+              const roomHumColor = (v) => {
+                if (v === null) return null;
+                const h = parseFloat(v);
+                if (h < 40) return '#26C6DA';
+                if (h < 61) return '#4CAF50';
+                if (h < 71) return '#f59e0b';
+                if (h < 81) return '#FF7043';
+                return '#F44336';
+              };
+              const row = (icon, label, v, unit, color) => {
+                const c = color ?? 'var(--secondary-text-color)';
+                const display = v !== null
+                  ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;color:${c};">${v} ${unit}</span>`
+                  : `<span style="font-size:0.8rem;font-weight:600;margin-left:8px;color:#ef5350;background:rgba(239,83,80,0.12);padding:1px 6px;border-radius:4px;">✕ unknown</span>`;
+                return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                  <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
+                  <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
+                  ${display}
+                </div>`;
+              };
+              return `<div style="width:100%;padding:2px 0;">
+                <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Raumklima</div>
+                ${row('mdi:thermometer','Temperatur',t_keller,'°C',roomTempColor(t_keller))}
+                ${row('mdi:water-percent','Feuchte',h_keller,'%','var(--primary-text-color)')}
+                ${row('mdi:battery','Akku',b_keller,'%')}
+              </div>`;
+            ]]]
+
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        styles:
+          card:
+            - padding: 10px 16px
+          custom_fields:
+            env:
+              - width: 100%
+              - justify-self: stretch
+              - box-sizing: border-box
+        custom_fields:
+          env: >
+            [[[
+              const raw = (id) => states[id];
+              const val = (id) => {
+                const s = raw(id)?.state;
+                return (!s || s === 'unknown' || s === 'unavailable') ? null : s;
+              };
+              const t_m1 = val('sensor.ewelink_snzb_01p_temperatur');
+              const h_m1 = val('sensor.ewelink_snzb_01p_luftfeuchtigkeit');
+              const b_m1 = val('sensor.ewelink_snzb_01p_batterie');
+              const row = (icon, label, v, unit) => {
+                const display = v !== null
+                  ? `<span style="font-size:1rem;font-weight:600;margin-left:8px;">${v} ${unit}</span>`
+                  : `<span style="font-size:0.8rem;font-weight:600;margin-left:8px;color:#ef5350;background:rgba(239,83,80,0.12);padding:1px 6px;border-radius:4px;">✕ unknown</span>`;
+                return `<div style="display:flex;align-items:center;padding:3px 0;gap:8px;">
+                  <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);"></ha-icon>
+                  <span style="color:var(--secondary-text-color);font-size:0.85rem;">${label}:</span>
+                  ${display}
+                </div>`;
+              };
+              return `<div style="width:100%;padding:2px 0;">
+                <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--secondary-text-color);margin-bottom:4px;">Miner-Rack</div>
+                ${row('mdi:thermometer-alert','Temperatur',t_m1,'°C')}
+                ${row('mdi:water-percent','Feuchte',h_m1,'%')}
+                ${row('mdi:battery','Akku',b_m1,'%')}
+              </div>`;
+            ]]]
+
+  # ── Spacer ──────────────────────────────────────────────────────────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    styles:
+      card:
+        - background: transparent
+        - box-shadow: none
+        - height: 8px
+        - padding: 0
+
+  # ── Systemstatus ─────────────────────────────────────────────────────
+  - type: horizontal-stack
+    cards:
+
+      - type: custom:button-card
+        entity: binary_sensor.pool_api_healthy
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        custom_fields:
+          status: >
+            [[[
+              const ok  = entity?.state === 'on';
+              const errRaw = states['input_text.pool_last_error']?.state || '';
+              const err = (errRaw === 'unknown' || errRaw === 'unavailable') ? '' : errRaw;
+              const st  = states['sensor.pool_api_status']?.state || '—';
+              const col = ok ? '#4caf50' : '#f44336';
+              const errLine = (!ok && err)
+                ? `<div style="font-size:0.62rem;color:#f44336;opacity:0.85;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${err}</div>`
+                : '';
+              return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;">
+                <span style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">F2Pool API</span>
+                <span style="font-size:0.95rem;font-weight:700;color:${col};">${ok ? '✓ OK' : '✗ ' + st}</span>
+                ${errLine}
+              </div>`;
+            ]]]
+        styles:
+          card:
+            - background: "rgba(255,255,255,0.03)"
+            - border-radius: 10px
+            - padding: 2px
+            - box-shadow: none
+          custom_fields:
+            status:
+              - width: 100%
+
+      - type: custom:button-card
+        entity: binary_sensor.bitcoin_data_healthy
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        custom_fields:
+          status: >
+            [[[
+              const ok = entity?.state === 'on';
+              const st = states['sensor.bitcoin_data_status']?.state || '—';
+              const bh = states['sensor.bitcoin_block_height']?.state || '—';
+              const col = ok ? '#4caf50' : '#f44336';
+              return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;">
+                <span style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">BTC-Daten</span>
+                <span style="font-size:0.95rem;font-weight:700;color:${col};">${ok ? '✓ ' + bh : '✗ ' + st}</span>
+              </div>`;
+            ]]]
+        styles:
+          card:
+            - background: "rgba(255,255,255,0.03)"
+            - border-radius: 10px
+            - padding: 2px
+            - box-shadow: none
+          custom_fields:
+            status:
+              - width: 100%
+
+      - type: custom:button-card
+        entity: sensor.mining_log_status
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        custom_fields:
+          status: >
+            [[[
+              const st   = entity?.state || '—';
+              const empty = st === 'Leer' || st === '—';
+              const col  = empty ? '#ff9800' : '#4caf50';
+              return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;">
+                <span style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">CSV-Log</span>
+                <span style="font-size:0.95rem;font-weight:700;color:${col};">${empty ? '⚠ ' : '✓ '}${st}</span>
+              </div>`;
+            ]]]
+        styles:
+          card:
+            - background: "rgba(255,255,255,0.03)"
+            - border-radius: 10px
+            - padding: 2px
+            - box-shadow: none
+          custom_fields:
+            status:
+              - width: 100%
+
+      - type: custom:button-card
+        entity: binary_sensor.shelly_miner1_healthy
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        custom_fields:
+          status: >
+            [[[
+              const ok  = entity?.state === 'on';
+              const sw  = states['switch.shellyplugsg3_dcb4d9c5567c']?.state;
+              const on  = sw === 'on';
+              const col = !ok ? '#f44336' : (on ? '#4caf50' : '#ff9800');
+              const lbl = !ok ? '✗ Offline' : (on ? '✓ AN' : '⊘ AUS');
+              return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;">
+                <span style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Miner 1</span>
+                <span style="font-size:0.95rem;font-weight:700;color:${col};">${lbl}</span>
+              </div>`;
+            ]]]
+        styles:
+          card:
+            - background: "rgba(255,255,255,0.03)"
+            - border-radius: 10px
+            - padding: 2px
+            - box-shadow: none
+          custom_fields:
+            status:
+              - width: 100%
+
+      - type: custom:button-card
+        entity: binary_sensor.shelly_miner2_healthy
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        custom_fields:
+          status: >
+            [[[
+              const ok  = entity?.state === 'on';
+              const sw  = states['switch.shellyplugsg3_d0cf13d86254']?.state;
+              const on  = sw === 'on';
+              const col = !ok ? '#f44336' : (on ? '#4caf50' : '#ff9800');
+              const lbl = !ok ? '✗ Offline' : (on ? '✓ AN' : '⊘ AUS');
+              return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;">
+                <span style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Miner 2</span>
+                <span style="font-size:0.95rem;font-weight:700;color:${col};">${lbl}</span>
+              </div>`;
+            ]]]
+        styles:
+          card:
+            - background: "rgba(255,255,255,0.03)"
+            - border-radius: 10px
+            - padding: 2px
+            - box-shadow: none
+          custom_fields:
+            status:
+              - width: 100%
+
+      - type: custom:button-card
+        entity: binary_sensor.sma_healthy
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        custom_fields:
+          status: >
+            [[[
+              const ok  = entity?.state === 'on';
+              const st  = states['sensor.sma_status']?.state || '—';
+              const col = ok ? '#4caf50' : '#f44336';
+              return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;">
+                <span style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">SMA</span>
+                <span style="font-size:0.95rem;font-weight:700;color:${col};">${ok ? '✓ ' + st : '✗ ' + st}</span>
+              </div>`;
+            ]]]
+        styles:
+          card:
+            - background: "rgba(255,255,255,0.03)"
+            - border-radius: 10px
+            - padding: 2px
+            - box-shadow: none
+          custom_fields:
+            status:
+              - width: 100%
