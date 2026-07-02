@@ -21,10 +21,6 @@ recording:
       trigger:
         - platform: time_pattern
           minutes: "/10"
-      condition:
-        - condition: state
-          entity_id: input_boolean.recording_active
-          state: "on"
       action:
         - action: mqtt.publish
           data:

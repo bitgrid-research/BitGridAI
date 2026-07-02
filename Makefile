@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f infra/docker-compose.yml
 
-.PHONY: check fmt lint test test-unit test-replay build build-ci clean deploy-ha deploy-ha-restart
+.PHONY: check fmt lint test test-unit test-replay build build-ci clean deploy-ha deploy-ha-restart sync-history check-gaps
 
 # Vollständiger Qualitätscheck (vor jedem PR)
 check: fmt lint test
@@ -42,6 +42,12 @@ deploy-ha:
 
 deploy-ha-restart:
 	bash scripts/deploy_ha.sh --restart
+
+sync-history:
+	python -m src.data.ha_history_sync --days 7
+
+check-gaps:
+	python -m src.data.gap_check --days 7
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
