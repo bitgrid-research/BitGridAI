@@ -49,6 +49,8 @@ custom_fields:
       parseLog(states['input_text.pool_btc_daily_log']?.state ?? '').forEach(e => {
         const [d, b] = e.split(','); if (d && !btcMap[d]) btcMap[d] = parseFloat(b) || 0;
       });
+      const liveThsRaw = parseFloat(states['sensor.pool_hashrate_h1_ths']?.state);
+      const liveThs = (!isNaN(liveThsRaw) && liveThsRaw > 0) ? liveThsRaw.toFixed(1) : null;
       const thsYest = parseFloat(states['sensor.pool_ths_yesterday']?.state) || 0;
       const phArr   = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
       const thsApi  = {};
@@ -115,7 +117,7 @@ custom_fields:
         const fw = r.live ? '600' : '400';
         const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
         const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
-        const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? '—';
+        const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? (r.live ? liveThs : null) ?? '—';
         const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
         const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';
         const earnedEur = (satNum !== null && r.kw > 0 && btcEur > 0)

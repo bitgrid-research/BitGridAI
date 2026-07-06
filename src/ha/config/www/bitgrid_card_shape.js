@@ -46,7 +46,7 @@ const SHAPED_CARDS = new Set([
 //
 // Farbe richtet sich nach der Leistung (W) der jeweiligen Bubble (derselbe
 // Shelly-Sensor, der auch in der Bubble angezeigt wird):
-//   < 300 W → grau · 300–800 W → grün · 800–1600 W → cyan · > 1600 W → orange.
+//   < 500 W → grau · 500–1000 W → grün · 1000–1500 W → cyan · ab 1500 W → orange.
 //
 // Bubble→Miner wird über den gerenderten <span class="label"> (= config name)
 // bestimmt und die echte Slot-Klasse aus dem DOM gelesen, NICHT über eine
@@ -77,10 +77,10 @@ function bubbleSlot(cl) {
 // Leistungs-Banding (W) → Bubble-Farbe. Null = unbekannt → Fallback behalten.
 function minerPowerColor(w) {
   if (w === null || Number.isNaN(w)) return null;
-  if (w < 300) return "#757575";    // grau (quasi aus / sehr niedrig)
-  if (w <= 800) return "#4CAF50";   // grün (300–800)
-  if (w <= 1600) return "#26C6DA";  // cyan (800–1600)
-  return "#F7931A";                 // orange (> 1600)
+  if (w < 500) return "#757575";    // grau (quasi aus / sehr niedrig)
+  if (w < 1000) return "#4CAF50";   // grün (500–1000)
+  if (w < 1500) return "#26C6DA";   // cyan (1000–1500)
+  return "#F7931A";                 // orange (ab 1500)
 }
 
 // Baut die :host-Override-CSS für die Miner-Bubbles einer PFCP-Instanz.

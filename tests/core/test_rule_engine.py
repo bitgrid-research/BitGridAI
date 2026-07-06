@@ -132,3 +132,59 @@ def test_manual_mode_noop_contains_autonomy_level_param(
     """NOOP_MANUAL_MODE trägt autonomy_level im params-Dict."""
     event = rule_engine.evaluate(nominal_state, autonomy_level="MANUAL")
     assert event.params.get("autonomy_level") == "MANUAL"
+
+
+# ── R2 Abendregel ─────────────────────────────────────────────────────────────
+
+
+def _evening_state(soc: float, hour_utc: int) -> EnergyState:
+    from datetime import datetime, timezone
+
+    return EnergyState(
+        block_id=f"2026-07-02T{hour_utc:02d}:00:00",
+        window_start=datetime(2026, 7, 2, hour_utc, 0, tzinfo=timezone.utc),
+        window_end=datetime(2026, 7, 2, hour_utc, 10, tzinfo=timezone.utc),
+        pv_power_w=300.0,
+        house_load_w=700.0,
+        grid_import_w=0.0,
+        battery_soc_pct=soc,
+        miner_temp_c=42.0,
+        miner_heartbeat_age_sec=5.0,
+        surplus_kw=-0.4,
+        quality="ok",
+    )
+
+
+def test_r2_evening_stops_at_65_after_17h() -> None:
+    """Abendregel: SoC=62% um 18:00 UTC muss STOP auslösen."""
+    cfg = RuleEngineConfig(evening_soc_min_pct=65.0, evening_start_hour_utc=17)
+    state = _evening_state(soc=62.0, hour_utc=18)
+    event = rule_engine.evaluate(state, config=cfg)
+    assert event.decision.action == "STOP"
+    assert "R2" in event.decision_code
+    assert "EVENING" in event.reason
+
+
+def test_r2_evening_no_stop_before_17h() -> None:
+    """Abendregel: SoC=62% um 15:00 UTC darf nicht stoppen (Tageszeit)."""
+    cfg = RuleEngineConfig(evening_soc_min_pct=65.0, evening_start_hour_utc=17)
+    state = _evening_state(soc=62.0, hour_utc=15)
+    event = rule_engine.evaluate(state, config=cfg)
+    assert event.decision.action != "STOP" or "R2" not in event.decision_code
+
+
+def test_r2_evening_disabled_by_default() -> None:
+    """evening_soc_min_pct=0.0 (Default): normaler Hard-Stop bei 50%."""
+    cfg = RuleEngineConfig()
+    state = _evening_state(soc=62.0, hour_utc=20)
+    event = rule_engine.evaluate(state, config=cfg)
+    assert "EVENING" not in event.reason
+
+
+def test_r2_evening_noop_in_soft_band() -> None:
+    """SoC im Abend-Soft-Band (65–73%) → NOOP, kein neuer Start."""
+    cfg = RuleEngineConfig(evening_soc_min_pct=65.0, evening_start_hour_utc=17)
+    state = _evening_state(soc=68.0, hour_utc=19)
+    event = rule_engine.evaluate(state, config=cfg)
+    assert event.decision.action == "NOOP"
+    assert "EVENING" in event.reason

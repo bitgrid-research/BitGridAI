@@ -190,7 +190,7 @@ cards:
                 ]]]
         tap_action:
           action: more-info
-          entity: switch.shellyplugsg3_dcb4d9c6b46c
+          entity: switch.shellyplusplugs_d4d4daf4eda4
 
 
   - type: custom:button-card

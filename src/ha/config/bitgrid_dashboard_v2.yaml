@@ -266,7 +266,7 @@ views:
                                       color:var(--secondary-text-color);opacity:0.65;margin-bottom:3px">${label}</div>
                           <div style="font-size:1.5rem;font-weight:700;line-height:1;
                                       white-space:nowrap">${value}</div>
-                          ${sub ? `<div style="font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);
+                          ${sub ? `<div style="font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);opacity:0.7;
                                       white-space:nowrap;margin-top:3px">${sub}</div>` : ''}
                         </div>`;
 
@@ -277,7 +277,7 @@ views:
                       const blockStr = blockH  !== null ? Math.round(blockH).toLocaleString('de-DE')          : '—';
                       let priceStr = eurRate !== null ? Math.round(eurRate).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">€</span>' : '—';
                       const haveBal  = balBtc !== null && balBtc > 0;
-                      const satsStr  = haveBal ? Math.round(balBtc * 1e8).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:600;opacity:0.8">SATs</span>' : '—';
+                      const satsStr  = haveBal ? Math.round(balBtc * 1e8).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">SATs</span>' : '—';
                       const euroSub  = (haveBal && eurRate !== null && eurRate > 0)
                         ? '≈ ' + (balBtc * eurRate).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €'
                         : '';
@@ -391,6 +391,7 @@ views:
               # ENERGIEFLUSS  —  Energie-Gruppe unten (flu, volle linke Breite)
               # ═══════════════════════════════════════════════════════════
               - type: custom:power-flow-card-plus
+                clickable_entities: true
                 # Runde Ecken/Hintergrund kommen vom Theme (ha-card-border-radius)
                 # plus www/bitgrid_card_shape.js: PFCP clippt seinen Hintergrund
                 # nicht selbst auf den Theme-Radius, und card-mod ist hier nicht
@@ -423,8 +424,8 @@ views:
                   # Zwei Miner statt eines Summen-Knotens (gleiche Shelly-Quellen,
                   # aus denen sensor.miner_total_power_w summiert). Die Bubble-Farbe
                   # wird NICHT hier statisch gesetzt, sondern live nach Leistung von
-                  # www/bitgrid_card_shape.js eingefärbt (< 300 W grau, 300–800 W grün,
-                  # 800–1600 W cyan, > 1600 W orange): das Modul liest den Shelly-Sensor und
+                  # www/bitgrid_card_shape.js eingefärbt (< 500 W grau, 500–1000 W grün,
+                  # 1000–1500 W cyan, ab 1500 W orange): das Modul liest den Shelly-Sensor und
                   # überschreibt die PFCP-CSS-Variable --individual-<slot>-color.
                   # color: hier ist nur der Fallback, falls das Modul (noch) nicht
                   # greift — neutrales Grau, damit nichts grell aufblitzt.
@@ -947,7 +948,18 @@ views:
                           label:
                             - color: "#90caf9"
                       - type: custom:button-card
-                        template: settings_spacer
+                        template: settings_pill
+                        entity: sensor.luftung_status
+                        name: Lüftung
+                        label: "[[[ return entity.state; ]]]"
+                        tap_action:
+                          action: more-info
+                          entity: switch.shellyplusplugs_d4d4daf4eda4
+                        styles:
+                          card:
+                            - border: "[[[ return entity.state==='Aktiv' ? '1px solid #4caf5044' : (entity.state==='Aus' ? '1px solid rgba(255,255,255,.15)' : '1px solid #ff980044'); ]]]"
+                          label:
+                            - color: "[[[ return entity.state==='Aktiv' ? '#4caf50' : (entity.state==='Aus' ? '#888888' : '#ff9800'); ]]]"
 
   # ═══════════════════════════════════════════════════════════════════════
   # TAB 3: STATISTIK  —  2 Spalten.

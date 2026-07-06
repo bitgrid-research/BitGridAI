@@ -8,7 +8,7 @@ mvp_auto:
       max: 100
       step: 1
       mode: box
-      initial: 60
+      initial: 70
       icon: mdi:battery-charging-60
 
     mvp_pv_start_w:
@@ -26,7 +26,7 @@ mvp_auto:
       max: 100
       step: 1
       mode: box
-      initial: 75
+      initial: 85
       icon: mdi:battery-70
 
     mvp_soc_super_pct:
@@ -35,7 +35,7 @@ mvp_auto:
       max: 100
       step: 5
       mode: box
-      initial: 90
+      initial: 100
       icon: mdi:battery
 
     mvp_soc_stop_pct:
@@ -44,7 +44,7 @@ mvp_auto:
       max: 100
       step: 1
       mode: box
-      initial: 50
+      initial: 60
       icon: mdi:battery-alert
 
 
@@ -63,7 +63,7 @@ mvp_auto:
       max: 40
       step: 0.5
       mode: box
-      initial: 31
+      initial: 40
       icon: mdi:home-thermometer-outline
 
     battery_capacity_kwh:
@@ -192,7 +192,7 @@ mvp_auto:
             {% set m2 = states('sensor.miner2_workmode_status') in ['Eco', 'Standard', 'Super'] %}
             {% if m1 or m2 %}
               Aktiv
-            {% elif states('switch.shellyplugsg3_dcb4d9c6b46c') == 'on' %}
+            {% elif states('switch.shellyplusplugs_d4d4daf4eda4') == 'on' %}
               {% set remaining = (as_timestamp(states('input_datetime.lueftung_cooldown_end'), 0) - now().timestamp()) | int %}
               {% if remaining > 0 %}
                 {{ '%d:%02d' | format(remaining // 60, remaining % 60) }}
@@ -274,13 +274,13 @@ mvp_auto:
             soc: "{{ states('sensor.battery_soc_pct') | float(0) }}"
             pv: "{{ states('sensor.pv_power_w') | float(0) }}"
             bat_w: "{{ states('sensor.battery_power_w') | float(0) }}"
-            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(60) }}"
+            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(70) }}"
             pv_start: "{{ states('input_number.mvp_pv_start_w') | float(6000) }}"
-            soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(75) }}"
-            soc_std_off: "{{ states('input_number.mvp_soc_eco_start_pct') | float(60) }}"
-            soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(90) }}"
-            soc_super_off: "{{ states('input_number.mvp_soc_std_pct') | float(75) }}"
-            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(50) }}"
+            soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(85) }}"
+            soc_std_off: "{{ states('input_number.mvp_soc_eco_start_pct') | float(70) }}"
+            soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(100) }}"
+            soc_super_off: "{{ states('input_number.mvp_soc_std_pct') | float(85) }}"
+            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(60) }}"
             m1_status: "{{ states('sensor.miner1_workmode_status') }}"
             m1_select: "{{ states('select.miner1_workmode_set') }}"
             m1_up_ts: "{{ state_attr('input_datetime.mvp_miner1_last_upgrade', 'timestamp') | float(0) }}"
@@ -355,13 +355,13 @@ mvp_auto:
                   data:
                     option: Eco
 
-            # P2: Akku voll → Standard-Cap (Super deaktiviert)
+            # P2: Akku voll → Super
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
               sequence:
                 - condition: template
-                  value_template: "{{ m1_status != 'Standard' }}"
+                  value_template: "{{ m1_status != 'Super' }}"
                 - condition: template
                   value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -371,13 +371,13 @@ mvp_auto:
                   value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0) }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P2 Standard-Cap: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m1_status }} (Super gesperrt)"
+                    message: "[mvp-miner1] P2 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m1_status }}"
                     level: info
                 - action: select.select_option
                   target:
                     entity_id: select.miner1_workmode_set
                   data:
-                    option: Standard
+                    option: Super
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.mvp_miner1_last_upgrade
@@ -536,13 +536,13 @@ mvp_auto:
             soc: "{{ states('sensor.battery_soc_pct') | float(0) }}"
             pv: "{{ states('sensor.pv_power_w') | float(0) }}"
             bat_w: "{{ states('sensor.battery_power_w') | float(0) }}"
-            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(60) }}"
+            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(70) }}"
             pv_start: "{{ states('input_number.mvp_pv_start_w') | float(6000) }}"
-            soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(75) }}"
-            soc_std_off: "{{ states('input_number.mvp_soc_eco_start_pct') | float(60) }}"
-            soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(90) }}"
-            soc_super_off: "{{ states('input_number.mvp_soc_std_pct') | float(75) }}"
-            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(50) }}"
+            soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(85) }}"
+            soc_std_off: "{{ states('input_number.mvp_soc_eco_start_pct') | float(70) }}"
+            soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(100) }}"
+            soc_super_off: "{{ states('input_number.mvp_soc_std_pct') | float(85) }}"
+            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(60) }}"
             m2_status: "{{ states('sensor.miner2_workmode_status') }}"
             m2_select: "{{ states('select.miner2_workmode_set') }}"
             m2_up_ts: "{{ state_attr('input_datetime.mvp_miner2_last_upgrade', 'timestamp') | float(0) }}"
@@ -617,13 +617,13 @@ mvp_auto:
                   data:
                     option: Eco
 
-            # P2: Akku voll → Standard-Cap (Super deaktiviert)
+            # P2: Akku voll → Super
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
               sequence:
                 - condition: template
-                  value_template: "{{ m2_status != 'Standard' }}"
+                  value_template: "{{ m2_status != 'Super' }}"
                 - condition: template
                   value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -633,13 +633,13 @@ mvp_auto:
                   value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0) }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P2 Standard-Cap: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }} (Super gesperrt)"
+                    message: "[mvp-miner2] P2 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }}"
                     level: info
                 - action: select.select_option
                   target:
                     entity_id: select.miner2_workmode_set
                   data:
-                    option: Standard
+                    option: Super
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.mvp_miner2_last_upgrade
@@ -827,7 +827,7 @@ mvp_auto:
     - id: mvp_lueftung_watchdog
       alias: "MVP: Lüftung Watchdog"
       description: >
-        Schaltet Lüftungs-Shelly (shellyplugsg3_dcb4d9c6b46c) ein sobald
+        Schaltet Lüftungs-Shelly (shellyplusplugs_d4d4daf4eda4) ein sobald
         irgendein Miner läuft. Nach Miner-Stop: 30 min Nachlaufzeit, dann aus.
         mode: restart → Neustart des Miners während Cooldown bricht Abschaltung ab.
       mode: restart
@@ -854,7 +854,7 @@ mvp_auto:
                     level: info
                 - action: switch.turn_on
                   target:
-                    entity_id: switch.shellyplugsg3_dcb4d9c6b46c
+                    entity_id: switch.shellyplusplugs_d4d4daf4eda4
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.lueftung_cooldown_end
@@ -863,7 +863,7 @@ mvp_auto:
           default:
             # Cooldown nur wenn Plug gerade wirklich an ist — verhindert Fehlstart beim HA-Boot
             - condition: state
-              entity_id: switch.shellyplugsg3_dcb4d9c6b46c
+              entity_id: switch.shellyplusplugs_d4d4daf4eda4
               state: "on"
             - action: system_log.write
               data:
@@ -882,7 +882,7 @@ mvp_auto:
                 level: info
             - action: switch.turn_off
               target:
-                entity_id: switch.shellyplugsg3_dcb4d9c6b46c
+                entity_id: switch.shellyplusplugs_d4d4daf4eda4
             - action: input_datetime.set_datetime
               target:
                 entity_id: input_datetime.lueftung_cooldown_end

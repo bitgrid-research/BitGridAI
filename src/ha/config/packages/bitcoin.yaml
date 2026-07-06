@@ -30,7 +30,7 @@ bitcoin:
           device_class: connectivity
           icon: mdi:fan
           state: >-
-            {{ states('switch.shellyplugsg3_dcb4d9c6b46c') not in ['unknown', 'unavailable'] }}
+            {{ states('switch.shellyplusplugs_d4d4daf4eda4') not in ['unknown', 'unavailable'] }}
 
         - name: "sma_healthy"
           unique_id: sma_healthy

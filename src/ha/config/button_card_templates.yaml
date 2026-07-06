@@ -17,7 +17,7 @@ miner_header:
     status: >
       [[[
         const on = entity.state === 'on';
-        return `<ha-icon icon="${on ? 'mdi:check-circle' : 'mdi:alert-circle'}"
+        return `<ha-icon icon="${on ? 'mdi:ethernet' : 'mdi:alert-circle'}"
           style="color:${on ? '#4CAF50' : '#F44336'}; --mdc-icon-size:22px;"></ha-icon>`;
       ]]]
   styles:

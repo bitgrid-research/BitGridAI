@@ -100,6 +100,11 @@ class RuleEngineConfig:
         # Standard/Super speist die Batteriereserve, dort greift R4 nicht.
         forecast_veto_enabled: bool = False,
         forecast_sustain_pv_kw: float = 3.0,
+        # R2 Abendregel (nur surplus-Strategie): ab evening_start_hour_utc
+        # gelten erhöhte SoC-Schwellen, um Nachtkapazität zu schützen.
+        # 0.0 = deaktiviert (Default).
+        evening_soc_min_pct: float = 0.0,
+        evening_start_hour_utc: int = 17,
     ) -> None:
         self.surplus_min_kw = surplus_min_kw
         self.price_max_ct_kwh = price_max_ct_kwh
@@ -128,6 +133,8 @@ class RuleEngineConfig:
         self.night_block_end_hour = night_block_end_hour
         self.forecast_veto_enabled = forecast_veto_enabled
         self.forecast_sustain_pv_kw = forecast_sustain_pv_kw
+        self.evening_soc_min_pct = evening_soc_min_pct
+        self.evening_start_hour_utc = evening_start_hour_utc
 
 
 def evaluate(
@@ -251,11 +258,16 @@ def evaluate(
     # (Studie) bleibt R2 die SoC-Reserve (soc_hard/soc_soft).
     r2_soc_soft = 0.0 if config.strategy == "soc_band" else config.soc_soft_min_pct
     r2_soc_hard = 0.0 if config.strategy == "soc_band" else config.soc_hard_min_pct
+    r2_evening_min = (
+        0.0 if config.strategy == "soc_band" else config.evening_soc_min_pct
+    )
     r2_vote = r2_autarky.evaluate(
         state,
         soc_soft_min_pct=r2_soc_soft,
         soc_hard_min_pct=r2_soc_hard,
         max_grid_import_w=config.max_grid_import_w,
+        evening_soc_min_pct=r2_evening_min,
+        evening_start_hour_utc=config.evening_start_hour_utc,
     )
     if r2_vote is not None:
         votes.append(r2_vote)

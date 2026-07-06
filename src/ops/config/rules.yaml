@@ -10,6 +10,14 @@ rules:
     soc_soft_min_pct: 58.0   # kein Neustart < 58 % (= HA Eco-Start)
     soc_hard_min_pct: 50.0   # Stopp <= 50 % Hausreserve (= HA Stop-SoC)
     max_grid_import_w: 500.0
+    # Tiefentladeschutz-Parameter — evening_soc_min_pct wird berechnet als:
+    #   battery_min_soc_pct + (overnight_load_kwh / battery_capacity_kwh * 100) + evening_soc_safety_margin_pct
+    battery_min_soc_pct: 10.0           # SMA-Tiefentladeschutz (Zielwert, dort einzustellen)
+    battery_capacity_kwh: 13.0          # Brutto-Kapazität (aus 11-Tage-Datenschnitt)
+    overnight_load_kwh: 7.0             # mittlere Nacht-Grundlast (700 W × 10 h)
+    evening_soc_safety_margin_pct: 5.0  # Sicherheitspuffer über berechnetem Minimum
+    evening_start_hour_utc: 17          # 17:00 UTC = 19:00 CEST
+    # => 10 + (7 / 13 * 100) + 5 = 68.8 %
 
   r3:
     max_chip_temp_c: 85.0

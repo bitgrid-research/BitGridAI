@@ -97,6 +97,30 @@ class ConfigLoader:
                     errors.append(
                         f"rules.yaml: r2.soc_hard_min_pct ({soc_hard}) muss kleiner sein als soc_soft_min_pct ({soc_soft})"
                     )
+            batt_min = r2.get("battery_min_soc_pct", None)
+            batt_cap = r2.get("battery_capacity_kwh", None)
+            overnight = r2.get("overnight_load_kwh", None)
+            if batt_min is not None and not isinstance(batt_min, (int, float)):
+                errors.append("rules.yaml: r2.battery_min_soc_pct muss eine Zahl sein")
+            elif isinstance(batt_min, (int, float)) and isinstance(
+                soc_hard, (int, float)
+            ):
+                if batt_min >= soc_hard:
+                    errors.append(
+                        f"rules.yaml: r2.battery_min_soc_pct ({batt_min}) muss kleiner sein als soc_hard_min_pct ({soc_hard})"
+                    )
+            if batt_cap is not None and (
+                not isinstance(batt_cap, (int, float)) or batt_cap <= 0
+            ):
+                errors.append(
+                    "rules.yaml: r2.battery_capacity_kwh muss eine positive Zahl sein"
+                )
+            if overnight is not None and (
+                not isinstance(overnight, (int, float)) or overnight <= 0
+            ):
+                errors.append(
+                    "rules.yaml: r2.overnight_load_kwh muss eine positive Zahl sein"
+                )
 
         r3 = rules.get("r3", {})
         if isinstance(r3, dict):
@@ -137,12 +161,27 @@ def rules_to_engine_config(data: dict[str, Any]) -> "RuleEngineConfig":
     r4 = r.get("r4", {})
     r5 = r.get("r5", {})
 
+    battery_min_soc_pct: float = r2.get("battery_min_soc_pct", 0.0)
+    battery_capacity_kwh: float = r2.get("battery_capacity_kwh", 0.0)
+    overnight_load_kwh: float = r2.get("overnight_load_kwh", 0.0)
+    evening_soc_safety_margin_pct: float = r2.get("evening_soc_safety_margin_pct", 5.0)
+    if battery_capacity_kwh > 0 and overnight_load_kwh > 0:
+        evening_soc_min_pct: float = (
+            battery_min_soc_pct
+            + overnight_load_kwh / battery_capacity_kwh * 100.0
+            + evening_soc_safety_margin_pct
+        )
+    else:
+        evening_soc_min_pct = r2.get("evening_soc_min_pct", 0.0)
+
     return RuleEngineConfig(
         surplus_min_kw=r1.get("surplus_min_kw", 1.5),
         price_max_ct_kwh=r1.get("price_max_ct_kwh", 25.0),
         soc_soft_min_pct=r2.get("soc_soft_min_pct", 58.0),
         soc_hard_min_pct=r2.get("soc_hard_min_pct", 50.0),
         max_grid_import_w=r2.get("max_grid_import_w", 500.0),
+        evening_soc_min_pct=evening_soc_min_pct,
+        evening_start_hour_utc=r2.get("evening_start_hour_utc", 17),
         max_chip_temp_c=r3.get("max_chip_temp_c", 85.0),
         t_resume_c=r3.get("t_resume_c", 75.0),
         comm_timeout_sec=r3.get("comm_timeout_sec", 60.0),
