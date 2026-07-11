@@ -18,7 +18,7 @@ miner_header:
       [[[
         const on = entity.state === 'on';
         return `<ha-icon icon="${on ? 'mdi:ethernet' : 'mdi:alert-circle'}"
-          style="color:${on ? '#4CAF50' : '#F44336'}; --mdc-icon-size:22px;"></ha-icon>`;
+          style="color:${on ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'}; --mdc-icon-size:22px;"></ha-icon>`;
       ]]]
   styles:
     grid:

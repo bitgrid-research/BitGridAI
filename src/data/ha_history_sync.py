@@ -57,6 +57,21 @@ ENTITY_MAP: list[tuple[str, str]] = [
     ("sensor.pv_forecast_kw", "pv_forecast_kw"),
 ]
 
+# Verbraucher-Plugs → device_states-Tabelle (pro Plug, 10-min-Bloecke).
+# sensor.geraete_power_w (Summe) ist im HA-Recorder ausgeschlossen und wird
+# bewusst nicht gespeichert: Summe = SUM(power_w) ueber die Haushalts-Plugs.
+DEVICE_ENTITY_MAP: list[tuple[str, str]] = [
+    ("sensor.shellyplugsg3_9070694abdf4_leistung", "kuehlschraenke"),
+    ("sensor.shellyplugsg3_d885ac1e9adc_leistung", "waschmaschine"),
+    ("sensor.shellyplugsg3_9070694c99d4_leistung", "tv"),
+    ("sensor.shellyplugsg3_d885ac18c3b4_leistung", "buero"),
+    # Miner-Infrastruktur: Lueftungs-Shelly (mvp_auto schaltet ihn, misst nicht)
+    ("sensor.shellyplusplugs_d4d4daf4eda4_leistung", "lueftung"),
+    # Noch nicht zugeordneter Plug (~40 W Dauerlast) — Slug spaeter per
+    # UPDATE device_states SET device = '<name>' umbenennbar
+    ("sensor.shellyplugsg3_d0cf13db3a00_leistung", "plug_d0cf13db3a00"),
+]
+
 _CRITICAL_FIELDS = {"pv_power_w", "house_load_w", "battery_soc_pct"}
 _HEARTBEAT_FALLBACK = 5.0  # sec — gilt als "ok" wenn kein Signal vorhanden
 
@@ -228,6 +243,37 @@ def resample_to_blocks(
     return states
 
 
+def resample_device_blocks(
+    entity_readings: dict[str, list[tuple[datetime, float | None]]],
+    device_map: list[tuple[str, str]],
+    start: datetime,
+    end: datetime,
+) -> list[tuple[str, str, float]]:
+    """
+    Konvertiert Plug-Rohdaten in (block_id, device, power_w)-Zeilen.
+
+    Gleiche Fenster- und Forward-Fill-Semantik wie resample_to_blocks.
+    Bloecke ohne jeglichen Wert (Plug nie gesehen) werden ausgelassen,
+    damit ein spaeterer Sync sie noch fuellen kann.
+    """
+    rows: list[tuple[str, str, float]] = []
+
+    t = _floor_to_block(start)
+    block_end_bound = _floor_to_block(end)
+
+    while t < block_end_bound:
+        win_end = t + timedelta(minutes=10)
+        block_id = t.strftime("%Y-%m-%dT%H:%M:%S")
+        for entity_id, device in device_map:
+            readings = entity_readings.get(entity_id, [])
+            value = _last_value_in_window(readings, t, win_end)
+            if value is not None:
+                rows.append((block_id, device, value))
+        t = win_end
+
+    return rows
+
+
 # ---------------------------------------------------------------------------
 # Sync-Logik
 # ---------------------------------------------------------------------------
@@ -275,6 +321,52 @@ def sync(
             added += 1
 
     log.info("Sync fertig: %d neu, %d bereits vorhanden", added, skipped)
+    return added, skipped
+
+
+def sync_devices(
+    start: datetime,
+    end: datetime,
+    conn: sqlite3.Connection,
+    ha_base_url: str,
+    token: str,
+) -> tuple[int, int]:
+    """
+    Synchronisiert Verbraucher-Plugs [start, end) in device_states.
+
+    Gibt (neue_zeilen, uebersprungene_zeilen) zurueck.
+    Bestehende Eintraege werden nie ueberschrieben (INSERT OR IGNORE).
+    """
+    entity_ids = [eid for eid, _ in DEVICE_ENTITY_MAP]
+    log.info(
+        "Hole Plug-History %s bis %s (%d Plugs)...",
+        start.strftime("%Y-%m-%d %H:%M"),
+        end.strftime("%Y-%m-%d %H:%M"),
+        len(entity_ids),
+    )
+    entity_readings = fetch_history(start, end, entity_ids, ha_base_url, token)
+
+    if not entity_readings:
+        log.warning("Keine Plug-Daten von HA erhalten — Device-Sync uebersprungen.")
+        return 0, 0
+
+    rows = resample_device_blocks(entity_readings, DEVICE_ENTITY_MAP, start, end)
+
+    added = 0
+    skipped = 0
+    for row in rows:
+        cur = conn.execute(
+            "INSERT OR IGNORE INTO device_states (block_id, device, power_w)"
+            " VALUES (?, ?, ?)",
+            row,
+        )
+        if cur.rowcount:
+            added += 1
+        else:
+            skipped += 1
+    conn.commit()
+
+    log.info("Device-Sync fertig: %d neu, %d bereits vorhanden", added, skipped)
     return added, skipped
 
 
@@ -361,6 +453,8 @@ def main() -> None:
         print(f"Sync: +{added} neue Bloecke, {skipped} uebersprungen")
         if added == 0 and skipped == 0:
             print("Warnung: Keine Daten empfangen — HA erreichbar?")
+        dev_added, dev_skipped = sync_devices(start, end, conn, ha_url, token)
+        print(f"Devices: +{dev_added} neue Zeilen, {dev_skipped} uebersprungen")
     finally:
         conn.close()
 

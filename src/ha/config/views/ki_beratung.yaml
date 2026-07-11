@@ -1,0 +1,187 @@
+# ═══════════════════════════════════════════════════════════════════════
+# ₿itsy-Beratung (rechte Spalte) — KI-Beratung + Status des KI-Stacks.
+# Eingebunden via !include in:
+#   - bitgrid_dashboard_v2.yaml  → Tab "₿itsy", grid-area: beratung
+#
+# Karte 1 "Beratung": zeigt die Hermes/Qwen-Beratung aus sensor.bitsy_advice
+# (Kontrakt: packages/bitsy.yaml), klar als KI-generiert gekennzeichnet.
+# Solange Hermes offline ist: deterministischer Ist-Zustand aus den Live-
+# Entities (die Datenbasis, die Hermes später ebenfalls bekommt).
+#
+# Karte 2 "KI-Stack": Zustand der Erklärschicht-Bausteine (Hermes-Agent,
+# LLM-Modell, Whisper-Sprachein-/ausgabe, letzte Analyse). Whisper ist
+# geplanter Ausbau, wird hier bewusst schon als Slot angezeigt.
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+
+  # ── Karte 1: Beratung (Hermes/Qwen oder deterministischer Fallback) ────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: var(--ha-card-background)
+        - border-radius: var(--ha-card-border-radius)
+        - overflow: hidden
+        - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+        - box-shadow: var(--ha-card-box-shadow)
+        - padding: 20px
+      grid:
+        - grid-template-areas: '"beratung"'
+        - grid-template-columns: 1fr
+      custom_fields:
+        beratung:
+          - width: 100%
+          - justify-self: stretch
+    custom_fields:
+      beratung: >
+        [[[
+          const fnum = (id) => {
+            const v = parseFloat(states[id]?.state);
+            return isNaN(v) ? null : v;
+          };
+          const cfg = (id, fb) => { const v = fnum(id); return v === null ? fb : v; };
+          const pct = (v) => v === null ? '—' : v.toLocaleString('de-DE', {maximumFractionDigits: 0}) + ' %';
+          const kw  = (w) => w === null ? '—' : (w / 1000).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' kW';
+          const wF  = (w) => w === null ? '—' : Math.round(w).toLocaleString('de-DE') + ' W';
+
+          const adv = states['sensor.bitsy_advice'];
+          const hermesOn = adv && !['unavailable', 'unknown', ''].includes(adv.state);
+
+          if (hermesOn) {
+            const a = adv.attributes || {};
+            const ts = a.generated_at ? new Date(a.generated_at) : null;
+            const tsStr = ts && !isNaN(ts.getTime())
+              ? ts.toLocaleString('de-DE', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'})
+              : '—';
+            const text = (a.text || '').replace(/\n/g, '<br>');
+            return `
+              <div style="width:100%">
+                <div style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;
+                            margin-bottom:12px;border:1px solid color-mix(in srgb, var(--accent-color) 40%, transparent);
+                            background:color-mix(in srgb, var(--accent-color) 12%, transparent)">
+                  <ha-icon icon="mdi:creation" style="--mdc-icon-size:13px;color:var(--accent-color)"></ha-icon>
+                  <span style="font-size:var(--bg-fs-label);font-weight:700;text-transform:uppercase;
+                               letter-spacing:0.07em;color:var(--accent-color)">KI-generiert · read-only</span>
+                </div>
+                <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1.2;
+                            color:var(--primary-text-color);margin-bottom:10px">${adv.state}</div>
+                <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.6">${text}</div>
+                <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--divider-color);
+                            font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);opacity:0.65">
+                  ${a.model || 'LLM'} · ${tsStr} · beeinflusst keine Steuerentscheidung
+                </div>
+              </div>`;
+          }
+
+          // Fallback: deterministischer Ist-Zustand (Datenbasis für Hermes)
+          const soc  = fnum('sensor.battery_soc_pct');
+          const pv   = fnum('sensor.pv_power_w');
+          const haus = fnum('sensor.house_load_w');
+          const min  = fnum('sensor.miner_total_power_w');
+          const chip = fnum('sensor.miner_max_chip_temp_c');
+          const maxChip  = cfg('input_number.mvp_tmax_std_threshold_c', 112);
+          const socStop  = cfg('input_number.mvp_soc_stop_pct', 50);
+          const ecoStart = cfg('input_number.mvp_soc_eco_start_pct', 60);
+          const socStd   = cfg('input_number.mvp_soc_std_pct', 75);
+          const socSuper = cfg('input_number.mvp_soc_super_pct', 90);
+          const modeRaw = states['sensor.miner1_workmode_status']?.state
+                      || states['sensor.miner2_workmode_status']?.state || '';
+          const mode = ['unavailable', 'unknown', ''].includes(modeRaw) ? '—' : modeRaw;
+          let band = '—';
+          if (soc !== null) {
+            band = soc < socStop ? 'Hausreserve' : soc < ecoStart ? 'Halteband'
+                 : soc < socStd ? 'Eco-Band' : soc < socSuper ? 'Standard-Band' : 'Super-Band';
+          }
+          const row = (icon, col, label, value, sub) => `
+            <div style="display:flex;align-items:center;gap:12px;padding:9px 0;
+                        border-bottom:1px solid color-mix(in srgb, var(--divider-color) 55%, transparent)">
+              <ha-icon icon="${icon}" style="--mdc-icon-size:19px;color:${col};flex-shrink:0"></ha-icon>
+              <span style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);flex:1">${label}</span>
+              <span style="font-size:var(--bg-fs-body);font-weight:700;white-space:nowrap">${value}</span>
+              ${sub ? `<span style="font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);opacity:0.7;white-space:nowrap">${sub}</span>` : ''}
+            </div>`;
+
+          return `
+            <div style="width:100%">
+              <div style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;
+                          margin-bottom:12px;border:1px solid rgba(255,255,255,0.18);
+                          background:rgba(255,255,255,0.06)">
+                <ha-icon icon="mdi:robot-off-outline" style="--mdc-icon-size:13px;color:var(--secondary-text-color)"></ha-icon>
+                <span style="font-size:var(--bg-fs-label);font-weight:700;text-transform:uppercase;
+                             letter-spacing:0.07em;color:var(--secondary-text-color)">Hermes offline · regelbasierte Sicht</span>
+              </div>
+              <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.55;margin-bottom:8px">
+                Sobald der Hermes-Agent mit dem Qwen-Modell verbunden ist, steht hier seine Beratung:
+                Ist-Zustand in Alltagssprache und konkrete Optimierungsvorschläge aus den Hausdaten.
+                Bis dahin die deterministische Datenbasis, auf der er arbeiten wird:
+              </div>
+              ${row('mdi:battery-high', 'var(--bg-color-eco,#4CAF50)', 'Ladezustand', pct(soc), band)}
+              ${row('mdi:solar-power-variant', 'var(--bg-color-pv,#EFB73C)', 'PV-Erzeugung', kw(pv), '')}
+              ${row('mdi:home-lightning-bolt-outline', '#A6A2D8', 'Haus-Last', kw(haus), '')}
+              ${row('mdi:pickaxe', 'var(--bg-color-standard,#26C6DA)', 'Miner', wF(min), mode)}
+              ${row('mdi:thermometer', 'var(--bg-color-heat,#EF5350)', 'Chip-Temperatur', chip === null ? '—' : Math.round(chip).toLocaleString('de-DE') + ' °C', 'Grenze ' + Math.round(maxChip) + ' °C')}
+            </div>`;
+        ]]]
+
+  # ── Karte 2: KI-Stack (Hermes / Modell / Whisper / letzte Analyse) ─────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: var(--ha-card-background)
+        - border-radius: var(--ha-card-border-radius)
+        - overflow: hidden
+        - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+        - box-shadow: var(--ha-card-box-shadow)
+        - padding: 16px 20px
+      grid:
+        - grid-template-areas: '"stack"'
+        - grid-template-columns: 1fr
+      custom_fields:
+        stack:
+          - width: 100%
+          - justify-self: stretch
+    custom_fields:
+      stack: >
+        [[[
+          const adv = states['sensor.bitsy_advice'];
+          const hermesOn = adv && !['unavailable', 'unknown', ''].includes(adv.state);
+          const a = (adv && adv.attributes) || {};
+          const model = a.model || 'Qwen (geplant)';
+          let last = '—';
+          if (a.generated_at) {
+            const ts = new Date(a.generated_at);
+            if (!isNaN(ts.getTime())) {
+              const mins = Math.round((Date.now() - ts.getTime()) / 60000);
+              last = mins < 1 ? 'gerade eben' : mins < 60 ? `vor ${mins} min`
+                   : mins < 1440 ? `vor ${Math.round(mins / 60)} h` : `vor ${Math.round(mins / 1440)} d`;
+            }
+          }
+          const on  = 'var(--bg-color-eco,#4CAF50)';
+          const off = 'var(--bg-color-idle,#9E9E9E)';
+          const tile = (icon, label, value, col) => `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;
+                        border:1px solid color-mix(in srgb, ${col} 27%, transparent);border-radius:14px">
+              <ha-icon icon="${icon}" style="--mdc-icon-size:18px;color:${col}"></ha-icon>
+              <span style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.05em;
+                           color:var(--secondary-text-color);opacity:0.7">${label}</span>
+              <span style="font-size:var(--bg-fs-secondary);font-weight:700;color:${col};
+                           text-align:center;line-height:1.2">${value}</span>
+            </div>`;
+          return `
+            <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:8px;width:100%">
+              ${tile('mdi:server-network', 'Hermes', hermesOn ? 'online' : 'offline', hermesOn ? on : off)}
+              ${tile('mdi:brain', 'Modell', model, hermesOn ? on : off)}
+              ${tile('mdi:microphone-outline', 'Whisper', 'geplant', off)}
+              ${tile('mdi:clock-outline', 'Analyse', last, hermesOn ? on : off)}
+            </div>`;
+        ]]]

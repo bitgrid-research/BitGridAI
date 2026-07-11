@@ -12,7 +12,7 @@ frontend:
     # ?v= Cache-Bust: bei jeder Änderung an bitgrid_card_shape.js hochzählen,
     # sonst lädt der Browser bzw. das Wandtablet (Kiosk) die alte gecachte
     # Version. Datum als Versionsstempel.
-    - /local/bitgrid_card_shape.js?v=20260628b
+    - /local/bitgrid_card_shape.js?v=20260711c
 
 lovelace:
   resource_mode: yaml
@@ -162,6 +162,31 @@ mqtt:
       unit_of_measurement: "kW"
       state_class: measurement
       expire_after: 7200
+
+    # ── ₿itsy: Andockpunkt der Erklärschicht (Tab "₿itsy" in v2) ─────────
+    # Kontrakt für den späteren Hermes-Agenten (Qwen-LLM im lokalen Netz).
+    # Muss HIER stehen, nicht in packages/: mqtt im Package-Merge liefert
+    # "required key 'platform' not provided" (HA-Version unterstützt das
+    # Mergen des mqtt-Keys aus Packages nicht).
+    # Hermes publiziert (retained):
+    #   bitgrid/explain/bitsy/status → "online"|"offline" (als LWT setzen)
+    #   bitgrid/explain/bitsy/advice → JSON:
+    #     {"headline": "...", "text": "...", "mood": "...",
+    #      "model": "qwen3:14b", "generated_at": "ISO-8601"}
+    # Read-only-Prinzip: kein Steuerpfad, nur Erklärung/Beratung. Solange
+    # nichts publiziert wurde, ist der Sensor unavailable und der Tab zeigt
+    # die deterministische, regelbasierte Sicht.
+    - name: "Bitsy Advice"
+      unique_id: bitsy_advice
+      state_topic: "bitgrid/explain/bitsy/advice"
+      # State = headline; HA-States sind auf 255 Zeichen begrenzt, deshalb
+      # hart gekappt. Der Volltext lebt in den Attributen (text).
+      value_template: "{{ (value_json.headline | default(''))[:250] }}"
+      json_attributes_topic: "bitgrid/explain/bitsy/advice"
+      availability_topic: "bitgrid/explain/bitsy/status"
+      payload_available: "online"
+      payload_not_available: "offline"
+      icon: mdi:rodent
 
 # ── BitGridAI Entscheidungs-Logik ─────────────────────────────────────────────
 # Alle Regelparameter als editierbare Helper

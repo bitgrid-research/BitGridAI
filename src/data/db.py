@@ -42,6 +42,13 @@ CREATE TABLE IF NOT EXISTS energy_states (
     pv_forecast_kw          REAL
 );
 
+CREATE TABLE IF NOT EXISTS device_states (
+    block_id  TEXT NOT NULL,
+    device    TEXT NOT NULL,
+    power_w   REAL,
+    PRIMARY KEY (block_id, device)
+);
+
 CREATE TABLE IF NOT EXISTS active_overrides (
     command_id    TEXT PRIMARY KEY,
     action        TEXT NOT NULL,

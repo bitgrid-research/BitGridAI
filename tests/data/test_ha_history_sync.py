@@ -12,9 +12,11 @@ import pytest
 from src.data.db import get_connection
 from src.data.gap_check import find_gaps, gap_count_minutes
 from src.data.ha_history_sync import (
+    DEVICE_ENTITY_MAP,
     ENTITY_MAP,
     _floor_to_block,
     _last_value_in_window,
+    resample_device_blocks,
     resample_to_blocks,
 )
 from src.data.state_store import StateStore
@@ -179,6 +181,65 @@ def test_resample_forward_fills_across_blocks() -> None:
     # Alle Bloecke sollen 77.0 haben (Forward-Fill)
     for b in blocks:
         assert b.battery_soc_pct == 77.0
+
+
+# ---------------------------------------------------------------------------
+# resample_device_blocks / device_states-Upsert
+# ---------------------------------------------------------------------------
+
+_FRIDGE = "sensor.shellyplugsg3_9070694abdf4_leistung"
+_TV = "sensor.shellyplugsg3_9070694c99d4_leistung"
+
+
+def test_device_resample_one_row_per_device_and_block() -> None:
+    entity_readings = {_FRIDGE: _readings((0, 87.0)), _TV: _readings((0, 0.0))}
+    rows = resample_device_blocks(
+        entity_readings, DEVICE_ENTITY_MAP, T0, T0 + timedelta(minutes=30)
+    )
+    # 3 Bloecke x 2 Plugs mit Daten (die 4 anderen Plugs ohne Daten fehlen)
+    assert len(rows) == 6
+    assert ("2026-06-01T10:00:00", "kuehlschraenke", 87.0) in rows
+    assert ("2026-06-01T10:20:00", "tv", 0.0) in rows
+
+
+def test_device_resample_forward_fills_across_blocks() -> None:
+    entity_readings = {_FRIDGE: _readings((2, 90.0))}
+    rows = resample_device_blocks(
+        entity_readings, DEVICE_ENTITY_MAP, T0, T0 + timedelta(minutes=30)
+    )
+    # Wert nur im ersten Block, danach Forward-Fill
+    assert rows == [
+        ("2026-06-01T10:00:00", "kuehlschraenke", 90.0),
+        ("2026-06-01T10:10:00", "kuehlschraenke", 90.0),
+        ("2026-06-01T10:20:00", "kuehlschraenke", 90.0),
+    ]
+
+
+def test_device_resample_skips_devices_without_any_data() -> None:
+    rows = resample_device_blocks({}, DEVICE_ENTITY_MAP, T0, T0 + timedelta(hours=1))
+    assert rows == []
+
+
+def test_device_states_insert_or_ignore(db_conn) -> None:
+    row = ("2026-06-01T10:00:00", "kuehlschraenke", 87.0)
+    cur = db_conn.execute(
+        "INSERT OR IGNORE INTO device_states (block_id, device, power_w)"
+        " VALUES (?, ?, ?)",
+        row,
+    )
+    assert cur.rowcount == 1
+    # Zweiter Insert mit anderem Wert wird ignoriert (kein Ueberschreiben)
+    cur = db_conn.execute(
+        "INSERT OR IGNORE INTO device_states (block_id, device, power_w)"
+        " VALUES (?, ?, ?)",
+        ("2026-06-01T10:00:00", "kuehlschraenke", 999.0),
+    )
+    assert cur.rowcount == 0
+    value = db_conn.execute(
+        "SELECT power_w FROM device_states WHERE block_id = ? AND device = ?",
+        ("2026-06-01T10:00:00", "kuehlschraenke"),
+    ).fetchone()[0]
+    assert value == 87.0
 
 
 # ---------------------------------------------------------------------------

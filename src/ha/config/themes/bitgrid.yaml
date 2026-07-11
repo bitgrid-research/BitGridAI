@@ -12,8 +12,22 @@
 BitGridAI:
   # ── Marken-Akzente ──────────────────────────────────────────────────
   primary-color: "#4CAF50"
-  accent-color: "#f59e0b"
+  accent-color: "#f59e0b"              # Amber: Standby/Cooldown/Übergangs-Warnung
   text-primary-color: "#ffffff"        # Text auf primary-color (Buttons)
+
+  # ── Semantische Farb-Tokens (eine Quelle für Modus-/Statusfarben) ───
+  # Analog zur Typo-Skala bg-fs-*: Dashboard, Views und www/bitgrid_card_
+  # shape.js referenzieren var(--bg-color-*), statt Hex-Werte zu duplizieren.
+  # Kurs-Chips (positiv/negativ) nutzen eco bzw. reserve mit. Bewusste
+  # Ausnahme: die Pastell-Palette der power-flow-card-plus (siehe Kommentar
+  # dort), die ruhiger wirken soll als die kräftigen Modus-Farben.
+  bg-color-eco: "#4CAF50"        # Eco-Modus / positiv (= primary-color)
+  bg-color-standard: "#26C6DA"   # Standard-Modus (Cyan)
+  bg-color-super: "#F7931A"      # Super-Modus (Bitcoin-Orange)
+  bg-color-reserve: "#EF5350"    # Hausreserve / Warnung / negativ
+  bg-color-heat: "#FF7043"       # Temperatur-Warnstufe (100–109 °C, Chip-Temp)
+  bg-color-pv: "#EFB73C"         # PV/Sonne (Gold, = PFCP-Solar-Bubble)
+  bg-color-idle: "#757575"       # aus / inaktiv / unter Schwelle
 
   # ── Vibranter Verlaufs-Hintergrund (iOS-Look, kein Bild nötig) ──────
   lovelace-background: "linear-gradient(150deg, #21346f 0%, #4b2da0 46%, #9c3a72 100%)"

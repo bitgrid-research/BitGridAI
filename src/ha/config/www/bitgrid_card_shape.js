@@ -46,7 +46,11 @@ const SHAPED_CARDS = new Set([
 //
 // Farbe richtet sich nach der Leistung (W) der jeweiligen Bubble (derselbe
 // Shelly-Sensor, der auch in der Bubble angezeigt wird):
-//   < 500 W → grau · 500–1000 W → grün · 1000–1500 W → cyan · ab 1500 W → orange.
+//   < 500 W → idle-grau · 500–1000 W → eco-grün · 1000–1500 W → standard-cyan ·
+//   ab 1500 W → super-orange (Bitcoin). Werte kommen als var(--bg-color-*) aus
+// dem Theme (themes/bitgrid.yaml, Abschnitt "Semantische Farb-Tokens"); der
+// Hex-Fallback ist die dortige Kanonik, falls die Variable (noch) nicht am
+// View hängt.
 //
 // Bubble→Miner wird über den gerenderten <span class="label"> (= config name)
 // bestimmt und die echte Slot-Klasse aus dem DOM gelesen, NICHT über eine
@@ -77,10 +81,10 @@ function bubbleSlot(cl) {
 // Leistungs-Banding (W) → Bubble-Farbe. Null = unbekannt → Fallback behalten.
 function minerPowerColor(w) {
   if (w === null || Number.isNaN(w)) return null;
-  if (w < 500) return "#757575";    // grau (quasi aus / sehr niedrig)
-  if (w < 1000) return "#4CAF50";   // grün (500–1000)
-  if (w < 1500) return "#26C6DA";   // cyan (1000–1500)
-  return "#F7931A";                 // orange (ab 1500)
+  if (w < 500) return "var(--bg-color-idle,#757575)";       // quasi aus / sehr niedrig
+  if (w < 1000) return "var(--bg-color-eco,#4CAF50)";       // 500–1000
+  if (w < 1500) return "var(--bg-color-standard,#26C6DA)";  // 1000–1500
+  return "var(--bg-color-super,#F7931A)";                   // ab 1500
 }
 
 // Baut die :host-Override-CSS für die Miner-Bubbles einer PFCP-Instanz.
@@ -147,23 +151,23 @@ const CLOCK_TODAY_CSS = `
 //    zu den Geschwisterkarten (Stunden/5-Tage/Sonnenstand), die die volle Breite
 //    nutzen. Mit dem jetzt kleinen Icon entsteht dabei kein stoerender Spalt mehr.
 const CLOCK_TODAY_TEXT_CSS = `
-  .grow-img{max-width:104px!important;max-height:104px!important;}
+  .grow-img{max-width:114px!important;max-height:114px!important;}
   clock-weather-card-today-right{justify-content:center!important;}
   clock-weather-card-today-right-wrap-top{color:var(--secondary-text-color)!important;}
   clock-weather-card-today-right-wrap-center{color:var(--primary-text-color)!important;}
   clock-weather-card-today-right-wrap-bottom{color:var(--secondary-text-color)!important;}
 `;
 
+// 5-Tage-Vorschau: Zeilen bestehen aus <forecast-text>-Tags (Tag, Min-Temp,
+// Max-Temp) direkt im Haupt-Shadow-Root der Karte — die Rows haben KEINEN
+// eigenen Shadow-Root, daher muss die Farbregel hier hinein. Erste
+// forecast-text je Zeile = Wochentag (bleibt), die uebrigen = Min/Max-
+// Temperatur, in Hellgrau wie die Uhrzeiten der Stunden-Karte (FORECAST_CSS).
 const CLOCK_FORECAST_CSS = `
   :host{height:100%!important;}
   ha-card{height:100%!important;display:flex!important;flex-direction:column!important;justify-content:center!important;}
-  clock-weather-card-forecast{zoom:0.9!important;}
-`;
-
-// 5-Tage-Vorschau: Minimal-/Maximaltemperatur in den Zeilen kleiner, nicht fett
-// und in der gleichen Farbe wie die Uhrzeiten in der Stunden-Karte (FORECAST_CSS).
-const CLOCK_FORECAST_ROW_CSS = `
-  .low-temp,.high-temp,.temp-low,.temp-high{font-size:0.85rem!important;font-weight:400!important;color:var(--secondary-text-color)!important;}
+  clock-weather-card-forecast{zoom:0.81!important;}
+  clock-weather-card-forecast-row forecast-text:not(:first-of-type){color:var(--secondary-text-color)!important;}
 `;
 
 // weather-forecast-Karte (Stunden, hrs): jede Spalte stapelt Uhrzeit (oben),
@@ -235,11 +239,6 @@ function styleCard(node) {
     }
     if (sr.querySelector("clock-weather-card-forecast")) {
       css += CLOCK_FORECAST_CSS;
-      const forecastEl = sr.querySelector("clock-weather-card-forecast");
-      const searchRoot = (forecastEl && forecastEl.shadowRoot) || sr;
-      searchRoot.querySelectorAll("clock-weather-card-forecast-row").forEach((row) => {
-        injectInto(row.shadowRoot, "bitgrid-forecast-row", CLOCK_FORECAST_ROW_CSS);
-      });
     }
   }
   if (node.tagName === "HUI-WEATHER-FORECAST-CARD") css += FORECAST_CSS;
