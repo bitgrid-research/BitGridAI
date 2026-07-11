@@ -275,6 +275,17 @@ views:
                       const balBtc   = fnum('sensor.pool_balance_btc');
                       const eurRate  = fnum('sensor.btc_eur_price');
                       const blockStr = blockH  !== null ? Math.round(blockH).toLocaleString('de-DE')          : '—';
+                      // Block-Tick: bei neuem Block flippt die Zahl orange auf und glueht
+                      // FLASH_MS lang aus. Die Karte re-rendert bei jedem Sensor-Tick (PV,
+                      // SoC, ...) komplett neu; darum negative animation-delay = Blockalter,
+                      // so setzt jeder Re-Render die Animation nahtlos an der richtigen
+                      // Stelle fort, statt sie neu zu starten.
+                      const FLASH_MS = 60000;
+                      const bhLc  = states['sensor.bitcoin_block_height']?.last_changed;
+                      const bhAge = bhLc ? Date.now() - new Date(bhLc).getTime() : Infinity;
+                      const blockAnim = (bhAge >= 0 && bhAge < FLASH_MS)
+                        ? `animation:bgz-block-tick ${FLASH_MS}ms linear ${-Math.round(bhAge)}ms both;`
+                        : '';
                       let priceStr = eurRate !== null ? Math.round(eurRate).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">€</span>' : '—';
                       const haveBal  = balBtc !== null && balBtc > 0;
                       const satsStr  = haveBal ? Math.round(balBtc * 1e8).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">SATs</span>' : '—';
@@ -339,6 +350,14 @@ views:
                       const balSub   = euroSub ? euroSub + euroDelta : '';
 
                       return `
+                        <style>
+                          @keyframes bgz-block-tick {
+                            0%   { transform:rotateX(90deg); color:#F7931A; text-shadow:0 0 16px rgba(247,147,26,.8); }
+                            1%   { transform:rotateX(0);     color:#F7931A; text-shadow:0 0 16px rgba(247,147,26,.8); }
+                            70%  { transform:rotateX(0);     color:#F7931A; text-shadow:0 0 8px rgba(247,147,26,.4); }
+                            100% { transform:rotateX(0);     color:var(--primary-text-color); text-shadow:0 0 0 rgba(247,147,26,0); }
+                          }
+                        </style>
                         <div style="display:flex;flex-direction:column;height:100%;width:100%">
                           <div style="display:flex;gap:24px;align-items:center">
                             <img src="/local/${img}?v=20260625"
@@ -355,7 +374,7 @@ views:
                             <div style="width:24%;max-width:135px;flex-shrink:0;text-align:center">
                               <div style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
                                           color:var(--secondary-text-color);opacity:0.65;margin-bottom:3px">Blockzeit</div>
-                              <div style="font-size:1.5rem;font-weight:700;line-height:1;white-space:nowrap">${blockStr}</div>
+                              <div style="font-size:1.5rem;font-weight:700;line-height:1;white-space:nowrap;${blockAnim}">${blockStr}</div>
                             </div>
                             ${stat('Balance', satsLine, balSub)}
                             ${stat('Kurs', priceStr, priceSub)}
@@ -1066,3 +1085,110 @@ views:
               grid-area: stats
             cards:
               - !include views/stats_overview.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB 4: GERÄTE  —  2 Spalten.
+  # Links: 4 Verbraucher-Plugs als Kacheln + Summenkarte (geraete.yaml)
+  # Rechts: Leistungs- und Tagesverbrauchs-Verlauf (geraete_verlauf.yaml)
+  # Entity-Zuordnung + Tages-kWh: packages/devices.yaml
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Geräte
+    path: geraete
+    icon: mdi:power-plug
+    theme: BitGridAI
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: min-content auto
+          grid-template-areas: '"tl tr" "geraete verlauf"'
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+
+          # ── Gruppen-Titel links: GERÄTE ──────────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tl
+            icon: mdi:power-plug
+            name: Geräte
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── Gruppen-Titel rechts: VERLAUF ────────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tr
+            icon: mdi:chart-line
+            name: Verlauf
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── Geräte-Kacheln links ─────────────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: geraete
+            cards:
+              - !include views/geraete.yaml
+
+          # ── Verlauf rechts ───────────────────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: verlauf
+            cards:
+              - !include views/geraete_verlauf.yaml

@@ -304,8 +304,8 @@ cards:
                     if (mode === 'Eco')
                       return t >= 80 ? '#F44336' : t >= 75 ? '#f59e0b' : '#4CAF50';
                     if (mode === 'Standard')
-                      return t >= 110 ? '#F44336' : t >= 100 ? '#FF7043' : t >= 95 ? '#f59e0b' : '#4CAF50';
-                    return t >= 108 ? '#F44336' : t >= 100 ? '#FF7043' : t >= 90 ? '#f59e0b' : t >= 80 ? '#26C6DA' : '#4CAF50';
+                      return t >= 110 ? '#F44336' : t >= 100 ? '#FF7043' : '#4CAF50';
+                    return t >= 110 ? '#F44336' : t >= 100 ? '#FF7043' : '#4CAF50';
                   };
                   const tmaxColor = tempColor(tmax);
                   const tavgColor = tempColor(tavg);
@@ -636,8 +636,8 @@ cards:
                     if (mode === 'Eco')
                       return t >= 80 ? '#F44336' : t >= 75 ? '#f59e0b' : '#4CAF50';
                     if (mode === 'Standard')
-                      return t >= 110 ? '#F44336' : t >= 100 ? '#FF7043' : t >= 95 ? '#f59e0b' : '#4CAF50';
-                    return t >= 108 ? '#F44336' : t >= 100 ? '#FF7043' : t >= 90 ? '#f59e0b' : t >= 80 ? '#26C6DA' : '#4CAF50';
+                      return t >= 110 ? '#F44336' : t >= 100 ? '#FF7043' : '#4CAF50';
+                    return t >= 110 ? '#F44336' : t >= 100 ? '#FF7043' : '#4CAF50';
                   };
                   const tmaxColor = tempColor(tmax);
                   const tavgColor = tempColor(tavg);

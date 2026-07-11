@@ -1,13 +1,10 @@
 # ═══════════════════════════════════════════════════════════════════════
-# BitGridAI — "Glass"-Theme (iOS-Glassmorphism).
+# BitGridAI — "Glass"-Theme (iOS-Glassmorphism), gedämpft.
 # Vibranter Farbverlauf als Hintergrund + dunkle, halbtransparente Glas-
-# karten, die den Verlauf durchscheinen lassen. Helle, lesbare Typo.
-#
-# Warum kein card-mod / kein backdrop-filter: Blur verwischt den Hinter-
-# grund, aber ein Farbverlauf ist bereits glatt — nach dem Blur sähe er
-# identisch aus. Über einem Verlauf genügen transluzente Karten für den
-# Glas-Effekt. Jede ha-card (nativ wie custom) erbt das über die Tokens,
-# kein Per-Karte-Styling nötig.
+# karten. WICHTIG: Nur die Dashboard-Karten sind transluzent. Dialoge,
+# Menüs, Tooltips und Eingabefelder sind OPAK — transluzente Overlays
+# machten More-Info-Dialoge unlesbar (Inhalt schien durch) und Tooltips
+# weiß-auf-weiß.
 #
 # Stellschrauben: lovelace-background (der Verlauf), die Alpha-Werte in
 # ha-card-background (wie stark das Glas durchscheint), ha-card-border-radius.
@@ -40,47 +37,56 @@ BitGridAI:
   bg-fs-secondary: "0.875rem" # Sekundaertext
   bg-fs-label: "0.75rem"      # Mini-Labels (UPPERCASE)
 
-  # ── Glaskarten: dunkel-transluzent, EIN Radius, weicher Schatten ────
-  ha-card-background: "linear-gradient(180deg, rgba(38,44,72,0.58) 0%, rgba(24,28,50,0.46) 100%)"
-  card-background-color: "rgba(30,35,60,0.52)"
-  secondary-background-color: "rgba(255,255,255,0.10)"
+  # ── Glaskarten (iOS-Look): dunkel-transluzent, gedämpfter als v1 ────
+  # Original-Glas war 0.58/0.46 (zu durchsichtig), voll opak wirkte tot.
+  # 0.78/0.68 behält den Glas-Effekt, lässt aber weniger durchscheinen.
+  # Dialoge, Menüs und Tooltips (unten) bleiben voll opak, sonst unlesbar.
+  ha-card-background: "linear-gradient(180deg, rgba(38,44,72,0.78) 0%, rgba(24,28,50,0.68) 100%)"
+  card-background-color: "#1e2338"
+  secondary-background-color: "#272d4a"
   ha-card-border-radius: "20px"
   ha-card-border-width: "1px"
   ha-card-border-color: "rgba(255,255,255,0.16)"
   ha-card-box-shadow: "0 8px 32px rgba(8,10,25,0.30)"
 
+  # ── Dialoge & Menüs: opake Oberfläche ───────────────────────────────
+  # ha-dialog und mwc-menu ziehen ihre Fläche aus --mdc-theme-surface
+  # (Fallback: card-background-color). Beides explizit opak setzen, sonst
+  # scheint der Dashboard-Inhalt durch den More-Info-Dialog.
+  mdc-theme-surface: "#1e2338"
+  ha-dialog-surface-background: "#1e2338"
+
+  # ── Tooltips: dunkel-opak, helle Schrift ────────────────────────────
+  # HA 2026.x nutzt ha-tooltip (Web-Awesome-basiert) mit eigenen Tokens;
+  # ohne sie fällt der Hintergrund auf Weiß zurück, die Schrift kommt
+  # aber hell aus dem Theme → weiß-auf-weiß. paper-tooltip-Variablen
+  # bleiben für ältere Komponenten (z.B. Custom Cards) gesetzt.
+  ha-tooltip-background-color: "#1e2338"
+  ha-tooltip-text-color: "#f3f5fb"
+  paper-tooltip-background: "#1e2338"
+  paper-tooltip-text-color: "#f3f5fb"
+  paper-tooltip-opacity: "1"
+
   # ── Eingabefelder (MWC-Select/TextField) ────────────────────────────
-  # MWC ignoriert --mdc-text-field-fill-color im Settings- und Entity-Row-
-  # Kontext (Box bleibt MWC-Weiß). Ink-Farbe muss daher dunkel sein, sonst
-  # weißer Text auf weißem Hintergrund (unlesbar, sichtbar im Profil-Dialog).
-  # Gilt systemweit für alle MWC-Inputs: konsistent lesbar, da alle Felder
-  # hellen Hintergrund behalten. Regelschwellen-Karten überschreiben lokal
-  # per card-mod (bitgrid_dashboard_v2.yaml), wo der dunkle Hintergrund
-  # explizit mit dunkler Schrift kombiniert wird.
+  # Füllfarbe explizit HELL setzen + Ink dunkel: eine Kombination, die in
+  # jedem Kontext lesbar ist. Ohne explizite Füllfarbe fällt MWC je nach
+  # Kontext auf Weiß oder die dunkle Surface zurück, was weiß-auf-weiß
+  # bzw. schwarz-auf-dunkel erzeugte (unlesbare Textboxen in Dialogen).
+  mdc-text-field-fill-color: "#e9ecf5"
   mdc-text-field-ink-color: "#1a1a2e"
   mdc-text-field-label-ink-color: "#3a3a5e"
+  mdc-select-fill-color: "#e9ecf5"
   mdc-select-ink-color: "#1a1a2e"
   mdc-select-label-ink-color: "#3a3a5e"
   mdc-select-dropdown-icon-color: "#1a1a2e"
 
-  # ── Kopfleiste (transluzent) ────────────────────────────────────────
-  app-header-background-color: "rgba(20,24,44,0.30)"
+  # ── Kopfleiste (transluzent, etwas deckender als v1: 0.30 → 0.55) ───
+  app-header-background-color: "rgba(20,24,44,0.55)"
   app-header-text-color: "#f3f5fb"
 
-  # ── Sidebar (dunkel-glasig) ─────────────────────────────────────────
-  sidebar-background-color: "rgba(16,19,36,0.92)"
+  # ── Sidebar (dunkel, opak) ──────────────────────────────────────────
+  sidebar-background-color: "#101324"
   sidebar-text-color: "#c8cdda"
   sidebar-icon-color: "#9aa0b4"
   sidebar-selected-text-color: "#4CAF50"
   sidebar-selected-icon-color: "#4CAF50"
-
-  # ── More-Info-Dialog: opake Oberfläche ──────────────────────────────
-  # ha-dialog nutzt var(--card-background-color) als Surface-Hintergrund.
-  # CSS-Custom-Properties kaskadieren durch Shadow-DOM, daher reicht es,
-  # diese Variable auf ha-more-info-dialog zu setzen, statt Shadow-DOM zu
-  # piercing. Karten auf dem Dashboard bleiben transluzent (Glass-Effekt).
-  card-mod-theme: |
-    ha-more-info-dialog {
-      --card-background-color: rgba(20, 24, 44, 0.97) !important;
-      --secondary-background-color: rgba(255, 255, 255, 0.07) !important;
-    }

@@ -73,6 +73,7 @@ recorder:
     entities:
       # Aus Rohdaten rekonstruierbar
       - sensor.surplus_kw
+      - sensor.geraete_power_w
       - sensor.battery_power_w
       - sensor.battery_power_flowchart_w
       - sensor.block_id
@@ -90,6 +91,11 @@ recorder:
       - sensor.grid_export_daily
       - sensor.house_energy_daily
       - sensor.heizstab_energy_daily
+      - sensor.waschmaschine_energy_daily
+      - sensor.tv_energy_daily
+      - sensor.kuehlschraenke_energy_daily
+      - sensor.buero_energy_daily
+      - sensor.geraete_energy_daily
       - sensor.solar_coverage_pct
       - sensor.deadband_hit_rate_pct
       - sensor.efficiency_kwh_per_h_live

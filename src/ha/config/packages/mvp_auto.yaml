@@ -335,25 +335,25 @@ mvp_auto:
                       data:
                         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P1b: Temp-Sperre aktiv → Eco erzwingen (level-triggered, kein Cooldown)
+            # P1b: Temp-Sperre aktiv → Super blockieren, Standard erlaubt (level-triggered, kein Cooldown)
             - conditions:
                 - condition: template
                   value_template: >
                     {{ now_ts < state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0)
-                       and m1_status in ['Super', 'Standard'] }}
+                       and m1_status == 'Super' }}
               sequence:
                 - action: system_log.write
                   data:
                     message: >
                       [mvp-miner1] P1b Temp-Sperre: lockout bis
                       {{ states('input_datetime.mvp_miner1_temp_lockout_until') }}
-                      — status={{ m1_status }} → Eco
+                      — status={{ m1_status }} → Standard
                     level: warning
                 - action: select.select_option
                   target:
                     entity_id: select.miner1_workmode_set
                   data:
-                    option: Eco
+                    option: Standard
 
             # P2: Akku voll → Super
             - conditions:
@@ -597,25 +597,25 @@ mvp_auto:
                       data:
                         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P1b: Temp-Sperre aktiv → Eco erzwingen (level-triggered, kein Cooldown)
+            # P1b: Temp-Sperre aktiv → Super blockieren, Standard erlaubt (level-triggered, kein Cooldown)
             - conditions:
                 - condition: template
                   value_template: >
                     {{ now_ts < state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0)
-                       and m2_status in ['Super', 'Standard'] }}
+                       and m2_status == 'Super' }}
               sequence:
                 - action: system_log.write
                   data:
                     message: >
                       [mvp-miner2] P1b Temp-Sperre: lockout bis
                       {{ states('input_datetime.mvp_miner2_temp_lockout_until') }}
-                      — status={{ m2_status }} → Eco
+                      — status={{ m2_status }} → Standard
                     level: warning
                 - action: select.select_option
                   target:
                     entity_id: select.miner2_workmode_set
                   data:
-                    option: Eco
+                    option: Standard
 
             # P2: Akku voll → Super
             - conditions:
@@ -960,15 +960,16 @@ mvp_auto:
           data:
             datetime: "{{ (now() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') }}"
 
-    # ── TMax-Stufe 1: Super → Standard bei 112°C ─────────────────────────
-    # Erster Schritt des Temperatur-Kaskade: Super → Standard sobald TMax
-    # mvp_tmax_std_threshold_c (112°C) überschreitet. Gibt dem Miner die
-    # Chance sich auf Standard zu kühlen bevor Stufe 2 (Standard → Eco) greift.
+    # ── TMax-Sicherheit: Super → Standard bei 112°C ──────────────────────
+    # Super → Standard sobald TMax mvp_tmax_std_threshold_c (112°C) erreicht.
+    # Der 3h-Temp-Lockout blockiert danach Super (P1b/P2), Standard bleibt
+    # erlaubt. Letzte Instanz darunter ist der interne Hardware-Schutz des
+    # Miners (Selbstabschaltung, siehe tmax_lockout_on_selfstop).
     - id: mvp_miner1_tmax_std_safety
       alias: "MVP: Miner 1 TMax → Standard"
       description: >
         Drosselt Miner 1 von Super auf Standard sobald TMax >= mvp_tmax_std_threshold_c (112°C).
-        Stufe 1 der Kaskade: 112°C → Standard, 113°C → Eco.
+        Setzt 3h Temp-Lockout: blockiert Super, Standard bleibt erlaubt.
         Kein Cooldown — Sicherheit hat Vorrang.
         Trigger static 99°C (< min. Schwelle 100°C) — Condition prüft konfigurierten Wert.
       mode: single
@@ -1012,7 +1013,7 @@ mvp_auto:
       alias: "MVP: Miner 2 TMax → Standard"
       description: >
         Drosselt Miner 2 von Super auf Standard sobald TMax >= mvp_tmax_std_threshold_c (112°C).
-        Stufe 1 der Kaskade: 112°C → Standard, 113°C → Eco.
+        Setzt 3h Temp-Lockout: blockiert Super, Standard bleibt erlaubt.
         Kein Cooldown — Sicherheit hat Vorrang.
         Trigger static 99°C (< min. Schwelle 100°C) — Condition prüft konfigurierten Wert.
       mode: single
@@ -1062,7 +1063,7 @@ mvp_auto:
       description: >
         Setzt 3h Temp-Lockout wenn Miner 1 von aktiver Workmode nach Standby/Off
         wechselt und TMax erhöht ist oder die API nicht mehr antwortet.
-        95°C statt Schwelle (113°C): interner Hardware-Schutz greift früher;
+        95°C statt Schwelle (112°C): interner Hardware-Schutz greift früher;
         unavailable fängt den Fall ab wo die API beim Übertemperatur-Stop schon
         abgestürzt ist und float(0) die Bedingung sonst fälschlicherweise killen würde.
       mode: single
@@ -1106,7 +1107,7 @@ mvp_auto:
       description: >
         Setzt 3h Temp-Lockout wenn Miner 2 von aktiver Workmode nach Standby/Off
         wechselt und TMax erhöht ist oder die API nicht mehr antwortet.
-        95°C statt Schwelle (113°C): interner Hardware-Schutz greift früher;
+        95°C statt Schwelle (112°C): interner Hardware-Schutz greift früher;
         unavailable fängt den Fall ab wo die API beim Übertemperatur-Stop schon
         abgestürzt ist und float(0) die Bedingung sonst fälschlicherweise killen würde.
       mode: single

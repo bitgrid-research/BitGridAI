@@ -173,3 +173,60 @@ settings_spacer:
       - box-shadow: none
       - border: none
       - pointer-events: none
+
+# Geräte-Kachel (Tab "Geräte"): Icon + Name + aktuelle Leistung + Tages-kWh.
+# entity = Leistungs-Sensor des Plugs; variables.energy_daily = Entity-ID des
+# zugehörigen Tages-kWh-Sensors (packages/devices.yaml). Icon färbt sich ab
+# 5 W Bezug (Lavendel = Verbrauchs-Farbe der Energiefluss-Karte), darunter
+# bzw. bei unavailable bleibt es gedimmt.
+device_tile:
+  show_name: true
+  show_icon: true
+  show_state: false
+  show_label: true
+  tap_action:
+    action: more-info
+  label: >
+    [[[
+      const fmtW = v => {
+        const n = parseFloat(v);
+        if (isNaN(n)) return '—';
+        return n >= 1000
+          ? (n / 1000).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kW'
+          : Math.round(n).toLocaleString('de-DE') + ' W';
+      };
+      const fmtKwh = v => {
+        const n = parseFloat(v);
+        return isNaN(n) ? '—'
+          : n.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kWh';
+      };
+      const eDaily = variables?.energy_daily ? states[variables.energy_daily]?.state : null;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+        <span style="font-size:1.45rem;font-weight:700;line-height:1.1">${fmtW(entity?.state)}</span>
+        <span style="font-size:0.75rem;color:var(--secondary-text-color)">Heute: ${fmtKwh(eDaily)}</span>
+      </div>`;
+    ]]]
+  styles:
+    card:
+      - padding: 16px 10px
+      - opacity: "[[[ return ['unavailable','unknown'].includes(entity?.state) ? '0.45' : '1'; ]]]"
+    grid:
+      - grid-template-areas: '"i" "n" "l"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto auto auto
+      - justify-items: center
+    icon:
+      - width: 30px
+      - height: 30px
+      - color: >
+          [[[
+            const n = parseFloat(entity?.state);
+            return (!isNaN(n) && n >= 5) ? '#A6A2D8' : 'var(--secondary-text-color)';
+          ]]]
+    name:
+      - font-size: 0.9rem
+      - font-weight: 600
+      - margin-top: 6px
+      - margin-bottom: 4px
+    label:
+      - justify-self: center
