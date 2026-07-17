@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════
-# Geräte (linke Spalte) — Summenkarte + 4 Verbraucher-Kacheln.
+# Geräte (linke Spalte) — Summenkarte + 6 Verbraucher-Kacheln.
 # Eingebunden via !include in:
 #   - bitgrid_dashboard_v2.yaml  → Tab "Geräte", grid-area: geraete
 # Entity-Zuordnung und Tages-kWh-Sensoren: packages/devices.yaml.
@@ -60,6 +60,7 @@ cards:
         icon: mdi:fridge
         variables:
           energy_daily: sensor.kuehlschraenke_energy_daily
+          accent_color: "#4C86D6"
       - type: custom:button-card
         template: device_tile
         entity: sensor.shellyplugsg3_d885ac1e9adc_leistung
@@ -67,6 +68,7 @@ cards:
         icon: mdi:washing-machine
         variables:
           energy_daily: sensor.waschmaschine_energy_daily
+          accent_color: "#E8A23D"
 
   - type: horizontal-stack
     cards:
@@ -77,6 +79,7 @@ cards:
         icon: mdi:television
         variables:
           energy_daily: sensor.tv_energy_daily
+          accent_color: "#E2604F"
       - type: custom:button-card
         template: device_tile
         entity: sensor.shellyplugsg3_d885ac18c3b4_leistung
@@ -84,3 +87,23 @@ cards:
         icon: mdi:desktop-classic
         variables:
           energy_daily: sensor.buero_energy_daily
+          accent_color: "#2FBF96"
+
+  - type: horizontal-stack
+    cards:
+      - type: custom:button-card
+        template: device_tile
+        entity: sensor.shellyplusplugs_d4d4daf4eda4_leistung
+        name: Lüftung
+        icon: mdi:fan
+        variables:
+          energy_daily: sensor.lueftung_energy_daily
+          accent_color: "#9575CD"
+      - type: custom:button-card
+        template: device_tile
+        entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
+        name: Server, NAS, KI-Agent
+        icon: mdi:server
+        variables:
+          energy_daily: sensor.server_energy_daily
+          accent_color: "#E0538D"

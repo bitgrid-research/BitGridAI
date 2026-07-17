@@ -1,0 +1,263 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Bitcoin-Netzwerk-Hashrate — echter Log-Log-Chart (Y=log10(EH/s) über
+# X=log10(Tage seit Genesis)) im Analyse-Tab (rechte Spalte "Netzwerk"),
+# über der Difficulty-Karte. Geometrie/Typografie 1:1 aus ki_powerlaw.yaml
+# übernommen (gleiche Kartenbreite/-höhe im Tab). Reine Markt-/Netzwerk-
+# Kontextinformation, KEIN Eingang in core/: Mining-Entscheidungen bleiben
+# SoC-/PV-basiert.
+#
+# Sichtfenster: die Achse zoomt auf 2013-heute (ASIC-Ära, VIEW_START_MS
+# unten) statt die volle 2009-heute-Spanne zu zeigen — sonst würden die
+# ersten ~3 Jahre (praktisch flache CPU/GPU-Mining-Phase) den Großteil der
+# Chartbreite einnehmen. Trend/Fit rechnen weiter auf der VOLLEN Historie
+# seit Genesis (kommt unverändert aus btc_hashrate.py); nur die Anzeige ist
+# gezoomt, klar im Footer ausgewiesen (Nutzer-Entscheidung 2026-07-12).
+#
+# Datenherkunft (zwei Quellen, im Chart farblich unterschieden):
+#   - "Eigene Messung": src/data/btc_hashrate.py, live von der self-hosted
+#     mempool.space-Instanz (lokal im Netz, deckt nur den Zeitraum ab, den
+#     der eigene Node bereits indiziert hat).
+#   - "Backfill": einmaliger, manueller Zug von blockchain.info für die Zeit
+#     davor (siehe scripts/backfill_hashrate_blockchain_info.py, ADR-024).
+#     Der reguläre Betrieb (dieser Chart, das Python-Modul) greift NIE live
+#     auf blockchain.info zu, nur auf die einmal gezogene, lokal abgelegte
+#     Seed-Datei. Diese Karte liest ausschließlich die vom Skript erzeugte
+#     lokale Datei (fetch('/local/...')), kein Live-Netzwerkzugriff vom
+#     Wandtablet aus.
+#
+# Trendlinie: dieselbe Log-Log-OLS-Regression wie beim Preis-Chart
+# (log10(EH/s) = a + b*log10(Tage)), aber OHNE Zukunftsprojektion (siehe
+# _DEFAULT_FUTURE_DAYS=0 in btc_hashrate.py) und OHNE Support-/Widerstands-
+# band: die Hashrate-Regression ist rein deskriptiv über die Vergangenheit,
+# kein etabliertes Modell wie die BTC-Preis-Power-Law-Heuristik. Eine
+# Projektion würde bei b~9-10 binnen weniger Jahre auf absurde EH/s-Werte
+# führen (Overstating-Risiko) — deshalb bewusst weggelassen.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+custom_fields:
+  chart: >
+    [[[
+      if (!window._bgHashrate) window._bgHashrate = { status: 'idle', data: null };
+
+      if (window._bgHashrate.status === 'idle') {
+        window._bgHashrate.status = 'fetching';
+        fetch('/local/btc_hashrate.json?v=' + Date.now())
+          .then(r => r.json())
+          .then(data => { window._bgHashrate = { status: 'ok', data }; })
+          .catch(() => { window._bgHashrate.status = 'error'; });
+      }
+
+      const wrap = (inner) => `<div style="width:100%">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:var(--bg-fs-title);font-weight:700;color:var(--primary-text-color)">Bitcoin-Netzwerk-Hashrate</span>
+          <span style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
+                       color:var(--secondary-text-color);opacity:0.6">Deskriptiver Trend, keine Prognose</span>
+        </div>
+        ${inner}
+      </div>`;
+
+      if (window._bgHashrate.status !== 'ok') {
+        const msg = window._bgHashrate.status === 'error'
+          ? 'Chart nicht verfügbar (lokales Hashrate-Artefakt fehlt oder ist ungültig).'
+          : 'Lade Hashrate-Historie …';
+        return wrap(`<div style="padding:30px 0;text-align:center;color:var(--secondary-text-color)">${msg}</div>`);
+      }
+
+      const data = window._bgHashrate.data;
+      const points = data.hashrates || [];
+      if (points.length < 2) {
+        return wrap(`<div style="padding:30px 0;text-align:center;color:var(--secondary-text-color)">Zu wenig Hashrate-Historie geladen.</div>`);
+      }
+
+      const GENESIS_MS = Date.UTC(2009, 0, 3);
+      const dayToDate = (days) => new Date(GENESIS_MS + days * 86400000);
+
+      const { a, b } = data.fit;
+      const regY = (days) => a + b * Math.log10(days);
+
+      const fullMinDays = Math.max(points[0][0], 1); // log10(0) undefiniert
+      const xMaxDays = points[points.length - 1][0];
+      const lastDays = points[points.length - 1][0];
+      const lastVal  = points[points.length - 1][1];
+      const ownSinceDays = data.own_measurement_since_days;
+
+      // Sichtfenster ab der ASIC-Ära (2013): auf log10(Tage seit Genesis)
+      // würden die ersten ~3 Jahre (2009-2012, praktisch flache CPU/GPU-
+      // Mining-Phase) den Großteil der Chartbreite einnehmen und 2013-heute
+      // (die eigentlich interessante Wachstumsphase) auf einen Streifen
+      // zusammenquetschen - anders als beim Preis-Chart, dessen Datenreihe
+      // erst ~2011 beginnt und diese Stauchung dadurch gar nicht erst zeigt.
+      // Der Trend/Fit rechnet weiter auf der VOLLEN Historie seit Genesis
+      // (data.fit kommt unverändert aus btc_hashrate.py); nur die sichtbare
+      // Achse zoomt - explizit im Footer ausgewiesen, kein stiller
+      // Datenverlust.
+      const VIEW_START_MS = Date.UTC(2013, 0, 1);
+      const xMinDays = Math.max((VIEW_START_MS - GENESIS_MS) / 86400000, fullMinDays);
+
+      const visiblePoints = points.filter(p => p[0] >= xMinDays);
+      const vals = visiblePoints.map(p => p[1]);
+      const yMinDecadeExp = Math.floor(Math.log10(Math.min(...vals)));
+      const yMaxDecadeExp = Math.ceil(Math.log10(Math.max(...vals)));
+
+      // cL breiter als beim Preis-Chart (56): die Einheiten-Treppe
+      // (z.B. "100 TH/s") braucht mehr Platz als nackte Zahlen.
+      const W = 640, H = 360, cL = 70, cR = 618, cT = 14, cB = 300;
+      const xLogMin = Math.log10(xMinDays), xLogMax = Math.log10(xMaxDays);
+      const xForDays = (days) => cL + (Math.log10(Math.max(days, 1)) - xLogMin) / (xLogMax - xLogMin) * (cR - cL);
+      const yForLogVal = (logV) => cB - (logV - yMinDecadeExp) / (yMaxDecadeExp - yMinDecadeExp) * (cB - cT);
+      const yForVal = (v) => yForLogVal(Math.log10(v));
+
+      const cOwn    = 'var(--bg-color-super,#F7931A)';
+      const cBackf  = 'rgba(255,255,255,0.35)';
+      const cTrend  = 'var(--bg-color-eco,#4CAF50)';
+
+      // SI-Einheiten-Treppe H/s -> kH/s -> ... -> EH/s -> ZH/s statt nackter
+      // EH/s-Zahlen: die Reihe deckt >15 Zehnerpotenzen ab, "0,0000001 EH/s"
+      // ist nicht lesbar. Da Y-Ticks immer exakte Zehnerpotenzen sind, landet
+      // jeder Tick beim Einheitenwechsel automatisch auf einer glatten Zahl
+      // (1, 10 oder 100), nie auf krummen Nachkommastellen.
+      const HASH_UNITS = ['H/s', 'kH/s', 'MH/s', 'GH/s', 'TH/s', 'PH/s', 'EH/s', 'ZH/s', 'YH/s'];
+      const fmtHashrate = (ehs) => {
+        const hs = ehs * 1e18;
+        if (hs <= 0) return `0 ${HASH_UNITS[0]}`;
+        const idx = Math.max(0, Math.min(Math.floor(Math.log10(hs) / 3), HASH_UNITS.length - 1));
+        const val = hs / 10 ** (idx * 3);
+        const digits = val < 10 ? 2 : val < 100 ? 1 : 0;
+        return val.toLocaleString('de-DE', {maximumFractionDigits: digits}) + ' ' + HASH_UNITS[idx];
+      };
+      const fmtEh = (v) => v.toLocaleString('de-DE', {maximumFractionDigits: v < 10 ? 2 : 0});
+
+      let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:hidden">`;
+
+      // Y-Gitter (Zehnerpotenzen). Bei sehr vielen Dekaden (Hashrate spannt
+      // >15 Zehnerpotenzen seit Genesis) werden Labels ausgedünnt, damit sie
+      // sich nicht überlappen; die Gitterlinie selbst bleibt immer sichtbar.
+      const decadeCount = yMaxDecadeExp - yMinDecadeExp;
+      const pxPerDecade = (cB - cT) / Math.max(decadeCount, 1);
+      const labelStep = Math.max(1, Math.ceil(28 / pxPerDecade));
+      for (let e = yMinDecadeExp; e <= yMaxDecadeExp; e++) {
+        const y = yForLogVal(e);
+        s += `<line x1="${cL}" y1="${y}" x2="${cR}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>`;
+        if ((e - yMinDecadeExp) % labelStep === 0) {
+          s += `<text x="${cL - 6}" y="${y + 3.5}" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Roboto,sans-serif" text-anchor="end">${fmtHashrate(10 ** e)}</text>`;
+        }
+      }
+
+      // X-Gitter + Jahres-Beschriftung (log-skaliert wie beim Preis-Chart).
+      // Genesis (03.01.2009) liegt NACH dem 1. Januar 2009 - die rohe
+      // Tick-Position fürs Startjahr wäre negativ und würde sonst
+      // stillschweigend übersprungen (sieht aus wie unerklärte Leerfläche
+      // vor dem eigentlichen Start). Deshalb wird die Position auf xMinDays
+      // geklemmt statt verworfen: das Startjahr sitzt immer sichtbar am
+      // linken Rand. Erstes und letztes Jahr werden nie durch die
+      // Abstands-Ausdünnung verdrängt, damit "heute" rechts nie fehlt.
+      const startYear = dayToDate(xMinDays).getUTCFullYear();
+      const endYear = dayToDate(xMaxDays).getUTCFullYear();
+      const yearTicks = [];
+      for (let yr = startYear; yr <= endYear; yr++) {
+        const raw = (Date.UTC(yr, 0, 1) - GENESIS_MS) / 86400000;
+        const days = Math.min(Math.max(raw, xMinDays), xMaxDays);
+        yearTicks.push({ yr, x: xForDays(days) });
+      }
+      let lastLabelX = -Infinity;
+      yearTicks.forEach((t, i) => {
+        const isEdge = i === 0 || i === yearTicks.length - 1;
+        s += `<line x1="${t.x}" y1="${cT}" x2="${t.x}" y2="${cB}" stroke="rgba(255,255,255,0.05)" stroke-width="0.8"/>`;
+        if (isEdge || t.x - lastLabelX >= 24) {
+          const anchor = i === 0 ? 'start' : i === yearTicks.length - 1 ? 'end' : 'middle';
+          s += `<text x="${t.x}" y="${cB + 13}" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Roboto,sans-serif" text-anchor="${anchor}">${t.yr}</text>`;
+          lastLabelX = t.x;
+        }
+      });
+      s += `<text x="${cL + (cR - cL) / 2}" y="${cB + 26}" fill="rgba(255,255,255,0.35)" font-size="9" font-family="Roboto,sans-serif" text-anchor="middle">Jahr</text>`;
+
+      // Trendlinie: im Log-Log-Raum eine Gerade, nur über den tatsächlichen
+      // Datenbereich (keine Zukunftsprojektion, siehe Kommentar oben). Bei
+      // extrem kleinen xMinDays kann regY() weit unter die sichtbare
+      // Y-Skala fallen (der Fit ist über die volle Spannweite gerechnet,
+      // nicht nur den sichtbaren Ausschnitt) - auf den Zeichenbereich
+      // geklemmt, sonst schießt die Linie diagonal aus dem Rahmen.
+      const clampY = (y) => Math.min(Math.max(y, cT), cB);
+      const trendY1 = clampY(yForLogVal(regY(xMinDays)));
+      const trendY2 = clampY(yForLogVal(regY(xMaxDays)));
+      s += `<line x1="${cL}" y1="${trendY1}" x2="${cR}" y2="${trendY2}" style="stroke:${cTrend}" stroke-width="1.6" stroke-dasharray="5 3" opacity="0.9"/>`;
+
+      // Hashrate-Kurve: zweifarbig an der own_measurement_since_days-Grenze
+      // gesplittet, damit Backfill (Fremdquelle) und eigene Messung optisch
+      // unterscheidbar bleiben (Transparenz über die Datenherkunft).
+      const boundary = (ownSinceDays !== null && ownSinceDays !== undefined) ? ownSinceDays : xMaxDays;
+      const backfillPts = visiblePoints.filter(p => p[0] <= boundary);
+      const ownPts = visiblePoints.filter(p => p[0] >= boundary);
+      const toPath = (pts) => pts.map(([d, v]) => `${xForDays(d).toFixed(1)},${yForVal(v).toFixed(1)}`).join(' ');
+      if (backfillPts.length > 1) {
+        s += `<polyline points="${toPath(backfillPts)}" fill="none" stroke="${cBackf}" stroke-width="1.4" stroke-linejoin="round"/>`;
+      }
+      if (ownPts.length > 1) {
+        s += `<polyline points="${toPath(ownPts)}" fill="none" stroke="${cOwn}" stroke-width="1.8" stroke-linejoin="round"/>`;
+      }
+
+      // Aktueller Wert: Punkt + Label
+      const curX = xForDays(lastDays), curY = yForVal(lastVal);
+      s += `<circle cx="${curX}" cy="${curY}" r="4" fill="white" stroke="${cOwn}" stroke-width="2"/>`;
+
+      // Rahmen
+      s += `<line x1="${cL}" y1="${cT}" x2="${cL}" y2="${cB}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+      s += `<line x1="${cL}" y1="${cB}" x2="${cR}" y2="${cB}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+
+      // Legende
+      const legendItem = (x, color, label, dash) => `
+        <line x1="${x}" y1="${cT - 4}" x2="${x + 14}" y2="${cT - 4}" style="stroke:${color}" stroke-width="2" ${dash ? `stroke-dasharray="${dash}"` : ''}/>
+        <text x="${x + 18}" y="${cT - 1}" fill="rgba(255,255,255,0.65)" font-size="8.5" font-family="Roboto,sans-serif">${label}</text>`;
+      s += legendItem(cL, cOwn, 'Eigene Messung', '');
+      s += legendItem(cL + 110, cBackf, 'Backfill (blockchain.info)', '');
+      s += legendItem(cL + 290, cTrend, 'Trend (heuristisch)', '5 3');
+
+      s += '</svg>';
+
+      // Trendabweichung des aktuellen Werts (rein deskriptiv, keine Prognose)
+      const fairValue = Math.pow(10, regY(lastDays));
+      const pctDiff = (lastVal / fairValue - 1) * 100;
+      const diffTxt = (pctDiff >= 0 ? '+' : '') + pctDiff.toLocaleString('de-DE', {maximumFractionDigits: 0}) + ' %';
+      const ownSinceTxt = (ownSinceDays !== null && ownSinceDays !== undefined)
+        ? dayToDate(ownSinceDays).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'})
+        : '—';
+      const genAt = data.generated_at ? new Date(data.generated_at) : null;
+      const genTxt = genAt && !isNaN(genAt.getTime())
+        ? genAt.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'})
+        : '—';
+      const genesisTxt = data.genesis_date
+        ? new Date(data.genesis_date).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'})
+        : '03.01.2009';
+
+      const footer = `
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--divider-color);
+                    display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;
+                    font-size:var(--bg-fs-secondary);color:var(--secondary-text-color)">
+          <span>Hashrate: <b style="color:var(--primary-text-color)">${fmtEh(lastVal)} EH/s</b>
+                 · Trendabweichung: ${diffTxt}</span>
+          <span style="opacity:0.6">Trend berechnet seit ${genesisTxt}, Ansicht ab ${startYear} (ASIC-Ära)
+                 · Eigene Messung seit ${ownSinceTxt} · Backfill: blockchain.info (einmalig) · Generiert: ${genTxt}</span>
+        </div>`;
+
+      return wrap(s + footer);
+    ]]]
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 18px 20px
+  grid:
+    - grid-template-areas: '"chart"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    chart:
+      - width: 100%
+      - justify-self: stretch

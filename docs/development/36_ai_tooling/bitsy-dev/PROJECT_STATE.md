@@ -1,11 +1,15 @@
 # PROJECT_STATE.md - BitGridAI Aktueller Stand
 
-> Zuletzt aktualisiert: 2026-03-20
-> Git: clean — letzter Commit: `0f4ea0b Update README with synchronization note`
+> Zuletzt aktualisiert: 2026-07-12 (Claude Code, gegen tatsächlichen Repo-Stand verifiziert)
+> Git: letzter Commit: `9d7ec97 feat: add device tracking and bitsy ki tab`
 
 ## Projektstatus
 
-**Phase:** Research & Architektur — vollständig dokumentiert, Code-Implementierung noch nicht begonnen.
+**Phase:** Architektur vollständig dokumentiert, Code-Implementierung weit fortgeschritten.
+`src/{core,adapters,data,explain,ha,ops,sim,ui}` existieren mit Tests unter `tests/`,
+HA-Dashboard und Miner-MVP laufen produktiv. Diese Datei war zuvor auf dem Stand vom
+2026-03-20 stehengeblieben ("Code-Implementierung noch nicht begonnen") — das stimmte
+nicht mehr mit dem Repo überein und wurde korrigiert.
 
 ---
 
@@ -49,16 +53,20 @@ Alle 12 Kapitel existieren und haben Inhalt.
 
 ## Source Code — src/
 
-Nur READMEs mit Planungsdokumenten — kein Code implementiert.
+Alle acht Module sind implementiert, jeweils mit Tests unter `tests/<modul>/`. Diese
+Tabelle gibt einen groben Stand wieder (Vorhandensein, nicht Detailschärfe) — für
+Konsistenz-/Qualitätsprüfungen im Detail siehe `FINDINGS.md`.
 
-| Modul | Geplante Funktion |
-|-------|-------------------|
-| `core/` | Rule Engine, Block-Scheduler, EnergyState |
-| `adapters/` | MQTT, ESPHome, Modbus, REST |
-| `explain/` | Mapping R1–R5 → Textbausteine |
-| `ui/` | Optionale eigene UI |
-| `sim/` | Szenarien, Replay, Fixtures |
-| `ha/` | Home Assistant Config (docker-compose vorhanden) |
+| Modul | Status |
+|-------|--------|
+| `core/` | ✅ Rule Engine (R1–R5), Block-Scheduler, EnergyState, Override-Handler |
+| `adapters/` | ✅ MQTT, Modbus, Shelly, Canaan/Bitaxe-Miner, Forecast, Preis, Telemetrie |
+| `data/` | ✅ Event-/State-Store, KPI-Reporting, HA-History-Sync, BTC-Power-Law |
+| `explain/` | ✅ ExplainAgent, Decision-Codes, ₿itsy-Status/Trigger-Server |
+| `ha/` | ✅ Home-Assistant-Konfiguration (Dashboard, Packages, Custom Components) |
+| `ops/` | ✅ Config-Loader, Health-Check, Metrics, Logging |
+| `sim/` | ✅ Szenario-Generierung, Replay, Studien-Analyse (SoC-Band, Faithfulness, Güte) |
+| `ui/` | ✅ API (FastAPI) |
 
 ---
 
@@ -83,11 +91,11 @@ Nur READMEs mit Planungsdokumenten — kein Code implementiert.
 ## Letzte Commits
 
 ```
-0f4ea0b – Update README with synchronization note
-261a0cb – Add next-step and main overview links
-470f885 – Fix German typos in trust dimensions doc
-24819cc – Add TODO for trust and appreciation context
-a0e3ef9 – Update 2023a_home_assistant_exploration.md
+9d7ec97 – feat: add device tracking and bitsy ki tab
+e0f7025 – Add devices tab & refine miner safety logic
+f0b064a – Add R2 evening SoC rule; HA UI tweaks
+541ee1e – feat: add HA history sync and gap detection
+2c5d982 – ha: Dashboard UI revamp, SoC defaults & stats
 ```
 
 ---

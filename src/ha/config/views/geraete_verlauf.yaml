@@ -21,6 +21,10 @@ cards:
         name: TV
       - entity: sensor.shellyplugsg3_d885ac18c3b4_leistung
         name: Büro
+      - entity: sensor.shellyplusplugs_d4d4daf4eda4_leistung
+        name: Lüftung
+      - entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
+        name: Server, NAS, KI-Agent
 
   - type: statistics-graph
     title: Tagesverbrauch (14 Tage)
@@ -38,3 +42,7 @@ cards:
         name: TV
       - entity: sensor.shellyplugsg3_d885ac18c3b4_energie
         name: Büro
+      - entity: sensor.shellyplusplugs_d4d4daf4eda4_energie
+        name: Lüftung
+      - entity: sensor.shellyplugsg3_d0cf13db3a00_energie
+        name: Server, NAS, KI-Agent

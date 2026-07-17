@@ -95,6 +95,8 @@ recorder:
       - sensor.tv_energy_daily
       - sensor.kuehlschraenke_energy_daily
       - sensor.buero_energy_daily
+      - sensor.lueftung_energy_daily
+      - sensor.server_energy_daily
       - sensor.geraete_energy_daily
       - sensor.solar_coverage_pct
       - sensor.deadband_hit_rate_pct
@@ -164,15 +166,19 @@ mqtt:
       expire_after: 7200
 
     # ── ₿itsy: Andockpunkt der Erklärschicht (Tab "₿itsy" in v2) ─────────
-    # Kontrakt für den späteren Hermes-Agenten (Qwen-LLM im lokalen Netz).
+    # Kontrakt für src/explain/bitsy_status.py (Ollama/Qwen im lokalen Netz,
+    # direkt angebunden, kein Agenten-Framework).
     # Muss HIER stehen, nicht in packages/: mqtt im Package-Merge liefert
     # "required key 'platform' not provided" (HA-Version unterstützt das
     # Mergen des mqtt-Keys aus Packages nicht).
-    # Hermes publiziert (retained):
-    #   bitgrid/explain/bitsy/status → "online"|"offline" (als LWT setzen)
+    # bitsy_status.py publiziert (retained, explizit bei jedem Lauf, kein
+    # LWT: das Skript läuft als kurzlebiger Batch-Job ohne Dauerverbindung):
+    #   bitgrid/explain/bitsy/status → "online"|"offline"
     #   bitgrid/explain/bitsy/advice → JSON:
     #     {"headline": "...", "text": "...", "mood": "...",
     #      "model": "qwen3:14b", "generated_at": "ISO-8601"}
+    #   bitgrid/explain/bitsy/chat → JSON (nur bei einer Frage, ask()):
+    #     {"question": "...", "answer": "...", "answered_at": "ISO-8601"}
     # Read-only-Prinzip: kein Steuerpfad, nur Erklärung/Beratung. Solange
     # nichts publiziert wurde, ist der Sensor unavailable und der Tab zeigt
     # die deterministische, regelbasierte Sicht.
@@ -187,6 +193,34 @@ mqtt:
       payload_available: "online"
       payload_not_available: "offline"
       icon: mdi:rodent
+
+    # ── ₿itsy-Chat: Freitextantwort (Baustein 3, packages/bitsy_chat.yaml) ──
+    # Ersetzt input_text.bitsy_answer (255-Zeichen-Hardlimit der input_text-
+    # Domain in HA, nicht erhöhbar): State bleibt aus Konsistenzgründen
+    # ebenso gekappt, aber die Attribute (answer/question) sind unbegrenzt,
+    # genau wie bei "Bitsy Advice" oben.
+    - name: "Bitsy Chat"
+      unique_id: bitsy_chat
+      state_topic: "bitgrid/explain/bitsy/chat"
+      value_template: "{{ (value_json.answer | default(''))[:250] }}"
+      json_attributes_topic: "bitgrid/explain/bitsy/chat"
+      icon: mdi:comment-text-outline
+
+# ── ₿itsy: "Jetzt aktualisieren"-Button (₿itsy-Tab, ki_beratung.yaml) ────────
+# Ruft src/explain/bitsy_trigger_server.py auf, Docker-Container bitgrid-bitsy
+# (infra/docker-compose.yml), laeuft auf DIESEM Host (.62, network_mode: host,
+# daher localhost statt LAN-IP) mit restart:unless-stopped. Der Container laesst
+# daraufhin src/explain/bitsy_status.py einmal durchlaufen (HA lesen, Ollama
+# fragen, MQTT publizieren) und macht das intern zusaetzlich alle 10 Minuten
+# von selbst. Kein Steuerpfad: startet nur einen Lese-/Erklaer-Durchlauf,
+# core/ bleibt unberuehrt.
+# Port 8766, NICHT 8765 (das ist fuer den geplanten bitgrid-ui-Dienst
+# reserviert, siehe infra/docker-compose.override.yml).
+rest_command:
+  bitsy_trigger:
+    url: "http://localhost:8766/trigger"
+    method: POST
+    timeout: 30
 
 # ── BitGridAI Entscheidungs-Logik ─────────────────────────────────────────────
 # Alle Regelparameter als editierbare Helper

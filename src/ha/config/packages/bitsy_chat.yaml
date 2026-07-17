@@ -1,0 +1,81 @@
+bitsy_chat:
+  # ═══════════════════════════════════════════════════════════════════════
+  # ₿itsy-Chat (Baustein 3, KI-Erklärschicht): Freitextfrage an Bitsy im
+  # ₿itsy-Tab (Karte in views/ki_beratung.yaml). Antwort kommt von Ollama
+  # (qwen3.5:9b), gleicher Klassifikations-/Persona-Unterbau wie der
+  # periodische Status (src/explain/bitsy_status.py:ask()).
+  #
+  # Bewusst NICHT gegen das Hermes-Agent-Framework (Umbrel .96): dessen
+  # SYSTEM_PROMPT.md listet unter "Eiserne Leitplanken" explizit "kein
+  # externer Chat-Kanal an diesem Agenten". Entscheidung 2026-07-12: erstmal
+  # nur ein Chat direkt gegen Ollama, dieselbe Instanz, die bitsy_status.py
+  # ohnehin schon fuer den periodischen Status anfragt. Kein Steuerpfad: der
+  # /ask-Endpoint liest nur HA-Zustand, schreibt nirgends in core/.
+  #
+  # Ablauf: input_text.bitsy_question tippen (Stift-Icon in der Entities-
+  # Karte antippen) → Automation bitsy_ask_question feuert auf die
+  # Zustandsaenderung → rest_command.bitsy_ask (POST localhost:8766/ask,
+  # derselbe Trigger-Server-Container wie bitsy_trigger) → bitsy_status.
+  # ask() publiziert die Antwort selbst per MQTT (sensor.bitsy_chat, siehe
+  # configuration.yaml) mit vollem Text in den Attributen, kein 255-Zeichen-
+  # Limit mehr wie beim frueheren input_text.bitsy_answer (deshalb auch
+  # keine harte Kuerze im Chat-Prompt mehr noetig). Die Automation hier
+  # publiziert nur noch einen Fallback, wenn der REST-Call selbst fehlschlaegt
+  # (Trigger-Server nicht erreichbar, ask() lief dann nie).
+  # ═══════════════════════════════════════════════════════════════════════
+
+  input_text:
+    bitsy_question:
+      name: "Frage an Bitsy"
+      icon: mdi:comment-question-outline
+      max: 255
+      initial: ""
+
+  rest_command:
+    bitsy_ask:
+      url: "http://localhost:8766/ask"
+      method: POST
+      content_type: "application/json"
+      payload: "{{ {'question': question} | to_json }}"
+      timeout: 30
+
+  automation:
+    - id: bitsy_ask_question
+      alias: "Bitsy: Frage beantworten"
+      description: >
+        Feuert, wenn input_text.bitsy_question auf einen nicht-leeren Wert
+        gesetzt wird. Ruft rest_command.bitsy_ask synchron auf; die Antwort
+        selbst publiziert bitsy_status.ask() bereits per MQTT. Nur wenn der
+        REST-Call komplett fehlschlaegt (bitsy_resp undefiniert), publiziert
+        die Automation selbst einen Fallback auf denselben Topic.
+      mode: single
+      trigger:
+        - platform: state
+          entity_id: input_text.bitsy_question
+      condition:
+        - condition: template
+          value_template: >
+            {{ trigger.to_state.state not in ['', 'unknown', 'unavailable'] }}
+      action:
+        - action: rest_command.bitsy_ask
+          data:
+            question: "{{ trigger.to_state.state }}"
+          response_variable: bitsy_resp
+          continue_on_error: true
+        - if:
+            - condition: template
+              value_template: "{{ bitsy_resp is not defined }}"
+          then:
+            - action: mqtt.publish
+              data:
+                topic: "bitgrid/explain/bitsy/chat"
+                retain: true
+                payload: >
+                  {{ {'question': trigger.to_state.state,
+                      'answer': 'Bitsy ist gerade nicht erreichbar.',
+                      'answered_at': now().isoformat()} | to_json }}
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.bitsy_question
+          data:
+            value: ""

@@ -1,134 +1,274 @@
 # ═══════════════════════════════════════════════════════════════════════
-# ₿itsy-Beratung (rechte Spalte) — KI-Beratung + Status des KI-Stacks.
-# Eingebunden via !include in:
-#   - bitgrid_dashboard_v2.yaml  → Tab "₿itsy", grid-area: beratung
+# ₿itsy-Beratung (rechte Spalte) — KI-Version derselben Hamster-Karte wie
+# views/ki_bitsy.yaml (links), damit ein direkter A/B-Vergleich möglich ist:
+# identisches Layout (Bild+Text-Zeile, Blockzeit/Balance/Kurs-Fußleiste),
+# nur die Textquelle unterscheidet sich. Links = deterministische Branches,
+# rechts = Headline/Text aus sensor.bitsy_advice (Ollama, Kontrakt in
+# configuration.yaml, gefüllt von src/explain/bitsy_status.py).
+# Eingebunden via !include in bitgrid_dashboard_v2.yaml → Tab "₿itsy".
 #
-# Karte 1 "Beratung": zeigt die Hermes/Qwen-Beratung aus sensor.bitsy_advice
-# (Kontrakt: packages/bitsy.yaml), klar als KI-generiert gekennzeichnet.
-# Solange Hermes offline ist: deterministischer Ist-Zustand aus den Live-
-# Entities (die Datenbasis, die Hermes später ebenfalls bekommt).
-#
-# Karte 2 "KI-Stack": Zustand der Erklärschicht-Bausteine (Hermes-Agent,
-# LLM-Modell, Whisper-Sprachein-/ausgabe, letzte Analyse). Whisper ist
-# geplanter Ausbau, wird hier bewusst schon als Slot angezeigt.
+# Karte 2 "KI-Stack": Zustand der Erklärschicht-Bausteine (Ollama-
+# Verbindung, LLM-Modell, Whisper-Sprachein-/ausgabe, letzte Analyse).
+# Whisper ist geplanter Ausbau, wird hier bewusst schon als Slot angezeigt.
+# "Ollama" zeigt den zuletzt publizierten Status aus bitsy_status.py
+# (bitgrid/explain/bitsy/status, "offline" bei fehlgeschlagenem Ollama-
+# Call — s. dort), kein separates Agenten-Framework.
 # ═══════════════════════════════════════════════════════════════════════
 type: vertical-stack
 cards:
 
-  # ── Karte 1: Beratung (Hermes/Qwen oder deterministischer Fallback) ────
-  - type: custom:button-card
-    show_name: false
-    show_icon: false
-    show_state: false
-    tap_action:
-      action: none
-    styles:
-      card:
-        - background: var(--ha-card-background)
-        - border-radius: var(--ha-card-border-radius)
-        - overflow: hidden
-        - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
-        - box-shadow: var(--ha-card-box-shadow)
-        - padding: 20px
-      grid:
-        - grid-template-areas: '"beratung"'
-        - grid-template-columns: 1fr
-      custom_fields:
-        beratung:
-          - width: 100%
-          - justify-self: stretch
-    custom_fields:
-      beratung: >
-        [[[
-          const fnum = (id) => {
-            const v = parseFloat(states[id]?.state);
-            return isNaN(v) ? null : v;
-          };
-          const cfg = (id, fb) => { const v = fnum(id); return v === null ? fb : v; };
-          const pct = (v) => v === null ? '—' : v.toLocaleString('de-DE', {maximumFractionDigits: 0}) + ' %';
-          const kw  = (w) => w === null ? '—' : (w / 1000).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' kW';
-          const wF  = (w) => w === null ? '—' : Math.round(w).toLocaleString('de-DE') + ' W';
+  # ── Karte 1: Hamster-Karte + Frag-Bitsy-Eingabe (visuell zusammengefuehrt) ─
+  # Zwei Karten (button-card + entities), aber nur der aeussere vertical-
+  # stack traegt Hintergrund/Rand/Schatten (card_mod :host); beide Kinder
+  # sind selbst chrome-los (transparent, kein eigener Rand/Schatten) --
+  # dieselbe Technik wie die Eco/Standard/Super-Button-Reihe in views/
+  # miner_controls.yaml. Trennlinie zwischen beiden nur ueber border-top auf
+  # der entities-Karte (visuell wie die Blockzeit-Fusszeile innen).
+  #
+  # Warum zwei Karten statt Frage-Feld direkt im custom_fields-HTML von
+  # Karte 1: custom:button-card ist selbst ein <button>-Element, interaktive
+  # Kind-Elemente (input) darin sind ungueltiges HTML-Nesting -- Tippen hat
+  # in einem frueheren Versuch schlicht nicht funktioniert (siehe frueherer
+  # Git-Stand). Die entities-Karte (input_text-Zeile) bleibt deshalb ein
+  # eigenstaendiges Element, nur visuell nahtlos angeschlossen statt als
+  # eigene Karte darunter.
+  #
+  # Antwort erscheint NICHT hier im Eingabefeld: sie ueberschreibt Headline/
+  # Text der Hamster-Karte oben, solange sie juenger ist als die letzte
+  # periodische Analyse (Logik siehe custom_fields.hamster unten).
+  - type: vertical-stack
+    card_mod:
+      style: |
+        :host {
+          display: flex !important;
+          flex-direction: column !important;
+          background: var(--ha-card-background);
+          border-radius: var(--ha-card-border-radius) !important;
+          border: var(--ha-card-border-width) solid var(--ha-card-border-color);
+          box-shadow: var(--ha-card-box-shadow);
+          overflow: hidden !important;
+          contain: paint !important;
+        }
+    cards:
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        custom_fields:
+          hamster: >
+            [[[
+              const fnum = (id) => {
+                const v = parseFloat(states[id]?.state);
+                return isNaN(v) ? null : v;
+              };
 
-          const adv = states['sensor.bitsy_advice'];
-          const hermesOn = adv && !['unavailable', 'unknown', ''].includes(adv.state);
+              const adv = states['sensor.bitsy_advice'];
+              const ollamaOn = adv && !['unavailable', 'unknown', ''].includes(adv.state);
+              const a = (adv && adv.attributes) || {};
 
-          if (hermesOn) {
-            const a = adv.attributes || {};
-            const ts = a.generated_at ? new Date(a.generated_at) : null;
-            const tsStr = ts && !isNaN(ts.getTime())
-              ? ts.toLocaleString('de-DE', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'})
-              : '—';
-            const text = (a.text || '').replace(/\n/g, '<br>');
-            return `
-              <div style="width:100%">
-                <div style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;
-                            margin-bottom:12px;border:1px solid color-mix(in srgb, var(--accent-color) 40%, transparent);
-                            background:color-mix(in srgb, var(--accent-color) 12%, transparent)">
-                  <ha-icon icon="mdi:creation" style="--mdc-icon-size:13px;color:var(--accent-color)"></ha-icon>
-                  <span style="font-size:var(--bg-fs-label);font-weight:700;text-transform:uppercase;
-                               letter-spacing:0.07em;color:var(--accent-color)">KI-generiert · read-only</span>
-                </div>
-                <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1.2;
-                            color:var(--primary-text-color);margin-bottom:10px">${adv.state}</div>
-                <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.6">${text}</div>
-                <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--divider-color);
-                            font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);opacity:0.65">
-                  ${a.model || 'LLM'} · ${tsStr} · beeinflusst keine Steuerentscheidung
-                </div>
-              </div>`;
-          }
+              // Frag-Bitsy-Antwort (Karte 4, packages/bitsy_chat.yaml) ueberschreibt
+              // die periodische Statusmeldung hier oben, aber nur solange sie
+              // juenger ist als die letzte periodische Analyse: sonst wuerde eine
+              // Frage von vor drei Stunden fuer immer den aktuellen Zustand
+              // verdecken. Kein Timer, kein Sonderzustand, nur ein Zeitvergleich
+              // zweier ohnehin vorhandener Zeitstempel.
+              const chat = states['sensor.bitsy_chat'];
+              const chatAttrs = (chat && chat.attributes) || {};
+              const hasAnswer = chat && !['', 'unknown', 'unavailable'].includes(chat.state) && chatAttrs.answer;
+              const adviceTs = a.generated_at ? new Date(a.generated_at).getTime() : 0;
+              const answerTs = (hasAnswer && chatAttrs.answered_at) ? new Date(chatAttrs.answered_at).getTime() : -1;
+              const showAnswer = hasAnswer && answerTs > adviceTs;
 
-          // Fallback: deterministischer Ist-Zustand (Datenbasis für Hermes)
-          const soc  = fnum('sensor.battery_soc_pct');
-          const pv   = fnum('sensor.pv_power_w');
-          const haus = fnum('sensor.house_load_w');
-          const min  = fnum('sensor.miner_total_power_w');
-          const chip = fnum('sensor.miner_max_chip_temp_c');
-          const maxChip  = cfg('input_number.mvp_tmax_std_threshold_c', 112);
-          const socStop  = cfg('input_number.mvp_soc_stop_pct', 50);
-          const ecoStart = cfg('input_number.mvp_soc_eco_start_pct', 60);
-          const socStd   = cfg('input_number.mvp_soc_std_pct', 75);
-          const socSuper = cfg('input_number.mvp_soc_super_pct', 90);
-          const modeRaw = states['sensor.miner1_workmode_status']?.state
-                      || states['sensor.miner2_workmode_status']?.state || '';
-          const mode = ['unavailable', 'unknown', ''].includes(modeRaw) ? '—' : modeRaw;
-          let band = '—';
-          if (soc !== null) {
-            band = soc < socStop ? 'Hausreserve' : soc < ecoStart ? 'Halteband'
-                 : soc < socStd ? 'Eco-Band' : soc < socSuper ? 'Standard-Band' : 'Super-Band';
-          }
-          const row = (icon, col, label, value, sub) => `
-            <div style="display:flex;align-items:center;gap:12px;padding:9px 0;
-                        border-bottom:1px solid color-mix(in srgb, var(--divider-color) 55%, transparent)">
-              <ha-icon icon="${icon}" style="--mdc-icon-size:19px;color:${col};flex-shrink:0"></ha-icon>
-              <span style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);flex:1">${label}</span>
-              <span style="font-size:var(--bg-fs-body);font-weight:700;white-space:nowrap">${value}</span>
-              ${sub ? `<span style="font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);opacity:0.7;white-space:nowrap">${sub}</span>` : ''}
-            </div>`;
+              // Bild aus mood ableiten — dieselben Assets wie die deterministische
+              // Karte links, mapped auf den vom Python-Skript gesetzten mood-Code
+              // (classify_state() in src/explain/bitsy_status.py; das LLM kann
+              // diese Zuordnung nicht beeinflussen, nur Headline/Text formulieren).
+              const IMG_BY_MOOD = {
+                schlaeft:  'bithamster_sleep.png',
+                wartet:    'bithamster_wait.png',
+                zufrieden: 'bithamster_eco.png',
+                fleissig:  'bithamster_standard.png',
+                volllast:  'bithamster_super.png',
+                alarmiert: 'bithamster_wait.png',
+              };
 
-          return `
-            <div style="width:100%">
-              <div style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;
-                          margin-bottom:12px;border:1px solid rgba(255,255,255,0.18);
-                          background:rgba(255,255,255,0.06)">
-                <ha-icon icon="mdi:robot-off-outline" style="--mdc-icon-size:13px;color:var(--secondary-text-color)"></ha-icon>
-                <span style="font-size:var(--bg-fs-label);font-weight:700;text-transform:uppercase;
-                             letter-spacing:0.07em;color:var(--secondary-text-color)">Hermes offline · regelbasierte Sicht</span>
-              </div>
-              <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.55;margin-bottom:8px">
-                Sobald der Hermes-Agent mit dem Qwen-Modell verbunden ist, steht hier seine Beratung:
-                Ist-Zustand in Alltagssprache und konkrete Optimierungsvorschläge aus den Hausdaten.
-                Bis dahin die deterministische Datenbasis, auf der er arbeiten wird:
-              </div>
-              ${row('mdi:battery-high', 'var(--bg-color-eco,#4CAF50)', 'Ladezustand', pct(soc), band)}
-              ${row('mdi:solar-power-variant', 'var(--bg-color-pv,#EFB73C)', 'PV-Erzeugung', kw(pv), '')}
-              ${row('mdi:home-lightning-bolt-outline', '#A6A2D8', 'Haus-Last', kw(haus), '')}
-              ${row('mdi:pickaxe', 'var(--bg-color-standard,#26C6DA)', 'Miner', wF(min), mode)}
-              ${row('mdi:thermometer', 'var(--bg-color-heat,#EF5350)', 'Chip-Temperatur', chip === null ? '—' : Math.round(chip).toLocaleString('de-DE') + ' °C', 'Grenze ' + Math.round(maxChip) + ' °C')}
-            </div>`;
-        ]]]
+              let head, sub, img;
+              if (showAnswer) {
+                // Kurzes Label oben ("Antwort von ₿itsy:"), die eigentliche
+                // Chat-Antwort läuft unten als sub in derselben Formatierung wie
+                // a.text (grau, line-height 1.55) — die bricht zuverlässig um,
+                // anders als der fette Titel-Text, der bei langen Antworten über
+                // den Kartenrand lief. Ersetzt den periodischen Systemstatus,
+                // solange die Antwort aktuell ist.
+                head = 'Antwort von ₿itsy:';
+                sub  = (chatAttrs.answer || '').replace(/\n/g, '<br>').replace(/\.\s+/g, '.<br>');
+                img  = IMG_BY_MOOD[a.mood] || 'bithamster_wait.png';
+              } else if (ollamaOn) {
+                head = adv.state;
+                // Nach jedem Satzende ein <br>, dasselbe Muster wie die
+                // deterministische Karte links (dort stehen die Saetze schon
+                // explizit mit <br> verbunden, deshalb bricht sie nie ab).
+                // Ollama liefert einen durchgehenden Fliesstext ohne Umbrueche,
+                // ohne diesen Schritt lief der Text ueber den Kartenrand hinaus.
+                sub  = (a.text || '').replace(/\n/g, '<br>').replace(/\.\s+/g, '.<br>');
+                img  = IMG_BY_MOOD[a.mood] || 'bithamster_wait.png';
+              } else {
+                head = 'Ollama offline';
+                sub  = 'Sobald Ollama wieder erreichbar ist, '
+                     + 'erscheint hier seine Formulierung desselben Zustands, den die '
+                     + 'Karte links regelbasiert zeigt.';
+                img  = 'bithamster_wait.png';
+              }
 
-  # ── Karte 2: KI-Stack (Hermes / Modell / Whisper / letzte Analyse) ─────
+              const stat = (label, value, sub) => `
+                <div style="text-align:center">
+                  <div style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
+                              color:var(--secondary-text-color);opacity:0.65;margin-bottom:3px">${label}</div>
+                  <div style="font-size:1.5rem;font-weight:700;line-height:1;
+                              white-space:nowrap">${value}</div>
+                  ${sub ? `<div style="font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);opacity:0.7;
+                              white-space:nowrap;margin-top:3px">${sub}</div>` : ''}
+                </div>`;
+
+              // Bitcoin-Fußleiste, identisch zur Karte links (bewusst dupliziert,
+              // fuer den A/B-Vergleich muessen beide Fusszeilen exakt gleich sein)
+              const blockH   = fnum('sensor.bitcoin_block_height');
+              const balBtc   = fnum('sensor.pool_balance_btc');
+              const eurRate  = fnum('sensor.btc_eur_price');
+              const blockStr = blockH  !== null ? Math.round(blockH).toLocaleString('de-DE')          : '—';
+              const FLASH_MS = 60000;
+              const bhLc  = states['sensor.bitcoin_block_height']?.last_changed;
+              const bhAge = bhLc ? Date.now() - new Date(bhLc).getTime() : Infinity;
+              const blockAnim = (bhAge >= 0 && bhAge < FLASH_MS)
+                ? `animation:bgz-block-tick ${FLASH_MS}ms linear ${-Math.round(bhAge)}ms both;`
+                : '';
+              let priceStr = eurRate !== null ? Math.round(eurRate).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">€</span>' : '—';
+              const haveBal  = balBtc !== null && balBtc > 0;
+              const satsStr  = haveBal ? Math.round(balBtc * 1e8).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">SATs</span>' : '—';
+              const euroSub  = (haveBal && eurRate !== null && eurRate > 0)
+                ? '≈ ' + (balBtc * eurRate).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €'
+                : '';
+
+              const up = 'var(--bg-color-eco,#4CAF50)', down = 'var(--bg-color-reserve,#EF5350)';
+              const dchip = (txt, col, em) => `<span style="font-size:${em || 0.72}em;font-weight:600;margin-left:4px;color:${col}">${txt}</span>`;
+              const eurPrev = fnum('input_number.btc_eur_day_start');
+              let priceSub = '';
+              if (eurRate !== null && eurPrev !== null && eurPrev > 0) {
+                const dp = (eurRate - eurPrev) / eurPrev * 100;
+                const s  = (dp >= 0 ? '+' : '−')
+                         + Math.abs(dp).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                priceStr += dchip(`(${s} %)`, dp >= 0 ? up : down, 0.5);
+              }
+
+              const yIso = (() => { const d = new Date(); d.setDate(d.getDate() - 1);
+                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+              let yBtc = null;
+              (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {
+                const md = tx.mining_extra?.mining_date; if (!md) return;
+                const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
+                if (sd.toISOString().slice(0, 10) !== yIso) return;
+                const v = parseFloat(tx.amount ?? tx.changed_balance);
+                if (v > 0) yBtc = v;
+              });
+              if (yBtc === null) {
+                (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
+                  if (!e[0] || !e[2]) return;
+                  const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
+                  if (sd.toISOString().slice(0, 10) === yIso) yBtc = e[2];
+                });
+              }
+              if (yBtc === null) {
+                const raw = states['input_text.pool_btc_daily_log']?.state ?? '';
+                (raw && raw !== 'unknown' && raw !== 'unavailable' ? raw.split('|') : []).forEach(e => {
+                  const [d, b] = e.split(','); if (d === yIso) { const v = parseFloat(b); if (v > 0) yBtc = v; }
+                });
+              }
+              const haveYield = yBtc !== null && yBtc > 0;
+              const satsDelta = haveYield ? dchip('(+' + Math.round(yBtc * 1e8).toLocaleString('de-DE') + ')', up, 0.5) : '';
+              const euroDelta = (haveYield && eurRate !== null && eurRate > 0)
+                ? dchip('(+' + (yBtc * eurRate).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €)', up)
+                : '';
+              const satsLine = haveBal ? satsStr + satsDelta : satsStr;
+              const balSub   = euroSub ? euroSub + euroDelta : '';
+
+              return `
+                <style>
+                  @keyframes bgz-block-tick {
+                    0%   { transform:rotateX(90deg); color:var(--bg-color-super,#F7931A); text-shadow:0 0 16px rgba(247,147,26,.8); }
+                    1%   { transform:rotateX(0);     color:var(--bg-color-super,#F7931A); text-shadow:0 0 16px rgba(247,147,26,.8); }
+                    70%  { transform:rotateX(0);     color:var(--bg-color-super,#F7931A); text-shadow:0 0 8px rgba(247,147,26,.4); }
+                    100% { transform:rotateX(0);     color:var(--primary-text-color); text-shadow:0 0 0 rgba(247,147,26,0); }
+                  }
+                </style>
+                <div style="display:flex;flex-direction:column;height:100%;width:100%">
+                  <div style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;
+                              margin-bottom:14px;align-self:flex-start;
+                              border:1px solid color-mix(in srgb, var(--accent-color) 40%, transparent);
+                              background:color-mix(in srgb, var(--accent-color) 12%, transparent)">
+                    <ha-icon icon="mdi:creation" style="--mdc-icon-size:13px;color:var(--accent-color)"></ha-icon>
+                    <span style="font-size:var(--bg-fs-label);font-weight:700;text-transform:uppercase;
+                                 letter-spacing:0.07em;color:var(--accent-color)">KI-generiert · read-only</span>
+                  </div>
+                  <div style="display:flex;gap:24px;align-items:center">
+                    <img src="/local/${img}?v=20260625"
+                         style="width:24%;max-width:135px;aspect-ratio:1;border-radius:50%;flex-shrink:0;
+                                object-fit:cover;border:2px solid var(--divider-color)">
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1.3;
+                                  white-space:normal;overflow-wrap:break-word;
+                                  color:var(--primary-text-color);margin-bottom:12px">${head}</div>
+                      <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.55;
+                                  white-space:normal;overflow-wrap:break-word">${sub}</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;padding-top:14px;margin-top:14px;
+                              border-top:1px solid var(--divider-color)">
+                    <div style="width:24%;max-width:135px;flex-shrink:0;text-align:center">
+                      <div style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
+                                  color:var(--secondary-text-color);opacity:0.65;margin-bottom:3px">Blockzeit</div>
+                      <div style="font-size:1.5rem;font-weight:700;line-height:1;white-space:nowrap;${blockAnim}">${blockStr}</div>
+                    </div>
+                    ${stat('Balance', satsLine, balSub)}
+                    ${stat('Kurs', priceStr, priceSub)}
+                  </div>
+                </div>`;
+            ]]]
+        styles:
+          card:
+            - background: transparent
+            - border-radius: 0
+            - overflow: hidden
+            - border: none
+            - box-shadow: none
+            - padding: 20px
+          grid:
+            - grid-template-areas: '"hamster"'
+            - grid-template-columns: 1fr
+          custom_fields:
+            hamster:
+              - height: 100%
+              - width: 100%
+              - justify-self: stretch
+              - align-self: stretch
+      - type: entities
+        card_mod:
+          style: |
+            ha-card {
+              background: transparent !important;
+              border: none !important;
+              box-shadow: none !important;
+              border-radius: 0 !important;
+              border-top: 1px solid var(--divider-color) !important;
+              margin: 0 !important;
+            }
+        entities:
+          - entity: input_text.bitsy_question
+            name: Deine Frage
+            icon: mdi:comment-question-outline
+
+  # ── Karte 2: KI-Stack (Ollama / Modell / Whisper / letzte Analyse) ─────
   - type: custom:button-card
     show_name: false
     show_icon: false
@@ -154,7 +294,7 @@ cards:
       stack: >
         [[[
           const adv = states['sensor.bitsy_advice'];
-          const hermesOn = adv && !['unavailable', 'unknown', ''].includes(adv.state);
+          const ollamaOn = adv && !['unavailable', 'unknown', ''].includes(adv.state);
           const a = (adv && adv.attributes) || {};
           const model = a.model || 'Qwen (geplant)';
           let last = '—';
@@ -179,9 +319,45 @@ cards:
             </div>`;
           return `
             <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:8px;width:100%">
-              ${tile('mdi:server-network', 'Hermes', hermesOn ? 'online' : 'offline', hermesOn ? on : off)}
-              ${tile('mdi:brain', 'Modell', model, hermesOn ? on : off)}
+              ${tile('mdi:server-network', 'Ollama', ollamaOn ? 'online' : 'offline', ollamaOn ? on : off)}
+              ${tile('mdi:brain', 'Modell', model, ollamaOn ? on : off)}
               ${tile('mdi:microphone-outline', 'Whisper', 'geplant', off)}
-              ${tile('mdi:clock-outline', 'Analyse', last, hermesOn ? on : off)}
+              ${tile('mdi:clock-outline', 'Analyse', last, ollamaOn ? on : off)}
             </div>`;
         ]]]
+
+  # ── Karte 3: "Jetzt aktualisieren"-Button ───────────────────────────────
+  # Ruft rest_command.bitsy_trigger (configuration.yaml) → HTTP-Trigger-Server
+  # (Docker-Container bitgrid-bitsy auf .62, infra/docker-compose.yml) →
+  # src/explain/bitsy_status.py einmal durchlaufen. Laeuft mit
+  # restart:unless-stopped, unabhaengig vom Dev-Rechner.
+  - type: custom:button-card
+    name: Jetzt aktualisieren
+    icon: mdi:refresh
+    show_state: false
+    tap_action:
+      action: call-service
+      service: rest_command.bitsy_trigger
+      haptic: light
+    styles:
+      card:
+        - background: var(--ha-card-background)
+        - border-radius: var(--ha-card-border-radius)
+        - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+        - box-shadow: var(--ha-card-box-shadow)
+        - padding: 10px
+      grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: min-content 1fr
+        - align-items: center
+      icon:
+        - color: var(--accent-color)
+        - width: 20px
+        - height: 20px
+      name:
+        - font-size: var(--bg-fs-body)
+        - font-weight: 700
+        - color: var(--primary-text-color)
+        - justify-self: start
+        - padding-left: 8px
+

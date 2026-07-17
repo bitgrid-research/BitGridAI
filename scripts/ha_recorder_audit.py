@@ -30,10 +30,33 @@ FEATURE_GROUPS: dict[str, list[str]] = {
     "Netz (Bezug/Einspeisung)": ["grid", "netz", "import", "export", "einspeis"],
     "Speicher (SoC/Leistung)": ["soc", "battery", "batt", "speicher", "akku"],
     "Miner": ["miner", "mining", "avalon", "hashrate", "hash_rate", "chip", "asic"],
-    "Wetter": ["weather", "outdoor", "aussen", "cloud", "wolke", "humidity", "rain", "regen"],
+    "Wetter": [
+        "weather",
+        "outdoor",
+        "aussen",
+        "cloud",
+        "wolke",
+        "humidity",
+        "rain",
+        "regen",
+    ],
     "Sonnenstand": ["sun", "sonne", "elevation", "azimuth", "azimut"],
-    "Einstrahlung/Prognose": ["forecast", "prognose", "irradiance", "ghi", "radiation", "einstrahl"],
-    "Entscheidungen/Baender": ["bg_decision", "decision", "rule_", "band", "_mode", "autonomy"],
+    "Einstrahlung/Prognose": [
+        "forecast",
+        "prognose",
+        "irradiance",
+        "ghi",
+        "radiation",
+        "einstrahl",
+    ],
+    "Entscheidungen/Baender": [
+        "bg_decision",
+        "decision",
+        "rule_",
+        "band",
+        "_mode",
+        "autonomy",
+    ],
 }
 
 _SECONDS_PER_DAY = 86400.0
@@ -104,14 +127,12 @@ def _ts_to_dt(value: object) -> datetime | None:
 
 
 def _collect_modern(conn: sqlite3.Connection) -> list[EntityStat]:
-    rows = conn.execute(
-        """
+    rows = conn.execute("""
         SELECT sm.entity_id, COUNT(*) AS n,
                MIN(s.last_updated_ts) AS first_ts, MAX(s.last_updated_ts) AS last_ts
         FROM states s JOIN states_meta sm ON s.metadata_id = sm.metadata_id
         GROUP BY sm.entity_id
-        """
-    ).fetchall()
+        """).fetchall()
     stats: list[EntityStat] = []
     for entity_id, n, first_ts, last_ts in rows:
         stats.append(
@@ -121,13 +142,11 @@ def _collect_modern(conn: sqlite3.Connection) -> list[EntityStat]:
 
 
 def _collect_legacy(conn: sqlite3.Connection) -> list[EntityStat]:
-    rows = conn.execute(
-        """
+    rows = conn.execute("""
         SELECT entity_id, COUNT(*) AS n,
                MIN(last_updated) AS first_ts, MAX(last_updated) AS last_ts
         FROM states GROUP BY entity_id
-        """
-    ).fetchall()
+        """).fetchall()
     return [
         EntityStat(entity_id, int(n), _ts_to_dt(first_ts), _ts_to_dt(last_ts))
         for entity_id, n, first_ts, last_ts in rows
@@ -223,7 +242,9 @@ def build_report(db_path: Path) -> str:
     lines.append("## Fazit")
     lines.append("")
     if missing:
-        lines.append("Fehlende Feature-Gruppen (blockieren oder schwaechen die Analyse):")
+        lines.append(
+            "Fehlende Feature-Gruppen (blockieren oder schwaechen die Analyse):"
+        )
         for name in missing:
             lines.append(f"- **{name}**")
     else:

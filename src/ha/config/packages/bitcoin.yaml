@@ -104,25 +104,69 @@ bitcoin:
               {{ s | float(0) | int }} W
             {% endif %}
 
-  # ── Bitcoin Network Difficulty ────────────────────────────────────────────────
-  # Unabhängig vom Miner-Status — pollt direkt von blockchain.info.
-  # Wert in T (Trillion = 1e12). Beispiel: 135.59 T
+    # ── Naechste Halbierung ─────────────────────────────────────────────────
+    # Reine Arithmetik auf bitcoin_block_height (feste Ziel-Blockzeit 600s,
+    # bewusst NICHT der schwankende Epochen-Durchschnitt — dieselbe
+    # Zurueckhaltung wie zuvor in btc_difficulty.py: fuer einen >1-Jahres-
+    # Horizont waere der kurzfristige Durchschnitt irrefuehrend praezise).
+    # Modulo-Formel: liegt height exakt auf einer Halbierungshoehe, gibt
+    # `210000 - (height % 210000)` korrekt 210000 zurueck (naechste, noch
+    # ausstehende Halbierung), kein Sonderfall noetig.
+    - sensor:
+        - name: "bitcoin_next_halving"
+          unique_id: bitcoin_next_halving
+          icon: mdi:bitcoin
+          unit_of_measurement: "Blöcke"
+          state: >-
+            {% set height = states('sensor.bitcoin_block_height') | int(0) %}
+            {{ 210000 - (height % 210000) }}
+          attributes:
+            next_halving_height: >-
+              {% set height = states('sensor.bitcoin_block_height') | int(0) %}
+              {{ ((height // 210000) + 1) * 210000 }}
+            remaining_days: >-
+              {% set height = states('sensor.bitcoin_block_height') | int(0) %}
+              {% set remaining = 210000 - (height % 210000) %}
+              {{ (remaining * 600 / 86400) | round(1) }}
+            next_halving_date: >-
+              {% set height = states('sensor.bitcoin_block_height') | int(0) %}
+              {% set remaining = 210000 - (height % 210000) %}
+              {{ (now() + timedelta(seconds=remaining * 600)).isoformat() }}
+
+  # ── Bitcoin-Netzwerkdaten: self-hosted mempool.space (192.168.178.96:3006) ───
+  # Ersetzt blockchain.info/blockstream.info (oeffentliche Cloud-APIs, TODO seit
+  # laengerem unerledigt): Netzwerkkonstante "keine externen APIs ohne lokale
+  # Alternative" (CLAUDE.md), dieselbe self-hosted Instanz wie
+  # src/data/btc_hashrate.py und btc_power_law.py (MEMPOOL_HOST/PORT aus .env,
+  # hier hardcodiert wie alle anderen LAN-Geraete in diesem Config-Baum, siehe
+  # z.B. packages/avalonq_miner1.yaml).
+  #
+  # bitcoin_network_difficulty (roher Difficulty-Wert in T, genutzt in
+  # packages/stats.yaml + economics.yaml fuer Profitabilitaets-Berechnungen):
+  # mempool hat keinen direkten "aktuelle Difficulty"-Endpunkt, aber
+  # /api/v1/mining/difficulty-adjustments/1w liefert die juengsten Retarget-
+  # Punkte als [timestamp, height, difficulty, change] — der letzte Eintrag
+  # traegt den aktuellen Wert.
+  #
+  # bitcoin_difficulty_adjustment + bitcoin_next_halving versorgen die
+  # Schwierigkeitsanpassungs-Karte im Analyse-Tab (views/ki_difficulty.yaml)
+  # direkt mit Live-Werten — kein Python-Skript, kein JSON-Artefakt mehr
+  # noetig (btc_difficulty.py wurde deshalb entfernt, ADR siehe
+  # 091_adr_de.md). HA aktualisiert das selbst per scan_interval, exakt wie
+  # bitcoin_block_height es schon immer tat.
   rest:
-    - resource: "https://blockchain.info/q/getdifficulty"
+    - resource: "http://192.168.178.96:3006/api/v1/mining/difficulty-adjustments/1w"
       scan_interval: 3600
       sensor:
         - name: "bitcoin_network_difficulty"
           unique_id: bitcoin_network_difficulty
-          value_template: "{{ (value | float(0) / 1e12) | round(2) }}"
+          value_template: "{{ (value_json[-1][2] | float(0) / 1e12) | round(2) }}"
           unit_of_measurement: "T"
           state_class: measurement
           icon: mdi:bitcoin
 
     # ── Bitcoin Block Height ───────────────────────────────────────────────────
-    # Primär (TODO): Umbrel-Mempool ersetzen wenn läuft (Port 3006):
-    #   resource: "http://umbrel.local:3006/api/blocks/tip/height"
-    # Fallback: Blockstream public API — kein API-Key nötig
-    - resource: "https://blockstream.info/api/blocks/tip/height"
+    - resource: "http://192.168.178.96:3006/api/blocks/tip/height"
       scan_interval: 60
       sensor:
         - name: "bitcoin_block_height"
@@ -131,3 +175,22 @@ bitcoin:
           unit_of_measurement: ""
           state_class: measurement
           icon: mdi:bitcoin
+
+    # ── Schwierigkeitsanpassung (naechster Retarget, ~alle 2 Wochen) ──────────
+    # Rohe mempool-Felder als Attribute durchgereicht (keine Umrechnung in HA,
+    # das macht die Karte in JS — gleiche Aufteilung wie bei allen anderen
+    # Karten in diesem Dashboard).
+    - resource: "http://192.168.178.96:3006/api/v1/difficulty-adjustment"
+      scan_interval: 300
+      sensor:
+        - name: "bitcoin_difficulty_adjustment"
+          unique_id: bitcoin_difficulty_adjustment
+          value_template: "{{ value_json.difficultyChange | round(2) }}"
+          unit_of_measurement: "%"
+          state_class: measurement
+          icon: mdi:trending-down
+          json_attributes:
+            - remainingBlocks
+            - remainingTime
+            - previousRetarget
+            - nextRetargetHeight

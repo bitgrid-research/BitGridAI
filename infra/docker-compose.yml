@@ -30,6 +30,39 @@ services:
     env_file: ../.env
     restart: unless-stopped
 
+  # ₿itsy-Erklaerschicht: HTTP-Trigger (Button im ₿itsy-Tab) + periodischer
+  # 10-Minuten-Takt in einem Prozess (src/explain/bitsy_trigger_server.py).
+  # network_mode: host, weil der Dienst HA/Ollama/MQTT ueber die echten LAN-
+  # Adressen aus .env erreicht (UMBREL_HOST/OLLAMA_HOST/MQTT_HOST), nicht
+  # ueber das isolierte bitgrid_net der anderen Services hier. Ersetzt die
+  # fruehere Windows-Scheduled-Task-Loesung auf dem Dev-Rechner (fragil,
+  # z.B. bei versehentlich geschlossenem Konsolenfenster).
+  bitgrid-bitsy:
+    build:
+      context: ..
+      dockerfile: src/explain/Dockerfile
+    image: bitgrid-bitsy:latest
+    container_name: bitgrid-bitsy
+    network_mode: host
+    env_file: ../.env
+    restart: unless-stopped
+
+  # Lokales TTS (Wyoming-Protokoll) fuer den ₿itsy-Chat, Baustein 2.
+  # Ersetzt Cloud-Google-TTS (aktuell die einzige in HA geladene TTS-Engine,
+  # verstoesst gegen "kein Cloud-Backhaul") durch ein selbst gehostetes
+  # Piper-Modell. network_mode: host, damit HA (laeuft auf diesem Host
+  # ebenfalls mit network_mode: host) es unter localhost:10200 erreicht,
+  # dasselbe Muster wie bitgrid-bitsy. Modell-Cache liegt in ../data/piper,
+  # damit der Download nicht bei jedem Container-Neustart erneut passiert.
+  bitgrid-piper:
+    image: rhasspy/wyoming-piper:latest
+    container_name: bitgrid-piper
+    network_mode: host
+    command: --voice de_DE-thorsten-medium
+    volumes:
+      - ../data/piper:/data
+    restart: unless-stopped
+
 networks:
   default:
     name: bitgrid_net

@@ -1,0 +1,197 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Bitcoin Power-Law-Chart — Markteinordnung im Analyse-Tab (linke Spalte
+# "Markt"). Log-Log: Preis (Y) über Zeit (X), analog zu gängigen
+# Power-Law-Charts (z.B. BitBO). Reine Markt-Kontext-Information,
+# KEIN Eingang in core/: Mining-Entscheidungen bleiben SoC-/PV-basiert.
+#
+# Datenquelle: src/data/btc_power_law.py, Backfill von der self-hosted
+# mempool.space-Instanz (Open Source, AGPL-3.0), lokal im Netz. Das Skript
+# schreibt www/btc_power_law.json; diese Karte liest NUR diese lokale Datei
+# (fetch('/local/...')), kein Live-Netzwerkzugriff vom Wandtablet aus.
+#
+# Im Log-Log-Raum ist eine Power-Law-Funktion (log(Preis)=a+b*log(Tage))
+# eine GERADE. Regressions-/Support-/Widerstandslinie brauchen deshalb nur
+# ihre zwei Endpunkte, keine Kurven-Interpolation (anders als der SoC-Chart
+# in bitgrid_dashboard_v2.yaml, der echte Bezier-Kurven braucht).
+#
+# Heuristisches Modell zur Einordnung, KEINE Preisprognose (wissenschaftliche
+# Sauberkeit: kein Overstating). Die Zahlen sind statistische Beschreibung
+# der Vergangenheit, keine belastbare Zukunftsaussage.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+custom_fields:
+  chart: >
+    [[[
+      if (!window._bgPowerLaw) window._bgPowerLaw = { status: 'idle', data: null };
+
+      if (window._bgPowerLaw.status === 'idle') {
+        window._bgPowerLaw.status = 'fetching';
+        fetch('/local/btc_power_law.json?v=' + Date.now())
+          .then(r => r.json())
+          .then(data => { window._bgPowerLaw = { status: 'ok', data }; })
+          .catch(() => { window._bgPowerLaw.status = 'error'; });
+      }
+
+      const wrap = (inner) => `<div style="width:100%">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:var(--bg-fs-title);font-weight:700;color:var(--primary-text-color)">Bitcoin Power-Law</span>
+          <span style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
+                       color:var(--secondary-text-color);opacity:0.6">Marktkontext, keine Prognose</span>
+        </div>
+        ${inner}
+      </div>`;
+
+      if (window._bgPowerLaw.status !== 'ok') {
+        const msg = window._bgPowerLaw.status === 'error'
+          ? 'Chart nicht verfügbar (lokales Preis-Artefakt fehlt oder ist ungültig).'
+          : 'Lade Preishistorie …';
+        return wrap(`<div style="padding:30px 0;text-align:center;color:var(--secondary-text-color)">${msg}</div>`);
+      }
+
+      const data = window._bgPowerLaw.data;
+      const prices = data.prices || [];
+      if (prices.length < 2) {
+        return wrap(`<div style="padding:30px 0;text-align:center;color:var(--secondary-text-color)">Zu wenig Preishistorie geladen.</div>`);
+      }
+
+      const GENESIS_MS = Date.UTC(2009, 0, 3);
+      const dayToDate = (days) => new Date(GENESIS_MS + days * 86400000);
+
+      const { a, b, sigma, k } = data.fit;
+      const regY = (days) => a + b * Math.log10(days);
+      const resY = (days) => regY(days) + k * sigma;
+      const supY = (days) => regY(days) - k * sigma;
+
+      const xMinDays = prices[0][0];
+      const xMaxDays = data.chart_max_days;
+      const lastPrice = prices[prices.length - 1][1];
+      const lastDays  = prices[prices.length - 1][0];
+
+      // Y-Dekaden aus den echten Daten ableiten (kein willkürlicher Fixwert):
+      // unten = Dekade unter dem Minimalpreis, oben = 2 Dekaden über dem
+      // Allzeithoch (Raum für den aktuellen Kurs + einen Teil des Korridors;
+      // die Widerstandslinie darf am rechten Rand aus dem Rahmen laufen,
+      // wie im BitBO-Referenzchart).
+      const minPrice = Math.min(...prices.map(p => p[1]));
+      const maxPrice = Math.max(...prices.map(p => p[1]));
+      const yMinDecadeExp = Math.floor(Math.log10(minPrice));
+      const yMaxDecadeExp = Math.ceil(Math.log10(maxPrice)) + 2;
+
+      const W = 640, H = 360, cL = 56, cR = 618, cT = 14, cB = 300;
+      const xLogMin = Math.log10(xMinDays), xLogMax = Math.log10(xMaxDays);
+      const xForDays = (days) => cL + (Math.log10(days) - xLogMin) / (xLogMax - xLogMin) * (cR - cL);
+      const yForLogPrice = (logP) => cB - (logP - yMinDecadeExp) / (yMaxDecadeExp - yMinDecadeExp) * (cB - cT);
+      const yForPrice = (price) => yForLogPrice(Math.log10(price));
+
+      const cReg = 'var(--bg-color-eco,#4CAF50)';
+      const cRes = '#AB7DF0';
+      const cSup = 'var(--bg-color-reserve,#EF5350)';
+      const cPrice = 'var(--bg-color-super,#F7931A)';
+
+      const fmtUsd = (v) => {
+        if (v >= 1000) return Math.round(v).toLocaleString('de-DE') + ' $';
+        if (v >= 1) return v.toLocaleString('de-DE', {maximumFractionDigits: 2}) + ' $';
+        return v.toLocaleString('de-DE', {maximumFractionDigits: 2}) + ' $';
+      };
+
+      let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:hidden">`;
+
+      // Y-Gitter + Beschriftung (Zehnerpotenzen)
+      for (let e = yMinDecadeExp; e <= yMaxDecadeExp; e++) {
+        const y = yForLogPrice(e);
+        const val = Math.pow(10, e);
+        s += `<line x1="${cL}" y1="${y}" x2="${cR}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>`;
+        s += `<text x="${cL - 6}" y="${y + 3.5}" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Roboto,sans-serif" text-anchor="end">${val.toLocaleString('de-DE')}</text>`;
+      }
+
+      // X-Gitter + Jahres-Beschriftung (Ticks verdichten sich nach rechts,
+      // das ist die erwartete Optik einer log-skalierten Zeitachse).
+      const startYear = dayToDate(xMinDays).getUTCFullYear();
+      const endYear = dayToDate(xMaxDays).getUTCFullYear();
+      let lastLabelX = -Infinity;
+      for (let yr = startYear; yr <= endYear; yr++) {
+        const days = (Date.UTC(yr, 0, 1) - GENESIS_MS) / 86400000;
+        if (days < xMinDays || days > xMaxDays) continue;
+        const x = xForDays(days);
+        s += `<line x1="${x}" y1="${cT}" x2="${x}" y2="${cB}" stroke="rgba(255,255,255,0.05)" stroke-width="0.8"/>`;
+        if (x - lastLabelX >= 15) {
+          s += `<text x="${x}" y="${cB + 13}" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Roboto,sans-serif" text-anchor="middle">${yr}</text>`;
+          lastLabelX = x;
+        }
+      }
+      s += `<text x="${cL + (cR - cL) / 2}" y="${cB + 26}" fill="rgba(255,255,255,0.35)" font-size="9" font-family="Roboto,sans-serif" text-anchor="middle">Jahr</text>`;
+
+      // Fit-Geraden: im Log-Log-Raum ist Power-Law = Gerade, daher genuegen
+      // je zwei Endpunkte (kein Kurven-Sampling noetig).
+      const line = (fn, color, dash) => {
+        const x1 = cL, x2 = cR;
+        const y1 = yForLogPrice(fn(xMinDays)), y2 = yForLogPrice(fn(xMaxDays));
+        return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${color}" stroke-width="1.6" ${dash ? `stroke-dasharray="${dash}"` : ''} opacity="0.9"/>`;
+      };
+      s += line(resY, cRes, '5 3');
+      s += line(regY, cReg, '');
+      s += line(supY, cSup, '5 3');
+
+      // Historische Preiskurve (echte Marktdaten, keine Glättung)
+      const pts = prices.map(([days, price]) => `${xForDays(days).toFixed(1)},${yForPrice(price).toFixed(1)}`).join(' ');
+      s += `<polyline points="${pts}" fill="none" stroke="${cPrice}" stroke-width="1.8" stroke-linejoin="round"/>`;
+
+      // Aktueller Kurs: Punkt + Label
+      const curX = xForDays(lastDays), curY = yForPrice(lastPrice);
+      s += `<circle cx="${curX}" cy="${curY}" r="4" fill="white" stroke="${cPrice}" stroke-width="2"/>`;
+
+      // Rahmen
+      s += `<line x1="${cL}" y1="${cT}" x2="${cL}" y2="${cB}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+      s += `<line x1="${cL}" y1="${cB}" x2="${cR}" y2="${cB}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+
+      // Legende
+      const legendItem = (x, color, label, dash) => `
+        <line x1="${x}" y1="${cT - 4}" x2="${x + 14}" y2="${cT - 4}" style="stroke:${color}" stroke-width="2" ${dash ? `stroke-dasharray="${dash}"` : ''}/>
+        <text x="${x + 18}" y="${cT - 1}" fill="rgba(255,255,255,0.65)" font-size="8.5" font-family="Roboto,sans-serif">${label}</text>`;
+      s += legendItem(cL, cPrice, 'Kurs', '');
+      s += legendItem(cL + 68, cRes, 'Widerstand', '5 3');
+      s += legendItem(cL + 168, cReg, 'Regression', '');
+      s += legendItem(cL + 268, cSup, 'Unterstützung', '5 3');
+
+      s += '</svg>';
+
+      // Einordnung: Abstand des aktuellen Kurses zur Regressionslinie
+      const fairValue = Math.pow(10, regY(lastDays));
+      const pctDiff = (lastPrice / fairValue - 1) * 100;
+      const diffTxt = (pctDiff >= 0 ? '+' : '') + pctDiff.toLocaleString('de-DE', {maximumFractionDigits: 0}) + ' %';
+      const genAt = data.generated_at ? new Date(data.generated_at) : null;
+      const genTxt = genAt && !isNaN(genAt.getTime())
+        ? genAt.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'})
+        : '—';
+
+      const footer = `
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--divider-color);
+                    display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;
+                    font-size:var(--bg-fs-secondary);color:var(--secondary-text-color)">
+          <span>Kurs: <b style="color:var(--primary-text-color)">${fmtUsd(lastPrice)}</b>
+                 · Regressionslinie: ${diffTxt}</span>
+          <span style="opacity:0.6">Backfill: ${genTxt} · heuristisches Modell, keine Prognose</span>
+        </div>`;
+
+      return wrap(s + footer);
+    ]]]
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 18px 20px
+  grid:
+    - grid-template-areas: '"chart"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    chart:
+      - width: 100%
+      - justify-self: stretch

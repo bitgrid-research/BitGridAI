@@ -11,7 +11,7 @@ CLI:
   python -m src.data.ha_history_sync --from 2026-06-01 --to 2026-06-30
 
 Env-Vars (aus .env):
-  UMBREL_HOST   — HA-Host-IP (default: 192.168.178.62)
+  UMBREL_HOST   — HA-Host-IP
   HA_PORT       — HA-Port    (default: 8123)
   HA_TOKEN      — Long-Lived Access Token
 """
@@ -38,7 +38,7 @@ log = logging.getLogger(__name__)
 # Konfiguration
 # ---------------------------------------------------------------------------
 
-_UMBREL_HOST = os.getenv("UMBREL_HOST", "192.168.178.62")
+_UMBREL_HOST = os.getenv("UMBREL_HOST", "")
 _HA_PORT = os.getenv("HA_PORT", "8123")
 _HA_TOKEN = os.getenv("HA_TOKEN", "")
 
@@ -429,6 +429,9 @@ def main() -> None:
     port = os.getenv("HA_PORT", _HA_PORT)
     token = os.getenv("HA_TOKEN", _HA_TOKEN)
 
+    if not host:
+        log.error("UMBREL_HOST nicht gesetzt. In .env eintragen.")
+        raise SystemExit(1)
     if not token:
         log.error("HA_TOKEN nicht gesetzt. In .env eintragen.")
         raise SystemExit(1)

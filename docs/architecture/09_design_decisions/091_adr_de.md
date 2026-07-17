@@ -39,6 +39,7 @@ Diese Tabelle fasst die wichtigsten, das System prägenden strategischen Entsche
 | **021 Determinismus-Invariante erzwungen** | Die Kern-Invarianten (kein ML, kein Zufall, keine Importe aus oberen/seitlichen Layern in `src/core`) werden durch einen ausführbaren Architektur-Test (`tests/core/test_architecture.py`) in `make check` mechanisch geprüft. | Macht den wissenschaftlichen Kernanspruch (Determinismus, ADR 007) zu einem **fallierbaren CI-Gate** statt einer Prosa-Konvention. | Testbarkeit, Determinismus, Reproducibility |
 | **022 OverrideStore-Port** | Die SQLite-Persistenz des OverrideHandler liegt hinter einem Port (`OverrideStore`, Protocol im Kern); die Implementierung (`SqliteOverrideStore`) lebt in `data/`. | Hält Persistenz/I-O aus dem deterministischen Kern (Hexagonal, ADR 002); `core/` importiert kein `sqlite3` mehr. | Whitebox, Hexagonal, Determinismus |
 | **023 command_id als Surrogat-ID** | `Decision.command_id` ist Surrogat-/Idempotenz-ID (EventStore-PK + Aktor-Dedup), nicht Teil der Entscheidung; Vergabe an der Boundary (Runner), nicht im Kern. | Präzisiert den Determinismus-Scope: Semantik ist deterministisch, die ID ausgenommen; `uuid` verlässt den Kern. | Determinismus, Reproducibility, Replay |
+| **024 Einmaliger externer Backfill (Hashrate)** | Für die Hashrate-Vorgeschichte vor dem lokal indizierten Zeitraum der self-hosted mempool.space-Instanz wird EINMALIG, manuell, blockchain.info als Fremdquelle gezogen (`scripts/backfill_hashrate_blockchain_info.py`) und als statische Seed-Datei committet. Der reguläre Betrieb (`src/data/btc_hashrate.py`) greift nie live auf blockchain.info zu. | Bewusste, eng begrenzte Ausnahme von ADR-001/011 (Local-First, keine externen Cloud-APIs): die lokale Alternative (mempool-Node auf `INDEXING_BLOCKS_AMOUNT`=-1 umkonfigurieren + reindizieren) ist unverhältnismäßig aufwendig für eine Kontext-Visualisierung. | Local-First (Ausnahme), Transparenz, Reproduzierbarkeit |
 
 ---
 
@@ -189,6 +190,48 @@ brächten keinen Mehrwert für den semantischen Replay-Vergleich.
 - `uuid` verlässt `src/core/`; der Architektur-Guard (ADR 021) verbietet es nun.
 - Replay (`src/sim/replay.py`) ist nachweislich frei von uuid und vergleicht reine Semantik.
 - Boundary-Vergabe in beiden Runnern; `ActuationWriter.new_command_id()` ist die einzige Quelle.
+
+---
+
+## ADR 024 — Einmaliger externer Backfill für Hashrate-Vorgeschichte (Detail)
+
+**Kontext.** Der Hashrate-Chart im ₿itsy-Tab (`views/ki_hashrate.yaml`) soll die Netzwerk-
+Hashrate wie den BTC-Preis als Log-Log-Chart seit Genesis zeigen. Die self-hosted
+mempool.space-Instanz (`MEMPOOL_HOST`, bereits Quelle der Preishistorie, ADR-lose Praxis seit
+`btc_power_law.py`) indiziert Hashrate/Difficulty aber nur für den Zeitraum, den ihr eigener
+Node bereits verarbeitet hat (aktuell ≈ 1 Jahr, gesteuert über die Backend-Konfiguration
+`INDEXING_BLOCKS_AMOUNT`) — kein Backfill seit Genesis wie bei der Preishistorie, die aus einem
+extern gespeisten, aber lokal terminierten Feed kommt.
+
+**Geprüfte Optionen.**
+- **A — mempool-Node umkonfigurieren + reindizieren:** `INDEXING_BLOCKS_AMOUNT=-1` setzen und den
+  Node die komplette Kette neu verarbeiten lassen. Bliebe vollständig local-first. Verworfen:
+  unverhältnismäßiger Aufwand/Laufzeit auf der Gigi-Umbrel-Box für eine reine
+  Kontext-Visualisierung, kein Bezug zur Last-/Mining-Steuerung.
+- **B — Live-Fallback auf blockchain.info im laufenden Betrieb:** `btc_hashrate.py` ruft bei
+  fehlender lokaler Historie live extern ab. Verworfen: verletzt ADR-001/011 dauerhaft, nicht nur
+  einmalig — der reguläre Betrieb bekäme eine harte Cloud-Abhängigkeit.
+- **C — Einmaliger manueller Backfill (gewählt):** ein separates, nicht in `src/data/`
+  importiertes Skript (`scripts/backfill_hashrate_blockchain_info.py`) zieht die Vorgeschichte
+  einmal von der öffentlichen, unauthentifizierten blockchain.info-Chart-API und schreibt eine
+  statische Seed-Datei (`src/data/btc_hashrate_seed.json`, committet). Der reguläre Betrieb liest
+  nur noch diese lokale Datei.
+
+**Entscheidung: Option C.** `merge_with_seed()` bevorzugt bei Überschneidung immer die live von
+mempool.space gemessenen Werte; der Seed deckt ausschließlich die Zeit davor ab. Die Karte zeigt
+beide Quellen farblich getrennt (`own_measurement_since_days`), damit die Datenherkunft
+transparent bleibt (kein Overstating der eigenen Messreihe).
+
+**Konsequenzen.**
+- Erster (und bewusst einziger) Punkt im Repo, an dem ein Skript direkt eine externe Cloud-API
+  anspricht — klar isoliert in `scripts/`, nicht in `src/data/` oder `src/core/`.
+- Die Trendlinie im Chart wird NICHT in die Zukunft projiziert (anders als beim Preis-Chart):
+  bei der gefitteten Steigung (b≈9–10) würde schon eine Projektion von wenigen Jahren auf
+  physikalisch unplausible EH/s-Werte führen. Die Regression ist rein deskriptiv über die
+  Vergangenheit, kein etabliertes Modell wie die BTC-Preis-Power-Law-Heuristik.
+- Bricht Option A (lokale Reindizierung) irgendwann durch, kann die Seed-Datei ersatzlos entfernt
+  werden — `btc_hashrate.py` funktioniert auch ohne sie, dann nur mit dem lokal indizierten
+  Zeitraum.
 
 ---
 > **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die wichtigsten Qualitätsanforderungen im Detail.

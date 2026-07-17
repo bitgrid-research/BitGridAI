@@ -18,6 +18,8 @@ dependencies = [
     "pandas>=2.0",
     "pyarrow>=14.0",
     "scipy>=1.12",
+    "paramiko>=3.4",
+    "numpy>=1.26",
 ]
 
 [project.optional-dependencies]
@@ -42,6 +44,11 @@ exclude = "src/ha/config/custom_components/"
 
 [[tool.mypy.overrides]]
 module = "pymodbus.*"
+ignore_missing_imports = true
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = "paramiko.*"
 ignore_missing_imports = true
 follow_imports = "skip"
 

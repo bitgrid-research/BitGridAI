@@ -507,7 +507,11 @@ mvp_auto:
       alias: "MVP: Miner 2 Watchdog"
       description: >
         Prüft SoC/PV und setzt Workmode von Miner 2.
-        Priorität: Stop > Super > Super-Downgrade > Eco-Start
+        Priorität: Stop > Standard-Wechsel > Eco-Start.
+        Super ist für Miner 2 kategorisch gesperrt (Nutzer-Entscheidung
+        2026-07-12) — select.miner2_workmode_set bietet die Option gar nicht
+        mehr an (siehe avalonq_miner2.yaml), daher gibt es hier keine
+        P2-Super-Regel mehr. Sicherheitsnetz: mvp_miner2_super_lockout.
       mode: single
       trigger:
         - platform: time_pattern
@@ -617,36 +621,11 @@ mvp_auto:
                   data:
                     option: Standard
 
-            # P2: Akku voll → Super
-            - conditions:
-                - condition: template
-                  value_template: "{{ soc >= soc_super_on }}"
-              sequence:
-                - condition: template
-                  value_template: "{{ m2_status != 'Super' }}"
-                - condition: template
-                  value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
-                - condition: state
-                  entity_id: binary_sensor.raumtemperatur_zu_heiss
-                  state: "off"
-                - condition: template
-                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0) }}"
-                - action: system_log.write
-                  data:
-                    message: "[mvp-miner2] P2 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }}"
-                    level: info
-                - action: select.select_option
-                  target:
-                    entity_id: select.miner2_workmode_set
-                  data:
-                    option: Super
-                - action: input_datetime.set_datetime
-                  target:
-                    entity_id: input_datetime.mvp_miner2_last_upgrade
-                  data:
-                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+            # P2: entfällt für Miner 2 — Super kategorisch gesperrt (s.o.)
 
             # P3: Super-Deadband unterschritten → Standard (blockiert wenn Upgrade-Cooldown aktiv)
+            # Bleibt als Aufräum-Regel stehen falls Miner 2 doch mal in Super war
+            # (z.B. Sperre kurzzeitig gelockert) — m2_status == 'Super' kann sonst nicht mehr eintreten.
             - conditions:
                 - condition: template
                   value_template: "{{ soc < soc_super_off and m2_status == 'Super' }}"
@@ -763,6 +742,55 @@ mvp_auto:
                         entity_id: input_datetime.last_start_at
                       data:
                         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    # ── Miner 2: Super-Sperre (Sicherheitsnetz) ────────────────────────────
+    - id: mvp_miner2_super_lockout
+      alias: "MVP: Miner 2 Super-Sperre"
+      description: >
+        Miner 2 darf nur in Super laufen wenn die Automatik (input_boolean.
+        miner2_auto_load_management) AUS ist (Nutzer-Entscheidung 2026-07-12).
+        Die eigentliche Sperre sitzt in select.miner2_workmode_set (Super steht
+        dort nur als Option zur Wahl wenn die Automatik aus ist, siehe
+        avalonq_miner2.yaml) — das blockiert Watchdog, Dashboard-Button und
+        jeden select.select_option-Aufruf über HA, solange die Automatik läuft.
+        Diese Automation ist das Sicherheitsnetz für den Fall, dass Miner 2
+        trotzdem in Super landet während die Automatik an ist (z.B. der Miner
+        selbst außerhalb von HA umgeschaltet wurde, oder die Automatik erst
+        NACH einem manuellen Super wieder eingeschaltet wurde): erzwingt
+        sofortigen Downgrade auf Standard. Kein Cooldown — Sperre hat Vorrang.
+        Ist die Automatik aus, greift diese Automation nicht — Super bleibt
+        dann frei manuell wählbar.
+      mode: single
+      trigger:
+        - platform: state
+          entity_id: sensor.miner2_workmode_status
+          to: "Super"
+        - platform: state
+          entity_id: input_boolean.miner2_auto_load_management
+          to: "on"
+      condition:
+        - condition: state
+          entity_id: input_boolean.miner2_auto_load_management
+          state: "on"
+        - condition: template
+          value_template: "{{ states('sensor.miner2_workmode_status') == 'Super' }}"
+      action:
+        - action: system_log.write
+          data:
+            message: >
+              [mvp-miner2] Super-Sperre: Miner 2 hat Super erreicht (vermutlich
+              außerhalb von HA gesetzt) → sofort zurück auf Standard
+            level: warning
+        - action: select.select_option
+          target:
+            entity_id: select.miner2_workmode_set
+          data:
+            option: Standard
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.mvp_miner2_last_downgrade
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
     # ── P3b: PV-reaktiver Super→Eco Downgrade ────────────────────────────
     - id: mvp_p3b_pv_reactive_downgrade

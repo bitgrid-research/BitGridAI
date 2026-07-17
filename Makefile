@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f infra/docker-compose.yml
 
-.PHONY: check fmt lint test test-unit test-replay build build-ci clean deploy-ha deploy-ha-restart sync-history check-gaps
+.PHONY: check fmt lint test test-unit test-replay build build-ci clean deploy-ha deploy-ha-restart sync-history check-gaps obsidian-sync obsidian-sync-all obsidian-sync-watch
 
 # Vollständiger Qualitätscheck (vor jedem PR)
 check: fmt lint test
@@ -48,6 +48,21 @@ sync-history:
 
 check-gaps:
 	python -m src.data.gap_check --days 7
+
+update-btc-power-law:
+	python -m src.data.btc_power_law
+
+update-btc-difficulty:
+	python -m src.data.btc_difficulty
+
+obsidian-sync:
+	python scripts/sync_obsidian.py
+
+obsidian-sync-all:
+	python scripts/sync_obsidian.py --all
+
+obsidian-sync-watch:
+	python scripts/sync_obsidian.py --watch
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +

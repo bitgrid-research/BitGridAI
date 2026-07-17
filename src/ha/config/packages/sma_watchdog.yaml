@@ -11,6 +11,16 @@ sma_watchdog:
           to: "unavailable"
           for:
             minutes: 2
+        # Wiederholter Trigger: der State-Trigger oben feuert nur EINMAL beim
+        # Übergang. Bleibt der Sensor unavailable (Reload hat nicht gegriffen),
+        # würde die Automation sonst nie wieder auslösen. Deshalb zusätzlich
+        # periodisch prüfen, solange der Zustand anhält.
+        - platform: time_pattern
+          minutes: "/10"
+      condition:
+        - condition: state
+          entity_id: sensor.sma_tripower_pv_power
+          state: "unavailable"
       action:
         - action: homeassistant.reload_config_entry
           target:

@@ -206,6 +206,7 @@ celerybeat.pid
 # Environments
 .env
 .envrc
+.obsidian_sync_state.json
 .venv
 env/
 venv/

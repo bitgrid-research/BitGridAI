@@ -64,6 +64,23 @@ Tool-Profil unten: ein Prompt allein hält ein Modell nicht zurück, die Tool-Fr
 | Home Assistant (device control) | **aus** | Steuerpfad, rote Linie |
 | Computer Use, Vision, Spotify, X, Image/Video | aus | nicht gebraucht |
 
+## Vault-Suche (Projektwissen, read-only)
+
+Der Obsidian-Wissens-Vault ([`docs/status/README.md`](../../../status/README.md) et al.,
+siehe [`scripts/sync_obsidian.py`](../../../../scripts/sync_obsidian.py)) wird semantisch
+durchsuchbar ueber einen eigenen, dauerhaft laufenden Dienst auf derselben Box
+(`src/explain/vault_search_server.py`, Deploy: `scripts/deploy_vault_search.py`):
+
+```bash
+curl "http://<GIGI-IP>:8767/search?q=<Suchbegriffe>&k=5"
+```
+
+Der Agent nutzt das per Code Execution (kein Datei-Zugriff auf die Sandbox noetig — die
+Sandbox ist ephemer, Netzwerk nach draussen funktioniert dagegen zuverlaessig, genau wie
+beim Ollama-Aufruf). Antwort: JSON-Liste mit `source`/`title`/`group`/`tags`/`text`/`score`
+je Treffer. Index wird bei jedem `sync_obsidian.py`-Lauf automatisch aktualisiert
+(`POST /reindex`).
+
 ## Datenzugang (read-only)
 
 Echte Betriebsdaten liegen im **HA-Recorder** (`home-assistant_v2.db`, 1 Jahr Retention)

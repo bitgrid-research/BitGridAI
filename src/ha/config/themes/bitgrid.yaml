@@ -94,6 +94,61 @@ BitGridAI:
   mdc-select-label-ink-color: "#3a3a5e"
   mdc-select-dropdown-icon-color: "#1a1a2e"
 
+  # ── Eingabefelder, harter Fallback (card-mod) ────────────────────────
+  # Die mdc-text-field-*-Tokens oben erreichen offenbar nicht mehr jeden
+  # Kontext (Stand HA 2026.5.3): sowohl input_text-Zeilen (₿itsy-Chat) als
+  # auch die Regelschwellen-Zahlenfelder in den Regler-Dialogen (input_
+  # number more-info) zeigten fast-weiße, unlesbare Schrift auf hellem
+  # Grund — die Tokens oben reichen also gerade NICHT bis in ha-textfield
+  # hinein. card-mod (HACS, bereits als Resource geladen, siehe
+  # configuration.yaml) kann global CSS injizieren statt pro Karte:
+  # card-mod-root wirkt auf JEDE Karte, card-mod-more-info zusätzlich auf
+  # Mehr-Info-Dialoge (dort leben die Regler-Zahlenfelder). $: durchdringt
+  # eine Shadow-DOM-Ebene, damit die Ink-Farbe auch das tatsächliche
+  # <input>-Element trifft, nicht nur die (offenbar ignorierte) Custom
+  # Property.
+  card-mod-theme: "BitGridAI"
+  card-mod-root: |
+    ha-textfield, mwc-textfield, ha-select, mwc-select {
+      --mdc-text-field-fill-color: #e9ecf5 !important;
+      --mdc-text-field-ink-color: #1a1a2e !important;
+      --mdc-text-field-label-ink-color: #3a3a5e !important;
+      --mdc-select-fill-color: #e9ecf5 !important;
+      --mdc-select-ink-color: #1a1a2e !important;
+    }
+    ha-textfield $: {
+      .mdc-text-field__input { color: #1a1a2e !important; }
+      .mdc-floating-label { color: #3a3a5e !important; }
+      .mdc-text-field__ripple { background-color: #e9ecf5 !important; }
+    }
+    /* input_text-Zeilen in entities-Karten (z.B. "Frag Bitsy") sitzen in
+       hui-input-text-entity-row, einer eigenen Shadow-Root-Ebene vor dem
+       ha-textfield oben: die Regeln darüber erreichen sie deshalb nicht,
+       der zweifach verschachtelte $:-Durchstich hier schon. */
+    hui-input-text-entity-row $: {
+      ha-textfield {
+        --mdc-text-field-fill-color: #e9ecf5 !important;
+        --mdc-text-field-ink-color: #1a1a2e !important;
+        --mdc-text-field-label-ink-color: #3a3a5e !important;
+      }
+      ha-textfield $: {
+        .mdc-text-field__input { color: #1a1a2e !important; }
+        .mdc-floating-label { color: #3a3a5e !important; }
+        .mdc-text-field__ripple { background-color: #e9ecf5 !important; }
+      }
+    }
+  card-mod-more-info: |
+    ha-textfield, mwc-textfield {
+      --mdc-text-field-fill-color: #e9ecf5 !important;
+      --mdc-text-field-ink-color: #1a1a2e !important;
+      --mdc-text-field-label-ink-color: #3a3a5e !important;
+    }
+    ha-textfield $: {
+      .mdc-text-field__input { color: #1a1a2e !important; }
+      .mdc-floating-label { color: #3a3a5e !important; }
+      .mdc-text-field__ripple { background-color: #e9ecf5 !important; }
+    }
+
   # ── Kopfleiste (transluzent, etwas deckender als v1: 0.30 → 0.55) ───
   app-header-background-color: "rgba(20,24,44,0.55)"
   app-header-text-color: "#f3f5fb"

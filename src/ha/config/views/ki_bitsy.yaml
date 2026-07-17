@@ -1,20 +1,16 @@
 # ═══════════════════════════════════════════════════════════════════════
-# ₿itsy-Tamagotchi (linke Spalte) — das Gesicht der Erklärschicht.
-# Eingebunden via !include in:
-#   - bitgrid_dashboard_v2.yaml  → Tab "₿itsy", grid-area: bitsy
+# ₿itsy links (deterministisch, KEIN LLM) — Spiegel des Hamster-Karten-Layouts
+# von Tab 1 (bitgrid_dashboard_v2.yaml, Home): gleiches Bild+Text-Layout und
+# dieselbe Blockzeit/Balance/Kurs-Fußleiste, damit diese Karte optisch 1:1 mit
+# der KI-Karte rechts (ki_beratung.yaml) vergleichbar ist (A/B-Vergleich:
+# gleiche Hülle, nur die Textquelle unterscheidet sich).
 #
-# SPIEGEL der Hamster-Karte von Tab 1 (bitgrid_dashboard_v2.yaml, Home):
-# identische Entscheidungs-Branches (Nacht / Übertemperatur / Eco / Standard /
-# Super / Hausreserve / Halteband / Warte-auf-Sonne), identische Entities.
-# Ändert sich die Logik dort, MUSS sie hier synchron nachgezogen werden.
-# Bewusst dupliziert statt zentralisiert: der Endzustand ist, dass die
-# Erklärung aus der explain/-Schicht publiziert wird (packages/bitsy.yaml)
-# und dieser UI-JS-Zweig ganz verschwindet — bis dahin lohnt kein Refactor.
-#
-# Anders als Tab 1: Tamagotchi-Präsentation (großes Bild, Stimmungs-Chip,
-# Sprechblase) statt Status-Karte mit Bitcoin-Fußleiste. Die Sprechblase
-# bleibt IMMER regelbasiert-deterministisch; KI-Beratung (Hermes/Qwen)
-# erscheint klar getrennt in der rechten Spalte (ki_beratung.yaml).
+# Zustands-Branches = Spiegel der Home-Tab-Logik (bewusst dupliziert, siehe
+# Kommentar dort); ändert sich die Logik dort, hier nachziehen.
+# Blockzeit/Balance/Kurs-JS ebenfalls dupliziert (dritte Kopie neben Home-Tab
+# und der KI-Karte) — bewusste Ausnahme von "keine verfrühte Abstraktion":
+# ohne gemeinsames JS-Modul über button-card-Grenzen hinweg ist Duplikation
+# hier die einfachere, nachvollziehbarere Lösung als ein neuer Shared-Loader.
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:button-card
 show_name: false
@@ -23,7 +19,7 @@ show_state: false
 tap_action:
   action: none
 custom_fields:
-  bitsy: >
+  hamster: >
     [[[
       const fnum = (id) => {
         const v = parseFloat(states[id]?.state);
@@ -56,112 +52,170 @@ custom_fields:
       const pvStartW  = cfg('input_number.mvp_pv_start_w', 6000);
       const maxChip   = cfg('input_number.mvp_tmax_std_threshold_c', 112);
 
-      // Farb-Tokens aus themes/bitgrid.yaml
-      const cEco = 'var(--bg-color-eco,#4CAF50)';
-      const cStd = 'var(--bg-color-standard,#26C6DA)';
-      const cSup = 'var(--bg-color-super,#F7931A)';
-      const cRes = 'var(--bg-color-reserve,#EF5350)';
-      const cIdl = 'var(--bg-color-idle,#9E9E9E)';
-      const cPv  = 'var(--bg-color-pv,#EFB73C)';
-
-      // Branches = Spiegel von Tab 1, plus Stimmung (mood) fürs Tamagotchi.
-      let head, sub, img, mood, moodCol;
+      let head, sub, img;
       if (!socKnown && !running) {
         head = 'Verbindung wird aufgebaut';
         sub  = 'Die Sensoren melden sich gerade nach einem Neustart.<br>'
-             + 'Sobald Ladezustand und PV anliegen, sage ich dir, was los ist.';
-        img  = 'bithamster_wait.png'; mood = 'wartet auf Daten'; moodCol = cIdl;
+             + 'Sobald Ladezustand und PV anliegen, zeigt die Karte den Betriebszustand.';
+        img  = 'bithamster_wait.png';
       } else if (night) {
         head = 'Nachtsperre aktiv';
         sub  = `Es ist ${h}:00 Uhr, Beginn des Nachtfensters von 22:00 bis 06:00 Uhr.<br>`
              + 'In dieser Zeit ist das Mining unabhängig vom Ladezustand ausgesetzt.<br>'
              + 'Der Normalbetrieb beginnt wieder ab 06:00 Uhr.';
-        img  = 'bithamster_sleep.png'; mood = 'schläft'; moodCol = '#90caf9';
+        img  = 'bithamster_sleep.png';
       } else if (chipV !== null && chipV >= maxChip) {
         head = 'Sicherheits-Stopp: zu heiß';
         sub  = `Die Chip-Temperatur liegt mit ${pct(chipV)} °C über der Sicherheitsgrenze von ${pct(maxChip)} °C.<br>`
              + 'Der Miner wird sofort gestoppt, nicht überstimmbar.<br>'
              + 'Ein Wiederanlauf erfolgt erst nach Abkühlung.';
-        img  = 'bithamster_wait.png'; mood = 'alarmiert'; moodCol = cRes;
+        img  = 'bithamster_wait.png';
       } else if (mode === 'Eco') {
         head = 'Miner läuft sparsam (Eco)';
         sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Eco-Band, die PV bei ${kw(pvW)} kW.<br>`
              + `Der Miner minet gedrosselt im Eco-Modus${pvW < pvStartW ? ' aus dem Akku weiter' : ''}.<br>`
              + `Unter ${pct(socStop)} % greift die Hausreserve, ab ${pct(socStd)} % schaltet er auf Standard.`;
-        img  = 'bithamster_eco.png'; mood = 'zufrieden'; moodCol = cEco;
+        img  = 'bithamster_eco.png';
       } else if (mode === 'Standard') {
         head = 'Miner läuft in Standard';
         sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Standard-Band.<br>`
              + 'Der Miner läuft im Standard-Modus.<br>'
              + `Ab ${pct(socSuper)} % folgt Super, unter ${pct(socStdStp)} % fällt er auf Eco zurück.`;
-        img  = 'bithamster_standard.png'; mood = 'fleißig'; moodCol = cStd;
+        img  = 'bithamster_standard.png';
       } else if (mode === 'Super') {
         head = 'Miner läuft auf Volllast (Super)';
         sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Super-Band (ab ${pct(socSuper)} %).<br>`
              + 'Der Miner läuft mit voller Last im Super-Modus.<br>'
              + `Unter ${pct(socSupStp)} % fällt er auf Standard zurück.`;
-        img  = 'bithamster_super.png'; mood = 'voll im Flow'; moodCol = cSup;
+        img  = 'bithamster_super.png';
       } else if (soc < socStop) {
         head = 'Akku lädt zuerst';
         sub  = `Der Ladezustand ist mit ${pct(soc)} % unter die Hausreserve von ${pct(socStop)} % gefallen.<br>`
              + 'Der Miner bleibt aus und lädt zuerst wieder auf.<br>'
              + `Ein Start ist erst ab ${pct(ecoStart)} % möglich.`;
-        img  = 'bithamster_wait.png'; mood = 'besorgt'; moodCol = cRes;
+        img  = 'bithamster_wait.png';
       } else if (soc < ecoStart) {
         head = 'Akku im Halteband';
         sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Halteband (${pct(socStop)}–${pct(ecoStart)} %).<br>`
              + 'Ein Neustart ist hier gesperrt, der Miner bleibt aus.<br>'
              + `Ein Start ist erst ab ${pct(ecoStart)} % möglich.`;
-        img  = 'bithamster_wait.png'; mood = 'geduldig'; moodCol = cIdl;
+        img  = 'bithamster_wait.png';
       } else {
         head = 'Warte auf Sonne';
         sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Eco-Band, doch die PV reicht mit ${kw(pvW)} kW nicht (nötig ${kw(pvStartW)} kW).<br>`
              + 'Der Miner bleibt aus.<br>'
              + `Ab ${kw(pvStartW)} kW startet er im Eco-Modus.`;
-        img  = 'bithamster_wait.png'; mood = 'wartet auf Sonne'; moodCol = cPv;
+        img  = 'bithamster_wait.png';
       }
 
-      // Hermes-Status nur als dezente Fußnote; Details in der rechten Spalte.
-      const adv = states['sensor.bitsy_advice'];
-      const hermesOn = adv && !['unavailable', 'unknown', ''].includes(adv.state);
+      const stat = (label, value, sub) => `
+        <div style="text-align:center">
+          <div style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
+                      color:var(--secondary-text-color);opacity:0.65;margin-bottom:3px">${label}</div>
+          <div style="font-size:1.5rem;font-weight:700;line-height:1;
+                      white-space:nowrap">${value}</div>
+          ${sub ? `<div style="font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);opacity:0.7;
+                      white-space:nowrap;margin-top:3px">${sub}</div>` : ''}
+        </div>`;
+
+      // Bitcoin-Fußleiste, identisch zum Home-Tab (bewusst dupliziert)
+      const blockH   = fnum('sensor.bitcoin_block_height');
+      const balBtc   = fnum('sensor.pool_balance_btc');
+      const eurRate  = fnum('sensor.btc_eur_price');
+      const blockStr = blockH  !== null ? Math.round(blockH).toLocaleString('de-DE')          : '—';
+      const FLASH_MS = 60000;
+      const bhLc  = states['sensor.bitcoin_block_height']?.last_changed;
+      const bhAge = bhLc ? Date.now() - new Date(bhLc).getTime() : Infinity;
+      const blockAnim = (bhAge >= 0 && bhAge < FLASH_MS)
+        ? `animation:bgz-block-tick ${FLASH_MS}ms linear ${-Math.round(bhAge)}ms both;`
+        : '';
+      let priceStr = eurRate !== null ? Math.round(eurRate).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">€</span>' : '—';
+      const haveBal  = balBtc !== null && balBtc > 0;
+      const satsStr  = haveBal ? Math.round(balBtc * 1e8).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">SATs</span>' : '—';
+      const euroSub  = (haveBal && eurRate !== null && eurRate > 0)
+        ? '≈ ' + (balBtc * eurRate).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €'
+        : '';
+
+      const up = 'var(--bg-color-eco,#4CAF50)', down = 'var(--bg-color-reserve,#EF5350)';
+      const dchip = (txt, col, em) => `<span style="font-size:${em || 0.72}em;font-weight:600;margin-left:4px;color:${col}">${txt}</span>`;
+      const eurPrev = fnum('input_number.btc_eur_day_start');
+      let priceSub = '';
+      if (eurRate !== null && eurPrev !== null && eurPrev > 0) {
+        const dp = (eurRate - eurPrev) / eurPrev * 100;
+        const s  = (dp >= 0 ? '+' : '−')
+                 + Math.abs(dp).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        priceStr += dchip(`(${s} %)`, dp >= 0 ? up : down, 0.5);
+      }
+
+      const yIso = (() => { const d = new Date(); d.setDate(d.getDate() - 1);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+      let yBtc = null;
+      (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {
+        const md = tx.mining_extra?.mining_date; if (!md) return;
+        const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
+        if (sd.toISOString().slice(0, 10) !== yIso) return;
+        const v = parseFloat(tx.amount ?? tx.changed_balance);
+        if (v > 0) yBtc = v;
+      });
+      if (yBtc === null) {
+        (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
+          if (!e[0] || !e[2]) return;
+          const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
+          if (sd.toISOString().slice(0, 10) === yIso) yBtc = e[2];
+        });
+      }
+      if (yBtc === null) {
+        const raw = states['input_text.pool_btc_daily_log']?.state ?? '';
+        (raw && raw !== 'unknown' && raw !== 'unavailable' ? raw.split('|') : []).forEach(e => {
+          const [d, b] = e.split(','); if (d === yIso) { const v = parseFloat(b); if (v > 0) yBtc = v; }
+        });
+      }
+      const haveYield = yBtc !== null && yBtc > 0;
+      const satsDelta = haveYield ? dchip('(+' + Math.round(yBtc * 1e8).toLocaleString('de-DE') + ')', up, 0.5) : '';
+      const euroDelta = (haveYield && eurRate !== null && eurRate > 0)
+        ? dchip('(+' + (yBtc * eurRate).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €)', up)
+        : '';
+      const satsLine = haveBal ? satsStr + satsDelta : satsStr;
+      const balSub   = euroSub ? euroSub + euroDelta : '';
 
       return `
         <style>
-          @keyframes bgz-bitsy-float {
-            0%, 100% { transform: translateY(0); }
-            50%      { transform: translateY(-7px); }
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .bgz-bitsy-img { animation: none !important; }
+          @keyframes bgz-block-tick {
+            0%   { transform:rotateX(90deg); color:var(--bg-color-super,#F7931A); text-shadow:0 0 16px rgba(247,147,26,.8); }
+            1%   { transform:rotateX(0);     color:var(--bg-color-super,#F7931A); text-shadow:0 0 16px rgba(247,147,26,.8); }
+            70%  { transform:rotateX(0);     color:var(--bg-color-super,#F7931A); text-shadow:0 0 8px rgba(247,147,26,.4); }
+            100% { transform:rotateX(0);     color:var(--primary-text-color); text-shadow:0 0 0 rgba(247,147,26,0); }
           }
         </style>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%">
-          <img class="bgz-bitsy-img" src="/local/${img}?v=20260625"
-               style="width:52%;max-width:260px;aspect-ratio:1;border-radius:50%;object-fit:cover;
-                      border:3px solid color-mix(in srgb, ${moodCol} 55%, transparent);
-                      box-shadow:0 0 34px color-mix(in srgb, ${moodCol} 30%, transparent);
-                      animation:bgz-bitsy-float 6s ease-in-out infinite">
-          <div style="display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:999px;
-                      border:1px solid color-mix(in srgb, ${moodCol} 40%, transparent);
-                      background:color-mix(in srgb, ${moodCol} 12%, transparent)">
-            <span style="width:8px;height:8px;border-radius:50%;background:${moodCol}"></span>
+        <div style="display:flex;flex-direction:column;height:100%;width:100%">
+          <div style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;
+                      margin-bottom:14px;align-self:flex-start;border:1px solid rgba(255,255,255,0.18);
+                      background:rgba(255,255,255,0.06)">
+            <ha-icon icon="mdi:function-variant" style="--mdc-icon-size:13px;color:var(--secondary-text-color)"></ha-icon>
             <span style="font-size:var(--bg-fs-label);font-weight:700;text-transform:uppercase;
-                         letter-spacing:0.07em;color:${moodCol}">${mood}</span>
+                         letter-spacing:0.07em;color:var(--secondary-text-color)">Regelbasiert · deterministisch</span>
           </div>
-          <div style="position:relative;width:100%;margin-top:6px">
-            <div style="position:absolute;top:-7px;left:50%;width:14px;height:14px;
-                        transform:translateX(-50%) rotate(45deg);
-                        background:rgba(255,255,255,0.055);
-                        border-left:1px solid var(--divider-color);border-top:1px solid var(--divider-color)"></div>
-            <div style="border:1px solid var(--divider-color);border-radius:16px;padding:18px 20px;
-                        background:rgba(255,255,255,0.055)">
+          <div style="display:flex;gap:24px;align-items:center">
+            <img src="/local/${img}?v=20260625"
+                 style="width:24%;max-width:135px;aspect-ratio:1;border-radius:50%;flex-shrink:0;
+                        object-fit:cover;border:2px solid var(--divider-color)">
+            <div style="flex:1;min-width:0">
               <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1.15;
-                          color:var(--primary-text-color);margin-bottom:10px">${head}</div>
-              <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.55">${sub}</div>
+                          white-space:normal;overflow-wrap:break-word;
+                          color:var(--primary-text-color);margin-bottom:12px">${head}</div>
+              <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.55;
+                          white-space:normal;overflow-wrap:break-word">${sub}</div>
             </div>
           </div>
-          <div style="font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);opacity:0.6">
-            Erklärung: regelbasiert, deterministisch · Hermes-Beratung: ${hermesOn ? 'aktiv (siehe rechts)' : 'offline'}
+          <div style="display:flex;justify-content:space-between;padding-top:14px;margin-top:14px;
+                      border-top:1px solid var(--divider-color)">
+            <div style="width:24%;max-width:135px;flex-shrink:0;text-align:center">
+              <div style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
+                          color:var(--secondary-text-color);opacity:0.65;margin-bottom:3px">Blockzeit</div>
+              <div style="font-size:1.5rem;font-weight:700;line-height:1;white-space:nowrap;${blockAnim}">${blockStr}</div>
+            </div>
+            ${stat('Balance', satsLine, balSub)}
+            ${stat('Kurs', priceStr, priceSub)}
           </div>
         </div>`;
     ]]]
@@ -172,11 +226,13 @@ styles:
     - overflow: hidden
     - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
     - box-shadow: var(--ha-card-box-shadow)
-    - padding: 26px 22px 20px
+    - padding: 20px
   grid:
-    - grid-template-areas: '"bitsy"'
+    - grid-template-areas: '"hamster"'
     - grid-template-columns: 1fr
   custom_fields:
-    bitsy:
+    hamster:
+      - height: 100%
       - width: 100%
       - justify-self: stretch
+      - align-self: stretch

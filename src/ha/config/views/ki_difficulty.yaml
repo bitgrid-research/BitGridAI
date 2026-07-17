@@ -1,0 +1,106 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Schwierigkeitsanpassung & Halbierungs-Countdown — direkt unter der
+# Hashrate-Karte im Analyse-Tab (ki_hashrate.yaml, rechte Spalte "Netzwerk").
+# Reine Markt-/Netzwerk-Kontextinformation, KEIN Eingang in core/: Mining-
+# Entscheidungen bleiben SoC-/PV-basiert.
+#
+# Datenherkunft: zwei native HA-Sensoren (packages/bitcoin.yaml), kein
+# Python-Skript, kein JSON-Artefakt mehr (btc_difficulty.py wurde entfernt,
+# siehe ADR in docs/architecture/09_design_decisions/091_adr_de.md).
+#   - sensor.bitcoin_difficulty_adjustment: rest:-Sensor, pollt alle 5 Minuten
+#     /api/v1/difficulty-adjustment der self-hosted mempool.space-Instanz.
+#   - sensor.bitcoin_next_halving: template:-Sensor, reine Arithmetik auf
+#     sensor.bitcoin_block_height (feste Ziel-Blockzeit 600s statt
+#     schwankendem Epochen-Durchschnitt, bewusst grob statt falsch praezise
+#     auf >1 Jahr Horizont).
+# Beide aktualisieren sich selbst per scan_interval/Trigger, exakt wie
+# sensor.bitcoin_block_height es fuer die Blockzeit-Fusszeile schon immer tat
+# — kein Scheduler, kein manueller `make`-Lauf noetig.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+custom_fields:
+  content: >
+    [[[
+      const diffE = states['sensor.bitcoin_difficulty_adjustment'];
+      const halvE = states['sensor.bitcoin_next_halving'];
+      const bad = (e) => !e || ['unknown', 'unavailable'].includes(e.state);
+
+      const wrap = (inner) => `<div style="width:100%">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <span style="font-size:var(--bg-fs-title);font-weight:700;color:var(--primary-text-color)">Schwierigkeitsanpassung</span>
+        </div>
+        ${inner}
+      </div>`;
+
+      if (bad(diffE) || bad(halvE)) {
+        return wrap(`<div style="padding:30px 0;text-align:center;color:var(--secondary-text-color)">Nicht verfügbar (Sensor bitcoin_difficulty_adjustment oder bitcoin_next_halving liefert keinen Wert).</div>`);
+      }
+
+      const a = diffE.attributes || {};
+      const h = halvE.attributes || {};
+      const remainingBlocks = Math.round(parseFloat(a.remainingBlocks ?? 0));
+      const remainingDays = parseFloat(a.remainingTime ?? 0) / 1000 / 86400;
+      const changePct = parseFloat(diffE.state);
+      const prevPct = parseFloat(a.previousRetarget ?? 0);
+      const halvingDate = h.next_halving_date;
+      const halvingDays = parseFloat(h.remaining_days ?? 0);
+
+      const fmtDays = (days) => {
+        const total = Math.floor(days);
+        if (total < 365) return `In ~${total} Tag${total === 1 ? '' : 'e'}`;
+        const years = Math.floor(total / 365);
+        const rem = total - years * 365;
+        return `In ~${years} Jahr${years > 1 ? 'e' : ''}, ${rem} Tage`;
+      };
+      const fmtPct = (v) => v.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      const arrow = (v) => v >= 0
+        ? `<span style="color:var(--bg-color-eco,#4CAF50)">▲ ${fmtPct(v)}</span>`
+        : `<span style="color:var(--bg-color-reserve,#EF5350)">▼ ${fmtPct(Math.abs(v))}</span>`;
+      const fmtDate = (iso) => new Date(iso).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'});
+
+      const col = (label, value, sub) => `
+        <div style="flex:1;min-width:0;text-align:center">
+          <div style="font-size:var(--bg-fs-secondary);font-weight:600;color:var(--bg-color-standard,#26C6DA);margin-bottom:6px">${label}</div>
+          <div style="font-size:var(--bg-fs-title);font-weight:700;color:var(--primary-text-color);white-space:nowrap">${value}</div>
+          <div style="font-size:var(--bg-fs-label);color:var(--secondary-text-color);margin-top:4px">${sub}</div>
+        </div>`;
+
+      const body = `<div style="display:flex;gap:8px">
+        ${col('Verbleibend', `${remainingBlocks} <span style="font-size:var(--bg-fs-secondary);font-weight:400;color:var(--secondary-text-color)">Blöcke</span>`, fmtDays(remainingDays))}
+        ${col('Schätzung', arrow(changePct) + ' %', `Vorherige: ${arrow(prevPct)} %`)}
+        ${col('Nächste Halbierung', fmtDate(halvingDate), fmtDays(halvingDays))}
+      </div>`;
+
+      const genAt = diffE.last_updated ? new Date(diffE.last_updated) : null;
+      const genTxt = genAt && !isNaN(genAt.getTime())
+        ? genAt.toLocaleString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'})
+        : '—';
+      const footer = `
+        <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--divider-color);
+                    font-size:var(--bg-fs-label);color:var(--secondary-text-color);opacity:0.6">
+          Retarget: aktueller Epochen-Durchschnitt (mempool.space) · Halbierung: Ziel-Blockzeit 600s,
+          keine Prognose · Aktualisiert: ${genTxt}
+        </div>`;
+
+      return wrap(body + footer);
+    ]]]
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 18px 20px
+  grid:
+    - grid-template-areas: '"content"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    content:
+      - width: 100%
+      - justify-self: stretch

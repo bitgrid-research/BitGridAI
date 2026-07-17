@@ -176,9 +176,13 @@ settings_spacer:
 
 # Geräte-Kachel (Tab "Geräte"): Icon + Name + aktuelle Leistung + Tages-kWh.
 # entity = Leistungs-Sensor des Plugs; variables.energy_daily = Entity-ID des
-# zugehörigen Tages-kWh-Sensors (packages/devices.yaml). Icon färbt sich ab
-# 5 W Bezug (Lavendel = Verbrauchs-Farbe der Energiefluss-Karte), darunter
-# bzw. bei unavailable bleibt es gedimmt.
+# zugehörigen Tages-kWh-Sensors (packages/devices.yaml). variables.accent_color =
+# Hex-Farbe der zugehörigen Linie im "Leistung (24h)"-Verlaufschart (geraete_
+# verlauf.yaml), damit Kachel-Icon und Chart-Legende visuell zusammengehören.
+# Icon zeigt immer die volle Gerätefarbe, unabhängig vom aktuellen Verbrauch
+# (analog zur Chart-Legende, die auch bei 0 W eingefärbt bleibt). Fallback
+# ohne accent_color: Lavendel (alte Einheitsfarbe). Bei unavailable/unknown
+# bleibt nur die Karten-Opacity gedimmt (siehe styles.card.opacity unten).
 device_tile:
   show_name: true
   show_icon: true
@@ -218,11 +222,7 @@ device_tile:
     icon:
       - width: 30px
       - height: 30px
-      - color: >
-          [[[
-            const n = parseFloat(entity?.state);
-            return (!isNaN(n) && n >= 5) ? '#A6A2D8' : 'var(--secondary-text-color)';
-          ]]]
+      - color: "[[[ return variables?.accent_color || '#A6A2D8'; ]]]"
     name:
       - font-size: 0.9rem
       - font-weight: 600

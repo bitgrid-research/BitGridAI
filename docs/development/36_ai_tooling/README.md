@@ -2,9 +2,10 @@
 
 BitGridAI wird mit KI-Unterstützung gebaut — aber nach klaren Regeln.
 
-Zwei Agenten arbeiten zusammen, jeder mit eigenem Kontext, eigener Rolle und eigenen Grenzen.
-**₿itsy** lebt auf dem Umbrel-Server. **Claude Code** läuft in VSCode auf dem Entwicklungsrechner.
-Beide kennen die Projektprinzipien. Beide dürfen widersprechen.
+Mehrere Agenten arbeiten zusammen, jeder mit eigenem Kontext, eigener Rolle und eigenen Grenzen.
+**₿itsy** (Dev/Home/Study) lebt auf dem Haupt-Umbrel-Server. **DEV-BitHamster** läuft auf
+einer eigenen, getrennten Umbrel-Instanz. **Claude Code** läuft in VSCode auf dem
+Entwicklungsrechner. Alle kennen die Projektprinzipien. Alle dürfen widersprechen.
 
 > **Wichtig:** KI unterstützt — sie entscheidet nicht.
 > Architekturprinzipien, Red Lines und Qualitätsziele gelten für Agenten genauso wie für Code.
@@ -35,10 +36,10 @@ Regeln oder Override-Endpunkte. Auch nicht auf Bitte des Nutzers.
 
 &nbsp;
 
-## Vier Agenten, drei Rollen
+## Fünf Agenten, vier Rollen
 
 ```
-Entwicklungsrechner                  Umbrel Server (LAN)
+Entwicklungsrechner                  Haupt-Umbrel (LAN)
 ┌──────────────────┐     ┌───────────────────────────────────────────┐
 │  Claude Code     │     │  ₿itsy-Dev     (bitsy-dev/)               │
 │  (VSCode)        │◄────►│  Projektassistent, arc42, Entwicklung     │
@@ -51,6 +52,13 @@ Entwicklungsrechner                  Umbrel Server (LAN)
                          │  ₿itsy-Study   (bitsy-study/)             │
                          │  Erklärung für Forscher & Studie          │
                          │  Modell: Qwen3:14b (präzise)              │
+                         └───────────────────────────────────────────┘
+
+                          Eigene Umbrel-Instanz (getrennt, LAN)
+                         ┌───────────────────────────────────────────┐
+                         │  DEV-BitHamster (hermes-bithamster/)      │
+                         │  Analyse & Erklärung Solar-Mining         │
+                         │  Modell: Qwen3.5:9b (Hermes-Agent/Ollama) │
                          └───────────────────────────────────────────┘
 ```
 
@@ -100,6 +108,10 @@ CLAUDE.md          ← Projektweite Instruktionen (Repo-Root)
 docs/              ← Architektur, Forschung, Entwicklungs-Docs
 src/               ← vollständiger Quellcode
 ```
+
+### UI-Design-Workflow
+
+Google Stitch → `design.md` → Claude Code setzt um: [`stitch-ui/README.md`](./stitch-ui/README.md)
 
 &nbsp;
 
@@ -199,19 +211,49 @@ bitsy-study/
 
 ---
 
-## Vergleich der drei ₿itsy-Varianten
+## DEV-BitHamster — Analyse- & Erklär-Agent für Solar-Mining
 
-| | ₿itsy-Dev | ₿itsy-Home | ₿itsy-Study |
-|--|-----------|-----------|------------|
-| **Zielgruppe** | Entwickler | Heimnutzer | Forscher + Teilnehmer |
-| **Ton** | technisch, direkt | klar, alltagsnah | neutral, strukturiert |
-| **Kennt Codebase** | ja | nein | nein |
-| **Kennt arc42** | ja | nein | nein |
-| **Langzeitgedächtnis** | ja (MEMORY.md) | nein | nein |
-| **Datenzugang** | Repo, Git, Docs | /state, /timeline, /preview | + /research/export |
-| **Schreibzugriff** | Docs, Code (auf Anfrage) | **keiner** | **keiner** |
-| **Aktorzugriff** | **keiner** | **keiner** | **keiner** |
-| **Modell** | Qwen3:14b | Qwen3:4b | Qwen3:14b |
+Läuft auf einer eigenen Umbrel-Instanz (Hermes-Agent, Nous Research), getrennt von
+₿itsy-Dev/-Home/-Study. Zwei Rollen in einem Agenten: erklärt Energie-Entscheidungen
+warm und einfach für Laien **und** durchsucht read-only die Home-Assistant-Recorder-DB
+nach Optimierungsmustern — vor allem optimale SoC-Bänder sowie Wetter-/Saisonfenster
+für möglichst effektives Solar-Mining.
+**Kein Schreibzugriff. Keine Aktorbefehle. Kein HA-Token** — kleinstmögliche Angriffsfläche.
+
+Funde sind **Hypothesen**, kein automatischer Rückfluss nach `core/` — das würde die
+Determinismus-Firewall verletzen (siehe CLAUDE.md, "Was nie passiert").
+
+**Workspace:** `docs/development/36_ai_tooling/hermes-bithamster/`
+
+```
+hermes-bithamster/
+├── SOUL.md            ← Werte, Stil, Domainwissen
+├── PERSONA.md         ← Persona / System-Prompt
+├── DESCRIPTION.md     ← Kurzbeschreibung
+└── SYSTEM_PROMPT.md   ← Index
+```
+
+**Datenquellen (read-only):** HA-Recorder-DB (Snapshot, nicht die Live-DB)
+
+**Modell:** Qwen3.5:9b via Ollama — vollständig lokal, kein Cloud-Backhaul.
+
+&nbsp;
+
+---
+
+## Vergleich der Erklär- und Analyse-Agenten
+
+| | ₿itsy-Dev | ₿itsy-Home | ₿itsy-Study | DEV-BitHamster |
+|--|-----------|-----------|------------|-----------------|
+| **Zielgruppe** | Entwickler | Heimnutzer | Forscher + Teilnehmer | Entwickler (Analyse) + Heimnutzer (Erklärung) |
+| **Ton** | technisch, direkt | klar, alltagsnah | neutral, strukturiert | warm, einfach (Erklärung) |
+| **Kennt Codebase** | ja | nein | nein | nein |
+| **Kennt arc42** | ja | nein | nein | nein |
+| **Langzeitgedächtnis** | ja (MEMORY.md) | nein | nein | nein |
+| **Datenzugang** | Repo, Git, Docs | /state, /timeline, /preview | + /research/export | HA-Recorder-DB (read-only, Snapshot) |
+| **Schreibzugriff** | Docs, Code (auf Anfrage) | **keiner** | **keiner** | **keiner** |
+| **Aktorzugriff** | **keiner** | **keiner** | **keiner** | **keiner** |
+| **Modell** | Qwen3:14b | Qwen3:4b | Qwen3:14b | Qwen3.5:9b |
 
 &nbsp;
 
@@ -219,14 +261,15 @@ bitsy-study/
 
 ## Zusammenspiel aller Agenten
 
-| Situation | Claude Code | ₿itsy-Dev | ₿itsy-Home | ₿itsy-Study |
-|-----------|------------|-----------|-----------|------------|
-| Feature implementieren | schreibt Code + Tests | prüft Architekturfit | — | — |
-| Docs ausarbeiten | schreibt Markdown | reviewed Konsistenz | — | — |
-| Nutzer fragt warum Miner läuft | — | — | erklärt in Klartext | — |
-| Forscher analysiert Szenario B | — | — | — | zeigt DecisionEvents, KPIs |
-| Studienteilnehmer fragt nach KPIs | — | — | — | erklärt Autarkie-Quote |
-| Architekturentscheidung | zeigt arc42-Kapitel | empfiehlt anhand BP | — | — |
+| Situation | Claude Code | ₿itsy-Dev | ₿itsy-Home | ₿itsy-Study | DEV-BitHamster |
+|-----------|------------|-----------|-----------|------------|-----------------|
+| Feature implementieren | schreibt Code + Tests | prüft Architekturfit | — | — | — |
+| Docs ausarbeiten | schreibt Markdown | reviewed Konsistenz | — | — | — |
+| Nutzer fragt warum Miner läuft | — | — | erklärt in Klartext | — | erklärt in Klartext |
+| Forscher analysiert Szenario B | — | — | — | zeigt DecisionEvents, KPIs | — |
+| Studienteilnehmer fragt nach KPIs | — | — | — | erklärt Autarkie-Quote | — |
+| Architekturentscheidung | zeigt arc42-Kapitel | empfiehlt anhand BP | — | — | — |
+| Sweet-Spot für Solar-Mining suchen | — | — | — | — | analysiert SoC-Bänder & Wetter read-only |
 
 &nbsp;
 
@@ -277,9 +320,10 @@ bitsy-study/
 | Agent | Modell | Läuft auf | Offline-fähig |
 |-------|--------|-----------|--------------|
 | Claude Code | Claude Sonnet (Anthropic) | Dev-Rechner | nein (API) |
-| ₿itsy | Qwen3:14b | Umbrel (lokal) | **ja** |
+| ₿itsy | Qwen3:14b | Haupt-Umbrel (lokal) | **ja** |
+| DEV-BitHamster | Qwen3.5:9b (Hermes-Agent/Ollama) | Eigene Umbrel-Instanz (lokal) | **ja** |
 
-₿itsy läuft vollständig offline — auch wenn kein Internet verfügbar ist.
+₿itsy und DEV-BitHamster laufen vollständig offline — auch wenn kein Internet verfügbar ist.
 Claude Code benötigt die Anthropic API — für Code-Arbeit am Dev-Rechner ist das der Trade-off.
 
 &nbsp;

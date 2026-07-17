@@ -365,8 +365,10 @@ views:
                                         object-fit:cover;border:2px solid var(--divider-color)">
                             <div style="flex:1;min-width:0">
                               <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1.15;
+                                          white-space:normal;overflow-wrap:break-word;
                                           color:var(--primary-text-color);margin-bottom:12px">${head}</div>
-                              <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.55">${sub}</div>
+                              <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.55;
+                                          white-space:normal;overflow-wrap:break-word">${sub}</div>
                             </div>
                           </div>
                           <div style="display:flex;justify-content:space-between;padding-top:14px;
@@ -468,10 +470,11 @@ views:
                       display_zero_tolerance: 25
                     - entity: sensor.ac_elwa_2_power1_solar
                       name: Heizstab
-                      icon: mdi:water-boiler
+                      icon: mdi:water
                       color: "#5C9EE2"           # Blau (kräftiger), fügt sich in die Palette
                     # Summierte Haushalts-Plugs aus dem Geräte-Tab (Kühlschränke,
-                    # Waschmaschine, TV, Büro; packages/devices.yaml). Teilmenge
+                    # Waschmaschine, TV, Büro, Lüftung, Server/NAS/KI-Agent;
+                    # packages/devices.yaml). Teilmenge
                     # der Haus-Last, wie die Miner: PFCP zieht das nicht vom
                     # Haus-Knoten ab, die Bubble macht den Anteil nur sichtbar.
                     - entity: sensor.geraete_power_w
@@ -1108,7 +1111,7 @@ views:
 
   # ═══════════════════════════════════════════════════════════════════════
   # TAB 4: GERÄTE  —  2 Spalten.
-  # Links: 4 Verbraucher-Plugs als Kacheln + Summenkarte (geraete.yaml)
+  # Links: 6 Verbraucher-Plugs als Kacheln + Summenkarte (geraete.yaml)
   # Rechts: Leistungs- und Tagesverbrauchs-Verlauf (geraete_verlauf.yaml)
   # Entity-Zuordnung + Tages-kWh: packages/devices.yaml
   # ═══════════════════════════════════════════════════════════════════════
@@ -1215,9 +1218,13 @@ views:
 
   # ═══════════════════════════════════════════════════════════════════════
   # TAB 5: ₿ITSY  —  KI-Tab, Spiegel der Erklärschicht. 2 Spalten.
-  # Links: Tamagotchi (großes Hamster-Bild, Stimmung, Sprechblase =
-  #        regelbasierter Zustand, Spiegel der Tab-1-Logik; ki_bitsy.yaml)
-  # Rechts: Hermes/Qwen-Beratung + KI-Stack-Status (ki_beratung.yaml)
+  # Links (deterministisch): Tamagotchi (ki_bitsy.yaml) + Energiefluss-Karte
+  #        darunter, Spiegel von Tab 1 (Home) — beides regelbasiert, gehört
+  #        zusammen in die linke Spalte, keine LLM-Beteiligung.
+  # Rechts (KI): Hermes/Qwen-Beratung + KI-Stack-Status (ki_beratung.yaml).
+  #        Power-Law/Hashrate/Difficulty sind KEIN LLM-Output (deterministische
+  #        Backfill-Charts) und deshalb ausgelagert in TAB 6 (Analyse), nicht
+  #        hier — Vermischung mit dem KI-Erklär-Tab wäre irreführend.
   # MQTT-Andockpunkt für den Hermes-Agenten: packages/bitsy.yaml
   # Icon: mdi:hamster existiert nicht, mdi:rodent ist das nächstliegende.
   # ═══════════════════════════════════════════════════════════════════════
@@ -1308,16 +1315,176 @@ views:
                 - justify-self: start
                 - padding-left: 10px
 
-          # ── Tamagotchi links ─────────────────────────────────────────
+          # ── Tamagotchi + Energiefluss links (beides deterministisch) ──
+          # Energiefluss-Karte identisch zu Tab 1 (Home), bewusst dupliziert
+          # (siehe Kommentar dort). Gehört zur linken Spalte, keine
+          # LLM-Beteiligung, direkt unter dem regelbasierten Hamster.
           - type: vertical-stack
             view_layout:
               grid-area: bitsy
             cards:
               - !include views/ki_bitsy.yaml
+              - type: custom:power-flow-card-plus
+                clickable_entities: true
+                entities:
+                  grid:
+                    entity:
+                      consumption: sensor.grid_import_w
+                      production: sensor.grid_export_w
+                    color:
+                      consumption: "#8C97E6"
+                      production: "#5BC287"
+                  solar:
+                    entity: sensor.pv_power_w
+                    color: "#EFB73C"
+                  battery:
+                    entity: sensor.battery_power_flowchart_w
+                    state_of_charge: sensor.battery_soc_pct
+                    color:
+                      consumption: "#4FBF86"
+                      production: "#82D2A0"
+                  home:
+                    entity: sensor.house_load_w
+                    color: "#A6A2D8"
+                  individual:
+                    - entity: sensor.shellyplugsg3_dcb4d9c5567c_leistung
+                      name: Miner 1
+                      icon: mdi:pickaxe
+                      color: "#757575"
+                      display_zero: false
+                      display_zero_tolerance: 25
+                    - entity: sensor.shellyplugsg3_d0cf13d86254_leistung
+                      name: Miner 2
+                      icon: mdi:pickaxe
+                      color: "#757575"
+                      display_zero: false
+                      display_zero_tolerance: 25
+                    - entity: sensor.ac_elwa_2_power1_solar
+                      name: Heizstab
+                      icon: mdi:water
+                      color: "#5C9EE2"
+                    - entity: sensor.geraete_power_w
+                      name: Geräte
+                      icon: mdi:power-plug
+                      color: "#D08BB8"
+                      display_zero: false
+                      display_zero_tolerance: 10
 
-          # ── Beratung + KI-Stack rechts ───────────────────────────────
+          # ── Beratung + KI-Stack rechts ────────────────────────────────
           - type: vertical-stack
             view_layout:
               grid-area: beratung
             cards:
               - !include views/ki_beratung.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB 6: ANALYSE  —  Bitcoin-Markt-/Netzwerkkontext, 2 Spalten. Reine
+  # deterministische Backfill-Charts (kein LLM), deshalb bewusst getrennt vom
+  # ₿itsy-Tab (Tab 5, Erklärschicht). Mining-Entscheidungen bleiben SoC-/
+  # PV-basiert (core/), diese Charts sind reiner Kontext, keine Prognose.
+  # Links (Markt): Power-Law-Chart (ki_powerlaw.yaml) — Preis-Einordnung.
+  # Rechts (Netzwerk): Hashrate-Chart + Difficulty/Halbierung darunter
+  #        (ki_hashrate.yaml, ki_difficulty.yaml) — Netzwerk-Metriken.
+  # Datenquellen: src/data/btc_power_law.py, btc_hashrate.py, btc_difficulty.py
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Analyse
+    path: analyse
+    icon: mdi:chart-timeline-variant
+    theme: BitGridAI
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: min-content auto
+          grid-template-areas: '"tl tr" "markt netzwerk"'
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+
+          # ── Gruppen-Titel links: MARKT ───────────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tl
+            icon: mdi:currency-usd
+            name: Markt
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── Gruppen-Titel rechts: NETZWERK ───────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tr
+            icon: mdi:server-network
+            name: Netzwerk
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── Power-Law links ───────────────────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: markt
+            cards:
+              - !include views/ki_powerlaw.yaml
+
+          # ── Hashrate + Difficulty rechts ──────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: netzwerk
+            cards:
+              - !include views/ki_hashrate.yaml
+              - !include views/ki_difficulty.yaml
