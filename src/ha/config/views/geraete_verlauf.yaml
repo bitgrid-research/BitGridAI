@@ -2,6 +2,9 @@
 # Geräte-Verlauf (rechte Spalte) — Leistung 24 h + Tagesverbrauch.
 # Eingebunden via !include in:
 #   - bitgrid_dashboard_v2.yaml  → Tab "Geräte", grid-area: verlauf
+# 14 Verbraucher, nach Räumen sortiert (gleiche Reihenfolge wie die Kacheln
+# in geraete.yaml). Namen sind raum-qualifiziert, weil beide Graphen alle 14
+# in EINER Legende führen (zwei PCs, zwei TVs, zwei Kühlschränke).
 # Leistung: Recorder-Rohdaten der Plug-Sensoren (exclude-basiert, also drin).
 # Tagesverbrauch: Langzeit-Statistik der nativen kWh-Zähler (total_increasing),
 # stat_type change = Tagesdelta, robust gegen Zähler-Resets der Plugs.
@@ -13,18 +16,34 @@ cards:
     title: Leistung (24 h)
     hours_to_show: 24
     entities:
+      - entity: sensor.shellyplugsg3_9070694c577c_leistung
+        name: Kühlschrank Küche
+      - entity: sensor.shellyplugsg3_9070694b2854_leistung
+        name: Spülmaschine
+      - entity: sensor.shellyplugsg3_9070694c99d4_leistung
+        name: TV Wohnzimmer
+      - entity: sensor.shellyplugsg3_9070694d44bc_leistung
+        name: PC Schlafzimmer
+      - entity: sensor.shellyplugsg3_90706947f288_leistung
+        name: TV Schlafzimmer
+      - entity: sensor.shellyplugsg3_d885ac18c3b4_leistung
+        name: PC Büro
+      - entity: sensor.shellyplugsg3_9070694a1b6c_leistung
+        name: 3D-Drucker
       - entity: sensor.shellyplugsg3_9070694abdf4_leistung
-        name: Kühlschränke
+        name: Kühlschränke HW
       - entity: sensor.shellyplugsg3_d885ac1e9adc_leistung
         name: Waschmaschine
-      - entity: sensor.shellyplugsg3_9070694c99d4_leistung
-        name: TV
-      - entity: sensor.shellyplugsg3_d885ac18c3b4_leistung
-        name: Büro
+      - entity: sensor.shellyplugpmg3_9070695bb2a8_leistung
+        name: Trockner
+      - entity: sensor.shelly1pmg4_e4b06377adc0_leistung
+        name: Heizung
       - entity: sensor.shellyplusplugs_d4d4daf4eda4_leistung
         name: Lüftung
       - entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
-        name: Server, NAS, KI-Agent
+        name: Server/NAS
+      - entity: sensor.shellyplugsg3_907069492f30_leistung
+        name: Garage
 
   - type: statistics-graph
     title: Tagesverbrauch (14 Tage)
@@ -34,15 +53,31 @@ cards:
     stat_types:
       - change
     entities:
+      - entity: sensor.shellyplugsg3_9070694c577c_energie
+        name: Kühlschrank Küche
+      - entity: sensor.shellyplugsg3_9070694b2854_energie
+        name: Spülmaschine
+      - entity: sensor.shellyplugsg3_9070694c99d4_energie
+        name: TV Wohnzimmer
+      - entity: sensor.shellyplugsg3_9070694d44bc_energie
+        name: PC Schlafzimmer
+      - entity: sensor.shellyplugsg3_90706947f288_energie
+        name: TV Schlafzimmer
+      - entity: sensor.shellyplugsg3_d885ac18c3b4_energie
+        name: PC Büro
+      - entity: sensor.shellyplugsg3_9070694a1b6c_energie
+        name: 3D-Drucker
       - entity: sensor.shellyplugsg3_9070694abdf4_energie
-        name: Kühlschränke
+        name: Kühlschränke HW
       - entity: sensor.shellyplugsg3_d885ac1e9adc_energie
         name: Waschmaschine
-      - entity: sensor.shellyplugsg3_9070694c99d4_energie
-        name: TV
-      - entity: sensor.shellyplugsg3_d885ac18c3b4_energie
-        name: Büro
+      - entity: sensor.shellyplugpmg3_9070695bb2a8_energie
+        name: Trockner
+      - entity: sensor.shelly1pmg4_e4b06377adc0_energie
+        name: Heizung
       - entity: sensor.shellyplusplugs_d4d4daf4eda4_energie
         name: Lüftung
       - entity: sensor.shellyplugsg3_d0cf13db3a00_energie
-        name: Server, NAS, KI-Agent
+        name: Server/NAS
+      - entity: sensor.shellyplugsg3_907069492f30_energie
+        name: Garage

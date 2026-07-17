@@ -1,34 +1,74 @@
 # ═══════════════════════════════════════════════════════════════════════
-# Verbraucher-Plugs (Shelly Plug S Gen3 / Plus Plug) — Tab "Geräte"
+# Verbraucher-Plugs (Shelly Plug S/PM Gen3, Plus Plug, 1PM Gen4) — Tab "Geräte"
 # ═══════════════════════════════════════════════════════════════════════
-# 6 Haushalts-Verbraucher als eigene Messpunkte. Entity-IDs bleiben auf der
-# MAC-basierten Werks-ID (stabil gegen Umbenennen), Zuordnung:
-#   9070694abdf4 = Kühlschränke    d885ac1e9adc = Waschmaschine
-#   9070694c99d4 = TV              d885ac18c3b4 = Büro
-#   d4d4daf4eda4 = Lüftung (Plus Plug, s. mvp_auto.yaml Kühlungslogik)
-#   d0cf13db3a00 = Server, NAS, KI-Agent
+# 14 Haushalts-Verbraucher als eigene Messpunkte, nach Räumen gruppiert.
+# Entity-IDs bleiben auf der MAC-basierten Werks-ID (stabil gegen Umbenennen).
+# Bestehende Sensor-/Baseline-Keys (tv, buero, kuehlschraenke, waschmaschine,
+# lueftung, server) sind BEWUSST unverändert, damit Verlauf/Statistik nicht
+# abreißen — nur die Anzeige-Namen im View ändern sich (z. B. Büro → PC Büro).
+#
+# Zuordnung Key → Shelly-Slug → Raum:
+#   kuehlschrank_kueche  shellyplugsg3_9070694c577c Küche
+#   spuelmaschine        shellyplugsg3_9070694b2854 Küche
+#   tv                   shellyplugsg3_9070694c99d4 Wohnzimmer
+#   pc_schlafzimmer      shellyplugsg3_9070694d44bc Schlafzimmer
+#   tv_schlafzimmer      shellyplugsg3_90706947f288 Schlafzimmer
+#   buero                shellyplugsg3_d885ac18c3b4 Büro
+#   drucker              shellyplugsg3_9070694a1b6c Büro
+#   kuehlschraenke       shellyplugsg3_9070694abdf4 Hauswirtschaft
+#   waschmaschine        shellyplugsg3_d885ac1e9adc Hauswirtschaft
+#   trockner             shellyplugpmg3_9070695bb2a8 Hauswirtschaft
+#   heizung              shelly1pmg4_e4b06377adc0   Keller
+#   lueftung             shellyplusplugs_d4d4daf4eda4 Keller
+#   server               shellyplugsg3_d0cf13db3a00 Keller
+#   garage               shellyplugsg3_907069492f30 Garage
 #
 # Tages-kWh nach dem Midnight-Baseline-Muster aus packages/stats.yaml
 # (utility_meter wurde in HA 2026.x entfernt). Quelle ist der native
 # kWh-Zähler des Plugs (total_increasing). Zwei Abweichungen vom
-# Integral-Muster, weil die Quelle ein Geräte-Zähler statt ein
-# HA-Integral ist:
-#   - Zähler-Reset (Plug-Neustart): cur < base → Sensor fällt auf den
-#     Zählerwert selbst zurück statt auf 0 zu klemmen (Zähler beginnt
-#     nach Reset bei 0 ≈ Verbrauch seit Neustart).
-#   - Plug um Mitternacht nicht erreichbar: Baseline behält den alten
-#     Wert statt auf 0 zu fallen (float-Default = alte Baseline).
+# Integral-Muster (Zähler-Reset → Sensor fällt auf Zählerwert; Plug um
+# Mitternacht offline → Baseline behält alten Wert).
 devices:
 
   input_number:
-    waschmaschine_energy_midnight:
-      name: "Waschmaschine kWh Baseline Mitternacht"
+    kuehlschrank_kueche_energy_midnight:
+      name: "Kühlschrank Küche kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
+    spuelmaschine_energy_midnight:
+      name: "Spülmaschine kWh Baseline Mitternacht"
       min: 0
       max: 1000000
       step: 0.001
       mode: box
     tv_energy_midnight:
-      name: "TV kWh Baseline Mitternacht"
+      name: "TV Wohnzimmer kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
+    pc_schlafzimmer_energy_midnight:
+      name: "PC Schlafzimmer kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
+    tv_schlafzimmer_energy_midnight:
+      name: "TV Schlafzimmer kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
+    buero_energy_midnight:
+      name: "PC Büro kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
+    drucker_energy_midnight:
+      name: "3D-Drucker Büro kWh Baseline Mitternacht"
       min: 0
       max: 1000000
       step: 0.001
@@ -39,8 +79,20 @@ devices:
       max: 1000000
       step: 0.001
       mode: box
-    buero_energy_midnight:
-      name: "Büro kWh Baseline Mitternacht"
+    waschmaschine_energy_midnight:
+      name: "Waschmaschine kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
+    trockner_energy_midnight:
+      name: "Trockner kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
+    heizung_energy_midnight:
+      name: "Heizung kWh Baseline Mitternacht"
       min: 0
       max: 1000000
       step: 0.001
@@ -52,7 +104,13 @@ devices:
       step: 0.001
       mode: box
     server_energy_midnight:
-      name: "Server kWh Baseline Mitternacht"
+      name: "Server/NAS/KI kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
+    garage_energy_midnight:
+      name: "Garagengeräte kWh Baseline Mitternacht"
       min: 0
       max: 1000000
       step: 0.001
@@ -60,13 +118,22 @@ devices:
 
   template:
     - sensor:
-        - name: "waschmaschine_energy_daily"
-          unique_id: waschmaschine_energy_daily
+        - name: "kuehlschrank_kueche_energy_daily"
+          unique_id: kuehlschrank_kueche_energy_daily
           unit_of_measurement: "kWh"
           state_class: measurement
           state: >-
-            {% set cur  = states('sensor.shellyplugsg3_d885ac1e9adc_energie') | float(0) %}
-            {% set base = states('input_number.waschmaschine_energy_midnight') | float(0) %}
+            {% set cur  = states('sensor.shellyplugsg3_9070694c577c_energie') | float(0) %}
+            {% set base = states('input_number.kuehlschrank_kueche_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        - name: "spuelmaschine_energy_daily"
+          unique_id: spuelmaschine_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shellyplugsg3_9070694b2854_energie') | float(0) %}
+            {% set base = states('input_number.spuelmaschine_energy_midnight') | float(0) %}
             {{ (cur - base if cur >= base else cur) | round(3) }}
 
         - name: "tv_energy_daily"
@@ -78,13 +145,22 @@ devices:
             {% set base = states('input_number.tv_energy_midnight') | float(0) %}
             {{ (cur - base if cur >= base else cur) | round(3) }}
 
-        - name: "kuehlschraenke_energy_daily"
-          unique_id: kuehlschraenke_energy_daily
+        - name: "pc_schlafzimmer_energy_daily"
+          unique_id: pc_schlafzimmer_energy_daily
           unit_of_measurement: "kWh"
           state_class: measurement
           state: >-
-            {% set cur  = states('sensor.shellyplugsg3_9070694abdf4_energie') | float(0) %}
-            {% set base = states('input_number.kuehlschraenke_energy_midnight') | float(0) %}
+            {% set cur  = states('sensor.shellyplugsg3_9070694d44bc_energie') | float(0) %}
+            {% set base = states('input_number.pc_schlafzimmer_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        - name: "tv_schlafzimmer_energy_daily"
+          unique_id: tv_schlafzimmer_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shellyplugsg3_90706947f288_energie') | float(0) %}
+            {% set base = states('input_number.tv_schlafzimmer_energy_midnight') | float(0) %}
             {{ (cur - base if cur >= base else cur) | round(3) }}
 
         - name: "buero_energy_daily"
@@ -94,6 +170,51 @@ devices:
           state: >-
             {% set cur  = states('sensor.shellyplugsg3_d885ac18c3b4_energie') | float(0) %}
             {% set base = states('input_number.buero_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        - name: "drucker_energy_daily"
+          unique_id: drucker_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shellyplugsg3_9070694a1b6c_energie') | float(0) %}
+            {% set base = states('input_number.drucker_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        - name: "kuehlschraenke_energy_daily"
+          unique_id: kuehlschraenke_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shellyplugsg3_9070694abdf4_energie') | float(0) %}
+            {% set base = states('input_number.kuehlschraenke_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        - name: "waschmaschine_energy_daily"
+          unique_id: waschmaschine_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shellyplugsg3_d885ac1e9adc_energie') | float(0) %}
+            {% set base = states('input_number.waschmaschine_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        - name: "trockner_energy_daily"
+          unique_id: trockner_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shellyplugpmg3_9070695bb2a8_energie') | float(0) %}
+            {% set base = states('input_number.trockner_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        - name: "heizung_energy_daily"
+          unique_id: heizung_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shelly1pmg4_e4b06377adc0_energie') | float(0) %}
+            {% set base = states('input_number.heizung_energy_midnight') | float(0) %}
             {{ (cur - base if cur >= base else cur) | round(3) }}
 
         - name: "lueftung_energy_daily"
@@ -114,38 +235,66 @@ devices:
             {% set base = states('input_number.server_energy_midnight') | float(0) %}
             {{ (cur - base if cur >= base else cur) | round(3) }}
 
-        # Summen über alle 6 Plugs — für die Kopfkarte im Geräte-Tab.
-        # Nicht erreichbare Plugs zählen als 0, damit die Summe nie kippt.
+        - name: "garage_energy_daily"
+          unique_id: garage_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shellyplugsg3_907069492f30_energie') | float(0) %}
+            {% set base = states('input_number.garage_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        # Summe über alle 14 Plugs — Kopfkarte im Geräte-Tab und die
+        # "Geräte"-Bubble im Energiefluss (Home). Nicht erreichbare Plugs
+        # zählen als 0, damit die Summe nie kippt.
         - name: "geraete_power_w"
           unique_id: geraete_power_w
           unit_of_measurement: "W"
           device_class: power
           state_class: measurement
           state: >-
-            {{ (states('sensor.shellyplugsg3_d885ac1e9adc_leistung') | float(0)
-              + states('sensor.shellyplugsg3_9070694c99d4_leistung') | float(0)
-              + states('sensor.shellyplugsg3_9070694abdf4_leistung') | float(0)
-              + states('sensor.shellyplugsg3_d885ac18c3b4_leistung') | float(0)
-              + states('sensor.shellyplusplugs_d4d4daf4eda4_leistung') | float(0)
-              + states('sensor.shellyplugsg3_d0cf13db3a00_leistung') | float(0)) | round(1) }}
+            {{ (states('sensor.shellyplugsg3_9070694c577c_leistung') | float(0)
+                + states('sensor.shellyplugsg3_9070694b2854_leistung') | float(0)
+                + states('sensor.shellyplugsg3_9070694c99d4_leistung') | float(0)
+                + states('sensor.shellyplugsg3_9070694d44bc_leistung') | float(0)
+                + states('sensor.shellyplugsg3_90706947f288_leistung') | float(0)
+                + states('sensor.shellyplugsg3_d885ac18c3b4_leistung') | float(0)
+                + states('sensor.shellyplugsg3_9070694a1b6c_leistung') | float(0)
+                + states('sensor.shellyplugsg3_9070694abdf4_leistung') | float(0)
+                + states('sensor.shellyplugsg3_d885ac1e9adc_leistung') | float(0)
+                + states('sensor.shellyplugpmg3_9070695bb2a8_leistung') | float(0)
+                + states('sensor.shelly1pmg4_e4b06377adc0_leistung') | float(0)
+                + states('sensor.shellyplusplugs_d4d4daf4eda4_leistung') | float(0)
+                + states('sensor.shellyplugsg3_d0cf13db3a00_leistung') | float(0)
+                + states('sensor.shellyplugsg3_907069492f30_leistung') | float(0)
+            ) | round(1) }}
 
         - name: "geraete_energy_daily"
           unique_id: geraete_energy_daily
           unit_of_measurement: "kWh"
           state_class: measurement
           state: >-
-            {{ (states('sensor.waschmaschine_energy_daily') | float(0)
-              + states('sensor.tv_energy_daily') | float(0)
-              + states('sensor.kuehlschraenke_energy_daily') | float(0)
-              + states('sensor.buero_energy_daily') | float(0)
-              + states('sensor.lueftung_energy_daily') | float(0)
-              + states('sensor.server_energy_daily') | float(0)) | round(3) }}
+            {{ (states('sensor.kuehlschrank_kueche_energy_daily') | float(0)
+                + states('sensor.spuelmaschine_energy_daily') | float(0)
+                + states('sensor.tv_energy_daily') | float(0)
+                + states('sensor.pc_schlafzimmer_energy_daily') | float(0)
+                + states('sensor.tv_schlafzimmer_energy_daily') | float(0)
+                + states('sensor.buero_energy_daily') | float(0)
+                + states('sensor.drucker_energy_daily') | float(0)
+                + states('sensor.kuehlschraenke_energy_daily') | float(0)
+                + states('sensor.waschmaschine_energy_daily') | float(0)
+                + states('sensor.trockner_energy_daily') | float(0)
+                + states('sensor.heizung_energy_daily') | float(0)
+                + states('sensor.lueftung_energy_daily') | float(0)
+                + states('sensor.server_energy_daily') | float(0)
+                + states('sensor.garage_energy_daily') | float(0)
+            ) | round(3) }}
 
   automation:
     # Midnight-Reset: Baselines auf aktuelle Plug-Zählerstände setzen.
-    # 00:00:05 wie stats_midnight_baseline_reset (nach den YTD-Akkumulatoren).
-    # float-Default = alte Baseline: ist ein Plug um Mitternacht offline,
-    # bleibt die Baseline stehen statt auf 0 zu fallen.
+    # 00:00:05 wie stats_midnight_baseline_reset. float-Default = alte
+    # Baseline: ist ein Plug um Mitternacht offline, bleibt sie stehen
+    # statt auf 0 zu fallen.
     - id: devices_midnight_baseline_reset
       alias: "Devices: Midnight Baseline Reset"
       trigger:
@@ -154,11 +303,18 @@ devices:
       action:
         - action: input_number.set_value
           target:
-            entity_id: input_number.waschmaschine_energy_midnight
+            entity_id: input_number.kuehlschrank_kueche_energy_midnight
           data:
             value: >-
-              {{ states('sensor.shellyplugsg3_d885ac1e9adc_energie')
-                 | float(states('input_number.waschmaschine_energy_midnight') | float(0)) }}
+              {{ states('sensor.shellyplugsg3_9070694c577c_energie')
+                 | float(states('input_number.kuehlschrank_kueche_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.spuelmaschine_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shellyplugsg3_9070694b2854_energie')
+                 | float(states('input_number.spuelmaschine_energy_midnight') | float(0)) }}
         - action: input_number.set_value
           target:
             entity_id: input_number.tv_energy_midnight
@@ -168,11 +324,18 @@ devices:
                  | float(states('input_number.tv_energy_midnight') | float(0)) }}
         - action: input_number.set_value
           target:
-            entity_id: input_number.kuehlschraenke_energy_midnight
+            entity_id: input_number.pc_schlafzimmer_energy_midnight
           data:
             value: >-
-              {{ states('sensor.shellyplugsg3_9070694abdf4_energie')
-                 | float(states('input_number.kuehlschraenke_energy_midnight') | float(0)) }}
+              {{ states('sensor.shellyplugsg3_9070694d44bc_energie')
+                 | float(states('input_number.pc_schlafzimmer_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.tv_schlafzimmer_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shellyplugsg3_90706947f288_energie')
+                 | float(states('input_number.tv_schlafzimmer_energy_midnight') | float(0)) }}
         - action: input_number.set_value
           target:
             entity_id: input_number.buero_energy_midnight
@@ -180,6 +343,41 @@ devices:
             value: >-
               {{ states('sensor.shellyplugsg3_d885ac18c3b4_energie')
                  | float(states('input_number.buero_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.drucker_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shellyplugsg3_9070694a1b6c_energie')
+                 | float(states('input_number.drucker_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.kuehlschraenke_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shellyplugsg3_9070694abdf4_energie')
+                 | float(states('input_number.kuehlschraenke_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.waschmaschine_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shellyplugsg3_d885ac1e9adc_energie')
+                 | float(states('input_number.waschmaschine_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.trockner_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shellyplugpmg3_9070695bb2a8_energie')
+                 | float(states('input_number.trockner_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.heizung_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shelly1pmg4_e4b06377adc0_energie')
+                 | float(states('input_number.heizung_energy_midnight') | float(0)) }}
         - action: input_number.set_value
           target:
             entity_id: input_number.lueftung_energy_midnight
@@ -194,3 +392,10 @@ devices:
             value: >-
               {{ states('sensor.shellyplugsg3_d0cf13db3a00_energie')
                  | float(states('input_number.server_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.garage_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shellyplugsg3_907069492f30_energie')
+                 | float(states('input_number.garage_energy_midnight') | float(0)) }}

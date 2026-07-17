@@ -1004,113 +1004,7 @@ views:
                             - color: "[[[ return entity.state==='Aktiv' ? 'var(--bg-color-eco)' : (entity.state==='Aus' ? 'var(--bg-color-idle)' : 'var(--accent-color)'); ]]]"
 
   # ═══════════════════════════════════════════════════════════════════════
-  # TAB 3: STATISTIK  —  2 Spalten.
-  # Links: F2Pool Live-Daten (stats_pool.yaml)
-  # Rechts: kombinierte Energie+Mining Karten + Verlauf (stats_overview.yaml)
-  # ═══════════════════════════════════════════════════════════════════════
-  - title: Statistik
-    path: statistik
-    icon: mdi:chart-bar
-    theme: BitGridAI
-    panel: true
-    cards:
-      - type: custom:layout-card
-        layout_type: custom:grid-layout
-        layout:
-          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
-          grid-template-rows: min-content auto
-          grid-template-areas: '"tl tr" "pool stats"'
-          grid-gap: 14px
-          padding: 14px
-          box-sizing: border-box
-        cards:
-
-          # ── Gruppen-Titel links: F2POOL ──────────────────────────────
-          - type: custom:button-card
-            view_layout:
-              grid-area: tl
-            icon: mdi:pickaxe
-            name: F2Pool
-            show_state: false
-            tap_action:
-              action: none
-            styles:
-              card:
-                - background: none
-                - box-shadow: none
-                - border: none
-                - padding: 4px 4px 0
-              grid:
-                - grid-template-areas: '"i n"'
-                - grid-template-columns: min-content 1fr
-                - align-items: center
-              img_cell:
-                - justify-content: start
-                - align-self: center
-              icon:
-                - color: var(--secondary-text-color)
-                - width: 24px
-                - height: 24px
-              name:
-                - font-size: 1.0rem
-                - font-weight: 700
-                - text-transform: uppercase
-                - letter-spacing: 0.07em
-                - color: var(--secondary-text-color)
-                - justify-self: start
-                - padding-left: 10px
-
-          # ── Gruppen-Titel rechts: ÜBERSICHT ─────────────────────────
-          - type: custom:button-card
-            view_layout:
-              grid-area: tr
-            icon: mdi:chart-bar
-            name: Übersicht
-            show_state: false
-            tap_action:
-              action: none
-            styles:
-              card:
-                - background: none
-                - box-shadow: none
-                - border: none
-                - padding: 4px 4px 0
-              grid:
-                - grid-template-areas: '"i n"'
-                - grid-template-columns: min-content 1fr
-                - align-items: center
-              img_cell:
-                - justify-content: start
-                - align-self: center
-              icon:
-                - color: var(--secondary-text-color)
-                - width: 24px
-                - height: 24px
-              name:
-                - font-size: 1.0rem
-                - font-weight: 700
-                - text-transform: uppercase
-                - letter-spacing: 0.07em
-                - color: var(--secondary-text-color)
-                - justify-self: start
-                - padding-left: 10px
-
-          # ── F2Pool links ─────────────────────────────────────────────
-          - type: vertical-stack
-            view_layout:
-              grid-area: pool
-            cards:
-              - !include views/stats_pool.yaml
-
-          # ── Übersicht rechts ─────────────────────────────────────────
-          - type: vertical-stack
-            view_layout:
-              grid-area: stats
-            cards:
-              - !include views/stats_overview.yaml
-
-  # ═══════════════════════════════════════════════════════════════════════
-  # TAB 4: GERÄTE  —  2 Spalten.
+  # TAB 3: GERÄTE  —  2 Spalten.
   # Links: 6 Verbraucher-Plugs als Kacheln + Summenkarte (geraete.yaml)
   # Rechts: Leistungs- und Tagesverbrauchs-Verlauf (geraete_verlauf.yaml)
   # Entity-Zuordnung + Tages-kWh: packages/devices.yaml
@@ -1215,6 +1109,112 @@ views:
               grid-area: verlauf
             cards:
               - !include views/geraete_verlauf.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB 4: STATISTIK  —  2 Spalten.
+  # Links: F2Pool Live-Daten (stats_pool.yaml)
+  # Rechts: kombinierte Energie+Mining Karten + Verlauf (stats_overview.yaml)
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Statistik
+    path: statistik
+    icon: mdi:chart-bar
+    theme: BitGridAI
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: min-content auto
+          grid-template-areas: '"tl tr" "pool stats"'
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+
+          # ── Gruppen-Titel links: F2POOL ──────────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tl
+            icon: mdi:pickaxe
+            name: F2Pool
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── Gruppen-Titel rechts: ÜBERSICHT ─────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tr
+            icon: mdi:chart-bar
+            name: Übersicht
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── F2Pool links ─────────────────────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: pool
+            cards:
+              - !include views/stats_pool.yaml
+
+          # ── Übersicht rechts ─────────────────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: stats
+            cards:
+              - !include views/stats_overview.yaml
 
   # ═══════════════════════════════════════════════════════════════════════
   # TAB 5: ₿ITSY  —  KI-Tab, Spiegel der Erklärschicht. 2 Spalten.
