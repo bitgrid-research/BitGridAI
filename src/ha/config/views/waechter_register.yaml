@@ -1,0 +1,158 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Wächter, rechte Spalte: Watchdog-Register + Schwellen-Konsistenz.
+# Eingebunden via !include in:
+#   - bitgrid_dashboard_v2.yaml  → Tab "Wächter", grid-area: register
+#
+# Das ist der Meta-Watchdog: wer bewacht die Wächter. Entstanden aus dem Befund
+# vom 2026-07-17, als der Diagnose-Anomalie-Alarm wochenlang auf eine Entity
+# triggerte, die es nicht gibt (sensor.miner1_auto_diagnose statt
+# sensor.miner_1_auto_diagnose). Symptom waere hier sofort sichtbar gewesen:
+# ein periodischer Waechter mit last_triggered = nie.
+# Rein lesend, keine Steuerung.
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+
+  # ── Block 3: Watchdog-Register ───────────────────────────────────────
+  # Spalten je Eintrag: [entity, Label, erwartetes Intervall (s), Gate-Entity]
+  #
+  #   Intervall 0 = ereignisgesteuert. Dort ist "nie" KEIN Fehler, sondern heisst
+  #   nur: das Ereignis kam noch nicht.
+  #
+  #   Gate = die Bedingung, unter der der Waechter ueberhaupt handeln DARF.
+  #   Wichtig, weil HA `last_triggered` erst setzt, wenn die conditions
+  #   durchlaufen sind, nicht schon beim Tick. Ein Waechter mit ausgeschaltetem
+  #   Gate sieht sonst faelschlich "ueberfaellig" aus. Ohne Gate: '' eintragen.
+  #
+  # Zeilen werden in einer Liste gesammelt und am Ende gejoint, statt sie im
+  # Loop auszugeben: Jinja-Whitespace im Loop erzeugt sonst Leerzeilen zwischen
+  # den Zeilen, und Markdown rendert die Tabelle dann nicht.
+  - type: markdown
+    title: Watchdog-Register
+    content: |
+      {% set wd = [
+        ['automation.mvp_miner_1_watchdog', 'Miner 1 Regel-Tick', 120, 'input_boolean.miner1_auto_load_management'],
+        ['automation.mvp_miner_2_watchdog', 'Miner 2 Regel-Tick', 120, 'input_boolean.miner2_auto_load_management'],
+        ['automation.mvp_diagnose_wechsel_loggen', 'Diagnose-Logger', 0, ''],
+        ['automation.mvp_diagnose_anomalie_melden', 'Anomalie-Alarm', 0, ''],
+        ['automation.mvp_diagnose_anomalie_aufgeloest', 'Anomalie-Entwarnung', 0, ''],
+        ['automation.mvp_luftung_watchdog', 'Lueftung', 0, ''],
+        ['automation.mvp_raumtemperatur_eco', 'Raumtemp-Schutz', 0, ''],
+        ['automation.mvp_miner_1_tmax_standard', 'Miner 1 TMax-Drosselung', 0, ''],
+        ['automation.mvp_miner_2_tmax_standard', 'Miner 2 TMax-Drosselung', 0, ''],
+        ['automation.sma_session_watchdog_auto_reload_bei_unavailable', 'SMA-Session', 0, ''],
+        ['automation.pool_api_nicht_erreichbar', 'Pool-API-Ausfall', 0, ''],
+        ['automation.bg_safety_immediate_stop', 'R3 Sicherheits-Stopp', 0, ''],
+        ['automation.bg_override_expiry_watchdog', 'Override-Ablauf', 0, 'input_boolean.override_active'],
+      ] %}
+      {% set ns = namespace(rows=[]) %}
+      {% for e, label, iv, gate in wd %}
+        {% set st = states(e) %}
+        {% set lt = state_attr(e, 'last_triggered') %}
+        {% set age = (now().timestamp() - as_timestamp(lt)) if lt else -1 %}
+        {% set gate_off = gate != '' and not is_state(gate, 'on') %}
+        {% if age < 0 %}{% set agetxt = 'nie' %}
+        {% elif age < 120 %}{% set agetxt = 'vor ' ~ age | round(0) | int ~ ' s' %}
+        {% elif age < 7200 %}{% set agetxt = 'vor ' ~ (age / 60) | round(0) | int ~ ' min' %}
+        {% elif age < 172800 %}{% set agetxt = 'vor ' ~ (age / 3600) | round(0) | int ~ ' h' %}
+        {% else %}{% set agetxt = 'vor ' ~ (age / 86400) | round(0) | int ~ ' d' %}
+        {% endif %}
+        {% if st in ['unknown', 'unavailable'] %}
+          {% set mark = '❌' %}{% set agetxt = 'Entity fehlt' %}
+        {% elif st != 'on' %}
+          {% set mark = '⛔' %}{% set agetxt = 'deaktiviert' %}
+        {% elif gate_off %}
+          {% set mark = '⏸' %}{% set agetxt = agetxt ~ ' (Gate aus)' %}
+        {% elif iv > 0 and (age < 0 or age > iv * 3) %}
+          {% set mark = '🔴' %}
+        {% elif age < 0 %}
+          {% set mark = '⚪' %}
+        {% else %}
+          {% set mark = '🟢' %}
+        {% endif %}
+        {% set ns.rows = ns.rows + ['| ' ~ mark ~ ' | ' ~ label ~ ' | ' ~ agetxt ~ ' |'] %}
+      {% endfor %}
+      | | Wächter | Zuletzt gehandelt |
+      |:--|:--|--:|
+      {{ ns.rows | join('\n') }}
+
+      🟢 handelt regelmaessig · ⚪ ereignisgesteuert, noch nicht ausgeloest ·
+      ⏸ Vorbedingung aus (z.B. Automatik manuell aus) · 🔴 periodisch, aber
+      ueberfaellig · ⛔ deaktiviert · ❌ Entity fehlt
+
+      **🔴 bei einem periodischen Wächter heisst: er handelt nicht mehr.**
+      Bei ⚪ ist "nie" nur dann verdaechtig, wenn das Ereignis nachweislich
+      stattgefunden hat. Genau daran ist der Anomalie-Alarm wochenlang
+      unbemerkt vorbeigelaufen: er stand auf "nie", obwohl es Anomalien gab.
+
+      Achtung bei der Deutung: HA setzt `last_triggered` erst, wenn die
+      **conditions** durchgelaufen sind, nicht schon beim Tick. "Zuletzt
+      gehandelt" ist deshalb nicht dasselbe wie "zuletzt geprueft".
+
+  # ── Block 4: Schwellen-Konsistenz ────────────────────────────────────
+  # Prueft die gestufte Verteidigung aktiv nach, statt nur Zahlen anzuzeigen:
+  # 112 drosselt < 115 stoppt < 120 Hardcap. Kippt die Reihenfolge, ist die
+  # Stufung kaputt und der Block schlaegt an.
+  - type: markdown
+    title: Schwellen-Konsistenz (Temperatur)
+    content: |
+      {% set temp = states('sensor.miner_max_chip_temp_c') | float(0) %}
+      {% set mvp = states('input_number.mvp_tmax_std_threshold_c') | float(0) %}
+      {% set r3 = states('input_number.r3_max_chip_temp_c') | float(0) %}
+      {% set hardcap = 120 %}
+      | Stufe | Schwelle | Wirkung |
+      |:--|--:|:--|
+      | MVP-Drosselung | {{ mvp | round(0) | int }} °C | Super → Standard |
+      | R3-Stopp | {{ r3 | round(0) | int }} °C | beide Miner → Standby, 15 min Lockout |
+      | Core-Hardcap | {{ hardcap }} °C | nicht konfigurierbar (r3_safety.py) |
+
+      Aktuell gemessen: **{{ temp | round(1) }} °C**
+      {% if temp >= r3 %}🚨 ueber der R3-Schwelle
+      {%- elif temp >= mvp %}🌡️ ueber der MVP-Drosselschwelle
+      {%- else %}🟢 im Normalbereich
+      {%- endif %}
+
+      ---
+      {% if not (mvp < r3 < hardcap) %}
+      🔴 **Stufung verletzt.** Erwartet: Drosselung < Stopp < Hardcap, ist aber
+      {{ mvp | round(0) | int }} / {{ r3 | round(0) | int }} / {{ hardcap }}.
+      So greifen zwei Regler gleichzeitig auf denselben Aktor, oder eine Stufe
+      ist tot. Nicht ignorieren.
+      {% else %}
+      🟢 Stufung intakt: {{ mvp | round(0) | int }} < {{ r3 | round(0) | int }} < {{ hardcap }} °C.
+      {% endif %}
+
+      Kalibriert gegen 7 Tage Realbetrieb (n=1033, Mittel 90,8 °C, Max 113,0 °C).
+      R3 ist damit Reserve, kein Dauerauslöser: in diesem Zeitraum haette es kein
+      einziges Mal gefeuert. Die frueheren 90 °C lagen unter 74,9 % des
+      Normalbetriebs.
+
+  # ── R3-Sicherheitspfad: Zustand ──────────────────────────────────────
+  # Sichtbar machen, was frueher nur im Log stand. system_state = SAFE_MODE bei
+  # laufenden Minern war der Befund vom 2026-07-17.
+  - type: entities
+    title: R3-Sicherheitspfad
+    show_header_toggle: false
+    state_color: true
+    entities:
+      - entity: binary_sensor.r3_overtemp
+        name: R3 Übertemperatur
+      - entity: binary_sensor.r3_comm_timeout
+        name: R3 Kommunikationsausfall
+      - entity: binary_sensor.r3_emergency_stop
+        name: R3 Notfall-Stop (manuell)
+      - entity: binary_sensor.r3_safety_override
+        name: R3 Veto aktiv (sperrt die Watchdogs)
+        secondary_info: last-changed
+      - entity: binary_sensor.safety_lockout_active
+        name: Safety-Lockout
+      - entity: input_datetime.safety_lockout_until
+        name: Lockout bis
+      - type: section
+        label: Was das System ueber sich selbst behauptet
+      - entity: input_select.system_state
+        name: system_state
+      - entity: sensor.bg_decision_code
+        name: Entscheidungs-Code (live)
+      - entity: input_text.decision_reason
+        name: Begruendung (zuletzt geschrieben)

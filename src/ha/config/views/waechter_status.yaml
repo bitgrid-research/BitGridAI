@@ -1,0 +1,82 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Wächter, linke Spalte: Liveness-Ampel + aktuelle Gate-Diagnose.
+# Eingebunden via !include in:
+#   - bitgrid_dashboard_v2.yaml  → Tab "Wächter", grid-area: liveness
+#
+# Zweck: zeigt, ob die Datenquellen ueberhaupt noch leben, und welches Gate
+# gerade einen Moduswechsel verhindert. Rein lesend, keine Steuerung.
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+
+  # ── Block 1: Liveness ────────────────────────────────────────────────
+  # Nur echte Verfuegbarkeits-Signale, keine Messwerte. Wer hier gruen ist,
+  # liefert Daten; alles andere im System baut darauf auf.
+  - type: entities
+    title: Liveness
+    show_header_toggle: false
+    state_color: true
+    entities:
+      - type: section
+        label: Miner (API-Ping alle 5 s, packages/avalonq_minerN.yaml)
+      - entity: binary_sensor.miner1_available
+        name: Miner 1 API
+        secondary_info: last-changed
+      - entity: binary_sensor.miner2_available
+        name: Miner 2 API
+        secondary_info: last-changed
+      - entity: sensor.miner_heartbeat_age_sec
+        name: Heartbeat-Alter (abgeleitet)
+      - type: section
+        label: Pool (F2Pool)
+      - entity: binary_sensor.pool_api_healthy
+        name: Pool-API erreichbar
+        secondary_info: last-changed
+      - entity: binary_sensor.miner1_pool_status
+        name: Miner 1 am Pool
+      - entity: binary_sensor.miner2_pool_status
+        name: Miner 2 am Pool
+      - type: section
+        label: Wechselrichter (SMA, Session-Watchdog haengt hier dran)
+      - entity: sensor.sma_tripower_pv_power
+        name: SMA PV-Leistung
+        secondary_info: last-changed
+      - type: section
+        label: Erklaerschicht (MQTT + Ollama, read-only)
+      - entity: sensor.bitsy_advice
+        name: ₿itsy-Status
+        secondary_info: last-changed
+
+  # ── Block 2: Wer blockiert gerade ────────────────────────────────────
+  # Spiegel der Watchdog-Regelkette aus packages/mvp_diagnose.yaml. Der Kern-
+  # nutzen des Tabs: eine `condition:` mitten in einer choose-Sequence bricht
+  # lautlos ab und loggt nichts. Hier wird daraus ein sichtbarer Zustand.
+  - type: markdown
+    title: Wer blockiert gerade
+    content: |
+      {% set codes = {
+        'ok':           ['🟢', 'Ist-Modus entspricht Ziel'],
+        'cooldown':     ['⏳', 'Moduswechsel gesperrt (Cooldown laeuft)'],
+        'temp_lockout': ['🌡️', 'Temperatur-Lockout aktiv (3 h nach Selbstabschaltung)'],
+        'room_hot':     ['🔥', 'Raumtemperatur zu hoch'],
+        'night_block':  ['🌙', 'Nacht-Sperre aktiv'],
+        'pv_wait':      ['☀️', 'Wartet auf PV-Schwelle oder Cooldown'],
+        'auto_off':     ['✋', 'Auto-Lastmanagement AUS, manuelle Steuerung'],
+        'anomaly':      ['🚨', 'ANOMALIE: kein Gate erklaert diesen Modus'],
+        'unavailable':  ['❔', 'SoC oder Workmode nicht verfuegbar'],
+      } %}
+      {% for e in ['sensor.miner_1_auto_diagnose', 'sensor.miner_2_auto_diagnose'] %}
+      {%- set st = states(e) %}
+      {%- set meta = codes.get(st, ['❔', 'Unbekannter Code: ' ~ st]) %}
+      **{{ meta[0] }} {{ state_attr(e, 'friendly_name') | default(e) | replace(' Auto-Diagnose', '') }} — {{ meta[1] }}**
+
+      {{ state_attr(e, 'summary') | default('(keine Zusammenfassung)') }}
+
+      SoC {{ state_attr(e, 'soc_pct') | default('?') }} % ·
+      Downgrade-CD {{ state_attr(e, 'downgrade_cooldown_min') | default('?') }} min ·
+      Upgrade-CD {{ state_attr(e, 'upgrade_cooldown_min') | default('?') }} min ·
+      Temp-Lockout {{ state_attr(e, 'temp_lockout_min') | default('?') }} min
+      {% endfor %}
+      ---
+      Aktualisiert alle 30 s. `anomaly` heisst: Ist-Modus weicht vom Ziel ab und
+      **kein** bekanntes Gate erklaert es. Das ist dann ein Bug, kein Betriebszustand.

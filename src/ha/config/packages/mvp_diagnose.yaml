@@ -9,7 +9,13 @@ mvp_diagnose:
   # eine `condition:` mitten in einer choose-Sequence bricht lautlos ab und loggt
   # nichts. Hier wird daraus ein sichtbarer Zustand + Alarm.
   #
-  # Zustands-Codes (sensor.minerN_auto_diagnose):
+  # Entity-IDs: sensor.miner_1_auto_diagnose / sensor.miner_2_auto_diagnose.
+  # Der Unterstrich nach "miner" kommt aus dem Slug von `name: "Miner 1 Auto-
+  # Diagnose"` und laesst sich nicht durch Umbenennen von `name:` beeinflussen:
+  # die ID ist ueber `unique_id` in der Registry festgeschrieben. Automationen
+  # unten MUESSEN diese Schreibweise nutzen (siehe unten "sensor.miner_N_...").
+  #
+  # Zustands-Codes (sensor.miner_N_auto_diagnose):
   #   ok            Ist-Modus == Ziel-Modus (alles korrekt)
   #   cooldown      will wechseln, blockiert durch 1h Up-/Downgrade-Cooldown (erwartet)
   #   temp_lockout  will hoch, blockiert durch 3h Temperatur-Lockout (erwartet)
@@ -304,8 +310,8 @@ mvp_diagnose:
       trigger:
         - platform: state
           entity_id:
-            - sensor.miner1_auto_diagnose
-            - sensor.miner2_auto_diagnose
+            - sensor.miner_1_auto_diagnose
+            - sensor.miner_2_auto_diagnose
       condition:
         - condition: template
           value_template: >-
@@ -331,8 +337,8 @@ mvp_diagnose:
       trigger:
         - platform: state
           entity_id:
-            - sensor.miner1_auto_diagnose
-            - sensor.miner2_auto_diagnose
+            - sensor.miner_1_auto_diagnose
+            - sensor.miner_2_auto_diagnose
           to: "anomaly"
           for: "00:05:00"
       action:
@@ -366,8 +372,8 @@ mvp_diagnose:
       trigger:
         - platform: state
           entity_id:
-            - sensor.miner1_auto_diagnose
-            - sensor.miner2_auto_diagnose
+            - sensor.miner_1_auto_diagnose
+            - sensor.miner_2_auto_diagnose
           from: "anomaly"
       condition:
         - condition: template

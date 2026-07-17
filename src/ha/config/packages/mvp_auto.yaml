@@ -193,7 +193,11 @@ mvp_auto:
             {% if m1 or m2 %}
               Aktiv
             {% elif states('switch.shellyplusplugs_d4d4daf4eda4') == 'on' %}
-              {% set remaining = (as_timestamp(states('input_datetime.lueftung_cooldown_end'), 0) - now().timestamp()) | int %}
+              {# state_attr timestamp, nicht as_timestamp(states(...)): letzteres liest
+                 den naiven input_datetime-String als UTC und zeigte die Restzeit
+                 dadurch 2 h zu lang an (belegt 2026-07-17). Das Abschalten selbst
+                 haengt am delay unten und war nie betroffen, nur diese Anzeige. #}
+              {% set remaining = (state_attr('input_datetime.lueftung_cooldown_end', 'timestamp') | float(0) - now().timestamp()) | int %}
               {% if remaining > 0 %}
                 {{ '%d:%02d' | format(remaining // 60, remaining % 60) }}
               {% else %}
@@ -260,6 +264,18 @@ mvp_auto:
         - condition: state
           entity_id: input_boolean.miner1_auto_load_management
           state: "on"
+        # R3-Vorrang (2026-07-17). Solange ein Sicherheits-Stopp oder sein
+        # Lockout steht, haelt sich dieser Watchdog komplett raus. Ohne das Gate
+        # kaempfen zwei Regler um select.miner1_workmode_set: script.bg_stop
+        # setzt auf Standby, dieser Watchdog 2 Minuten spaeter wieder hoch,
+        # endlos. Bewusst fail-open formuliert (nur ein explizites 'on' sperrt):
+        # steht der Sensor auf unknown/unavailable, z.B. kurz nach Neustart,
+        # laeuft die Automatik normal weiter. Der TMax-Schutz (112 °C) und die
+        # Hardware liegen ohnehin darunter.
+        - condition: template
+          value_template: >
+            {{ not (is_state('binary_sensor.r3_safety_override', 'on')
+                    or is_state('binary_sensor.safety_lockout_active', 'on')) }}
       action:
         - if:
             - condition: template
@@ -526,6 +542,11 @@ mvp_auto:
         - condition: state
           entity_id: input_boolean.miner2_auto_load_management
           state: "on"
+        # R3-Vorrang, siehe ausfuehrliche Begruendung bei mvp_miner1_watchdog.
+        - condition: template
+          value_template: >
+            {{ not (is_state('binary_sensor.r3_safety_override', 'on')
+                    or is_state('binary_sensor.safety_lockout_active', 'on')) }}
       action:
         - if:
             - condition: template

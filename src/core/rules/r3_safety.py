@@ -13,8 +13,20 @@ from __future__ import annotations
 
 from src.core.models import EnergyState, RuleVote
 
-# Absolute Sicherheitsgrenzen als Compile-Time-Konstanten (letzte Absicherung)
-_ABSOLUTE_MAX_TEMP_C: float = 95.0
+# Absolute Sicherheitsgrenzen als Compile-Time-Konstanten (letzte Absicherung).
+#
+# _ABSOLUTE_MAX_TEMP_C war bis 2026-07-17 auf 95.0 gesetzt. Dieser Wert lag
+# unterhalb des normalen Betriebsfensters der real verbauten Avalon Q: 7 Tage
+# Realbetrieb (n=1033 Messpunkte bei laufendem Miner, sensor.miner_max_chip_temp_c)
+# ergaben Mittel 90.8 °C, Max 113.0 °C, davon 62.3 % der Zeit >= 95 °C. Der Kern
+# haette die Hardware also im Normalbetrieb dauerhaft gestoppt, und weil min()
+# hier jede Config klemmt, war das nicht konfigurierbar reparierbar.
+# Neuer Envelope (Nutzer-Entscheidung 2026-07-17), gestufte Verteidigung:
+#   112 °C  -> MVP drosselt Super auf Standard (packages/mvp_auto.yaml)
+#   115 °C  -> R3 stoppt (input_number.r3_max_chip_temp_c)
+#   120 °C  -> dieses Hardcap, letzte Absicherung gegen eine verstellte Config
+# Aendern nur mit neuer Messreihe, nicht nach Gefuehl.
+_ABSOLUTE_MAX_TEMP_C: float = 120.0
 _ABSOLUTE_MAX_HEARTBEAT_SEC: float = 300.0
 
 

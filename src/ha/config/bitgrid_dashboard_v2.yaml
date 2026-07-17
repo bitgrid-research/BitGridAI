@@ -1488,3 +1488,113 @@ views:
             cards:
               - !include views/ki_hashrate.yaml
               - !include views/ki_difficulty.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB 7: WÄCHTER  —  2 Spalten. Der Meta-Watchdog: wer bewacht die Wächter.
+  # Links: Liveness der Datenquellen + welches Gate gerade blockiert
+  #        (waechter_status.yaml)
+  # Rechts: Watchdog-Register mit last_triggered + Schwellen-Konsistenz
+  #        (waechter_register.yaml)
+  # Entstanden aus dem Befund 2026-07-17 (toter Anomalie-Alarm + Geisterschicht
+  # im R3-Pfad). Rein lesend, dieser Tab steuert nichts.
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Wächter
+    path: waechter
+    icon: mdi:shield-search
+    theme: BitGridAI
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: min-content auto
+          grid-template-areas: '"tl tr" "liveness register"'
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+
+          # ── Gruppen-Titel links: ZUSTAND ─────────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tl
+            icon: mdi:pulse
+            name: Zustand
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── Gruppen-Titel rechts: WÄCHTER ────────────────────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: tr
+            icon: mdi:shield-search
+            name: Wächter
+            show_state: false
+            tap_action:
+              action: none
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"i n"'
+                - grid-template-columns: min-content 1fr
+                - align-items: center
+              img_cell:
+                - justify-content: start
+                - align-self: center
+              icon:
+                - color: var(--secondary-text-color)
+                - width: 24px
+                - height: 24px
+              name:
+                - font-size: 1.0rem
+                - font-weight: 700
+                - text-transform: uppercase
+                - letter-spacing: 0.07em
+                - color: var(--secondary-text-color)
+                - justify-self: start
+                - padding-left: 10px
+
+          # ── Liveness + Gate-Diagnose links ───────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: liveness
+            cards:
+              - !include views/waechter_status.yaml
+
+          # ── Register + Schwellen rechts ──────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: register
+            cards:
+              - !include views/waechter_register.yaml

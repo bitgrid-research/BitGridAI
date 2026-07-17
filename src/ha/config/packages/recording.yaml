@@ -21,6 +21,12 @@ recording:
       trigger:
         - platform: time_pattern
           minutes: "/10"
+      # Das Gate stand bis 2026-07-17 nur in der Beschreibung, nicht im Code: die
+      # Automation publizierte immer, der Schalter war wirkungslos.
+      condition:
+        - condition: state
+          entity_id: input_boolean.recording_active
+          state: "on"
       action:
         - action: mqtt.publish
           data:
@@ -39,7 +45,13 @@ recording:
                "miner_w":{{ states('sensor.miner_total_power_w') | float(0) | round(1) }},
                "surplus_kw":{{ states('sensor.surplus_kw') | float(0) | round(3) }},
                "forecast_kw":{{ states('sensor.pv_forecast_kw') | float(0) | round(2) }},
-               "price_ct":{{ states('sensor.energy_price_ct_kwh') | float(0) | round(2) }},
+               {# "price_ct" bewusst NICHT aufgezeichnet: es gibt keinen Preis-Feed
+                  (sensor.energy_price_ct_kwh existiert nicht, die Schranke ist laut
+                  Thesis Kap. 4 im Forschungsbetrieb inert). Das Feld stand hier und
+                  war dauerhaft 0.0, sah im Rohlog aber wie ein Messwert aus.
+                  energy_price_ct_kwh wird fuer Replays deterministisch aus dem
+                  dokumentierten Tarifmodell in src/sim/augment.py ergaenzt, nicht
+                  hier gemessen. jsonl_to_csv.py hat das Feld ohnehin nie gelesen. #}
                "decision":"{{ states('sensor.bg_decision_code') }}",
                "reason":"{{ states('input_text.decision_reason') }}",
                "override":{{ is_state('input_boolean.override_active', 'on') | lower }},

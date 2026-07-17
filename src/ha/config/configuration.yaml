@@ -242,8 +242,13 @@ input_boolean:
 input_select:
   system_state:
     name: system_state
+    # ACHTUNG Quoting: unquoted OFF liest YAML 1.1 als Boolean false, HA bekam
+    # dadurch die Option 'False' statt 'OFF' (live bestaetigt 2026-07-17:
+    # options: ['False', 'ARMED', ...]). script.bg_stop setzt hier "OFF" als
+    # String, was dann nie zu einer gueltigen Option passte. Gleiches gilt fuer
+    # ON/YES/NO/TRUE (YAML-"Norway-Problem"): in dieser Liste immer quoten.
     options:
-      - OFF
+      - "OFF"
       - ARMED
       - RUNNING
       - THROTTLED
@@ -251,7 +256,7 @@ input_select:
       - LOCKOUT
       - SAFE_MODE
       - ERROR
-    initial: OFF
+    initial: "OFF"
   decision_action:
     name: decision_action
     options:
@@ -348,10 +353,15 @@ input_number:
   r3_max_chip_temp_c:
     name: r3_max_chip_temp_c
     min: 0
-    max: 120
+    max: 130
     step: 1
     mode: box
-    initial: 90
+    # 115 °C = R3-Stopp, gestufte Verteidigung ueber der MVP-Drosselung (112 °C)
+    # und ueber dem in 7 Tagen gemessenen Maximum (113 °C). Vorher 90 °C, das lag
+    # mitten im Normalbetrieb (74.9 % der Messpunkte darueber) und hat die
+    # Geisterschicht dauernd ausgeloest. Siehe Warnblock bei binary_sensor.r3_*
+    # und src/core/rules/r3_safety.py. Nicht ohne neue Messreihe senken.
+    initial: 115
   r3_comm_timeout_sec:
     name: r3_comm_timeout_sec
     min: 0
@@ -721,7 +731,37 @@ template:
               (states('sensor.grid_export_w') | float(0))) <=
              (states('input_number.r2_max_grid_import_w') | float(0)) }}
 
-      # R3: Übertemperatur (max beider Miner)
+      # ── R3-Sensoren: scharfer Sicherheitspfad, gestufte Verteidigung ────────
+      # Diese r3_*-Sensoren spiegeln src/core/rules/r3_safety.py (Thesis-Kern)
+      # UND steuern real: automation bg_safety_immediate_stop (automations.yaml)
+      # triggert auf r3_overtemp/r3_comm_timeout/r3_emergency_stop -> 'on' und
+      # ruft script.bg_force_safety_stop -> bg_stop -> select.minerN_workmode_set
+      # auf Standby. Als einzige bg_*-Automation laeuft sie ungefiltert, die
+      # anderen sind simulation_mode-gated. Das ist so gewollt: Safety gilt auch
+      # in Produktion.
+      #
+      # Stufung (Nutzer-Entscheidung 2026-07-17, gegen 7 Tage Realdaten kalibriert:
+      # n=1033, Mittel 90.8 °C, Max 113.0 °C):
+      #   112 °C  mvp_tmax_std_threshold_c -> MVP drosselt Super auf Standard
+      #   115 °C  r3_max_chip_temp_c       -> R3 stoppt beide Miner + 15 min Lockout
+      #   120 °C  _ABSOLUTE_MAX_TEMP_C     -> Hardcap im Core, nicht konfigurierbar
+      # R3 ist damit echte Reserve: in den 7 Tagen waere es kein einziges Mal
+      # ausgeloest worden. Vorher stand r3_max_chip_temp_c auf 90 °C, also unter
+      # 74.9 % des Normalbetriebs, und hat staendig gefeuert.
+      #
+      # Historie (nicht wiederholen): bis 2026-07-17 schaltete bg_stop das nicht
+      # mehr existente switch.miner_relay. Der Aufruf erzeugte nur ein WARNING,
+      # das Skript lief weiter und schrieb SAFE_MODE + Lockout + decision_code,
+      # waehrend die Miner real in Super/Standard weiterliefen. Der
+      # Sicherheits-Stopp war reine Buchhaltung. Wer hier Schwellen anfasst:
+      # erst pruefen, ob der Pfad bis zum Aktor wirklich durchlaeuft.
+      #
+      # Gegenstueck: die mvp_minerN_watchdogs sind auf r3_safety_override /
+      # safety_lockout_active gated (packages/mvp_auto.yaml), sonst wuerden sie
+      # den R3-Stopp 2 Minuten spaeter ueberschreiben.
+      # ────────────────────────────────────────────────────────────────────────
+
+      # R3: Übertemperatur (max beider Miner) — siehe Block oben
       - name: r3_overtemp
         unique_id: r3_overtemp
         state: >-
@@ -749,12 +789,17 @@ template:
              is_state('binary_sensor.r3_emergency_stop', 'on') }}
 
       # Safety-Lockout aktiv
+      # state_attr(..., 'timestamp') statt as_timestamp(states(...)): der State
+      # eines input_datetime ist ein NAIVER String ("2026-07-17 14:18:36"), den
+      # as_timestamp() als UTC liest, waehrend now() zeitzonenbewusst ist. Das
+      # ergab hier exakt +7200 s Versatz (belegt 2026-07-17), der Lockout lief
+      # also 15 min + 2 h. Das timestamp-Attribut liefert die korrekte Epoche.
       - name: safety_lockout_active
         unique_id: safety_lockout_active
         state: >-
-          {% set until = states('input_datetime.safety_lockout_until') %}
-          {% if until in ['unknown', 'unavailable', ''] %}false
-          {% else %}{{ as_timestamp(now()) < as_timestamp(until) }}
+          {% set until_ts = state_attr('input_datetime.safety_lockout_until', 'timestamp') %}
+          {% if until_ts is none %}false
+          {% else %}{{ now().timestamp() < until_ts | float(0) }}
           {% endif %}
 
       # Miner läuft (mindestens einer)
@@ -764,13 +809,13 @@ template:
           {{ states('sensor.miner1_workmode_status') in ['Eco', 'Standard', 'Super'] or
              states('sensor.miner2_workmode_status') in ['Eco', 'Standard', 'Super'] }}
 
-      # R5: Deadband
+      # R5: Deadband — timestamp-Attribut, siehe Begruendung bei safety_lockout_active
       - name: r5_deadband_active
         unique_id: r5_deadband_active
         state: >-
-          {% set until = states('input_datetime.deadband_valid_until') %}
-          {% if until in ['unknown', 'unavailable', ''] %}false
-          {% else %}{{ as_timestamp(now()) < as_timestamp(until) }}
+          {% set until_ts = state_attr('input_datetime.deadband_valid_until', 'timestamp') %}
+          {% if until_ts is none %}false
+          {% else %}{{ now().timestamp() < until_ts | float(0) }}
           {% endif %}
 
       # R5: Mindest-Laufzeit

@@ -133,9 +133,31 @@ bg_stop:
   sequence:
     - variables:
         is_safety_stop: "{{ safety_stop in [true, 'true', 'True', 'on', 1, '1'] }}"
-    - service: switch.turn_off
-      target:
-        entity_id: switch.miner_relay
+    # Aktor-Zugriff, sim/real getrennt. Vorher stand hier ein switch.turn_off auf
+    # switch.miner_relay: diese Entity existiert nicht mehr, der Aufruf erzeugte
+    # nur "Referenced entities switch.miner_relay are missing" (WARNING), das
+    # Skript lief weiter und schrieb SAFE_MODE + Lockout, waehrend die Miner real
+    # in Super/Standard weiterliefen (Befund 2026-07-17). Der Sicherheits-Stopp
+    # war damit reine Buchhaltung ohne Wirkung.
+    # simulation_mode MUSS die echten Miner ausklammern, sonst greift ein
+    # Sim-Durchlauf in die Produktion.
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.simulation_mode
+              state: "on"
+          sequence:
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.miner_relay_sim
+      default:
+        - service: select.select_option
+          target:
+            entity_id:
+              - select.miner1_workmode_set
+              - select.miner2_workmode_set
+          data:
+            option: "Standby"
     - choose:
         - conditions:
             - condition: template
@@ -271,8 +293,10 @@ bg_force_safety_stop:
       target:
         entity_id: input_text.decision_explanation
       data:
+        # sensor.miner_max_chip_temp_c, nicht sensor.miner_temp_c: letzteres
+        # existiert nicht (mehr) und lieferte hier dauerhaft "temp=unknownC".
         value: >-
-          STOP via R3_SAFETY | temp={{ states('sensor.miner_temp_c') }}C hb={{ states('sensor.miner_heartbeat_age_sec') }}s estop={{ states('input_boolean.r3_emergency_stop') }}
+          STOP via R3_SAFETY | temp={{ states('sensor.miner_max_chip_temp_c') }}C hb={{ states('sensor.miner_heartbeat_age_sec') }}s estop={{ states('input_boolean.r3_emergency_stop') }}
     - service: input_text.set_value
       target:
         entity_id: input_text.decision_code
