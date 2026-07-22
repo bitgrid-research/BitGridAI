@@ -13,7 +13,7 @@
 
 | Eigenschaft | Wert |
 |------------|------|
-| Modell | `qwen3:14b` |
+| Modell | `qwen3:30b` |
 | Betrieb | lokal auf Umbrel oder Research-Node |
 | Telemetrie | keine |
 
@@ -21,7 +21,7 @@
 
 | Service | Adresse |
 |---------|---------|
-| OpenClaw | `umbrel.local:18789` oder Research-Node |
+| Hermes Agent | `192.168.178.96:18790` oder Research-Node |
 | BitGridAI API | `bitgrid-core:8080` (intern im Docker-Netz) |
 
 ## Export-Format

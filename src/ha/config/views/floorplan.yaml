@@ -1,0 +1,445 @@
+type: picture-elements
+image: /local/grundriss/base.png
+elements:
+  - type: state-label
+    entity: sensor.shellyplugpmg3_9070695bb2a8_leistung
+    title: null
+    style:
+      top: 43.71%
+      left: 9.58%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_9070694d44bc_leistung 
+    title: null
+    style:
+      top: 38.95%
+      left: 24.13%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_9070694a1b6c_leistung
+    title: null
+    style:
+      top: 75.30%
+      left: 80.31%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: binary_sensor.wohnzimmer_ofen_alarm
+    title: null
+    style:
+      top: 18.46%
+      left: 60.59%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: binary_sensor.gastezimmer_alarm
+    title: null
+    style:
+      top: 16.03%
+      left: 88.08%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_9070694c577c_leistung
+    title: null
+    style:
+      top: 64.61%
+      left: 63.80%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: climate.buro_michael
+    title: null
+    style:
+      top: 59.01%
+      left: 90.39%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: toggle
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: climate.wohnzimmer_fenster
+    title: null
+    style:
+      top: 76.90%
+      left: 71.32%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: toggle
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: climate.bad
+    title: null
+    style:
+      top: 52.74%
+      left: 27.41%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: toggle
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_9070694c99d4_leistung
+    title: null
+    style:
+      top: 44.72%
+      left: 77.75%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_d885ac1e9adc_leistung
+    title: null
+    style:
+      top: 22.39%
+      left: 10.59%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: binary_sensor.kuche_alarm
+    title: null
+    style:
+      top: 85.22%
+      left: 59.50%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: binary_sensor.hauswirtschaftsraum_alarm
+    title: null
+    style:
+      top: 31.21%
+      left: 4.78%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: climate.michaels_schlafzimmer
+    title: null
+    style:
+      top: 66.20%
+      left: 9.49%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: toggle
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_90706947f288_leistung
+    title: null
+    style:
+      top: 19.91%
+      left: 30.29%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_9070694b2854_leistung
+    title: null
+    style:
+      top: 68.56%
+      left: 54.22%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: climate.davids_zimmer
+    title: null
+    style:
+      top: 23.30%
+      left: 39.45%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: toggle
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: climate.gastezimmer
+    title: null
+    style:
+      top: 22.46%
+      left: 84.76%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: toggle
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: binary_sensor.wohnzimmer_fenster_alarm
+    title: null
+    style:
+      top: 85.11%
+      left: 73.70%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: climate.hauswirtschaftsraum
+    title: null
+    style:
+      top: 33.72%
+      left: 9.55%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: toggle
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_9070694abdf4_leistung
+    title: null
+    style:
+      top: 21.44%
+      left: 15.67%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: binary_sensor.michaels_schlafzimmer_alarm
+    title: null
+    style:
+      top: 68.87%
+      left: 4.74%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: climate.kuche
+    title: null
+    style:
+      top: 76.60%
+      left: 58.53%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: toggle
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: binary_sensor.buro_grosses_fenster_alarm
+    title: null
+    style:
+      top: 60.36%
+      left: 95.30%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: climate.wohnzimmer_ofen
+    title: null
+    style:
+      top: 37.73%
+      left: 53.38%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: toggle
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-icon
+    entity: binary_sensor.davids_zimmer_alarm
+    title: null
+    style:
+      top: 14.80%
+      left: 38.20%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info

@@ -16,6 +16,26 @@ cards:
     title: Liveness
     show_header_toggle: false
     state_color: true
+    # Farbsemantik dieser Karte: lebendig = gruen, tot = rot. HA faerbt aktive
+    # Zustaende sonst amber (--state-active-color), was hier widerspruechlich
+    # aussieht: "Verbunden" in Warnfarbe. Gesetzt werden mehrere Ebenen der
+    # HA-State-Color-Kaskade (device-class-spezifisch -> domain -> generisch),
+    # damit die Farbe unabhaengig davon greift, welche Ebene HA je Entity zieht.
+    # Werte kommen aus den Theme-Tokens, keine neuen Hex-Werte.
+    # ACHTUNG: gilt nur fuer diese Karte. In der R3-Karte (waechter_register.yaml)
+    # ist die Semantik umgekehrt, dort bedeutet 'on' Alarm.
+    card_mod:
+      style: |
+        ha-card {
+          --state-binary_sensor-connectivity-on-color: var(--bg-color-eco);
+          --state-binary_sensor-connectivity-off-color: var(--bg-color-reserve);
+          --state-binary_sensor-on-color: var(--bg-color-eco);
+          --state-binary_sensor-active-color: var(--bg-color-eco);
+          --state-active-color: var(--bg-color-eco);
+          --state-binary_sensor-off-color: var(--bg-color-reserve);
+          --state-binary_sensor-inactive-color: var(--bg-color-reserve);
+          --state-inactive-color: var(--bg-color-reserve);
+        }
     entities:
       - type: section
         label: Miner (API-Ping alle 5 s, packages/avalonq_minerN.yaml)
@@ -32,6 +52,10 @@ cards:
       - entity: binary_sensor.pool_api_healthy
         name: Pool-API erreichbar
         secondary_info: last-changed
+      - entity: sensor.pool_api_status
+        name: Pool-API Status
+      - entity: input_text.pool_blocked_ip_last
+        name: Zuletzt geblockte IP (Whitelist)
       - entity: binary_sensor.miner1_pool_status
         name: Miner 1 am Pool
       - entity: binary_sensor.miner2_pool_status

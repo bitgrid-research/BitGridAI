@@ -7,8 +7,13 @@ INFRASTRUCTURE.md
 # Claude Code Projektanweisungen (nur lokal, nicht öffentlich)
 CLAUDE.md
 
-# Deploy-Scripts (enthalten IPs, Pfade, sudo-Logik — nur lokal)
+# Deploy-/Betriebs-Scripts (enthalten IPs, Pfade, sudo-Logik — nur lokal)
 scripts/deploy_ha.sh
+scripts/deploy_floorplan.sh
+scripts/deploy_bitsy.py
+scripts/deploy_query_server.py
+scripts/watch_hermes.py
+scripts/watch_nachtforscher.py
 
 # BitGridAI — Laufzeit-Daten (nie einchecken)
 data/bitgrid.db

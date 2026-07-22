@@ -1,4 +1,9 @@
-# PROJECT_STATE.md - BitGridAI Aktueller Stand
+# PROJECT_STATE.md - BitGridAI Aktueller Stand (ARCHIVIERT)
+
+> **Archiviert seit 22.07.2026**, gehörte zum alten ₿itsy-Dev-Repo-Review-
+> Workflow (siehe `IDENTITY.md`). Wird nicht mehr gepflegt — Neo hat keine
+> Repo-/arc42-Review-Rolle mehr. Stand unten ist ein Snapshot, kein aktueller
+> Repo-Status.
 
 > Zuletzt aktualisiert: 2026-07-12 (Claude Code, gegen tatsächlichen Repo-Stand verifiziert)
 > Git: letzter Commit: `9d7ec97 feat: add device tracking and bitsy ki tab`

@@ -2,8 +2,8 @@
 
 Cross-Track-Orientierung über DEV, THESIS und SIM in ein bis zwei Minuten. Diese
 Seite ersetzt keine der bestehenden Detail-Quellen (siehe Links je Track) — sie
-zeigt nur, wo diese Quellen gerade stehen, damit niemand (Nutzer, Claude Code,
-₿itsy-Dev) sie einzeln durchsuchen muss, um sich zu orientieren.
+zeigt nur, wo diese Quellen gerade stehen, damit niemand (Nutzer, Claude Code)
+sie einzeln durchsuchen muss, um sich zu orientieren.
 
 **Update-Ritual:** wird manuell am Ende relevanter Sessions aktualisiert — kein
 Automatismus. Wenn diese Seite länger als ein paar Wochen nicht angefasst wurde,
@@ -16,7 +16,10 @@ und die Track-Quellen unten verifizieren, nicht blind übernehmen.
 
 ## Track 1 — DEV (System)
 
-**Detail-Quelle:** [`bitsy-dev/PROJECT_STATE.md`](../development/36_ai_tooling/bitsy-dev/PROJECT_STATE.md)
+**Detail-Quelle:** `git log`, `git status` — das frühere
+[`PROJECT_STATE.md`](../development/36_ai_tooling/neo/PROJECT_STATE.md) ist seit
+22.07.2026 archiviert (gehörte zur alten ₿itsy-Dev-Rolle) und wird nicht mehr
+gepflegt.
 
 Architektur vollständig dokumentiert, alle acht `src/`-Module implementiert und
 getestet. HA-Dashboard und Miner-MVP laufen produktiv.

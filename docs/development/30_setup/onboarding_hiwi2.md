@@ -59,8 +59,8 @@ cd src/ha && docker compose up -d
 
 | Agent / Zielgruppe | Modell | Erklärungstiefe |
 |---|---|---|
-| ₿itsy-Home (Heimnutzer) | Qwen3:4b | einfach, alltagsnah |
-| ₿itsy-Study (Forscher) | Qwen3:14b | technisch, mit Parametern |
+| ₿itsy-Home (Heimnutzer) | qwen3:4b-instruct | einfach, alltagsnah |
+| ₿itsy-Study (Forscher) | qwen3:30b | technisch, mit Parametern |
 
 Beide lesen `DecisionEvents` read-only. Deine Aufgabe: herausarbeiten, was jede Zielgruppe braucht, und die UI entsprechend gestalten. Das ist eine Design-/UI-Frage und **getrennt** vom A/B-Vergleich der Studie (die Studie selbst nutzt für Gruppe B eine einzige generische Stimme).
 

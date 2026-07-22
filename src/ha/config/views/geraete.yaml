@@ -1,19 +1,40 @@
 # ═══════════════════════════════════════════════════════════════════════
-# Geräte (linke Spalte) — Summenkarte + 14 Verbraucher-Kacheln, nach Räumen.
+# Geräte — Summenkarte + Batterie-Wächter + Raum-Gruppen.
 # Eingebunden via !include in:
 #   - bitgrid_dashboard_v2.yaml  → Tab "Geräte", grid-area: geraete
 # Entity-Zuordnung und Tages-kWh-Sensoren: packages/devices.yaml.
-# Kachel-Layout: button-card-Template device_tile (button_card_templates.yaml).
-# Farbschema: Raum = Farbton (Icon der Raum-Überschrift + Kacheln), Gerät =
-# Helligkeitsstufe innerhalb des Raum-Farbtons (Weiß-Tint, s aus gen_devices).
-# 7-Ton-Palette CVD-geprüft (dataviz validate_palette), Cyan/Orange bleiben den
-# Miner-Modi (Standard/Super) vorbehalten.
+#
+# Kachel-Typen (button_card_templates.yaml):
+#   device_tile   Strom-Verbraucher (Shelly): W + Tages-kWh
+#   climate_tile  Thermostat (climate.*): Ist-Temperatur + Heizzustand + Batterie
+#   window_tile   Fensterkontakt (binary_sensor.*_alarm): OFFEN/zu + Batterie
+#   switch_tile   Lampe/Schalter (light.*|switch.*): an/aus, Tap toggelt
+#   room_header   Raum-Überschrift (Farbe via variables.accent_color)
+#
+# Layout: EIN responsives Kachel-Raster (custom:grid-layout, auto-fill). Kacheln
+# packen sich automatisch; Summenkarte, Batterie-Wächter und Raum-Überschriften
+# spannen via grid-column 1/-1 über die volle Rasterbreite und trennen die Räume.
+#
+# Farbschema: Raum = EIN Farbton (Header = Basis). Geräte sind gleichmäßige Tint-
+# Stufen dieses Tons (Richtung Weiß gemischt, hellstes Gerät = 55 % Weiß), in
+# Kachel-Reihenfolge von dunkel nach hell. Cyan/Orange bleiben den Miner-Modi
+# (Standard/Super) vorbehalten. Rot (#e66767) und Amber (#E6A100) sind semantisch
+# reserviert: offenes Fenster / schwache Batterie (überschreiben das Icon).
 # ═══════════════════════════════════════════════════════════════════════
-type: vertical-stack
+type: custom:layout-card
+layout_type: custom:grid-layout
+layout:
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))
+  grid-gap: 10px
+  max-width: 700px
+  margin: 0
+  padding: 0
 cards:
 
-  # ── Summenkarte: alle 14 Plugs zusammen ────────────────────────────────
+  # ── Summenkarte: alle Strom-Plugs zusammen (volle Rasterbreite) ────────
   - type: custom:button-card
+    view_layout:
+      grid-column: 1 / -1
     show_name: false
     show_icon: false
     show_state: false
@@ -54,380 +75,415 @@ cards:
           </div>`;
         ]]]
 
-  # ── Küche ───────────────────────────────────────────────────
+  # ── Batterie-Wächter: Sensoren ≤ 50 % (Frühwarnung, volle Rasterbreite) ─
   - type: custom:button-card
-    name: Küche
-    icon: mdi:silverware-fork-knife
+    view_layout:
+      grid-column: 1 / -1
+    show_name: false
+    show_icon: false
     show_state: false
     tap_action:
       action: none
     styles:
       card:
-        - background: none
-        - box-shadow: none
-        - border: none
-        - padding: 12px 4px 2px
+        - padding: 12px 16px
       grid:
-        - grid-template-areas: '"i n"'
-        - grid-template-columns: min-content 1fr
-        - align-items: center
-      img_cell:
-        - justify-content: start
-      icon:
-        - color: "#008300"
-        - width: 20px
-        - height: 20px
-      name:
-        - font-size: 0.82rem
-        - font-weight: 700
-        - text-transform: uppercase
-        - letter-spacing: 0.06em
-        - color: "#008300"
-        - justify-self: start
-        - padding-left: 8px
-  - type: horizontal-stack
-    cards:
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_9070694c577c_leistung
-        name: Kühlschrank
-        icon: mdi:fridge
-        variables:
-          energy_daily: sensor.kuehlschrank_kueche_energy_daily
-          accent_color: "#008300"
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_9070694b2854_leistung
-        name: Spülmaschine
-        icon: mdi:dishwasher
-        variables:
-          energy_daily: sensor.spuelmaschine_energy_daily
-          accent_color: "#66B566"
+        - grid-template-areas: '"bat"'
+        - grid-template-columns: 1fr
+      custom_fields:
+        bat:
+          - width: 100%
+          - justify-self: stretch
+    custom_fields:
+      bat: >
+        [[[
+          const bats = Object.keys(states)
+            .filter(e => e.startsWith('sensor.') && /batterie/.test(e)
+              && states[e].attributes.device_class === 'battery')
+            .map(e => {
+              const raw = states[e].state;
+              const v = parseInt(raw);
+              const dead = isNaN(v);
+              return {
+                v: dead ? -1 : v,
+                dead: dead,
+                n: (states[e].attributes.friendly_name || e).replace(/ Batterie.*/i, '')
+              };
+            })
+            .sort((a, b) => a.v - b.v);
+          const flag = bats.filter(x => x.dead || x.v <= 50);
+          const chip = x => {
+            const c = (x.dead || x.v <= 20) ? '#e66767' : (x.v <= 50 ? '#E6A100' : '#7A9E7E');
+            const val = x.dead ? 'leer?' : x.v + '%';
+            return `<span style="display:inline-flex;align-items:center;gap:4px;margin:3px 12px 3px 0;white-space:nowrap">
+              <ha-icon icon="mdi:battery-alert-variant-outline" style="--mdc-icon-size:16px;color:${c}"></ha-icon>
+              <span style="font-size:0.8rem">${x.n}</span>
+              <span style="font-size:0.8rem;font-weight:700;color:${c}">${val}</span></span>`;
+          };
+          const head = `<ha-icon icon="mdi:battery-70" style="--mdc-icon-size:18px;color:#A6A2D8"></ha-icon>
+            <span style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#A6A2D8;margin-left:8px">Batterie-Wächter</span>`;
+          const body = flag.length
+            ? flag.map(chip).join('')
+            : `<span style="font-size:0.85rem;color:var(--secondary-text-color)">Alle ${bats.length} Sensoren über 50 %.</span>`;
+          return `<div><div style="display:flex;align-items:center;margin-bottom:4px">${head}</div>
+            <div style="display:flex;flex-wrap:wrap">${body}</div></div>`;
+        ]]]
+
+  # ── Küche ───────────────────────────────────────────────────
+  - type: custom:button-card
+    template: room_header
+    view_layout:
+      grid-column: 1 / -1
+    name: Küche
+    icon: mdi:silverware-fork-knife
+    variables:
+      accent_color: "#008300"
+  - type: custom:button-card
+    template: climate_tile
+    entity: climate.kuche
+    name: Heizung
+    variables:
+      battery: sensor.kuche_batterie_2
+      accent_color: "#008300"
+  - type: custom:button-card
+    template: window_tile
+    entity: binary_sensor.kuche_alarm
+    name: Fenster
+    variables:
+      battery: sensor.kuche_batterie
+      accent_color: "#2f9a2f"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_9070694c577c_leistung
+    name: Kühlschrank
+    icon: mdi:fridge
+    variables:
+      energy_daily: sensor.kuehlschrank_kueche_energy_daily
+      accent_color: "#5eb05e"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_9070694b2854_leistung
+    name: Spülmaschine
+    icon: mdi:dishwasher
+    variables:
+      energy_daily: sensor.spuelmaschine_energy_daily
+      accent_color: "#8cc78c"
 
   # ── Wohnzimmer ──────────────────────────────────────────────
   - type: custom:button-card
+    template: room_header
+    view_layout:
+      grid-column: 1 / -1
     name: Wohnzimmer
     icon: mdi:sofa
-    show_state: false
-    tap_action:
-      action: none
-    styles:
-      card:
-        - background: none
-        - box-shadow: none
-        - border: none
-        - padding: 12px 4px 2px
-      grid:
-        - grid-template-areas: '"i n"'
-        - grid-template-columns: min-content 1fr
-        - align-items: center
-      img_cell:
-        - justify-content: start
-      icon:
-        - color: "#3987e5"
-        - width: 20px
-        - height: 20px
-      name:
-        - font-size: 0.82rem
-        - font-weight: 700
-        - text-transform: uppercase
-        - letter-spacing: 0.06em
-        - color: "#3987e5"
-        - justify-self: start
-        - padding-left: 8px
-  - type: horizontal-stack
-    cards:
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_9070694c99d4_leistung
-        name: TV
-        icon: mdi:television
-        variables:
-          energy_daily: sensor.tv_energy_daily
-          accent_color: "#3987E5"
-      - type: custom:button-card
-        styles:
-          card:
-            - background: none
-            - box-shadow: none
-            - border: none
-
-  # ── Schlafzimmer ────────────────────────────────────────────
+    variables:
+      accent_color: "#3987e5"
   - type: custom:button-card
-    name: Schlafzimmer
+    template: climate_tile
+    entity: climate.wohnzimmer_fenster
+    name: Heizung Fenster
+    variables:
+      battery: sensor.wohnzimmer_fenster_batterie_2
+      accent_color: "#3987e5"
+  - type: custom:button-card
+    template: climate_tile
+    entity: climate.wohnzimmer_ofen
+    name: Heizung Ofen
+    variables:
+      battery: sensor.wohnzimmer_ofen_batterie
+      accent_color: "#4990e7"
+  - type: custom:button-card
+    template: window_tile
+    entity: binary_sensor.wohnzimmer_fenster_alarm
+    name: Fenster
+    variables:
+      battery: sensor.wohnzimmer_fenster_batterie
+      accent_color: "#589ae9"
+  - type: custom:button-card
+    template: window_tile
+    entity: binary_sensor.wohnzimmer_ofen_alarm
+    name: Fenster Ofen
+    variables:
+      battery: sensor.wohnzimmer_ofen_batterie_2
+      accent_color: "#68a3eb"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_9070694c99d4_leistung
+    name: TV
+    icon: mdi:television
+    variables:
+      energy_daily: sensor.tv_energy_daily
+      accent_color: "#77aded"
+  - type: custom:button-card
+    template: switch_tile
+    entity: light.tv_lampe
+    name: TV Lampe
+    icon: mdi:lamp
+    variables:
+      accent_color: "#87b6ef"
+  - type: custom:button-card
+    template: switch_tile
+    entity: switch.wohnwand_beleuchtung
+    name: Wohnwand
+    icon: mdi:led-strip-variant
+    variables:
+      accent_color: "#96c0f1"
+  - type: custom:button-card
+    template: switch_tile
+    entity: switch.wohnzimmerlampe
+    name: Lampe
+    icon: mdi:floor-lamp
+    variables:
+      accent_color: "#a6c9f3"
+
+  # ── Schlafzimmer #1 (PC + TV) ───────────────────────────────
+  - type: custom:button-card
+    template: room_header
+    view_layout:
+      grid-column: 1 / -1
+    name: Schlafzimmer 1
     icon: mdi:bed
-    show_state: false
-    tap_action:
-      action: none
-    styles:
-      card:
-        - background: none
-        - box-shadow: none
-        - border: none
-        - padding: 12px 4px 2px
-      grid:
-        - grid-template-areas: '"i n"'
-        - grid-template-columns: min-content 1fr
-        - align-items: center
-      img_cell:
-        - justify-content: start
-      icon:
-        - color: "#199e70"
-        - width: 20px
-        - height: 20px
-      name:
-        - font-size: 0.82rem
-        - font-weight: 700
-        - text-transform: uppercase
-        - letter-spacing: 0.06em
-        - color: "#199e70"
-        - justify-self: start
-        - padding-left: 8px
-  - type: horizontal-stack
-    cards:
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_9070694d44bc_leistung
-        name: PC
-        icon: mdi:desktop-tower-monitor
-        variables:
-          energy_daily: sensor.pc_schlafzimmer_energy_daily
-          accent_color: "#199E70"
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_90706947f288_leistung
-        name: TV
-        icon: mdi:television
-        variables:
-          energy_daily: sensor.tv_schlafzimmer_energy_daily
-          accent_color: "#75C5A9"
+    variables:
+      accent_color: "#199e70"
+  - type: custom:button-card
+    template: climate_tile
+    entity: climate.davids_zimmer
+    name: Heizung
+    variables:
+      battery: sensor.davids_zimmer_batterie_2
+      accent_color: "#199e70"
+  - type: custom:button-card
+    template: window_tile
+    entity: binary_sensor.davids_zimmer_alarm
+    name: Fenster
+    variables:
+      battery: sensor.davids_zimmer_batterie
+      accent_color: "#43b08a"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_9070694d44bc_leistung
+    name: PC
+    icon: mdi:desktop-tower-monitor
+    variables:
+      energy_daily: sensor.pc_schlafzimmer_energy_daily
+      accent_color: "#6dc2a4"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_90706947f288_leistung
+    name: TV
+    icon: mdi:television
+    variables:
+      energy_daily: sensor.tv_schlafzimmer_energy_daily
+      accent_color: "#98d3bf"
+
+  # ── Schlafzimmer #2 ─────────────────────────────────────────
+  - type: custom:button-card
+    template: room_header
+    view_layout:
+      grid-column: 1 / -1
+    name: Schlafzimmer 2
+    icon: mdi:bed-outline
+    variables:
+      accent_color: "#23B892"
+  - type: custom:button-card
+    template: climate_tile
+    entity: climate.michaels_schlafzimmer
+    name: Heizung
+    variables:
+      battery: sensor.michaels_schlafzimmer_batterie
+      accent_color: "#23B892"
+  - type: custom:button-card
+    template: window_tile
+    entity: binary_sensor.michaels_schlafzimmer_alarm
+    name: Fenster
+    variables:
+      battery: sensor.michaels_schlafzimmer_batterie_2
+      accent_color: "#9cdfce"
 
   # ── Büro ────────────────────────────────────────────────────
   - type: custom:button-card
+    template: room_header
+    view_layout:
+      grid-column: 1 / -1
     name: Büro
     icon: mdi:desk
-    show_state: false
-    tap_action:
-      action: none
-    styles:
-      card:
-        - background: none
-        - box-shadow: none
-        - border: none
-        - padding: 12px 4px 2px
-      grid:
-        - grid-template-areas: '"i n"'
-        - grid-template-columns: min-content 1fr
-        - align-items: center
-      img_cell:
-        - justify-content: start
-      icon:
-        - color: "#c98500"
-        - width: 20px
-        - height: 20px
-      name:
-        - font-size: 0.82rem
-        - font-weight: 700
-        - text-transform: uppercase
-        - letter-spacing: 0.06em
-        - color: "#c98500"
-        - justify-self: start
-        - padding-left: 8px
-  - type: horizontal-stack
-    cards:
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_d885ac18c3b4_leistung
-        name: PC
-        icon: mdi:desktop-classic
-        variables:
-          energy_daily: sensor.buero_energy_daily
-          accent_color: "#C98500"
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_9070694a1b6c_leistung
-        name: 3D-Drucker
-        icon: mdi:printer-3d
-        variables:
-          energy_daily: sensor.drucker_energy_daily
-          accent_color: "#DFB666"
+    variables:
+      accent_color: "#c98500"
+  - type: custom:button-card
+    template: climate_tile
+    entity: climate.buro_michael
+    name: Heizung
+    variables:
+      battery: sensor.buro_michael_batterie
+      accent_color: "#c98500"
+  - type: custom:button-card
+    template: window_tile
+    entity: binary_sensor.buro_grosses_fenster_alarm
+    name: Fenster groß
+    variables:
+      battery: sensor.buro_grosses_fenster_batterie
+      accent_color: "#d09623"
+  - type: custom:button-card
+    template: window_tile
+    entity: binary_sensor.buro_kleines_fenster_alarm
+    name: Fenster klein
+    variables:
+      battery: sensor.buro_kleines_fenster_batterie
+      accent_color: "#d8a746"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_d885ac18c3b4_leistung
+    name: PC
+    icon: mdi:desktop-classic
+    variables:
+      energy_daily: sensor.buero_energy_daily
+      accent_color: "#dfb769"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_9070694a1b6c_leistung
+    name: 3D-Drucker
+    icon: mdi:printer-3d
+    variables:
+      energy_daily: sensor.drucker_energy_daily
+      accent_color: "#e7c88c"
+
+  # ── Gästezimmer ─────────────────────────────────────────────
+  - type: custom:button-card
+    template: room_header
+    view_layout:
+      grid-column: 1 / -1
+    name: Gästezimmer
+    icon: mdi:bed-double-outline
+    variables:
+      accent_color: "#C98AB0"
+  - type: custom:button-card
+    template: climate_tile
+    entity: climate.gastezimmer
+    name: Heizung
+    variables:
+      battery: sensor.gastezimmer_batterie
+      accent_color: "#C98AB0"
+  - type: custom:button-card
+    template: window_tile
+    entity: binary_sensor.gastezimmer_alarm
+    name: Fenster
+    variables:
+      battery: sensor.gastezimmer_batterie_2
+      accent_color: "#e7cadb"
+
+  # ── Bad ─────────────────────────────────────────────────────
+  - type: custom:button-card
+    template: room_header
+    view_layout:
+      grid-column: 1 / -1
+    name: Bad
+    icon: mdi:shower
+    variables:
+      accent_color: "#4C97C4"
+  - type: custom:button-card
+    template: climate_tile
+    entity: climate.bad
+    name: Heizung
+    variables:
+      battery: sensor.bad_batterie
+      accent_color: "#4C97C4"
 
   # ── Hauswirtschaft ──────────────────────────────────────────
   - type: custom:button-card
+    template: room_header
+    view_layout:
+      grid-column: 1 / -1
     name: Hauswirtschaft
     icon: mdi:hanger
-    show_state: false
-    tap_action:
-      action: none
-    styles:
-      card:
-        - background: none
-        - box-shadow: none
-        - border: none
-        - padding: 12px 4px 2px
-      grid:
-        - grid-template-areas: '"i n"'
-        - grid-template-columns: min-content 1fr
-        - align-items: center
-      img_cell:
-        - justify-content: start
-      icon:
-        - color: "#d55181"
-        - width: 20px
-        - height: 20px
-      name:
-        - font-size: 0.82rem
-        - font-weight: 700
-        - text-transform: uppercase
-        - letter-spacing: 0.06em
-        - color: "#d55181"
-        - justify-self: start
-        - padding-left: 8px
-  - type: horizontal-stack
-    cards:
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_9070694abdf4_leistung
-        name: Kühlschränke
-        icon: mdi:fridge
-        variables:
-          energy_daily: sensor.kuehlschraenke_energy_daily
-          accent_color: "#D55181"
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_d885ac1e9adc_leistung
-        name: Waschmaschine
-        icon: mdi:washing-machine
-        variables:
-          energy_daily: sensor.waschmaschine_energy_daily
-          accent_color: "#DD749A"
-  - type: horizontal-stack
-    cards:
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugpmg3_9070695bb2a8_leistung
-        name: Trockner
-        icon: mdi:tumble-dryer
-        variables:
-          energy_daily: sensor.trockner_energy_daily
-          accent_color: "#E697B3"
-      - type: custom:button-card
-        styles:
-          card:
-            - background: none
-            - box-shadow: none
-            - border: none
+    variables:
+      accent_color: "#d55181"
+  - type: custom:button-card
+    template: climate_tile
+    entity: climate.hauswirtschaftsraum
+    name: Heizung
+    variables:
+      battery: sensor.hauswirtschaftsraum_batterie_2
+      accent_color: "#d55181"
+  - type: custom:button-card
+    template: window_tile
+    entity: binary_sensor.hauswirtschaftsraum_alarm
+    name: Fenster
+    variables:
+      battery: sensor.hauswirtschaftsraum_batterie
+      accent_color: "#db6992"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_9070694abdf4_leistung
+    name: Kühlschränke
+    icon: mdi:fridge
+    variables:
+      energy_daily: sensor.kuehlschraenke_energy_daily
+      accent_color: "#e181a4"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_d885ac1e9adc_leistung
+    name: Waschmaschine
+    icon: mdi:washing-machine
+    variables:
+      energy_daily: sensor.waschmaschine_energy_daily
+      accent_color: "#e699b5"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugpmg3_9070695bb2a8_leistung
+    name: Trockner
+    icon: mdi:tumble-dryer
+    variables:
+      energy_daily: sensor.trockner_energy_daily
+      accent_color: "#ecb1c6"
 
   # ── Keller ──────────────────────────────────────────────────
   - type: custom:button-card
+    template: room_header
+    view_layout:
+      grid-column: 1 / -1
     name: Keller
     icon: mdi:stairs-down
-    show_state: false
-    tap_action:
-      action: none
-    styles:
-      card:
-        - background: none
-        - box-shadow: none
-        - border: none
-        - padding: 12px 4px 2px
-      grid:
-        - grid-template-areas: '"i n"'
-        - grid-template-columns: min-content 1fr
-        - align-items: center
-      img_cell:
-        - justify-content: start
-      icon:
-        - color: "#9085e9"
-        - width: 20px
-        - height: 20px
-      name:
-        - font-size: 0.82rem
-        - font-weight: 700
-        - text-transform: uppercase
-        - letter-spacing: 0.06em
-        - color: "#9085e9"
-        - justify-self: start
-        - padding-left: 8px
-  - type: horizontal-stack
-    cards:
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shelly1pmg4_e4b06377adc0_leistung
-        name: Heizung
-        icon: mdi:radiator
-        variables:
-          energy_daily: sensor.heizung_energy_daily
-          accent_color: "#9085E9"
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplusplugs_d4d4daf4eda4_leistung
-        name: Lüftung
-        icon: mdi:fan
-        variables:
-          energy_daily: sensor.lueftung_energy_daily
-          accent_color: "#A69DED"
-  - type: horizontal-stack
-    cards:
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
-        name: Server, NAS, KI
-        icon: mdi:server
-        variables:
-          energy_daily: sensor.server_energy_daily
-          accent_color: "#BCB6F2"
-      - type: custom:button-card
-        styles:
-          card:
-            - background: none
-            - box-shadow: none
-            - border: none
+    variables:
+      accent_color: "#9085e9"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shelly1pmg4_e4b06377adc0_leistung
+    name: Heizung
+    icon: mdi:radiator
+    variables:
+      energy_daily: sensor.heizung_energy_daily
+      accent_color: "#9085E9"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplusplugs_d4d4daf4eda4_leistung
+    name: Lüftung
+    icon: mdi:fan
+    variables:
+      energy_daily: sensor.lueftung_energy_daily
+      accent_color: "#afa7ef"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
+    name: Server, NAS, KI
+    icon: mdi:server
+    variables:
+      energy_daily: sensor.server_energy_daily
+      accent_color: "#cdc8f5"
 
   # ── Garage ──────────────────────────────────────────────────
   - type: custom:button-card
+    template: room_header
+    view_layout:
+      grid-column: 1 / -1
     name: Garage
     icon: mdi:garage
-    show_state: false
-    tap_action:
-      action: none
-    styles:
-      card:
-        - background: none
-        - box-shadow: none
-        - border: none
-        - padding: 12px 4px 2px
-      grid:
-        - grid-template-areas: '"i n"'
-        - grid-template-columns: min-content 1fr
-        - align-items: center
-      img_cell:
-        - justify-content: start
-      icon:
-        - color: "#e66767"
-        - width: 20px
-        - height: 20px
-      name:
-        - font-size: 0.82rem
-        - font-weight: 700
-        - text-transform: uppercase
-        - letter-spacing: 0.06em
-        - color: "#e66767"
-        - justify-self: start
-        - padding-left: 8px
-  - type: horizontal-stack
-    cards:
-      - type: custom:button-card
-        template: device_tile
-        entity: sensor.shellyplugsg3_907069492f30_leistung
-        name: Garagengeräte
-        icon: mdi:tools
-        variables:
-          energy_daily: sensor.garage_energy_daily
-          accent_color: "#E66767"
-      - type: custom:button-card
-        styles:
-          card:
-            - background: none
-            - box-shadow: none
-            - border: none
+    variables:
+      accent_color: "#e66767"
+  - type: custom:button-card
+    template: device_tile
+    entity: sensor.shellyplugsg3_907069492f30_leistung
+    name: Garagengeräte
+    icon: mdi:tools
+    variables:
+      energy_daily: sensor.garage_energy_daily
+      accent_color: "#E66767"

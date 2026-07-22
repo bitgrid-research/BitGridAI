@@ -2,10 +2,12 @@
 
 BitGridAI wird mit KI-Unterstützung gebaut — aber nach klaren Regeln.
 
-Mehrere Agenten arbeiten zusammen, jeder mit eigenem Kontext, eigener Rolle und eigenen Grenzen.
-**₿itsy** (Dev/Home/Study) lebt auf dem Haupt-Umbrel-Server. **DEV-BitHamster** läuft auf
-einer eigenen, getrennten Umbrel-Instanz. **Claude Code** läuft in VSCode auf dem
-Entwicklungsrechner. Alle kennen die Projektprinzipien. Alle dürfen widersprechen.
+**Real und aktiv sind genau zwei Agenten:** **Claude Code** (VSCode,
+Entwicklungsrechner) und **Neo** (Hermes Agent auf Umbrel, nächtliche
+Energie-Musteranalyse). Alles andere in diesem Ordner — ₿itsy-Home,
+₿itsy-Study, DEV-BitHamster — sind Personas, die entworfen, aber **nie
+deployt** wurden (Archiv weiter unten). Verschlankt am 22.07.2026, um Docs und
+Realität wieder deckungsgleich zu machen.
 
 > **Wichtig:** KI unterstützt — sie entscheidet nicht.
 > Architekturprinzipien, Red Lines und Qualitätsziele gelten für Agenten genauso wie für Code.
@@ -26,8 +28,8 @@ Entwicklungsrechner. Alle kennen die Projektprinzipien. Alle dürfen widersprech
                         ▼
 ┌──────────────────────────────────────────────────────┐
 │  ERKLÄRUNGSSCHICHT  (KI erlaubt)                     │
-│  ₿itsy-Home · ₿itsy-Study                           │
-│  lesen Events → erzeugen Text → niemals steuern      │
+│  Neo — liest Fakten, sucht Muster, schreibt          │
+│  Hypothesen, steuert nie                             │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -36,31 +38,20 @@ Regeln oder Override-Endpunkte. Auch nicht auf Bitte des Nutzers.
 
 &nbsp;
 
-## Fünf Agenten, vier Rollen
+## Zwei Agenten, real im Einsatz
 
 ```
 Entwicklungsrechner                  Haupt-Umbrel (LAN)
 ┌──────────────────┐     ┌───────────────────────────────────────────┐
-│  Claude Code     │     │  ₿itsy-Dev     (bitsy-dev/)               │
-│  (VSCode)        │◄────►│  Projektassistent, arc42, Entwicklung     │
-│  Code · Docs     │     │  Modell: Qwen3:14b                        │
-└──────────────────┘     ├───────────────────────────────────────────┤
-                         │  ₿itsy-Home    (bitsy-home/)              │
-                         │  Erklärung für Heimnutzer                 │
-                         │  Modell: Qwen3:4b  (schnell)              │
-                         ├───────────────────────────────────────────┤
-                         │  ₿itsy-Study   (bitsy-study/)             │
-                         │  Erklärung für Forscher & Studie          │
-                         │  Modell: Qwen3:14b (präzise)              │
-                         └───────────────────────────────────────────┘
-
-                          Eigene Umbrel-Instanz (getrennt, LAN)
-                         ┌───────────────────────────────────────────┐
-                         │  DEV-BitHamster (hermes-bithamster/)      │
-                         │  Analyse & Erklärung Solar-Mining         │
-                         │  Modell: Qwen3.5:9b (Hermes-Agent/Ollama) │
-                         └───────────────────────────────────────────┘
+│  Claude Code     │     │  Neo — Nachtforscher    (neo/)            │
+│  (VSCode)        │◄────►│  Naechtliche Energie-/Mining-Analyse       │
+│  Code · Docs     │     │  Modell: gemma4:e4b (Ollama, lokal)       │
+└──────────────────┘     └───────────────────────────────────────────┘
 ```
+
+Neo lief bis zum 22.07.2026 unter dem Namen ₿itsy-Dev als
+Repo-/arc42-Review-Assistent (siehe `neo/FINDINGS.md`, seit 28.06.2026
+inaktiv gewesen). Gleiche Hermes-Agent-Instanz, neue, schmalere Rolle.
 
 &nbsp;
 
@@ -117,159 +108,58 @@ Google Stitch → `design.md` → Claude Code setzt um: [`stitch-ui/README.md`](
 
 ---
 
-## ₿itsy-Dev — Projektassistent für Entwicklung
+## Neo — Nachtforscher
 
-Läuft auf Umbrel, kennt das Projekt von Grund auf.
-Technischer Sparringspartner, kein Ja-Sager. Prüft Vorschläge gegen Projektprinzipien.
+Läuft auf Umbrel (Hermes Agent), analysiert nachts per Cron (01:00 UTC) die
+Energie-/Mining-Fakten des Tages und schreibt höchstens drei falsifizierbare
+Hypothesen. Kein Ja-Sager, aber auch kein Repo-Reviewer mehr: diese Instanz
+hieß bis 22.07.2026 ₿itsy-Dev und machte arc42-/Code-Reviews (archiviert,
+siehe unten), die Rolle wurde bewusst verschmälert.
 
-**Workspace:** `docs/development/36_ai_tooling/bitsy-dev/`
+**Workspace:** `docs/development/36_ai_tooling/neo/`
 
 ```
-bitsy-dev/
-├── SOUL.md           ← Werte, Stil, Domainwissen, BP-01–BP-21
-├── IDENTITY.md       ← Name, Zweck, Grenzen
-├── USER.md           ← Wer der Entwickler ist, wie er denkt
-├── AGENTS.md         ← Session-Startup, Heartbeat-Regeln, Red Lines
-├── TOOLS.md          ← IPs, Ports, Pfade, Modelle
-├── PROJECT_STATE.md  ← Aktueller Stand des Repos (gepflegt)
-├── BOOTSTRAP.md      ← Einmalig: Initialisierung
-├── HEARTBEAT.md      ← Aktuelle Aufgaben für den nächsten Heartbeat
-└── MEMORY.md         ← Langzeit-Gedächtnis (nur Main-Session)
+neo/
+├── README.md         ← Überblick, Live-Config vs. dieser Ordner
+├── SOUL.md            ← Identität, Charakter, Regeln (Spiegel der Live-Version)
+├── IDENTITY.md        ← Name, Zweck, Grenzen, Vorgeschichte (₿itsy-Dev → Neo)
+├── USER.md            ← Wer der Betreiber ist, wie er denkt
+├── TOOLS.md            ← IPs, Ports, Mounts, Modellwahl-Begründung
+├── FINDINGS.md         ← ARCHIVIERT: alte ₿itsy-Dev-Repo-Befunde (bis 28.06.2026)
+└── PROJECT_STATE.md    ← ARCHIVIERT: Repo-Snapshot zur Zeit von ₿itsy-Dev
 ```
 
-**Session-Startup:**
-```
-1. SOUL.md          → wer bin ich?
-2. USER.md          → wen helfe ich?
-3. PROJECT_STATE.md → wo stehen wir?
-4. memory/HEUTE.md  → was war gestern?
-5. MEMORY.md        → (nur Main-Session) Langzeitkontext
-```
+**Lesereihenfolge pro Nacht** (im Vault, nicht in diesem Ordner):
+`00_START_HIER.md` → `kontext/leitplanken.md` → `kontext/automation.md` →
+`kontext/entities.md` → `kontext/architektur_rahmen.md` → `kontext/*.md` (Rest) →
+`bestaetigt/README.md` → Tagesbericht.
 
-**Modell:** Qwen3:14b — kein Cloud-Backhaul, keine Telemetrie.
+**Modell:** `gemma4:e4b` — kein Cloud-Backhaul, keine Telemetrie. Begründung
+der Modellwahl (gegen `qwen3:30b`, `llama3.1:8b` getestet): `neo/TOOLS.md`.
+
+**Eigenes Gedächtnis:** `memory_neo/` im Obsidian-Vault, read-write, getrennt
+vom read-only Wissensordner. Struktur und Regeln (BELEGT vs. GEDANKE):
+`neo/SOUL.md`.
 
 &nbsp;
 
 ---
 
-## ₿itsy-Home — Erklärung für Heimnutzer
+## Archiv: entworfen, nie deployt
 
-Erklärt dem Prosumer was das System gerade tut und warum.
-Kein Jargon. Kurze Sätze. Zahlen mit Einheit.
-**Kein Schreibzugriff. Keine Aktorbefehle.**
+Drei weitere Personas wurden für dieses Projekt konzipiert, laufen aber nicht
+und liefen nie als eigene Dienste. Sie bleiben als Design-Referenz im Repo,
+nicht als aktives Tooling:
 
-**Workspace:** `docs/development/36_ai_tooling/bitsy-home/`
+| Persona | Gedacht für | Workspace | Status |
+|---|---|---|---|
+| ₿itsy-Home | Erklärung für Heimnutzer (Klartext, keine Aktorbefehle) | `bitsy-home/` | nie deployt |
+| ₿itsy-Study | Erklärung für Forscher & Studienteilnehmer, inkl. Export | `bitsy-study/` | nie deployt |
+| DEV-BitHamster | Solar-Mining-Analyse auf eigener Umbrel-Instanz | `hermes-bithamster/` | nie deployt, Infra (`.62`) existiert nicht mehr |
 
-```
-bitsy-home/
-├── SOUL.md       ← Ton, Grenzen, Beispielantworten
-├── IDENTITY.md   ← Zweck, Modell, Datenquellen
-├── USER.md       ← Der Heimnutzer — was er will, wie er denkt
-├── AGENTS.md     ← Session-Startup, erlaubte Endpunkte, Red Lines
-├── TOOLS.md      ← API-Endpunkte (read-only), Modell
-└── BOOTSTRAP.md  ← Einmalig: Initialisierung
-```
-
-**Datenquellen (read-only):**
-- `GET /state` — aktueller EnergyState
-- `GET /timeline` — letzte Entscheidungsblöcke
-- `GET /preview` — nächster Block (Prognose)
-
-**Modell:** Qwen3:4b — schnell, ressourcenschonend für Erkläraufgaben.
-
-&nbsp;
-
----
-
-## ₿itsy-Study — Erklärung für Forscher & Studie
-
-Unterstützt Studienteilnehmer und Forscher beim Verstehen von Systementscheidungen,
-KPIs und Szenarien. Strukturiert, neutral, quellengenau.
-**Kein Schreibzugriff. Keine Aktorbefehle.**
-
-**Workspace:** `docs/development/36_ai_tooling/bitsy-study/`
-
-```
-bitsy-study/
-├── SOUL.md       ← Ton, Grenzen, Beispiele für beide Zielgruppen
-├── IDENTITY.md   ← Zweck, Modell, Datenquellen
-├── USER.md       ← Studienteilnehmer vs. Forscher — unterschiedliche Bedürfnisse
-├── AGENTS.md     ← Session-Startup, Opt-in-Prüfung, Red Lines
-├── TOOLS.md      ← API-Endpunkte inkl. /research/export, Export-Format
-└── BOOTSTRAP.md  ← Einmalig: Initialisierung
-```
-
-**Datenquellen (read-only):**
-- `GET /state`, `GET /timeline`, `GET /preview`
-- `GET /research/export` — nur bei aktivem Opt-in
-
-**Export-Bundle enthält:** `decisions.parquet`, `states.parquet`, `kpis.json`, `manifest.json`
-
-**Modell:** Qwen3:14b — für präzise Auswertung und strukturierte Outputs.
-
-&nbsp;
-
----
-
-## DEV-BitHamster — Analyse- & Erklär-Agent für Solar-Mining
-
-Läuft auf einer eigenen Umbrel-Instanz (Hermes-Agent, Nous Research), getrennt von
-₿itsy-Dev/-Home/-Study. Zwei Rollen in einem Agenten: erklärt Energie-Entscheidungen
-warm und einfach für Laien **und** durchsucht read-only die Home-Assistant-Recorder-DB
-nach Optimierungsmustern — vor allem optimale SoC-Bänder sowie Wetter-/Saisonfenster
-für möglichst effektives Solar-Mining.
-**Kein Schreibzugriff. Keine Aktorbefehle. Kein HA-Token** — kleinstmögliche Angriffsfläche.
-
-Funde sind **Hypothesen**, kein automatischer Rückfluss nach `core/` — das würde die
-Determinismus-Firewall verletzen (siehe CLAUDE.md, "Was nie passiert").
-
-**Workspace:** `docs/development/36_ai_tooling/hermes-bithamster/`
-
-```
-hermes-bithamster/
-├── SOUL.md            ← Werte, Stil, Domainwissen
-├── PERSONA.md         ← Persona / System-Prompt
-├── DESCRIPTION.md     ← Kurzbeschreibung
-└── SYSTEM_PROMPT.md   ← Index
-```
-
-**Datenquellen (read-only):** HA-Recorder-DB (Snapshot, nicht die Live-DB)
-
-**Modell:** Qwen3.5:9b via Ollama — vollständig lokal, kein Cloud-Backhaul.
-
-&nbsp;
-
----
-
-## Vergleich der Erklär- und Analyse-Agenten
-
-| | ₿itsy-Dev | ₿itsy-Home | ₿itsy-Study | DEV-BitHamster |
-|--|-----------|-----------|------------|-----------------|
-| **Zielgruppe** | Entwickler | Heimnutzer | Forscher + Teilnehmer | Entwickler (Analyse) + Heimnutzer (Erklärung) |
-| **Ton** | technisch, direkt | klar, alltagsnah | neutral, strukturiert | warm, einfach (Erklärung) |
-| **Kennt Codebase** | ja | nein | nein | nein |
-| **Kennt arc42** | ja | nein | nein | nein |
-| **Langzeitgedächtnis** | ja (MEMORY.md) | nein | nein | nein |
-| **Datenzugang** | Repo, Git, Docs | /state, /timeline, /preview | + /research/export | HA-Recorder-DB (read-only, Snapshot) |
-| **Schreibzugriff** | Docs, Code (auf Anfrage) | **keiner** | **keiner** | **keiner** |
-| **Aktorzugriff** | **keiner** | **keiner** | **keiner** | **keiner** |
-| **Modell** | Qwen3:14b | Qwen3:4b | Qwen3:14b | Qwen3.5:9b |
-
-&nbsp;
-
----
-
-## Zusammenspiel aller Agenten
-
-| Situation | Claude Code | ₿itsy-Dev | ₿itsy-Home | ₿itsy-Study | DEV-BitHamster |
-|-----------|------------|-----------|-----------|------------|-----------------|
-| Feature implementieren | schreibt Code + Tests | prüft Architekturfit | — | — | — |
-| Docs ausarbeiten | schreibt Markdown | reviewed Konsistenz | — | — | — |
-| Nutzer fragt warum Miner läuft | — | — | erklärt in Klartext | — | erklärt in Klartext |
-| Forscher analysiert Szenario B | — | — | — | zeigt DecisionEvents, KPIs | — |
-| Studienteilnehmer fragt nach KPIs | — | — | — | erklärt Autarkie-Quote | — |
-| Architekturentscheidung | zeigt arc42-Kapitel | empfiehlt anhand BP | — | — | — |
-| Sweet-Spot für Solar-Mining suchen | — | — | — | — | analysiert SoC-Bänder & Wetter read-only |
+Falls eine dieser Rollen später gebraucht wird: das Workspace-Schema
+(`SOUL.md`, `IDENTITY.md`, `TOOLS.md`) ist bereits vollständig entworfen, nur
+nicht ans Netz gebracht.
 
 &nbsp;
 
@@ -319,11 +209,10 @@ hermes-bithamster/
 
 | Agent | Modell | Läuft auf | Offline-fähig |
 |-------|--------|-----------|--------------|
-| Claude Code | Claude Sonnet (Anthropic) | Dev-Rechner | nein (API) |
-| ₿itsy | Qwen3:14b | Haupt-Umbrel (lokal) | **ja** |
-| DEV-BitHamster | Qwen3.5:9b (Hermes-Agent/Ollama) | Eigene Umbrel-Instanz (lokal) | **ja** |
+| Claude Code | Claude Opus 4.8 (Anthropic) | Dev-Rechner | nein (API) |
+| Neo | `gemma4:e4b` (Ollama) | Haupt-Umbrel (lokal) | **ja** |
 
-₿itsy und DEV-BitHamster laufen vollständig offline — auch wenn kein Internet verfügbar ist.
+Neo läuft vollständig offline — auch wenn kein Internet verfügbar ist.
 Claude Code benötigt die Anthropic API — für Code-Arbeit am Dev-Rechner ist das der Trade-off.
 
 &nbsp;
@@ -332,7 +221,7 @@ Claude Code benötigt die Anthropic API — für Code-Arbeit am Dev-Rechner ist 
 
 ## Erweiterbarkeit
 
-Neue Agenten oder Modelle lassen sich über OpenClaw hinzufügen.
+Neue Agenten oder Modelle lassen sich über Hermes Agent hinzufügen.
 Das Workspace-Schema (`SOUL.md`, `AGENTS.md`, `TOOLS.md`) ist portierbar —
 ein neuer Agent für eine spezifische Aufgabe (z.B. Research-Analyse) bekommt denselben Rahmen.
 

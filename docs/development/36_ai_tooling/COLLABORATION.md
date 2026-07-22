@@ -1,40 +1,45 @@
-# Zusammenarbeit: KI-Team – ₿itsy-Dev, Claude Code & Stitch
+# Zusammenarbeit: KI-Team – Neo, Claude Code & Stitch
 
 Das KI-Team besteht aus drei Agenten mit klar getrennten Rollen.
-Der gemeinsame Kanal für Code & Architektur: **`bitsy-dev/FINDINGS.md`** im Git-Repo.
+Der gemeinsame Kanal für Neos Beobachtungen: **`nachtberichte/`** auf dem Umbrel-Server.
 Design-Übergabe via **`src/ui/design.md`** (Stitch → Claude Code).
 
 &nbsp;
 
 ## Rollen
 
-| | ₿itsy-Dev | Claude Code | Stitch |
+| | Neo | Claude Code | Stitch |
 |---|---|---|---|
-| **Läuft auf** | Umbrel (LAN, offline-fähig) | Dev-Rechner (VSCode, API) | stitch.withgoogle.com (Cloud, via MCP) |
-| **Modell** | Qwen3:14b (lokal) | Claude Sonnet 4.6 (Anthropic) | Google Stitch |
-| **Arbeitet** | autonom, im Hintergrund | auf direkten Auftrag | auf direkten Auftrag |
-| **Stärke** | Repo-Analyse, arc42-Konsistenz, Langzeitgedächtnis | Implementierung, Tests, Docs schreiben | UI/UX Design, Design-System, Komponenten |
-| **Schreibt in** | `FINDINGS.md`, `MEMORY.md`, `memory/` | Code, Docs, `FINDINGS.md` (Status) | `src/ui/design.md` (Export oder MCP) |
-| **Kein Zugriff auf** | — | — | `core/`, keine Entscheidungslogik |
+| **Läuft auf** | Hermes-Agent auf Umbrel `.96:18790`, Modell von Ollama `.104` | Dev-Rechner (VSCode, API) | stitch.withgoogle.com (Cloud, via MCP) |
+| **Modell** | `gemma4:e4b` (lokal auf `.104`) | Claude Opus 4.8 (Anthropic) | Google Stitch |
+| **Arbeitet** | autonom, nachts (Cron 01:00 UTC) | auf direkten Auftrag | auf direkten Auftrag |
+| **Stärke** | Muster-/Optimierungsanalyse in Energie-/Miningdaten | Implementierung, Tests, Docs schreiben | UI/UX Design, Design-System, Komponenten |
+| **Schreibt in** | `nachtberichte/`, eigener Ordner `memory_neo/` | Code, Docs, Vault (nach Prüfung) | `src/ui/design.md` (Export oder MCP) |
+| **Kein Zugriff auf** | `core/`, Vault (read-only), keine Konfiguration | — | `core/`, keine Entscheidungslogik |
 
 &nbsp;
 
-## Workflow
+## Workflow: Neo → Claude Code
 
 ```
-₿itsy-Dev                         FINDINGS.md                    Claude Code
+Neo                              nachtberichte/                  Claude Code
     │                                   │                              │
-    │── analysiert Repo ────────────────►│ [Offen]                      │
-    │                                   │◄─────────────────────────────│ liest beim nächsten Auftrag
-    │                                   │                              │── verifiziert gegen Repo
-    │                                   │                              │── fixt Problem
-    │                                   │── [Erledigt / Falsch-Positiv]◄│
-    │◄── Heartbeat: liest Status ───────│                              │
-    │── Folgeanalyse wenn nötig ────────►│                              │
+    │── liest Fakten + Vault ──────────►│                              │
+    │── schreibt Hypothesen ───────────►│ JJJJ-MM-TT_hypothesen.md     │
+    │                                   │◄─────────────────────────────│ liest, prüft gegen Repo/Anlage
+    │                                   │                              │── übernimmt Geprüftes in Vault
+    │                                   │                              │   (bestaetigt/ oder kontext/*.md)
+    │                                   │                              │── baut Werkzeugwünsche
+    │◄── liest übernommenes Wissen beim nächsten Lauf aus dem Vault ───│
 ```
 
-**Der Entwickler vermittelt:** Ein kurzer Hinweis ("schau dir die neuen Findings an") reicht —
-Claude Code liest `FINDINGS.md` direkt, kein Copy-Paste nötig.
+**Der Betreiber vermittelt:** ein kurzer Hinweis reicht — Claude Code liest den
+Bericht in `nachtberichte/` direkt, kein Copy-Paste nötig.
+
+Neos eigenes Gedächtnis (`memory_neo/`, Obsidian) ist getrennt davon: dort
+sammelt er selbst Zwischenstände (`kurzzeit.md`), Langzeit-Erkenntnisse
+(`langzeit/JJJJ-MM.md`) und offene Gedanken (`gedanken.md`) über Nächte und
+Neustarts hinweg. Details: [`neo/SOUL.md`](./neo/SOUL.md).
 
 &nbsp;
 
@@ -58,51 +63,55 @@ Feature-Drift prüfen: Stitch erfindet manchmal Features, die im Backend nicht e
 
 &nbsp;
 
-## FINDINGS.md — das geteilte Protokoll
+## nachtberichte/JJJJ-MM-TT_hypothesen.md — das geteilte Protokoll
 
-### ₿itsy-Dev schreibt (neue Findings)
+### Neo schreibt (pro Nacht, höchstens drei)
 
 ```markdown
-### [DATUM] [BEREICH] Kurztitel
-**Datei:** `pfad/zur/datei.md` (Zeile X)
-**Problem:** Was genau stimmt nicht?
-**Schwere:** Kritisch / Mittel / Niedrig
-**Empfehlung:** Was sollte getan werden?
+### Hypothese N
+**Beobachtung:** was in den Fakten auffiel, mit Beleg (Datei/Abschnitt)
+**Hypothese:** vermutete Ursache oder Optimierungspotenzial
+**Änderung:** konkreter Vorschlag
+**Erwarteter Effekt:** was sich ändern sollte
+**Falsifikation:** unter welcher Bedingung die Hypothese widerlegt wäre
 **Status:** Offen
 ```
 
-### Claude Code antwortet (Status-Update)
+Kein belastbarer Fund ist ein vollwertiges Ergebnis: dann schreibt Neo genau
+einen Satz statt eine erzwungene Hypothese.
 
-```markdown
-**Status:** Erledigt — `pfad/zur/datei.md` angepasst (Claude Code, YYYY-MM-DD)
-**Status:** Falsch-Positiv — Datei existiert, anderes Namensschema (Claude Code, YYYY-MM-DD)
-**Status:** In Bearbeitung — größere Änderung, läuft (Claude Code, YYYY-MM-DD)
-```
+### Claude Code antwortet (nach Prüfung)
+
+Übernommenes Wissen wandert in den Vault (`bestaetigt/README.md` oder eine
+passende `kontext/*.md`-Datei), damit Neo es beim nächsten Lauf liest und
+nicht erneut vorschlägt. Abgelehntes bleibt in `nachtberichte/` mit kurzer
+Begründung, warum es nicht übernommen wurde.
 
 &nbsp;
 
 ## Schweregrade & Eskalation
 
-| Schwere | Bedeutung | Wer handelt |
+| Einordnung | Bedeutung | Wer handelt |
 |---|---|---|
-| **Kritisch** | Architekturprinzip verletzt, Datenverlust möglich | Sofort zum Entwickler — nicht eigenständig fixen |
-| **Mittel** | Inkonsistenz, fehlendes Kapitel, falscher Link | Claude Code auf Hinweis des Entwicklers |
-| **Niedrig** | Tippfehler, Formatierung, Stil | ₿itsy-Dev kann direkt korrigieren |
+| **Sicherheitsrelevant** | Hypothese berührt Temperatur-/Netzschutz | Sofort prüfen, nicht auf den nächsten Zyklus warten |
+| **Optimierung** | Mehr Sats/Tag ohne Zielkonflikt (siehe `kontext/architektur_rahmen.md`) | Claude Code prüft im normalen Rhythmus |
+| **Zielkonflikt** | Mehr Sats, aber auf Kosten von Transparenz/Sicherheit/Vorhersagbarkeit | Mit dem Betreiber besprechen, nicht automatisch übernehmen |
 
 &nbsp;
 
 ## Wichtige Regeln
 
-**₿itsy-Dev:**
-- Findings immer mit Pfad, Zeile und konkretem Befund dokumentieren
-- Nichts eigenständig ändern außer Tippfehler und offensichtliche Formatfehler
-- Erledigte Findings beim nächsten Heartbeat prüfen — Folgeanalyse anstoßen wenn nötig
+**Neo:**
+- Jede Zahl braucht eine Fundstelle (Faktenbericht oder Werkzeug-Antwort)
+- Nichts eigenständig ändern — kein Terminal, keine Konfiguration, kein HA-Token
+- Werkzeugwunsch statt Schätzung, wenn eine Abfrage fehlt
 
 **Claude Code:**
-- Findings vor Umsetzung immer gegen den tatsächlichen Repo-Stand verifizieren
-- ₿itsy-Dev läuft auf Umbrel — Pfade oder Konventionen können von seiner Perspektive abweichen
-- Nach jedem Fix: Status in FINDINGS.md aktualisieren und committen
-- Falsch-Positive nicht ignorieren — mit Begründung markieren, damit ₿itsy-Dev dazulernt
+- Hypothesen vor Übernahme immer gegen den tatsächlichen Repo-/Anlagenstand verifizieren
+- Nach jeder SOUL.md-/Config-Änderung: Hermes neu starten **und**
+  `scripts/reset_neo_session.py --yes` ausführen (sonst laufen bestehende
+  Chat-Sessions mit der alten, gecachten Identität weiter)
+- Abgelehnte Vorschläge nicht ignorieren — mit Begründung markieren
 
 &nbsp;
 
@@ -117,11 +126,13 @@ Feature-Drift prüfen: Stitch erfindet manchmal Features, die im Backend nicht e
 ├── stitch-ui/
 │   ├── README.md                 ← Stitch Workflow-Guide (Design → Code)
 │   └── DESIGN.md                 ← Stitch-Prompt für BitGridAI UI
-└── bitsy-dev/
-    ├── FINDINGS.md               ← geteilter Kanal: Befunde & Status
-    ├── MEMORY.md                 ← ₿itsy-Dev Langzeitgedächtnis
-    ├── PROJECT_STATE.md          ← Projektstatus + Hintergrundagenda
-    ├── AGENTS.md                 ← ₿itsy-Dev Session & Heartbeat Regeln
-    ├── COMMANDS.md               ← Slash Commands (/full-review etc.) + Trigger-Flag-Protokoll
-    └── HEARTBEAT.md              ← aktive Checkliste + Trigger Flags (z. B. FULL_REVIEW_REQUESTED)
+└── neo/
+    ├── README.md                 ← Überblick, Live-Config vs. dieser Ordner
+    ├── SOUL.md                   ← Spiegel der live deployten Identität/Regeln
+    ├── IDENTITY.md                ← Name, Zweck, Grenzen, Vorgeschichte (₿itsy-Dev → Neo)
+    ├── USER.md                    ← wer der Betreiber ist, wie er denkt
+    ├── TOOLS.md                   ← IPs, Ports, Mounts, Modellwahl-Begründung
+    ├── DESCRIPTION.md              ← Discord-Bot-Kurzbeschreibung (Portal-Spiegel)
+    ├── FINDINGS.md                ← ARCHIVIERT: alte ₿itsy-Dev-Repo-Befunde
+    └── PROJECT_STATE.md           ← ARCHIVIERT: Repo-Snapshot zur Zeit von ₿itsy-Dev
 ```

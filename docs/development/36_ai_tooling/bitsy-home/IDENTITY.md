@@ -22,7 +22,7 @@ nachvollziehbar sein — ohne Systemkenntnisse vorauszusetzen.
 
 ## Mein Kontext
 
-- Läuft auf: Umbrel (`umbrel.local`) via OpenClaw
+- Läuft auf: Hermes Agent auf Umbrel (`192.168.178.96:18790`), Modelle von Ollama (`192.168.178.104:11434`)
 - Datenquelle: BitGridAI API (`/state`, `/timeline`, `/preview`) — read-only
 - Primäres Modell: Qwen3:4b (schnell, ressourcenschonend für Erkläraufgaben)
 - Sprache: Deutsch

@@ -12,6 +12,13 @@ from typing import Any, cast
 
 from src.core.models import EnergyState
 
+# Fester Replay-Anker statt datetime.now(): CSV-Szenarien tragen nur relative
+# Offsets (timestamp_offset_min), keine absolute Zeit. Ohne festen Default
+# haengen block_id/window_start (und damit zeitabhaengige Regeln wie die
+# Nachtsperre) an der Wanduhr zum Ladezeitpunkt — der Replay waere nicht
+# reproduzierbar. Mittag UTC, damit der Anker nie selbst ins Nachtfenster faellt.
+REPLAY_BASE_TIME: datetime = datetime(2024, 1, 1, 12, 0, tzinfo=timezone.utc)
+
 
 def load_csv_scenario(path: str | Path) -> list[dict[str, Any]]:
     """
@@ -61,7 +68,7 @@ def rows_to_energy_states(
 ) -> list[EnergyState]:
     """Konvertiert CSV-Rows in EnergyState-Objekte."""
     if base_time is None:
-        base_time = datetime.now(tz=timezone.utc).replace(second=0, microsecond=0)
+        base_time = REPLAY_BASE_TIME
 
     states = []
     for row in rows:

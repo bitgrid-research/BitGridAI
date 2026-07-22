@@ -6,11 +6,14 @@ Gleicher Input → gleicher Output. Keine Abweichungen erlaubt.
 
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 
 import pytest
 
+from src.core import block_scheduler
 from src.sim.replay import replay_fixture, replay_scenario
+from src.sim.scenario_loader import load_fixture
 
 FIXTURES_DIR = Path(__file__).parent.parent.parent / "src" / "sim" / "fixtures"
 SCENARIOS_DIR = Path(__file__).parent.parent.parent / "src" / "sim" / "scenarios"
@@ -36,6 +39,19 @@ def test_replay_is_deterministic() -> None:
     r2 = replay_fixture(FIXTURES_DIR / "state_nominal.json")
     assert r1["action"] == r2["action"]
     assert r1["decision_code"] == r2["decision_code"]
+
+
+def test_replay_valid_until_anchored_to_fixture() -> None:
+    """valid_until haengt an der aufgezeichneten window_start, nicht an der
+    Wanduhr. Ohne now-Injektion in replay_fixture wuerde datetime.now() greifen
+    und valid_until waere nicht reproduzierbar (der Bug, den dieser Test faengt)."""
+    data = load_fixture(FIXTURES_DIR / "state_nominal.json")
+    window_start = datetime.fromisoformat(data["window_start"])
+    expected = block_scheduler.get_valid_until(window_start)
+
+    result = replay_fixture(FIXTURES_DIR / "state_nominal.json")
+
+    assert result["valid_until"] == expected.isoformat()
 
 
 def test_sh1_scenario_replay_consistent() -> None:

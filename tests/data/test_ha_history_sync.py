@@ -116,8 +116,8 @@ def _build_entity_readings(
         inv_map["miner_temp_c"]: [(T0, 85.0)],
         inv_map["miner_heartbeat_age_sec"]: [(T0, 5.0)],
         inv_map["miner_power_w"]: [(T0, 1700.0)],
-        inv_map["energy_price_ct_kwh"]: [(T0, 18.5)],
         inv_map["pv_forecast_kw"]: [(T0, 5.2)],
+        inv_map["heizstab_power_w"]: [(T0, 900.0)],
     }
 
 

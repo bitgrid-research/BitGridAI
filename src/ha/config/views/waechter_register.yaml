@@ -134,6 +134,22 @@ cards:
     title: R3-Sicherheitspfad
     show_header_toggle: false
     state_color: true
+    # Farbsemantik hier GEGENLAEUFIG zur Liveness-Karte: 'on' heisst
+    # Uebertemperatur / Kommunikationsausfall / Veto aktiv, also Alarm -> rot.
+    # 'off' ist der Normalfall und bleibt bewusst ruhig (kein Gruen: ein
+    # abwesender Alarm ist kein Erfolg, den man feiern muesste, und ein Feld
+    # voll gruener Punkte stumpft gegen den einen roten ab).
+    card_mod:
+      style: |
+        ha-card {
+          --state-binary_sensor-on-color: var(--bg-color-reserve);
+          --state-binary_sensor-active-color: var(--bg-color-reserve);
+          --state-active-color: var(--bg-color-reserve);
+          --state-binary_sensor-problem-on-color: var(--bg-color-reserve);
+          --state-binary_sensor-off-color: var(--bg-color-idle);
+          --state-binary_sensor-inactive-color: var(--bg-color-idle);
+          --state-inactive-color: var(--bg-color-idle);
+        }
     entities:
       - entity: binary_sensor.r3_overtemp
         name: R3 Übertemperatur

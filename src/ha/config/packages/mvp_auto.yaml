@@ -72,7 +72,19 @@ mvp_auto:
       max: 30
       step: 0.5
       mode: box
-      initial: 10
+      # 12,5 kWh = nutzbare Energie am Wechselrichterausgang ueber einen
+      # vollen SoC-Hub, gemessen 2026-07-21 ueber 8 Entladenaechte
+      # (Median, Streuung 10,9 bis 13,0). Nennkapazitaet der Anlage sind
+      # 15,0 kWh: zwei SMA-Batterien a 7,5 kWh an Strang A und C des
+      # Sunny Boy Storage (Slot B unbelegt). Der Unterschied ist der
+      # Round-Trip-Wirkungsgrad, den die Lebensdauerzaehler des Geraets
+      # mit 4196/5181 kWh = 81 % bestaetigen.
+      #
+      # Hier gehoert der GEMESSENE Wert hin, nicht der Nennwert: die
+      # Reichweitenrechnung wuerde sonst 20 % zu viel Energie annehmen,
+      # und der Fehler ginge in die unangenehme Richtung (Speicher frueher
+      # leer als geplant). Bis 2026-07-21 stand hier 10 kWh.
+      initial: 12.5
       icon: mdi:battery-high
 
   input_boolean:
@@ -242,6 +254,16 @@ mvp_auto:
             {% endif %}
             {{ states('input_boolean.mvp_night_block_enabled') == 'on' and in_block }}
 
+        - name: "MVP Nachmittag aktiv"
+          unique_id: mvp_nachmittag_aktiv
+          icon: mdi:weather-sunset-down
+          state: >
+            {# Nachmittag = Sonne über den Zenit hinaus (Azimut >= 180°, Süd→West).
+               Deterministisch und saisonal selbstkorrigierend, kein fester Uhrzeit-
+               Anker. Bei fehlendem sun.sun-Wert fail-safe auf 'Nachmittag'
+               (float(180)): lieber auf Eco kappen als fälschlich hochschalten. #}
+            {{ state_attr('sun.sun', 'azimuth') | float(180) >= 180 }}
+
   automation:
 
     # ── Miner 1: Steuerungs-Automation ────────────────────────────────────
@@ -260,6 +282,9 @@ mvp_auto:
           entity_id: sensor.battery_soc_pct
         - platform: state
           entity_id: sensor.pv_power_w
+        - platform: state
+          entity_id: binary_sensor.mvp_nachmittag_aktiv
+          to: "on"
       condition:
         - condition: state
           entity_id: input_boolean.miner1_auto_load_management
@@ -293,7 +318,7 @@ mvp_auto:
             soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(70) }}"
             pv_start: "{{ states('input_number.mvp_pv_start_w') | float(6000) }}"
             soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(85) }}"
-            soc_std_off: "{{ states('input_number.mvp_soc_eco_start_pct') | float(70) }}"
+            soc_std_collapse: "{{ states('input_number.mvp_soc_std_pct') | float(85) - 2 }}"
             soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(100) }}"
             soc_super_off: "{{ states('input_number.mvp_soc_std_pct') | float(85) }}"
             soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(60) }}"
@@ -314,7 +339,11 @@ mvp_auto:
               up_cd={{ [0, (m1_up_ts + cooldown_sec - now_ts) | int] | max }}s
               dn_cd={{ [0, (m1_dn_ts + cooldown_sec - now_ts) | int] | max }}s
               pv_bypass_in={{ [0, (m1_dn_ts + 900 - now_ts) | int] | max }}s
-            level: warning
+            # Pro-Durchlauf-Trace: feuert bei jeder SoC/PV-Änderung (~alle 5s) und
+            # flutet sonst home-assistant.log. Auf debug → im Normalbetrieb (Default
+            # info) unsichtbar, per `logger:` auf debug bei Bedarf wieder sichtbar.
+            # Die echten Moduswechsel/Sicherheits-Events unten bleiben auf info/warning.
+            level: debug
 
         - choose:
             # P1: SoC zu niedrig → Standby (kein Cooldown — Sicherheit geht vor)
@@ -371,10 +400,42 @@ mvp_auto:
                   data:
                     option: Standard
 
-            # P2: Akku voll → Super
+            # P0a: Nachmittag (ab Sonnenhöchststand) → auf Eco kappen.
+            # Nutzer-Entscheidung 2026-07-19: nachmittags nur noch runterschalten,
+            # langsam und effizient minen. Steht bewusst über P2/P2.5 (die zusätzlich
+            # per not-afternoon-Gate gesperrt sind). Kein Cooldown — ein Cap nach
+            # unten darf nicht von einem Aufwärts-Cooldown blockiert werden. Sobald
+            # der Miner in Eco ist, greift dieser Zweig nicht mehr (Status != Std/Super)
+            # und die gesperrten Aufwärts-Regeln halten Eco stabil bis Nacht/Stop.
+            - conditions:
+                - condition: state
+                  entity_id: binary_sensor.mvp_nachmittag_aktiv
+                  state: "on"
+                - condition: template
+                  value_template: "{{ m1_status in ['Standard', 'Super'] }}"
+              sequence:
+                - action: system_log.write
+                  data:
+                    message: >
+                      [mvp-miner1] P0a Nachmittag-Cap: Sonne über Zenit
+                      (azimut={{ state_attr('sun.sun', 'azimuth') | round(0) }}°)
+                      — status={{ m1_status }} → Eco (langsam & effizient, kein Cooldown)
+                    level: info
+                - action: select.select_option
+                  target:
+                    entity_id: select.miner1_workmode_set
+                  data:
+                    option: Eco
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.mvp_miner1_last_downgrade
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+            # P2: Akku voll → Super (nur vormittags — nachmittags per Gate gesperrt)
             - conditions:
                 - condition: template
-                  value_template: "{{ soc >= soc_super_on }}"
+                  value_template: "{{ soc >= soc_super_on and is_state('binary_sensor.mvp_nachmittag_aktiv', 'off') }}"
               sequence:
                 - condition: template
                   value_template: "{{ m1_status != 'Super' }}"
@@ -400,7 +461,9 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P3: Super-Deadband unterschritten → Standard (blockiert wenn Upgrade-Cooldown aktiv)
+            # P3: Super-Band verlassen (Sonne geht) → Eco direkt, kein Zwischenschritt
+            # Standard. Eco zieht weniger, der Akku traegt das Mining laenger und
+            # effizienter bis zur Hausreserve. Blockiert wenn Upgrade-Cooldown aktiv.
             - conditions:
                 - condition: template
                   value_template: "{{ soc < soc_super_off and m1_status == 'Super' }}"
@@ -409,13 +472,13 @@ mvp_auto:
                   value_template: "{{ (now_ts - m1_up_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P3 Super→Standard: soc={{ soc }}% < {{ soc_super_off }}% — Deadband unterschritten"
+                    message: "[mvp-miner1] P3 Super→Eco: soc={{ soc }}% < {{ soc_super_off }}% — Sonne weg, effizient auslaufen"
                     level: info
                 - action: select.select_option
                   target:
                     entity_id: select.miner1_workmode_set
                   data:
-                    option: Standard
+                    option: Eco
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.mvp_miner1_last_downgrade
@@ -423,9 +486,10 @@ mvp_auto:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
             # P2.5: SoC im Standard-Bereich → Standard (Eco→Standard, blockiert wenn Downgrade-Cooldown aktiv)
+            # Nachmittags per Gate gesperrt: dann bleibt Eco die Obergrenze.
             - conditions:
                 - condition: template
-                  value_template: "{{ soc >= soc_std_on and m1_status == 'Eco' }}"
+                  value_template: "{{ soc >= soc_std_on and m1_status == 'Eco' and is_state('binary_sensor.mvp_nachmittag_aktiv', 'off') }}"
               sequence:
                 - condition: template
                   value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
@@ -449,16 +513,18 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P3.5: Standard-Deadband unterschritten → Eco (blockiert wenn Upgrade-Cooldown aktiv)
+            # P3.5: Standard-Band verlassen → Eco. Greift nur wenn der Miner in Standard
+            # blieb (Tages-Peak unter Super). Schwelle 2 Punkte unter der Standard-Ein-
+            # Schwelle (85), damit die Hochschaltung P2.5 nicht dagegen flattert.
             - conditions:
                 - condition: template
-                  value_template: "{{ soc < soc_std_off and m1_status == 'Standard' }}"
+                  value_template: "{{ soc < soc_std_collapse and m1_status == 'Standard' }}"
               sequence:
                 - condition: template
                   value_template: "{{ (now_ts - m1_up_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P3.5 Standard→Eco: soc={{ soc }}% < {{ soc_std_off }}% — Deadband unterschritten"
+                    message: "[mvp-miner1] P3.5 Standard→Eco: soc={{ soc }}% < {{ soc_std_collapse }}% — effizient auslaufen"
                     level: info
                 - action: select.select_option
                   target:
@@ -538,6 +604,9 @@ mvp_auto:
           entity_id: sensor.battery_soc_pct
         - platform: state
           entity_id: sensor.pv_power_w
+        - platform: state
+          entity_id: binary_sensor.mvp_nachmittag_aktiv
+          to: "on"
       condition:
         - condition: state
           entity_id: input_boolean.miner2_auto_load_management
@@ -564,7 +633,7 @@ mvp_auto:
             soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(70) }}"
             pv_start: "{{ states('input_number.mvp_pv_start_w') | float(6000) }}"
             soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(85) }}"
-            soc_std_off: "{{ states('input_number.mvp_soc_eco_start_pct') | float(70) }}"
+            soc_std_collapse: "{{ states('input_number.mvp_soc_std_pct') | float(85) - 2 }}"
             soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(100) }}"
             soc_super_off: "{{ states('input_number.mvp_soc_std_pct') | float(85) }}"
             soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(60) }}"
@@ -585,7 +654,9 @@ mvp_auto:
               up_cd={{ [0, (m2_up_ts + cooldown_sec - now_ts) | int] | max }}s
               dn_cd={{ [0, (m2_dn_ts + cooldown_sec - now_ts) | int] | max }}s
               pv_bypass_in={{ [0, (m2_dn_ts + 900 - now_ts) | int] | max }}s
-            level: warning
+            # Pro-Durchlauf-Trace: siehe mvp_miner1_watchdog — auf debug gesetzt,
+            # damit home-assistant.log nicht alle 5s geflutet wird.
+            level: debug
 
         - choose:
             # P1: SoC zu niedrig → Standby (kein Cooldown — Sicherheit geht vor)
@@ -642,11 +713,39 @@ mvp_auto:
                   data:
                     option: Standard
 
+            # P0a: Nachmittag (ab Sonnenhöchststand) → auf Eco kappen.
+            # Nutzer-Entscheidung 2026-07-19: nachmittags nur noch runterschalten,
+            # langsam und effizient minen. Kein Cooldown — Cap nach unten hat Vorrang.
+            - conditions:
+                - condition: state
+                  entity_id: binary_sensor.mvp_nachmittag_aktiv
+                  state: "on"
+                - condition: template
+                  value_template: "{{ m2_status in ['Standard', 'Super'] }}"
+              sequence:
+                - action: system_log.write
+                  data:
+                    message: >
+                      [mvp-miner2] P0a Nachmittag-Cap: Sonne über Zenit
+                      (azimut={{ state_attr('sun.sun', 'azimuth') | round(0) }}°)
+                      — status={{ m2_status }} → Eco (langsam & effizient, kein Cooldown)
+                    level: info
+                - action: select.select_option
+                  target:
+                    entity_id: select.miner2_workmode_set
+                  data:
+                    option: Eco
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.mvp_miner2_last_downgrade
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
             # P2: entfällt für Miner 2 — Super kategorisch gesperrt (s.o.)
 
-            # P3: Super-Deadband unterschritten → Standard (blockiert wenn Upgrade-Cooldown aktiv)
-            # Bleibt als Aufräum-Regel stehen falls Miner 2 doch mal in Super war
-            # (z.B. Sperre kurzzeitig gelockert) — m2_status == 'Super' kann sonst nicht mehr eintreten.
+            # P3: Super-Band verlassen → Eco direkt (parallel zu Miner 1). Aufraeum-Regel
+            # falls Miner 2 doch mal in Super war; der Sofort-Net mvp_miner2_super_lockout
+            # zieht Super ohnehin zuerst auf Standard, daher greift das hier praktisch nie.
             - conditions:
                 - condition: template
                   value_template: "{{ soc < soc_super_off and m2_status == 'Super' }}"
@@ -655,13 +754,13 @@ mvp_auto:
                   value_template: "{{ (now_ts - m2_up_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P3 Super→Standard: soc={{ soc }}% < {{ soc_super_off }}% — Deadband unterschritten"
+                    message: "[mvp-miner2] P3 Super→Eco: soc={{ soc }}% < {{ soc_super_off }}% — Sonne weg, effizient auslaufen"
                     level: info
                 - action: select.select_option
                   target:
                     entity_id: select.miner2_workmode_set
                   data:
-                    option: Standard
+                    option: Eco
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.mvp_miner2_last_downgrade
@@ -669,9 +768,10 @@ mvp_auto:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
             # P2.5: SoC im Standard-Bereich → Standard (Eco→Standard, blockiert wenn Downgrade-Cooldown aktiv)
+            # Nachmittags per Gate gesperrt: dann bleibt Eco die Obergrenze.
             - conditions:
                 - condition: template
-                  value_template: "{{ soc >= soc_std_on and m2_status == 'Eco' }}"
+                  value_template: "{{ soc >= soc_std_on and m2_status == 'Eco' and is_state('binary_sensor.mvp_nachmittag_aktiv', 'off') }}"
               sequence:
                 - condition: template
                   value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
@@ -695,16 +795,18 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P3.5: Standard-Deadband unterschritten → Eco (blockiert wenn Upgrade-Cooldown aktiv)
+            # P3.5: Standard-Band verlassen → Eco. Greift nur wenn der Miner in Standard
+            # blieb (Tages-Peak unter Super). Schwelle 2 Punkte unter der Standard-Ein-
+            # Schwelle (85), damit die Hochschaltung P2.5 nicht dagegen flattert.
             - conditions:
                 - condition: template
-                  value_template: "{{ soc < soc_std_off and m2_status == 'Standard' }}"
+                  value_template: "{{ soc < soc_std_collapse and m2_status == 'Standard' }}"
               sequence:
                 - condition: template
                   value_template: "{{ (now_ts - m2_up_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P3.5 Standard→Eco: soc={{ soc }}% < {{ soc_std_off }}% — Deadband unterschritten"
+                    message: "[mvp-miner2] P3.5 Standard→Eco: soc={{ soc }}% < {{ soc_std_collapse }}% — effizient auslaufen"
                     level: info
                 - action: select.select_option
                   target:

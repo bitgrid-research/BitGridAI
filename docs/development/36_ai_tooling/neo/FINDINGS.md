@@ -1,4 +1,10 @@
-# FINDINGS.md – Schwachstellen & Analysebefunde
+# FINDINGS.md – Schwachstellen & Analysebefunde (ARCHIVIERT)
+
+> **Archiviert seit 22.07.2026.** Letzter echter Eintrag: 28.06.2026. Diese
+> Instanz hieß damals ₿itsy-Dev und machte autonome Repo-/arc42-Reviews; diese
+> Rolle wurde durch Neo (nächtliche Energie-Musteranalyse) ersetzt, siehe
+> `IDENTITY.md`. Die Befunde unten bleiben als Projekthistorie stehen,
+> es kommen aber keine neuen mehr hinzu.
 
 > Autonome Hintergrundanalyse von ₿itsy-Dev.
 > Neue Befunde oben eintragen — älteste unten.

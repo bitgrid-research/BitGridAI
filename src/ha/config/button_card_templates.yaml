@@ -205,14 +205,14 @@ device_tile:
           : n.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kWh';
       };
       const eDaily = variables?.energy_daily ? states[variables.energy_daily]?.state : null;
-      return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-        <span style="font-size:1.45rem;font-weight:700;line-height:1.1">${fmtW(entity?.state)}</span>
-        <span style="font-size:0.75rem;color:var(--secondary-text-color)">Heute: ${fmtKwh(eDaily)}</span>
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <span style="font-size:1.2rem;font-weight:700;line-height:1.1">${fmtW(entity?.state)}</span>
+        <span style="font-size:0.72rem;color:var(--secondary-text-color)">Heute: ${fmtKwh(eDaily)}</span>
       </div>`;
     ]]]
   styles:
     card:
-      - padding: 16px 10px
+      - padding: 9px 10px
       - opacity: "[[[ return ['unavailable','unknown'].includes(entity?.state) ? '0.45' : '1'; ]]]"
     grid:
       - grid-template-areas: '"i" "n" "l"'
@@ -220,13 +220,180 @@ device_tile:
       - grid-template-rows: auto auto auto
       - justify-items: center
     icon:
-      - width: 30px
-      - height: 30px
+      - width: 24px
+      - height: 24px
       - color: "[[[ return variables?.accent_color || '#A6A2D8'; ]]]"
     name:
-      - font-size: 0.9rem
+      - font-size: 0.85rem
       - font-weight: 600
-      - margin-top: 6px
-      - margin-bottom: 4px
+      - margin-top: 3px
+      - margin-bottom: 2px
+    label:
+      - justify-self: center
+
+# ─── Raum-Überschrift (dedupliziert; Farbe via variables.accent_color) ───────
+room_header:
+  show_name: true
+  show_icon: true
+  show_state: false
+  tap_action:
+    action: none
+  styles:
+    card:
+      - background: none
+      - box-shadow: none
+      - border: none
+      - padding: 8px 4px 0
+    grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: min-content 1fr
+      - align-items: center
+    img_cell:
+      - justify-content: start
+    icon:
+      - color: "[[[ return variables?.accent_color || '#A6A2D8'; ]]]"
+      - width: 20px
+      - height: 20px
+    name:
+      - font-size: 0.82rem
+      - font-weight: 700
+      - text-transform: uppercase
+      - letter-spacing: 0.06em
+      - color: "[[[ return variables?.accent_color || '#A6A2D8'; ]]]"
+      - justify-self: start
+      - padding-left: 8px
+
+# ─── Thermostat-Kachel: Ist-Temperatur groß, Heizzustand + Batterie klein ────
+#   entity: climate.*   variables: battery (sensor.*_batterie), accent_color
+climate_tile:
+  show_name: true
+  show_icon: true
+  show_state: false
+  show_label: true
+  tap_action:
+    action: more-info
+  icon: >
+    [[[ return (entity?.attributes?.hvac_action === 'heating') ? 'mdi:radiator' : 'mdi:thermometer'; ]]]
+  label: >
+    [[[
+      const t = entity?.attributes?.current_temperature;
+      const temp = (t === undefined || t === null)
+        ? '—'
+        : Number(t).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '°';
+      const heating = entity?.attributes?.hvac_action === 'heating';
+      const heatStr = heating ? 'heizt' : (entity?.state === 'off' ? 'aus' : 'bereit');
+      const heatCol = heating ? '#E6893B' : 'var(--secondary-text-color)';
+      const bs = variables?.battery ? states[variables.battery] : null;
+      const b = bs ? parseInt(bs.state) : NaN;
+      const bCol = isNaN(b) ? 'var(--secondary-text-color)'
+        : (b <= 20 ? '#e66767' : (b <= 50 ? '#E6A100' : 'var(--secondary-text-color)'));
+      const bStr = isNaN(b) ? '' : `<span style="color:${bCol}">🔋${b}%</span>`;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <span style="font-size:1.2rem;font-weight:700;line-height:1.1">${temp}</span>
+        <span style="font-size:0.72rem"><span style="color:${heatCol}">${heatStr}</span>${bStr ? ' · ' + bStr : ''}</span>
+      </div>`;
+    ]]]
+  styles:
+    card:
+      - padding: 9px 10px
+      - opacity: "[[[ return ['unavailable','unknown'].includes(entity?.state) ? '0.45' : '1'; ]]]"
+    grid:
+      - grid-template-areas: '"i" "n" "l"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto auto auto
+      - justify-items: center
+    icon:
+      - width: 24px
+      - height: 24px
+      - color: "[[[ return (entity?.attributes?.hvac_action === 'heating') ? '#E6893B' : (variables?.accent_color || '#A6A2D8'); ]]]"
+    name:
+      - font-size: 0.85rem
+      - font-weight: 600
+      - margin-top: 3px
+      - margin-bottom: 2px
+    label:
+      - justify-self: center
+
+# ─── Fensterkontakt-Kachel: OFFEN/zu prominent + Batterie ────────────────────
+#   entity: binary_sensor.*_alarm   variables: battery, accent_color
+window_tile:
+  show_name: true
+  show_icon: true
+  show_state: false
+  show_label: true
+  tap_action:
+    action: more-info
+  icon: >
+    [[[ return entity?.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'; ]]]
+  label: >
+    [[[
+      const open = entity?.state === 'on';
+      const stStr = open
+        ? '<span style="color:#e66767;font-weight:700">OFFEN</span>'
+        : '<span style="color:var(--secondary-text-color);font-weight:700">zu</span>';
+      const bs = variables?.battery ? states[variables.battery] : null;
+      const b = bs ? parseInt(bs.state) : NaN;
+      const bCol = isNaN(b) ? 'var(--secondary-text-color)'
+        : (b <= 20 ? '#e66767' : (b <= 50 ? '#E6A100' : 'var(--secondary-text-color)'));
+      const bStr = isNaN(b) ? '' : `<span style="color:${bCol}">🔋${b}%</span>`;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <span style="font-size:1.05rem;line-height:1.1">${stStr}</span>
+        <span style="font-size:0.72rem">${bStr}</span>
+      </div>`;
+    ]]]
+  styles:
+    card:
+      - padding: 9px 10px
+      - opacity: "[[[ return ['unavailable','unknown'].includes(entity?.state) ? '0.45' : '1'; ]]]"
+    grid:
+      - grid-template-areas: '"i" "n" "l"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto auto auto
+      - justify-items: center
+    icon:
+      - width: 24px
+      - height: 24px
+      - color: "[[[ return entity?.state === 'on' ? '#e66767' : (variables?.accent_color || '#A6A2D8'); ]]]"
+    name:
+      - font-size: 0.85rem
+      - font-weight: 600
+      - margin-top: 3px
+      - margin-bottom: 2px
+    label:
+      - justify-self: center
+
+# ─── Schaltbare Last (Lampe/Steckdose): an/aus, Tap toggelt ──────────────────
+#   entity: light.* | switch.*   variables: accent_color
+switch_tile:
+  show_name: true
+  show_icon: true
+  show_state: false
+  show_label: true
+  tap_action:
+    action: toggle
+  label: >
+    [[[
+      const on = entity?.state === 'on';
+      const col = on ? (variables?.accent_color || '#199E70') : 'var(--secondary-text-color)';
+      return `<span style="font-size:0.95rem;font-weight:700;color:${col}">${on ? 'an' : 'aus'}</span>`;
+    ]]]
+  styles:
+    card:
+      - padding: 9px 10px
+      - opacity: "[[[ return ['unavailable','unknown'].includes(entity?.state) ? '0.45' : '1'; ]]]"
+    grid:
+      - grid-template-areas: '"i" "n" "l"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto auto auto
+      - justify-items: center
+    icon:
+      - width: 24px
+      - height: 24px
+      - color: "[[[ return entity?.state === 'on' ? (variables?.accent_color || '#A6A2D8') : 'var(--disabled-text-color, #6b6b6b)'; ]]]"
+    name:
+      - font-size: 0.85rem
+      - font-weight: 600
+      - margin-top: 3px
+      - margin-bottom: 2px
     label:
       - justify-self: center

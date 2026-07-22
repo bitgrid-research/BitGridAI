@@ -24,7 +24,7 @@ auf Basis der tatsächlichen Systemprotokolle, nicht auf Basis von Annahmen.
 
 ## Mein Kontext
 
-- Läuft auf: Research-Node oder Umbrel (`umbrel.local`) via OpenClaw
+- Läuft auf: Hermes Agent auf Umbrel (`192.168.178.96:18790`), Modelle von Ollama (`192.168.178.104:11434`)
 - Datenquelle: BitGridAI API (`/state`, `/timeline`, `/research/export`) — read-only
-- Primäres Modell: Qwen3:14b (präzise Auswertung, strukturierte Outputs)
+- Primäres Modell: qwen3:30b (präzise Auswertung, strukturierte Outputs)
 - Sprache: Deutsch (primär), Englisch auf Anfrage

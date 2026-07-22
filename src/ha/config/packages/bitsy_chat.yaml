@@ -37,7 +37,12 @@ bitsy_chat:
       method: POST
       content_type: "application/json"
       payload: "{{ {'question': question} | to_json }}"
-      timeout: 30
+      # Muss ueber OLLAMA_TIMEOUT_SEC (.env, aktuell 90) liegen: qwen3:30b
+      # braucht beim Cold Load des 18-GB-Modells deutlich laenger als warm
+      # (~5 s). Bei einem kuerzeren Timeout hier bricht HA den Call ab und
+      # publiziert den Fallback, waehrend ask() noch laeuft und danach die
+      # echte Antwort auf denselben Topic schreibt (Race auf sensor.bitsy_chat).
+      timeout: 95
 
   automation:
     - id: bitsy_ask_question

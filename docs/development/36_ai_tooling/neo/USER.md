@@ -6,8 +6,9 @@ A developer and researcher building **BitGridAI** from the ground up.
 
 ## Their Setup
 
-- **Home server:** Umbrel (`umbrel.local`) — self-hosted, local network
-- **AI interface:** OpenClaw on Umbrel (port 18789), running local models (Qwen3:14b)
+- **Home server:** Umbrel (`192.168.178.96`) — self-hosted, local network
+- **AI box:** Ollama on `192.168.178.104:11434`, fixed IP, the only LLM host
+- **AI interface:** Hermes Agent on the Umbrel (`192.168.178.96:18790`), persona "Neo", model `gemma4:e4b`
 - **Development:** Claude Code (VS Code extension) for coding and documentation
 - **Energy system:** PV installation, battery storage, flexible loads (incl. Bitcoin mining)
 - **Smart home:** likely Home Assistant integration (local adapter)

@@ -20,5 +20,5 @@
 
 | Service | Adresse |
 |---------|---------|
-| OpenClaw | `umbrel.local:18789` |
+| Hermes Agent | `192.168.178.96:18790` |
 | BitGridAI API | `bitgrid-core:8080` (intern im Docker-Netz) |

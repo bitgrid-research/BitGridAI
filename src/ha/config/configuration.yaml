@@ -41,6 +41,12 @@ lovelace:
       title: BitGridAI v2
       icon: mdi:bitcoin
       show_in_sidebar: true
+    bitgridai-demo:
+      mode: yaml
+      filename: bitgrid_dashboard_demo.yaml
+      title: BitGridAI Demo
+      icon: mdi:presentation
+      show_in_sidebar: true
     bitgridai-v1:
       mode: yaml
       filename: bitgrid_dashboard_v1.yaml
