@@ -1,0 +1,159 @@
+# ═══════════════════════════════════════════════════════════════════════
+# HEIZSTAB (ELEKTRISCH) — Tabelle im Tab "Heizung" (bitgrid_dashboard_v3.yaml).
+#
+# AC-ELWA-2 (Warmwasser-Heizstab, zwei Leistungskanäle solar-/netzbezogen).
+# Gleiche Entities wie im "Heizstab"-Block auf dem Dev-Dashboard
+# (views/miner_stats.yaml Z.207ff): sensor.ac_elwa_2_screen_mode,
+# _temperatur_1, _power1_solar, _power1_grid. Summenleistung/Tagesenergie
+# aus packages/devices.yaml (heizstab_power_w, heizstab_energy_daily,
+# Midnight-Baseline-Muster).
+# Kartenrahmen/Zeilenstil identisch zu views/heizung_oel.yaml und
+# views/verbrauch_nach_geraetetyp.yaml (gleicher Tab-Familienstandard).
+#
+# "Anteil Tag aktiv" + "PV-Anteil" (26.08.2026, Nutzer-Skizze): echte,
+# zeitgewichtete Berechnung aus der HA-History-REST-API (hass.callApi,
+# gleiches Muster/Cache wie views/heizung_oel.yaml, dort der volle
+# Begründungskommentar). PV-Anteil = zeitgewichtetes Wh-Integral von
+# power1_solar geteilt durch (power1_solar + power1_grid) — echte
+# Energie-Trapezintegration über die Tagessamples, kein simpler Momentan-
+# Leistungs-Schnappschuss (der wäre bei einem Heizstab mit hartem Ein/Aus-
+# Takten irreführend).
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 16px 14px
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    body:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  body: >
+    [[[
+      const fnum = (id) => { const v = parseFloat(states[id]?.state); return isNaN(v) ? null : v; };
+      const modeRaw = states['sensor.ac_elwa_2_screen_mode']?.state;
+      const mode = (!modeRaw || modeRaw === 'unavailable' || modeRaw === 'unknown') ? '—' : modeRaw;
+      const modeColor = mode === '—' ? 'var(--secondary-text-color)' : (mode === 'Standby' ? 'var(--secondary-text-color)' : '#4CAF50');
+      const tempC = fnum('sensor.ac_elwa_2_temperatur_1');
+      const pSolar = fnum('sensor.ac_elwa_2_power1_solar');
+      const pGrid = fnum('sensor.ac_elwa_2_power1_grid');
+      const pTotal = fnum('sensor.heizstab_power_w');
+      const kwhToday = fnum('sensor.heizstab_energy_daily');
+
+      const fmtW = (v) => v === null ? '—' : (v < 10 ? v.toFixed(1) : Math.round(v).toLocaleString('de-DE')) + ' W';
+      const fmtC = (v) => v === null ? '—' : v.toLocaleString('de-DE', {maximumFractionDigits: 1}) + ' °C';
+      const fmtKwh = (v) => v === null ? '—' : v.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kWh';
+      const fmtPct = (v) => v === null || v === undefined ? '…' : v.toLocaleString('de-DE', {maximumFractionDigits: 1}) + ' %';
+
+      window._bgHeizCache = window._bgHeizCache || {};
+      const historySamples = (entityId, midnightIso) =>
+        hass.callApi('GET', `history/period/${midnightIso}?filter_entity_id=${entityId}&minimal_response`)
+          .then((resp) => (resp && resp[0]) || []);
+
+      // Anteil Tag aktiv: Duty-Cycle wie bei heizung_oel.yaml, threshold
+      // identisch zur Netz-/Solar-Detektion oben (> 5 W = "läuft").
+      const dutyPct = (() => {
+        const key = 'heizstab_duty';
+        const cache = window._bgHeizCache;
+        const now = Date.now();
+        const c = cache[key];
+        if (!c || now - (c.fetching || 0) > 5 * 60000) {
+          cache[key] = Object.assign({}, c, { fetching: now });
+          const midnight = new Date(); midnight.setHours(0, 0, 0, 0);
+          historySamples('sensor.heizstab_power_w', midnight.toISOString()).then((samples) => {
+            const end = Date.now();
+            let onMs = 0;
+            for (let i = 0; i < samples.length; i++) {
+              const v = parseFloat(samples[i].state);
+              const tStart = new Date(samples[i].last_changed).getTime();
+              const tEnd = i + 1 < samples.length ? new Date(samples[i + 1].last_changed).getTime() : end;
+              if (!isNaN(v) && v > 5) onMs += Math.max(0, tEnd - tStart);
+            }
+            const totalMs = end - midnight.getTime();
+            cache[key] = { ts: Date.now(), pct: totalMs > 0 ? (onMs / totalMs) * 100 : null };
+            try { this.requestUpdate && this.requestUpdate(); } catch (e) {}
+          }).catch(() => { cache[key] = { ts: Date.now(), pct: null }; });
+        }
+        return cache[key] && cache[key].pct !== undefined ? cache[key].pct : undefined;
+      })();
+
+      // PV-Anteil: zeitgewichtetes Wh-Integral (Trapez) je Kanal, siehe
+      // Kopfkommentar. Zwei getrennte History-Requests statt eines mit
+      // filter_entity_id=a,b: die HA-REST-API dokumentiert die Reihenfolge
+      // der zurückgegebenen Arrays bei mehreren Entities nicht verlässlich.
+      const pvSharePct = (() => {
+        const key = 'heizstab_pv_share';
+        const cache = window._bgHeizCache;
+        const now = Date.now();
+        const c = cache[key];
+        if (!c || now - (c.fetching || 0) > 5 * 60000) {
+          cache[key] = Object.assign({}, c, { fetching: now });
+          const midnight = new Date(); midnight.setHours(0, 0, 0, 0);
+          const iso = midnight.toISOString();
+          const integrateWh = (samples) => {
+            const end = Date.now();
+            let wh = 0;
+            for (let i = 0; i < samples.length; i++) {
+              const v = parseFloat(samples[i].state);
+              const tStart = new Date(samples[i].last_changed).getTime();
+              const tEnd = i + 1 < samples.length ? new Date(samples[i + 1].last_changed).getTime() : end;
+              if (!isNaN(v)) wh += v * Math.max(0, tEnd - tStart) / 3600000;
+            }
+            return wh;
+          };
+          Promise.all([
+            historySamples('sensor.ac_elwa_2_power1_solar', iso),
+            historySamples('sensor.ac_elwa_2_power1_grid', iso),
+          ]).then(([solarSamples, gridSamples]) => {
+            const solarWh = integrateWh(solarSamples);
+            const gridWh = integrateWh(gridSamples);
+            const totalWh = solarWh + gridWh;
+            cache[key] = { ts: Date.now(), pct: totalWh > 0 ? (solarWh / totalWh) * 100 : null };
+            try { this.requestUpdate && this.requestUpdate(); } catch (e) {}
+          }).catch(() => { cache[key] = { ts: Date.now(), pct: null }; });
+        }
+        return cache[key] && cache[key].pct !== undefined ? cache[key].pct : undefined;
+      })();
+
+      const row = (icon, label, val, color=null) => {
+        const c = color ? `color:${color};` : 'color:var(--primary-text-color);';
+        return `<div style="display:flex;align-items:center;padding:7px 2px;gap:8px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <ha-icon icon="${icon}" style="--mdc-icon-size:15px;color:rgba(255,255,255,0.7);"></ha-icon>
+          </div>
+          <span style="flex:1;min-width:0;color:var(--primary-text-color);font-size:0.92rem;font-weight:600;">${label}</span>
+          <span style="font-size:0.95rem;font-weight:700;${c}white-space:nowrap;">${val}</span>
+        </div>`;
+      };
+      const sep = '<div style="border-top:1px solid rgba(255,255,255,0.06);margin:0 2px;"></div>';
+
+      const rows = [
+        row('mdi:information-outline', 'Zustand', mode, modeColor),
+        row('mdi:thermometer-water', 'Temperatur', fmtC(tempC)),
+        row('mdi:solar-power', 'Leistung Solar', fmtW(pSolar), pSolar > 0 ? '#4CAF50' : null),
+        row('mdi:transmission-tower', 'Leistung Netz', fmtW(pGrid), pGrid > 0 ? '#f59e0b' : null),
+        row('mdi:flash', 'Leistung gesamt', fmtW(pTotal), '#4FC3F7'),
+        row('mdi:counter', 'Energie heute', fmtKwh(kwhToday), '#4FC3F7'),
+        row('mdi:chart-donut', 'Anteil Tag aktiv', fmtPct(dutyPct), '#4FC3F7'),
+        row('mdi:solar-power', 'PV-Anteil', fmtPct(pvSharePct), '#4CAF50'),
+      ].join(sep);
+
+      return `<div style="display:flex;flex-direction:column;width:100%">
+        <div style="font-size:1rem;font-weight:700;color:var(--primary-text-color);margin-bottom:6px;padding-left:2px;">Heizstab (elektrisch)</div>
+        ${rows}
+      </div>`;
+    ]]]

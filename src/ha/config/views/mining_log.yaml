@@ -3,156 +3,341 @@
 # Eingebunden via !include in:
 #   - views/miner_stats.yaml      → Dev-"Miner"-Tab (rechte Spalte)
 #   - bitgrid_dashboard_v2.yaml     → Tab "Steuerung", unter den Minern
+#   - bitgrid_dashboard_v3.yaml     → Tab "BitcoinInfo", rechte Spalte
 # Reine custom:button-card, kein button_card_templates-Bezug. Quellen/Logik
 # (Settlement-History → payout_history → daily_log) unverändert aus miner_stats.
+#
+# Kein eigener Karten-Header mehr (entfernt 26.08.2026, Nutzer-Wunsch): in
+# v3 uebernimmt ein externer Abschnittstitel "MINING VERLAUF" diese Rolle
+# (bitgrid_dashboard_v3.yaml, grid-area "tr"). v2/Dev-Miner-Tab zeigen die
+# Tabelle seitdem ohne Titel darueber — bei Bedarf dort ebenfalls einen
+# Abschnittstitel ergaenzen, nicht den Header hier wieder einbauen (geteilte
+# Datei).
+#
+# Woche/Monat-Navigation (26.08.2026, Nutzer-Wunsch, ersetzt die vorherige
+# "letzte 30 Tage, durchscrollen"-Ansicht komplett): input_select.mining_log_
+# periode (Woche/Monat) + input_number.mining_log_offset (0 = aktuelle
+# Periode, 1 = eine zurueck, ...), beide in packages/stats.yaml. Gleiches
+# UI-Muster wie historie_zeitraum_cycler.yaml (Tab EnergieInfo): Label-Karte
+# + Pfeile als eigene button-cards (custom_fields koennen keine eigenen
+# Klick-Ziele pro Element haben, nur die ganze Karte).
 # ═════════════════════════════════════════════════════════
-type: custom:button-card
-show_name: false
-show_icon: false
-show_state: false
-styles:
-  card:
-    - padding: 12px 16px
-  custom_fields:
-    mining_log:
-      - width: 100%
-      - justify-self: stretch
-      - box-sizing: border-box
-custom_fields:
-  mining_log: >
-    [[[
-      const parseLog = (raw) => (raw && raw !== 'unknown' && raw !== 'unavailable') ? raw.split('|').filter(e => e.includes(',')) : [];
-      const recentLog = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
-      const csvLog = parseLog(states['sensor.mining_log_history']?.attributes?.rows ?? '');
-      const seenDates = new Set(recentLog.map(e => e.split(',')[0]));
-      const deduped = [];
-      csvLog.forEach(e => { const d = e.split(',')[0]; if (!seenDates.has(d)) { seenDates.add(d); deduped.push(e); } });
-      const logEntries = [...recentLog, ...deduped].sort((a,b) => b.split(',')[0].localeCompare(a.split(',')[0]));
-      const btcMap = {};
-      const settleThs = {};
-      (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {
-        const hr = tx.mining_extra?.hash_rate;
-        const md = tx.mining_extra?.mining_date;
-        if (!hr || !md) return;
-        const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
-        const d = sd.toISOString().slice(0, 10);
-        settleThs[d] = (hr / 1e12).toFixed(2);
-        const btcVal = parseFloat(tx.amount ?? tx.changed_balance);
-        if (btcVal > 0) btcMap[d] = btcVal;
-      });
-      (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
-        if (!e[0] || !e[2]) return;
-        const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
-        const d = sd.toISOString().slice(0, 10);
-        if (!btcMap[d]) btcMap[d] = e[2];
-      });
-      parseLog(states['input_text.pool_btc_daily_log']?.state ?? '').forEach(e => {
-        const [d, b] = e.split(','); if (d && !btcMap[d]) btcMap[d] = parseFloat(b) || 0;
-      });
-      const liveThsRaw = parseFloat(states['sensor.pool_hashrate_h1_ths']?.state);
-      const liveThs = (!isNaN(liveThsRaw) && liveThsRaw > 0) ? liveThsRaw.toFixed(1) : null;
-      const thsYest = parseFloat(states['sensor.pool_ths_yesterday']?.state) || 0;
-      const phArr   = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
-      const thsApi  = {};
-      if (thsYest > 0 && phArr.length > 0) {
-        const sd = new Date(phArr[0][0]); sd.setUTCDate(sd.getUTCDate() - 1);
-        thsApi[sd.toISOString().slice(0, 10)] = thsYest.toFixed(1);
-      }
-      const thsLog  = {};
-      parseLog(states['input_text.pool_ths_daily_log']?.state ?? '').forEach(e => {
-        const [d, t] = e.split(','); if (d && t) thsLog[d] = t;
-      });
-      const csvThs = {
-        '2026-05-03':'51.46','2026-05-02':'54.36','2026-05-01':'57.62',
-        '2026-04-30':'61.47','2026-04-29':'54.91','2026-04-28':'56.54',
-        '2026-04-27':'62.04','2026-04-26':'52.91','2026-04-25':'58.40',
-        '2026-04-24':'64.92','2026-04-23':'65.03','2026-04-22':'64.86',
-        '2026-04-21':'14.59','2026-04-20':'50.26','2026-04-19':'25.12',
-        '2026-04-18':'36.90','2026-04-17':'50.09','2026-04-16':'49.84',
-        '2026-04-15':'58.32','2026-04-14':'44.94','2026-04-12':'14.36',
-        '2026-04-11':'36.88','2026-04-10':'10.14','2026-04-09':'52.46',
-        '2026-04-08':'45.44','2026-04-07':'50.52','2026-04-06':'55.23',
-        '2026-04-05':'23.90','2026-04-04':'12.39','2026-04-03':'11.26',
-        '2026-04-02':'56.48','2026-04-01':'32.51','2026-03-31':'20.18',
-        '2026-03-30':'18.85','2026-03-29':'15.74','2026-03-28':'19.06'
-      };
-      const btcEur    = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
-      const STROM_EUR = 0.078;
-      const parseEntry = (e) => {
-        const p = e.split(',');
-        return { d: p[0]??'', on: p[1]??'–', off: p[2]??'–',
-          tot: parseFloat(p[3])||0, ec: parseFloat(p[4])||0,
-          st: parseFloat(p[5])||0, sp: parseFloat(p[6])||0, kw: parseFloat(p[7])||0 };
-      };
-      const fmtDt  = (iso) => (iso && iso.length >= 10) ? iso.slice(8,10)+'.'+iso.slice(5,7) : '—';
-      const fmtT   = (dt)  => (!dt || !dt.includes(' ')) ? '–' : dt.split(' ')[1].slice(0,5);
-      const fmtHm  = (v)   => { const n=parseFloat(v); if(!n||n<=0) return '0h'; const h=Math.floor(n),m=Math.round((n-h)*60); return m>0?`${h}h${m}m`:`${h}h`; };
-      const fmtH1  = (v)   => { const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(1); };
-      const fmtSat = (btc) => (!btc || btc <= 0) ? '—' : Math.round(btc * 1e8);
-      const _d = new Date(); const todayIso = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
-      const startDt  = states['input_datetime.last_start_at']?.state ?? '';
-      const stopDt   = states['input_datetime.last_stop_at']?.state ?? '';
-      const startTime = startDt.startsWith(todayIso) ? fmtT(startDt) : '–';
-      const stopTime  = stopDt.startsWith(todayIso)  ? fmtT(stopDt)  : '–';
-      const todayRow = {
-        d: todayIso, on: startTime, off: stopTime,
-        tot: parseFloat(states['sensor.miner_uptime_today_h']?.state)||0,
-        ec:  parseFloat(states['sensor.miner_eco_hours_today']?.state)||0,
-        st:  parseFloat(states['sensor.miner_standard_hours_today']?.state)||0,
-        sp:  parseFloat(states['sensor.miner_super_hours_today']?.state)||0,
-        kw:  parseFloat(states['sensor.mining_energy_daily']?.state)||0,
-        live: true
-      };
-      const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
-      const cutoffIso = cutoff.toISOString().slice(0, 10);
-      const allRows = [todayRow, ...logEntries.map(parseEntry).filter(r => r.d >= cutoffIso)];
-      const cols = '50px 42px 42px 54px 36px 36px 40px 44px 44px 44px 50px 46px';
-      const th = (t,r) => `<div style="font-size:0.62rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
-      const headers = `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;border-bottom:1px solid var(--divider-color);margin-bottom:2px;">
-        ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Ges.',1)}${th('Eco',1)}${th('Std',1)}${th('Sup',1)}${th('kWh',1)}${th('TH/s',1)}${th('SATs',1)}${th('S/kWh',1)}${th('€/kWh',1)}
-      </div>`;
-      const rowHtml = (r) => {
-        const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
-        const dc = r.live ? 'var(--primary-text-color)' : 'var(--secondary-text-color)';
-        const fw = r.live ? '600' : '400';
-        const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
-        const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
-        const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? (r.live ? liveThs : null) ?? '—';
-        const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
-        const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';
-        const earnedEur = (satNum !== null && r.kw > 0 && btcEur > 0)
-          ? satNum * btcEur / 1e8 / r.kw : null;
-        const eurStr   = earnedEur !== null ? earnedEur.toFixed(3) : '—';
-        const eurColor = earnedEur === null ? 'var(--secondary-text-color)'
-          : earnedEur >= 0.156 ? '#F7931A'
-          : earnedEur >= 0.125 ? '#26C6DA'
-          : earnedEur >= 0.100 ? '#4CAF50'
-          : earnedEur >= 0.078 ? '#FFFFFF'
-          : '#9E9E9E';
-        return `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;${hl}">
-          <div style="font-size:0.82rem;color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
-          ${c(r.on,'inherit')}${c(r.off,'inherit')}
-          ${c(fmtHm(r.tot),'var(--primary-text-color)')}
-          ${c(fmtH1(r.ec)+'h','#4CAF50')}
-          ${c(fmtH1(r.st)+'h','#26C6DA')}
-          ${c(fmtH1(r.sp)+'h','#F7931A')}
-          ${c(r.kw.toFixed(2),'white')}
-          ${c(ths,'#FFFFFF')}
-          ${c(sat,'#F7931A')}
-          ${c(sPerKwh,'#F7931A')}
-          ${c(eurStr,eurColor)}
-        </div>`;
-      };
-      return `<div style="width:100%;overflow-x:auto;">
-        <div style="min-width:620px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
-            <ha-icon icon="mdi:calendar-clock" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
-            <span style="font-size:0.88rem;font-weight:700;">Mining Verlauf</span>
-          </div>
-          ${headers}
-          <div style="max-height:560px;overflow-y:auto;scrollbar-width:thin;">
-            ${allRows.map(rowHtml).join('')}
-          </div>
-        </div>
-      </div>`;
-    ]]]
+type: vertical-stack
+cards:
+
+  # ── Zeitraum-Typ: Woche / Monat ──────────────────────────────────────
+  - type: horizontal-stack
+    cards:
+      - type: custom:button-card
+        name: Woche
+        show_name: true
+        show_icon: false
+        show_state: false
+        entity: input_select.mining_log_periode
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          service_data:
+            entity_id: input_select.mining_log_periode
+            option: Woche
+        styles:
+          card:
+            - background: >-
+                [[[ return entity.state === 'Woche' ? 'var(--secondary-background-color)' : 'none' ]]]
+            - box-shadow: none
+            - border: none
+            - padding: 6px
+          name:
+            - font-size: 0.85rem
+            - font-weight: 700
+            - color: >-
+                [[[ return entity.state === 'Woche' ? 'var(--primary-text-color)' : 'var(--secondary-text-color)' ]]]
+      - type: custom:button-card
+        name: Monat
+        show_name: true
+        show_icon: false
+        show_state: false
+        entity: input_select.mining_log_periode
+        tap_action:
+          action: call-service
+          service: input_select.select_option
+          service_data:
+            entity_id: input_select.mining_log_periode
+            option: Monat
+        styles:
+          card:
+            - background: >-
+                [[[ return entity.state === 'Monat' ? 'var(--secondary-background-color)' : 'none' ]]]
+            - box-shadow: none
+            - border: none
+            - padding: 6px
+          name:
+            - font-size: 0.85rem
+            - font-weight: 700
+            - color: >-
+                [[[ return entity.state === 'Monat' ? 'var(--primary-text-color)' : 'var(--secondary-text-color)' ]]]
+
+  # ── Pfeile links/rechts, Zeitraum-Label mittig in derselben Zeile
+  # (03.09.2026, Nutzer-Wunsch: Label nicht mehr in eigener Zeile über den
+  # Pfeilen, sondern zwischen ihnen) ─────────────────────────────────────
+  - type: horizontal-stack
+    cards:
+      - type: custom:button-card
+        icon: mdi:chevron-left
+        show_name: false
+        show_icon: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: input_number.increment
+          service_data:
+            entity_id: input_number.mining_log_offset
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - flex: "0 0 auto"
+          icon:
+            - color: var(--secondary-text-color)
+            - width: 28px
+            - height: 28px
+
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        entity: input_number.mining_log_offset
+        tap_action:
+          action: none
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - padding: 2px 4px
+            - flex: "1 1 auto"
+          grid:
+            - grid-template-areas: '"body"'
+            - grid-template-columns: 1fr
+          custom_fields:
+            body:
+              - width: 100%
+              - justify-self: stretch
+        custom_fields:
+          body: >
+            [[[
+              const periode = states['input_select.mining_log_periode']?.state ?? 'Woche';
+              const offset = parseInt(entity.state) || 0;
+              const today = new Date();
+              const fmt = (d) => d.toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'});
+              let label;
+              if (periode === 'Monat') {
+                const base = new Date(today.getFullYear(), today.getMonth() - offset, 1);
+                label = base.toLocaleDateString('de-DE', {month: 'long', year: 'numeric'});
+              } else {
+                const dow = (today.getDay() + 6) % 7;
+                const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dow - offset*7);
+                const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+                label = `${fmt(monday)} – ${fmt(sunday)} ${sunday.getFullYear()}`;
+              }
+              const tag = offset === 0 ? ' (aktuell)' : '';
+              return `<div style="text-align:center;font-size:0.95rem;font-weight:700;color:var(--primary-text-color);margin-top:13px;">${label}${tag}</div>`;
+            ]]]
+
+      - type: custom:button-card
+        icon: mdi:chevron-right
+        show_name: false
+        show_icon: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: input_number.decrement
+          service_data:
+            entity_id: input_number.mining_log_offset
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - flex: "0 0 auto"
+          icon:
+            - color: var(--secondary-text-color)
+            - width: 28px
+            - height: 28px
+
+  # ── Tabelle ────────────────────────────────────────────────────────────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    styles:
+      card:
+        - padding: 12px 16px
+      grid:
+        - grid-template-areas: '"mining_log"'
+        - grid-template-columns: 1fr
+      custom_fields:
+        mining_log:
+          - width: 100%
+          - justify-self: stretch
+          - box-sizing: border-box
+    custom_fields:
+      mining_log: >
+        [[[
+          const parseLog = (raw) => (raw && raw !== 'unknown' && raw !== 'unavailable') ? raw.split('|').filter(e => e.includes(',')) : [];
+          const recentLog = [...parseLog(states['input_text.mining_daily_log']?.state ?? ''), ...parseLog(states['input_text.mining_daily_log_b']?.state ?? '')];
+          const csvLog = parseLog(states['sensor.mining_log_history']?.attributes?.rows ?? '');
+          const seenDates = new Set(recentLog.map(e => e.split(',')[0]));
+          const deduped = [];
+          csvLog.forEach(e => { const d = e.split(',')[0]; if (!seenDates.has(d)) { seenDates.add(d); deduped.push(e); } });
+          const logEntries = [...recentLog, ...deduped].sort((a,b) => b.split(',')[0].localeCompare(a.split(',')[0]));
+          const btcMap = {};
+          const settleThs = {};
+          (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {
+            const hr = tx.mining_extra?.hash_rate;
+            const md = tx.mining_extra?.mining_date;
+            if (!hr || !md) return;
+            const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
+            const d = sd.toISOString().slice(0, 10);
+            settleThs[d] = (hr / 1e12).toFixed(2);
+            const btcVal = parseFloat(tx.amount ?? tx.changed_balance);
+            if (btcVal > 0) btcMap[d] = btcVal;
+          });
+          (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
+            if (!e[0] || !e[2]) return;
+            const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
+            const d = sd.toISOString().slice(0, 10);
+            if (!btcMap[d]) btcMap[d] = e[2];
+          });
+          parseLog(states['input_text.pool_btc_daily_log']?.state ?? '').forEach(e => {
+            const [d, b] = e.split(','); if (d && !btcMap[d]) btcMap[d] = parseFloat(b) || 0;
+          });
+          const liveThsRaw = parseFloat(states['sensor.pool_hashrate_h1_ths']?.state);
+          const liveThs = (!isNaN(liveThsRaw) && liveThsRaw > 0) ? liveThsRaw.toFixed(1) : null;
+          const thsYest = parseFloat(states['sensor.pool_ths_yesterday']?.state) || 0;
+          const phArr   = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
+          const thsApi  = {};
+          if (thsYest > 0 && phArr.length > 0) {
+            const sd = new Date(phArr[0][0]); sd.setUTCDate(sd.getUTCDate() - 1);
+            thsApi[sd.toISOString().slice(0, 10)] = thsYest.toFixed(1);
+          }
+          const thsLog  = {};
+          parseLog(states['input_text.pool_ths_daily_log']?.state ?? '').forEach(e => {
+            const [d, t] = e.split(','); if (d && t) thsLog[d] = t;
+          });
+          const csvThs = {
+            '2026-05-03':'51.46','2026-05-02':'54.36','2026-05-01':'57.62',
+            '2026-04-30':'61.47','2026-04-29':'54.91','2026-04-28':'56.54',
+            '2026-04-27':'62.04','2026-04-26':'52.91','2026-04-25':'58.40',
+            '2026-04-24':'64.92','2026-04-23':'65.03','2026-04-22':'64.86',
+            '2026-04-21':'14.59','2026-04-20':'50.26','2026-04-19':'25.12',
+            '2026-04-18':'36.90','2026-04-17':'50.09','2026-04-16':'49.84',
+            '2026-04-15':'58.32','2026-04-14':'44.94','2026-04-12':'14.36',
+            '2026-04-11':'36.88','2026-04-10':'10.14','2026-04-09':'52.46',
+            '2026-04-08':'45.44','2026-04-07':'50.52','2026-04-06':'55.23',
+            '2026-04-05':'23.90','2026-04-04':'12.39','2026-04-03':'11.26',
+            '2026-04-02':'56.48','2026-04-01':'32.51','2026-03-31':'20.18',
+            '2026-03-30':'18.85','2026-03-29':'15.74','2026-03-28':'19.06'
+          };
+          const btcEur    = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+          const parseEntry = (e) => {
+            const p = e.split(',');
+            return { d: p[0]??'', on: p[1]??'–', off: p[2]??'–',
+              tot: parseFloat(p[3])||0, ec: parseFloat(p[4])||0,
+              st: parseFloat(p[5])||0, sp: parseFloat(p[6])||0, kw: parseFloat(p[7])||0 };
+          };
+          const fmtDt  = (iso) => (iso && iso.length >= 10) ? iso.slice(8,10)+'.'+iso.slice(5,7) : '—';
+          const fmtT   = (dt)  => (!dt || !dt.includes(' ')) ? '–' : dt.split(' ')[1].slice(0,5);
+          const fmtHm  = (v)   => { const n=parseFloat(v); if(!n||n<=0) return '0h'; const h=Math.floor(n),m=Math.round((n-h)*60); return m>0?`${h}h${m}m`:`${h}h`; };
+          const fmtH1  = (v)   => { const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(1); };
+          const fmtSat = (btc) => (!btc || btc <= 0) ? '—' : Math.round(btc * 1e8);
+          const _d = new Date(); const todayIso = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
+          const startDt  = states['input_datetime.last_start_at']?.state ?? '';
+          const stopDt   = states['input_datetime.last_stop_at']?.state ?? '';
+          const startTime = startDt.startsWith(todayIso) ? fmtT(startDt) : '–';
+          const stopTime  = stopDt.startsWith(todayIso)  ? fmtT(stopDt)  : '–';
+          const todayRow = {
+            d: todayIso, on: startTime, off: stopTime,
+            tot: parseFloat(states['sensor.miner_uptime_today_h']?.state)||0,
+            ec:  parseFloat(states['sensor.miner_eco_hours_today']?.state)||0,
+            st:  parseFloat(states['sensor.miner_standard_hours_today']?.state)||0,
+            sp:  parseFloat(states['sensor.miner_super_hours_today']?.state)||0,
+            kw:  parseFloat(states['sensor.mining_energy_daily']?.state)||0,
+            live: true
+          };
+
+          // Woche/Monat-Fenster statt fixem 30-Tage-Cutoff (26.08.2026,
+          // Nutzer-Wunsch, ersetzt die rollierende Ansicht komplett).
+          const periode = states['input_select.mining_log_periode']?.state ?? 'Woche';
+          const offset = parseInt(states['input_number.mining_log_offset']?.state) || 0;
+          const isoOf = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          let rangeStart, rangeEnd;
+          if (periode === 'Monat') {
+            const base = new Date(_d.getFullYear(), _d.getMonth() - offset, 1);
+            rangeStart = new Date(base.getFullYear(), base.getMonth(), 1);
+            rangeEnd = new Date(base.getFullYear(), base.getMonth() + 1, 0);
+          } else {
+            const dow = (_d.getDay() + 6) % 7;
+            rangeStart = new Date(_d.getFullYear(), _d.getMonth(), _d.getDate() - dow - offset*7);
+            rangeEnd = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), rangeStart.getDate() + 6);
+          }
+          const rangeStartIso = isoOf(rangeStart);
+          const rangeEndIso = isoOf(rangeEnd);
+
+          const parsedEntries = logEntries.map(parseEntry).filter(r => r.d >= rangeStartIso && r.d <= rangeEndIso && r.d !== todayIso);
+          const todayInRange = todayIso >= rangeStartIso && todayIso <= rangeEndIso;
+          const allRows = todayInRange ? [todayRow, ...parsedEntries] : parsedEntries;
+
+          const cols = '50px 42px 42px 54px 36px 36px 40px 44px 44px 44px 50px 46px';
+          const th = (t,r) => `<div style="font-size:0.62rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
+          const headers = `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;border-bottom:1px solid var(--divider-color);margin-bottom:2px;">
+            ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Ges.',1)}${th('Eco',1)}${th('Std',1)}${th('Sup',1)}${th('kWh',1)}${th('TH/s',1)}${th('SATs',1)}${th('S/kWh',1)}${th('€/kWh',1)}
+          </div>`;
+          const rowHtml = (r) => {
+            const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
+            const dc = r.live ? 'var(--primary-text-color)' : 'var(--secondary-text-color)';
+            const fw = r.live ? '600' : '400';
+            const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
+            const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
+            const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? (r.live ? liveThs : null) ?? '—';
+            const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
+            const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';
+            const earnedEur = (satNum !== null && r.kw > 0 && btcEur > 0)
+              ? satNum * btcEur / 1e8 / r.kw : null;
+            const eurStr   = earnedEur !== null ? earnedEur.toFixed(3) : '—';
+            const eurColor = earnedEur === null ? 'var(--secondary-text-color)'
+              : earnedEur >= 0.156 ? '#F7931A'
+              : earnedEur >= 0.125 ? '#26C6DA'
+              : earnedEur >= 0.100 ? '#4CAF50'
+              : earnedEur >= 0.078 ? '#FFFFFF'
+              : '#9E9E9E';
+            return `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;${hl}">
+              <div style="font-size:0.82rem;color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
+              ${c(r.on,'inherit')}${c(r.off,'inherit')}
+              ${c(fmtHm(r.tot),'var(--primary-text-color)')}
+              ${c(fmtH1(r.ec)+'h','#4CAF50')}
+              ${c(fmtH1(r.st)+'h','#26C6DA')}
+              ${c(fmtH1(r.sp)+'h','#F7931A')}
+              ${c(r.kw.toFixed(2),'white')}
+              ${c(ths,'#FFFFFF')}
+              ${c(sat,'#F7931A')}
+              ${c(sPerKwh,'#F7931A')}
+              ${c(eurStr,eurColor)}
+            </div>`;
+          };
+          const emptyMsg = allRows.length === 0
+            ? `<div style="padding:30px 0;text-align:center;color:var(--secondary-text-color)">Keine Daten fuer diesen Zeitraum.</div>`
+            : '';
+          // Kein max-height/overflow-y-Scrollcontainer mehr (26.08.2026,
+          // Nutzer-Wunsch): die Tabelle ist jetzt ohnehin auf hoechstens
+          // eine Woche (7 Zeilen) oder einen Monat (bis zu 31 Zeilen)
+          // begrenzt, kein Bedarf mehr fuer eine interne Scrollbar.
+          return `<div style="width:100%;overflow-x:auto;">
+            <div style="min-width:620px;">
+              ${headers}
+              ${allRows.map(rowHtml).join('')}
+              ${emptyMsg}
+            </div>
+          </div>`;
+        ]]]

@@ -12,7 +12,7 @@ frontend:
     # ?v= Cache-Bust: bei jeder Änderung an bitgrid_card_shape.js hochzählen,
     # sonst lädt der Browser bzw. das Wandtablet (Kiosk) die alte gecachte
     # Version. Datum als Versionsstempel.
-    - /local/bitgrid_card_shape.js?v=20260711c
+    - /local/bitgrid_card_shape.js?v=20260823
 
 lovelace:
   resource_mode: yaml
@@ -34,24 +34,47 @@ lovelace:
       type: module
     - url: /hacsfiles/lovelace-horizon-card/lovelace-horizon-card.js
       type: module
+    # apexcharts-card (HACS): Wochen-Verlaufschart (PV/Verbrauch/Akku) auf dem
+    # Demo-Home-Tab, scrollbar/zoombar über 7 Tage. Ordnername auf dem Server
+    # verifiziert (ls www/community/): "apexcharts-card", NICHT "lovelace-
+    # apexcharts-card" — anders als die HACS-Repo-Namen der übrigen Karten
+    # oben (lovelace-card-mod, lovelace-layout-card, ...).
+    - url: /hacsfiles/apexcharts-card/apexcharts-card.js
+      type: module
+    # bubble-card (HACS, Clooos/Bubble-Card): Balken-Listen fuer "Verbrauch
+    # nach Gerätetyp" (Tab "EnergieInfo"), Nutzer-Wunsch 25.08.2026. War
+    # bereits am 11.07.2026 uber HACS installiert (www/community/Bubble-Card/,
+    # Grossschreibung wie der GitHub-Repo-Name), nur nie hier eingetragen —
+    # deshalb bislang ungenutzt. Pfad-Grossschreibung beachten: anders als
+    # die anderen HACS-Ordner oben (alle lowercase) heisst dieser exakt
+    # "Bubble-Card", 25.08.2026 live per HTTP-Request verifiziert.
+    - url: /hacsfiles/Bubble-Card/bubble-card.js
+      type: module
   dashboards:
-    bitgridai-v2:
-      mode: yaml
-      filename: bitgrid_dashboard_v2.yaml
-      title: BitGridAI v2
-      icon: mdi:bitcoin
-      show_in_sidebar: true
-    bitgridai-demo:
-      mode: yaml
-      filename: bitgrid_dashboard_demo.yaml
-      title: BitGridAI Demo
-      icon: mdi:presentation
-      show_in_sidebar: true
+    # 03.09.2026, Nutzer-Wunsch: v1/v2 aus der Sidebar ausgeblendet
+    # (show_in_sidebar: false), Config bleibt vollstaendig aktiv/erreichbar
+    # unter /bitgridai-v1 bzw. /bitgridai-v2 — jederzeit reversibel.
     bitgridai-v1:
       mode: yaml
       filename: bitgrid_dashboard_v1.yaml
       title: BitGridAI v1
-      icon: mdi:view-dashboard
+      icon: mdi:close
+      show_in_sidebar: false
+    bitgridai-v2:
+      mode: yaml
+      filename: bitgrid_dashboard_v2.yaml
+      title: BitGridAI v2
+      icon: mdi:close
+      show_in_sidebar: false
+    # URL-Pfad UND Dateiname 23./24.08.2026 von "demo" auf "v3" umbenannt
+    # (Nutzer-Entscheidung, volle Konsistenz mit v1/v2) — bricht das
+    # gespeicherte Kiosk-Bookmark auf dem Tischdemo-Geraet, muss dort einmal
+    # manuell auf /bitgridai-v3/home neu gesetzt werden.
+    bitgridai-v3:
+      mode: yaml
+      filename: bitgrid_dashboard_v3.yaml
+      title: BitGridAI v3
+      icon: mdi:bitcoin
       show_in_sidebar: true
 
 automation: !include automations.yaml
@@ -104,6 +127,9 @@ recorder:
       - sensor.lueftung_energy_daily
       - sensor.server_energy_daily
       - sensor.geraete_energy_daily
+      - sensor.pv_self_use_savings_eur
+      - sensor.grid_import_cost_eur
+      - sensor.total_profit_today_eur
       - sensor.solar_coverage_pct
       - sensor.deadband_hit_rate_pct
       - sensor.efficiency_kwh_per_h_live
@@ -295,6 +321,41 @@ input_select:
       - MINER2
       - NONE
     initial: BOTH
+  # 25.08.2026, Nutzer-Vorgabe: ein zentraler Zeitraum-Umschalter für den
+  # Abschnitt "Historie" (Tab "EnergieInfo") — alle Kacheln sollen diesen
+  # Zeitraum gemeinsam nutzen ("alle Kacheln nachziehen"), statt jede Karte
+  # einzeln umzustellen. Vereinfacht auf reine rollierende Fenster (kein
+  # kalendarisch ausgerichtetes Tag/Woche/Monat mehr, Nutzer-Vorgabe).
+  historie_zeitraum:
+    name: "Historie: Zeitraum"
+    icon: mdi:history
+    options:
+      - "Letzte 24 Stunden"
+      - "Letzte 7 Tage"
+      - "Letzte 30 Tage"
+      - "Letzte 12 Monate"
+    initial: "Letzte 24 Stunden"
+  # 25.08.2026, Nutzer-Vorgabe: nur noch EIN Graph gleichzeitig im Abschnitt
+  # "Historie" (Tab "EnergieInfo"), Pfeile oben wechseln durch — gleiches
+  # Muster wie der Haus/Garage-Umschalter im Tab "Grundriss" (input_boolean.
+  # fp_view_garage), hier mit input_select statt input_boolean, da 7 statt
+  # nur 2 Zustände. "Gesamtenergie" zusätzlich zu den 6 Räumen aufgenommen
+  # ("nur einen graph anzeigen keine 2 spalten 2 graphen") — vorher stand
+  # Gesamtenergie fest neben dem Raum-Umschalter in einer 2-Spalten-Zeile.
+  # Reihenfolge der Räume identisch zur Raum-Reihenfolge im Abschnitt
+  # "Verbrauch nach Räumen" (heute).
+  historie_raum:
+    name: "Historie: Ansicht"
+    icon: mdi:home-search
+    options:
+      - "Gesamtenergie"
+      - "Untergeschoss"
+      - "Wohnzimmer"
+      - "Küche"
+      - "Schlafzimmer"
+      - "Büro"
+      - "Hauswirtschaft"
+    initial: "Untergeschoss"
 
 input_number:
   # ── Simulation-Inputs (Slider) ───────────────────────────────────────────

@@ -30,6 +30,9 @@ const SHAPED_CARDS = new Set([
   // mitklemmen. Trifft auch die zwei transparenten Titel-Buttons (tl/tr), das
   // ist harmlos (kein Hintergrund, nichts zu clippen).
   "BUTTON-CARD",
+  // apexcharts-card (Wochen-Verlauf, Demo-Home-Tab): malt seinen Hintergrund
+  // ebenfalls ungeclippt, gleiches Muster wie PFCP/clock-weather-card oben.
+  "APEXCHARTS-CARD",
 ]);
 
 // ── power-flow-card-plus: Miner-Bubbles nach Leistung einfärben ──────────

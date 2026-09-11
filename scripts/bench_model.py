@@ -69,8 +69,15 @@ if isinstance(sys.stdout, io.TextIOWrapper):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 ENV = dotenv_values(".env")
-OLLAMA = (ENV.get("OLLAMA_HOST") or "http://192.168.178.104:11434").rstrip("/")
+OLLAMA = (ENV.get("OLLAMA_HOST") or "").rstrip("/")
 MINDEST_KONTEXT = 64_000
+
+if not OLLAMA:
+    sys.exit(
+        "OLLAMA_HOST ist nicht gesetzt. Trage den Ollama-Endpunkt in .env ein, "
+        "z.B. OLLAMA_HOST=http://<host>:11434. Kein Default im Code, damit "
+        "keine Netzwerkadressen im Repository landen."
+    )
 
 
 def api(

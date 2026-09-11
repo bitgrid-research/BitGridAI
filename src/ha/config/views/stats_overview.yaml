@@ -47,6 +47,26 @@ cards:
               const autColor  = autarkie === null ? 'var(--secondary-text-color)'
                 : autarkie >= 80 ? '#4CAF50' : autarkie >= 50 ? '#f59e0b' : '#ef5350';
 
+              const satsToday  = Math.round((parseFloat(states['sensor.pool_earned_today_btc']?.state) || 0) * 1e8);
+              const revenueEur = states['sensor.mining_revenue_today_eur']?.state ?? null;
+              const advNum     = parseFloat(states['sensor.mining_vs_feedin_ct_kwh']?.state);
+              const advColor   = isNaN(advNum) ? 'var(--secondary-text-color)' : advNum >= 0 ? '#4CAF50' : '#ef5350';
+              const advStr     = isNaN(advNum) ? '—' : (advNum >= 0 ? '+' : '') + advNum.toFixed(1) + ' ct/kWh';
+
+              // Lokal (Miner-eigene Meldung) vs. Pool-effektiv: weichen beide stark
+              // voneinander ab, ist das ein Fruehwarnsignal fuer Pool-/Netzwerk-
+              // probleme (Stale/Rejected Shares) statt Hardware-Defekt.
+              const localThs1 = parseFloat(states['sensor.miner1_thsspd']?.state) || 0;
+              const localThs2 = parseFloat(states['sensor.miner2_thsspd']?.state) || 0;
+              const localThsSum = localThs1 + localThs2;
+              const poolThs = parseFloat(states['sensor.pool_hashrate_h1_ths']?.state) || 0;
+              const hrDeltaPct = localThsSum > 0 ? ((poolThs - localThsSum) / localThsSum * 100) : null;
+              const hrColor = hrDeltaPct === null ? 'var(--secondary-text-color)'
+                : Math.abs(hrDeltaPct) <= 10 ? '#4CAF50' : '#ef5350';
+              const hrStr = localThsSum <= 0 ? '—'
+                : `${localThsSum.toFixed(1)} lokal / ${poolThs.toFixed(1)} Pool` +
+                  (hrDeltaPct !== null ? ` (${hrDeltaPct >= 0 ? '+' : ''}${hrDeltaPct.toFixed(0)} %)` : '');
+
               const fmtKwh = v => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(2) + ' kWh'; };
               const fmtH   = v => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(1) + ' h'; };
               const fmtPct = v => v !== null ? v.toFixed(0) + ' %' : '—';
@@ -79,6 +99,11 @@ cards:
                 ${sep()}
                 ${row('mdi:pickaxe', 'Mining Energie', fmtKwh(mineKwh), '#f59e0b')}
                 ${row('mdi:timer-outline', 'Uptime', upFmt, 'var(--secondary-text-color)')}
+                ${sep()}
+                ${row('mdi:bitcoin', 'Sats verdient', satsToday.toLocaleString('de-DE') + ' sats', '#F7931A')}
+                ${row('mdi:cash-plus', 'Mining-Ertrag', revenueEur !== null ? parseFloat(revenueEur).toFixed(2) + ' €' : '—', '#F7931A')}
+                ${row('mdi:scale-balance', 'Vorteil vs. Einspeisung', advStr, advColor)}
+                ${row('mdi:speedometer', 'Hashrate lokal/Pool', hrStr, hrColor)}
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px;">
                   ${modeBox('Eco', fmtH(ecoH), '#4CAF50')}
                   ${modeBox('Standard', fmtH(stdH), '#26C6DA')}
@@ -131,6 +156,12 @@ cards:
               const autColor  = autarkie === null ? 'var(--secondary-text-color)'
                 : autarkie >= 80 ? '#4CAF50' : autarkie >= 50 ? '#f59e0b' : '#ef5350';
 
+              const earnedMtdBtc = (parseFloat(states['input_number.pool_earned_mtd_btc']?.state) || 0)
+                                 + (parseFloat(states['sensor.pool_earned_today_btc']?.state) || 0);
+              const satsMtd    = Math.round(earnedMtdBtc * 1e8);
+              const btcEurNow  = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+              const revenueMtdEur = earnedMtdBtc * btcEurNow;
+
               const fmtKwh = v => {
                 const n = parseFloat(v);
                 if (isNaN(n)) return '—';
@@ -173,6 +204,10 @@ cards:
                 ${sep()}
                 ${row('mdi:pickaxe', 'Mining Energie', fmtKwh(mine), '#f59e0b')}
                 ${row('mdi:timer-outline', 'Uptime', fmtUp(upH), 'var(--secondary-text-color)')}
+                ${sep()}
+                ${row('mdi:bitcoin', 'Sats verdient', satsMtd.toLocaleString('de-DE') + ' sats', '#F7931A')}
+                ${row('mdi:cash-plus', 'Ertrag (≈ akt. Kurs)', revenueMtdEur > 0 ? revenueMtdEur.toFixed(2) + ' €' : '—', '#F7931A')}
+                <div style="font-size:0.6rem;color:var(--secondary-text-color);opacity:0.7;margin:2px 0 4px;">Sats-Erfassung seit 24.08.2026</div>
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px;">
                   ${modeBox('Eco', fmtUp(ecoM), '#4CAF50')}
                   ${modeBox('Standard', fmtUp(stdM), '#26C6DA')}
@@ -225,6 +260,12 @@ cards:
               const autColor  = autarkie === null ? 'var(--secondary-text-color)'
                 : autarkie >= 80 ? '#4CAF50' : autarkie >= 50 ? '#f59e0b' : '#ef5350';
 
+              const earnedYtdBtc = (parseFloat(states['input_number.pool_earned_ytd_btc']?.state) || 0)
+                                  + (parseFloat(states['sensor.pool_earned_today_btc']?.state) || 0);
+              const satsYtd    = Math.round(earnedYtdBtc * 1e8);
+              const btcEurNow  = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+              const revenueYtdEur = earnedYtdBtc * btcEurNow;
+
               const fmtKwh = v => {
                 const n = parseFloat(v);
                 if (isNaN(n)) return '—';
@@ -266,6 +307,10 @@ cards:
                 ${sep()}
                 ${row('mdi:pickaxe', 'Mining Energie', fmtKwh(mine), '#f59e0b')}
                 ${row('mdi:timer-outline', 'Uptime', fmtUp(upH), 'var(--secondary-text-color)')}
+                ${sep()}
+                ${row('mdi:bitcoin', 'Sats verdient', satsYtd.toLocaleString('de-DE') + ' sats', '#F7931A')}
+                ${row('mdi:cash-plus', 'Ertrag (≈ akt. Kurs)', revenueYtdEur > 0 ? revenueYtdEur.toFixed(2) + ' €' : '—', '#F7931A')}
+                <div style="font-size:0.6rem;color:var(--secondary-text-color);opacity:0.7;margin:2px 0 4px;">Sats-Erfassung seit 24.08.2026</div>
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px;">
                   ${modeBox('Eco', fmtUp(ecoY), '#4CAF50')}
                   ${modeBox('Standard', fmtUp(stdY), '#26C6DA')}

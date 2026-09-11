@@ -32,6 +32,7 @@ cards:
               box-shadow: var(--ha-card-box-shadow) !important;
               overflow: hidden !important;
               contain: paint !important;
+              min-width: 0 !important;
             }
         cards:
 
@@ -66,8 +67,8 @@ cards:
                   ]]]
                 styles:
                   icon:
-                    - width: 44px
-                    - height: 44px
+                    - width: 76px
+                    - height: 76px
                     - color: >
                         [[[
                           const s = entity.state;
@@ -96,8 +97,8 @@ cards:
                   ]]]
                 styles:
                   icon:
-                    - width: 44px
-                    - height: 44px
+                    - width: 76px
+                    - height: 76px
                     - color: >
                         [[[
                           return entity.state === 'on'
@@ -250,88 +251,347 @@ cards:
                     - color: >
                         [[[return entity.state==='Super'?'var(--primary-text-color)':'var(--secondary-text-color)']]]
 
+          # ─────────────────────────────────────────
+          # Abschnitts-Überschrift vor den Detail-Listen
+          # ─────────────────────────────────────────
           - type: custom:button-card
             show_name: false
             show_icon: false
             show_state: false
             styles:
               card:
-                - padding: 12px 8px
                 - background: transparent
                 - box-shadow: none
                 - border: none
+                - border-top: 1px solid rgba(255,255,255,0.08)
+                - margin: 4px 8px 0
+                - padding: 10px 2px 4px
               grid:
-                - grid-template-areas: '"stats"'
+                - grid-template-areas: '"body"'
                 - grid-template-columns: 1fr
               custom_fields:
-                stats:
+                body:
                   - width: 100%
                   - justify-self: stretch
-                  - align-self: stretch
                   - box-sizing: border-box
             custom_fields:
-              stats: >
+              body: >
                 [[[
-                  const ths = states['sensor.miner1_thsspd']?.state ?? '—';
-                  const jth = states['sensor.miner1_energy_per_th']?.state ?? '—';
-                  const sw  = states['sensor.shellyplugsg3_dcb4d9c5567c_leistung']?.state ?? '—';
-                  const fan = states['sensor.miner1_fanr']?.state ?? '—';
-                  const tmax = states['sensor.miner1_tmax']?.state ?? '—';
-                  const tavg = states['sensor.miner1_tavg']?.state ?? '—';
-                  const hbi  = states['sensor.miner1_hbitemp']?.state ?? '—';
-                  const hbo  = states['sensor.miner1_hbotemp']?.state ?? '—';
-                  const statusEnt = states['sensor.miner1_workmode_status'];
-                  const mode = statusEnt?.state ?? '—';
-                  const parseIdt = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
-                    ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
-                  const sinceTs  = Math.max(
-                    parseIdt(states['input_datetime.mvp_miner1_last_upgrade']?.state),
-                    parseIdt(states['input_datetime.mvp_miner1_last_downgrade']?.state)
-                  );
-                  const since    = sinceTs > 0
-                    ? new Date(sinceTs * 1000).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
-                    : '—';
-                  const cd = states['sensor.miner_1_cooldown_status']?.state ?? '—';
-                  const cdActive = cd !== '—' && cd !== 'unavailable' && cd !== 'unknown';
-                  const cdColor = cdActive ? 'var(--accent-color)' : 'var(--secondary-text-color)';
-                  const cdTag = cdActive
-                    ? `<span style="margin-left:8px;font-size:0.78rem;color:var(--accent-color);font-weight:600;">${cd}</span>`
-                    : '';
-                  const tempColor = (v) => {
-                    if (v === '—') return 'var(--secondary-text-color)';
-                    const t = parseFloat(v);
-                    if (mode === 'Standby' || mode === 'Idle' || mode === 'Off' || t < 45) return 'var(--secondary-text-color)';
-                    if (mode === 'Eco')
-                      return t >= 80 ? 'var(--bg-color-reserve)' : t >= 75 ? 'var(--accent-color)' : 'var(--bg-color-eco)';
-                    if (mode === 'Standard')
-                      return t >= 110 ? 'var(--bg-color-reserve)' : t >= 100 ? 'var(--bg-color-heat)' : 'var(--bg-color-eco)';
-                    return t >= 110 ? 'var(--bg-color-reserve)' : t >= 100 ? 'var(--bg-color-heat)' : 'var(--bg-color-eco)';
-                  };
-                  const tmaxColor = tempColor(tmax);
-                  const tavgColor = tempColor(tavg);
-                  const hbiColor  = tempColor(hbi);
-                  const hboColor  = tempColor(hbo);
-                  const row = (icon, label, val, color) =>
-                    `<div style="display:flex;align-items:center;padding:3px 0;">
-                      <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color ?? 'var(--secondary-text-color)'};flex-shrink:0;margin-right:8px;"></ha-icon>
-                      <span style="flex:1;color:${color ?? 'var(--secondary-text-color)'};font-size:0.85rem;">${label}:</span>
-                      <span style="font-size:1rem;font-weight:600;color:${color ?? 'inherit'};text-align:right;white-space:nowrap;">${val}</span>
-                    </div>`;
-                  return `<div style="width:100%;padding:4px 0;text-align:left;">
-                    ${row('mdi:speedometer','Hashrate', ths !== '—' ? ths + ' TH/s' : '—')}
-                    ${row('mdi:lightning-bolt','Effizienz', jth !== '—' ? jth + ' J/TH' : '—')}
-                    ${row('mdi:power-plug','Verbrauch', sw !== '—' ? sw + ' W' : '—')}
-                    ${row('mdi:fan','Lüfter', fan !== '—' ? fan + ' %' : '—')}
-                    ${row('mdi:thermometer-high','Höchsttemp.', tmax !== '—' ? tmax + ' °C' : '—', tmaxColor)}
-                    ${row('mdi:thermometer-auto','Ø Temperatur', tavg !== '—' ? tavg + ' °C' : '—', tavgColor)}
-                    ${row('mdi:thermometer-chevron-down','Einlass', hbi !== '—' ? hbi + ' °C' : '—', hbiColor)}
-                    ${row('mdi:thermometer-chevron-up','Auslass', hbo !== '—' ? hbo + ' °C' : '—', hboColor)}
-                    <div style="display:flex;align-items:center;padding:3px 0;">
-                      <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:16px;color:${cdColor};flex-shrink:0;margin-right:8px;"></ha-icon>
-                      <span style="flex:1;color:${cdColor};font-size:0.85rem;">Status seit:</span>
-                      <span style="font-size:1rem;font-weight:600;display:flex;align-items:center;gap:4px;white-space:nowrap;">${since}&#160;&#160;${mode}${cdTag}</span>
-                    </div>
-                  </div>`;
+                  return `<div style="font-size:var(--bg-fs-label);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--secondary-text-color);opacity:0.65;">Details</div>`;
+                ]]]
+
+          # ─────────────────────────────────────────
+          # DETAIL-ANSICHT — 6 aufklappbare Listen (Stromversorgung, Miner,
+          # Hashboard, Kühlung, Pool, Log), Entities aus packages/avalonq_miner1.yaml
+          # (1:1 der dortigen template-Sektion; Log zusätzlich aus
+          # input_text.mvp_miner1_debug, packages/mvp_auto.yaml). Zustand pro
+          # Liste in input_boolean.miner1_detail_* (packages/avalonq_miner1.yaml),
+          # damit der Auf-/Zu-Zustand über Reloads hinweg erhalten bleibt
+          # (kein window-Var-Hack wie bei der SoC-Trace oben: hier reicht
+          # ein echter, reaktiver State, weil jede Sektion an genau einen
+          # eigenen input_boolean gebunden ist → button-card rendert bei
+          # jedem Tap zuverlässig neu). window.bgMinerDetail (Renderer)
+          # ist gemeinsam über alle 12 Blöcke (2 Miner × 6 Listen) genutzt.
+          #
+          # Bewusst NICHT enthalten: Hashrate/Effizienz (THSspd,
+          # Energy_per_TH) — das alte, immer sichtbare Kennzahlen-Panel
+          # (Hashrate/Effizienz/Verbrauch/Lüfter/Temperaturen/"Status seit")
+          # wurde am 24.08.2026 entfernt (Nutzer-Entscheidung: nur noch die
+          # Akkordeon-Listen). Beide Werte stehen aktuell in keiner der 6
+          # Listen — bei Bedarf in "Stromversorgung" oder "Kühlung" ergänzen.
+          # ─────────────────────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner1_detail_power
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  if (!window.bgMinerDetail) {
+                    window.bgMinerDetail = function(icon, title, ok, open, rows) {
+                      const rowHtml = rows.map((row) => {
+                        const [ic, label, val, col] = row;
+                        if (ic === 'text') {
+                          return `<div style="padding:2px 2px 6px;color:var(--secondary-text-color);font-size:var(--bg-fs-label);line-height:1.4;white-space:normal;">${label}</div>`;
+                        }
+                        return `
+                        <div style="display:flex;align-items:center;padding:4px 2px;">
+                          <ha-icon icon="${ic}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;margin-right:8px;"></ha-icon>
+                          <span style="flex:1;color:var(--secondary-text-color);font-size:var(--bg-fs-secondary);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
+                          <span style="font-size:var(--bg-fs-secondary);font-weight:600;text-align:right;white-space:nowrap;padding-left:8px;color:${col || 'var(--primary-text-color)'};">${val}</span>
+                        </div>`;
+                      }).join('');
+                      return `
+                        <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;">
+                          <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;"></ha-icon>
+                          <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bg-fs-body);font-weight:700;color:var(--secondary-text-color);text-align:left;">${title}</span>
+                          <ha-icon icon="${ok ? 'mdi:check-circle' : 'mdi:alert-circle'}" style="--mdc-icon-size:18px;color:${ok ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'};margin-right:6px;flex-shrink:0;"></ha-icon>
+                          <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                        </div>
+                        ${open ? `<div style="padding:0 2px 8px;">${rowHtml}</div>` : ''}`;
+                    };
+                  }
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  const num = (id, d) => { const v = parseFloat(g(id)); return v===null||isNaN(v) ? '—' : v.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d}); };
+                  const open = entity.state === 'on';
+                  const ok = states['switch.shellyplugsg3_dcb4d9c5567c']?.state === 'on';
+                  return window.bgMinerDetail('mdi:flash-outline', 'Stromversorgung', ok, open, [
+                    ['mdi:cog-outline', 'Modus:', g('sensor.miner1_workmode_status') ?? '—'],
+                    ['mdi:cog-outline', 'Arbeitsstufe:', g('sensor.miner1_worklevel') ?? '—'],
+                    ['mdi:lightning-bolt', 'Soll-Leistung:', num('sensor.miner1_mode_power_output',0) + ' W'],
+                    ['mdi:lightning-bolt', 'Ist-Leistung:', num('sensor.miner1_cur_load',0) + ' W'],
+                  ]);
+                ]]]
+
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner1_detail_miner
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  const open = entity.state === 'on';
+                  const ok = states['binary_sensor.miner1_available']?.state === 'on';
+                  return window.bgMinerDetail('mdi:memory', 'Miner', ok, open, [
+                    ['mdi:lan-connect', 'Verbindung:', ok ? 'Verbunden' : 'Getrennt'],
+                    ['mdi:timer-outline', 'Laufzeit:', g('sensor.miner1_uptime') ?? '—'],
+                    ['mdi:fit-to-screen', 'LCD-Display:', states['binary_sensor.miner1_lcdonoff_status']?.state === 'on' ? 'An' : 'Aus'],
+                    ['mdi:thermometer', 'Innentemperatur:', (() => { const v=parseFloat(g('sensor.miner1_itemp')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})+' °C'; })()],
+                    ['mdi:lan', 'Netzwerkfehler (#):', g('sensor.miner1_network_errors') ?? '—'],
+                    ['mdi:comment-text-outline', 'Status:', g('sensor.miner1_systemstatus') ?? '—'],
+                    ['mdi:list-status', 'Statuscode:', g('sensor.miner1_state') ?? '—'],
+                    ['mdi:identifier', 'ID:', g('sensor.miner1_id') ?? '—'],
+                    ['mdi:chip', 'Firmware:', g('sensor.miner1_firmware') ?? '—'],
+                    ['mdi:lan', 'MAC-Adresse:', g('sensor.miner1_mac_address') ?? '—'],
+                    ['mdi:counter', 'CGMiner-Version:', g('sensor.miner1_cgminer_version') ?? '—'],
+                    ['mdi:api', 'API-Version:', g('sensor.miner1_api_version_status') ?? '—'],
+                  ]);
+                ]]]
+
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner1_detail_hashboard
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  const t1 = (id) => { const v=parseFloat(g(id)); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})+' °C'; };
+                  const open = entity.state === 'on';
+                  const ok = states['sensor.miner1_api_litestats']?.state === 'OK';
+                  const asics = g('sensor.miner1_total_asics');
+                  const asicModel = g('sensor.miner1_asic_model');
+                  const hbi = g('sensor.miner1_hbitemp'), hbo = g('sensor.miner1_hbotemp');
+                  const hbiN = hbi!==null?parseFloat(hbi).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1}):'—';
+                  const hboN = hbo!==null?parseFloat(hbo).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1}):'—';
+                  const cpuFreq = (() => { const v=parseFloat(g('sensor.miner1_cpu_freq')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); })();
+                  const hwErrR = (() => { const v=parseFloat(g('sensor.miner1_hardware_errorsr')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:3,maximumFractionDigits:3}); })();
+                  return window.bgMinerDetail('mdi:expansion-card-variant', 'Hashboard', ok, open, [
+                    ['mdi:cube-outline', 'Gefundene Blöcke:', g('sensor.miner1_found_blocks') ?? '—'],
+                    ['mdi:memory', 'CPU-Modell:', g('sensor.miner1_cpu_model') ?? '—'],
+                    ['mdi:sine-wave', 'CPU-Frequenz:', cpuFreq + ' MHz'],
+                    ['mdi:chip', 'ASIC-Modell:', (asics ?? '—') + ' x · ' + (asicModel ?? '—')],
+                    ['mdi:thermometer-check', 'ASIC-Temperatur (Soll):', t1('sensor.miner1_tart')],
+                    ['mdi:thermometer-auto', 'ASIC-Temperatur (Ø):', t1('sensor.miner1_tavg')],
+                    ['mdi:thermometer-high', 'ASIC-Temperatur (Max):', t1('sensor.miner1_tmax')],
+                    ['mdi:thermometer-lines', 'Ein-/Austrittstemperatur:', hbiN + ' °C / ' + hboN + ' °C'],
+                    ['mdi:alert-outline', 'Hardwarefehler (#):', g('sensor.miner1_hardware_errors') ?? '—'],
+                    ['mdi:alert-outline', 'Hardwarefehler (%):', hwErrR + ' %'],
+                  ]);
+                ]]]
+
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner1_detail_cooling
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  const int0 = (id) => { const v=parseFloat(g(id)); return isNaN(v)?'—':v.toLocaleString('de-DE',{maximumFractionDigits:0}); };
+                  const open = entity.state === 'on';
+                  const ok = states['sensor.miner1_fanerr']?.state !== '1';
+                  return window.bgMinerDetail('mdi:fan', 'Kühlung', ok, open, [
+                    ['mdi:fan', 'Lüfterleistung:', int0('sensor.miner1_fanr') + ' %'],
+                    ['mdi:air-filter', 'Filterlaufzeit:', int0('sensor.miner1_filter') + ' Min.'],
+                    ['mdi:fan', 'Drehzahl (Einlass):', int0('sensor.miner1_fan1') + ' / ' + int0('sensor.miner1_fan2') + ' rpm'],
+                    ['mdi:fan', 'Drehzahl (Auslass):', int0('sensor.miner1_fan3') + ' / ' + int0('sensor.miner1_fan4') + ' rpm'],
+                  ]);
+                ]]]
+
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner1_detail_pool
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  const int0 = (id) => { const v=parseFloat(g(id)); return isNaN(v)?'—':v.toLocaleString('de-DE',{maximumFractionDigits:0}); };
+                  const open = entity.state === 'on';
+                  const ok = states['binary_sensor.miner1_pool_status']?.state === 'on';
+                  const rejR = (() => { const v=parseFloat(g('sensor.miner1_rejection_rate')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); })();
+                  const spm = (() => { const v=parseFloat(g('sensor.miner1_avg_shares_per_min')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); })();
+                  return window.bgMinerDetail('mdi:pool', 'Pool', ok, open, [
+                    ['mdi:web', 'URL:', g('sensor.miner1_pool') ?? '—'],
+                    ['mdi:timer-sand', 'Latenz:', int0('sensor.miner1_ping') + ' ms'],
+                    ['mdi:check-circle-outline', 'Akzeptierte Shares:', int0('sensor.miner1_accepted_shares')],
+                    ['mdi:close-circle-outline', 'Abgelehnte Shares:', int0('sensor.miner1_rejected_shares') + ' (' + rejR + ' %)'],
+                    ['mdi:clock-check', 'Letzter Share:', int0('sensor.miner1_latest_share') + ' s'],
+                    ['mdi:timer-outline', 'Shares pro Minute:', spm],
+                    ['mdi:calculator-variant-outline', 'Stratum-Schwierigkeit:', int0('sensor.miner1_stratum_difficulty')],
+                    ['mdi:calculator-variant-outline', 'Netzwerk-Schwierigkeit:', (() => { const v=parseFloat(g('sensor.miner1_network_difficulty')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); })() + ' T'],
+                  ]);
+                ]]]
+
+          # ─────────────────────────────────────────
+          # LOG — Begruendung aus mvp_miner1_watchdog (mvp_auto.yaml), vorher
+          # als eigene markdown-Karte unter beiden Minern (bitgrid_dashboard_v3.yaml,
+          # 27.08.2026) angezeigt, jetzt als 6. Akkordeon je Miner (31.08.2026,
+          # Nutzer-Wunsch: konsistent mit den anderen 5 Detail-Listen).
+          # ─────────────────────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner1_detail_log
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const open = entity.state === 'on';
+                  const rule = states['input_text.mvp_miner1_rule']?.state ?? '';
+                  const ok = !['R1 Stopp', 'R2 Temp-Sperre'].includes(rule);
+                  const entries = (states['sensor.miner_1_log']?.attributes?.entries || []).slice().reverse();
+                  const rows = entries.length ? entries.map((e) => `
+                    <div style="display:flex;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                      <span style="color:var(--secondary-text-color);flex-shrink:0;">${e.time}</span>
+                      <span style="opacity:0.55;flex-shrink:0;">${e.miner}</span>
+                      <span style="font-weight:700;color:var(--primary-text-color);flex-shrink:0;">${e.rule}</span>
+                      <span style="color:var(--secondary-text-color);overflow-wrap:anywhere;">${e.values}</span>
+                    </div>`).join('') : '<div style="color:var(--secondary-text-color);">Noch keine Einträge</div>';
+                  return window.bgMinerDetail('mdi:text-box-outline', 'Log', ok, open, [
+                    ['text', `<div style="max-height:240px;overflow-y:auto;">${rows}</div>`],
+                  ]);
                 ]]]
 
       # ─────────────────────────────────────────────
@@ -364,6 +624,7 @@ cards:
               box-shadow: var(--ha-card-box-shadow) !important;
               overflow: hidden !important;
               contain: paint !important;
+              min-width: 0 !important;
             }
         cards:
 
@@ -398,8 +659,8 @@ cards:
                   ]]]
                 styles:
                   icon:
-                    - width: 44px
-                    - height: 44px
+                    - width: 76px
+                    - height: 76px
                     - color: >
                         [[[
                           const s = entity.state;
@@ -428,8 +689,8 @@ cards:
                   ]]]
                 styles:
                   icon:
-                    - width: 44px
-                    - height: 44px
+                    - width: 76px
+                    - height: 76px
                     - color: >
                         [[[
                           return entity.state === 'on'
@@ -552,11 +813,7 @@ cards:
               - type: custom:button-card
                 entity: select.miner2_workmode_set
                 name: Super
-                icon: >
-                  [[[
-                    return states['input_boolean.miner2_auto_load_management']?.state === 'on'
-                      ? 'mdi:lock' : 'mdi:rocket-launch';
-                  ]]]
+                icon: mdi:rocket-launch
                 show_state: false
                 tap_action:
                   action: call-service
@@ -574,111 +831,338 @@ cards:
                     - height: 72px
                     - box-sizing: border-box !important
                     - margin: "0 !important"
-                    - opacity: >
-                        [[[
-                          return states['input_boolean.miner2_auto_load_management']?.state === 'on'
-                            ? '0.35' : '1';
-                        ]]]
-                    - cursor: >
-                        [[[
-                          return states['input_boolean.miner2_auto_load_management']?.state === 'on'
-                            ? 'default' : 'pointer';
-                        ]]]
                   icon:
                     - color: >
-                        [[[
-                          if (states['input_boolean.miner2_auto_load_management']?.state === 'on') {
-                            return 'rgba(255,255,255,0.3)';
-                          }
-                          return entity.state==='Super' ? 'var(--bg-color-super)' : 'rgba(255,255,255,0.3)';
-                        ]]]
+                        [[[return entity.state==='Super'?'var(--bg-color-super)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
                   name:
                     - font-size: 0.72rem
-                    - font-weight: "400"
-                    - color: "var(--secondary-text-color)"
+                    - font-weight: >
+                        [[[return entity.state==='Super'?'700':'400']]]
+                    - color: >
+                        [[[return entity.state==='Super'?'var(--primary-text-color)':'var(--secondary-text-color)']]]
 
+          # ─────────────────────────────────────────
+          # Abschnitts-Überschrift vor den Detail-Listen
+          # ─────────────────────────────────────────
           - type: custom:button-card
             show_name: false
             show_icon: false
             show_state: false
             styles:
               card:
-                - padding: 12px 8px
                 - background: transparent
                 - box-shadow: none
                 - border: none
+                - border-top: 1px solid rgba(255,255,255,0.08)
+                - margin: 4px 8px 0
+                - padding: 10px 2px 4px
               grid:
-                - grid-template-areas: '"stats"'
+                - grid-template-areas: '"body"'
                 - grid-template-columns: 1fr
               custom_fields:
-                stats:
+                body:
                   - width: 100%
                   - justify-self: stretch
-                  - align-self: stretch
                   - box-sizing: border-box
             custom_fields:
-              stats: >
+              body: >
                 [[[
-                  const ths = states['sensor.miner2_thsspd']?.state ?? '—';
-                  const jth = states['sensor.miner2_energy_per_th']?.state ?? '—';
-                  const sw  = states['sensor.shellyplugsg3_d0cf13d86254_leistung']?.state ?? '—';
-                  const fan = states['sensor.miner2_fanr']?.state ?? '—';
-                  const tmax = states['sensor.miner2_tmax']?.state ?? '—';
-                  const tavg = states['sensor.miner2_tavg']?.state ?? '—';
-                  const hbi  = states['sensor.miner2_hbitemp']?.state ?? '—';
-                  const hbo  = states['sensor.miner2_hbotemp']?.state ?? '—';
-                  const statusEnt = states['sensor.miner2_workmode_status'];
-                  const mode = statusEnt?.state ?? '—';
-                  const parseIdt = (s) => (s && s !== 'unknown' && s !== 'unavailable' && !s.startsWith('1970'))
-                    ? new Date(s.replace(' ', 'T')).getTime() / 1000 : 0;
-                  const sinceTs  = Math.max(
-                    parseIdt(states['input_datetime.mvp_miner2_last_upgrade']?.state),
-                    parseIdt(states['input_datetime.mvp_miner2_last_downgrade']?.state)
-                  );
-                  const since    = sinceTs > 0
-                    ? new Date(sinceTs * 1000).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})
-                    : '—';
-                  const cd = states['sensor.miner_2_cooldown_status']?.state ?? '—';
-                  const cdActive = cd !== '—' && cd !== 'unavailable' && cd !== 'unknown';
-                  const cdColor = cdActive ? 'var(--accent-color)' : 'var(--secondary-text-color)';
-                  const cdTag = cdActive
-                    ? `<span style="margin-left:8px;font-size:0.78rem;color:var(--accent-color);font-weight:600;">${cd}</span>`
-                    : '';
-                  const tempColor = (v) => {
-                    if (v === '—') return 'var(--secondary-text-color)';
-                    const t = parseFloat(v);
-                    if (mode === 'Standby' || mode === 'Idle' || mode === 'Off' || t < 45) return 'var(--secondary-text-color)';
-                    if (mode === 'Eco')
-                      return t >= 80 ? 'var(--bg-color-reserve)' : t >= 75 ? 'var(--accent-color)' : 'var(--bg-color-eco)';
-                    if (mode === 'Standard')
-                      return t >= 110 ? 'var(--bg-color-reserve)' : t >= 100 ? 'var(--bg-color-heat)' : 'var(--bg-color-eco)';
-                    return t >= 110 ? 'var(--bg-color-reserve)' : t >= 100 ? 'var(--bg-color-heat)' : 'var(--bg-color-eco)';
-                  };
-                  const tmaxColor = tempColor(tmax);
-                  const tavgColor = tempColor(tavg);
-                  const hbiColor  = tempColor(hbi);
-                  const hboColor  = tempColor(hbo);
-                  const row = (icon, label, val, color) =>
-                    `<div style="display:flex;align-items:center;padding:3px 0;">
-                      <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color ?? 'var(--secondary-text-color)'};flex-shrink:0;margin-right:8px;"></ha-icon>
-                      <span style="flex:1;color:${color ?? 'var(--secondary-text-color)'};font-size:0.85rem;">${label}:</span>
-                      <span style="font-size:1rem;font-weight:600;color:${color ?? 'inherit'};text-align:right;white-space:nowrap;">${val}</span>
-                    </div>`;
-                  return `<div style="width:100%;padding:4px 0;text-align:left;">
-                    ${row('mdi:speedometer','Hashrate', ths !== '—' ? ths + ' TH/s' : '—')}
-                    ${row('mdi:lightning-bolt','Effizienz', jth !== '—' ? jth + ' J/TH' : '—')}
-                    ${row('mdi:power-plug','Verbrauch', sw !== '—' ? sw + ' W' : '—')}
-                    ${row('mdi:fan','Lüfter', fan !== '—' ? fan + ' %' : '—')}
-                    ${row('mdi:thermometer-high','Höchsttemp.', tmax !== '—' ? tmax + ' °C' : '—', tmaxColor)}
-                    ${row('mdi:thermometer-auto','Ø Temperatur', tavg !== '—' ? tavg + ' °C' : '—', tavgColor)}
-                    ${row('mdi:thermometer-chevron-down','Einlass', hbi !== '—' ? hbi + ' °C' : '—', hbiColor)}
-                    ${row('mdi:thermometer-chevron-up','Auslass', hbo !== '—' ? hbo + ' °C' : '—', hboColor)}
-                    <div style="display:flex;align-items:center;padding:3px 0;">
-                      <ha-icon icon="mdi:timer-outline" style="--mdc-icon-size:16px;color:${cdColor};flex-shrink:0;margin-right:8px;"></ha-icon>
-                      <span style="flex:1;color:${cdColor};font-size:0.85rem;">Status seit:</span>
-                      <span style="font-size:1rem;font-weight:600;display:flex;align-items:center;gap:4px;white-space:nowrap;">${since}&#160;&#160;${mode}${cdTag}</span>
-                    </div>
-                  </div>`;
+                  return `<div style="font-size:var(--bg-fs-label);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--secondary-text-color);opacity:0.65;">Details</div>`;
+                ]]]
+
+          # ─────────────────────────────────────────
+          # DETAIL-ANSICHT — 6 aufklappbare Listen, siehe Kommentar bei Miner 1
+          # oben. window.bgMinerDetail ist dort definiert, hier nur genutzt.
+          # ─────────────────────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner2_detail_power
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  if (!window.bgMinerDetail) {
+                    window.bgMinerDetail = function(icon, title, ok, open, rows) {
+                      const rowHtml = rows.map((row) => {
+                        const [ic, label, val, col] = row;
+                        if (ic === 'text') {
+                          return `<div style="padding:2px 2px 6px;color:var(--secondary-text-color);font-size:var(--bg-fs-label);line-height:1.4;white-space:normal;">${label}</div>`;
+                        }
+                        return `
+                        <div style="display:flex;align-items:center;padding:4px 2px;">
+                          <ha-icon icon="${ic}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;margin-right:8px;"></ha-icon>
+                          <span style="flex:1;color:var(--secondary-text-color);font-size:var(--bg-fs-secondary);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
+                          <span style="font-size:var(--bg-fs-secondary);font-weight:600;text-align:right;white-space:nowrap;padding-left:8px;color:${col || 'var(--primary-text-color)'};">${val}</span>
+                        </div>`;
+                      }).join('');
+                      return `
+                        <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;">
+                          <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;"></ha-icon>
+                          <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bg-fs-body);font-weight:700;color:var(--secondary-text-color);text-align:left;">${title}</span>
+                          <ha-icon icon="${ok ? 'mdi:check-circle' : 'mdi:alert-circle'}" style="--mdc-icon-size:18px;color:${ok ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'};margin-right:6px;flex-shrink:0;"></ha-icon>
+                          <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                        </div>
+                        ${open ? `<div style="padding:0 2px 8px;">${rowHtml}</div>` : ''}`;
+                    };
+                  }
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  const num = (id, d) => { const v = parseFloat(g(id)); return v===null||isNaN(v) ? '—' : v.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d}); };
+                  const open = entity.state === 'on';
+                  const ok = states['switch.shellyplugsg3_d0cf13d86254']?.state === 'on';
+                  return window.bgMinerDetail('mdi:flash-outline', 'Stromversorgung', ok, open, [
+                    ['mdi:cog-outline', 'Modus:', g('sensor.miner2_workmode_status') ?? '—'],
+                    ['mdi:cog-outline', 'Arbeitsstufe:', g('sensor.miner2_worklevel') ?? '—'],
+                    ['mdi:lightning-bolt', 'Soll-Leistung:', num('sensor.miner2_mode_power_output',0) + ' W'],
+                    ['mdi:lightning-bolt', 'Ist-Leistung:', num('sensor.miner2_cur_load',0) + ' W'],
+                  ]);
+                ]]]
+
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner2_detail_miner
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  const open = entity.state === 'on';
+                  const ok = states['binary_sensor.miner2_available']?.state === 'on';
+                  return window.bgMinerDetail('mdi:memory', 'Miner', ok, open, [
+                    ['mdi:lan-connect', 'Verbindung:', ok ? 'Verbunden' : 'Getrennt'],
+                    ['mdi:timer-outline', 'Laufzeit:', g('sensor.miner2_uptime') ?? '—'],
+                    ['mdi:fit-to-screen', 'LCD-Display:', states['binary_sensor.miner2_lcdonoff_status']?.state === 'on' ? 'An' : 'Aus'],
+                    ['mdi:thermometer', 'Innentemperatur:', (() => { const v=parseFloat(g('sensor.miner2_itemp')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})+' °C'; })()],
+                    ['mdi:lan', 'Netzwerkfehler (#):', g('sensor.miner2_network_errors') ?? '—'],
+                    ['mdi:comment-text-outline', 'Status:', g('sensor.miner2_systemstatus') ?? '—'],
+                    ['mdi:list-status', 'Statuscode:', g('sensor.miner2_state') ?? '—'],
+                    ['mdi:identifier', 'ID:', g('sensor.miner2_id') ?? '—'],
+                    ['mdi:chip', 'Firmware:', g('sensor.miner2_firmware') ?? '—'],
+                    ['mdi:lan', 'MAC-Adresse:', g('sensor.miner2_mac_address') ?? '—'],
+                    ['mdi:counter', 'CGMiner-Version:', g('sensor.miner2_cgminer_version') ?? '—'],
+                    ['mdi:api', 'API-Version:', g('sensor.miner2_api_version_status') ?? '—'],
+                  ]);
+                ]]]
+
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner2_detail_hashboard
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  const t1 = (id) => { const v=parseFloat(g(id)); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})+' °C'; };
+                  const open = entity.state === 'on';
+                  const ok = states['sensor.miner2_api_litestats']?.state === 'OK';
+                  const asics = g('sensor.miner2_total_asics');
+                  const asicModel = g('sensor.miner2_asic_model');
+                  const hbi = g('sensor.miner2_hbitemp'), hbo = g('sensor.miner2_hbotemp');
+                  const hbiN = hbi!==null?parseFloat(hbi).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1}):'—';
+                  const hboN = hbo!==null?parseFloat(hbo).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1}):'—';
+                  const cpuFreq = (() => { const v=parseFloat(g('sensor.miner2_cpu_freq')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); })();
+                  const hwErrR = (() => { const v=parseFloat(g('sensor.miner2_hardware_errorsr')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:3,maximumFractionDigits:3}); })();
+                  return window.bgMinerDetail('mdi:expansion-card-variant', 'Hashboard', ok, open, [
+                    ['mdi:cube-outline', 'Gefundene Blöcke:', g('sensor.miner2_found_blocks') ?? '—'],
+                    ['mdi:memory', 'CPU-Modell:', g('sensor.miner2_cpu_model') ?? '—'],
+                    ['mdi:sine-wave', 'CPU-Frequenz:', cpuFreq + ' MHz'],
+                    ['mdi:chip', 'ASIC-Modell:', (asics ?? '—') + ' x · ' + (asicModel ?? '—')],
+                    ['mdi:thermometer-check', 'ASIC-Temperatur (Soll):', t1('sensor.miner2_tart')],
+                    ['mdi:thermometer-auto', 'ASIC-Temperatur (Ø):', t1('sensor.miner2_tavg')],
+                    ['mdi:thermometer-high', 'ASIC-Temperatur (Max):', t1('sensor.miner2_tmax')],
+                    ['mdi:thermometer-lines', 'Ein-/Austrittstemperatur:', hbiN + ' °C / ' + hboN + ' °C'],
+                    ['mdi:alert-outline', 'Hardwarefehler (#):', g('sensor.miner2_hardware_errors') ?? '—'],
+                    ['mdi:alert-outline', 'Hardwarefehler (%):', hwErrR + ' %'],
+                  ]);
+                ]]]
+
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner2_detail_cooling
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  const int0 = (id) => { const v=parseFloat(g(id)); return isNaN(v)?'—':v.toLocaleString('de-DE',{maximumFractionDigits:0}); };
+                  const open = entity.state === 'on';
+                  const ok = states['sensor.miner2_fanerr']?.state !== '1';
+                  return window.bgMinerDetail('mdi:fan', 'Kühlung', ok, open, [
+                    ['mdi:fan', 'Lüfterleistung:', int0('sensor.miner2_fanr') + ' %'],
+                    ['mdi:air-filter', 'Filterlaufzeit:', int0('sensor.miner2_filter') + ' Min.'],
+                    ['mdi:fan', 'Drehzahl (Einlass):', int0('sensor.miner2_fan1') + ' / ' + int0('sensor.miner2_fan2') + ' rpm'],
+                    ['mdi:fan', 'Drehzahl (Auslass):', int0('sensor.miner2_fan3') + ' / ' + int0('sensor.miner2_fan4') + ' rpm'],
+                  ]);
+                ]]]
+
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner2_detail_pool
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  const int0 = (id) => { const v=parseFloat(g(id)); return isNaN(v)?'—':v.toLocaleString('de-DE',{maximumFractionDigits:0}); };
+                  const open = entity.state === 'on';
+                  const ok = states['binary_sensor.miner2_pool_status']?.state === 'on';
+                  const rejR = (() => { const v=parseFloat(g('sensor.miner2_rejection_rate')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); })();
+                  const spm = (() => { const v=parseFloat(g('sensor.miner2_avg_shares_per_min')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); })();
+                  return window.bgMinerDetail('mdi:pool', 'Pool', ok, open, [
+                    ['mdi:web', 'URL:', g('sensor.miner2_pool') ?? '—'],
+                    ['mdi:timer-sand', 'Latenz:', int0('sensor.miner2_ping') + ' ms'],
+                    ['mdi:check-circle-outline', 'Akzeptierte Shares:', int0('sensor.miner2_accepted_shares')],
+                    ['mdi:close-circle-outline', 'Abgelehnte Shares:', int0('sensor.miner2_rejected_shares') + ' (' + rejR + ' %)'],
+                    ['mdi:clock-check', 'Letzter Share:', int0('sensor.miner2_latest_share') + ' s'],
+                    ['mdi:timer-outline', 'Shares pro Minute:', spm],
+                    ['mdi:calculator-variant-outline', 'Stratum-Schwierigkeit:', int0('sensor.miner2_stratum_difficulty')],
+                    ['mdi:calculator-variant-outline', 'Netzwerk-Schwierigkeit:', (() => { const v=parseFloat(g('sensor.miner2_network_difficulty')); return isNaN(v)?'—':v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); })() + ' T'],
+                  ]);
+                ]]]
+
+          # ─────────────────────────────────────────
+          # LOG — siehe Kommentar bei Miner 1 oben.
+          # ─────────────────────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.miner2_detail_log
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: rgba(255,255,255,0.04)
+                - box-shadow: none
+                - border: none
+                - border-radius: 14px
+                - overflow: hidden
+                - margin: 0 8px 6px
+                - padding: 2px 12px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const open = entity.state === 'on';
+                  const rule = states['input_text.mvp_miner2_rule']?.state ?? '';
+                  const ok = !['R1 Stopp', 'R2 Temp-Sperre'].includes(rule);
+                  const entries = (states['sensor.miner_2_log']?.attributes?.entries || []).slice().reverse();
+                  const rows = entries.length ? entries.map((e) => `
+                    <div style="display:flex;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                      <span style="color:var(--secondary-text-color);flex-shrink:0;">${e.time}</span>
+                      <span style="opacity:0.55;flex-shrink:0;">${e.miner}</span>
+                      <span style="font-weight:700;color:var(--primary-text-color);flex-shrink:0;">${e.rule}</span>
+                      <span style="color:var(--secondary-text-color);overflow-wrap:anywhere;">${e.values}</span>
+                    </div>`).join('') : '<div style="color:var(--secondary-text-color);">Noch keine Einträge</div>';
+                  return window.bgMinerDetail('mdi:text-box-outline', 'Log', ok, open, [
+                    ['text', `<div style="max-height:240px;overflow-y:auto;">${rows}</div>`],
+                  ]);
                 ]]]

@@ -19,6 +19,7 @@ Env-Vars (aus .env):
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import logging
 import os
@@ -71,7 +72,32 @@ ENTITY_MAP: list[tuple[str, str]] = [
     # configuration.yaml, das ebenfalls power1_solar integriert. Vorher stand
     # heizstab_power_w hart auf None, die Spalte war ueber alle Bloecke leer.
     ("sensor.ac_elwa_2_power1_solar", "heizstab_power_w"),
+    # Wetter/Heizlast fuer die naechste saisonale Optimierung (Fruehling-vs-
+    # Herbst-Frage, Winter-Grundlast). HA-History existiert erst ab Anfang/
+    # Mitte Juli 2026 (Integration wurde spaeter eingerichtet), nicht seit
+    # Mai — echte Luecke davor, kein Sync-Fehler. Siehe
+    # docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md.
+    ("sensor.cloud_coverage", "cloud_coverage_pct"),
+    ("sensor.outdoor_temperature", "outdoor_temp_c"),
+    ("sensor.outdoor_humidity", "outdoor_humidity_pct"),
+    ("sensor.heizung_energy_daily", "heizung_energy_kwh_today"),
+    ("sensor.sun_azimuth", "sun_azimuth_deg"),
+    ("sensor.sun_elevation", "sun_elevation_deg"),
 ]
+
+# battery_power_w bewusst NICHT in ENTITY_MAP: der Sensor selbst steht in
+# configuration.yaml im Recorder-Exclude ("aus Rohdaten rekonstruierbar") und
+# hat deshalb NIE HA-History — ein Mapping wuerde die Spalte fuer immer leer
+# lassen, ohne dass es auffiele (2026-08-23 live per HA-History-API
+# verifiziert: 0 Punkte ueber jeden getesteten Zeitraum). Stattdessen wird er
+# aus den beiden tatsaechlich aufgezeichneten SMA-Rohsensoren nachgerechnet
+# (siehe configuration.yaml Z.552-565: battery_power_w = charge - discharge),
+# in _apply_battery_power() unten. Die Live-Automation (R8/mvp_p3b in
+# mvp_auto.yaml) nutzt battery_power_w bereits als Entscheidungssignal, es war
+# vorher nur nirgends persistiert — siehe
+# docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md.
+_BATTERY_CHARGE_ENTITY = "sensor.sma_storage_battery_power_charge_total"
+_BATTERY_DISCHARGE_ENTITY = "sensor.sma_storage_battery_power_discharge_total"
 
 # Verbraucher-Plugs → device_states-Tabelle (pro Plug, 10-min-Bloecke).
 # sensor.geraete_power_w (Summe) ist im HA-Recorder ausgeschlossen und wird
@@ -423,6 +449,33 @@ def resample_to_blocks(
     return states
 
 
+def apply_battery_power(
+    blocks: list[EnergyState],
+    entity_readings: dict[str, list[tuple[datetime, float | None]]],
+) -> list[EnergyState]:
+    """Rechnet battery_power_w = charge - discharge nach (siehe ENTITY_MAP-
+    Kommentar oben: der Sensor selbst hat nie HA-History, die beiden SMA-
+    Rohsensoren dagegen schon). Blockweise dieselbe Vorwaerts-Fuell-Logik wie
+    resample_to_blocks. Reine Ergaenzung — laesst Bloecke ohne Ladedaten
+    unveraendert (battery_power_w bleibt None, keine erfundenen Werte)."""
+    charge = entity_readings.get(_BATTERY_CHARGE_ENTITY, [])
+    discharge = entity_readings.get(_BATTERY_DISCHARGE_ENTITY, [])
+    if not charge and not discharge:
+        return blocks
+
+    result = []
+    for state in blocks:
+        c = _last_value_in_window(charge, state.window_start, state.window_end)
+        d = _last_value_in_window(discharge, state.window_start, state.window_end)
+        if c is None and d is None:
+            result.append(state)
+        else:
+            result.append(
+                dataclasses.replace(state, battery_power_w=(c or 0.0) - (d or 0.0))
+            )
+    return result
+
+
 def resample_device_blocks(
     entity_readings: dict[str, list[tuple[datetime, float | None]]],
     device_map: list[tuple[str, str]],
@@ -555,7 +608,10 @@ def sync(
     Gibt (neue_bloecke, uebersprungene_bloecke) zurueck.
     Bestehende Eintraege werden nie ueberschrieben (INSERT OR IGNORE).
     """
-    entity_ids = [eid for eid, _ in ENTITY_MAP]
+    entity_ids = [eid for eid, _ in ENTITY_MAP] + [
+        _BATTERY_CHARGE_ENTITY,
+        _BATTERY_DISCHARGE_ENTITY,
+    ]
     for missing_entity in verify_entities(entity_ids, ha_base_url, token):
         log.error(
             "Quell-Entity existiert nicht in HA: %s, die zugehoerige Spalte "
@@ -575,6 +631,7 @@ def sync(
         return 0, 0
 
     blocks = resample_to_blocks(entity_readings, ENTITY_MAP, start, end)
+    blocks = apply_battery_power(blocks, entity_readings)
     log.info("%d Bloecke resamplet", len(blocks))
 
     store = StateStore(conn)

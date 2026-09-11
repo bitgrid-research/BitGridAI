@@ -1,0 +1,197 @@
+# ═══════════════════════════════════════════════════════════════════════
+# FINANZ-BILANZ  —  Balkendiagramm: Ersparnis PV-Eigennutzung, Mining-Ertrag,
+# Netzbezugskosten (negativ), Gesamt-Profit heute (Summe der ersten drei).
+# Sensoren: packages/economics.yaml (pv_self_use_savings_eur,
+# mining_revenue_today_eur, grid_import_cost_eur, total_profit_today_eur).
+# Reines Tageswert-Balkendiagramm (kein Verlauf), daher raw-SVG in
+# custom:button-card statt eigener Chart-Library — gleiches Muster wie die
+# SoC-Band-Visualisierung im Steuerung-Tab, kein neuer HACS-Dependency.
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Home".
+# Kein Titel im Chart (Nutzer-Entscheidung 23.08.2026: die Karte braucht
+# keine eigene Überschrift).
+# Höhenangleichung an Miner statt Energiefluss (31.08.2026, Nutzer-Wunsch
+# "Miner soll wie Finanzen [hoch sein]"): DAS ist eine andere Kopplung als
+# der am 23.08.2026 verworfene Versuch (damals: fest an Energiefluss
+# angeglichen, Balken sahen "künstlich überdehnt" aus). Die Karte war bei
+# ihrer festen Kartenbreite von Natur aus deutlich hoeher als die Miner-
+# Boxen, reines viewBox-Seitenverhaeltnis — Fix ueber die Zeichenflaeche
+# selbst (viewBox W/cR unten, 570/550 -> 760/730: breiter statt hoeher),
+# nicht ueber CSS-Grid-Stretch der Karte. KEIN flex:1/justify-content:center
+# mehr auf dieser Karte (Versuch 31.08.2026, noch am selben Tag verworfen,
+# Nutzer-Feedback "Padding unten viel weniger"): dieselbe Lehre wie bei
+# Energiefluss/PFCP (s. bitgrid_dashboard_v3.yaml) — die Karte wurde von der
+# Grid-Zeile auf Miner-Hoehe gestreckt, aber justify-content:center erreichte
+# den Inhalt nicht, der tote Bereich landete komplett unten. Karte bleibt
+# jetzt bei ihrer natuerlichen Hoehe, kein erzwungenes Stretch.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+# zoom-Kommentar s. bitgrid_dashboard_v3.yaml, Hamster-Karte (Home-Tab).
+card_mod:
+  style: |
+    :host {
+      zoom: min(1, calc(100vh / 1200px)) !important;
+    }
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 12px
+  grid:
+    - grid-template-areas: '"chart"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    chart:
+      # 65% -> 75% -> wieder 100% (31.08.2026, Nutzer-Wunsch "Breite
+      # ausnutzen"): die Zielhoehe kommt jetzt aus der breiteren SVG-
+      # Zeichenflaeche (viewBox W/cR oben, 570/550 -> 760/730), nicht mehr
+      # aus einer schmaleren, zentrierten Karte.
+      - width: 100%
+      - height: 100%
+      - justify-self: stretch
+      - align-self: stretch
+custom_fields:
+  chart: >
+    [[[
+      const num = (id) => { const v = parseFloat(states[id]?.state); return isNaN(v) ? 0 : v; };
+      const savings = num('sensor.pv_self_use_savings_eur');
+      const mining  = num('sensor.mining_revenue_today_eur');
+      const cost    = -num('sensor.grid_import_cost_eur');
+      const total   = num('sensor.total_profit_today_eur');
+
+      // v3-Datenrollen (24.08.2026, --bgai-*-v3 in themes/bitgrid.yaml):
+      // jeder Balken uebernimmt die Rolle seiner Quelle, dashboard-weit
+      // konsistent mit PFCP und Verlaufsgraph. Gesamt-Profit ist IMMER
+      // die neutrale Summe-Farbe, auch bei negativem Wert — das Vorzeichen
+      // zeigt bereits die Balkenrichtung (ueber/unter der Nulllinie), eine
+      // zusaetzliche Rot-Einfaerbung waere redundant und wuerde die Farbe
+      // von ihrer Rollen-Bedeutung loesen.
+      const cHome   = 'var(--bgai-home-v3, #3FD07F)';   // Zuhause/Akku (Ersparnis = Haus-Eigenverbrauch)
+      const cMining = 'var(--bgai-mining-v3, #F7931A)'; // Mining/Bitcoin
+      const cGrid   = 'var(--bgai-grid-v3, #7C83E8)';   // Netz
+      const cTotal  = 'var(--bgai-total-v3, #C7D0E8)';  // Summe/Gesamt-Profit, neutral
+      const bars = [
+        { label: ['Ersparnis', '(PV-Eigenverbrauch)'], value: savings, color: cHome },
+        { label: ['Mining-Ertrag', ''], value: mining, color: cMining },
+        { label: ['Netzbezugskosten', ''], value: cost, color: cGrid },
+        { label: ['Gesamtprofit', 'heute'], value: total, color: cTotal },
+      ];
+
+      // 31.08.2026: der Versuch, den SVG-Achsentext auf font-size="12" zu
+      // ziehen (analog zu Verlaufs apexcharts fontSize:"12px"), war ein
+      // Denkfehler — diese SVG hat ein viewBox="0 0 W H", das per
+      // width:100% auf die tatsaechliche Kartenbreite gestreckt wird. Ein
+      // SVG-font-size-Wert ist daher KEIN echtes CSS-Pixel wie bei
+      // apexcharts-card, sondern wird um den Skalierungsfaktor der Karte
+      // vergroessert (hier sichtbar deutlich zu groß). Zurueckgesetzt auf
+      // den urspruenglichen, bewaehrten Wert.
+      // W 570->760, cR 550->730 (31.08.2026, Nutzer-Wunsch "Finanzen soll die
+      // Breite ausnutzen" statt schmal+zentriert bei width:75%, s. u.
+      // custom_fields.chart): breitere Zeichenflaeche bei GLEICHER Hoehe (H,
+      // cT, cB unveraendert) ergibt bei 100% Kartenbreite dieselbe
+      // Endhoehe wie vorher bei 75% Breite (236/730*0.75≈236/760*1.0) —
+      // die Balken ruecken nur weiter auseinander (mehr Slot-Breite), keine
+      // vertikale Stauchung/Verzerrung. cL (Y-Achsen-Labelspalte) bleibt fix.
+      // H 236->218 (31.08.2026, Nutzer-Feedback "Abstand von den x-Achsen-
+      // Bezeichnern zum Kartenrand viel zu gross"): die zweizeiligen Labels
+      // (z. B. "Ersparnis"/"(PV-Eigenverbrauch)") enden bei cB+30+11=211,
+      // H=236 liess ~25px ungenutzten Rand darunter. 218 laesst knapp 7px
+      // Luft, ohne die zweite Zeile abzuschneiden — H ist jetzt an dieser
+      // Untergrenze, weiteres Kuerzen wuerde die zweite Zeile abschneiden.
+      // W 760->950->760, cR 730->920->730 (31.08.2026): der 950er-Versuch
+      // war laut Nutzer "zu sehr gestaucht" (Balken zu flach/breit) und
+      // noch am selben Tag zurueckgerollt. Die Höhenangleichung an Miner
+      // laeuft jetzt stattdessen ueber die Miner-Box selbst (staerkeres
+      // Padding/Gap, s. views/steuerung_quick.yaml), nicht mehr ueber
+      // weiteres Stauchen der Finanzen-Zeichenflaeche.
+      // H 218->230->236 (02.09.2026, Nutzer-Wunsch "Achsenbeschriftung noch
+      // etwas groesser"): Puffer fuer die jetzt groesseren zweizeiligen
+      // Kategorie-Labels (font-size zuletzt 9->10.5->12) — bei nur 9px Font
+      // passte die zweite Zeile mit knapp 7px Luft gerade so (31.08.2026-
+      // Kommentar), das reicht bei 12px nicht mehr.
+      // cL 46->106->72, cR 730->653->688 (02.09.2026, Nutzer-Feedback "10%
+      // waeren besser gewesen" nach dem 20%-Versuch): Zeichenflaeche
+      // (cR-cL) jetzt nur 10% kleiner als das Original, weiterhin zentriert
+      // im gleichen W=760-Canvas (W selbst bleibt unveraendert, sonst
+      // skaliert die viewBox-Stretch alle font-size-Werte mit hoch, s.
+      // Kommentar bei bars.forEach oben).
+      // cB 170->154->162 (02.09.2026, Nutzer-Feedback "dann 5%" statt 10%):
+      // nur die Balkenflaeche (cB-cT) selbst verkleinert, H bewusst
+      // UNVERAENDERT gelassen — H wurde extra mehrfach hochgezogen (218->
+      // 230->236), damit die zweizeiligen Kategorie-Labels unter den
+      // Balken nicht abgeschnitten werden (s. Kommentar bei bars.forEach
+      // unten). H mitzuschrumpfen wuerde genau dieses bereits zweimal
+      // aufgetretene Problem riskieren.
+      const W = 760, H = 236, cL = 72, cR = 688, cT = 14, cB = 162;
+
+      // Nice-Step-Achse: rundet auf 1/2/5/10*10^n, ~2 Gridlinien bis zum Max
+      // (31.08.2026, Nutzer-Wunsch "weniger kleinteilig": vorher /4, war bei
+      // typischen Werten um 1€ mit Schritt 0,20 zu feinstufig).
+      const maxAbs = Math.max(...bars.map(b => Math.abs(b.value)), 0.01);
+      const rough = maxAbs / 2;
+      const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+      const norm = rough / mag;
+      const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag;
+      const maxV = Math.max(...bars.map(b => b.value), 0);
+      const minV = Math.min(...bars.map(b => b.value), 0);
+      // Kopfraum ueber dem hoechsten Balken: vorher fest "+ step" (eine
+      // ganze Gridlinie extra), das liess den Chart bei den jetzt groeberen
+      // Schritten (s. o., /2 statt /4) deutlich zu leer wirken (31.08.2026,
+      // Nutzer-Feedback "kaputt", Beispiel maxV≈4 bei step=2 sprang auf
+      // yMax=8 statt der noetigen ~6). Jetzt proportional: 15% Kopfraum auf
+      // den Wert selbst, erst danach auf die naechste Gridlinie gerundet.
+      const yMax = Math.ceil((maxV * 1.15) / step) * step;
+      const yMin = minV < 0 ? -(Math.ceil(-minV / step) * step) : 0;
+      const yOf = (v) => cB - (v - yMin) / (yMax - yMin) * (cB - cT);
+      const y0 = yOf(0);
+
+      // 2 Nachkommastellen (24.08.2026, Nutzer-Feedback): Werte sind Euro-
+      // Betraege, 1 Nachkommastelle rundete Cent-Betraege unsauber auf "0,0".
+      const fmt = (v) => v.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">`;
+
+      // Y-Gridlines + Labels
+      for (let v = yMin; v <= yMax + 0.001; v += step) {
+        const y = yOf(v);
+        s += `<line x1="${cL}" y1="${y}" x2="${cR}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>`;
+        s += `<text x="${cL - 6}" y="${y + 3.5}" fill="rgba(255,255,255,0.5)" font-size="14" font-family="Roboto,sans-serif" text-anchor="end">${fmt(v)}</text>`;
+      }
+      // 0-Linie kräftiger
+      s += `<line x1="${cL}" y1="${y0}" x2="${cR}" y2="${y0}" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>`;
+      // Y-Achsentitel (rotiert)
+      s += `<text x="14" y="${(cT + cB) / 2}" fill="rgba(255,255,255,0.4)" font-size="15" font-family="Roboto,sans-serif" text-anchor="middle" transform="rotate(-90 14 ${(cT + cB) / 2})">Profit in €</text>`;
+
+      // Balken
+      const slotW = (cR - cL) / bars.length;
+      const barW = slotW * 0.5;
+      bars.forEach((b, i) => {
+        const cx = cL + slotW * i + slotW / 2;
+        const yv = yOf(b.value);
+        const yTop = Math.min(y0, yv);
+        const h = Math.max(1, Math.abs(y0 - yv));
+        const col = b.color;
+        s += `<rect x="${cx - barW / 2}" y="${yTop}" width="${barW}" height="${h}" rx="4" fill="${col}" opacity="0.85"/>`;
+
+        const labelY = b.value >= 0 ? yTop - 8 : yTop + h + 16;
+        s += `<text x="${cx}" y="${labelY}" fill="${col}" font-size="13" font-family="Roboto,sans-serif" font-weight="700" text-anchor="middle">${fmt(b.value)}</text>`;
+
+        // +30 statt +16 (24.08.2026, Nutzer-Feedback): Wert-Label eines negativen
+        // Balkens liegt im Extremfall (Wert = yMin) exakt bei cB+16 — ohne
+        // Abstand wuerde es die erste Kategorie-Zeile ueberlappen.
+        const lines = b.label.filter(l => l);
+        lines.forEach((line, li) => {
+          s += `<text x="${cx}" y="${cB + 30 + li * 15}" fill="rgba(255,255,255,0.55)" font-size="12" font-family="Roboto,sans-serif" text-anchor="middle">${line}</text>`;
+        });
+      });
+
+      s += '</svg>';
+      return s;
+    ]]]

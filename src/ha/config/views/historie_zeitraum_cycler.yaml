@@ -1,0 +1,96 @@
+# ═══════════════════════════════════════════════════════════════════════
+# HISTORIE — ZEITRAUM-UMSCHALTER — Abschnitt "Historie" (Tab
+# "EnergieInfo"). 25.08.2026: Anlauf mit onclick="..." direkt auf den
+# <ha-icon>-Pfeilen (statt tap_action) hat die Klicks stumm verschluckt —
+# vermutlich blockiert HAs Content-Security-Policy inline onclick-Attribute
+# per innerHTML injiziert (kein Fehler sichtbar, Klick tat einfach nichts,
+# live bestätigt: "pfeile funktionieren nicht mehr"). Zurück zu
+# tap_action auf zwei separaten button-cards (das hat vorher nachweislich
+# funktioniert).
+#
+# 03.09.2026, Nutzer-Wunsch: Pfeile + Label jetzt doch in EINER Zeile
+# (Pfeile links/rechts, Label mittig) statt gestapelt — gleiches Muster wie
+# views/mining_log.yaml (dort am selben Tag genauso umgebaut). Der 25.08.
+# Row-Stapel-Fix oben betraf ein anderes Problem (custom:layout-card
+# rendert bei min-content-Spalten gar nichts) — hier wird stattdessen
+# natives horizontal-stack mit flex-Anteilen genutzt, das hat bei
+# mining_log.yaml bereits nachweislich funktioniert.
+#
+# input_select.select_previous / .select_next sind HAs eingebaute Services
+# fürs Durchblättern mit Wraparound.
+#
+# Steuert die Kacheln noch NICHT automatisch — "alle Kacheln nachziehen"
+# ist ein eigener, noch offener Schritt.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# ═══════════════════════════════════════════════════════════════════════
+type: horizontal-stack
+cards:
+  - type: custom:button-card
+    icon: mdi:chevron-left
+    show_name: false
+    show_icon: true
+    show_state: false
+    tap_action:
+      action: call-service
+      service: input_select.select_previous
+      service_data:
+        entity_id: input_select.historie_zeitraum
+    styles:
+      card:
+        - background: none
+        - box-shadow: none
+        - border: none
+        - flex: "0 0 auto"
+      icon:
+        - color: var(--secondary-text-color)
+        - width: 32px
+        - height: 32px
+
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    entity: input_select.historie_zeitraum
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: none
+        - box-shadow: none
+        - border: none
+        - padding: 4px 4px 0
+        - flex: "1 1 auto"
+      grid:
+        - grid-template-areas: '"body"'
+        - grid-template-columns: 1fr
+      custom_fields:
+        body:
+          - width: 100%
+          - justify-self: stretch
+    custom_fields:
+      body: >
+        [[[
+          return `<div style="text-align:center;font-size:1.0rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--secondary-text-color);margin-top:10px;">${entity.state}</div>`;
+        ]]]
+
+  - type: custom:button-card
+    icon: mdi:chevron-right
+    show_name: false
+    show_icon: true
+    show_state: false
+    tap_action:
+      action: call-service
+      service: input_select.select_next
+      service_data:
+        entity_id: input_select.historie_zeitraum
+    styles:
+      card:
+        - background: none
+        - box-shadow: none
+        - border: none
+        - flex: "0 0 auto"
+      icon:
+        - color: var(--secondary-text-color)
+        - width: 32px
+        - height: 32px

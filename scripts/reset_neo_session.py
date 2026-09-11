@@ -17,7 +17,6 @@ dann startet die naechste Nachricht in jedem Chat-Kanal garantiert frisch.
 
     python scripts/reset_neo_session.py            # zeigt betroffene Sessions, fragt nach
     python scripts/reset_neo_session.py --yes       # loescht ohne Rueckfrage
-    python scripts/reset_neo_session.py --source discord   # nur eine Quelle (Default: alle Chat-Quellen)
 
 Cron-Sessions (`cron_*`) sind ausgenommen: die kriegen sowieso pro Lauf eine
 neue Session, die betrifft dieses Problem nicht.
@@ -44,8 +43,6 @@ UMBREL_USER = ENV.get("UMBREL_USER_GIGI") or ENV.get("UMBREL_USER") or "umbrel"
 SUDO = ENV.get("UMBREL_SUDO_PASS_GIGI") or ENV.get("UMBREL_SUDO_PASS") or ""
 CONTAINER = "hermes-agent_web_1"
 
-CHAT_QUELLEN = ("discord", "telegram", "whatsapp", "slack")
-
 
 def ssh(befehl: str, timeout: int = 30) -> str:
     remote = f"echo {shlex.quote(SUDO)} | sudo -S -p '' bash -c " + shlex.quote(befehl)
@@ -62,15 +59,24 @@ def ssh(befehl: str, timeout: int = 30) -> str:
     return (ergebnis.stdout or "") + (ergebnis.stderr or "")
 
 
-def sitzungen_je_quelle(quelle: str) -> list[str]:
-    ausgabe = ssh(
-        f"docker exec {CONTAINER} hermes sessions list --source {quelle} --limit 50"
-    )
+def alle_interaktiven_sitzungen() -> list[str]:
+    """Listet ALLE Sessions ungefiltert und schliesst nur cron_*-Sessions aus.
+
+    Der --source-Filter von `hermes sessions list` erwies sich am 23.07.2026
+    als unzuverlaessig: er lieferte "No sessions found" fuer eine Session, die
+    im ungefilterten Listing nachweislich vorhanden und aktiv war (Discord,
+    zuletzt vor 7 Minuten aktiv). Deshalb hier bewusst kein serverseitiger
+    Quellen-Filter mehr, sondern client-seitiges Ausschliessen von cron_*.
+    """
+    ausgabe = ssh(f"docker exec {CONTAINER} hermes sessions list --limit 100")
     ids = []
     for zeile in ausgabe.splitlines():
         teile = zeile.rsplit(None, 1)
-        if len(teile) == 2 and teile[1].count("_") >= 2 and not zeile.startswith("─"):
-            ids.append(teile[1])
+        if len(teile) != 2 or zeile.startswith("─") or teile[1] == "ID":
+            continue
+        sid = teile[1]
+        if sid.count("_") >= 2 and not sid.startswith("cron_"):
+            ids.append(sid)
     return ids
 
 
@@ -78,28 +84,16 @@ def main() -> None:
     p = argparse.ArgumentParser(
         description="Loescht laufende Chat-Sessions, damit die naechste Nachricht die aktuelle SOUL.md laedt"
     )
-    p.add_argument(
-        "--source",
-        choices=CHAT_QUELLEN,
-        help="Nur eine Quelle statt aller Chat-Kanaele (discord, telegram, whatsapp, slack)",
-    )
     p.add_argument("--yes", action="store_true", help="Ohne Rueckfrage loeschen")
     args = p.parse_args()
 
-    quellen = [args.source] if args.source else list(CHAT_QUELLEN)
+    ids = alle_interaktiven_sitzungen()
 
-    gefunden: dict[str, list[str]] = {}
-    for quelle in quellen:
-        ids = sitzungen_je_quelle(quelle)
-        if ids:
-            gefunden[quelle] = ids
-
-    if not gefunden:
+    if not ids:
         print("Keine laufenden Chat-Sessions gefunden, nichts zu tun.")
         return
 
-    for quelle, ids in gefunden.items():
-        print(f"{quelle}: {len(ids)} Session(en) — {', '.join(ids)}")
+    print(f"{len(ids)} Session(en): {', '.join(ids)}")
 
     if not args.yes:
         antwort = input("Diese Sessions loeschen? [y/N] ").strip().lower()
@@ -107,11 +101,10 @@ def main() -> None:
             print("Abgebrochen, nichts geloescht.")
             return
 
-    for quelle, ids in gefunden.items():
-        for sid in ids:
-            out = ssh(f"docker exec {CONTAINER} hermes sessions delete {sid} --yes")
-            status = "OK" if "Deleted session" in out else out.strip()[:120]
-            print(f"  {quelle}/{sid}: {status}")
+    for sid in ids:
+        out = ssh(f"docker exec {CONTAINER} hermes sessions delete {sid} --yes")
+        status = "OK" if "Deleted session" in out else out.strip()[:120]
+        print(f"  {sid}: {status}")
 
     print(
         "Fertig. Die naechste Nachricht in jedem Kanal startet frisch mit der aktuellen SOUL.md."

@@ -1,0 +1,104 @@
+# ═══════════════════════════════════════════════════════════════════════
+# HEIZUNG (ÖL) — VERLAUF (HEUTE)  —  "Heizung an"-Pulse nach Nutzer-Skizze
+# (26.08.2026): rechteckige Blöcke, wenn der Brenner lief. Kein Kessel-
+# temperatur-Sensor vorhanden (siehe views/heizung_oel.yaml, voller
+# Begründungskommentar) — bewusst NUR die Laufzeit gezeigt, keine
+# erfundene Temperaturkurve.
+#
+# Quelle: sensor.shelly1pmg4_e4b06377adc0_leistung (Brenner-Sicherungskreis-
+# Proxy), auf 0/1 thresholdet (> 5 W = an, wie in heizung_oel.yaml). Die
+# Schwelle wird NICHT client-seitig auf den rohen Watt-Verlauf angewendet
+# (apexcharts-card's "transform" arbeitet nach der group_by-Aggregation),
+# sondern per group_by func:max + duration:2min: ein 2-Minuten-Fenster
+# gilt als "an", sobald die Leistung darin einmal über der Schwelle lag —
+# das verhindert, dass kurze Ein-Phasen durch Mittelung unter die Schwelle
+# fallen und aus den Pulsen verschwinden.
+# Gleiche apexcharts-card-Technik wie views/energieverlauf_tag.yaml (dort
+# der volle Begründungskommentar zu graph_span/span/extend_to).
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Heizung".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:apexcharts-card
+update_interval: 5min
+header:
+  show: true
+  title: Heizung (Öl) — Verlauf (heute)
+  show_states: false
+graph_span: 1d
+span:
+  start: day
+now:
+  show: false
+apex_config:
+  annotations:
+    xaxis:
+      - x: "EVAL:new Date().getTime()"
+        borderColor: "rgba(255,255,255,0.5)"
+        strokeDashArray: 4
+        label:
+          text: jetzt
+          orientation: vertical
+          offsetY: 7
+          borderColor: "rgba(255,255,255,0)"
+          style:
+            color: "rgba(255,255,255,0.8)"
+            background: "rgba(255,255,255,0)"
+            fontSize: "10px"
+            fontFamily: "Roboto, sans-serif"
+  chart:
+    height: 200
+    toolbar:
+      show: false
+    zoom:
+      enabled: false
+  legend:
+    show: false
+  grid:
+    borderColor: "rgba(255,255,255,0.07)"
+    strokeDashArray: 4
+  xaxis:
+    tickAmount: 12
+    labels:
+      style:
+        colors: "rgba(255,255,255,0.5)"
+        fontSize: "11px"
+        fontFamily: "Roboto, sans-serif"
+yaxis:
+  # Konfigurationsfehler behoben (27.08.2026): tickAmount ist keine
+  # apexcharts-card-eigene yaxis-Option (die kennt nur id/min/max/decimals/
+  # show/apex_config/…), sondern ein natives ApexCharts-Yaxis-Feld und
+  # gehört daher unter apex_config, nicht auf die gleiche Ebene wie min/max.
+  # Anders als beim card-eigenen "xaxis:"-Block oben, der tickAmount direkt
+  # unterstützt (vgl. views/energieverlauf_tag.yaml), validiert
+  # apexcharts-card den yaxis-Eintrag strikt gegen sein eigenes Schema und
+  # lehnt unbekannte Top-Level-Keys ab — das war der Konfigurationsfehler.
+  - id: status
+    min: 0
+    max: 1
+    decimals: 0
+    apex_config:
+      tickAmount: 1
+      title:
+        text: Brenner an
+        style:
+          color: "rgba(255,255,255,0.4)"
+          fontSize: "11px"
+          fontFamily: "Roboto, sans-serif"
+      labels:
+        style:
+          colors: "rgba(255,255,255,0.5)"
+          fontSize: "11px"
+          fontFamily: "Roboto, sans-serif"
+series:
+  - entity: sensor.shelly1pmg4_e4b06377adc0_leistung
+    name: Heizung an
+    yaxis_id: status
+    color: "#8D6E63"
+    type: area
+    curve: stepline
+    opacity: 0.45
+    stroke_width: 1.5
+    extend_to: now
+    transform: "return x > 5 ? 1 : 0;"
+    group_by:
+      func: max
+      duration: 2min

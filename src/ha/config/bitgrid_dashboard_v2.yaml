@@ -46,7 +46,7 @@ views:
   # beim Deploy durch ein sauberes v<semver> (ohne git-SHA/Build-Metadata).
   # Lovelace-View-Titel kennen kein Templating, daher Injection beim Deploy.
   # Der hier committete Wert ist nur Fallback fürs direkte Laden ohne Deploy.
-  - title: BitGridAI - v0.2.0
+  - title: BitGridAI - v0.3.0
     path: home
     icon: mdi:home
     theme: BitGridAI
@@ -729,6 +729,10 @@ views:
                           const std  = parseFloat(states['input_number.mvp_soc_std_pct']?.state || 75);
                           const sup  = parseFloat(states['input_number.mvp_soc_super_pct']?.state || 90);
                           const stop = parseFloat(states['input_number.mvp_soc_stop_pct']?.state || 50);
+                          // Eigene Runterschalt-Schwellen seit 23.08.2026 (vorher: Super kollabierte
+                          // ueber den pauschalen Nachmittags-Cap, keine eigene Runterschalt-Marke).
+                          const supOff = parseFloat(states['input_number.mvp_soc_super_off_pct']?.state || 95);
+                          const stdOff = parseFloat(states['input_number.mvp_soc_std_off_pct']?.state || 83);
                           const soc  = parseFloat(states['sensor.battery_soc_pct']?.state);
                           const W=570, H=290, cL=48, cR=545, cT=30, cB=252;
                           const yS = s => cB - s*(cB-cT)/100;
@@ -769,7 +773,6 @@ views:
                           const xDstart=xH(noonH+1.5),xDp1=xH(noonH+1.5+aw*0.30),xDp2=xH(noonH+1.5+aw*0.68);
                           function xForT_desc(t){const u=1-t;return u*u*u*xDstart+3*u*u*t*xDp1+3*u*t*t*xDp2+t*t*t*xSet;}
                           function posC_desc(s){const y=yS(s);return{x:xForT_desc(1-tForY(y)),y};}
-                          const ecoEndC=posC_desc(stop);
                           const batD='M '+cL+','+batMin+' L '+xRise+','+batMin+
                                      ' C '+bP1x+','+batMin+' '+bP2x+','+cT+' '+xNoon+','+cT+
                                      ' L '+xDstart+','+cT+
@@ -780,13 +783,17 @@ views:
                           const sunD='M '+xRise+','+cB+
                                      ' C '+(xRise+hs1*0.55)+','+cB+' '+(xNoon-hs1*0.35)+','+cT+' '+xNoon+','+cT+
                                      ' S '+(xNoon+hs2*0.55)+','+cB+' '+xSet+','+cB;
-                          function mark(c,col,lbl){
+                          function mark(c,col,lbl,dotCol,dotR){
+                            dotCol=dotCol||col; dotR=dotR||5;
                             const ly=Math.max(cT+8,c.y-22);
                             const hasLine=(c.y-6)>(ly+4);
                             return '<text x="'+c.x+'" y="'+ly+'" style="fill:'+col+'" font-size="10" font-family="Roboto,sans-serif" font-weight="600" text-anchor="middle">'+lbl+'</text>'+
                                    (hasLine?'<line x1="'+c.x+'" y1="'+(ly+4)+'" x2="'+c.x+'" y2="'+(c.y-6)+'" style="stroke:'+col+'" stroke-width="1.5" opacity="0.8"/>':'')+
-                                   '<circle cx="'+c.x+'" cy="'+c.y+'" r="5" style="fill:'+col+'" stroke="rgba(20,10,50,0.9)" stroke-width="2"/>';
+                                   '<circle cx="'+c.x+'" cy="'+c.y+'" r="'+dotR+'" style="fill:'+dotCol+'" stroke="rgba(20,10,50,0.9)" stroke-width="2"/>';
                           }
+                          // Runterschalt-Punkte dunkler als die Hochschalt-Punkte derselben Farbe,
+                          // damit "hoch"/"runter" auch ohne Pfeil-Text auf einen Blick erkennbar ist.
+                          const darken=col=>'color-mix(in srgb, '+col+' 55%, black)';
                           let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">';
                           s+='<circle cx="52" cy="11" r="4" style="fill:'+cEco+'"/><text x="59" y="15" fill="rgba(255,255,255,0.65)" font-size="9.5" font-family="Roboto,sans-serif">Schematik</text>';
                           s+='<line x1="148" y1="11" x2="162" y2="11" stroke="rgba(255,255,255,0.8)" stroke-width="2"/><circle cx="155" cy="11" r="3" fill="white"/><text x="167" y="15" fill="rgba(255,255,255,0.65)" font-size="9.5" font-family="Roboto,sans-serif">Verlauf heute</text>';
@@ -843,13 +850,13 @@ views:
                           s+=mark(ecoC,cEco,'Eco '+eco+'%');
                           s+=mark(stdC,cStd,'Std '+std+'%');
                           s+=mark(supC,cSup,'Super '+sup+'%');
-                          // Nachmittags-Cap ab Sonnenhoechststand (mvp_auto.yaml P0a):
-                          // ab hier setzt die Automatik den Miner auf Eco und sperrt
-                          // Hochschaltungen. Sonnen-/zeitgetrieben, nicht SoC-getrieben.
-                          // Ersetzt den frueheren "Eco ab 85%"-Abstiegspunkt.
-                          s+='<line x1="'+xNoon+'" y1="'+(cT+18)+'" x2="'+xNoon+'" y2="'+cB+'" style="stroke:'+cEco+'" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.65"/>';
-                          s+='<text x="'+(xNoon+6)+'" y="'+yS(24)+'" style="fill:'+cEco+'" font-size="10" font-family="Roboto,sans-serif" font-weight="600">Eco-Cap ab Mittag</text>';
-                          s+='<circle cx="'+ecoEndC.x+'" cy="'+ecoEndC.y+'" r="3.5" style="fill:'+cEco+'" stroke="rgba(20,10,50,0.85)" stroke-width="1.5" opacity="0.7"/>';
+                          // Runterschalt-Schwellen auf dem absteigenden Ast (mvp_auto.yaml R4/R6):
+                          // SoC-getrieben, nicht zeit-/sonnenstandgetrieben (der frühere pauschale
+                          // "Eco-Cap ab Mittag" (P0a) wurde am 23.08.2026 entfernt — siehe
+                          // docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md).
+                          const supOffC=posC_desc(supOff),stdOffC=posC_desc(stdOff);
+                          s+=mark(supOffC,cSup,'Super↓'+supOff+'%',darken(cSup),4);
+                          s+=mark(stdOffC,cStd,'Std↓'+stdOff+'%',darken(cStd),4);
                           // Debug status (oben rechts, klein)
                           s+='<text x="'+(cR-2)+'" y="22" fill="rgba(255,255,255,0.35)" font-size="7.5" font-family="Roboto,sans-serif" text-anchor="end">'+_dbg+'</text>';
                           // Real trace: white polyline — only points within chart range [5h, 23h]
@@ -1610,3 +1617,187 @@ views:
     panel: true
     cards:
       - !include views/floorplan.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB (letzter): EINSTELLUNGEN  —  alle R1-R8-Schwellen aus mvp_auto.yaml
+  # an einem Ort, editierbar (tap → nativer HA-Editor). Ergaenzt die
+  # Kurzuebersicht im Steuerung-Tab um die neuen Runterschalt-/Notbremse-
+  # Werte (R4/R6/R8), die bislang nirgends in der UI sichtbar waren.
+  # Neu 23.08.2026, bewusst als letzter Tab (Zahnrad-Konvention), siehe
+  # docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md.
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Einstellungen
+    path: einstellungen
+    icon: mdi:cog
+    theme: BitGridAI
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Hochschalten (R3 / R5 / R7)"
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: "1fr"
+                  grid-template-rows: repeat(4, auto)
+                  grid-gap: 4px
+                cards:
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_soc_eco_start_pct
+                    name: Eco-Start SoC (R7)
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                    styles:
+                      label:
+                        - color: "var(--bg-color-eco)"
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_soc_std_pct
+                    name: Standard-Start SoC (R5)
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                    styles:
+                      label:
+                        - color: "var(--bg-color-standard)"
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_soc_super_pct
+                    name: Super-Start SoC (R3)
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                    styles:
+                      label:
+                        - color: "var(--bg-color-super)"
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_pv_start_w
+                    name: PV-Kaltstart (R7-Bypass)
+                    label: "[[[ return (parseFloat(entity.state)/1000).toFixed(1) + ' kW'; ]]]"
+                    styles:
+                      label:
+                        - color: "var(--bg-color-pv)"
+              - type: markdown
+                content: "### Runterschalten (R1 / R4 / R6)"
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: "1fr"
+                  grid-template-rows: repeat(3, auto)
+                  grid-gap: 4px
+                cards:
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_soc_super_off_pct
+                    name: Super-Ausstieg SoC (R4)
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                    styles:
+                      label:
+                        - color: "color-mix(in srgb, var(--bg-color-super) 55%, black)"
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_soc_std_off_pct
+                    name: Standard-Ausstieg SoC (R6)
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                    styles:
+                      label:
+                        - color: "color-mix(in srgb, var(--bg-color-standard) 55%, black)"
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_soc_stop_pct
+                    name: Hausreserve / Stop SoC (R1)
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                    styles:
+                      label:
+                        - color: "var(--bg-color-reserve)"
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Akku-Notbremse (R8, unabhängig vom SoC)"
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: "1fr"
+                  grid-template-rows: repeat(2, auto)
+                  grid-gap: 4px
+                cards:
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_batt_discharge_super_downgrade_w
+                    name: Entladeschutz Super→Eco
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' W'; ]]]"
+                    styles:
+                      label:
+                        - color: "var(--bg-color-super)"
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_batt_discharge_std_downgrade_w
+                    name: Entladeschutz Standard→Eco
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' W'; ]]]"
+                    styles:
+                      label:
+                        - color: "var(--bg-color-standard)"
+              - type: markdown
+                content: "### Sicherheit (R2)"
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: "1fr"
+                  grid-template-rows: repeat(2, auto)
+                  grid-gap: 4px
+                cards:
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_tmax_std_threshold_c
+                    name: Chip-Temp max (Super-Sperre 3h)
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' °C'; ]]]"
+                    styles:
+                      label:
+                        - color: "var(--bg-color-heat)"
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_number.mvp_room_temp_eco_threshold_c
+                    name: Raumtemp max (Eco-Zwang)
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' °C'; ]]]"
+                    styles:
+                      label:
+                        - color: "#ffb74d"
+              - type: markdown
+                content: "### Nacht-Sperre"
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: "1fr"
+                  grid-template-rows: repeat(3, auto)
+                  grid-gap: 4px
+                cards:
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_boolean.mvp_night_block_enabled
+                    name: Nacht-Sperre aktiv
+                    label: "[[[ return entity.state === 'on' ? 'AN' : 'AUS'; ]]]"
+                    styles:
+                      label:
+                        - color: "[[[ return entity.state==='on' ? 'var(--bg-color-eco)' : 'var(--bg-color-idle)'; ]]]"
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_datetime.mvp_night_block_start
+                    name: Nacht-Sperre ab
+                    label: "[[[ return (entity.state || '00:00:00').slice(0,5); ]]]"
+                    styles:
+                      label:
+                        - color: "#90caf9"
+                  - type: custom:button-card
+                    template: settings_row
+                    entity: input_datetime.mvp_night_block_end
+                    name: Nacht-Sperre bis
+                    label: "[[[ return (entity.state || '00:00:00').slice(0,5); ]]]"
+                    styles:
+                      label:
+                        - color: "#90caf9"

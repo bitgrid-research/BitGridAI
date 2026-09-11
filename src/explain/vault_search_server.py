@@ -109,34 +109,16 @@ def load_chunks(vault_path: Path) -> list[Chunk]:
     for md_file in sorted(vault_path.rglob("*.md")):
         if ".obsidian" in md_file.parts:
             continue
-        # Unbestaetigte Hypothesen des Nachtanalysten bleiben draussen.
-        #
-        # Sonst entsteht eine Selbstbestaetigungsschleife: der Agent schreibt
-        # nachts eine Vermutung nach database_exploration, findet sie in der
-        # naechsten Nacht ueber genau diese Suche wieder und liest sie als
-        # Beleg. Nach ein paar Wochen ist eine gut belegte Unwahrheit daraus
-        # geworden. Erst wenn ein Mensch eine Hypothese geprueft hat, wandert
-        # sie nach bestaetigt/ und wird damit zitierfaehig.
-        # Regeln dazu: database_exploration/README.md
+        # Unbestaetigte Hypothesen bleiben draussen: sonst entsteht eine
+        # Selbstbestaetigungsschleife (Vermutung indiziert, in der naechsten Suche
+        # als Beleg gelesen). Erst nach menschlicher Pruefung (-> bestaetigt/) wird
+        # eine Hypothese zitierfaehig. Regeln: database_exploration/README.md
         if md_file.stem.endswith("_hypothesen"):
             log.debug("Uebersprungen (unbestaetigt): %s", md_file.name)
             continue
-        # CLAUDE.md ist die Betriebsanleitung EINES BESTIMMTEN Agenten
-        # (Claude Code) und keine Projektdokumentation. Sie steht im Vault,
-        # damit Menschen sie in Obsidian lesen koennen, gehoert aber nicht in
-        # den Suchindex eines anderen Agenten.
-        #
-        # Der Chunker zerlegt sie in Absaetze. Ein Fragment wie "Direkt
-        # ausfuehren statt vorschlagen: die relevanten Dateien lesen und
-        # direkt aendern" liest sich ohne seinen Rahmen wie eine Erlaubnis,
-        # und der Nachtanalyst darf genau das nicht (er schlaegt vor, er
-        # aendert nicht). Dasselbe gilt fuer die Deploy-Kommandos darin.
-        #
-        # Verloren geht dabei fast nichts: die tragenden Projektprinzipien
-        # stehen ohnehin in docs/architecture (arc42, 6 Qualitaetsziele) und
-        # bleiben indiziert. Was Hermes an Leitplanken braucht, steht in
-        # database_exploration/kontext/leitplanken.md, geschrieben fuer seine
-        # Rolle.
+        # Agenten-Betriebsanleitung, keine Projektdokumentation: Fragmente daraus
+        # lesen sich ohne Kontext wie generelle Handlungserlaubnis. Tragende
+        # Prinzipien bleiben ueber docs/architecture indiziert.
         if md_file.name == "CLAUDE.md":
             log.debug("Uebersprungen (Agenten-Betriebsanleitung): %s", md_file)
             continue

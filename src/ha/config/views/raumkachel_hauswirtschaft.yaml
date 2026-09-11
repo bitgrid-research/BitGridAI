@@ -1,0 +1,80 @@
+# ═══════════════════════════════════════════════════════════════════════
+# RAUM-KACHEL HAUSWIRTSCHAFT — siehe raumkachel_untergeschoss.yaml für die volle
+# Begründung (window.bgRoomKachel-Fallback-Muster).
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+entity: input_boolean.raumkachel_hauswirtschaft
+tap_action:
+  action: toggle
+styles:
+  card:
+    - background: rgba(255,255,255,0.045)
+    - border-radius: 14px
+    - padding: 6px 14px
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    body:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  body: >
+    [[[
+      if (!window.bgRoomKachel) {
+        window.bgRoomKachel = function(icon, title, totalEntityId, open, deviceRows) {
+          const totalW = parseFloat(states[totalEntityId]?.state) || 0;
+          const ring = (frac, idx) => {
+            const size = 34, sw = 3.5;
+            const p = Math.max(0, Math.min(1, frac)) * 100;
+            return `<div style="width:${size}px;height:${size}px;flex-shrink:0;border-radius:50%;
+              background:conic-gradient(from 0deg,
+                #4CAF50 0%, #4CAF50 ${Math.min(35, p).toFixed(2)}%,
+                #26C6DA ${Math.min(52.5, p).toFixed(2)}%,
+                #F7931A ${Math.min(70, p).toFixed(2)}%,
+                #F7931A ${p.toFixed(2)}%,
+                rgba(255,255,255,0.15) ${p.toFixed(2)}% 100%);
+              -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - ${sw}px), #000 calc(100% - ${sw}px));
+              mask:radial-gradient(farthest-side, transparent calc(100% - ${sw}px), #000 calc(100% - ${sw}px));
+            "></div>`;
+          };
+          const rowHtml = deviceRows.map(([ic, label, id], i) => {
+            const w = parseFloat(states[id]?.state);
+            const known = !isNaN(w);
+            const val = known ? w : 0;
+            const frac = totalW > 0 ? val / totalW : 0;
+            const valStr = known ? (val < 10 ? val.toFixed(1) : Math.round(val)) + ' W' : '—';
+            return `<div style="display:flex;align-items:center;padding:7px 2px;gap:8px;">
+              <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <ha-icon icon="${ic}" style="--mdc-icon-size:15px;color:rgba(255,255,255,0.7);"></ha-icon>
+              </div>
+              <span style="flex:1;min-width:0;color:var(--secondary-text-color);font-size:0.92rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
+              <span style="font-size:0.95rem;font-weight:700;color:var(--secondary-text-color);white-space:nowrap;">${valStr}</span>
+              ${ring(frac, i)}
+            </div>`;
+          }).join('<div style="border-top:1px solid rgba(255,255,255,0.06);margin:0 2px;"></div>');
+
+          return `<div style="display:flex;flex-direction:column;padding:6px 0;cursor:pointer;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--primary-text-color);flex-shrink:0;"></ha-icon>
+              <span style="flex:1;font-size:1.05rem;font-weight:700;color:var(--primary-text-color);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${title}</span>
+              <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+            </div>
+            <div style="text-align:center;font-size:0.95rem;font-weight:700;color:var(--secondary-text-color);margin-top:2px;">
+              ⚡ ${totalW.toLocaleString('de-DE', {maximumFractionDigits: 1})} W
+            </div>
+            ${open ? `<div style="margin-top:6px;">${rowHtml}</div>` : ''}
+          </div>`;
+        };
+      }
+      const open = entity.state === 'on';
+      return window.bgRoomKachel('mdi:washing-machine', 'Hauswirtschaft', 'sensor.raum_hauswirtschaft_power_w', open, [
+        ['mdi:fridge-outline', 'Kühlschränke', 'sensor.shellyplugsg3_9070694abdf4_leistung'],
+        ['mdi:tumble-dryer', 'Trockner', 'sensor.shellyplugpmg3_9070695bb2a8_leistung'],
+        ['mdi:washing-machine', 'Waschmaschine', 'sensor.shellyplugsg3_d885ac1e9adc_leistung'],
+      ]);
+    ]]]

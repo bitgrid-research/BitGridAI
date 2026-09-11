@@ -38,7 +38,39 @@ economics:
       unit_of_measurement: "ct/kWh"
       mode: box
       icon: mdi:transmission-tower-export
-      # 7,8 ct = Break-Even / Opportunitätskosten je kWh Überschuss.
+      # EEG-Vergütung 2026 ist nach Anlagengröße gestaffelt: 0,082 €/kWh für
+      # die ersten 10 kWp, 0,071 €/kWh für den Anteil 10-40 kWp. Bei 13 kWp
+      # Anlagengröße (Nutzer-Angabe 23.08.2026) ergibt das kapazitätsgewichtet
+      # (10×8,2 + 3×7,1) / 13 = 7,95 ct/kWh, gerundet 7,9 ct/kWh.
+
+    grid_price_ct_kwh:
+      name: "Strompreis Netzbezug (ct/kWh)"
+      min: 0
+      max: 60
+      step: 0.01
+      unit_of_measurement: "ct/kWh"
+      mode: box
+      icon: mdi:transmission-tower-import
+      # Pfalzwerke Grundversorgung (Netzgebiet Glan-Münchweiler), Arbeitspreis
+      # seit 01.04.2026: 36,24 ct/kWh brutto. Recherchiert 23.08.2026, siehe
+      # pfalzwerke.de/pfalzwerke-gruppe/presse (Preissenkung zum 1.4.2026).
+      # Speist die Finanz-Bilanz-Karte (Ersparnis Haus-Eigenverbrauch,
+      # Netzbezugskosten).
+
+    hardware_cost_eur:
+      name: "Investierte Hardware (€)"
+      min: 0
+      max: 50000
+      step: 10
+      unit_of_measurement: "€"
+      mode: box
+      icon: mdi:cash-multiple
+      # 25.08.2026, Nutzer-Wunsch: reines Eingabefeld fuer die Gesamtsumme der
+      # Anlage (Miner + ggf. Batterie/PV, vom Nutzer selbst definiert), aktuell
+      # OHNE verknuepfte Amortisations-/ROI-Berechnung — dafuer fehlen noch ein
+      # Investitions-Startdatum und eine Festlegung, was genau als "Hardware"
+      # zaehlt (nur Miner oder gesamte PV/Akku-Anlage). Siehe Rueckfrage an
+      # Nutzer, nicht eigenmaechtig entschieden.
 
   template:
     - sensor:
@@ -116,3 +148,53 @@ economics:
             {% set kwh = states('sensor.grid_export_daily') | float(0) %}
             {% set fit = states('input_number.feed_in_tariff_ct_kwh') | float(7.8) %}
             {{ (kwh * fit / 100) | round(2) }}
+
+        # ── Finanz-Bilanz-Karte (Demo-Dashboard, Tab Home) ─────────────────
+        # Vier Balken: Ersparnis Haus-Eigenverbrauch, Mining-Ertrag,
+        # Netzbezugskosten (negativ), Gesamt-Profit heute (Summe der ersten
+        # drei).
+        #
+        # Ersparnis zählt NUR den Haus-Eigenverbrauch (PV minus Einspeisung,
+        # minus Mining-Energie), nicht den vollen PV-Eigenverbrauch. Grund:
+        # Mining verbraucht ausschließlich PV-/Akku-Überschuss, der sonst
+        # eingespeist worden wäre — der korrekte Vergleichswert dafür ist die
+        # entgangene Einspeisevergütung (Opportunitätskosten), nicht der volle
+        # Strompreis (gleiches Prinzip wie sensor.mining_vs_feedin_ct_kwh oben).
+        # Der Wert dieser Energie steht schon in mining_revenue_today_eur;
+        # würde sie hier zusätzlich zum Strompreis als "Ersparnis" gezählt,
+        # zählt dieselbe kWh doppelt. Verifiziert 23.08.2026 gegen Recherche
+        # zu PV-Eigenverbrauchsrechnung und Solar-Mining-Wirtschaftlichkeit
+        # (Opportunitätskosten-Prinzip bei flexiblen/PV-Überschuss-Lasten).
+        - name: pv_self_use_savings_eur
+          unique_id: pv_self_use_savings_eur
+          unit_of_measurement: "€"
+          icon: mdi:home-lightning-bolt-outline
+          state: >-
+            {% set pv    = states('sensor.pv_energy_daily') | float(0) %}
+            {% set exp   = states('sensor.grid_export_daily') | float(0) %}
+            {% set mine  = states('sensor.mining_energy_daily') | float(0) %}
+            {% set gp    = states('input_number.grid_price_ct_kwh') | float(30.0) %}
+            {% set self_use_total = [pv - exp, 0] | max %}
+            {% set self_use_haus  = [self_use_total - mine, 0] | max %}
+            {{ (self_use_haus * gp / 100) | round(2) }}
+
+        # Kosten des tatsächlichen Netzbezugs heute (Import-kWh × Strompreis)
+        - name: grid_import_cost_eur
+          unique_id: grid_import_cost_eur
+          unit_of_measurement: "€"
+          icon: mdi:transmission-tower-import
+          state: >-
+            {% set kwh = states('sensor.grid_import_daily') | float(0) %}
+            {% set gp  = states('input_number.grid_price_ct_kwh') | float(30.0) %}
+            {{ (kwh * gp / 100) | round(2) }}
+
+        # Gesamt-Profit heute = Ersparnis + Mining-Ertrag − Netzbezugskosten
+        - name: total_profit_today_eur
+          unique_id: total_profit_today_eur
+          unit_of_measurement: "€"
+          icon: mdi:finance
+          state: >-
+            {% set savings = states('sensor.pv_self_use_savings_eur') | float(0) %}
+            {% set mining  = states('sensor.mining_revenue_today_eur') | float(0) %}
+            {% set cost    = states('sensor.grid_import_cost_eur') | float(0) %}
+            {{ (savings + mining - cost) | round(2) }}

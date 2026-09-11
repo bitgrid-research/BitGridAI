@@ -53,6 +53,23 @@ stats:
       step: 0.01
       mode: box
 
+    # ── Mining-Verlauf-Navigation (26.08.2026, views/mining_log.yaml) ─────
+    # Ein gemeinsamer Versatz-Zaehler statt getrennter Woche-/Monat-Zaehler:
+    # 0 = aktuelle Woche/aktueller Monat, 1 = eine Periode zurueck, usw. Die
+    # Bedeutung ("Woche" oder "Monat") kommt aus input_select.mining_log_
+    # periode. Absichtlich EIN Zaehler fuer beide Modi (einfacher als pro
+    # Modus einen eigenen Pfeil-Satz zu verdrahten) — Nebeneffekt: ein
+    # Moduswechsel bei Versatz>0 springt auf eine andere reale Periode
+    # (z.B. "2 Wochen zurueck" -> "2 Monate zurueck"), das ist bewusst in
+    # Kauf genommen, kein Bug.
+    mining_log_offset:
+      name: "Mining Verlauf: Zeitraum-Versatz"
+      icon: mdi:arrow-left-right
+      min: 0
+      max: 52
+      step: 1
+      mode: box
+
     pv_energy_midnight:
       name: "PV kWh Baseline Mitternacht"
       min: 0
@@ -211,6 +228,17 @@ stats:
       max: 99999
       step: 0.01
       mode: box
+
+  # ── Mining-Verlauf-Navigation, Fortsetzung: Zeitraum-Typ ─────────────────
+  # Siehe input_number.mining_log_offset oben fuer den Versatz-Zaehler.
+  input_select:
+    mining_log_periode:
+      name: "Mining Verlauf: Zeitraum-Typ"
+      icon: mdi:calendar-range
+      options:
+        - "Woche"
+        - "Monat"
+      initial: "Woche"
 
   # ── Laufzeit-Tracking via history_stats + Lastprofil-Baseline ───────────────
   sensor:
@@ -748,12 +776,19 @@ stats:
       action:
         - variables:
             log_date: "{{ now().strftime('%Y-%m-%d') }}"
+            # startswith(log_date) ist Pflicht: last_start_at/last_stop_at werden
+            # NICHT taeglich zurueckgesetzt. Lief der Miner heute gar nicht, wuerde
+            # sonst die Uhrzeit vom letzten echten Lauf faelschlich als "heutiger"
+            # Start/Stop geloggt (Bug gefunden 26.08.2026 — 25.08./18.08. zeigten
+            # exakt den Start/Stop des jeweiligen Vortags trotz 0h Laufzeit). Die
+            # Recovery-Automation (stats_recover_missed_daily_log) hatte diese
+            # Pruefung schon korrekt, nur dieser Haupt-Pfad nicht.
             start_t: >-
               {% set s = states('input_datetime.last_start_at') %}
-              {{ s.split(' ')[1][:5] if ' ' in s and s not in ['unknown','unavailable'] else '--:--' }}
+              {{ s.split(' ')[1][:5] if ' ' in s and s.startswith(log_date) and s not in ['unknown','unavailable'] else '--:--' }}
             stop_t: >-
               {% set s = states('input_datetime.last_stop_at') %}
-              {{ s.split(' ')[1][:5] if ' ' in s and s not in ['unknown','unavailable'] else '--:--' }}
+              {{ s.split(' ')[1][:5] if ' ' in s and s.startswith(log_date) and s not in ['unknown','unavailable'] else '--:--' }}
             tot_h: "{{ states('sensor.miner_uptime_today_h') | float(0) | round(2) }}"
             eco_h: "{{ states('sensor.miner_eco_hours_today') | float(0) | round(1) }}"
             std_h: "{{ states('sensor.miner_standard_hours_today') | float(0) | round(1) }}"
@@ -879,13 +914,18 @@ stats:
 
   # ── CSV-History-Sensor: liest mining_log.csv für UI (>10 Einträge) ──────────────
   # Einzeiliges Python: YAML >- würde Newlines zu Leerzeichen falten → IndentationError
+  # Tail-Limit 26.08.2026 von 60 auf 500 erhoeht (Bug gefunden: die Wochen/
+  # Monats-Navigation in mining_log.yaml kann bis zu 52 Wochen zurueckblaettern,
+  # aber bei 60 Zeilen reichte das Fenster nur ~2 Monate zurueck — "Keine
+  # Daten" fuer aeltere, tatsaechlich vorhandene Wochen. 500 Zeilen decken
+  # deutlich mehr als ein Jahr taeglicher Eintraege ab.
   command_line:
     - sensor:
         name: "mining_log_history"
         unique_id: mining_log_history
         scan_interval: 3600
         command: >-
-          python3 -c "import json; f=open('/config/mining_log.csv'); lines=[l.strip() for l in f if l.strip() and not l.startswith('date')]; f.close(); print(json.dumps({'rows': '|'.join(lines[-60:])}))"
+          python3 -c "import json; f=open('/config/mining_log.csv'); lines=[l.strip() for l in f if l.strip() and not l.startswith('date')]; f.close(); print(json.dumps({'rows': '|'.join(lines[-500:])}))"
         value_template: "OK"
         json_attributes:
           - rows

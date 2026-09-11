@@ -14,8 +14,11 @@ from src.data.gap_check import find_gaps, gap_count_minutes
 from src.data.ha_history_sync import (
     DEVICE_ENTITY_MAP,
     ENTITY_MAP,
+    _BATTERY_CHARGE_ENTITY,
+    _BATTERY_DISCHARGE_ENTITY,
     _floor_to_block,
     _last_value_in_window,
+    apply_battery_power,
     resample_device_blocks,
     resample_to_blocks,
 )
@@ -118,6 +121,12 @@ def _build_entity_readings(
         inv_map["miner_power_w"]: [(T0, 1700.0)],
         inv_map["pv_forecast_kw"]: [(T0, 5.2)],
         inv_map["heizstab_power_w"]: [(T0, 900.0)],
+        inv_map["cloud_coverage_pct"]: [(T0, 49.0)],
+        inv_map["outdoor_temp_c"]: [(T0, 20.3)],
+        inv_map["outdoor_humidity_pct"]: [(T0, 44.0)],
+        inv_map["heizung_energy_kwh_today"]: [(T0, 0.1)],
+        inv_map["sun_azimuth_deg"]: [(T0, 180.0)],
+        inv_map["sun_elevation_deg"]: [(T0, 45.0)],
     }
 
 
@@ -165,6 +174,42 @@ def test_resample_quality_warn_on_one_critical_missing() -> None:
     )
     assert blocks[0].quality == "warn"
     assert "battery_soc_pct" in blocks[0].missing_signals
+
+
+# ---------------------------------------------------------------------------
+# apply_battery_power
+# ---------------------------------------------------------------------------
+
+
+def test_apply_battery_power_computes_charge_minus_discharge() -> None:
+    entity_readings = _build_entity_readings()
+    entity_readings[_BATTERY_CHARGE_ENTITY] = [(T0, 500.0)]
+    entity_readings[_BATTERY_DISCHARGE_ENTITY] = [(T0, 0.0)]
+    blocks = resample_to_blocks(
+        entity_readings, ENTITY_MAP, T0, T0 + timedelta(minutes=10)
+    )
+    blocks = apply_battery_power(blocks, entity_readings)
+    assert blocks[0].battery_power_w == 500.0
+
+
+def test_apply_battery_power_discharge_is_negative() -> None:
+    entity_readings = _build_entity_readings()
+    entity_readings[_BATTERY_CHARGE_ENTITY] = [(T0, 0.0)]
+    entity_readings[_BATTERY_DISCHARGE_ENTITY] = [(T0, 620.0)]
+    blocks = resample_to_blocks(
+        entity_readings, ENTITY_MAP, T0, T0 + timedelta(minutes=10)
+    )
+    blocks = apply_battery_power(blocks, entity_readings)
+    assert blocks[0].battery_power_w == -620.0
+
+
+def test_apply_battery_power_leaves_none_when_no_data() -> None:
+    entity_readings = _build_entity_readings()
+    blocks = resample_to_blocks(
+        entity_readings, ENTITY_MAP, T0, T0 + timedelta(minutes=10)
+    )
+    blocks = apply_battery_power(blocks, entity_readings)
+    assert blocks[0].battery_power_w is None
 
 
 def test_resample_forward_fills_across_blocks() -> None:

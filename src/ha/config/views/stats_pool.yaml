@@ -1,7 +1,9 @@
 # ═══════════════════════════════════════════════════════════════════════
-# Linke Spalte Statistik-Tab: Energie-Status + Miner-Umfeld/Statistik.
-# Entities: siehe energy_status_bar.yaml und miner_stats_noweather.yaml.
-# (F2Pool-Live-Karte entfernt; Pool-Entities bleiben in packages/pool.yaml.)
+# Linke Spalte Statistik-Tab: Energie-Status + F2Pool Live-Snapshot.
+# Entities: siehe energy_status_bar.yaml und stats_f2pool_live.yaml.
+# Genutzt von bitgrid_dashboard_v2.yaml (Tab Statistik, Spalte links).
+# bitgrid_dashboard_v3.yaml hat diese Spalte 24.08.2026 auf Nutzer-Wunsch
+# entfernt, diese Datei bleibt fuer v2 bestehen.
 # ═══════════════════════════════════════════════════════════════════════
 type: vertical-stack
 cards:
@@ -9,5 +11,5 @@ cards:
   # ── Energie-Status ──────────────────────────────────────────────────────
   - !include energy_status_bar.yaml
 
-  # ── Miner-Umfeld & Statistik (ohne Wetterzeitstrahl) ────────────────────
-  - !include miner_stats_noweather.yaml
+  # ── F2Pool Live-Snapshot ─────────────────────────────────────────────────
+  - !include stats_f2pool_live.yaml

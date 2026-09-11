@@ -1,0 +1,212 @@
+type: picture-elements
+card_mod:
+  style: |
+    ha-card {
+      background: none;
+      box-shadow: none;
+      border: none;
+      padding: 0;
+      /* Hochkant-Bild (800x1050) auf voller Seitenbreite im 1-Spalten-
+         Grundriss-Tab wurde riesig hoch (Nutzer-Feedback 24.08.2026:
+         "soll noch auf die Seite passen"). 667px bleibt die Breiten-
+         Obergrenze fuer breite Screens.
+         Zusaetzlich (24.08.2026, Nutzer-Wunsch "nicht scrollbar"): Breite
+         auch an die Fensterhoehe koppeln (gleiches 170px-Budget wie
+         views/floorplan.yaml, siehe dort fuer Details), damit das
+         Hochkant-Bild bei knapper Fensterhoehe automatisch schrumpft statt
+         die Seite scrollbar zu machen. Drittes min()-Glied 100%: ohne das
+         kann die hoehen-abgeleitete Breite bei schmalerem Fenster ueber die
+         Spaltenbreite hinauswachsen (Bug, Nutzer-Feedback 24.08.2026
+         Vollbild "Bild zu gross", siehe views/floorplan.yaml). */
+      width: min(667px, calc((100vh - 170px) * 800 / 1050), 100%);
+      width: min(667px, calc((100svh - 170px) * 800 / 1050), 100%);
+      aspect-ratio: 800 / 1050;
+      height: auto;
+      margin: 0 auto;
+      /* Nutzer-Feedback 24.08.2026: Hintergrund unten trotzdem abgeschnitten
+         (schwarzer Rand). overflow:visible verhindert jedes Clipping durch
+         die Karte selbst, hier und auf allen Kindelementen (img/#root),
+         unabhaengig davon wie hui-picture-elements-card intern die Hoehe
+         berechnet. */
+      overflow: visible !important;
+    }
+    ha-card #root {
+      overflow: visible !important;
+    }
+    ha-card img,
+    ha-card hui-image {
+      overflow: visible !important;
+      height: auto !important;
+      max-height: none !important;
+    }
+image: /local/garage_floorplan/transparent.png?version=989F2A4C371280A29235EFB270843EB5
+elements:
+  - type: conditional
+    title: Base
+    conditions:
+      []
+    elements:
+      - type: image
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+        image: /local/garage_floorplan/base.png?version=DE29A8DD50F361E442C480AEE8C6D63C
+        filter: none
+        style:
+          left: 50%
+          top: 50%
+          width: 100%
+  - type: state-label
+    entity: sensor.ewelink_snzb_01p_temperatur
+    title: null
+    style:
+      top: 9.16%
+      left: 49.88%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_d0cf13d86254_leistung
+    title: null
+    style:
+      top: 21.08%
+      left: 21.37%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shelly1pmg4_e4b06377adc0_leistung
+    title: null
+    style:
+      top: 36.00%
+      left: 60.35%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.ac_elwa_2_power1_solar
+    title: null
+    style:
+      top: 29.40%
+      left: 47.16%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.battery_soc_pct
+    title: null
+    style:
+      top: 36.70%
+      left: 77.23%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplusplugs_d4d4daf4eda4_leistung
+    title: null
+    style:
+      top: 44.94%
+      left: 19.46%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_dcb4d9c5567c_leistung
+    title: null
+    style:
+      top: 30.60%
+      left: 21.32%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_907069492f30_leistung
+    title: null
+    style:
+      top: 74.95%
+      left: 82.74%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.battery_power_w
+    title: null
+    style:
+      top: 29.49%
+      left: 77.32%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info

@@ -1,0 +1,321 @@
+# ═══════════════════════════════════════════════════════════════════════
+# VERLAUF (HEUTE)  —  PV-Leistung / Verbrauch / Batteriestand für den laufenden
+# Tag, 00:00–24:00 Uhr. custom:apexcharts-card (HACS) statt raw-SVG, weil
+# die Karte reale Recorder-Historie braucht (kein Cloud-Call, rein lokal).
+# Alle drei Serien als transluzente Fläche (type: area), angelehnt an die
+# Regelschwellen-Optik (views/... SVG in bitgrid_dashboard_v3.yaml, Tab
+# "Steuerung"): weiche, überlappende Flächen statt harter Linien.
+# Ersetzt die vorherige 7-Tage-Scroll/Zoom-Ansicht (energieverlauf_woche.yaml,
+# 23.08.2026 verworfen): kein Toolbar/Zoom mehr nötig, ein Tag ist auf einen
+# Blick lesbar, passt zum statischen Look der übrigen Kiosk-Kacheln.
+# extend_to: now (statt Default "end"): ohne das zieht apexcharts-card den
+# letzten bekannten Wert flach bis 24:00 durch, das sähe wie eine (nicht
+# vorhandene) Prognose aus. Fläche endet stattdessen exakt an der "jetzt"-
+# Linie, der Rest des Tages bleibt leer.
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Home".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:apexcharts-card
+# Kartenpadding explizit 20px (31.08.2026, Nutzer-Feedback: Abstand vom
+# Kartenrand wich sichtbar von der Finanz-Bilanz-Karte darunter ab, deren
+# padding dort ueber styles.card.padding: 20px explizit gesetzt ist).
+# apexcharts-card hat kein eigenes YAML-Padding-Feld wie custom:button-card,
+# card_mod ist hier die einzige Stellschraube fuer das aeussere ha-card-Padding.
+# KEIN flex:1/ha-card-Stretch (Versuch 31.08.2026, noch am selben Tag
+# verworfen): auf den Energiefluss-Partner (g2l, PFCP) gestretchtes CSS
+# stretchte hier die aeussere ha-card NICHT sichtbar (anders als bei PFCP,
+# wo genau dieselbe Technik einen toten Bereich erzeugte) — die Grid-Zeile
+# scheint align-items:stretch fuer dieses Kartenpaar nicht zuverlaessig
+# durchzusetzen. Stattdessen jetzt die robuste, native Loesung: chart.height
+# direkt erhoeht (s. u.), damit die Karte von sich aus in etwa Energiefluss'
+# Hoehe erreicht — kein Kampf gegen interne Wrapper einer Drittanbieter-Karte.
+# zoom-Kommentar s. bitgrid_dashboard_v3.yaml, Hamster-Karte (Home-Tab).
+card_mod:
+  style: |
+    :host {
+      zoom: min(1, calc(100vh / 1200px)) !important;
+    }
+    ha-card {
+      padding: 12px !important;
+    }
+# Ohne update_interval reagiert apexcharts-card auf JEDE Aenderung der
+# darunterliegenden Sensoren (mehrmals pro Minute) und rendert komplett neu
+# (24.08.2026, Nutzer-Feedback: wirkte im UI unruhig/zu haeufig). 5 Minuten
+# reicht fuer einen Tagesverlauf mit 1h-group_by voellig aus.
+update_interval: 5min
+# Eigener Kartentitel deaktiviert (31.08.2026, Nutzer-Wunsch): der Gruppen-
+# Titel "Verlauf (heute)" ausserhalb der Karte (bitgrid_dashboard_v3.yaml,
+# template: group_header) macht ihn redundant.
+header:
+  show: false
+graph_span: 1d
+span:
+  start: day
+# now: (eingebauter Shortcut) 25.08.2026 deaktiviert: die Label-Box der
+# Bibliothek berechnet ihre X-Position falsch, sobald eine zweite (opposite)
+# Y-Achse existiert (hier "soc"/Batteriestand) — verifiziert am Live-Tablet,
+# die blaue Box stand nach Hard-Refresh sofort wieder am selben falschen
+# Versatz, kein Cache-Artefakt. Ersatz unten als manuelle native
+# ApexCharts-Annotation (apex_config.annotations.xaxis mit EVAL:), die
+# Positionen korrekt gegen beide Achsen auflöst.
+now:
+  show: false
+apex_config:
+  annotations:
+    xaxis:
+      - x: "EVAL:new Date().getTime()"
+        borderColor: "rgba(255,255,255,0.5)"
+        strokeDashArray: 4
+        label:
+          text: jetzt
+          orientation: vertical
+          offsetY: 7
+          borderColor: "rgba(255,255,255,0)"
+          style:
+            color: "rgba(255,255,255,0.8)"
+            background: "rgba(255,255,255,0)"
+            fontSize: "10px"
+            fontFamily: "Roboto, sans-serif"
+  chart:
+    # ApexCharts-Default ohne explizite Höhe: 350px. 20 % kleiner → 280px.
+    # +12px (31.08.2026, Nutzer-Feedback, nach Korrektur auf legend.offsetY
+    # vereinfacht): Ausgleich fuer legend.offsetY 20 (statt urspruenglich 8),
+    # sonst wird die Legende fuer den zusaetzlichen Versatz zweizeilig
+    # gequetscht statt den gewuenschten Abstand sichtbar zu zeigen.
+    # 292 -> 350 -> 320 -> 315 (31.08.2026, Nutzer-Wunsch "Verlauf muss wie
+    # Energiefluss alligned sein"): 350 war zu viel, 320 laut Nutzer "5px
+    # kleiner". Weiterhin eine Schaetzung anhand von Live-Screenshots, kein
+    # Messwert.
+    # 330 -> 260 -> 330 -> 297 -> 330 (02.09.2026, Nutzer-Wunsch "3 Badges
+    # oben, 2 drunter" in der Legende): der Umbruch ist jetzt gewollt (s.
+    # legend.fontSize unten), dafuer braucht die Legende eine zweite Zeile
+    # Platz — Puffer wieder hochgesetzt.
+    height: 330
+    toolbar:
+      show: false
+    zoom:
+      enabled: false
+  # Legendentext in der jeweiligen Serienfarbe statt neutralem Weiß/Grau,
+  # wie die "settings_pill"-Boxen im Regelschwellen-Tab (Label-Farbe =
+  # Token-/Entitätsfarbe, z. B. Eco-Label grün, Hausreserve-Label rot).
+  legend:
+    labels:
+      useSeriesColors: true
+    # Mehr Abstand zwischen den Legenden-Eintraegen (24.08.2026, Nutzer-
+    # Feedback: ApexCharts-Default (5px) liess die vier Labels zu eng
+    # aneinandergequetscht wirken).
+    itemMargin:
+      horizontal: 16
+      vertical: 4
+    # offsetY 20 (31.08.2026, Nutzer-Feedback, mehrfach nachjustiert:
+    # zuletzt 8→16→22, jetzt auf 20 vereinfacht nachdem klar war, dass die
+    # Zeitbeschriftung selbst unveraendert bleiben sollte). Schiebt die
+    # Legenden-Badges (Batteriestand/PV-Leistung/Netzbezug/Hausverbrauch/
+    # Miner-Verbrauch) deutlich sichtbar weg von der Zeitachsen-Beschriftung
+    # darueber (00:00, 02:00...). chart.height (s.o.) waechst im selben
+    # Schritt mit, sonst wird die Legende dafuer zweizeilig gequetscht.
+    offsetY: 20
+    # 12px (31.08.2026, weiter runter von 14px auf Nutzer-Feedback: bei 14px
+    # brach die Legende immer noch in zwei Zeilen um, bei 16px erst recht).
+    # 16px (02.09.2026, Nutzer-Wunsch "3 Badges oben, 2 drunter" — der
+    # Umbruch ist jetzt ausdruecklich erwuenscht statt vermieden, chart.
+    # height unten hat entsprechend Puffer fuer die zweite Legenden-Zeile
+    # bekommen). Exakter Umbruch bei 3+2 ist mit dem jetzigen grid.padding
+    # nicht vorhersagbar, Live-Check noetig.
+    fontSize: "16px"
+    fontFamily: "Roboto, sans-serif"
+    fontWeight: 400
+  # Gitternetzlinien dezent (24.08.2026, Nutzer-Feedback): waren im
+  # ApexCharts-Default hell/weiss und stachen gegen die dezenten,
+  # niedrig-opaken Gridlines der Finanz-Bilanz-Karte (rgba(255,255,255,0.07),
+  # views/finanz_bilanz.yaml) ab — hier auf denselben Wert angeglichen.
+  grid:
+    borderColor: "rgba(255,255,255,0.07)"
+    strokeDashArray: 4
+    # padding.left/right (02.09.2026, Nutzer-Wunsch "Breite 5% kleiner"):
+    # apexcharts-card hat kein direktes chart.width wie chart.height, die
+    # Zeichenflaeche fuellt die Kartenbreite automatisch — grid.padding
+    # schneidet stattdessen links/rechts etwas ab, analog zur manuellen
+    # cL/cR-Verkleinerung bei der Finanz-Bilanz-Karte (views/
+    # finanz_bilanz.yaml). Werte geschaetzt, kein Messwert.
+    padding:
+      left: 15
+      right: 15
+  # Achsentitel/-Beschriftung auf denselben gedimmten Grauton wie die
+  # "Profit in €"-Achse der Finanz-Bilanz-Karte gezogen (24.08.2026,
+  # Nutzer-Feedback: Default-Weiß von apexcharts-card stach gegen die
+  # dezente Optik der übrigen Karte ab). rgba(255,255,255,0.4) = Titel,
+  # 0.5 = Zahlenbeschriftung, siehe views/finanz_bilanz.yaml als Referenz.
+  xaxis:
+    # tickAmount erzwingt gleichmaessige 2h-Schritte bis zum Tagesende
+    # (24.08.2026, Nutzer-Feedback: ohne das liess ApexCharts den letzten
+    # Tick bei 22:00 weg, die Zeitleiste wirkte rechts abgeschnitten).
+    tickAmount: 12
+    labels:
+      # Kein eigener offsetY (31.08.2026, nach Nutzer-Korrektur zurueckgesetzt):
+      # der Abstand, um den es dem Nutzer ging, war nie zwischen Achsenlinie
+      # und Zeitbeschriftung, sondern zwischen Zeitbeschriftung und den
+      # Legenden-Badges darunter — siehe legend.offsetY unten, dort ist der
+      # richtige Stellhebel.
+      style:
+        colors: "rgba(255,255,255,0.5)"
+        # 15px (02.09.2026, Nutzer-Wunsch "Achsenbeschriftung Zahlen +2"
+        # nochmal; Historie: 9px wirkte 31.08.2026 neben der Legende
+        # winzig).
+        fontSize: "15px"
+        fontFamily: "Roboto, sans-serif"
+        fontWeight: 400
+yaxis:
+  - id: power
+    decimals: 1
+    apex_config:
+      title:
+        text: Leistung (kW)
+        style:
+          color: "rgba(255,255,255,0.4)"
+          fontSize: "15px"
+          fontFamily: "Roboto, sans-serif"
+          # ApexCharts-Default fuer yaxis.title ist fontWeight 600 (Bold-
+          # Optik, 31.08.2026 Nutzer-Feedback) — explizit auf 400 (normal)
+          # gesetzt, wie die uebrige, unaufdringliche Achsen-Typografie.
+          fontWeight: 400
+      labels:
+        style:
+          colors: "rgba(255,255,255,0.5)"
+          fontSize: "15px"
+          fontFamily: "Roboto, sans-serif"
+          fontWeight: 400
+  - id: soc
+    opposite: true
+    min: 0
+    max: 100
+    decimals: 0
+    apex_config:
+      title:
+        text: Batteriestand (%)
+        # offsetX 12 (31.08.2026, Nutzer-Feedback): ApexCharts platziert den
+        # Titel einer "opposite"-Y-Achse standardmaessig enger an die Zahlen
+        # als bei der normalen linken Achse (Leistung (kW)) — ohne
+        # offsetX sass "Batteriestand (%)" sichtbar naeher an "100/80/60..."
+        # als der Referenz-Abstand links. +12px = derselbe Wert wie
+        # fontSize/var(--bg-fs-label), zieht den Titel weiter nach rechts
+        # weg von den Zahlen.
+        offsetX: 12
+        style:
+          color: "rgba(255,255,255,0.4)"
+          fontSize: "15px"
+          fontFamily: "Roboto, sans-serif"
+          fontWeight: 400
+      labels:
+        style:
+          colors: "rgba(255,255,255,0.5)"
+          fontSize: "15px"
+          fontFamily: "Roboto, sans-serif"
+          fontWeight: 400
+series:
+  # Akku-Stand als erste Serie (24.08.2026, Nutzer-Wunsch: Legende soll mit
+  # Akku links beginnen) — Reihenfolge in "series:" bestimmt die Legenden-
+  # Reihenfolge bei apexcharts-card, hat sonst keine funktionale Wirkung
+  # (yaxis_id/Farbe/Rendering bleiben pro Serie explizit gesetzt).
+  - entity: sensor.battery_soc_pct
+    name: Batteriestand
+    yaxis_id: soc
+    color: "#3FD07F"   # v3-Datenrolle Zuhause/Akku, wie PFCP-Batterie
+    type: area
+    curve: smooth
+    opacity: 0.14
+    stroke_width: 1.5
+    # Akku-Stand als durchgezogene "Basis"-Serie (24.08.2026, Nutzer-Wunsch).
+    stroke_dash: 0
+    extend_to: now
+    unit: "%"
+    group_by:
+      func: avg
+      duration: 1h
+  - entity: sensor.pv_power_w
+    name: PV-Leistung
+    yaxis_id: power
+    # apexcharts-card/ApexCharts loest var(--...) in der color-Option NICHT
+    # auf (bestaetigt 24.08.2026: alle Legenden-Punkte wurden schwarz) —
+    # hier bewusst literales Hex statt --bgai-pv-v3, Wert bleibt identisch.
+    color: "#FFD24A"   # v3-Datenrolle PV (Leistung statt Ertrag, s.o. Nutzer-Feedback 24.08.2026)
+    type: area
+    curve: smooth
+    opacity: 0.35
+    stroke_width: 1.5
+    # Strichlinien-Muster zusaetzlich zur Farbe als zweites Unterscheidungs-
+    # merkmal (24.08.2026, Nutzer-Wunsch): jede der 4 Serien bekommt ein
+    # eigenes stroke_dash. Akku-Stand ist die durchgezogene "Basis"-Serie
+    # (s.o.), PV bekommt daher ein eigenes, deutlich sichtbares Dash-Muster.
+    stroke_dash: 6
+    extend_to: now
+    unit: kW
+    transform: "return x / 1000;"
+    group_by:
+      func: avg
+      duration: 1h
+  # Netzbezug (26.08.2026, Nutzer-Wunsch): dieselbe Farbe wie im Energiefluss
+  # weiter unten auf diesem Tab (color.consumption der PFCP-Grid-Entity,
+  # #7C83E8 = var(--bgai-grid-v3)) — literales Hex statt var(), aus
+  # demselben Grund wie bei PV/Miner oben (apexcharts-card loest CSS-
+  # Variablen in der color-Option nicht auf).
+  # Echtes "Punkt-Strich" (Dash-Dot) ist mit ApexCharts NICHT moeglich:
+  # stroke_dash setzt nur eine EINHEITLICHE Strichlaenge pro Serie, kein
+  # kombiniertes Punkt+Strich-Muster (Bibliotheksgrenze, keine Config-
+  # Luecke). Stattdessen eine fuenfte, von den bestehenden vier (0/2/6/8)
+  # klar unterscheidbare Laenge.
+  # Reihenfolge (26.08.2026, Nutzer-Wunsch): direkt nach PV-Leistung, beide
+  # Energiequellen zusammen in der Legende, vor den beiden Verbrauchern.
+  - entity: sensor.grid_import_w
+    name: Netzbezug
+    yaxis_id: power
+    color: "#7C83E8"
+    type: area
+    curve: smooth
+    opacity: 0.25
+    stroke_width: 1.5
+    stroke_dash: 4
+    extend_to: now
+    unit: kW
+    transform: "return x / 1000;"
+    group_by:
+      func: avg
+      duration: 1h
+  # Hausverbrauch nutzt hier bewusst NICHT die Zuhause/Akku-Rolle (Gruen),
+  # sondern die Geraete-Rolle (Rosa/#C08AD8): zwei Gruentoene neben Akku-Stand
+  # blieben trotz mehrerer Versuche (dunkler, heller) im Tooltip schwer
+  # unterscheidbar (Nutzer-Feedback 24.08.2026). "Geraete" taucht in diesem
+  # Chart nicht als eigene Serie auf, daher kein Farbkonflikt hier — bewusste
+  # Ausnahme vom "eine Farbe = eine Bedeutung"-Prinzip nur fuer diesen Chart.
+  - entity: sensor.house_load_w
+    name: Hausverbrauch
+    yaxis_id: power
+    color: "#C08AD8"   # Geraete-Rolle (Rosa), hier zweckentfremdet fuer maximalen Kontrast zu Akku-Gruen
+    type: area
+    curve: smooth
+    opacity: 0.25
+    stroke_width: 1.5
+    stroke_dash: 2
+    extend_to: now
+    unit: kW
+    transform: "return x / 1000;"
+    group_by:
+      func: avg
+      duration: 1h
+  # house_load_w ist bereits "ohne Miner" definiert (siehe configuration.yaml
+  # surplus_kw-Kommentar) — Hausverbrauch und Miner-Verbrauch sind zwei echte,
+  # unabhaengige Serien, keine Aufteilung einer gemeinsamen Summe.
+  - entity: sensor.miner_total_power_w
+    name: Miner-Verbrauch
+    yaxis_id: power
+    color: "#F7931A"   # v3-Datenrolle Mining/Bitcoin (literal, siehe PV-Kommentar oben)
+    type: area
+    curve: smooth
+    opacity: 0.25
+    stroke_width: 1.5
+    stroke_dash: 8
+    extend_to: now
+    unit: kW
+    transform: "return x / 1000;"
+    group_by:
+      func: avg
+      duration: 1h

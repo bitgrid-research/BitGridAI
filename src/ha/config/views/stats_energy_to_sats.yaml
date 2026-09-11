@@ -1,0 +1,167 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Energy-to-Sats-Effizienz — Tagesbalken + statischer Fenster-Durchschnitt
+# (Ø-Linie, wie stats_pool_monthly.yaml) gegen das offizielle Ziel aus
+# docs/architecture/01_introduction_and_goals/012_quality_goals.md. Der
+# rollierende 7-Tage-Schnitt (bis 01.09.2026 eine zweite Linie) ist auf
+# Nutzer-Wunsch entfernt — eine einzelne Ø-Linie ist leichter zu lesen und
+# passt zum Rest des Tabs. `avg_7d`/`latest_avg_7d` bleiben im JSON-Artefakt
+# (src/data/energy_to_sats_export.py) fuer andere Konsumenten, diese Karte
+# nutzt sie nicht mehr. Seit 01.09.2026 saisonal gestaffeltes Ziel statt fest
+# 45 sats/kWh (ADR 029, 091_adr_de.md) — der feste Wert war seit Wochen um
+# Faktor ~2,8 unterboten. Ziel/Label kommen dynamisch aus dem JSON-Artefakt
+# (target_sats_per_kwh), kein Hardcode hier. Erste sichtbare Nutzung dieser
+# Kennzahl ueberhaupt, siehe ADR 026 (091_adr_de.md) — vorher lebten Sats-
+# Daten nur in HA, nie in bitgrid.db, das Ziel war technisch nicht messbar.
+#
+# Datenherkunft: src/data/energy_to_sats_export.py liest bitgrid.db
+# (daily_kpi + View v_energy_to_sats_7d) und schreibt ein lokales JSON-
+# Artefakt. Diese Karte liest ausschliesslich diese lokale Datei
+# (fetch('/local/...')), kein Live-Netzwerkzugriff, gleiches Muster wie
+# ki_hashrate.yaml/ki_difficulty.yaml. Tage ohne F2Pool-Abrechnung fehlen
+# im Chart (keine erfundene Null), siehe compute_day() in daily_kpi.py.
+#
+# KEIN Steuerpfad: reine Anzeige, beeinflusst keine Mining-Entscheidung
+# in core/ (KPIs informieren, sie steuern nichts, 05243_kpi_reporting.md).
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Statistik",
+# linke Spalte.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+custom_fields:
+  chart: >
+    [[[
+      if (!window._bgEnergyToSats) window._bgEnergyToSats = { status: 'idle', data: null };
+
+      if (window._bgEnergyToSats.status === 'idle') {
+        window._bgEnergyToSats.status = 'fetching';
+        fetch('/local/energy_to_sats.json?v=' + Date.now())
+          .then(r => r.json())
+          .then(data => { window._bgEnergyToSats = { status: 'ok', data }; })
+          .catch(() => { window._bgEnergyToSats.status = 'error'; });
+      }
+
+      // Kein eigener Karten-Header (entfernt 26.08.2026, Nutzer-Wunsch,
+      // gleiche Behandlung wie stats_f2pool_results.yaml): der Titel "Ziel
+      // (... sats/kWh)" steht bereits in der Chart-Legende, keine
+      // Duplizierung noetig.
+      const wrap = (inner) => `<div style="width:100%">${inner}</div>`;
+
+      if (window._bgEnergyToSats.status !== 'ok') {
+        const msg = window._bgEnergyToSats.status === 'error'
+          ? 'Chart nicht verfügbar (lokales Artefakt fehlt — python -m src.data.energy_to_sats_export laufen lassen).'
+          : 'Lade Energy-to-Sats-Historie …';
+        return wrap(`<div style="padding:30px 0;text-align:center;color:var(--secondary-text-color)">${msg}</div>`);
+      }
+
+      const data = window._bgEnergyToSats.data;
+      const days = data.days || [];
+      if (days.length < 1) {
+        return wrap(`<div style="padding:30px 0;text-align:center;color:var(--secondary-text-color)">Noch keine Tage mit F2Pool-Abrechnung in der Datenbank.</div>`);
+      }
+
+      const target = data.target_sats_per_kwh ?? 45;
+
+      const W = 640, H = 300, cL = 54, cR = 618, cT = 16, cB = 240;
+      const n = days.length;
+      const barW = Math.min(28, (cR - cL) / n * 0.6);
+      const slot = (cR - cL) / n;
+      const xForIdx = (i) => cL + slot * i + slot / 2;
+
+      const vals = days.map(d => d.energy_to_sats).filter(v => v !== null && v !== undefined);
+      // Statischer Durchschnitt ueber das gesamte gezeigte Fenster (01.09.2026,
+      // Nutzer-Wunsch: "wie bei Langzeitbilanz" statt rollierendem 7-Tage-
+      // Schnitt) — eine einzelne Linie + Wert rechts, kein zweiter Trend, der
+      // sich mit dem Tagesbalken ueberlagert.
+      const avgVal = vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+      const allVals = vals.concat([target, avgVal]);
+      const yMax = Math.max(...allVals) * 1.15;
+      const yMin = Math.min(0, Math.min(...allVals));
+      const yForVal = (v) => cB - (v - yMin) / (yMax - yMin) * (cB - cT);
+
+      const cBar = 'var(--primary-text-color,#EAEFFB)';
+      const cAvg = 'var(--bg-color-standard,#26C6DA)';
+      const cTarget = 'var(--bg-color-eco,#4CAF50)';
+
+      // Feste Hoehe statt breiten-relativer viewBox-Skalierung (03.09.2026,
+      // Nutzer-Wunsch: linke/rechte Karte pro Zeile gleich hoch). Passend zu
+      // stats_btc_price.yaml (311px + eigener Kopfbereich ~48px): diese Karte
+      // hat keinen Kopfbereich, daher 40px hoeher, damit beide Karten auf
+      // dieselbe Gesamthoehe kommen. preserveAspectRatio="none": erzwingt die
+      // feste Hoehe unabhaengig von der Kartenbreite.
+      let s = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:246px;display:block;overflow:hidden">`;
+
+      // Y-Gitter: 4 gleich verteilte Linien plus Nulllinie.
+      const ySteps = 4;
+      for (let i = 0; i <= ySteps; i++) {
+        const v = yMin + (yMax - yMin) * i / ySteps;
+        const y = yForVal(v);
+        s += `<line x1="${cL}" y1="${y}" x2="${cR}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>`;
+        s += `<text x="${cL - 6}" y="${y + 3.5}" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Roboto,sans-serif" text-anchor="end">${v.toFixed(0)}</text>`;
+      }
+
+      // Zielband: durchgehende horizontale Linie beim saisonalen Ziel
+      // (01.09.2026, Nutzer-Wunsch: durchgehend statt gestrichelt).
+      const yTarget = yForVal(target);
+      s += `<line x1="${cL}" y1="${yTarget}" x2="${cR}" y2="${yTarget}" style="stroke:${cTarget}" stroke-width="1.4" opacity="0.85"/>`;
+
+      // Tagesbalken.
+      days.forEach((d, i) => {
+        if (d.energy_to_sats === null || d.energy_to_sats === undefined) return;
+        const x = xForIdx(i) - barW / 2;
+        const y = yForVal(Math.max(d.energy_to_sats, 0));
+        const yBase = yForVal(0);
+        const h = Math.max(yBase - y, 0);
+        s += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" fill="${cBar}" opacity="0.85" rx="2"/>`;
+      });
+
+      // Durchschnittslinie: gestrichelt, Wert rechts (wie stats_pool_monthly.yaml).
+      if (avgVal > 0) {
+        const yAvg = yForVal(avgVal);
+        s += `<line x1="${cL}" y1="${yAvg}" x2="${cR}" y2="${yAvg}" style="stroke:${cAvg}" stroke-width="1.4" stroke-dasharray="5 3" opacity="0.85"/>`;
+        s += `<text x="${cR}" y="${yAvg - 5}" fill="${cAvg}" font-size="8.5" font-family="Roboto,sans-serif" font-weight="700" text-anchor="end">Ø ${avgVal.toFixed(1)}</text>`;
+      }
+
+      // X-Achse: Tageslabels, bei vielen Tagen ausgedünnt.
+      const labelStep = Math.max(1, Math.ceil(n / 10));
+      days.forEach((d, i) => {
+        if (i % labelStep !== 0 && i !== n - 1) return;
+        const x = xForIdx(i);
+        const label = d.day.slice(8, 10) + '.' + d.day.slice(5, 7);
+        s += `<text x="${x.toFixed(1)}" y="${cB + 13}" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Roboto,sans-serif" text-anchor="middle">${label}</text>`;
+      });
+
+      // Rahmen.
+      s += `<line x1="${cL}" y1="${cT}" x2="${cL}" y2="${cB}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+      s += `<line x1="${cL}" y1="${cB}" x2="${cR}" y2="${cB}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+
+      // Legende.
+      const legendItem = (x, color, label, dash) => `
+        <line x1="${x}" y1="${cT - 4}" x2="${x + 14}" y2="${cT - 4}" style="stroke:${color}" stroke-width="2" ${dash ? `stroke-dasharray="${dash}"` : ''}/>
+        <text x="${x + 18}" y="${cT - 1}" fill="rgba(255,255,255,0.65)" font-size="8.5" font-family="Roboto,sans-serif">${label}</text>`;
+      s += legendItem(cL, cBar, 'Tageswert', '');
+      s += legendItem(cL + 110, cTarget, `Ziel (${target} sats/kWh)`, '');
+
+      s += '</svg>';
+
+      return wrap(s);
+    ]]]
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 18px 20px
+  grid:
+    - grid-template-areas: '"chart"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    chart:
+      - width: 100%
+      - justify-self: stretch

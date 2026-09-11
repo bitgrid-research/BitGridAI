@@ -1,0 +1,189 @@
+# ═══════════════════════════════════════════════════════════════════════
+# F2Pool Live-Snapshot — Balance, heutige Sats, Worker, Live-Hashrate ggü.
+# gestern, Stale-Rate, BTC/EUR-Kurs + Tagesänderung. Ersetzt die alte
+# "F2Pool"-Spalte im Statistik-Tab, die trotz Überschrift keine Pool-Zahlen
+# zeigte (nur Haustechnik-Telemetrie aus views/miner_stats_noweather.yaml,
+# die Datei ist entfallen). Health-Badges (F2Pool API, BTC-Daten, CSV-Log)
+# sind von dort hierher übernommen, thematisch näher an den Zahlen, die
+# sie erklären.
+# Sensoren: packages/pool.yaml, packages/bitcoin.yaml.
+# Eingebunden via !include in views/stats_pool.yaml → bitgrid_dashboard_v2.yaml,
+# Tab "Statistik" (v3 hat diese Spalte 24.08.2026 entfernt).
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+
+  # ── Health-Badges ────────────────────────────────────────────────────
+  - type: horizontal-stack
+    cards:
+      - type: custom:button-card
+        entity: binary_sensor.pool_api_healthy
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        custom_fields:
+          status: >
+            [[[
+              const ok  = entity?.state === 'on';
+              const errRaw = states['input_text.pool_last_error']?.state || '';
+              const err = (errRaw === 'unknown' || errRaw === 'unavailable') ? '' : errRaw;
+              const st  = states['sensor.pool_api_status']?.state || '—';
+              const col = ok ? '#4caf50' : '#f44336';
+              const errLine = (!ok && err)
+                ? `<div style="font-size:0.62rem;color:#f44336;opacity:0.85;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${err}</div>`
+                : '';
+              return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;">
+                <span style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">F2Pool API</span>
+                <span style="font-size:0.95rem;font-weight:700;color:${col};">${ok ? '✓ OK' : '✗ ' + st}</span>
+                ${errLine}
+              </div>`;
+            ]]]
+        styles:
+          card:
+            - background: "rgba(255,255,255,0.03)"
+            - border-radius: 10px
+            - padding: 2px
+            - box-shadow: none
+          custom_fields:
+            status:
+              - width: 100%
+
+      - type: custom:button-card
+        entity: binary_sensor.bitcoin_data_healthy
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        custom_fields:
+          status: >
+            [[[
+              const ok = entity?.state === 'on';
+              const st = states['sensor.bitcoin_data_status']?.state || '—';
+              const bh = states['sensor.bitcoin_block_height']?.state || '—';
+              const col = ok ? '#4caf50' : '#f44336';
+              return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;">
+                <span style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">BTC-Daten</span>
+                <span style="font-size:0.95rem;font-weight:700;color:${col};">${ok ? '✓ ' + bh : '✗ ' + st}</span>
+              </div>`;
+            ]]]
+        styles:
+          card:
+            - background: "rgba(255,255,255,0.03)"
+            - border-radius: 10px
+            - padding: 2px
+            - box-shadow: none
+          custom_fields:
+            status:
+              - width: 100%
+
+      - type: custom:button-card
+        entity: sensor.mining_log_status
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: none
+        custom_fields:
+          status: >
+            [[[
+              const st   = entity?.state || '—';
+              const empty = st === 'Leer' || st === '—';
+              const col  = empty ? '#ff9800' : '#4caf50';
+              return `<div style="display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;">
+                <span style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">CSV-Log</span>
+                <span style="font-size:0.95rem;font-weight:700;color:${col};">${empty ? '⚠ ' : '✓ '}${st}</span>
+              </div>`;
+            ]]]
+        styles:
+          card:
+            - background: "rgba(255,255,255,0.03)"
+            - border-radius: 10px
+            - padding: 2px
+            - box-shadow: none
+          custom_fields:
+            status:
+              - width: 100%
+
+  # ── Spacer ──────────────────────────────────────────────────────────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    styles:
+      card:
+        - background: transparent
+        - box-shadow: none
+        - height: 8px
+        - padding: 0
+
+  # ── Live-Snapshot ───────────────────────────────────────────────────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - padding: 12px 16px
+      custom_fields:
+        snapshot:
+          - width: 100%
+          - justify-self: stretch
+          - box-sizing: border-box
+    custom_fields:
+      snapshot: >
+        [[[
+          const balBtc    = parseFloat(states['sensor.pool_balance_btc']?.state) || 0;
+          const earnedBtc = parseFloat(states['sensor.pool_earned_today_btc']?.state) || 0;
+          const workers   = states['sensor.pool_workers_active']?.state ?? '—';
+          const liveThs   = parseFloat(states['sensor.pool_hashrate_h1_ths']?.state) || 0;
+          const yestThs   = parseFloat(states['sensor.pool_ths_yesterday']?.state) || 0;
+          const stalePct  = parseFloat(states['sensor.pool_stale_pct']?.state);
+          const btcEur    = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+          const dayStart  = parseFloat(states['input_number.btc_eur_day_start']?.state) || 0;
+
+          const fmtSats = (btc) => Math.round(btc * 1e8).toLocaleString('de-DE');
+          const fmtThs  = (v) => v > 0 ? v.toFixed(1) + ' TH/s' : '—';
+
+          const thsDeltaPct = (yestThs > 0 && liveThs > 0) ? ((liveThs - yestThs) / yestThs * 100) : null;
+          const thsDeltaStr = thsDeltaPct === null ? ''
+            : (thsDeltaPct >= 0 ? ' (+' : ' (') + thsDeltaPct.toFixed(0) + '% ggü. gestern)';
+          const thsDeltaColor = thsDeltaPct === null ? 'var(--secondary-text-color)'
+            : thsDeltaPct >= -5 ? '#4CAF50' : thsDeltaPct >= -15 ? '#f59e0b' : '#ef5350';
+
+          const staleColor = isNaN(stalePct) ? 'var(--secondary-text-color)'
+            : stalePct <= 1 ? '#4CAF50' : stalePct <= 3 ? '#f59e0b' : '#ef5350';
+
+          const priceDeltaPct = dayStart > 0 ? ((btcEur - dayStart) / dayStart * 100) : null;
+          const priceColor = priceDeltaPct === null ? 'var(--secondary-text-color)'
+            : priceDeltaPct >= 0 ? '#4CAF50' : '#ef5350';
+          const priceDeltaStr = priceDeltaPct === null ? ''
+            : (priceDeltaPct >= 0 ? ' (+' : ' (') + priceDeltaPct.toFixed(1) + '% heute)';
+
+          const row = (icon, label, val, iconColor) =>
+            `<div style="display:flex;align-items:center;padding:3px 0;gap:6px;width:100%;">
+              <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+              <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+              <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+            </div>`;
+          const sep = () => `<div style="margin:6px 0;border-top:1px solid var(--divider-color);"></div>`;
+
+          return `<div style="width:100%;padding:2px 0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+              <ha-icon icon="mdi:pickaxe" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+              <span style="font-size:0.88rem;font-weight:700;">F2Pool Live</span>
+            </div>
+            ${row('mdi:wallet-outline', 'Balance', balBtc.toFixed(8) + ' BTC', '#F7931A')}
+            ${row('mdi:bitcoin', 'Sats heute', fmtSats(earnedBtc) + ' sats', '#F7931A')}
+            ${row('mdi:server-network', 'Worker aktiv', workers, 'var(--secondary-text-color)')}
+            ${sep()}
+            ${row('mdi:speedometer', 'Hashrate (1h)', fmtThs(liveThs) + thsDeltaStr, thsDeltaColor)}
+            ${row('mdi:alert-circle-outline', 'Stale-Rate', isNaN(stalePct) ? '—' : stalePct.toFixed(2) + ' %', staleColor)}
+            ${sep()}
+            ${row('mdi:currency-eur', 'BTC/EUR', btcEur > 0 ? btcEur.toLocaleString('de-DE') + ' €' + priceDeltaStr : '—', priceColor)}
+          </div>`;
+        ]]]

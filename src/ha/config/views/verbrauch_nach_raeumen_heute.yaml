@@ -1,0 +1,90 @@
+# ═══════════════════════════════════════════════════════════════════════
+# VERBRAUCH NACH RÄUMEN (HEUTE) — 2. Abschnitt links (Tab "EnergieInfo"),
+# unter "Echtzeitverbrauch". Grid 3 Zeilen × 2 Spalten, ein Kachel pro Raum.
+#
+# 25.08.2026, dritte Kurskorrektur: "garage und keller als räume
+# zusammenlegen und Untergeschoss nenne, Schlafzimmer wo keine Shelly drin
+# sind wegmachen" — Keller+Garage zu einer Kachel "Untergeschoss"
+# zusammengelegt (raumkachel_untergeschoss.yaml, raum_untergeschoss_power_w
+# in devices.yaml), Schlafzimmer-Kachel entfernt (stand nach der David-PC-
+# Korrektur ohnehin bei 0 Geraeten). 8 Kacheln → 6, Grid entsprechend von
+# 2×4 auf 2×3 verkleinert.
+#
+# 25.08.2026, zwei Kurskorrekturen der Nutzer-Vorgabe direkt hintereinander:
+# 1) "mach keine bubble cards sondern versuch die kacheln pro raum
+#    nachzubauen" — erster Anlauf war custom:bubble-card (Pop-up + Slider),
+#    jetzt stattdessen dasselbe Akkordeon-Muster wie window.bgMinerDetail
+#    (Steuerung-Tab, views/miner_controls.yaml): eigene Karte, Tippen
+#    schaltet input_boolean.raumkachel_* (packages/devices.yaml), Inhalt
+#    klappt inline auf. Ring-Gauge pro Gerät ist eigenes SVG
+#    (stroke-dasharray-Kreis), da Bubble Card sowas nicht anbietet.
+# 2) "in einer kachel sollen die Shellyplugs aufgelistet die dem raum
+#    zugeordnet sind mit der kummulierten W und oben zusammengerechnet" —
+#    also Echtzeit-Watt, NICHT die Tages-kWh-Sensoren aus dem ersten Anlauf
+#    (raum_*_energy_daily, miner1/2_energy_daily etc. in devices.yaml
+#    bleiben trotzdem stehen, koennten fuer eine spaetere echte "heute"-
+#    Ansicht noch nuetzlich sein). Nutzt dieselben raum_*_power_w-Summen
+#    und _leistung-Einzelsensoren wie Feld 1 ("Verbrauch nach Räumen").
+#
+# Ring-Gauge-Anteil = Geraet-W / Raum-Gesamt-W (0 wenn Raum-Gesamt 0 ist).
+# Raum-Geraete-Zuordnung: identisch zu raum_*_power_w (packages/devices.yaml)
+# — live aus HAs Area-Registry verifiziert, nicht aus altem Kommentarblock.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+  # 25.08.2026, Nutzer-Vorgabe: transparenter Gruppentitel-Stil statt
+  # gekachelter Markdown-Karte, siehe bitgrid_dashboard_v3.yaml
+  # ("Echtzeitverbrauch"-Titel) für die volle Begründung.
+  - type: custom:button-card
+    icon: mdi:home-analytics
+    name: Verbrauch nach Räumen
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - background: none
+        - box-shadow: none
+        - border: none
+        - padding: 4px 4px 0
+      grid:
+        - grid-template-areas: '"i n"'
+        - grid-template-columns: min-content 1fr
+        - align-items: center
+      img_cell:
+        - justify-content: start
+        - align-self: center
+      icon:
+        - color: var(--secondary-text-color)
+        - width: 24px
+        - height: 24px
+      name:
+        - font-size: 1.0rem
+        - font-weight: 700
+        - text-transform: uppercase
+        - letter-spacing: 0.07em
+        - color: var(--secondary-text-color)
+        - justify-self: start
+        - padding-left: 10px
+
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      # 25.08.2026: erst 4 Spalten, dann 2, dann alle 6 Räume in einer Zeile
+      # (volle Seitenbreite verfügbar, siehe bitgrid_dashboard_v3.yaml,
+      # grid-area "full"). Nutzer-Feedback zur 6er-Reihe: Kacheln zu schmal,
+      # Schrift kaum lesbar — jetzt 3 Spalten × 2 Zeilen, dafür größere
+      # Schrift in den Kacheln selbst (raumkachel_*.yaml, window.bgRoomKachel).
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+      grid-template-rows: auto
+      grid-gap: 8px
+      align-items: start
+    cards:
+      - !include raumkachel_untergeschoss.yaml
+      - !include raumkachel_wohnzimmer.yaml
+      - !include raumkachel_kueche.yaml
+      - !include raumkachel_schlafzimmer1.yaml
+      - !include raumkachel_buero.yaml
+      - !include raumkachel_hauswirtschaft.yaml

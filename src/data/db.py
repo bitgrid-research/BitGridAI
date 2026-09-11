@@ -39,7 +39,14 @@ CREATE TABLE IF NOT EXISTS energy_states (
     miner_power_w           REAL,
     heizstab_power_w        REAL,
     energy_price_ct_kwh     REAL,
-    pv_forecast_kw          REAL
+    pv_forecast_kw          REAL,
+    battery_power_w         REAL,
+    cloud_coverage_pct      REAL,
+    outdoor_temp_c          REAL,
+    outdoor_humidity_pct    REAL,
+    heizung_energy_kwh_today REAL,
+    sun_azimuth_deg         REAL,
+    sun_elevation_deg       REAL
 );
 
 CREATE TABLE IF NOT EXISTS device_states (
@@ -121,6 +128,41 @@ CREATE TABLE IF NOT EXISTS override_log (
     user_reason   TEXT
 );
 
+-- Tagesabrechnung des Mining-Pools (F2Pool). Anders als energy_states/
+-- miner_states KEIN Block-Raster: F2Pool rechnet einmal taeglich ab
+-- (~02:00, siehe packages/pool.yaml), ein 10-Minuten-Raster waere hier
+-- unpassend. Rohfakt, nicht rekonstruierbar (im Gegensatz zu daily_kpi
+-- unten) — deshalb INSERT OR IGNORE, nie ueberschrieben. Quelle: HAs
+-- sensor.pool_settlement_history (F2Pool V2 API), Fallback
+-- input_text.pool_btc_daily_log. Siehe src/data/pool_settlement_sync.py
+-- und ADR 026 (docs/architecture/09_design_decisions/091_adr_de.md).
+CREATE TABLE IF NOT EXISTS bitcoin_daily_settlement (
+    day                  TEXT PRIMARY KEY,   -- UTC-Kalendertag, aus mining_date (F2Pool-Settlement)
+    earned_btc           REAL NOT NULL,
+    pool_ths_avg         REAL,               -- F2Pool-gemeldeter Tagesschnitt, nicht HA-lokal gemittelt
+    btc_eur_price_approx REAL,               -- Naeherung: Kurs bei Tagesbeginn, NICHT Kurs zum Abrechnungszeitpunkt
+    source               TEXT NOT NULL,      -- 'ha:pool_settlement_history' | 'ha:pool_btc_daily_log' (Fallback)
+    captured_at          TEXT NOT NULL
+);
+
+-- BTC/EUR-Tageskurs fuer den Verlaufschart im BitcoinInfo-Tab
+-- (views/stats_btc_price.yaml). price_eur ist der erste beobachtete
+-- mempool.space-Tick des UTC-Kalendertags (downsample_daily() in
+-- btc_power_law.py), kein echter Tagesdurchschnitt. INSERT OR REPLACE
+-- (nicht OR IGNORE wie bitcoin_daily_settlement): ein erneuter Abruf
+-- desselben abgeschlossenen Tages liefert denselben Wert, ein Ueberschreiben
+-- kann also nichts verlieren, macht die Sync-Logik aber robust gegen
+-- kuenftige Aenderungen an der Downsampling-Regel. Waechst unbegrenzt
+-- (kein Rolling-Fenster, mempool.space liefert je Sync die volle Historie):
+-- src/data/btc_price_history.py schreibt hier IMMER alles, das --days-
+-- Fenster fuers Dashboard-JSON wird erst beim Export aus dieser Tabelle
+-- herausgeschnitten, siehe Kommentar dort.
+CREATE TABLE IF NOT EXISTS btc_price_daily (
+    day        TEXT PRIMARY KEY,   -- UTC-Kalendertag (YYYY-MM-DD)
+    price_eur  REAL NOT NULL,
+    fetched_at TEXT NOT NULL
+);
+
 -- ---------------------------------------------------------------------------
 -- Tagesaggregate
 --
@@ -147,6 +189,12 @@ CREATE TABLE IF NOT EXISTS daily_kpi (
     grid_export_kwh      REAL,
     mining_kwh           REAL,
     heizstab_kwh         REAL,
+    -- Sats pro kWh Mining-Energie, aus bitcoin_daily_settlement. NULL wenn
+    -- fuer den Tag keine Abrechnung vorliegt oder mining_kwh = 0 (keine
+    -- erfundene Null, siehe compute_day() in daily_kpi.py). Offizielles
+    -- Ziel laut docs/architecture/01_introduction_and_goals/012_quality_goals.md:
+    -- >= 45 sats/kWh im 7-Tage-Schnitt (siehe View v_energy_to_sats_7d).
+    energy_to_sats       REAL,
     pv_peak_w            REAL,
     pv_peak_block        TEXT,
     soc_min_pct          REAL,
@@ -225,6 +273,19 @@ SELECT miner,
 FROM miner_states
 WHERE ths > 0 AND power_w > 0
 GROUP BY miner, workmode_status;
+
+-- 7-Tage-Schnitt von energy_to_sats gegen das offizielle Ziel (>= 45 sats/kWh,
+-- 012_quality_goals.md). Echte Kalendertage (date(a.day, '-7 days')), keine
+-- ROWS-BETWEEN-Fensterfunktion: die wuerde stillschweigend ueber Luecketage
+-- hinwegmitteln und einen 7-Tage-Schnitt behaupten, der in Wahrheit auf
+-- weniger Tagen beruht.
+CREATE VIEW IF NOT EXISTS v_energy_to_sats_7d AS
+SELECT a.day, a.energy_to_sats,
+       (SELECT AVG(b.energy_to_sats) FROM daily_kpi b
+        WHERE b.day > date(a.day, '-7 days') AND b.day <= a.day
+          AND b.energy_to_sats IS NOT NULL) AS energy_to_sats_7d_avg
+FROM daily_kpi a
+WHERE a.energy_to_sats IS NOT NULL;
 """
 
 
@@ -241,6 +302,40 @@ _KPI_MIGRATIONS: list[tuple[str, str]] = [
 _ENERGY_STATE_MIGRATIONS: list[tuple[str, str]] = [
     ("miner_power_w", "ALTER TABLE energy_states ADD COLUMN miner_power_w    REAL"),
     ("heizstab_power_w", "ALTER TABLE energy_states ADD COLUMN heizstab_power_w REAL"),
+    # 2026-08-23: sensor.battery_power_w wird von der Live-Automation
+    # (mvp_p3b_pv_reactive_downgrade, R8) bereits als Entscheidungssignal
+    # genutzt, war bisher aber nirgends persistiert — jede saisonale Analyse
+    # musste den Akku-Fluss ueber pv_power_w-house_load_w annaehern statt das
+    # echte Signal zu verwenden. Siehe
+    # docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md.
+    ("battery_power_w", "ALTER TABLE energy_states ADD COLUMN battery_power_w REAL"),
+    # 2026-08-23: Wetter/Heizlast fuer die naechste saisonale Optimierung
+    # (Fruehling-vs-Herbst-Frage, Winter-Grundlast) — siehe
+    # docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md.
+    # Alle vier haben HA-History erst ab Anfang/Mitte Juli 2026, nicht seit
+    # Mai — die Luecke davor ist echt, keine erfundenen Werte.
+    (
+        "cloud_coverage_pct",
+        "ALTER TABLE energy_states ADD COLUMN cloud_coverage_pct REAL",
+    ),
+    ("outdoor_temp_c", "ALTER TABLE energy_states ADD COLUMN outdoor_temp_c REAL"),
+    (
+        "outdoor_humidity_pct",
+        "ALTER TABLE energy_states ADD COLUMN outdoor_humidity_pct REAL",
+    ),
+    (
+        "heizung_energy_kwh_today",
+        "ALTER TABLE energy_states ADD COLUMN heizung_energy_kwh_today REAL",
+    ),
+    ("sun_azimuth_deg", "ALTER TABLE energy_states ADD COLUMN sun_azimuth_deg REAL"),
+    (
+        "sun_elevation_deg",
+        "ALTER TABLE energy_states ADD COLUMN sun_elevation_deg REAL",
+    ),
+]
+
+_DAILY_KPI_MIGRATIONS: list[tuple[str, str]] = [
+    ("energy_to_sats", "ALTER TABLE daily_kpi ADD COLUMN energy_to_sats REAL"),
 ]
 
 
@@ -281,6 +376,13 @@ def _migrate(conn: sqlite3.Connection) -> None:
     }
     for col, ddl in _ENERGY_STATE_MIGRATIONS:
         if col not in existing_es:
+            conn.execute(ddl)
+
+    existing_dk = {
+        row[1] for row in conn.execute("PRAGMA table_info(daily_kpi)").fetchall()
+    }
+    for col, ddl in _DAILY_KPI_MIGRATIONS:
+        if col not in existing_dk:
             conn.execute(ddl)
 
     conn.commit()

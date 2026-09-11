@@ -136,14 +136,28 @@ def compute_day(conn: sqlite3.Connection, day: date) -> bool:
         (start, end),
     ).fetchone()[0]
 
+    mining_kwh = _kwh(base[7])
+    # Sats pro kWh Mining-Energie. NULL wenn fuer den Tag keine F2Pool-
+    # Abrechnung vorliegt (bitcoin_daily_settlement, siehe
+    # pool_settlement_sync.py) oder mining_kwh <= 0 — eine Zeile mit einer
+    # erfundenen Null waere eine Behauptung ueber einen Tag, ueber den wir
+    # nichts wissen, gleiches Prinzip wie beim Rest dieser Funktion.
+    settlement = conn.execute(
+        "SELECT earned_btc FROM bitcoin_daily_settlement WHERE day = ?",
+        (day.isoformat(),),
+    ).fetchone()
+    energy_to_sats = None
+    if settlement is not None and mining_kwh and mining_kwh > 0:
+        energy_to_sats = round(settlement[0] * 1e8 / mining_kwh, 2)
+
     conn.execute(
         "INSERT OR REPLACE INTO daily_kpi (day, blocks, coverage_pct, quality_warn,"
         " quality_error, missing_signals, pv_kwh, house_kwh, grid_import_kwh,"
-        " grid_export_kwh, mining_kwh, heizstab_kwh, pv_peak_w, pv_peak_block,"
-        " soc_min_pct, soc_max_pct, soc_mean_pct, soc_h_locked, soc_h_hold,"
-        " soc_h_eco, soc_h_standard, soc_h_super, blocks_temp_ge_110,"
+        " grid_export_kwh, mining_kwh, heizstab_kwh, energy_to_sats, pv_peak_w,"
+        " pv_peak_block, soc_min_pct, soc_max_pct, soc_mean_pct, soc_h_locked,"
+        " soc_h_hold, soc_h_eco, soc_h_standard, soc_h_super, blocks_temp_ge_110,"
         " blocks_switch_mismatch, blocks_surplus_idle, computed_at)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (
             day.isoformat(),
             blocks,
@@ -155,8 +169,9 @@ def compute_day(conn: sqlite3.Connection, day: date) -> bool:
             _kwh(base[4]),
             _kwh(base[5]),
             _kwh(base[6]),
-            _kwh(base[7]),
+            mining_kwh,
             _kwh(base[8]),
+            energy_to_sats,
             peak[1] if peak else None,
             peak[0] if peak else None,
             base[9],

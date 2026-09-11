@@ -2,7 +2,7 @@
 
 Willkommen im BitGridAI-Projekt. Diese Seite führt dich durch den Einstieg in deinen Schwerpunkt: Benutzeroberfläche, erklärbare KI-Ausgaben und die zielgruppengerechte Aufbereitung der Erklärungen.
 
-> **Hinweis zur Nutzerstudie:** Die Studie vergleicht nur zwei Erklärformate, **A (statischer Regeltext)** vs. **B (LLM-Erklärung in einer generischen Stimme)** — **ohne Personas**. Gemessen wird primär das **Nutzervertrauen** (FF1) und die **Güte** der LLM-Ausgaben (FF2). Die unten genannten „Zielgruppen" (Heimnutzer vs. Forscher, ₿itsy-Home/₿itsy-Study) betreffen die zielgruppengerechte UI-Gestaltung, **nicht** den Studien-Faktor.
+> **Hinweis zur Nutzerstudie:** Die Studie vergleicht nur zwei Erklärformate, **A (statischer Regeltext)** vs. **B (LLM-Erklärung in einer generischen Stimme)** — **ohne Personas**. Gemessen wird primär das **Nutzervertrauen** (FF1) und die **Güte** der LLM-Ausgaben (FF2). Die unten genannten „Zielgruppen" (Heimnutzer vs. Forscher) betreffen die zielgruppengerechte UI-Gestaltung, **nicht** den Studien-Faktor.
 
 ---
 
@@ -49,20 +49,25 @@ cd src/ha && docker compose up -d
 1. **HA-Dashboard verstehen** — `src/ha/config/bitgrid_dashboard_v1.yaml` lesen, Dashboard im Browser erkunden
 2. **DecisionEvent verstehen** — `src/core/models.py` lesen: was steckt in einem Event?
 3. **Explain-Schicht erkunden** — `src/explain/` lesen: wie werden Events in Text übersetzt?
-4. **Zielgruppen-Anforderungen ableiten** — Welche Infos braucht ein Heimnutzer vs. ein Forscher? (`₿itsy-Home` vs. `₿itsy-Study`) — eine UI-Frage, unabhängig vom Studien-A/B-Faktor
+4. **Zielgruppen-Anforderungen ableiten** — Welche Infos braucht ein Heimnutzer vs. ein Forscher? Eine UI-Frage, unabhängig vom Studien-A/B-Faktor
 
 ---
 
 ## Wichtige Konzepte
 
-### Zielgruppen → Erklärungstiefe (₿itsy-Agenten)
+### Zielgruppen → Erklärungstiefe
 
-| Agent / Zielgruppe | Modell | Erklärungstiefe |
-|---|---|---|
-| ₿itsy-Home (Heimnutzer) | qwen3:4b-instruct | einfach, alltagsnah |
-| ₿itsy-Study (Forscher) | qwen3:30b | technisch, mit Parametern |
+| Zielgruppe | Erklärungstiefe |
+|---|---|
+| Heimnutzer | einfach, alltagsnah |
+| Forscher | technisch, mit Parametern |
 
-Beide lesen `DecisionEvents` read-only. Deine Aufgabe: herausarbeiten, was jede Zielgruppe braucht, und die UI entsprechend gestalten. Das ist eine Design-/UI-Frage und **getrennt** vom A/B-Vergleich der Studie (die Studie selbst nutzt für Gruppe B eine einzige generische Stimme).
+Kein eigener Agent/keine eigene Persona dafür geplant (Konzept verworfen, nie
+deployt) — das ist eine reine UI-/Design-Zielsetzung: dieselbe Erklärschicht
+(`src/explain/`) liest `DecisionEvents` read-only, die Aufbereitung passt sich
+der Zielgruppe an.
+
+Deine Aufgabe: herausarbeiten, was jede Zielgruppe braucht, und die UI entsprechend gestalten. Das ist eine Design-/UI-Frage und **getrennt** vom A/B-Vergleich der Studie (die Studie selbst nutzt für Gruppe B eine einzige generische Stimme).
 
 ### DecisionEvent — das zentrale Datenobjekt
 

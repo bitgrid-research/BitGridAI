@@ -1,0 +1,68 @@
+# ═══════════════════════════════════════════════════════════════════════
+# ECHTZEITVERBRAUCH — Abschnitt 1 (linke Spalte) im Tab "EnergieInfo".
+# Momentane Leistung aller Verbraucher/Erzeuger als Liste, gleiche Sensoren
+# wie die PFCP-Energiefluss-Karte auf dem Home-Tab (bitgrid_dashboard_v3.yaml),
+# hier als Zahlenliste statt Flussdiagramm — fuer schnelles Ablesen exakter
+# Werte statt der visuellen Uebersicht. Batterie zeigt Lade-/Entladerichtung
+# ueber sensor.battery_power_w (Vorzeichen: positiv = laedt, negativ =
+# entlaedt, wie in packages/mvp_auto.yaml genutzt), nicht den vorzeichen-
+# angepassten PFCP-Sensor battery_power_flowchart_w.
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 16px 18px
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    body:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  body: >
+    [[[
+      const w = (id) => { const v = parseFloat(states[id]?.state); return isNaN(v) ? null : v; };
+      const fmtKw = (watt) => watt === null ? '—'
+        : (watt / 1000).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kW';
+      const fmtPct = (v) => v === null ? '—' : Math.round(v) + ' %';
+
+      const battW = w('sensor.battery_power_w');
+      const battLabel = battW === null ? 'Batterie' : battW > 20 ? 'Batterie lädt' : battW < -20 ? 'Batterie entlädt' : 'Batterie (Ruhe)';
+      const battIcon  = battW === null ? 'mdi:battery-unknown' : battW > 20 ? 'mdi:battery-charging' : battW < -20 ? 'mdi:battery-arrow-down-outline' : 'mdi:battery';
+      const battVal   = battW === null ? '—' : fmtKw(Math.abs(battW));
+
+      const row = (icon, label, val, color) => `
+        <div style="display:flex;align-items:center;padding:6px 0;gap:10px;width:100%;">
+          <ha-icon icon="${icon}" style="--mdc-icon-size:18px;color:${color};flex-shrink:0;"></ha-icon>
+          <span style="color:var(--secondary-text-color);font-size:0.85rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${label}</span>
+          <span style="font-size:0.92rem;font-weight:700;white-space:nowrap;color:${color};">${val}</span>
+        </div>`;
+      const sep = () => '<div style="margin:4px 0;border-top:1px solid var(--divider-color);"></div>';
+
+      return `<div style="width:100%;">
+        ${row('mdi:solar-power', 'PV-Leistung', fmtKw(w('sensor.pv_power_w')), '#FFD24A')}
+        ${row('mdi:transmission-tower-import', 'Netzbezug', fmtKw(w('sensor.grid_import_w')), '#7C83E8')}
+        ${row('mdi:transmission-tower-export', 'Einspeisung', fmtKw(w('sensor.grid_export_w')), '#7C83E8')}
+        ${row('mdi:home-lightning-bolt', 'Hausverbrauch', fmtKw(w('sensor.house_load_w')), '#3FD07F')}
+        ${row(battIcon, battLabel, battVal, '#3FD07F')}
+        ${row('mdi:battery-outline', 'Batteriestand', fmtPct(w('sensor.battery_soc_pct')), '#3FD07F')}
+        ${sep()}
+        ${row('mdi:pickaxe', 'Miner 1', fmtKw(w('sensor.shellyplugsg3_dcb4d9c5567c_leistung')), '#F7931A')}
+        ${row('mdi:pickaxe', 'Miner 2', fmtKw(w('sensor.shellyplugsg3_d0cf13d86254_leistung')), '#F7931A')}
+        ${row('mdi:water', 'Heizstab', fmtKw(w('sensor.ac_elwa_2_power1_solar')), '#5C9EE2')}
+        ${row('mdi:power-plug', 'Geräte', fmtKw(w('sensor.geraete_power_w')), '#C08AD8')}
+      </div>`;
+    ]]]

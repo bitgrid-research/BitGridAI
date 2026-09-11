@@ -1,12 +1,70 @@
 type: picture-elements
-image: /local/grundriss/base.png
+card_mod:
+  style: |
+    ha-card {
+      background: none;
+      box-shadow: none;
+      border: none;
+      padding: 0;
+      /* Volle Seitenbreite im 1-Spalten-Grundriss-Tab (24.08.2026) würde bei
+         2:1-Landschaftsbild auf breiten Screens/Tablets zu hoch werden.
+         1663px bleibt die Breiten-Obergrenze fuer breite Screens.
+         Zusaetzlich (24.08.2026, Nutzer-Wunsch "nicht scrollbar"): Breite auch
+         an die Fensterhoehe koppeln, damit Kopfzeile + Bild immer ohne
+         Scrollen passen. 170px Reserviert-Budget = aeussere Stack-Paddings
+         (2x14px) + Haus/Garage-Kopfzeile + Sicherheitsabstand, ein erster
+         Schaetzwert, ggf. nach Sichttest auf dem Tablet nachjustieren.
+         Reihenfolge wichtig: die 100vh-Variante zuerst als Fallback fuer
+         Engines ohne svh-Unterstuetzung, danach die 100svh-Variante
+         (gewinnt per Kaskade, wird sonst als ungueltig verworfen).
+         Drittes min()-Glied 100%: ohne das kann die hoehen-abgeleitete
+         Breite bei schmalerem Fenster ueber die Spaltenbreite hinauswachsen
+         (Bug, Nutzer-Feedback 24.08.2026 Vollbild "Bild zu gross"). */
+      width: min(1663px, calc((100vh - 170px) * 1774 / 887), 100%);
+      width: min(1663px, calc((100svh - 170px) * 1774 / 887), 100%);
+      aspect-ratio: 1774 / 887;
+      height: auto;
+      margin: 0 auto;
+      /* Nutzer-Feedback 24.08.2026: Hintergrund unten trotzdem abgeschnitten
+         (schwarzer Rand). overflow:visible verhindert jedes Clipping durch
+         die Karte selbst, hier und auf allen Kindelementen (img/#root),
+         unabhaengig davon wie hui-picture-elements-card intern die Hoehe
+         berechnet. */
+      overflow: visible !important;
+    }
+    ha-card #root {
+      overflow: visible !important;
+    }
+    ha-card img,
+    ha-card hui-image {
+      overflow: visible !important;
+      height: auto !important;
+      max-height: none !important;
+    }
+image: /local/floorplan/transparent.png?version=099AC734B1AC1E24315EA02D07546A90
 elements:
+  - type: conditional
+    title: Base
+    conditions:
+      []
+    elements:
+      - type: image
+        tap_action:
+          action: none
+        hold_action:
+          action: none
+        image: /local/floorplan/base.png?version=E4592A2C2A4F87DEB8883E14E236B380
+        filter: none
+        style:
+          left: 50%
+          top: 50%
+          width: 100%
   - type: state-label
     entity: sensor.shellyplugpmg3_9070695bb2a8_leistung
     title: null
     style:
-      top: 43.71%
-      left: 9.58%
+      top: 42.77%
+      left: 8.49%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -19,11 +77,11 @@ elements:
     hold_action:
       action: more-info
   - type: state-label
-    entity: sensor.shellyplugsg3_9070694d44bc_leistung 
+    entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
     title: null
     style:
-      top: 38.95%
-      left: 24.13%
+      top: 38.51%
+      left: 18.14%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -39,8 +97,25 @@ elements:
     entity: sensor.shellyplugsg3_9070694a1b6c_leistung
     title: null
     style:
-      top: 75.30%
-      left: 80.31%
+      top: 81.66%
+      left: 92.21%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.ewelink_snzb_02p_temperatur_2
+    title: null
+    style:
+      top: 51.48%
+      left: 48.42%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -56,8 +131,8 @@ elements:
     entity: binary_sensor.wohnzimmer_ofen_alarm
     title: null
     style:
-      top: 18.46%
-      left: 60.59%
+      top: 12.60%
+      left: 60.83%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -73,8 +148,8 @@ elements:
     entity: binary_sensor.gastezimmer_alarm
     title: null
     style:
-      top: 16.03%
-      left: 88.08%
+      top: 9.52%
+      left: 88.99%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -90,8 +165,8 @@ elements:
     entity: sensor.shellyplugsg3_9070694c577c_leistung
     title: null
     style:
-      top: 64.61%
-      left: 63.80%
+      top: 67.22%
+      left: 64.20%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -107,8 +182,8 @@ elements:
     entity: climate.buro_michael
     title: null
     style:
-      top: 59.01%
-      left: 90.39%
+      top: 63.54%
+      left: 92.06%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -124,8 +199,8 @@ elements:
     entity: climate.wohnzimmer_fenster
     title: null
     style:
-      top: 76.90%
-      left: 71.32%
+      top: 81.73%
+      left: 72.03%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -141,8 +216,8 @@ elements:
     entity: climate.bad
     title: null
     style:
-      top: 52.74%
-      left: 27.41%
+      top: 53.36%
+      left: 26.79%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -158,8 +233,8 @@ elements:
     entity: sensor.shellyplugsg3_9070694c99d4_leistung
     title: null
     style:
-      top: 44.72%
-      left: 77.75%
+      top: 43.60%
+      left: 78.52%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -175,8 +250,25 @@ elements:
     entity: sensor.shellyplugsg3_d885ac1e9adc_leistung
     title: null
     style:
-      top: 22.39%
-      left: 10.59%
+      top: 17.49%
+      left: 8.21%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_d885ac18c3b4_leistung
+    title: null
+    style:
+      top: 55.56%
+      left: 88.68%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -192,8 +284,8 @@ elements:
     entity: binary_sensor.kuche_alarm
     title: null
     style:
-      top: 85.22%
-      left: 59.50%
+      top: 91.58%
+      left: 59.77%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -209,8 +301,25 @@ elements:
     entity: binary_sensor.hauswirtschaftsraum_alarm
     title: null
     style:
-      top: 31.21%
-      left: 4.78%
+      top: 27.86%
+      left: 3.54%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_9070694d44bc_leistung
+    title: null
+    style:
+      top: 36.59%
+      left: 23.34%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -226,8 +335,8 @@ elements:
     entity: climate.michaels_schlafzimmer
     title: null
     style:
-      top: 66.20%
-      left: 9.49%
+      top: 69.23%
+      left: 8.36%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -243,8 +352,8 @@ elements:
     entity: sensor.shellyplugsg3_90706947f288_leistung
     title: null
     style:
-      top: 19.91%
-      left: 30.29%
+      top: 14.47%
+      left: 29.56%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -260,8 +369,8 @@ elements:
     entity: sensor.shellyplugsg3_9070694b2854_leistung
     title: null
     style:
-      top: 68.56%
-      left: 54.22%
+      top: 71.93%
+      left: 54.36%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -277,8 +386,8 @@ elements:
     entity: climate.davids_zimmer
     title: null
     style:
-      top: 23.30%
-      left: 39.45%
+      top: 18.40%
+      left: 39.07%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -294,8 +403,8 @@ elements:
     entity: climate.gastezimmer
     title: null
     style:
-      top: 22.46%
-      left: 84.76%
+      top: 17.28%
+      left: 85.75%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -311,8 +420,8 @@ elements:
     entity: binary_sensor.wohnzimmer_fenster_alarm
     title: null
     style:
-      top: 85.11%
-      left: 73.70%
+      top: 91.43%
+      left: 74.31%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -328,8 +437,8 @@ elements:
     entity: climate.hauswirtschaftsraum
     title: null
     style:
-      top: 33.72%
-      left: 9.55%
+      top: 31.09%
+      left: 8.38%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -341,12 +450,29 @@ elements:
       action: none
     hold_action:
       action: more-info
+  - type: state-icon
+    entity: binary_sensor.buro_kleines_fenster_alarm
+    title: null
+    style:
+      top: 89.83%
+      left: 88.80%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
   - type: state-label
     entity: sensor.shellyplugsg3_9070694abdf4_leistung
     title: null
     style:
-      top: 21.44%
-      left: 15.67%
+      top: 16.45%
+      left: 13.39%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -362,8 +488,8 @@ elements:
     entity: binary_sensor.michaels_schlafzimmer_alarm
     title: null
     style:
-      top: 68.87%
-      left: 4.74%
+      top: 72.74%
+      left: 3.56%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -379,8 +505,8 @@ elements:
     entity: climate.kuche
     title: null
     style:
-      top: 76.60%
-      left: 58.53%
+      top: 81.51%
+      left: 58.84%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -392,12 +518,29 @@ elements:
       action: none
     hold_action:
       action: more-info
+  - type: state-label
+    entity: sensor.shellyplugsg3_dcb4d9c6b46c_leistung
+    title: null
+    style:
+      top: 27.80%
+      left: 18.58%
+      border-radius: 50%
+      text-align: center
+      background-color: rgba(255, 255, 255, 0.3)
+      opacity: 100%
+      transform: translate(-50%, -50%) scale(100%)
+    tap_action:
+      action: more-info
+    double_tap_action:
+      action: none
+    hold_action:
+      action: more-info
   - type: state-icon
     entity: binary_sensor.buro_grosses_fenster_alarm
     title: null
     style:
-      top: 60.36%
-      left: 95.30%
+      top: 62.24%
+      left: 97.05%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -413,8 +556,8 @@ elements:
     entity: climate.wohnzimmer_ofen
     title: null
     style:
-      top: 37.73%
-      left: 53.38%
+      top: 35.46%
+      left: 53.45%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)
@@ -430,8 +573,8 @@ elements:
     entity: binary_sensor.davids_zimmer_alarm
     title: null
     style:
-      top: 14.80%
-      left: 38.20%
+      top: 8.44%
+      left: 37.88%
       border-radius: 50%
       text-align: center
       background-color: rgba(255, 255, 255, 0.3)

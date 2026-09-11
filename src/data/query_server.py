@@ -92,9 +92,9 @@ def tool_tage(conn: sqlite3.Connection, q: dict[str, str]) -> list[dict[str, Any
         conn,
         "SELECT day, blocks, coverage_pct, quality_warn, quality_error,"
         " missing_signals, pv_kwh, house_kwh, grid_import_kwh, grid_export_kwh,"
-        " mining_kwh, heizstab_kwh, pv_peak_w, soc_min_pct, soc_max_pct,"
-        " soc_mean_pct, soc_h_locked, soc_h_hold, soc_h_eco, soc_h_standard,"
-        " soc_h_super, blocks_temp_ge_110, blocks_switch_mismatch,"
+        " mining_kwh, heizstab_kwh, energy_to_sats, pv_peak_w, soc_min_pct,"
+        " soc_max_pct, soc_mean_pct, soc_h_locked, soc_h_hold, soc_h_eco,"
+        " soc_h_standard, soc_h_super, blocks_temp_ge_110, blocks_switch_mismatch,"
         " blocks_surplus_idle FROM daily_kpi WHERE day >= ? AND day <= ?"
         " ORDER BY day LIMIT ?",
         (von, bis, _MAX_ROWS["tage"]),

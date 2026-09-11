@@ -359,13 +359,13 @@ Häufig: fehlende System-Dependencies im Dockerfile, oder `requirements.txt` nic
 ```bash
 # Hermes Agent laeuft?
 curl -s -o /dev/null -w '%{http_code}
-' http://192.168.178.96:18790/
+' http://umbrel.local:18790/
 
 # Ollama (KI-Instanz) erreichbar und Modell vorhanden?
-curl -s http://192.168.178.104:11434/api/tags
+curl -s http://<OLLAMA-HOST>:11434/api/tags
 
 # Bitsy-Status/Chat-Dienst laeuft?
-curl -s -X POST http://192.168.178.96:8766/trigger
+curl -s -X POST http://umbrel.local:8766/trigger
 
 # Umbrel-Dienst prüfen
 ssh bitgrid "docker ps | grep openclaw"
@@ -380,32 +380,11 @@ In den Hermes-Agent-Einstellungen prüfen:
 | Workspace | Erwartetes Modell |
 |-----------|------------------|
 | `neo` | `gemma4:e4b` |
-| `bitsy-home` (nie deployt) | `qwen3:4b` |
-| `bitsy-study` (nie deployt) | `qwen3:30b` |
+
+Auf `.104` läuft seit 2026-08-06 verifiziert nur noch `gemma4:e4b` und
+`bge-m3:latest`, siehe `CLAUDE.md`.
 
 Wenn das falsche Modell aktiv ist: in der Hermes Agent-Oberfläche manuell wechseln.
-
-&nbsp;
-
-### Workspace nicht initialisiert (₿itsy kennt das Projekt nicht)
-
-`BOOTSTRAP.md` prüfen — falls noch vorhanden, wurde der erste Start nicht abgeschlossen.
-Datei manuell durchlaufen lassen oder Agent neu starten mit BOOTSTRAP-Anweisung.
-
-&nbsp;
-
-### ₿itsy-Home / Study schreibt trotzdem Aktorbefehle vor
-
-Das ist ein Konfigurationsfehler im SOUL.md oder AGENTS.md des Workspaces.
-
-Sofortmaßnahme: Session beenden.
-Dann `SOUL.md` und `AGENTS.md` des betroffenen Workspaces prüfen —
-die Red Lines müssen explizit stehen:
-
-```
-- Keine Aktorbefehle. Niemals.
-- Kein POST /override. Kein POST /cmd.
-```
 
 &nbsp;
 

@@ -1,0 +1,134 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Rückblick: Was wäre wenn — Sats/kWh und deren Wert an drei Referenz-
+# punkten (Mining-Start, vor 5 Jahren, vor 10 Jahren) vs. heute, mit der
+# ECHTEN eigenen Avalon-Q-Effizienz und der ECHTEN Netzwerk-Difficulty +
+# dem era-korrekten Block-Reward des jeweiligen Zeitpunkts (keine fiktive
+# Fremd-Hardware wie im Referenz-Post, Nutzer-Entscheidung 26.08.2026).
+# Gleiche Formel wie sensor.mining_value_ct_kwh (packages/economics.yaml):
+#   TH/kWh  = 3,6e6 J / Effizienz[J/TH]
+#   BTC/kWh = TH/kWh · 1e12 · Block-Reward · [Zeitpunkt] / (Difficulty[abs] · 2^32)
+#   ct/kWh  = BTC/kWh · BTC-Preis · 100
+#
+# Block-Reward ist NICHT konstant ueber alle drei Zeitpunkte (anders als
+# beim reinen Mining-Start-Vergleich, der noch in derselben Halbierungs-
+# Epoche liegt): 2016 = 12,5 BTC (nach der Halbierung Juli 2016), 2021 =
+# 6,25 BTC (nach Mai 2020), 2026 = 3,125 BTC (nach April 2024).
+#
+# Datenherkunft, einmalig recherchiert, NICHT live:
+#   - Difficulty: oeffentliche mempool.space-API (die eigene Node indiziert
+#     erst ab Ende Mai/Mitte Juni 2026 zurueck, siehe Diskussion 26.08.2026).
+#     Bewusste Ausnahme vom local-only-Prinzip fuer genau diese drei
+#     historischen Werte, kein wiederkehrender Call.
+#       23.03.2026: 133.793.147.307.542,8 (Anpassung 20.03.2026)
+#       25.08.2021: 17.615.033.039.278,88
+#       15.08.2016: 217.375.482.757,24
+#   - BTC/EUR-Kurs an allen drei Terminen: von der EIGENEN Mempool-Instanz
+#     (Preishistorie reicht bis 2010 zurueck, unabhaengig vom Sync-Stand
+#     der lokalen Bitcoin-Node) — 61.021 € / 41.196,90 € / 514,20 €.
+# "Heute"-Seite ist komplett live: sensor.bitcoin_network_difficulty,
+# sensor.btc_eur_price (lokale Mempool-Instanz), input_number.miner_
+# efficiency_j_th.
+#
+# Effizienz gilt als KONSTANT ueber alle Zeitpunkte: feste Hardware-
+# Eigenschaft der eigenen Avalon Q, keine Zeitreihe. Die Kursvervielfachung
+# ("Wert heute" / "Wert damals") ist rein preisgetrieben und unabhaengig
+# von der Difficulty — dieselben Sats sind unabhaengig davon, wie leicht
+# sie zu minen waren, heute preisgetrieben mehr oder weniger wert.
+#
+# Kein Steuerpfad: reine Anzeige, beeinflusst keine Mining-Entscheidung in
+# core/.
+#
+# Kein eigener Karten-Header: der Abschnittstitel sitzt als eigene
+# Gruppentitel-Karte davor (bitgrid_dashboard_v3.yaml).
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "BitcoinInfo",
+# linke Spalte, unterste Karte.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 14px 18px
+  grid:
+    - grid-template-areas: '"chart"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    chart:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  chart: >
+    [[[
+      // Referenzpunkte — einmalig recherchiert, siehe Datei-Header.
+      const REF_POINTS = [
+        { label: '23.03.2026', sub: 'Mining-Start', diffT: 133.7931473075428, reward: 3.125, price: 61021.0 },
+        { label: '25.08.2021', sub: 'vor 5 Jahren',  diffT: 17.61503303927888, reward: 6.25,  price: 41196.9 },
+        { label: '15.08.2016', sub: 'vor 10 Jahren', diffT: 0.21737548275723764, reward: 12.5, price: 514.2 },
+      ];
+
+      const eff = parseFloat(states['input_number.miner_efficiency_j_th']?.state) || 18.6;
+      const nowDiffT = parseFloat(states['sensor.bitcoin_network_difficulty']?.state) || 0;
+      const nowReward = parseFloat(states['input_number.block_reward_btc']?.state) || 3.125;
+      const nowPrice = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+
+      const satsPerKwh = (diffT, rewBtc) => {
+        const thPerKwh = 3.6e6 / eff;
+        const btcPerKwh = (thPerKwh * 1e12 * rewBtc) / (diffT * 1e12 * 4294967296);
+        return btcPerKwh * 1e8;
+      };
+      const satsNow = nowDiffT > 0 ? satsPerKwh(nowDiffT, nowReward) : 0;
+      const ctNow   = satsNow / 1e8 * nowPrice * 100;
+
+      const fmt1 = (v) => v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+      const fmt0 = (v) => Math.round(v).toLocaleString('de-DE');
+      const fmtX = (v) => v >= 10 ? Math.round(v).toLocaleString('de-DE') + 'x' : v.toFixed(2).replace('.', ',') + 'x';
+
+      const cOrange = 'var(--bg-color-super,#F7931A)';
+      const cCyan   = 'var(--bg-color-standard,#26C6DA)';
+
+      const rows = REF_POINTS.map(p => {
+        const sats = satsPerKwh(p.diffT, p.reward);
+        const ctThen = sats / 1e8 * p.price * 100;
+        const ctThenAtNow = sats / 1e8 * nowPrice * 100;
+        const mult = nowPrice / p.price;
+        return `<div style="display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr 0.9fr;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--divider-color);">
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;color:var(--primary-text-color);">${p.label}</div>
+            <div style="font-size:0.7rem;color:var(--secondary-text-color);">${p.sub}</div>
+          </div>
+          <div style="text-align:right;font-size:0.85rem;color:${cCyan};">${fmt1(sats)} sats/kWh</div>
+          <div style="text-align:right;font-size:0.85rem;color:var(--secondary-text-color);">${fmt1(ctThen)} ct/kWh</div>
+          <div style="text-align:right;font-size:0.85rem;color:${cOrange};font-weight:700;">${fmt1(ctThenAtNow)} ct/kWh</div>
+          <div style="text-align:right;font-size:0.9rem;font-weight:700;color:${cOrange};">${fmtX(mult)}</div>
+        </div>`;
+      }).join('');
+
+      return `<div style="width:100%;">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;">
+          <span style="font-size:0.85rem;color:var(--secondary-text-color);">Heute:</span>
+          <span style="font-size:1.15rem;font-weight:700;color:${cOrange};">${fmt1(satsNow)} sats/kWh</span>
+          <span style="font-size:0.9rem;color:var(--secondary-text-color);">· ${fmt1(ctNow)} ct/kWh</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr 0.9fr;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);font-size:0.68rem;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.03em;">
+          <div>Zeitpunkt</div>
+          <div style="text-align:right;">Sats/kWh damals</div>
+          <div style="text-align:right;">Wert damals</div>
+          <div style="text-align:right;">Wert heute</div>
+          <div style="text-align:right;">Kurs</div>
+        </div>
+        ${rows}
+        <div style="margin-top:8px;font-size:0.72rem;color:var(--secondary-text-color);opacity:0.65;">
+          Basis: echte eigene Avalon-Q-Effizienz (${eff.toFixed(1)} J/TH) + era-korrekter Block-Reward auf alle Zeitpunkte angewendet, kein Fremdmodell. "Damals"-Werte einmalig recherchiert (mempool.space), nicht live. "Kurs"-Spalte = reine Kursvervielfachung, unabhaengig von der Difficulty.
+        </div>
+      </div>`;
+    ]]]

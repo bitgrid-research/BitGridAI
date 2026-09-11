@@ -47,8 +47,21 @@ class EnergyState:
     grid_export_w: float | None = None
     miner_power_w: float | None = None
     heizstab_power_w: float | None = None
+    # Batterie-Lade-/Entladeleistung (negativ = Entladung). Nur Telemetrie,
+    # keine Kernregel liest dieses Feld — siehe R8 (mvp_p3b) in mvp_auto.yaml,
+    # das den entsprechenden Live-Sensor bereits als Entscheidungssignal nutzt.
+    battery_power_w: float | None = None
     energy_price_ct_kwh: float | None = None
     pv_forecast_kw: float | None = None
+    # Wetter/Heizlast — reine Telemetrie fuer saisonale Analysen (nicht Teil
+    # des Entscheidungspfads). Erst ab Juli 2026 verfuegbar (siehe
+    # ha_history_sync.py ENTITY_MAP-Kommentar).
+    cloud_coverage_pct: float | None = None
+    outdoor_temp_c: float | None = None
+    outdoor_humidity_pct: float | None = None
+    heizung_energy_kwh_today: float | None = None
+    sun_azimuth_deg: float | None = None
+    sun_elevation_deg: float | None = None
     # Dynamischer Mining-Ertrag pro kWh (ct) — für R1-Break-Even gegen die
     # Einspeisevergütung. None = Break-Even-Prüfung inaktiv (rückwärtskompatibel).
     mining_value_ct_kwh: float | None = None

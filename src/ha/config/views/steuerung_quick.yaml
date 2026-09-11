@@ -1,0 +1,608 @@
+# ═══════════════════════════════════════════════════════════════════════
+# STEUERUNG QUICK-ACTION  —  oberer Teil von views/miner_controls.yaml
+# (Header + Power/Auto/Reboot + Eco/Standard/Super) für beide Miner,
+# 1:1 übernommen, nur Display (Nutzer-Entscheidung 23.08.2026: gehört eher
+# in den vollen Tab) und das Kennzahlen-Panel (Hashrate/Temperaturen/...)
+# darunter entfallen — beides bleibt dem Steuerung-Tab vorbehalten. Bewusst
+# NICHT als eigene, verkürzte Nachbildung geschrieben (frühere Version hatte
+# ein Rendering-Problem bei Eco/Standard/Super im schmaleren Home-Kontext);
+# stattdessen der Original-Code, der dort nachweislich funktioniert.
+# Keine eigene Box/Überschrift mehr um das Ganze (Nutzer-Entscheidung
+# 23.08.2026): die beiden Miner-Karten haben schon je ihre eigene Glasbox,
+# ein zusätzlicher äußerer Rahmen + "Steuerung"-Titel war doppelt gerahmt.
+# Navigation in den vollen Tab bleibt über die Tab-Leiste oben (Hammer-Icon).
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Home".
+# KEIN flex:1/Höhenangleichung an Finanzen — zweiter Fehlversuch (02.09.2026,
+# Nutzer-Feedback "kaputt, zu viel Padding nach unten"): identische Lehre wie
+# bei Energiefluss/PFCP am selben Tag (s. bitgrid_dashboard_v3.yaml) —
+# erzwungenes Strecken auf einen deutlich hoeheren Partner sieht bei diesem
+# kompakten Button-Panel nicht gut aus, auch nicht mit justify-content:
+# space-between statt :center. Miner-Boxen bleiben bei ihrer natuerlichen
+# (durch das groessere Padding/Gap bereits vergroesserten) Hoehe, wie vor
+# diesem Versuch.
+# ═══════════════════════════════════════════════════════════════════════
+# zoom-Kommentar s. bitgrid_dashboard_v3.yaml, Hamster-Karte (Home-Tab).
+type: horizontal-stack
+card_mod:
+  style: |
+    :host {
+      zoom: calc(min(1, calc(100vh / 1200px)) * 0.90) !important;
+    }
+cards:
+
+      # ─────────────────────────────────────────────
+      # MINER 1
+      # ─────────────────────────────────────────────
+      - type: vertical-stack
+        card_mod:
+          style: |
+            :host {
+              /* height:fit-content wieder da (02.09.2026, zweiter
+                 Fehlversuch, Nutzer-Feedback "kaputt, zu viel Padding
+                 nach unten"): der justify-content:space-between-Versuch
+                 (Alternative zum am 31.08.2026 gescheiterten :center) sah
+                 bei diesem kompakten Button-Panel gegen die deutlich
+                 hoehere Finanzen-Karte trotzdem nicht gut aus — dieselbe
+                 Lehre wie bei Energiefluss/PFCP am selben Tag: erzwungenes
+                 Strecken auf einen viel groesseren Partner funktioniert bei
+                 diesen Karten nicht, unabhaengig von der Technik. Zurueck
+                 zur natuerlichen Hoehe (plus align-self:start auf g3l, s.
+                 bitgrid_dashboard_v3.yaml). */
+              height: fit-content !important;
+              display: flex !important;
+              flex-direction: column !important;
+              gap: 16px !important;
+              background: var(--ha-card-background) !important;
+              border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color) !important;
+              border-radius: 20px !important;
+              box-shadow: var(--ha-card-box-shadow) !important;
+              overflow: hidden !important;
+              contain: paint !important;
+              padding: 8px 14px 14px 14px !important;
+            }
+        cards:
+
+          - type: custom:button-card
+            template: miner_header
+            # Schrift groesser, nur diese Quick-Action-Karte (Nutzer-Wunsch
+            # 02.09.2026): miner_header/miner_btn sind geteilte Templates
+            # (button_card_templates.yaml, auch von v1 genutzt), darum hier
+            # lokal per card_mod statt am Template selbst — v1 bleibt
+            # unveraendert. Feste Card-Hoehe (Template: 56px) mit erhoeht,
+            # sonst schneidet die groessere Schrift oben/unten ab. Diese
+            # Zeile ist NICHT an Finanzen gestretcht (align-self:start, s.
+            # bitgrid_dashboard_v3.yaml g3l), darum kein Ueberlauf-Risiko wie
+            # bei Hamster/Wetter.
+            card_mod:
+              style: |
+                .name {
+                  font-size: 1.5rem !important;
+                }
+                ha-card {
+                  height: 68px !important;
+                }
+            entity: binary_sensor.miner1_available
+            name: "Miner Avalon Q 01  ›"
+            icon: mdi:memory
+            styles:
+              card:
+                - background: transparent
+                - box-shadow: none
+                - border: none
+                - padding: 0
+
+          - type: horizontal-stack
+            card_mod:
+              style: |
+                :host {
+                  margin: 0 !important;
+                }
+            cards:
+
+              - type: custom:button-card
+                template: miner_btn
+                # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
+                card_mod:
+                  style: |
+                    .name {
+                      font-size: 1.125rem !important;
+                    }
+                    .state {
+                      font-size: 1rem !important;
+                    }
+                    ha-card {
+                      height: 122px !important;
+                    }
+                entity: sensor.miner1_workmode_status
+                name: Power
+                icon: >
+                  [[[
+                    return entity.state === 'Standby' ? 'mdi:power-sleep' : 'mdi:power';
+                  ]]]
+                state_display: >
+                  [[[
+                    const s = entity.state;
+                    if (['Eco','Standard','Super'].includes(s)) return 'An';
+                    if (s === 'Standby') return 'Standby';
+                    return 'Aus';
+                  ]]]
+                styles:
+                  icon:
+                    - width: 76px
+                    - height: 76px
+                    - color: >
+                        [[[
+                          const s = entity.state;
+                          if (['Eco','Standard','Super'].includes(s)) return 'var(--bg-color-eco)';
+                          if (s === 'Standby') return 'var(--accent-color)';
+                          return 'var(--disabled-color)';
+                        ]]]
+                tap_action:
+                  action: call-service
+                  service: >
+                    [[[
+                      const on = ['Eco','Standard','Super'].includes(entity.state);
+                      return on
+                        ? 'shell_command.miner1_set_softoff'
+                        : 'shell_command.miner1_set_softon';
+                    ]]]
+
+              - type: custom:button-card
+                template: miner_btn
+                # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
+                card_mod:
+                  style: |
+                    .name {
+                      font-size: 1.125rem !important;
+                    }
+                    .state {
+                      font-size: 1rem !important;
+                    }
+                    ha-card {
+                      height: 122px !important;
+                    }
+                entity: input_boolean.miner1_auto_load_management
+                name: Auto
+                icon: mdi:refresh-auto
+                state_display: >
+                  [[[
+                    return entity.state === 'on' ? 'Ein' : 'Aus';
+                  ]]]
+                styles:
+                  icon:
+                    - width: 76px
+                    - height: 76px
+                    - color: >
+                        [[[
+                          return entity.state === 'on'
+                            ? 'var(--bg-color-eco)' : 'var(--disabled-color)';
+                        ]]]
+                tap_action:
+                  action: toggle
+
+              - type: custom:button-card
+                template: miner_btn
+                # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
+                card_mod:
+                  style: |
+                    .name {
+                      font-size: 1.125rem !important;
+                    }
+                    .state {
+                      font-size: 1rem !important;
+                    }
+                    ha-card {
+                      height: 122px !important;
+                    }
+                name: Reboot
+                icon: mdi:restart
+                show_state: false
+                styles:
+                  icon:
+                    - width: 44px
+                    - height: 44px
+                    - color: "var(--secondary-text-color)"
+                tap_action:
+                  action: call-service
+                  service: shell_command.miner1_reboot
+
+          - type: horizontal-stack
+            card_mod:
+              style: |
+                :host {
+                  display: flex !important;
+                  align-items: stretch !important;
+                  background: rgba(255,255,255,0.06);
+                  border-radius: 14px !important;
+                  overflow: hidden !important;
+                  margin: 0 !important;
+                }
+            cards:
+              - type: custom:button-card
+                entity: select.miner1_workmode_set
+                name: Eco
+                icon: mdi:leaf
+                show_state: false
+                tap_action:
+                  action: call-service
+                  service: select.select_option
+                  service_data:
+                    entity_id: select.miner1_workmode_set
+                    option: Eco
+                styles:
+                  card:
+                    - background: >
+                        [[[return entity.state==='Eco'?'rgba(255,255,255,0.14)':'transparent']]]
+                    - box-shadow: none
+                    - border: none
+                    - padding: 8px 4px
+                    - height: 80px
+                    - box-sizing: border-box !important
+                    - margin: "0 !important"
+                  icon:
+                    - color: >
+                        [[[return entity.state==='Eco'?'var(--bg-color-eco)':'rgba(255,255,255,0.3)']]]
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1.125rem
+                    - font-weight: >
+                        [[[return entity.state==='Eco'?'700':'400']]]
+                    - color: >
+                        [[[return entity.state==='Eco'?'var(--primary-text-color)':'var(--secondary-text-color)']]]
+              - type: custom:button-card
+                entity: select.miner1_workmode_set
+                name: Standard
+                icon: mdi:gauge
+                show_state: false
+                tap_action:
+                  action: call-service
+                  service: select.select_option
+                  service_data:
+                    entity_id: select.miner1_workmode_set
+                    option: Standard
+                styles:
+                  card:
+                    - background: >
+                        [[[return entity.state==='Standard'?'rgba(255,255,255,0.14)':'transparent']]]
+                    - box-shadow: none
+                    - border: none
+                    - padding: 8px 4px
+                    - height: 80px
+                    - box-sizing: border-box !important
+                    - margin: "0 !important"
+                  icon:
+                    - color: >
+                        [[[return entity.state==='Standard'?'var(--bg-color-standard)':'rgba(255,255,255,0.3)']]]
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1.125rem
+                    - font-weight: >
+                        [[[return entity.state==='Standard'?'700':'400']]]
+                    - color: >
+                        [[[return entity.state==='Standard'?'var(--primary-text-color)':'var(--secondary-text-color)']]]
+              - type: custom:button-card
+                entity: select.miner1_workmode_set
+                name: Super
+                icon: mdi:rocket-launch
+                show_state: false
+                tap_action:
+                  action: call-service
+                  service: select.select_option
+                  service_data:
+                    entity_id: select.miner1_workmode_set
+                    option: Super
+                styles:
+                  card:
+                    - background: >
+                        [[[return entity.state==='Super'?'rgba(255,255,255,0.14)':'transparent']]]
+                    - box-shadow: none
+                    - border: none
+                    - padding: 8px 4px
+                    - height: 80px
+                    - box-sizing: border-box !important
+                    - margin: "0 !important"
+                  icon:
+                    - color: >
+                        [[[return entity.state==='Super'?'var(--bg-color-super)':'rgba(255,255,255,0.3)']]]
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1.125rem
+                    - font-weight: >
+                        [[[return entity.state==='Super'?'700':'400']]]
+                    - color: >
+                        [[[return entity.state==='Super'?'var(--primary-text-color)':'var(--secondary-text-color)']]]
+
+      # ─────────────────────────────────────────────
+      # 8px Spacer
+      # ─────────────────────────────────────────────
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        styles:
+          card:
+            - background: transparent
+            - box-shadow: none
+            - width: 8px
+            - min-width: 8px
+            - max-width: 8px
+            - padding: 0
+
+      # ─────────────────────────────────────────────
+      # MINER 2
+      # ─────────────────────────────────────────────
+      - type: vertical-stack
+        card_mod:
+          style: |
+            :host {
+              /* height:fit-content wieder da, s. Kommentar bei Miner 1 oben
+                 fuer die volle Begruendung (02.09.2026). */
+              height: fit-content !important;
+              display: flex !important;
+              flex-direction: column !important;
+              gap: 16px !important;
+              background: var(--ha-card-background) !important;
+              border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color) !important;
+              border-radius: 20px !important;
+              box-shadow: var(--ha-card-box-shadow) !important;
+              overflow: hidden !important;
+              contain: paint !important;
+              padding: 8px 14px 14px 14px !important;
+            }
+        cards:
+
+          - type: custom:button-card
+            template: miner_header
+            # Schrift groesser, nur diese Quick-Action-Karte (Nutzer-Wunsch
+            # 02.09.2026): miner_header/miner_btn sind geteilte Templates
+            # (button_card_templates.yaml, auch von v1 genutzt), darum hier
+            # lokal per card_mod statt am Template selbst — v1 bleibt
+            # unveraendert. Feste Card-Hoehe (Template: 56px) mit erhoeht,
+            # sonst schneidet die groessere Schrift oben/unten ab. Diese
+            # Zeile ist NICHT an Finanzen gestretcht (align-self:start, s.
+            # bitgrid_dashboard_v3.yaml g3l), darum kein Ueberlauf-Risiko wie
+            # bei Hamster/Wetter.
+            card_mod:
+              style: |
+                .name {
+                  font-size: 1.5rem !important;
+                }
+                ha-card {
+                  height: 68px !important;
+                }
+            entity: binary_sensor.miner2_available
+            name: "Miner Avalon Q 02  ›"
+            icon: mdi:memory
+            styles:
+              card:
+                - background: transparent
+                - box-shadow: none
+                - border: none
+                - padding: 0
+
+          - type: horizontal-stack
+            card_mod:
+              style: |
+                :host {
+                  margin: 0 !important;
+                }
+            cards:
+
+              - type: custom:button-card
+                template: miner_btn
+                # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
+                card_mod:
+                  style: |
+                    .name {
+                      font-size: 1.125rem !important;
+                    }
+                    .state {
+                      font-size: 1rem !important;
+                    }
+                    ha-card {
+                      height: 122px !important;
+                    }
+                entity: sensor.miner2_workmode_status
+                name: Power
+                icon: >
+                  [[[
+                    return entity.state === 'Standby' ? 'mdi:power-sleep' : 'mdi:power';
+                  ]]]
+                state_display: >
+                  [[[
+                    const s = entity.state;
+                    if (['Eco','Standard','Super'].includes(s)) return 'An';
+                    if (s === 'Standby') return 'Standby';
+                    return 'Aus';
+                  ]]]
+                styles:
+                  icon:
+                    - width: 76px
+                    - height: 76px
+                    - color: >
+                        [[[
+                          const s = entity.state;
+                          if (['Eco','Standard','Super'].includes(s)) return 'var(--bg-color-eco)';
+                          if (s === 'Standby') return 'var(--accent-color)';
+                          return 'var(--disabled-color)';
+                        ]]]
+                tap_action:
+                  action: call-service
+                  service: >
+                    [[[
+                      const on = ['Eco','Standard','Super'].includes(entity.state);
+                      return on
+                        ? 'shell_command.miner2_set_softoff'
+                        : 'shell_command.miner2_set_softon';
+                    ]]]
+
+              - type: custom:button-card
+                template: miner_btn
+                # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
+                card_mod:
+                  style: |
+                    .name {
+                      font-size: 1.125rem !important;
+                    }
+                    .state {
+                      font-size: 1rem !important;
+                    }
+                    ha-card {
+                      height: 122px !important;
+                    }
+                entity: input_boolean.miner2_auto_load_management
+                name: Auto
+                icon: mdi:refresh-auto
+                state_display: >
+                  [[[
+                    return entity.state === 'on' ? 'Ein' : 'Aus';
+                  ]]]
+                styles:
+                  icon:
+                    - width: 76px
+                    - height: 76px
+                    - color: >
+                        [[[
+                          return entity.state === 'on'
+                            ? 'var(--bg-color-eco)' : 'var(--disabled-color)';
+                        ]]]
+                tap_action:
+                  action: toggle
+
+              - type: custom:button-card
+                template: miner_btn
+                # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
+                card_mod:
+                  style: |
+                    .name {
+                      font-size: 1.125rem !important;
+                    }
+                    .state {
+                      font-size: 1rem !important;
+                    }
+                    ha-card {
+                      height: 122px !important;
+                    }
+                name: Reboot
+                icon: mdi:restart
+                show_state: false
+                styles:
+                  icon:
+                    - width: 44px
+                    - height: 44px
+                    - color: "var(--secondary-text-color)"
+                tap_action:
+                  action: call-service
+                  service: shell_command.miner2_reboot
+
+          - type: horizontal-stack
+            card_mod:
+              style: |
+                :host {
+                  display: flex !important;
+                  align-items: stretch !important;
+                  background: rgba(255,255,255,0.06);
+                  border-radius: 14px !important;
+                  overflow: hidden !important;
+                  margin: 0 !important;
+                }
+            cards:
+              - type: custom:button-card
+                entity: select.miner2_workmode_set
+                name: Eco
+                icon: mdi:leaf
+                show_state: false
+                tap_action:
+                  action: call-service
+                  service: select.select_option
+                  service_data:
+                    entity_id: select.miner2_workmode_set
+                    option: Eco
+                styles:
+                  card:
+                    - background: >
+                        [[[return entity.state==='Eco'?'rgba(255,255,255,0.14)':'transparent']]]
+                    - box-shadow: none
+                    - border: none
+                    - padding: 8px 4px
+                    - height: 80px
+                    - box-sizing: border-box !important
+                    - margin: "0 !important"
+                  icon:
+                    - color: >
+                        [[[return entity.state==='Eco'?'var(--bg-color-eco)':'rgba(255,255,255,0.3)']]]
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1.125rem
+                    - font-weight: >
+                        [[[return entity.state==='Eco'?'700':'400']]]
+                    - color: >
+                        [[[return entity.state==='Eco'?'var(--primary-text-color)':'var(--secondary-text-color)']]]
+              - type: custom:button-card
+                entity: select.miner2_workmode_set
+                name: Standard
+                icon: mdi:gauge
+                show_state: false
+                tap_action:
+                  action: call-service
+                  service: select.select_option
+                  service_data:
+                    entity_id: select.miner2_workmode_set
+                    option: Standard
+                styles:
+                  card:
+                    - background: >
+                        [[[return entity.state==='Standard'?'rgba(255,255,255,0.14)':'transparent']]]
+                    - box-shadow: none
+                    - border: none
+                    - padding: 8px 4px
+                    - height: 80px
+                    - box-sizing: border-box !important
+                    - margin: "0 !important"
+                  icon:
+                    - color: >
+                        [[[return entity.state==='Standard'?'var(--bg-color-standard)':'rgba(255,255,255,0.3)']]]
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1.125rem
+                    - font-weight: >
+                        [[[return entity.state==='Standard'?'700':'400']]]
+                    - color: >
+                        [[[return entity.state==='Standard'?'var(--primary-text-color)':'var(--secondary-text-color)']]]
+              - type: custom:button-card
+                entity: select.miner2_workmode_set
+                name: Super
+                icon: mdi:rocket-launch
+                show_state: false
+                tap_action:
+                  action: call-service
+                  service: select.select_option
+                  service_data:
+                    entity_id: select.miner2_workmode_set
+                    option: Super
+                styles:
+                  card:
+                    - background: >
+                        [[[return entity.state==='Super'?'rgba(255,255,255,0.14)':'transparent']]]
+                    - box-shadow: none
+                    - border: none
+                    - padding: 8px 4px
+                    - height: 80px
+                    - box-sizing: border-box !important
+                    - margin: "0 !important"
+                  icon:
+                    - color: >
+                        [[[return entity.state==='Super'?'var(--bg-color-super)':'rgba(255,255,255,0.3)']]]
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1.125rem
+                    - font-weight: >
+                        [[[return entity.state==='Super'?'700':'400']]]
+                    - color: >
+                        [[[return entity.state==='Super'?'var(--primary-text-color)':'var(--secondary-text-color)']]]

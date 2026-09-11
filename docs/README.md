@@ -70,7 +70,7 @@ Hier bringen wir zusammen, was Architektur und Forschung vorbereitet haben: konk
 * [34 - Tests & Qualitätssicherung](./development/34_testing/README.md)
 * [35 - CI/CD & Deployment](./development/35_cicd/README.md)
 * [36 - AI-Agenten & Tooling](./development/36_ai_tooling/README.md)
-  * [Neo](./development/36_ai_tooling/neo/SOUL.md) · [Claude Code–Dev](./development/36_ai_tooling/claude-code/README.md) · [Stitch–UI](./development/36_ai_tooling/stitch-ui/README.md) · nie deployt: [₿itsy-Home](./development/36_ai_tooling/bitsy-home/SOUL.md), [₿itsy-Study](./development/36_ai_tooling/bitsy-study/SOUL.md), [DEV-BitHamster](./development/36_ai_tooling/hermes-bithamster/SOUL.md)
+  * [Neo](./development/36_ai_tooling/neo/SOUL.md) · [Claude Code–Dev](./development/36_ai_tooling/claude-code/README.md) · [Stitch–UI](./development/36_ai_tooling/stitch-ui/README.md) · nie deployt: [DEV-BitHamster](./development/36_ai_tooling/hermes-bithamster/SOUL.md)
 * [37 - Troubleshooting & FAQ](./development/37_troubleshooting/README.md)
 
 > Die vollständige *Kapitelübersicht der Entwicklung* inklusive Unterkapitel findest du in der [Kapitelübersicht](./development/README.md).

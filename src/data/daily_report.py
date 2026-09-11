@@ -204,6 +204,46 @@ def _section_energy(conn: sqlite3.Connection, day: date) -> str:
     return "\n".join(lines)
 
 
+def _section_bitcoin(conn: sqlite3.Connection, day: date) -> str:
+    """
+    Sats-Ertrag des Tages, aus bitcoin_daily_settlement + der daraus in
+    daily_kpi berechneten energy_to_sats-Kennzahl (siehe daily_kpi.py).
+    Fehlt die Abrechnung (Sync nicht gelaufen, F2Pool-Ausfall), sagt der
+    Bericht das explizit statt eine Zeile mit Nullen zu zeigen.
+    """
+    settlement = conn.execute(
+        "SELECT earned_btc, pool_ths_avg, source FROM bitcoin_daily_settlement"
+        " WHERE day = ?",
+        (day.isoformat(),),
+    ).fetchone()
+
+    lines = ["## Bitcoin", ""]
+    if settlement is None:
+        lines.append(
+            "Keine F2Pool-Abrechnungsdaten fuer diesen Tag (bitcoin_daily_settlement leer)."
+        )
+        lines.append("")
+        return "\n".join(lines)
+
+    earned_btc, pool_ths_avg, source = settlement
+    kpi_row = conn.execute(
+        "SELECT energy_to_sats FROM daily_kpi WHERE day = ?", (day.isoformat(),)
+    ).fetchone()
+    energy_to_sats = kpi_row[0] if kpi_row else None
+    sats = round(earned_btc * 1e8)
+
+    lines.append("| Groesse | Wert |")
+    lines.append("|---|---|")
+    lines.append(f"| Verdiente Sats | {sats:,} sats |".replace(",", "."))
+    lines.append(f"| Verdiente BTC | {earned_btc:.8f} BTC |")
+    lines.append(f"| Sats pro kWh | {_fmt(energy_to_sats, 2, ' sats/kWh')} |")
+    if pool_ths_avg is not None:
+        lines.append(f"| Pool-Hashrate (Tagesschnitt) | {pool_ths_avg:.1f} TH/s |")
+    lines.append(f"| Quelle | {source} |")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def _section_soc(conn: sqlite3.Connection, day: date) -> str:
     start, end = _day_bounds(day)
     rows = conn.execute(
@@ -419,6 +459,7 @@ def build_report(conn: sqlite3.Connection, day: date, sun: list[Any]) -> str:
         _section_quality(conn, day),
         _section_sun(day, sun),
         _section_energy(conn, day),
+        _section_bitcoin(conn, day),
         _section_soc(conn, day),
         _section_miners(conn, day),
         _section_flags(conn, day),

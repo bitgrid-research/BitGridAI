@@ -1,0 +1,168 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Langzeitbilanz — monatliche Sats/BTC-Bilanz als Balkendiagramm.
+#
+# Vergangene Monate kommen aus ZWEI Quellen, CSV hat Vorrang:
+#   1. pool_monthly.csv (sensor.pool_monthly_history, packages/pool.yaml),
+#      archiviert am 1. jedes Monats durch automation.pool_mtd_monthly_reset
+#      — existiert erst ab 01.09.2026, dafuer dauerhaft (kein Rolling-Fenster).
+#   2. sensor.pool_balance_btc.payout_history (F2Pool-API, ~155 Tage
+#      rollierend rueckwirkend) — deckt rueckwirkend Monate VOR der eigenen
+#      Archivierung ab (Mai-August 2026), faellt aber mit der Zeit aus dem
+#      155-Tage-Fenster. Gleiche Quelle, die mining_log.yaml schon fuer die
+#      SATs-Spalte nutzt.
+# Der laufende Monat nutzt DIESELBE Quelle wie die Historie (nicht den MTD-
+# Akkumulator input_number.pool_earned_mtd_btc — der zaehlt erst seit
+# 24.08.2026 und wuerde einen vorher begonnenen Monat systematisch zu klein
+# zeigen), nur optisch als gestrichelter Balken markiert ("laufend").
+#
+# Reiner Mining-Ertrag ueber Zeit, kein Kostenvergleich (Profit-Bilanz mit
+# PV-Ersparnis/Netzbezugskosten wuerde eine eigene historische Economics-
+# Pipeline brauchen, die es noch nicht gibt).
+#
+# Kein Steuerpfad: reine Anzeige, beeinflusst keine Mining-Entscheidung in
+# core/.
+#
+# Kein eigener Karten-Header: der Abschnittstitel "LANGZEITBILANZ" sitzt
+# als eigene Gruppentitel-Karte davor (bitgrid_dashboard_v3.yaml).
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "BitcoinInfo",
+# linke Spalte, unterste Karte.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 14px 18px
+  grid:
+    - grid-template-areas: '"chart"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    chart:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  chart: >
+    [[[
+      const MONATE = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+      const key = (y, m) => `${y}-${String(m).padStart(2,'0')}`;
+
+      // Quelle 1: eigenes CSV-Archiv (dauerhaft, aber erst ab 01.09.2026 befuellt).
+      const rawRows = states['sensor.pool_monthly_history']?.attributes?.rows ?? '';
+      const csvMap = {};
+      if (rawRows && rawRows !== 'unknown' && rawRows !== 'unavailable') {
+        rawRows.split('|').filter(e => e.includes(',')).forEach(e => {
+          const [y, m, btc] = e.split(',');
+          csvMap[key(parseInt(y), parseInt(m))] = parseFloat(btc) || 0;
+        });
+      }
+
+      // Quelle 2: F2Pools eigene Payout-Historie (~155 Tage rollierend),
+      // deckt rueckwirkend Monate ab, die das CSV-Archiv noch nicht kennt.
+      const payoutHist = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
+      const payoutMap = {};
+      payoutHist.forEach(e => {
+        const ts = e[0], desc = e[1], btc = e[2];
+        if (!ts || typeof btc !== 'number' || btc <= 0) return;
+        if (typeof desc === 'string' && !desc.includes('user_payout')) return;
+        const k = ts.slice(0, 7);
+        payoutMap[k] = (payoutMap[k] || 0) + btc;
+      });
+
+      // Laufender Monat markiert dieselbe Quelle wie die Historie (nicht den
+      // MTD-Akkumulator input_number.pool_earned_mtd_btc): der laeuft erst
+      // seit 24.08.2026, wuerde also fuer den aktuellen Monat systematisch
+      // zu wenig zeigen, sobald der Monat vor diesem Datum begann. payout_
+      // history deckt den ganzen bisherigen Monat ab, egal wann die eigene
+      // Zaehlung startete.
+      const now = new Date();
+      const curKey = key(now.getFullYear(), now.getMonth() + 1);
+
+      const allKeys = new Set([...Object.keys(csvMap), ...Object.keys(payoutMap)]);
+      const months = [...allKeys].sort().map(k => {
+        const [y, m] = k.split('-').map(Number);
+        const btc = csvMap[k] !== undefined ? csvMap[k] : payoutMap[k];
+        return { y, m, btc, live: k === curKey };
+      });
+
+      const fmtSats = (btc) => Math.round(btc * 1e8);
+
+      const wrap = (inner) => `<div style="width:100%;">${inner}</div>`;
+
+      if (months.length < 1 || (months.length === 1 && months[0].btc <= 0)) {
+        return wrap(`<div style="padding:20px 0;text-align:center;color:var(--secondary-text-color)">Noch keine Monatsdaten.</div>`);
+      }
+
+      const W = 640, H = 210, cL = 62, cR = 618, cT = 10, cB = 155;
+      const n = months.length;
+      const slotW = (cR - cL) / n;
+      const barW = Math.min(46, slotW * 0.55);
+
+      const sats = months.map(m => fmtSats(m.btc));
+      const maxSats = Math.max(...sats, 1);
+      const yMax = maxSats * 1.15;
+      const yForVal = (v) => cB - (v / yMax) * (cB - cT);
+
+      // Durchschnitt NUR ueber abgeschlossene Monate (31.08.2026, Nutzer-
+      // Wunsch): der laufende Monat hat erst ein paar Tage Ertrag und wuerde
+      // den Schnitt sonst kuenstlich nach unten ziehen.
+      const completedSats = months.filter(m => !m.live).map(m => fmtSats(m.btc));
+      const avgSats = completedSats.length > 0
+        ? completedSats.reduce((a, b) => a + b, 0) / completedSats.length
+        : 0;
+
+      const cBar = 'var(--primary-text-color,#EAEFFB)';
+      const cAvg = 'var(--bg-color-standard,#26C6DA)';
+
+      // Feste Hoehe statt breiten-relativer viewBox-Skalierung (03.09.2026,
+      // Nutzer-Wunsch: gleiche Hoehe wie Bitcoin-Kurs, stats_btc_price.yaml).
+      // preserveAspectRatio="none": erzwingt die feste Hoehe unabhaengig von
+      // der Kartenbreite (sonst Letterboxing statt Fuellen).
+      let s = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:270px;display:block;overflow:hidden">`;
+
+      const ySteps = 3;
+      for (let i = 0; i <= ySteps; i++) {
+        const v = yMax * i / ySteps;
+        const y = yForVal(v);
+        s += `<line x1="${cL}" y1="${y}" x2="${cR}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>`;
+        s += `<text x="${cL - 6}" y="${y + 3.5}" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Roboto,sans-serif" text-anchor="end">${Math.round(v).toLocaleString('de-DE')}</text>`;
+      }
+
+      // Durchschnittslinie: gestrichelt wie das Ziel-Band bei Effizienz,
+      // Cyan-Farbe = "Trend/Vergleichswert" ueber beide Charts im Tab hinweg.
+      if (avgSats > 0) {
+        const yAvg = yForVal(avgSats);
+        s += `<line x1="${cL}" y1="${yAvg}" x2="${cR}" y2="${yAvg}" style="stroke:${cAvg}" stroke-width="1.4" stroke-dasharray="5 3" opacity="0.85"/>`;
+        s += `<text x="${cR}" y="${yAvg - 5}" fill="${cAvg}" font-size="8.5" font-family="Roboto,sans-serif" font-weight="700" text-anchor="end">Ø ${Math.round(avgSats).toLocaleString('de-DE')}</text>`;
+      }
+
+      months.forEach((m, i) => {
+        const cx = cL + slotW * i + slotW / 2;
+        const val = fmtSats(m.btc);
+        const yTop = yForVal(val);
+        const h = Math.max(1, cB - yTop);
+        if (m.live) {
+          s += `<rect x="${cx - barW/2}" y="${yTop}" width="${barW}" height="${h}" rx="4" fill="${cBar}" opacity="0.35" stroke="${cBar}" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+        } else {
+          s += `<rect x="${cx - barW/2}" y="${yTop}" width="${barW}" height="${h}" rx="4" fill="${cBar}" opacity="0.85"/>`;
+        }
+        s += `<text x="${cx}" y="${yTop - 6}" fill="${cBar}" font-size="9" font-family="Roboto,sans-serif" font-weight="700" text-anchor="middle">${val.toLocaleString('de-DE')}</text>`;
+        const label = MONATE[m.m - 1] + " '" + String(m.y).slice(2) + (m.live ? ' (laufend)' : '');
+        s += `<text x="${cx}" y="${cB + 13}" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Roboto,sans-serif" text-anchor="middle">${label}</text>`;
+      });
+
+      s += `<line x1="${cL}" y1="${cT}" x2="${cL}" y2="${cB}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+      s += `<line x1="${cL}" y1="${cB}" x2="${cR}" y2="${cB}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+      s += '</svg>';
+
+      return wrap(s);
+    ]]]

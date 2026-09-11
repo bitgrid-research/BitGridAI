@@ -1,0 +1,123 @@
+# ═══════════════════════════════════════════════════════════════════════
+# HEIZSTAB — VERLAUF (HEUTE)  —  Leistung + Kesseltemperatur, laufender Tag
+# (00:00–24:00). Zwei-Achsen-Chart nach Nutzer-Skizze (26.08.2026): Watt
+# Heizstab als harte Ein/Aus-Stufenkurve (linke Achse), Temp. Kessel als
+# weiche Linie (rechte Achse). Gleiche custom:apexcharts-card-Technik wie
+# views/energieverlauf_tag.yaml (dort der volle Begründungskommentar zu
+# graph_span/span/extend_to/"jetzt"-Annotation) — hier nur die
+# Chart-spezifischen Abweichungen kommentiert.
+#
+# group_by 5min statt 1h (wie im PV/Netz-Verlauf): der Heizstab taktet
+# hart im Minutenbereich, eine Stundenmittelung würde die Ein/Aus-Stufen
+# aus der Skizze zu einer sanften Welle verschmieren.
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Heizung".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:apexcharts-card
+update_interval: 5min
+header:
+  show: true
+  title: Heizstab — Verlauf (heute)
+  show_states: false
+graph_span: 1d
+span:
+  start: day
+now:
+  show: false
+apex_config:
+  annotations:
+    xaxis:
+      - x: "EVAL:new Date().getTime()"
+        borderColor: "rgba(255,255,255,0.5)"
+        strokeDashArray: 4
+        label:
+          text: jetzt
+          orientation: vertical
+          offsetY: 7
+          borderColor: "rgba(255,255,255,0)"
+          style:
+            color: "rgba(255,255,255,0.8)"
+            background: "rgba(255,255,255,0)"
+            fontSize: "10px"
+            fontFamily: "Roboto, sans-serif"
+  chart:
+    height: 280
+    toolbar:
+      show: false
+    zoom:
+      enabled: false
+  legend:
+    labels:
+      useSeriesColors: true
+    itemMargin:
+      horizontal: 16
+      vertical: 4
+  grid:
+    borderColor: "rgba(255,255,255,0.07)"
+    strokeDashArray: 4
+  xaxis:
+    tickAmount: 12
+    labels:
+      style:
+        colors: "rgba(255,255,255,0.5)"
+        fontSize: "11px"
+        fontFamily: "Roboto, sans-serif"
+yaxis:
+  - id: watt
+    min: 0
+    decimals: 1
+    apex_config:
+      title:
+        text: Leistung (kW)
+        style:
+          color: "rgba(255,255,255,0.4)"
+          fontSize: "11px"
+          fontFamily: "Roboto, sans-serif"
+      labels:
+        style:
+          colors: "rgba(255,255,255,0.5)"
+          fontSize: "11px"
+          fontFamily: "Roboto, sans-serif"
+  - id: temp
+    opposite: true
+    decimals: 0
+    apex_config:
+      title:
+        text: Temp. Kessel (°C)
+        style:
+          color: "rgba(255,255,255,0.4)"
+          fontSize: "11px"
+          fontFamily: "Roboto, sans-serif"
+      labels:
+        style:
+          colors: "rgba(255,255,255,0.5)"
+          fontSize: "11px"
+          fontFamily: "Roboto, sans-serif"
+series:
+  - entity: sensor.heizstab_power_w
+    name: Watt Heizstab
+    yaxis_id: watt
+    color: "#4FC3F7"
+    type: area
+    curve: stepline
+    opacity: 0.3
+    stroke_width: 1.5
+    stroke_dash: 0
+    extend_to: now
+    unit: kW
+    transform: "return x / 1000;"
+    group_by:
+      func: max
+      duration: 5min
+  - entity: sensor.ac_elwa_2_temperatur_1
+    name: Temp. Kessel
+    yaxis_id: temp
+    color: "#FF8A65"
+    type: line
+    curve: smooth
+    stroke_width: 2
+    stroke_dash: 6
+    extend_to: now
+    unit: "°C"
+    group_by:
+      func: avg
+      duration: 5min

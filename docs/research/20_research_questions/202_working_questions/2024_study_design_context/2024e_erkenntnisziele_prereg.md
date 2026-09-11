@@ -115,9 +115,12 @@ Triangulation des Selbstberichts (angemessen / Disuse / Misuse je Szenario):
 ## Limitationen (vorab, ehrlich)
 
 - **N = 16** (balanciert 8 vs. 8) → der **between**-Primärtest erkennt nur **große**
-  Effekte (d ≈ 0,8 → Power ~45 %, einseitig). Der **within**-Vergleich (gepaart, N=16)
-  trägt mehr Power und beantwortet die Leitfrage direkter. Studie **hypothesen-generierend**,
-  Triangulation > p-Wert.
+  Effekte (d ≈ 0,8). Power hängt vom Verfahren ab: t-Test-Näherung ~45 %, aber das
+  primär geplante **Mann-Whitney-U** liegt real bei nur ~40 % (einseitig; nachgerechnet
+  11.08.2026 per Monte-Carlo-Simulation, 200.000 Wiederholungen: t-Test 45,1 %,
+  Mann-Whitney-U 39,5 % ± 0,2 Prozentpunkte). Für 80 % Power wären n=20/Gruppe (N=40)
+  nötig. Der **within**-Vergleich (gepaart, N=16) trägt mehr Power und beantwortet die
+  Leitfrage direkter. Studie **hypothesen-generierend**, Triangulation > p-Wert.
 - **Within-Reveal:** weil jede Person beide Varianten sieht, drohen Reihenfolge-/Demand-
   Effekte → Permutation der Reihenfolge, Trennung primär (vor Reveal)/within (nach Reveal),
   verblindete Auswertung.

@@ -133,13 +133,13 @@ bitcoin:
               {% set remaining = 210000 - (height % 210000) %}
               {{ (now() + timedelta(seconds=remaining * 600)).isoformat() }}
 
-  # ── Bitcoin-Netzwerkdaten: self-hosted mempool.space (192.168.178.96:3006) ───
+  # ── Bitcoin-Netzwerkdaten: self-hosted mempool.space (LAN, siehe secrets.yaml) ─
   # Ersetzt blockchain.info/blockstream.info (oeffentliche Cloud-APIs, TODO seit
   # laengerem unerledigt): Netzwerkkonstante "keine externen APIs ohne lokale
   # Alternative" (CLAUDE.md), dieselbe self-hosted Instanz wie
-  # src/data/btc_hashrate.py und btc_power_law.py (MEMPOOL_HOST/PORT aus .env,
-  # hier hardcodiert wie alle anderen LAN-Geraete in diesem Config-Baum, siehe
-  # z.B. packages/avalonq_miner1.yaml).
+  # src/data/btc_hashrate.py und btc_power_law.py (MEMPOOL_HOST/PORT aus .env).
+  # Die drei resource-URLs unten kommen aus secrets.yaml (!secret), diese Datei
+  # bleibt im Gegensatz zu packages/avalonq_miner1.yaml getrackt.
   #
   # bitcoin_network_difficulty (roher Difficulty-Wert in T, genutzt in
   # packages/stats.yaml + economics.yaml fuer Profitabilitaets-Berechnungen):
@@ -155,7 +155,7 @@ bitcoin:
   # 091_adr_de.md). HA aktualisiert das selbst per scan_interval, exakt wie
   # bitcoin_block_height es schon immer tat.
   rest:
-    - resource: "http://192.168.178.96:3006/api/v1/mining/difficulty-adjustments/1w"
+    - resource: !secret mempool_difficulty_adjustments_1w_url
       scan_interval: 3600
       sensor:
         - name: "bitcoin_network_difficulty"
@@ -166,7 +166,7 @@ bitcoin:
           icon: mdi:bitcoin
 
     # ── Bitcoin Block Height ───────────────────────────────────────────────────
-    - resource: "http://192.168.178.96:3006/api/blocks/tip/height"
+    - resource: !secret mempool_block_height_url
       scan_interval: 60
       sensor:
         - name: "bitcoin_block_height"
@@ -180,7 +180,7 @@ bitcoin:
     # Rohe mempool-Felder als Attribute durchgereicht (keine Umrechnung in HA,
     # das macht die Karte in JS — gleiche Aufteilung wie bei allen anderen
     # Karten in diesem Dashboard).
-    - resource: "http://192.168.178.96:3006/api/v1/difficulty-adjustment"
+    - resource: !secret mempool_difficulty_adjustment_url
       scan_interval: 300
       sensor:
         - name: "bitcoin_difficulty_adjustment"

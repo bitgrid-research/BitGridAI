@@ -241,7 +241,7 @@ cards:
     template: room_header
     view_layout:
       grid-column: 1 / -1
-    name: Schlafzimmer 1
+    name: Schlafzimmer
     icon: mdi:bed
     variables:
       accent_color: "#199e70"
@@ -436,15 +436,15 @@ cards:
       energy_daily: sensor.trockner_energy_daily
       accent_color: "#ecb1c6"
 
-  # ── Keller ──────────────────────────────────────────────────
+  # ── Garage (= Keller, gleiches Stockwerk, ein Raum) ───────────
   - type: custom:button-card
     template: room_header
     view_layout:
       grid-column: 1 / -1
-    name: Keller
-    icon: mdi:stairs-down
+    name: Garage
+    icon: mdi:garage
     variables:
-      accent_color: "#9085e9"
+      accent_color: "#e66767"
   - type: custom:button-card
     template: device_tile
     entity: sensor.shelly1pmg4_e4b06377adc0_leistung
@@ -463,27 +463,17 @@ cards:
       accent_color: "#afa7ef"
   - type: custom:button-card
     template: device_tile
-    entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
+    entity: sensor.shellyplugsg3_907069492f30_leistung
     name: Server, NAS, KI
     icon: mdi:server
     variables:
       energy_daily: sensor.server_energy_daily
       accent_color: "#cdc8f5"
-
-  # ── Garage ──────────────────────────────────────────────────
-  - type: custom:button-card
-    template: room_header
-    view_layout:
-      grid-column: 1 / -1
-    name: Garage
-    icon: mdi:garage
-    variables:
-      accent_color: "#e66767"
   - type: custom:button-card
     template: device_tile
-    entity: sensor.shellyplugsg3_907069492f30_leistung
-    name: Garagengeräte
-    icon: mdi:tools
+    entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
+    name: Runtipi Server
+    icon: mdi:server
     variables:
       energy_daily: sensor.garage_energy_daily
       accent_color: "#E66767"

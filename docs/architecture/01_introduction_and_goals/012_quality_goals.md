@@ -39,7 +39,7 @@ Wie messen wir objektiv, ob wir unsere Ziele erreichen? Wir haben harte Zahlen (
 | **Erklärungs-Abdeckung** | **≥ 98 %** aller Decisions haben dokumentierten Grund, Auslöser & Parameter | Analyse des Timeline-Exports auf Vollständigkeit (`explain_coverage`). |
 | **Vertrauens-Score** | **≥ 4/5 Punkten** in Nutzerumfragen (Likert-Skala, n=10) | Durchführung von Befragungen im Research-Panel. |
 | **Thermal-Safety-Events** | **0 ungeplante Übertemperaturen** (> 85 °C) | Überwachung des Health-Logs und der Sensorwerte. |
-| **Energy-to-Sats-Effizienz** | **≥ 45 sats/kWh** (im rolling 7-Tage-Schnitt) | Auswertung des `energy_to_value`-Datasets. |
+| **Energy-to-Sats-Effizienz** | **Saisonal gestaffelt** (im rolling 7-Tage-Schnitt): 125 sats/kWh Mai–Aug, 130 Mär/Apr/Sep, 135 Okt–Feb — siehe ADR 01.09.2026 (`091_adr_de.md`) für Herleitung und Einschränkungen. Löst den vorherigen festen Wert (45 sats/kWh) ab, der seit August 2026 routinemäßig um Faktor ~2,8 überschritten und damit kein Ziel mehr war. | Auswertung des `energy_to_value`-Datasets. |
 | **Traceability (Nachweisbarkeit)** | **100 %** der Blockfenster loggen den gewählten Pfad und die Begründung | Prüfung des manipulationssicheren "Append-only Hodl-Log". |
 
 ---

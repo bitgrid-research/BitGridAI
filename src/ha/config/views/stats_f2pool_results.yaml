@@ -1,0 +1,83 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Poolerträge — Balance, Total Income, Total Payout, Yesterday's/
+# Today's Est. Revenue direkt aus der F2Pool-API (packages/pool.yaml,
+# Resource /bitcoin/bitgridai). Ergaenzt stats_f2pool_live.yaml (Live-
+# Hashrate/Worker/Stale-Rate, weiterhin nur v2) um die reine Finanz-Sicht,
+# die dort fehlte — Nutzer-Wunsch 26.08.2026, angelehnt an F2Pools eigenes
+# Web-Dashboard (Balance/Total Income/Total Payout/Yesterday's Revenue/
+# Today's Est. Revenue).
+#
+# Total Income = Balance + Total Payout (F2Pool-Feld 'value'). Bewusst
+# KEIN "Manual Withdrawal"-Button wie im F2Pool-Original: eine echte BTC-
+# Auszahlung gehoert nicht als Ein-Klick-Aktion in ein Monitoring-Dashboard.
+#
+# Kein Steuerpfad: reine Anzeige, beeinflusst keine Mining-Entscheidung in
+# core/.
+#
+# Kein eigener Karten-Header (entfernt 26.08.2026, Nutzer-Wunsch): der
+# Gruppen-Titel "POOLERTRÄGE" darueber (bitgrid_dashboard_v3.yaml, grid-area
+# "tl") uebernimmt diese Rolle bereits.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "BitcoinInfo",
+# linke Spalte, oberste Karte.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 19px 18px
+  grid:
+    - grid-template-areas: '"f2pool"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    f2pool:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  f2pool: >
+    [[[
+      const balBtc      = parseFloat(states['sensor.pool_balance_btc']?.state) || 0;
+      const incomeBtc    = parseFloat(states['sensor.pool_total_income_btc']?.state) || 0;
+      const payoutBtc    = parseFloat(states['sensor.pool_paid_total_btc']?.state) || 0;
+      const yestBtc      = parseFloat(states['sensor.pool_revenue_yesterday_btc']?.state) || 0;
+      const todayEstBtc  = parseFloat(states['sensor.pool_revenue_today_est_btc']?.state) || 0;
+      const btcEur       = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+
+      const fmtBtc  = (v) => v.toFixed(8) + ' BTC';
+      const fmtSats = (v) => Math.round(v * 1e8).toLocaleString('de-DE') + ' sats';
+      const fmtEur  = (v) => btcEur > 0 ? (v * btcEur).toFixed(2) + ' €' : '—';
+
+      const stat = (label, val, sub, color) =>
+        `<div style="min-width:0;">
+          <div style="font-size:0.68rem;color:var(--secondary-text-color);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${label}</div>
+          <div style="font-size:0.95rem;font-weight:700;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${val}</div>
+          <div style="font-size:0.66rem;color:var(--secondary-text-color);opacity:0.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub}</div>
+        </div>`;
+
+      return `<div style="width:100%;">
+        <div style="display:flex;align-items:stretch;gap:18px;">
+          <div style="flex:0 0 auto;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+            <div style="font-size:0.7rem;color:var(--secondary-text-color);margin-bottom:4px;">Balance</div>
+            <div style="font-size:1.5rem;font-weight:700;color:var(--primary-text-color);white-space:nowrap;">${fmtBtc(balBtc)}</div>
+            <div style="font-size:0.7rem;color:var(--secondary-text-color);margin-top:3px;white-space:nowrap;">${fmtSats(balBtc)} · ${fmtEur(balBtc)}</div>
+          </div>
+          <div style="flex:0 0 1px;background:var(--divider-color);align-self:stretch;"></div>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;min-width:0;">
+            ${stat('Gesamteinnahmen', fmtBtc(incomeBtc), fmtEur(incomeBtc), 'var(--primary-text-color)')}
+            ${stat('Gesamtauszahlung', fmtBtc(payoutBtc), fmtEur(payoutBtc), 'var(--primary-text-color)')}
+            ${stat('Ertrag gestern', fmtBtc(yestBtc), fmtSats(yestBtc) + ' · ' + fmtEur(yestBtc), 'var(--primary-text-color)')}
+            ${stat('Ertrag heute (Schätzung)', fmtBtc(todayEstBtc), fmtSats(todayEstBtc) + ' · ' + fmtEur(todayEstBtc), 'var(--primary-text-color)')}
+          </div>
+        </div>
+      </div>`;
+    ]]]

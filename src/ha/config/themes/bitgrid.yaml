@@ -45,6 +45,9 @@ BitGridAI:
   # Stufe (Uhr ~3.5rem). Custom-Cards referenzieren var(--bg-fs-*), damit
   # Schriftgroessen projektweit aus einer Quelle kommen. Alle Stufen uniform
   # hochskalieren, falls auf dem Wandtablet aus Distanz zu klein.
+  # 26.08.2026: kurzzeitig um ~20% hochskaliert, auf Nutzer-Wunsch wieder
+  # zurueckgesetzt (BitcoinInfo-Tab sollte dieselbe Groesse wie alle anderen
+  # Tabs haben, nicht projektweit groesser).
   bg-fs-hero: "3.5rem"        # eine grosse Kennzahl (wie die Uhr)
   bg-fs-title: "1.75rem"      # Karten-Headline / grosse Stat-Werte
   bg-fs-body: "1rem"          # Fliesstext (HA-Default)
@@ -159,3 +162,29 @@ BitGridAI:
   sidebar-icon-color: "#9aa0b4"
   sidebar-selected-text-color: "#4CAF50"
   sidebar-selected-icon-color: "#4CAF50"
+
+  # ── v3-Farbpalette (24.08.2026, Nutzer-Vorgabe) ──────────────────────
+  # Bewusst NUR als zusaetzliche, "-v3"-benannte Variablen im BESTEHENDEN
+  # Theme deklariert, kein zweites Theme: v1/v2 referenzieren diese Namen
+  # nirgends, bleiben also unveraendert. Nur bitgrid_dashboard_v3.yaml
+  # und seine !include-Views (energieverlauf_tag.yaml, finanz_bilanz.yaml)
+  # nutzen sie. Sidebar/Topbar bleiben bewusst gemeinsam (Nutzer-Entscheidung
+  # 24.08.2026: strukturell nicht ohne echten Theme-Wechsel pro Dashboard
+  # scopebar, siehe docs/architecture ADR-Notiz falls das nochmal aufkommt).
+  #
+  # Datenrollen — jede Farbe bedeutet dashboard-weit in v3 genau eine Sache:
+  bgai-pv-v3: "#FFD24A"        # PV-Ertrag
+  bgai-mining-v3: "#F7931A"    # Mining / Bitcoin
+  bgai-home-v3: "#3FD07F"      # Zuhause / Akku
+  bgai-grid-v3: "#7C83E8"      # Netz
+  bgai-geraete-v3: "#C08AD8"   # Sonstige Geräte
+  bgai-total-v3: "#C7D0E8"     # Summe / Gesamt-Profit (neutral, kein Rot bei negativ)
+  bgai-alarm-v3: "#FF5C5C"     # Alarm / Not-Aus
+  bgai-erklaerung-v3: "#A3E635" # BitHamster / Erklärung
+
+  # Flächen/Text — nur per View-scoped card-mod in v3 angewendet (siehe
+  # bitgrid_dashboard_v3.yaml je View), NICHT global gesetzt:
+  bgai-card-bg-v3: "#182449"
+  bgai-divider-v3: "#26356B"
+  bgai-text-primary-v3: "#EAEFFB"
+  bgai-text-secondary-v3: "#A8B3D4"

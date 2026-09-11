@@ -1,0 +1,3050 @@
+title: BitGridAI v3
+
+# Geteilte custom:button-card-Templates (miner_header/miner_btn/...). Nötig,
+# weil der Steuerung-Tab views/miner_controls.yaml per !include einbindet, das
+# diese Templates referenziert. button_card_templates ist ein Pro-Dashboard-
+# Root-Key, fehlt er hier, rendert button-card "Konfigurationsfehler".
+# Gemeinsame Quelle mit bitgrid_dashboard_v1.yaml: button_card_templates.yaml.
+button_card_templates: !include button_card_templates.yaml
+
+# ═══════════════════════════════════════════════════════════════════════
+# Kiosk-Home-Screen für Wandtablet, zwei Spalten, je ein eigener vertical-
+# stack (Hoehe pro Spalte entkoppelt, keine geteilten Grid-Zeilen). Höhe
+# nicht auf einen Bildschirm geklemmt: die Karten bekommen ihre natürliche
+# Höhe, die Seite scrollt nach unten (wie Tab 2).
+#
+#        LINKS                      RECHTS
+#   ┌──────────────────────┐   ┌──────────────────────┐
+#   │ BITGRIDAI              │   │ WETTER                │
+#   │  Hamster-Erklärung   │   │  Wetter (Uhr+Stunden) │
+#   ├──────────────────────┤   │                        │
+#   │ ENERGIEFLUSS            │   │                        │
+#   │     Energiefluss     │   │                        │
+#   ├──────────────────────┤   ├──────────────────────┤
+#   │ MINER                 │   │ VERLAUF (HEUTE)        │
+#   │ Steuerung Quick-Action│   │   Verlauf-Chart        │
+#   │                        │   ├──────────────────────┤
+#   │                        │   │ FINANZEN               │
+#   │                        │   │   Finanz-Bilanz        │
+#   └──────────────────────┘   └──────────────────────┘
+#
+# Designprinzipien:
+#   - 2-Spalten-Grid, beide Spalten 50% breit (minmax(0,1fr): verhindert,
+#     dass der breite Miner-Quick-Action-Block seine Spalte sprengt, gleiche
+#     Technik wie im Steuerung-Tab). Gruppen-Titelzeilen (BitGridAI/Energiefluss/Miner links,
+#     Wetter/Verlauf (heute)/Finanzen rechts, template: group_header aus
+#     button_card_templates.yaml) wieder eingeführt (31.08.2026, Nutzer-
+#     Wunsch): anders als bei tl/tr in den übrigen Tabs stehen sie hier als
+#     eigene Karte INNERHALB des jeweiligen vertical-stacks, direkt vor der
+#     Karte(-ngruppe), die sie beschriften — kein gemeinsames Grid-Row-
+#     Matching zwischen links und rechts nötig.
+#   - Paarweises Grid-Row-Matching (Nutzer-Wunsch 31.08.2026, ersetzt die
+#     vorherige Entkopplung): 3 Zeilen à 2 Spalten, jedes Paar (BitGridAI↔
+#     Wetter, Energiefluss↔Verlauf, Miner↔Finanzen) sitzt in einer eigenen
+#     Grid-Zeile und wird per align-items:stretch auf gleiche Höhe gebracht.
+#     Ein früherer Versuch genau das (23.08.2026, Miner-Quick-Action ↔
+#     damaliger Partner sowie Finanz-Bilanz ↔ Energiefluss) wurde verworfen,
+#     weil reines Stretch bei blockgebundenem Inhalt hässlich aussah: leerer
+#     Raum unter den Miner-Buttons, künstlich überdehnt wirkende Balken.
+#     Diesmal zusätzlich abgefedert: die jeweils wachsende Karte bekommt
+#     flex:1 (card_mod :host) UND zentriert ihren Inhalt statt ihn oben
+#     anzupinnen bzw. zu verzerren — Balken-SVG behält sein viewBox-
+#     Seitenverhältnis (nur Positionierung ändert sich), Miner-Buttons werden
+#     vertikal zentriert. Nebeneffekt: die Gesamthöhe der Ansicht ist jetzt
+#     strukturell ≥ vorher (Summe der Zeilen-Maxima statt Maximum der
+#     Spalten-Summen) — die zoom-Kalibrierung weiter unten (1050px) ist
+#     deshalb nur eine hochgeschätzte Annahme und braucht einen Live-Check.
+#   - Rechts nur noch EIN Wetter-Baustein (Uhr+Icon + stündlicher Streifen),
+#     die 5-Tage-Vorschau und der Sonnenstand entfallen im Demo-Layout.
+#   - Finanz-Bilanz (views/finanz_bilanz.yaml) und Verlauf-Chart
+#     (views/energieverlauf_tag.yaml) sind neu: Sensoren in
+#     packages/economics.yaml. Verlauf nutzt custom:apexcharts-card (HACS,
+#     lokal installiert) statt raw-SVG, weil die Karte reale Recorder-
+#     Historie braucht (kein Cloud-Call). Zeigt den laufenden Tag
+#     (00:00–24:00) als drei transluzente Flächen, angelehnt an die
+#     Regelschwellen-Optik (Tab "Steuerung").
+#   - Steuerung Quick-Action (views/steuerung_quick.yaml): schneller
+#     Moduswechsel für beide Miner ohne die vollen Kennzahlen-Panels, Header
+#     verlinkt in den Steuerung-Tab.
+#   - fester Radius 20px, dunkle Glaskarten erben aus dem Theme BitGridAI;
+#     www/bitgrid_card_shape.js clippt die Custom-Cards (inkl. apexcharts-
+#     card) auf den Radius
+#   - NaN-sicher: 'unavailable' → '—' statt 'NaN' (wichtig nach HA-Restart)
+# ═══════════════════════════════════════════════════════════════════════
+
+views:
+
+  # Header-Titel = View-Titel, mittig zentriert via www/bitgrid_wide.js.
+  # Version kommt aus pyproject.toml; deploy_ha.sh ersetzt den Versionsteil
+  # beim Deploy durch ein sauberes v<semver> (ohne git-SHA/Build-Metadata).
+  # Lovelace-View-Titel kennen kein Templating, daher Injection beim Deploy.
+  # Der hier committete Wert ist nur Fallback fürs direkte Laden ohne Deploy.
+  - title: BitGridAI - v0.3.0
+    path: home
+    icon: mdi:home
+    theme: BitGridAI
+    # Eigener Verlauf nur fuer v3/Demo (v1/v2 nutzen weiterhin unveraendert
+    # das gemeinsame BitGridAI-Theme, themes/bitgrid.yaml lovelace-background).
+    # Formale v3-Palette 24.08.2026 (Nutzer-Vorgabe): "Verlauf oben links"
+    # -> "Verlauf unten rechts" = 135deg (to bottom right). Ersetzt jede
+    # vorherige Iteration. Grund laut Vorgabe: Gruen ist Statusfarbe fuer
+    # Zuhause/Akku (--bgai-home-v3), ein gruenstichiger Hintergrund senkt
+    # dort den Kontrast.
+    background: "linear-gradient(135deg, #0E1530 0%, #171A3A 100%)"
+    panel: true
+    # View-scoped Flaechen-/Textfarben (24.08.2026, Nutzer-Vorgabe): CSS-
+    # Custom-Properties auf :host der View gesetzt, vererben sich an alle
+    # Karten darunter (die bereits var(--card-background-color) etc.
+    # referenzieren) — ohne zweites Theme, ohne v1/v2 zu beruehren. Sidebar/
+    # Topbar liegen ausserhalb dieses DOM-Teilbaums und bleiben bewusst
+    # unveraendert (Nutzer-Entscheidung 24.08.2026).
+    card_mod:
+      style: |
+        :host {
+          --card-background-color: var(--bgai-card-bg-v3, #182449);
+          --divider-color: var(--bgai-divider-v3, #26356B);
+          --primary-text-color: var(--bgai-text-primary-v3, #EAEFFB);
+          --secondary-text-color: var(--bgai-text-secondary-v3, #A8B3D4);
+          /* Schrift groesser, nur v3 (Nutzer-Wunsch 02.09.2026): ueberschreibt die
+             Typo-Skala aus themes/bitgrid.yaml view-scoped, exakt dasselbe Muster
+             wie die Flaechen-/Textfarben oben — v1/v2 bleiben unveraendert. Werte
+             deutlich ueber der urspruenglich geplanten +3px-Stufe: die Home-Tab-
+             Inhaltskarten haben ein zusaetzliches zoom:min(1,calc(100vh/1200px))
+             (s. u.), das jede Erhoehung wieder verduennt — kompensiert durch
+             groessere Basiswerte statt zoom-Formel anzufassen. */
+          --bg-fs-label: 0.9375rem;
+          --bg-fs-secondary: 1.1875rem;
+          --bg-fs-body: 1.375rem;
+          --bg-fs-title: 2.125rem;
+          /* Neuer Token, nur fuer group_header-Gruppentitel (02.09.2026,
+             Nutzer-Wunsch "Ueberschriftgroessen fuer alle Gruppen in jedem
+             Tab wie Home"): das geteilte group_header-Template (button_card_
+             templates.yaml, auch von v1 genutzt) las bisher --bg-fs-body
+             (22px), Home hatte zusaetzlich 6x einen Pro-Karte-Override auf
+             1.6875rem (27px) — daher der Groessen-Unterschied zwischen
+             Tabs. Einheitlich in allen v3-Views gesetzt, v1 bleibt
+             unberuehrt (kennt die Variable nicht, Template faellt dort auf
+             --bg-fs-body zurueck). */
+          --bg-fs-group-header: 1rem;
+        }
+    cards:
+      - type: custom:layout-card
+        # KEIN zoom:calc(100vh/...) mehr (31.08.2026, Nutzer-Wunsch "Zoom-
+        # Einstellung aus dem Home-Tab raus"): das urspruengliche Ziel vom
+        # 24.08.2026 ("Startseite soll nie scrollen") stand zunehmend im Weg,
+        # nachdem der Home-Inhalt durch das paarweise Zeilen-Hoehen-Matching
+        # (s. Kopfkommentar) strukturell gewachsen ist — ein einzelner
+        # Zoom-Wert konnte "kein Abschneiden" und "gleiche Textgroesse wie
+        # Steuerung" (Nutzer-Wunsch, s. group_header-Overrides unten) nicht
+        # mehr gleichzeitig erfuellen, siehe die gescheiterten 900px/1150px-
+        # Versuche direkt zuvor in der Git-Historie dieser Datei. Home
+        # rendert jetzt in natuerlicher Groesse und scrollt bei Bedarf wie
+        # Tab 2 (Steuerung behaelt seinen eigenen zoom unveraendert).
+        layout_type: custom:grid-layout
+        layout:
+          # Beide Spalten 50% breit. minmax(0, 1fr) statt 1fr: der Steuerung-
+          # Quick-Action-Block (Miner 1 | Miner 2 nebeneinander) ist in seinem
+          # min-content breiter als 50% und würde sonst seine Spalte sprengen
+          # (gleiche Technik wie Tab "Steuerung" beim vollen Miner-Block).
+          # 3 Zeilen, jede ein Paar (g1=BitGridAI/Wetter, g2=Energiefluss/
+          # Verlauf, g3=Miner/Finanzen). align-items:stretch bringt pro Zeile
+          # die kuerzere Karte auf die Hoehe der laengeren (31.08.2026,
+          # Nutzer-Wunsch, s. Kopfkommentar fuer die verworfene Vorgeschichte).
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: auto auto auto
+          grid-template-areas: '"g1l g1r" "g2l g2r" "g3l g3r"'
+          align-items: stretch
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+
+          # ═══════════════════════════════════════════════════════════
+          # ZEILE 1 LINKS  —  Hamster-Erklärung (g1l), gepaart mit Wetter (g1r).
+          # Eigener vertical-stack, per align-items:stretch auf Zeilenhöhe.
+          # ═══════════════════════════════════════════════════════════
+          - type: vertical-stack
+            view_layout:
+              grid-area: g1l
+            # zoom hier statt einzeln auf der Hamster-Karte (02.09.2026,
+            # Versuch #3 gegen den Versatz zur Wetter-Spalte): Verdacht ist ein
+            # bekanntes zoom+flex-grow-Problem — flex-grow berechnet die
+            # Zielhoehe, zoom skaliert die schon berechnete Box danach nochmal
+            # nach unten, statt die Rechnung selbst zu beeinflussen. Zoom auf
+            # der ganzen Spalte (VOR der flex-Verteilung zwischen Gruppentitel
+            # und Hamster-Karte) umgeht das: die Streckung passiert komplett in
+            # unskalierten Koordinaten, erst danach schrumpft alles zusammen.
+            card_mod:
+              style: |
+                :host {
+                  zoom: min(1, calc(100vh / 1200px)) !important;
+                }
+            cards:
+
+              # ── Gruppen-Titel: BITGRIDAI (Hamster-Statuskarte) ──────────
+              # Eigenes Maskottchen-Icon statt mdi (Nutzer-Wunsch 31.08.2026):
+              # docs/media/hamster mdi2.png war reine Schwarz-Linienzeichnung
+              # auf Transparenz, auf der dunklen Kartenfarbe unsichtbar. Als
+              # www/hamster_mdi2.png in der Icon-Farbe der übrigen Gruppen-
+              # Titel (#A8B3D4 = var(--secondary-text-color)) eingefärbt
+              # deployt. Dieser button-card-Build (www/community/button-card/
+              # button-card.js) kennt kein top-level "image:" (erste Fassung
+              # blieb deshalb komplett leer, kein img-cell wurde gerendert,
+              # siehe _buildIcon/_buildEntityPicture im Bundle) — Bilder laufen
+              # hier ausschliesslich ueber entity_picture + show_entity_picture.
+              - type: custom:button-card
+                template: group_header
+                # font-size 1.5rem (31.08.2026, Nutzer-Wunsch "Überschriften
+                # in Home größer"): der Versuch, stattdessen die View-Zoom-
+                # Basis an Steuerung anzugleichen, brach das Home-Layout
+                # (Inhalt passte nicht mehr in den Viewport) und wurde
+                # zurueckgerollt (zoom bleibt 1150px, s. o.).
+                # Der fruehere Direkt-Override hier (font-size:1.6875rem)
+                # ist entfallen (02.09.2026): das geteilte group_header-
+                # Template liest jetzt selbst --bg-fs-group-header (view-
+                # scoped, s. :host oben), kein Pro-Karte-Override mehr
+                # noetig — zentraler Fix statt sechsfacher Duplikation.
+                show_entity_picture: true
+                entity_picture: /local/hamster_mdi2.png?v=20260831
+                name: BitGridAI
+
+              # ═══════════════════════════════════════════════════════════
+              # HAMSTER  —  Energie-Gruppe oben (ham). flex:1 (31.08.2026):
+              # waechst innerhalb des g1l-vertical-stacks auf die per
+              # align-items:stretch vorgegebene Zeilenhoehe, der Gruppentitel
+              # darueber bleibt bei seiner natuerlichen Hoehe. Der interne
+              # justify-content:space-between (s. u. im Template-String)
+              # verteilt zusaetzliche Hoehe als Luecke vor der Blockzeit/
+              # Balance/Kurs-Fussleiste statt als toten Raum danach.
+              # ═══════════════════════════════════════════════════════════
+              - type: custom:button-card
+                # zoom (31.08.2026, Nutzer-Wunsch "Karteninhalte verkleinern
+                # damit alles wieder reinpasst, nur die Überschriftgröße
+                # bleibt"): anders als der fruehere View-weite zoom sitzt er
+                # jetzt NUR auf den Inhalts-Karten, nicht auf den
+                # group_header-Karten (die bleiben bei 1.5rem, unskaliert).
+                # 1200px ist ein erster Schaetzwert, kein Messwert — nach
+                # Live-Screenshot in allen sieben Inhalts-Karten (s. gleiche
+                # Kommentarzeile) gemeinsam nachjustieren, damit sie
+                # gleichmaessig schrumpfen.
+                card_mod:
+                  style: |
+                    :host {
+                      /* flex-basis 0 statt auto (02.09.2026). zoom ist jetzt
+                         eine Ebene hoeher auf der g1l-Spalte gesetzt (s. dort),
+                         nicht mehr hier — Verdacht: zoom direkt auf einem
+                         flex-grow-Element skaliert die schon fertig berechnete
+                         Box nachtraeglich nochmal runter, statt die Rechnung
+                         selbst zu beeinflussen (Versatz zur Wetter-Karte trotz
+                         ha-card-Fix, s. u., unveraendert geblieben). */
+                      flex: 1 1 0 !important;
+                    }
+                    /* ha-card explizit auf 100% von :host (02.09.2026): fuer
+                       sich allein ebenfalls ohne sichtbaren Effekt geblieben,
+                       bleibt trotzdem gesetzt (korrekter als kein Wert). */
+                    ha-card {
+                      height: 100% !important;
+                    }
+                    /* Lokaler --bg-fs-title-Override (02.09.2026, Nutzer-
+                       Praezisierung "im Verhaeltnis zu den anderen Karten"):
+                       nicht "absolut zu gross", sondern zu gross verglichen
+                       mit dem Rest des Dashboards — 2.125rem (View-Default)
+                       und selbst 2rem standen ohne vergleichbares Gegenstueck
+                       da (dort ist --bg-fs-title sonst nirgends sichtbar im
+                       Einsatz). 1.5rem = dieselbe Groesse wie die Miner-
+                       Kartentitel (views/steuerung_quick.yaml), damit haben
+                       Blockzeit/Balance/Kurs/Ueberschrift jetzt ein echtes,
+                       bereits akzeptiertes Gegenstueck auf demselben Tab. */
+                    :host {
+                      --bg-fs-title: 1.5rem;
+                    }
+                show_name: false
+                show_icon: false
+                show_state: false
+                tap_action:
+                  action: none
+                custom_fields:
+                  hamster: >
+                    [[[
+                      const fnum = (id) => {
+                        const v = parseFloat(states[id]?.state);
+                        return isNaN(v) ? null : v;
+                      };
+                      const cfg = (id, fb) => { const v = fnum(id); return v === null ? fb : v; };
+                      const pct = (v) => v.toLocaleString('de-DE', {maximumFractionDigits: 0});
+                      const kw  = (w) => (w / 1000).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+
+                      const h = new Date().getHours();
+                      const night = states['binary_sensor.mvp_nacht_sperre_aktiv']?.state === 'on'
+                        || (h >= 22 || h < 6);
+                      const modeRaw = states['sensor.miner1_workmode_status']?.state
+                                  || states['sensor.miner2_workmode_status']?.state || '';
+                      const mode = (modeRaw === 'unavailable' || modeRaw === 'unknown') ? '' : modeRaw;
+                      const running = ['Eco', 'Standard', 'Super'].includes(mode);
+                      const socV   = fnum('sensor.battery_soc_pct');
+                      const pvV    = fnum('sensor.pv_power_w');
+                      const minerV = fnum('sensor.miner_total_power_w');
+                      const chipV  = fnum('sensor.miner_max_chip_temp_c');
+                      const socKnown = socV !== null;
+                      const soc    = socV ?? 0;
+                      const pvW    = pvV ?? 0;
+
+                      // Schwellen aus den HA-Config-Entities (Platzhalter-Legende soc_band_tagesverlauf.md)
+                      const socStop   = cfg('input_number.mvp_soc_stop_pct', 50);
+                      const ecoStart  = cfg('input_number.mvp_soc_eco_start_pct', 60);
+                      const socStd    = cfg('input_number.mvp_soc_std_pct', 75);
+                      const socStdStp = ecoStart;
+                      const socSuper  = cfg('input_number.mvp_soc_super_pct', 90);
+                      const socSupStp = socStd;
+                      const pvStartW  = cfg('input_number.mvp_pv_start_w', 6000);
+                      const maxChip   = cfg('input_number.mvp_tmax_std_threshold_c', 112);
+
+                      // Erklärtext A (statisch/regelbasiert) aus soc_band_tagesverlauf.md,
+                      // Platzhalter live aus den gebundenen Entities ersetzt. Zustand = sichtbare
+                      // Wahrheit (Workmode + Temperatur + SoC), NICHT bg_decision_code (entkoppelt).
+                      let head, sub, img;
+                      if (!socKnown && !running) {
+                        head = 'Verbindung wird aufgebaut';
+                        sub  = 'Die Sensoren melden sich gerade nach einem Neustart.<br>'
+                             + 'Sobald Ladezustand und PV anliegen, zeigt die Karte den Betriebszustand.';
+                        img  = 'bithamster_wait.png';
+                      } else if (night) {
+                        head = 'Nachtsperre aktiv';
+                        sub  = `Es ist ${h}:00 Uhr, Beginn des Nachtfensters von 22:00 bis 06:00 Uhr.<br>`
+                             + 'In dieser Zeit ist das Mining unabhängig vom Ladezustand ausgesetzt.<br>'
+                             + 'Der Normalbetrieb beginnt wieder ab 06:00 Uhr.';
+                        img  = 'bithamster_sleep.png';
+                      } else if (chipV !== null && chipV >= maxChip) {
+                        head = 'Sicherheits-Stopp: zu heiß';
+                        sub  = `Die Chip-Temperatur liegt mit ${pct(chipV)} °C über der Sicherheitsgrenze von ${pct(maxChip)} °C.<br>`
+                             + 'Der Miner wird sofort gestoppt, nicht überstimmbar.<br>'
+                             + 'Ein Wiederanlauf erfolgt erst nach Abkühlung.';
+                        img  = 'bithamster_wait.png';
+                      } else if (mode === 'Eco') {
+                        head = 'Miner läuft sparsam (Eco)';
+                        sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Eco-Band, die PV bei ${kw(pvW)} kW.<br>`
+                             + `Der Miner minet gedrosselt im Eco-Modus${pvW < pvStartW ? ' aus dem Akku weiter' : ''}.<br>`
+                             + `Unter ${pct(socStop)} % greift die Hausreserve, ab ${pct(socStd)} % schaltet er auf Standard.`;
+                        img  = 'bithamster_eco.png';
+                      } else if (mode === 'Standard') {
+                        head = 'Miner läuft in Standard';
+                        sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Standard-Band.<br>`
+                             + 'Der Miner läuft im Standard-Modus.<br>'
+                             + `Ab ${pct(socSuper)} % folgt Super, unter ${pct(socStdStp)} % fällt er auf Eco zurück.`;
+                        img  = 'bithamster_standard.png';
+                      } else if (mode === 'Super') {
+                        head = 'Miner läuft auf Volllast (Super)';
+                        sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Super-Band (ab ${pct(socSuper)} %).<br>`
+                             + 'Der Miner läuft mit voller Last im Super-Modus.<br>'
+                             + `Unter ${pct(socSupStp)} % fällt er auf Standard zurück.`;
+                        img  = 'bithamster_super.png';
+                      } else if (soc < socStop) {
+                        head = 'Akku lädt zuerst';
+                        sub  = `Der Ladezustand ist mit ${pct(soc)} % unter die Hausreserve von ${pct(socStop)} % gefallen.<br>`
+                             + 'Der Miner bleibt aus und lädt zuerst wieder auf.<br>'
+                             + `Ein Start ist erst ab ${pct(ecoStart)} % möglich.`;
+                        img  = 'bithamster_wait.png';
+                      } else if (soc < ecoStart) {
+                        head = 'Akku im Halteband';
+                        sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Halteband (${pct(socStop)}–${pct(ecoStart)} %).<br>`
+                             + 'Ein Neustart ist hier gesperrt, der Miner bleibt aus.<br>'
+                             + `Ein Start ist erst ab ${pct(ecoStart)} % möglich.`;
+                        img  = 'bithamster_wait.png';
+                      } else {
+                        head = 'Warte auf Sonne';
+                        sub  = `Der Ladezustand liegt mit ${pct(soc)} % im Eco-Band, doch die PV reicht mit ${kw(pvW)} kW nicht (nötig ${kw(pvStartW)} kW).<br>`
+                             + 'Der Miner bleibt aus.<br>'
+                             + `Ab ${kw(pvStartW)} kW startet er im Eco-Modus.`;
+                        img  = 'bithamster_wait.png';
+                      }
+
+                      // Stat-Werte auf var(--bg-fs-title) statt Fixwert 1.5rem
+                      // (31.08.2026, Nutzer-Wunsch "Schriftgroesse pro Art"):
+                      // der Token ist in themes/bitgrid.yaml explizit fuer
+                      // "Karten-Headline / grosse Stat-Werte" definiert, genau
+                      // diese Rolle haben Blockzeit/Balance/Kurs hier.
+                      const stat = (label, value, sub) => `
+                        <div style="text-align:center">
+                          <div style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
+                                      color:var(--secondary-text-color);opacity:0.65;margin-bottom:1px">${label}</div>
+                          <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1;
+                                      white-space:nowrap">${value}</div>
+                          ${sub ? `<div style="font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);opacity:0.7;
+                                      white-space:nowrap;margin-top:1px">${sub}</div>` : ''}
+                        </div>`;
+
+                      // Bitcoin-Fußleiste (wie altes Dashboard): Blockzeit, Kurs, Balance
+                      const blockH   = fnum('sensor.bitcoin_block_height');
+                      const balBtc   = fnum('sensor.pool_balance_btc');
+                      const eurRate  = fnum('sensor.btc_eur_price');
+                      const blockStr = blockH  !== null ? Math.round(blockH).toLocaleString('de-DE')          : '—';
+                      // Block-Tick: bei neuem Block flippt die Zahl orange auf und glueht
+                      // FLASH_MS lang aus. Die Karte re-rendert bei jedem Sensor-Tick (PV,
+                      // SoC, ...) komplett neu; darum negative animation-delay = Blockalter,
+                      // so setzt jeder Re-Render die Animation nahtlos an der richtigen
+                      // Stelle fort, statt sie neu zu starten.
+                      const FLASH_MS = 60000;
+                      const bhLc  = states['sensor.bitcoin_block_height']?.last_changed;
+                      const bhAge = bhLc ? Date.now() - new Date(bhLc).getTime() : Infinity;
+                      const blockAnim = (bhAge >= 0 && bhAge < FLASH_MS)
+                        ? `animation:bgz-block-tick ${FLASH_MS}ms linear ${-Math.round(bhAge)}ms both;`
+                        : '';
+                      let priceStr = eurRate !== null ? Math.round(eurRate).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">€</span>' : '—';
+                      const haveBal  = balBtc !== null && balBtc > 0;
+                      const satsStr  = haveBal ? Math.round(balBtc * 1e8).toLocaleString('de-DE') + ' <span style="font-size:0.6em;font-weight:400;color:var(--secondary-text-color);opacity:0.7">SATs</span>' : '—';
+                      const euroSub  = (haveBal && eurRate !== null && eurRate > 0)
+                        ? '≈ ' + (balBtc * eurRate).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €'
+                        : '';
+
+                      // ── Vergleich zu gestern ──────────────────────────────────────
+                      // Kurs: % gegen den Tagesstart-Kurs (= gestriger Schlusskurs eines
+                      // 24/7-Assets), gesichert um 00:00 in input_number.btc_eur_day_start
+                      // (Automation pool_midnight_baseline_reset). Vor dem ersten
+                      // Mitternachts-Lauf ist der Wert 0 → kein Delta, Karte bleibt sauber.
+                      const up = 'var(--bg-color-eco,#4CAF50)', down = 'var(--bg-color-reserve,#EF5350)';
+                      // em-relativ: skaliert mit der jeweiligen Zeile. Das Inline-Delta hinter
+                      // SATs steht auf der grossen Stat-Zeile und wird klein gehalten (0.5em),
+                      // damit es nicht ueber den Kartenrand laeuft; das Euro-Delta in der
+                      // kleinen Unterzeile bleibt bei 0.72em.
+                      const dchip = (txt, col, em) => `<span style="font-size:${em || 0.72}em;font-weight:600;margin-left:4px;color:${col}">${txt}</span>`;
+                      const eurPrev = fnum('input_number.btc_eur_day_start');
+                      let priceSub = '';
+                      if (eurRate !== null && eurPrev !== null && eurPrev > 0) {
+                        const dp = (eurRate - eurPrev) / eurPrev * 100;
+                        const s  = (dp >= 0 ? '+' : '−')
+                                 + Math.abs(dp).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        priceStr += dchip(`(${s} %)`, dp >= 0 ? up : down, 0.5);
+                      }
+
+                      // Balance: gestern geminte SATs (Tagesertrag). Gleiche Quellen und
+                      // Priorität wie der Mining-Verlauf (views/miner_stats.yaml): Settlement-
+                      // History → payout_history → pool_btc_daily_log, damit beide Karten
+                      // exakt denselben Tageswert zeigen. Auszahlungs-robust, da der Ertrag
+                      // (nicht das schwankende Pool-Guthaben) gezählt wird.
+                      const yIso = (() => { const d = new Date(); d.setDate(d.getDate() - 1);
+                        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+                      let yBtc = null;
+                      (states['sensor.pool_settlement_history']?.attributes?.transactions ?? []).forEach(tx => {
+                        const md = tx.mining_extra?.mining_date; if (!md) return;
+                        const sd = new Date(md * 1000); sd.setUTCDate(sd.getUTCDate() - 1);
+                        if (sd.toISOString().slice(0, 10) !== yIso) return;
+                        const v = parseFloat(tx.amount ?? tx.changed_balance);
+                        if (v > 0) yBtc = v;
+                      });
+                      if (yBtc === null) {
+                        (states['sensor.pool_balance_btc']?.attributes?.payout_history ?? []).forEach(e => {
+                          if (!e[0] || !e[2]) return;
+                          const sd = new Date(e[0]); sd.setUTCDate(sd.getUTCDate() - 1);
+                          if (sd.toISOString().slice(0, 10) === yIso) yBtc = e[2];
+                        });
+                      }
+                      if (yBtc === null) {
+                        const raw = states['input_text.pool_btc_daily_log']?.state ?? '';
+                        (raw && raw !== 'unknown' && raw !== 'unavailable' ? raw.split('|') : []).forEach(e => {
+                          const [d, b] = e.split(','); if (d === yIso) { const v = parseFloat(b); if (v > 0) yBtc = v; }
+                        });
+                      }
+                      const haveYield = yBtc !== null && yBtc > 0;
+                      const satsDelta = haveYield ? dchip('(+' + Math.round(yBtc * 1e8).toLocaleString('de-DE') + ')', up, 0.5) : '';
+                      const euroDelta = (haveYield && eurRate !== null && eurRate > 0)
+                        ? dchip('(+' + (yBtc * eurRate).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €)', up)
+                        : '';
+                      const satsLine = haveBal ? satsStr + satsDelta : satsStr;
+                      const balSub   = euroSub ? euroSub + euroDelta : '';
+
+                      return `
+                        <style>
+                          @keyframes bgz-block-tick {
+                            0%   { transform:rotateX(90deg); color:var(--bg-color-super,#F7931A); text-shadow:0 0 16px rgba(247,147,26,.8); }
+                            1%   { transform:rotateX(0);     color:var(--bg-color-super,#F7931A); text-shadow:0 0 16px rgba(247,147,26,.8); }
+                            70%  { transform:rotateX(0);     color:var(--bg-color-super,#F7931A); text-shadow:0 0 8px rgba(247,147,26,.4); }
+                            100% { transform:rotateX(0);     color:var(--primary-text-color); text-shadow:0 0 0 rgba(247,147,26,0); }
+                          }
+                        </style>
+                        <div style="display:flex;flex-direction:column;height:100%;width:100%;justify-content:space-between">
+                          <div style="display:flex;gap:16px;align-items:center">
+                            <img src="/local/${img}?v=20260625"
+                                 style="width:20%;max-width:110px;aspect-ratio:1;border-radius:50%;flex-shrink:0;
+                                        object-fit:cover;border:2px solid var(--divider-color)">
+                            <div style="flex:1;min-width:0">
+                              <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1.1;
+                                          white-space:normal;overflow-wrap:break-word;
+                                          color:var(--primary-text-color);margin-bottom:6px">${head}</div>
+                              <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.3;
+                                          white-space:normal;overflow-wrap:break-word">${sub}</div>
+                            </div>
+                          </div>
+                          <div style="display:flex;justify-content:space-between;padding-top:8px;
+                                      border-top:1px solid var(--divider-color)">
+                            <div style="width:24%;max-width:135px;flex-shrink:0;text-align:center">
+                              <div style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;
+                                          color:var(--secondary-text-color);opacity:0.65;margin-bottom:1px">Blockzeit</div>
+                              <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1;white-space:nowrap;${blockAnim}">${blockStr}</div>
+                            </div>
+                            ${stat('Balance', satsLine, balSub)}
+                            ${stat('Kurs', priceStr, priceSub)}
+                          </div>
+                        </div>`;
+                    ]]]
+                styles:
+                  card:
+                    # Neutrales Glas, identisch zu Wetter/Horizont: alle Werte
+                    # aus dem Theme (ha-card-*), kein Modus-Tint mehr.
+                    - background: var(--ha-card-background)
+                    - border-radius: var(--ha-card-border-radius)
+                    # Der sichtbare Radius wird (wie bei den anderen Karten) hart
+                    # von www/bitgrid_card_shape.js erzwungen (BUTTON-CARD im Set);
+                    # styles.card border-radius allein greift hier nicht sichtbar.
+                    # overflow:hidden clippt zusaetzlich den Inhalt auf den Radius.
+                    - overflow: hidden
+                    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+                    - box-shadow: var(--ha-card-box-shadow)
+                    - padding: 12px
+                  grid:
+                    - grid-template-areas: '"hamster"'
+                    - grid-template-columns: 1fr
+                  custom_fields:
+                    hamster:
+                      - height: 100%
+                      - width: 100%
+                      - justify-self: stretch
+                      - align-self: stretch
+
+          # ═══════════════════════════════════════════════════════════
+          # ZEILE 2 LINKS  —  Energiefluss (g2l), gepaart mit Verlauf (g2r).
+          # ═══════════════════════════════════════════════════════════
+          - type: vertical-stack
+            view_layout:
+              grid-area: g2l
+            cards:
+
+              # ── Gruppen-Titel: ENERGIEFLUSS ──────────────────────────────
+              # "Energie" verworfen (31.08.2026, Nutzer-Feedback "passt noch
+              # nicht ganz"): war der generische Gruppenname aus v2, als
+              # Hamster+Energiefluss noch EINE gemeinsame Gruppe bildeten.
+              # Seit der BitGridAI/Energie-Aufspaltung beschriftet er nur noch
+              # die Flussdiagramm-Karte, "Energiefluss" (wie im Code-Kommentar
+              # darunter) trifft den Inhalt genauer und passt zur Konvention
+              # der übrigen Titel (Miner, Wetter, Verlauf (heute), Finanzen:
+              # alle benennen konkret, was folgt, nicht die Oberkategorie).
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:lightning-bolt
+                name: Energiefluss
+
+              # ═══════════════════════════════════════════════════════════
+              # ENERGIEFLUSS  —  Energie-Gruppe unten (flu, volle linke Breite)
+              # KEIN flex:1/Höhenangleichung an Verlauf — zweiter Fehlversuch
+              # (02.09.2026, Nutzer-Feedback "kaputt", identisches Symptom wie
+              # der erste am 31.08.2026): selbst mit dem aus dem Bundle-Code
+              # verifizierten .card-content-Selektor (position:relative;
+              # margin:0 auto, keine eigene Hoehe) blieb der Flow-Diagramm-
+              # Inhalt spuerbar unzentriert mit grossem Leerraum unten. PFCP
+              # spielt intern offenbar grundsaetzlich nicht zuverlaessig mit
+              # Hoehen-Streckung mit, unabhaengig vom Selektor — kein dritter
+              # Versuch ohne neue Erkenntnis. Energiefluss bleibt bei seiner
+              # natuerlichen Hoehe, genau wie Finanz-Bilanz das schon fuer
+              # denselben Grund seit 23.08.2026 tut.
+              # ═══════════════════════════════════════════════════════════
+              - type: custom:power-flow-card-plus
+                # zoom-Kommentar s. Hamster-Karte oben.
+                card_mod:
+                  style: |
+                    :host {
+                      zoom: min(1, calc(100vh / 1200px)) !important;
+                    }
+                    /* Padding einheitlich 12px (02.09.2026, wie Verlauf/
+                       Finanzen): PFCP setzt selbst kein eigenes Padding
+                       (Bundle-Code verifiziert: .card-content{position:
+                       relative;margin:0 auto}, keine padding-Zeile), erbt
+                       den HA-Standard von 16px. */
+                    .card-content {
+                      padding: 12px !important;
+                    }
+                    /* Schrift groesser (Nutzer-Wunsch 02.09.2026). Klassen aus
+                       dem echten Bundle-Quellcode (power-flow-card-plus.js,
+                       github.com/flixlix/power-flow-card-plus) verifiziert,
+                       nicht geraten: .label sind die Knotennamen (PV/Netz/
+                       Haus/...), .secondary-info die Watt-/Prozent-Werte,
+                       beide fix auf 12px ohne eigenes !important. Diese Zeile
+                       hat KEIN align-items:stretch-Pairing mit Verlauf (s.
+                       Kommentar oben), daher niedrigeres Ueberlauf-Risiko als
+                       bei der Hamster-Karte. */
+                    .label,
+                    .secondary-info {
+                      font-size: 14px !important;
+                    }
+                clickable_entities: true
+                # Runde Ecken/Hintergrund kommen vom Theme (ha-card-border-radius)
+                # plus www/bitgrid_card_shape.js: PFCP clippt seinen Hintergrund
+                # nicht selbst auf den Theme-Radius, und card-mod ist hier nicht
+                # installiert. Das Modul injiziert den Radius in den Shadow-Root.
+                # Farbpalette 24.08.2026 auf die v3-Datenrollen umgestellt
+                # (--bgai-*-v3, themes/bitgrid.yaml): PV gelb, Netz violett,
+                # Zuhause+Batterie gruen, Geraete eigene Rosé-Rolle. Ersetzt
+                # die vorherige eigenstaendige Pastell-Insel — nur in v3, v1/v2
+                # behalten ihre eigene PFCP-Instanz unveraendert (separate Datei).
+                entities:
+                  grid:
+                    entity:
+                      consumption: sensor.grid_import_w
+                      production: sensor.grid_export_w
+                    color:
+                      consumption: "var(--bgai-grid-v3, #7C83E8)"
+                      production: "var(--bgai-grid-v3, #7C83E8)"
+                  solar:
+                    entity: sensor.pv_power_w
+                    color: "var(--bgai-pv-v3, #FFD24A)"
+                  battery:
+                    entity: sensor.battery_power_flowchart_w
+                    state_of_charge: sensor.battery_soc_pct
+                    color:
+                      consumption: "var(--bgai-home-v3, #3FD07F)"
+                      production: "var(--bgai-home-v3, #3FD07F)"
+                  home:
+                    entity: sensor.house_load_w
+                    # "Haus" statt PFCP-Default "Zuhause" (24.08.2026, Nutzer-
+                    # Wunsch): einheitlich mit "Hausverbrauch" im Verlauf-Chart
+                    # und "PV-Eigenverbrauch" in der Finanz-Bilanz-Karte.
+                    name: Haus
+                    # Ringfarbe (nicht das Icon, das bleibt weiss) 24.08.2026
+                    # auf die Geraete/Rosa-Rolle umgestellt (Nutzer-Wunsch),
+                    # analog zu Hausverbrauch im Verlauf-Chart. Batterie
+                    # behaelt die Zuhause/Akku-Gruen-Rolle (s.u.). Literales
+                    # Hex statt var(--bgai-geraete-v3, ...): mit var() blieb
+                    # der Ring gruen, obwohl dieselbe var()-Zeile bei der
+                    # "Geraete"-individual-Bubble korrekt Rosa rendert —
+                    # Verdacht: PFCPs dedizierter "home"-Knoten verarbeitet
+                    # die Farbe JS-seitig (Schatten/Glow o.ae.) und loest
+                    # dabei var() nicht auf, waehrend "individual"-Eintraege
+                    # den String nur als CSS durchreichen (gleiche Bugklasse
+                    # wie apexcharts-card, s.o.). Noch nicht am Live-Dashboard
+                    # verifiziert, nur die naheliegendste Erklaerung.
+                    color: "#C08AD8"
+                  # Zwei Miner statt eines Summen-Knotens (gleiche Shelly-Quellen,
+                  # aus denen sensor.miner_total_power_w summiert). Die Bubble-Farbe
+                  # wird NICHT hier statisch gesetzt, sondern live nach Leistung von
+                  # www/bitgrid_card_shape.js eingefärbt (< 500 W grau, 500–1000 W grün,
+                  # 1000–1500 W cyan, ab 1500 W orange): das Modul liest den Shelly-Sensor und
+                  # überschreibt die PFCP-CSS-Variable --individual-<slot>-color.
+                  # color: hier ist nur der Fallback, falls das Modul (noch) nicht
+                  # greift — neutrales Grau, damit nichts grell aufblitzt.
+                  # Slot-Zuordnung über den Bubble-Namen (span.label).
+                  individual:
+                    - entity: sensor.shellyplugsg3_dcb4d9c5567c_leistung
+                      name: Miner 1
+                      icon: mdi:pickaxe
+                      color: "#757575"
+                      display_zero: false
+                      display_zero_tolerance: 25
+                    - entity: sensor.shellyplugsg3_d0cf13d86254_leistung
+                      name: Miner 2
+                      icon: mdi:pickaxe
+                      color: "#757575"
+                      display_zero: false
+                      display_zero_tolerance: 25
+                    # Heizstab: keine der sechs Datenrollen trifft zu (kein PV/
+                    # Mining/Zuhause/Netz/Geraete/Summe-Konzept) — Farbe bewusst
+                    # unveraendert gelassen, siehe Rueckfrage an Nutzer.
+                    - entity: sensor.ac_elwa_2_power1_solar
+                      name: Heizstab
+                      icon: mdi:water
+                      color: "#5C9EE2"
+                    # Summierte Haushalts-Plugs aus dem Geräte-Tab (Kühlschränke,
+                    # Waschmaschine, TV, Büro, Lüftung, Server/NAS/KI-Agent;
+                    # packages/devices.yaml). Teilmenge
+                    # der Haus-Last, wie die Miner: PFCP zieht das nicht vom
+                    # Haus-Knoten ab, die Bubble macht den Anteil nur sichtbar.
+                    - entity: sensor.geraete_power_w
+                      name: Geräte
+                      icon: mdi:power-plug
+                      color: "var(--bgai-geraete-v3, #C08AD8)"
+                      display_zero: false
+                      display_zero_tolerance: 10
+
+          # ═══════════════════════════════════════════════════════════
+          # ZEILE 3 LINKS  —  Miner-Steuerung (g3l), gepaart mit Finanzen (g3r).
+          # ═══════════════════════════════════════════════════════════
+          - type: vertical-stack
+            view_layout:
+              grid-area: g3l
+            # align-self:start wieder da (02.09.2026, zweiter Fehlversuch,
+            # Nutzer-Feedback "kaputt, zu viel Padding nach unten"): der
+            # flex:1 1 0 + justify-content:space-between-Ansatz in
+            # steuerung_quick.yaml sah live trotzdem nicht gut aus — gleiche
+            # Lehre wie bei Energiefluss/PFCP am selben Tag (s. dort).
+            # Miner-Boxen bleiben bei natuerlicher Hoehe, oben in der Zeile.
+            card_mod:
+              style: |
+                :host {
+                  align-self: start !important;
+                }
+            cards:
+
+              # ── Gruppen-Titel: MINER ─────────────────────────────────────
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:pickaxe
+                name: Miner
+
+              # ═══════════════════════════════════════════════════════════
+              # STEUERUNG QUICK-ACTION  —  schneller Moduswechsel für beide
+              # Miner, ohne Kennzahlen-Panel. views/steuerung_quick.yaml,
+              # Header verlinkt in den vollen Steuerung-Tab.
+              # ═══════════════════════════════════════════════════════════
+              - !include views/steuerung_quick.yaml
+
+          # ═══════════════════════════════════════════════════════════
+          # ZEILE 1 RECHTS  —  Wetter (g1r, nur Uhr+Icon + stündlicher
+          # Streifen), gepaart mit BitGridAI/Hamster (g1l).
+          # ═══════════════════════════════════════════════════════════
+          - type: vertical-stack
+            view_layout:
+              grid-area: g1r
+            cards:
+
+              # ── Gruppen-Titel: WETTER ────────────────────────────────────
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:weather-partly-cloudy
+                name: Wetter
+
+              # ═══════════════════════════════════════════════════════════
+              # WETTER  —  einzige Wetteranzeige im Demo-Layout: Uhr+Icon
+              # (clock-weather-card, nur Heute-Bereich) über dem stündlichen
+              # Streifen (weather-forecast). 5-Tage-Vorschau und Sonnenstand
+              # entfallen hier bewusst (siehe Kopfkommentar).
+              # clock-weather-card (HACS: pkissling/clock-weather-card), nur der
+              # Heute-Bereich: Icon, aktuelle Lage, Uhr, Datum.
+              # Runde Ecken: Theme liefert ha-card-border-radius, aber die Karte
+              # clippt ihren Hintergrund nicht selbst darauf, das übernimmt
+              # www/bitgrid_card_shape.js (card-mod ist hier nicht installiert).
+              # fill-Icons statt animiert: farbig wie der Entwurf, aber leichter
+              # für das Wandtablet (Qualitätsziel Nachhaltigkeit/Edge-Schonung).
+              # ═══════════════════════════════════════════════════════════
+              - type: custom:clock-weather-card
+                # zoom-Kommentar s. Hamster-Karte oben.
+                card_mod:
+                  style: |
+                    :host {
+                      zoom: min(1, calc(100vh / 1200px)) !important;
+                    }
+                    /* Padding oben kleiner (02.09.2026, Nutzer-Feedback
+                       "oben noch zu viel Padding"): die Karte setzt selbst
+                       kein eigenes Padding (styles.ts, github.com/pkissling/
+                       clock-weather-card), erbt den HA-Standard von
+                       .card-content (16px). Asymmetrisch wie bei den
+                       Miner-Karten (steuerung_quick.yaml). */
+                    .card-content {
+                      padding: 4px 12px 12px 12px !important;
+                    }
+                    /* Schrift groesser (Nutzer-Wunsch 02.09.2026). Der erste
+                       Versuch (div, span) griff nicht: clock-weather-card
+                       (pkissling/clock-weather-card) rendert intern keine divs/
+                       spans, sondern eigene Pseudo-Tags als Styling-Hooks (s.
+                       styles.ts im Quellcode, github.com/pkissling/clock-weather-
+                       card). Jetzt gezielt auf die tatsaechlichen Tag-Namen:
+                       -center ist die grosse Uhr (Basis 3.5rem, feste height:4rem
+                       in der Karte selbst — height hier mit erhoehen, sonst wird
+                       die vergroesserte Zeit oben/unten abgeschnitten). */
+                    clock-weather-card-today-right-wrap-top,
+                    clock-weather-card-today-right-wrap-bottom {
+                      font-size: 1.0625em !important;
+                    }
+                    clock-weather-card-today-right-wrap-center {
+                      font-size: 3.57rem !important;
+                      height: auto !important;
+                    }
+                    /* Wetterbeschreibung ("Teils bewoelkt, 19°C") unters Icon
+                       statt ueber die Uhrzeit (02.09.2026, Nutzer-Wunsch). Die
+                       Karte hat dafuer kein Config-Feld (README komplett
+                       geprueft, nur hide_*-Toggles) — echtes DOM-Reordering
+                       ist bei dieser Fremd-Karte nicht moeglich, daher per
+                       display:contents die Zwischen-Container "aufloesen" und
+                       Icon/Beschreibung/Uhr/Datum neu auf ein eigenes 2x2-Grid
+                       verteilen. -today ist laut Quellcode (styles.ts,
+                       github.com/pkissling/clock-weather-card) der echte
+                       Flex-Container fuer Icon-links/Text-rechts. */
+                    clock-weather-card-today {
+                      display: grid !important;
+                      grid-template-columns: 35% 65%;
+                      grid-template-rows: auto auto;
+                      grid-template-areas: "icon clock" "cond date";
+                      align-items: center;
+                    }
+                    clock-weather-card-today-left {
+                      /* width:100% (02.09.2026, Nutzer-Feedback "Icon
+                         mittig"): die Karte selbst setzt hier width:35%
+                         (war relativ zum urspruenglichen Flex-Container
+                         gedacht) — im neuen Grid ist das 35% von der
+                         bereits 35% breiten Spalte, macht die Box viel zu
+                         schmal und linksbuendig. Die Karten-eigene
+                         justify-content:center (styles.ts) zentriert das Icon
+                         dann korrekt innerhalb der vollen Zellbreite. */
+                      grid-area: icon;
+                      width: 100% !important;
+                    }
+                    /* Icon jetzt per Hoehe begrenzt statt per Breite
+                       (02.09.2026, Nutzer-Feedback "oben zu viel Platz"):
+                       die Karte selbst gibt dem Icon keine feste Groesse
+                       (.grow-img: max-width/max-height:100%) — es fuellte
+                       bisher seine eigene Bild-Intrinsic-Hoehe, die groesser
+                       war als die Uhr, wodurch die Grid-Zeile "icon|clock"
+                       sich an der Icon-Hoehe orientierte und die Uhr mit
+                       Luft drumrum mittig sass (s. Kommentar bei
+                       align-items:center auf -today weiter oben). Explizite
+                       max-height, an die Uhr-Zeilenhoehe angeglichen, statt
+                       width-Prozent: die Zeile richtet sich jetzt nach der
+                       Uhr, nicht mehr nach dem Icon. */
+                    clock-weather-card-today-left .grow-img {
+                      width: auto !important;
+                      max-height: 7rem !important;
+                    }
+                    clock-weather-card-today-right,
+                    clock-weather-card-today-right-wrap {
+                      display: contents !important;
+                    }
+                    clock-weather-card-today-right-wrap-top {
+                      grid-area: cond;
+                      text-align: center !important;
+                      justify-self: center !important;
+                    }
+                    clock-weather-card-today-right-wrap-center {
+                      grid-area: clock;
+                    }
+                    clock-weather-card-today-right-wrap-bottom {
+                      /* text-align:end aus der Karte selbst (war fuer die
+                         rechtsbuendige alte Position gedacht) explizit
+                         auf center umgestellt, sonst rutscht das Datum an
+                         den rechten Rand der Spalte statt unter die per
+                         Flexbox zentrierte Uhrzeit (02.09.2026, Nutzer-
+                         Feedback "Datum ist nicht unter der Uhrzeit"). */
+                      grid-area: date;
+                      text-align: center !important;
+                      justify-self: center !important;
+                    }
+                entity: weather.forecast_home
+                sun_entity: sun.sun
+                # clock-weather-card-i18n kennt nur Kurz-Codes (de, en, …); 'de-DE'
+                # fällt auf Englisch zurück. Luxon (date_pattern) rendert 'de'
+                # ebenfalls deutsch, also deckt 'de' beides ab.
+                locale: de
+                time_format: '24'
+                date_pattern: 'cccc, dd.LL.yyyy'
+                weather_icon_type: fill
+                animated_icon: false
+                hide_today_section: false
+                hide_forecast_section: true
+                hide_clock: false
+                hide_date: false
+
+
+              # Eingebaute weather-forecast-Karte, stündlich: horizontaler
+              # Zeitstrahl. show_current aus, weil die Karte darüber (Uhr) die
+              # aktuelle Lage schon zeigt. Runde Ecken: in
+              # www/bitgrid_card_shape.js mit aufgenommen (HUI-WEATHER-
+              # FORECAST-CARD), damit sie wie die anderen garantiert auf den
+              # Radius geclippt wird.
+              - type: weather-forecast
+                # flex:1 (31.08.2026): waechst auf die g1-Zeilenhoehe
+                # (Partner: Hamster-Karte, g1l), der stuendliche Streifen
+                # wird vertikal zentriert statt oben angepinnt.
+                # zoom-Kommentar s. Hamster-Karte oben.
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 1 1 auto !important;
+                      zoom: min(1, calc(100vh / 1200px)) !important;
+                    }
+                    ha-card {
+                      display: flex !important;
+                      flex-direction: column !important;
+                      justify-content: center !important;
+                      padding: 12px !important;
+                    }
+                    /* Schrift groesser (Nutzer-Wunsch 02.09.2026). Der erste
+                       Versuch (div, span, 1.3em) traf zwar echte divs (dies ist
+                       eine eingebaute HA-Karte, kein fremdes Custom-Element wie
+                       clock-weather-card), aber em ist hier relativ zum
+                       VERERBTEN Font-Size des Elternelements, nicht zum
+                       bisherigen eigenen Wert der Karte (--ha-font-size-s/-l) —
+                       der Sprung war real, nur zu klein, um aufzufallen. Jetzt
+                       direkt auf die tatsaechlichen Klassen aus dem HA-
+                       Frontend-Quellcode (hui-weather-forecast-card.ts) mit
+                       festen rem-Werten, plus Icon-Groesse (--forecast-icon-size
+                       wird von .forecast.compact ueberschrieben, darum direkt
+                       auf .forecast-image-icon > * statt auf die Custom-
+                       Property zielen). */
+                    .forecast-item-label,
+                    .forecast-day-header {
+                      font-size: 1.05rem !important;
+                    }
+                    .forecast .temp,
+                    .forecast-item .templow {
+                      font-size: 1.4rem !important;
+                    }
+                    .forecast-image-icon > * {
+                      width: 52px !important;
+                      height: 52px !important;
+                    }
+                entity: weather.forecast_home
+                forecast_type: hourly
+                show_current: false
+                show_forecast: true
+
+          # ═══════════════════════════════════════════════════════════
+          # ZEILE 2 RECHTS  —  Verlauf-Chart (g2r), gepaart mit Energiefluss
+          # (g2l).
+          # ═══════════════════════════════════════════════════════════
+          - type: vertical-stack
+            view_layout:
+              grid-area: g2r
+            cards:
+
+              # ── Gruppen-Titel: VERLAUF (HEUTE) ───────────────────────────
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:chart-areaspline
+                name: Verlauf (heute)
+
+              # ═══════════════════════════════════════════════════════════
+              # VERLAUF  —  PV-Ertrag / Verbrauch / Akku-Stand für den
+              # laufenden Tag (00:00–24:00) als transluzente Flächen
+              # (apexcharts-card, HACS). views/energieverlauf_tag.yaml.
+              # Reihenfolge mit Finanz-Bilanz getauscht (26.08.2026,
+              # Nutzer-Wunsch): Verlauf jetzt oben.
+              # ═══════════════════════════════════════════════════════════
+              - !include views/energieverlauf_tag.yaml
+
+          # ═══════════════════════════════════════════════════════════
+          # ZEILE 3 RECHTS  —  Finanz-Bilanz (g3r), gepaart mit Miner (g3l).
+          # ═══════════════════════════════════════════════════════════
+          - type: vertical-stack
+            view_layout:
+              grid-area: g3r
+            cards:
+
+              # ── Gruppen-Titel: FINANZEN ──────────────────────────────────
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:finance
+                name: Finanzen (heute)
+
+              # ═══════════════════════════════════════════════════════════
+              # FINANZ-BILANZ  —  Ersparnis PV-Eigennutzung, Mining-Ertrag,
+              # Netzbezugskosten, Gesamt-Profit heute. views/finanz_bilanz.yaml,
+              # Sensoren in packages/economics.yaml.
+              # ═══════════════════════════════════════════════════════════
+              - !include views/finanz_bilanz.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB: ENERGIEINFO  —  war der Redesign-Entwurf "EnergieInfo v2" (ab
+  # 25.08.2026 schrittweise nach Nutzer-Anweisung aufgebaut). Zweispaltig:
+  # links Echtzeitverbrauch, rechts Historie/Verlauf, darunter Verbrauch nach
+  # Räumen volle Breite. Der alte, gleichnamige Tab (Raum-für-Raum-Listen,
+  # path energieinfo) wurde 25.08.2026 gelöscht, dieser Tab hat seinen Namen
+  # (ohne "v2") und Pfad "energieinfo" übernommen und wurde auf Position 2
+  # der Tab-Reihenfolge verschoben (Nutzer-Vorgabe).
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Steuerung
+    path: steuerung
+    icon: mdi:pickaxe
+    theme: BitGridAI
+    # Eigener Verlauf nur fuer v3/Demo (v1/v2 nutzen weiterhin unveraendert
+    # das gemeinsame BitGridAI-Theme, themes/bitgrid.yaml lovelace-background).
+    # Formale v3-Palette 24.08.2026 (Nutzer-Vorgabe): "Verlauf oben links"
+    # -> "Verlauf unten rechts" = 135deg (to bottom right). Ersetzt jede
+    # vorherige Iteration. Grund laut Vorgabe: Gruen ist Statusfarbe fuer
+    # Zuhause/Akku (--bgai-home-v3), ein gruenstichiger Hintergrund senkt
+    # dort den Kontrast.
+    background: "linear-gradient(135deg, #0E1530 0%, #171A3A 100%)"
+    panel: true
+    # View-scoped Flaechen-/Textfarben (24.08.2026, Nutzer-Vorgabe): CSS-
+    # Custom-Properties auf :host der View gesetzt, vererben sich an alle
+    # Karten darunter (die bereits var(--card-background-color) etc.
+    # referenzieren) — ohne zweites Theme, ohne v1/v2 zu beruehren. Sidebar/
+    # Topbar liegen ausserhalb dieses DOM-Teilbaums und bleiben bewusst
+    # unveraendert (Nutzer-Entscheidung 24.08.2026).
+    card_mod:
+      style: |
+        :host {
+          --card-background-color: var(--bgai-card-bg-v3, #182449);
+          --divider-color: var(--bgai-divider-v3, #26356B);
+          --primary-text-color: var(--bgai-text-primary-v3, #EAEFFB);
+          --secondary-text-color: var(--bgai-text-secondary-v3, #A8B3D4);
+          /* Schrift groesser, nur v3 (Nutzer-Wunsch 02.09.2026): ueberschreibt die
+             Typo-Skala aus themes/bitgrid.yaml view-scoped, exakt dasselbe Muster
+             wie die Flaechen-/Textfarben oben — v1/v2 bleiben unveraendert. Werte
+             deutlich ueber der urspruenglich geplanten +3px-Stufe: die Home-Tab-
+             Inhaltskarten haben ein zusaetzliches zoom:min(1,calc(100vh/1200px))
+             (s. u.), das jede Erhoehung wieder verduennt — kompensiert durch
+             groessere Basiswerte statt zoom-Formel anzufassen. */
+          --bg-fs-label: 0.9375rem;
+          --bg-fs-secondary: 1.1875rem;
+          --bg-fs-body: 1.375rem;
+          --bg-fs-title: 2.125rem;
+          /* Neuer Token, nur fuer group_header-Gruppentitel (02.09.2026,
+             Nutzer-Wunsch "Ueberschriftgroessen fuer alle Gruppen in jedem
+             Tab wie Home"): das geteilte group_header-Template (button_card_
+             templates.yaml, auch von v1 genutzt) las bisher --bg-fs-body
+             (22px), Home hatte zusaetzlich 6x einen Pro-Karte-Override auf
+             1.6875rem (27px) — daher der Groessen-Unterschied zwischen
+             Tabs. Einheitlich in allen v3-Views gesetzt, v1 bleibt
+             unberuehrt (kennt die Variable nicht, Template faellt dort auf
+             --bg-fs-body zurueck). */
+          --bg-fs-group-header: 1rem;
+        }
+    cards:
+      - type: custom:layout-card
+        # KEIN zoom:calc(100vh/900px) mehr (31.08.2026, Nutzer-Wunsch "Zoom
+        # aus Tab Steuerung raus", nachdem dieselbe Technik im Home-Tab
+        # zuvor schon entfernt wurde, s. dortiger Kommentar fuer die volle
+        # Begruendung: rem-Werte wurden unter zoom unvorhersehbar, das
+        # erschwerte jede Schriftgroessen-Anpassung). Rendert jetzt in
+        # natuerlicher Groesse, scrollt bei Bedarf statt zu skalieren —
+        # akzeptiert (24.08.2026 war "nie scrollen" das Ziel, das wird hier
+        # bewusst aufgegeben zugunsten von vorhersehbaren rem-Groessen).
+        layout_type: custom:grid-layout
+        layout:
+          # Zwei gleich breite Spalten (wie Tab 1), Gruppentitel in einer
+          # min-content-Zeile darüber. Die Regelschwellen-Spalte ist kürzer
+          # und lässt darunter Leerraum (akzeptiert) — Gesamthöhe des Grids
+          # wird jetzt per zoom oben auf die Fensterhöhe skaliert statt zu
+          # scrollen (24.08.2026, Nutzer-Wunsch).
+          # minmax(0, 1fr) statt 1fr: 1fr = minmax(auto, 1fr), und das auto-Minimum
+          # ist die min-content-Breite. Der Miner-Block (7-Button-Energiezeile,
+          # 2-Miner-Steuergrid) ist im min-content breiter als 50% und würde sonst
+          # seine Spalte sprengen und die rechte auf ~0 drücken. minmax(0, …)
+          # klemmt beide Spalten hart auf ihren 50%-Anteil (gleiche Technik wie
+          # Tab 1 bei den Zeilen).
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: auto
+          grid-template-areas: '"miner regel"'
+          # Titel+Inhalt jetzt in EINEM vertical-stack pro Spalte statt in
+          # getrennten Grid-Zeilen (02.09.2026, Nutzer-Wunsch "genau so wie
+          # bei den anderen Tabs, kein row-gap"): strukturell an Home/
+          # BitcoinInfo/EnergieInfo angeglichen (dort steckt der Gruppentitel
+          # immer im selben vertical-stack wie die Karte darunter, mit dessen
+          # eigenem, kleineren Standard-Abstand) statt eine eigene "tl/tr"-
+          # Kopfzeile separat zu grid-platzieren. Der vorherige row-gap:8px-
+          # Workaround war nur eine Zahlen-Annaeherung, keine echte
+          # strukturelle Angleichung.
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+
+          # ── Spalte links: MINER (Titel + Steuerungs-Grid, geteilt aus
+          # views/miner_controls.yaml) ────────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: miner
+            cards:
+              - type: custom:button-card
+                icon: mdi:pickaxe
+                name: Miner
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              # Der Log (input_text.mvp_miner1_debug/mvp_miner2_debug) war hier
+              # bis 31.08.2026 eine eigene markdown-Karte unter beiden Minern
+              # (27.08.2026, Nutzer-Wunsch). Jetzt als 6. Akkordeon je Miner in
+              # views/miner_controls.yaml selbst (konsistent mit den anderen
+              # 5 Detail-Listen), daher hier entfernt statt dupliziert.
+              - !include views/miner_controls.yaml
+
+          # ── Regelschwellen rechts: SoC-Bänder + Start/Sicherheit/Nacht ──
+          # Im schmaleren rechten 50%-Streifen vertikal gestapelt (statt
+          # nebeneinander wie früher über die volle Breite).
+          #
+          # 26.08.2026: WIEDERHERGESTELLT, nachdem eine vorherige Aenderung
+          # dieses Chart faelschlich komplett entfernt hatte (Nutzer-
+          # Feedback: "der Graph ist mir sehr wichtig"). Der SVG-Chart ist
+          # 1:1 aus bitgrid_dashboard_v2.yaml uebernommen (dort identisch
+          # vorhanden, verifiziert gleiche Zeilenzahl/Struktur) — die exakte
+          # v3-Fassung war nicht mehr rekonstruierbar, da nur Teile davon in
+          # der Session sichtbar waren, aus der geloescht wurde. Die 6
+          # vormals aufklappbaren read-only-Detailgruppen (Hochschalten/
+          # Runterschalten/Notbremse/Temperatur/Nachtsperre/Lueftung) sind
+          # NICHT wiederhergestellt: nur 2 von 6 waren vollstaendig aus der
+          # Session rekonstruierbar, der Rest haette geraten werden muessen
+          # — das wollte ich nicht stillschweigend tun. Season-Automatik-
+          # Tabelle steht stattdessen darunter.
+          - type: vertical-stack
+            view_layout:
+              grid-area: regel
+            # EINE Karte fuer Chart + Details-Header + alle 6 Gruppen (31.08.2026,
+            # Nutzer-Wunsch "soll auch alles in einer Karte stecken", analog zu den
+            # Miner-Karten). Ein card_mod direkt HIER (auf dem view_layout-
+            # verankerten Aussen-Wrapper) rendert nachweislich OHNE Rahmen (live
+            # getestet 31.08.2026: "es fehlt die Karte" trotz identischem :host-
+            # Snippet) — vermutlich verschluckt custom:grid-layout hier eine
+            # Ebene. Deshalb bleibt DIESER Wrapper bewusst card_mod-frei (wie
+            # auch grid-area:miner nebenan keinen eigenen hat) und der Rahmen
+            # sitzt stattdessen auf dem inneren vertical-stack direkt unten,
+            # der jetzt ALLES umfasst statt nur den Chart.
+            cards:
+              # ── Gruppen-Titel: REGELSCHWELLEN (02.09.2026 hierher verschoben,
+              # war vorher eine eigene Grid-Zeile "tr" — s. Kopfkommentar
+              # der Miner-Spalte fuer die volle Begruendung). ──────────
+              - type: custom:button-card
+                icon: mdi:tune-variant
+                name: Regelschwellen
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              # ── SoC-Bänder: Visualisierung + Details-Header + 6 Gruppen ─────
+              - type: vertical-stack
+                card_mod:
+                  style: |
+                    :host {
+                      background: var(--ha-card-background) !important;
+                      border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color) !important;
+                      border-radius: 20px !important;
+                      box-shadow: var(--ha-card-box-shadow) !important;
+                      overflow: hidden !important;
+                      contain: paint !important;
+                    }
+                cards:
+                  - type: custom:button-card
+                    show_name: false
+                    show_icon: false
+                    show_state: false
+                    tap_action:
+                      action: none
+                    styles:
+                      card:
+                        - padding: "6px 6px 2px 6px"
+                        - background: "transparent"
+                        - box-shadow: "none"
+                      grid:
+                        - grid-template-areas: '"chart"'
+                        - grid-template-columns: "1fr"
+                        - grid-template-rows: "auto"
+                      custom_fields:
+                        chart:
+                          - width: "100%"
+                          - overflow: "hidden"
+                    custom_fields:
+                      chart: >
+                        [[[
+                          const eco  = parseFloat(states['input_number.mvp_soc_eco_start_pct']?.state || 60);
+                          const std  = parseFloat(states['input_number.mvp_soc_std_pct']?.state || 75);
+                          const sup  = parseFloat(states['input_number.mvp_soc_super_pct']?.state || 90);
+                          const stop = parseFloat(states['input_number.mvp_soc_stop_pct']?.state || 50);
+                          // Eigene Runterschalt-Schwellen seit 23.08.2026 (vorher: Super kollabierte
+                          // ueber den pauschalen Nachmittags-Cap, keine eigene Runterschalt-Marke).
+                          const supOff = parseFloat(states['input_number.mvp_soc_super_off_pct']?.state || 95);
+                          const stdOff = parseFloat(states['input_number.mvp_soc_std_off_pct']?.state || 83);
+                          const soc  = parseFloat(states['sensor.battery_soc_pct']?.state);
+                          // Saisonale Automatik (mvp_auto.yaml): manche Monate erreichen Standard/
+                          // Super gar nicht (Rohwert > 100%, auf 100 gekappt) — dann keine Marker/
+                          // Linien dafuer zeichnen, sonst zeigt der Chart einen Schwellwert, der de
+                          // facto nie gilt (Nutzer-Feedback 27.08.2026: "wenn Super nicht aktiviert
+                          // ist, sollte auch kein Super-Wert angezeigt werden").
+                          const block = states['sensor.mvp_saison_status']?.state || 'Voll (Eco/Standard/Super)';
+                          const stdReachable = block !== 'Nur Eco';
+                          const supReachable = block === 'Voll (Eco/Standard/Super)';
+                          const W=570, H=290, cL=48, cR=545, cT=30, cB=252;
+                          const yS = s => cB - s*(cB-cT)/100;
+                          const batMin = yS(20);
+                          function tForY(ty) {
+                            let lo=0, hi=1;
+                            for(let i=0;i<60;i++){const m=(lo+hi)/2;const y=batMin*(1-m)*(1-m)*(1+2*m)+cT*m*m*(3-2*m);if(y>ty)lo=m;else hi=m;}
+                            return (lo+hi)/2;
+                          }
+                          // Real sun times from sun.sun (next_* are UTC; if >20h ahead it's tomorrow → -24h)
+                          const sa=states['sun.sun']?.attributes||{};
+                          const nowMs=Date.now();
+                          const sunMs=iso=>{if(!iso)return null;let ms=new Date(iso).getTime();if(ms-nowMs>20*3600000)ms-=86400000;return ms;};
+                          const hrOf=ms=>{if(!ms)return null;const d=new Date(ms);return d.getHours()+d.getMinutes()/60;};
+                          const riseH=hrOf(sunMs(sa.next_rising))??5.47;
+                          const noonH=hrOf(sunMs(sa.next_noon))??13.58;
+                          const setH=hrOf(sunMs(sa.next_setting))??21.68;
+                          // Chart X for decimal hour h, clamped to [cL,cR]
+                          const xH=h=>cL+Math.max(0,Math.min(1,(h-5.5)/17))*(cR-cL);
+                          const xRise=xH(riseH),xNoon=xH(noonH),xSet=xH(setH);
+                          // Battery ascending bezier: flat 20% until sunrise, then charge to 100% at noon
+                          // Y formula: P0y=P1y=batMin, P2y=P3y=cT → tForY binary search valid for any X points
+                          const hw=noonH-riseH; // morning window width in hours
+                          const bP1x=xH(riseH+hw*0.35);
+                          const bP3x=xNoon;
+                          const bP2x=xH(riseH+hw*0.70);
+                          function xForT(t){const u=1-t;return u*u*u*xRise+3*u*u*t*bP1x+3*u*t*t*bP2x+t*t*t*bP3x;}
+                          function posC(s){const y=yS(s);return{x:xForT(tForY(y)),y};}
+                          const ecoC=posC(eco),stdC=posC(std),supC=posC(sup);
+                          const hausY=yS(stop);
+                          const curY=isNaN(soc)?null:yS(Math.min(100,Math.max(0,soc)));
+                          // Modus-/Schwellenfarben aus den Theme-Tokens (themes/bitgrid.yaml).
+                          // Im SVG als style-Attribut setzen: var() wird in fill/stroke-
+                          // ATTRIBUTEN nicht aufgelöst, in style dagegen schon (erbt vom View).
+                          const cEco='var(--bg-color-eco,#4CAF50)',cStd='var(--bg-color-standard,#26C6DA)',cSup='var(--bg-color-super,#F7931A)',cRes='var(--bg-color-reserve,#EF5350)';
+                          // Battery: flat 20% to sunrise → charge to noon → plateau → discharge to sunset → flat 20% to 23h
+                          const aw=setH-(noonH+1.5); // afternoon window after plateau
+                          const xDstart=xH(noonH+1.5),xDp1=xH(noonH+1.5+aw*0.30),xDp2=xH(noonH+1.5+aw*0.68);
+                          function xForT_desc(t){const u=1-t;return u*u*u*xDstart+3*u*u*t*xDp1+3*u*t*t*xDp2+t*t*t*xSet;}
+                          function posC_desc(s){const y=yS(s);return{x:xForT_desc(1-tForY(y)),y};}
+                          const batD='M '+cL+','+batMin+' L '+xRise+','+batMin+
+                                     ' C '+bP1x+','+batMin+' '+bP2x+','+cT+' '+xNoon+','+cT+
+                                     ' L '+xDstart+','+cT+
+                                     ' C '+xDp1+','+cT+' '+xDp2+','+batMin+' '+xSet+','+batMin+
+                                     ' L '+cR+','+batMin;
+                          // Sun: real sunrise→noon→sunset from sun.sun, asymmetric halves
+                          const hs1=xNoon-xRise,hs2=xSet-xNoon;
+                          const sunD='M '+xRise+','+cB+
+                                     ' C '+(xRise+hs1*0.55)+','+cB+' '+(xNoon-hs1*0.35)+','+cT+' '+xNoon+','+cT+
+                                     ' S '+(xNoon+hs2*0.55)+','+cB+' '+xSet+','+cB;
+                          function mark(c,col,lbl,dotCol,dotR){
+                            dotCol=dotCol||col; dotR=dotR||5;
+                            const ly=Math.max(cT+8,c.y-22);
+                            const hasLine=(c.y-6)>(ly+4);
+                            return '<text x="'+c.x+'" y="'+ly+'" style="fill:'+col+'" font-size="13" font-family="Roboto,sans-serif" font-weight="600" text-anchor="middle">'+lbl+'</text>'+
+                                   (hasLine?'<line x1="'+c.x+'" y1="'+(ly+4)+'" x2="'+c.x+'" y2="'+(c.y-6)+'" style="stroke:'+col+'" stroke-width="1.5" opacity="0.8"/>':'')+
+                                   '<circle cx="'+c.x+'" cy="'+c.y+'" r="'+dotR+'" style="fill:'+dotCol+'" stroke="rgba(20,10,50,0.9)" stroke-width="2"/>';
+                          }
+                          // Runterschalt-Punkte dunkler als die Hochschalt-Punkte derselben Farbe,
+                          // damit "hoch"/"runter" auch ohne Pfeil-Text auf einen Blick erkennbar ist.
+                          const darken=col=>'color-mix(in srgb, '+col+' 55%, black)';
+                          let s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">';
+                          s+='<circle cx="52" cy="11" r="4" style="fill:'+cEco+'"/><text x="59" y="15" fill="rgba(255,255,255,0.65)" font-size="12.5" font-family="Roboto,sans-serif">Schematik</text>';
+                          s+='<line x1="148" y1="11" x2="162" y2="11" stroke="rgba(255,255,255,0.8)" stroke-width="2"/><circle cx="155" cy="11" r="3" fill="white"/><text x="167" y="15" fill="rgba(255,255,255,0.65)" font-size="12.5" font-family="Roboto,sans-serif">Verlauf heute</text>';
+                          s+='<line x1="280" y1="11" x2="292" y2="11" stroke="rgba(255,180,0,0.8)" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="286" cy="11" r="3" fill="rgba(255,180,0,0.7)"/><text x="297" y="15" fill="rgba(255,255,255,0.65)" font-size="12.5" font-family="Roboto,sans-serif">Sonne</text>';
+                          const yTicks=[0,20,40,60,80,100];
+                          for(const p of yTicks){const y=yS(p);s+='<line x1="'+cL+'" y1="'+y+'" x2="'+cR+'" y2="'+y+'" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/><text x="'+(cL-4)+'" y="'+(y+3.5)+'" fill="rgba(255,255,255,0.5)" font-size="12" font-family="Roboto,sans-serif" text-anchor="end">'+p+'%</text>';}
+                          for(let h=6;h<=22;h++){const x=xH(h);const major=(h%3===0);s+='<line x1="'+x+'" y1="'+cT+'" x2="'+x+'" y2="'+cB+'" stroke="rgba(255,255,255,'+(major?'0.07':'0.03')+')" stroke-width="0.8"/><text x="'+x+'" y="'+(cB+13)+'" fill="rgba(255,255,255,'+(major?'0.55':'0.3')+')" font-size="'+(major?'12':'11')+'" font-family="Roboto,sans-serif" text-anchor="middle">'+h+'</text>';}
+                          s+='<text x="'+(cL+(cR-cL)/2)+'" y="'+(cB+25)+'" fill="rgba(255,255,255,0.35)" font-size="12" font-family="Roboto,sans-serif" text-anchor="middle">Uhrzeit</text>';
+                          s+='<line x1="'+cL+'" y1="'+cT+'" x2="'+cL+'" y2="'+cB+'" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>';
+                          s+='<line x1="'+cL+'" y1="'+cB+'" x2="'+cR+'" y2="'+cB+'" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>';
+                          s+='<path d="'+sunD+' V'+cB+' H'+xRise+' Z" fill="rgba(255,165,0,0.12)"/>';
+                          s+='<path d="'+sunD+'" fill="none" stroke="rgba(255,180,0,0.55)" stroke-width="1.5" stroke-dasharray="5 3"/>';
+                          // Fetch today's real SoC history — WebSocket with fallback to input_text
+                          if(!window._bgsocTrace) window._bgsocTrace={date:'',pts:[],status:'idle'};
+                          const today=new Date().toISOString().slice(0,10);
+                          if(window._bgsocTrace.date!==today && window._bgsocTrace.status!=='fetching'){
+                            window._bgsocTrace.status='fetching';
+                            const t0=new Date(); t0.setHours(0,0,0,0);
+                            // Try callWS first, then connection.sendMessagePromise as fallback
+                            const wsFn=hass?.callWS?.bind(hass)||(msg=>hass?.connection?.sendMessagePromise?.(msg));
+                            const wsMsg={type:'history/history_during_period',start_time:t0.toISOString(),
+                              entity_ids:['sensor.battery_soc_pct'],minimal_response:true,no_attributes:true};
+                            const p=wsFn?.(wsMsg);
+                            if(p) p.then(res=>{
+                              const raw=res?.['sensor.battery_soc_pct']||[];
+                              const bkts={};
+                              for(const r of raw){
+                                // lu can be seconds or ms; last_updated as ISO fallback
+                                let ts=r.lu!==undefined?(r.lu>1e10?r.lu:r.lu*1000):(r.last_updated?Date.parse(r.last_updated):null);
+                                if(!ts)continue;
+                                const d=new Date(ts);
+                                const h=d.getHours()+d.getMinutes()/60;
+                                const bk=Math.round(h*6)/6;
+                                const v=parseFloat(r.s??r.state);
+                                if(!isNaN(v))bkts[bk]=v;
+                              }
+                              window._bgsocTrace={date:today,pts:Object.entries(bkts).sort((a,b)=>+a[0]-+b[0]).map(([h,v])=>[+h,v]),status:'ok'};
+                            }).catch(()=>{window._bgsocTrace.status='error';});
+                            else window._bgsocTrace.status='no-ws';
+                          }
+                          // Fallback: input_text.batt_soc_trace (30-min snapshots from automation)
+                          let trace=window._bgsocTrace.pts;
+                          if(trace.length===0){try{const raw=states['input_text.batt_soc_trace']?.state||'';const p=raw.split('|');if(p.length===2&&p[0]===today)trace=JSON.parse(p[1]);}catch(e){}}
+                          const _dbg=window._bgsocTrace.status+'/'+trace.length+'pts';
+                          const hasTrace=trace.length>3;
+                          // Green schematic: full when no data, faded reference when real trace present
+                          s+='<path d="'+batD+' V'+cB+' H'+cL+' Z" fill="rgba(76,175,80,'+(hasTrace?'0.04':'0.12')+')" />';
+                          s+='<path d="'+batD+'" fill="none" style="stroke:'+cEco+'" stroke-width="'+(hasTrace?'1':'2')+'" opacity="'+(hasTrace?'0.25':'1')+'"/>';
+                          s+='<line x1="'+cL+'" y1="'+hausY+'" x2="'+cR+'" y2="'+hausY+'" style="stroke:'+cRes+'" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.75"/>';
+                          s+='<text x="'+(cL+5)+'" y="'+(hausY-3)+'" style="fill:'+cRes+'" font-size="12.5" font-family="Roboto,sans-serif">Haus '+stop+'%</text>';
+                          s+='<line x1="'+cL+'" y1="'+ecoC.y+'" x2="'+cR+'" y2="'+ecoC.y+'" style="stroke:'+cEco+'" stroke-width="0.8" stroke-dasharray="4 5" opacity="0.35"/>';
+                          if(stdReachable) s+='<line x1="'+cL+'" y1="'+stdC.y+'" x2="'+cR+'" y2="'+stdC.y+'" style="stroke:'+cStd+'" stroke-width="0.8" stroke-dasharray="4 5" opacity="0.35"/>';
+                          if(supReachable) s+='<line x1="'+cL+'" y1="'+supC.y+'" x2="'+cR+'" y2="'+supC.y+'" style="stroke:'+cSup+'" stroke-width="0.8" stroke-dasharray="4 5" opacity="0.35"/>';
+                          s+=mark(ecoC,cEco,'Eco '+eco+'%');
+                          if(stdReachable) s+=mark(stdC,cStd,'Std '+std+'%');
+                          if(supReachable) s+=mark(supC,cSup,'Super '+sup+'%');
+                          // Runterschalt-Schwellen auf dem absteigenden Ast (mvp_auto.yaml R4/R6):
+                          // SoC-getrieben, nicht zeit-/sonnenstandgetrieben (der frühere pauschale
+                          // "Eco-Cap ab Mittag" (P0a) wurde am 23.08.2026 entfernt — siehe
+                          // docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md).
+                          const supOffC=posC_desc(supOff),stdOffC=posC_desc(stdOff);
+                          if(supReachable) s+=mark(supOffC,cSup,'Super↓'+supOff+'%',darken(cSup),4);
+                          if(stdReachable) s+=mark(stdOffC,cStd,'Std↓'+stdOff+'%',darken(cStd),4);
+                          // Debug status (oben rechts, klein)
+                          s+='<text x="'+(cR-2)+'" y="22" fill="rgba(255,255,255,0.35)" font-size="10.5" font-family="Roboto,sans-serif" text-anchor="end">'+_dbg+'</text>';
+                          // Real trace: white polyline — only points within chart range [5h, 23h]
+                          const visTrace=trace.filter(([h])=>h>=5.5&&h<=22.5);
+                          if(visTrace.length>1){
+                            const pts=visTrace.map(([h,v])=>xH(h).toFixed(1)+','+yS(v).toFixed(1)).join(' ');
+                            s+='<polyline points="'+pts+'" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+                          }
+                          // Current live position dot at (now, soc)
+                          if(curY!==null){
+                            const nowH=new Date().getHours()+new Date().getMinutes()/60;
+                            const nx=xH(nowH);
+                            s+='<line x1="'+nx+'" y1="'+cT+'" x2="'+nx+'" y2="'+cB+'" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="2 3"/>';
+                            s+='<circle cx="'+nx+'" cy="'+curY+'" r="5" fill="white" stroke="rgba(100,200,255,0.7)" stroke-width="2"/>';
+                            s+='<text x="'+(nx+8)+'" y="'+Math.max(curY+4,cT+12)+'" fill="rgba(255,255,255,0.9)" font-size="13" font-family="Roboto,sans-serif" font-weight="600">'+Math.round(soc)+'%</text>';
+                          }
+                          s+='</svg>';
+                          return s;
+                        ]]]
+                  # ── Übersicht: 6 unabhängig aufklappbare Gruppen ────────────
+                  # 27.08.2026: inline onclick="..." auf HTML-generierten Zeilen
+                  # (Vortag) wurde von HAs CSP stumm verschluckt (Klick tat nichts,
+                  # live bestaetigt: "da faltet sich nur das Menue zusammen") —
+                  # exakt dasselbe Problem, bereits einmal dokumentiert in
+                  # views/historie_zeitraum_cycler.yaml (25.08.2026). Deshalb jetzt
+                  # wie dort geloest: echte button-cards mit nativem tap_action
+                  # (Template settings_row/settings_row_icon, button_card_templates.yaml,
+                  # oeffnet more-info zuverlaessig), pro Gruppe in einer type: conditional
+                  # unter dem Header, sichtbar nur wenn input_boolean.mvp_detail_*
+                  # 'on' ist. Header-Kachel bleibt fuers Auf-/Zuklappen zustaendig.
+
+                  # ─────────────────────────────────────────
+                  # Abschnitts-Überschrift vor den 6 Gruppen, analog zu den Miner-
+                  # Karten (views/miner_controls.yaml, 31.08.2026, Nutzer-Wunsch
+                  # "genauso wie bei den Minern").
+                  # ─────────────────────────────────────────
+                  - type: custom:button-card
+                    show_name: false
+                    show_icon: false
+                    show_state: false
+                    styles:
+                      card:
+                        - background: transparent
+                        - box-shadow: none
+                        - border: none
+                        - border-top: 1px solid rgba(255,255,255,0.08)
+                        - margin: 4px 8px 0
+                        - padding: 10px 2px 4px
+                      grid:
+                        - grid-template-areas: '"body"'
+                        - grid-template-columns: 1fr
+                      custom_fields:
+                        body:
+                          - width: 100%
+                          - justify-self: stretch
+                          - box-sizing: border-box
+                    custom_fields:
+                      body: >
+                        [[[
+                          return `<div style="font-size:var(--bg-fs-label);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--secondary-text-color);opacity:0.65;">Automationsregeln</div>`;
+                        ]]]
+
+                  - type: custom:button-card
+                    show_name: false
+                    show_icon: false
+                    show_state: false
+                    entity: input_boolean.mvp_detail_hochschalten
+                    tap_action:
+                      action: toggle
+                    styles:
+                      card:
+                        - background: rgba(255,255,255,0.04)
+                        - box-shadow: none
+                        - border: none
+                        - border-radius: 14px
+                        - overflow: hidden
+                        - margin: 6px 8px 2px
+                        - padding: 2px 12px
+                      grid:
+                        - grid-template-areas: '"body"'
+                        - grid-template-columns: 1fr
+                      custom_fields:
+                        body:
+                          - width: 100%
+                          - justify-self: stretch
+                          - box-sizing: border-box
+                    custom_fields:
+                      body: >
+                        [[[
+                              if (!window.bgGroupHeader) {
+                                window.bgGroupHeader = function(icon, title, ok, open) {
+                                  return `
+                                    <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;">
+                                      <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;"></ha-icon>
+                                      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bg-fs-body);font-weight:700;color:var(--secondary-text-color);text-align:left;">${title}</span>
+                                      <ha-icon icon="${ok ? 'mdi:check-circle' : 'mdi:alert-circle'}" style="--mdc-icon-size:18px;color:${ok ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'};margin-right:6px;flex-shrink:0;"></ha-icon>
+                                      <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                                    </div>`;
+                                };
+                              }
+                          const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                          const open = entity.state === 'on';
+                          const ok = g('input_number.mvp_soc_eco_start_pct') !== null;
+                          return window.bgGroupHeader('mdi:trending-up', 'Hochschalten', ok, open);
+                        ]]]
+                  - type: conditional
+                    conditions:
+                      - entity: input_boolean.mvp_detail_hochschalten
+                        state: "on"
+                    card:
+                      type: vertical-stack
+                      card_mod:
+                        style: |
+                          :host {
+                            background: rgba(255,255,255,0.08);
+                            border-radius: 14px;
+                            margin: 0 8px 6px;
+                            overflow: hidden;
+                          }
+                          #root {
+                            gap: 1px !important;
+                          }
+                      cards:
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_soc_eco_start_pct
+                        name: "Eco ab"
+                        icon: mdi:leaf
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_soc_std_pct
+                        name: "Standard ab"
+                        icon: mdi:gauge
+                        label: "[[[ const b = states['sensor.mvp_saison_status']?.state; return b === 'Nur Eco' ? 'gesperrt' : Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_soc_super_pct
+                        name: "Super ab"
+                        icon: mdi:rocket-launch
+                        label: "[[[ const b = states['sensor.mvp_saison_status']?.state; return b !== 'Voll (Eco/Standard/Super)' ? 'gesperrt' : Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_pv_start_w
+                        name: "Sofortstart PV"
+                        icon: mdi:solar-power
+                        label: "[[[ return (parseFloat(entity.state)/1000).toFixed(1) + ' kW'; ]]]"
+                  - type: custom:button-card
+                    show_name: false
+                    show_icon: false
+                    show_state: false
+                    entity: input_boolean.mvp_detail_runterschalten
+                    tap_action:
+                      action: toggle
+                    styles:
+                      card:
+                        - background: rgba(255,255,255,0.04)
+                        - box-shadow: none
+                        - border: none
+                        - border-radius: 14px
+                        - overflow: hidden
+                        - margin: 2px 8px 2px
+                        - padding: 2px 12px
+                      grid:
+                        - grid-template-areas: '"body"'
+                        - grid-template-columns: 1fr
+                      custom_fields:
+                        body:
+                          - width: 100%
+                          - justify-self: stretch
+                          - box-sizing: border-box
+                    custom_fields:
+                      body: >
+                        [[[
+                              if (!window.bgGroupHeader) {
+                                window.bgGroupHeader = function(icon, title, ok, open) {
+                                  return `
+                                    <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;">
+                                      <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;"></ha-icon>
+                                      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bg-fs-body);font-weight:700;color:var(--secondary-text-color);text-align:left;">${title}</span>
+                                      <ha-icon icon="${ok ? 'mdi:check-circle' : 'mdi:alert-circle'}" style="--mdc-icon-size:18px;color:${ok ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'};margin-right:6px;flex-shrink:0;"></ha-icon>
+                                      <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                                    </div>`;
+                                };
+                              }
+                          const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                          const open = entity.state === 'on';
+                          const ok = g('input_number.mvp_soc_stop_pct') !== null;
+                          return window.bgGroupHeader('mdi:trending-down', 'Runterschalten', ok, open);
+                        ]]]
+                  - type: conditional
+                    conditions:
+                      - entity: input_boolean.mvp_detail_runterschalten
+                        state: "on"
+                    card:
+                      type: vertical-stack
+                      card_mod:
+                        style: |
+                          :host {
+                            background: rgba(255,255,255,0.08);
+                            border-radius: 14px;
+                            margin: 0 8px 6px;
+                            overflow: hidden;
+                          }
+                          #root {
+                            gap: 1px !important;
+                          }
+                      cards:
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_soc_super_off_pct
+                        name: "Super endet"
+                        icon: mdi:rocket-launch
+                        label: "[[[ const b = states['sensor.mvp_saison_status']?.state; return b !== 'Voll (Eco/Standard/Super)' ? 'gesperrt' : Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_soc_std_off_pct
+                        name: "Standard endet"
+                        icon: mdi:gauge
+                        label: "[[[ const b = states['sensor.mvp_saison_status']?.state; return b === 'Nur Eco' ? 'gesperrt' : Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_soc_stop_pct
+                        name: "Hausreserve"
+                        icon: mdi:home-battery-outline
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' %'; ]]]"
+                  - type: custom:button-card
+                    show_name: false
+                    show_icon: false
+                    show_state: false
+                    entity: input_boolean.mvp_detail_notbremse
+                    tap_action:
+                      action: toggle
+                    styles:
+                      card:
+                        - background: rgba(255,255,255,0.04)
+                        - box-shadow: none
+                        - border: none
+                        - border-radius: 14px
+                        - overflow: hidden
+                        - margin: 2px 8px 2px
+                        - padding: 2px 12px
+                      grid:
+                        - grid-template-areas: '"body"'
+                        - grid-template-columns: 1fr
+                      custom_fields:
+                        body:
+                          - width: 100%
+                          - justify-self: stretch
+                          - box-sizing: border-box
+                    custom_fields:
+                      body: >
+                        [[[
+                              if (!window.bgGroupHeader) {
+                                window.bgGroupHeader = function(icon, title, ok, open) {
+                                  return `
+                                    <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;">
+                                      <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;"></ha-icon>
+                                      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bg-fs-body);font-weight:700;color:var(--secondary-text-color);text-align:left;">${title}</span>
+                                      <ha-icon icon="${ok ? 'mdi:check-circle' : 'mdi:alert-circle'}" style="--mdc-icon-size:18px;color:${ok ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'};margin-right:6px;flex-shrink:0;"></ha-icon>
+                                      <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                                    </div>`;
+                                };
+                              }
+                          const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                          const open = entity.state === 'on';
+                          const ok = g('input_number.mvp_batt_discharge_super_downgrade_w') !== null;
+                          return window.bgGroupHeader('mdi:battery-alert', 'Notbremse', ok, open);
+                        ]]]
+                  - type: conditional
+                    conditions:
+                      - entity: input_boolean.mvp_detail_notbremse
+                        state: "on"
+                    card:
+                      type: vertical-stack
+                      card_mod:
+                        style: |
+                          :host {
+                            background: rgba(255,255,255,0.08);
+                            border-radius: 14px;
+                            margin: 0 8px 6px;
+                            overflow: hidden;
+                          }
+                          #root {
+                            gap: 1px !important;
+                          }
+                      cards:
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_batt_discharge_super_downgrade_w
+                        name: "Super → Eco ab"
+                        icon: mdi:rocket-launch
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' W'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_batt_discharge_std_downgrade_w
+                        name: "Standard → Eco ab"
+                        icon: mdi:gauge
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' W'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: sensor.battery_power_w
+                        name: "Batterieleistung aktuell"
+                        icon: mdi:flash
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' W'; ]]]"
+                  - type: custom:button-card
+                    show_name: false
+                    show_icon: false
+                    show_state: false
+                    entity: input_boolean.mvp_detail_temperatur
+                    tap_action:
+                      action: toggle
+                    styles:
+                      card:
+                        - background: rgba(255,255,255,0.04)
+                        - box-shadow: none
+                        - border: none
+                        - border-radius: 14px
+                        - overflow: hidden
+                        - margin: 2px 8px 2px
+                        - padding: 2px 12px
+                      grid:
+                        - grid-template-areas: '"body"'
+                        - grid-template-columns: 1fr
+                      custom_fields:
+                        body:
+                          - width: 100%
+                          - justify-self: stretch
+                          - box-sizing: border-box
+                    custom_fields:
+                      body: >
+                        [[[
+                              if (!window.bgGroupHeader) {
+                                window.bgGroupHeader = function(icon, title, ok, open) {
+                                  return `
+                                    <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;">
+                                      <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;"></ha-icon>
+                                      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bg-fs-body);font-weight:700;color:var(--secondary-text-color);text-align:left;">${title}</span>
+                                      <ha-icon icon="${ok ? 'mdi:check-circle' : 'mdi:alert-circle'}" style="--mdc-icon-size:18px;color:${ok ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'};margin-right:6px;flex-shrink:0;"></ha-icon>
+                                      <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                                    </div>`;
+                                };
+                              }
+                          const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                          const open = entity.state === 'on';
+                          const ok = g('input_number.mvp_tmax_std_threshold_c') !== null;
+                          return window.bgGroupHeader('mdi:thermometer-alert', 'Temperatur', ok, open);
+                        ]]]
+                  - type: conditional
+                    conditions:
+                      - entity: input_boolean.mvp_detail_temperatur
+                        state: "on"
+                    card:
+                      type: vertical-stack
+                      card_mod:
+                        style: |
+                          :host {
+                            background: rgba(255,255,255,0.08);
+                            border-radius: 14px;
+                            margin: 0 8px 6px;
+                            overflow: hidden;
+                          }
+                          #root {
+                            gap: 1px !important;
+                          }
+                      cards:
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_tmax_std_threshold_c
+                        name: "Miner zu heiß ab"
+                        icon: mdi:thermometer-alert
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' °C'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_room_temp_eco_threshold_c
+                        name: "Raum zu warm ab"
+                        icon: mdi:home-thermometer-outline
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' °C'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: sensor.miner1_tmax
+                        name: "Miner 1 TMax"
+                        icon: mdi:thermometer
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' °C'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: sensor.miner2_tmax
+                        name: "Miner 2 TMax"
+                        icon: mdi:thermometer
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' °C'; ]]]"
+                  - type: custom:button-card
+                    show_name: false
+                    show_icon: false
+                    show_state: false
+                    entity: input_boolean.mvp_detail_nachtsperre
+                    tap_action:
+                      action: toggle
+                    styles:
+                      card:
+                        - background: rgba(255,255,255,0.04)
+                        - box-shadow: none
+                        - border: none
+                        - border-radius: 14px
+                        - overflow: hidden
+                        - margin: 2px 8px 2px
+                        - padding: 2px 12px
+                      grid:
+                        - grid-template-areas: '"body"'
+                        - grid-template-columns: 1fr
+                      custom_fields:
+                        body:
+                          - width: 100%
+                          - justify-self: stretch
+                          - box-sizing: border-box
+                    custom_fields:
+                      body: >
+                        [[[
+                              if (!window.bgGroupHeader) {
+                                window.bgGroupHeader = function(icon, title, ok, open) {
+                                  return `
+                                    <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;">
+                                      <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;"></ha-icon>
+                                      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bg-fs-body);font-weight:700;color:var(--secondary-text-color);text-align:left;">${title}</span>
+                                      <ha-icon icon="${ok ? 'mdi:check-circle' : 'mdi:alert-circle'}" style="--mdc-icon-size:18px;color:${ok ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'};margin-right:6px;flex-shrink:0;"></ha-icon>
+                                      <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                                    </div>`;
+                                };
+                              }
+                          const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                          const open = entity.state === 'on';
+                          const ok = g('input_boolean.mvp_night_block_enabled') !== null;
+                          return window.bgGroupHeader('mdi:weather-night', 'Nacht-Sperre', ok, open);
+                        ]]]
+                  - type: conditional
+                    conditions:
+                      - entity: input_boolean.mvp_detail_nachtsperre
+                        state: "on"
+                    card:
+                      type: vertical-stack
+                      card_mod:
+                        style: |
+                          :host {
+                            background: rgba(255,255,255,0.08);
+                            border-radius: 14px;
+                            margin: 0 8px 6px;
+                            overflow: hidden;
+                          }
+                          #root {
+                            gap: 1px !important;
+                          }
+                      cards:
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_boolean.mvp_night_block_enabled
+                        name: "Aktiv"
+                        icon: mdi:weather-night
+                        label: "[[[ return entity.state === 'on' ? 'AN' : 'AUS'; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_datetime.mvp_night_block_start
+                        name: "Von"
+                        icon: mdi:clock-start
+                        label: "[[[ return (entity.state || '00:00:00').slice(0,5); ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_datetime.mvp_night_block_end
+                        name: "Bis"
+                        icon: mdi:clock-end
+                        label: "[[[ return (entity.state || '00:00:00').slice(0,5); ]]]"
+                  - type: custom:button-card
+                    show_name: false
+                    show_icon: false
+                    show_state: false
+                    entity: input_boolean.mvp_detail_lueftung
+                    tap_action:
+                      action: toggle
+                    styles:
+                      card:
+                        - background: rgba(255,255,255,0.04)
+                        - box-shadow: none
+                        - border: none
+                        - border-radius: 14px
+                        - overflow: hidden
+                        - margin: 2px 8px 10px
+                        - padding: 2px 12px
+                      grid:
+                        - grid-template-areas: '"body"'
+                        - grid-template-columns: 1fr
+                      custom_fields:
+                        body:
+                          - width: 100%
+                          - justify-self: stretch
+                          - box-sizing: border-box
+                    custom_fields:
+                      body: >
+                        [[[
+                              if (!window.bgGroupHeader) {
+                                window.bgGroupHeader = function(icon, title, ok, open) {
+                                  return `
+                                    <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;">
+                                      <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;"></ha-icon>
+                                      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bg-fs-body);font-weight:700;color:var(--secondary-text-color);text-align:left;">${title}</span>
+                                      <ha-icon icon="${ok ? 'mdi:check-circle' : 'mdi:alert-circle'}" style="--mdc-icon-size:18px;color:${ok ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'};margin-right:6px;flex-shrink:0;"></ha-icon>
+                                      <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                                    </div>`;
+                                };
+                              }
+                          const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                          const open = entity.state === 'on';
+                          const ok = g('sensor.luftung_status') !== null;
+                          return window.bgGroupHeader('mdi:fan', 'Lüftung', ok, open);
+                        ]]]
+                  - type: conditional
+                    conditions:
+                      - entity: input_boolean.mvp_detail_lueftung
+                        state: "on"
+                    card:
+                      type: vertical-stack
+                      card_mod:
+                        style: |
+                          :host {
+                            background: rgba(255,255,255,0.08);
+                            border-radius: 14px;
+                            margin: 0 8px 6px;
+                            overflow: hidden;
+                          }
+                          #root {
+                            gap: 1px !important;
+                          }
+                      cards:
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: sensor.luftung_status
+                        name: "Status"
+                        icon: mdi:fan
+                        label: "[[[ return entity.state; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_datetime.mvp_filter_last_cleaned
+                        name: "Filter zuletzt gereinigt"
+                        icon: mdi:air-filter
+                        label: "[[[ return entity.state; ]]]"
+                      - type: custom:button-card
+                        template: [settings_row, settings_row_icon]
+                        styles:
+                          card:
+                            - background: "transparent"
+                          icon:
+                            - color: var(--secondary-text-color)
+                        entity: input_number.mvp_filter_interval_days
+                        name: "Filterpflege-Intervall"
+                        icon: mdi:calendar-clock
+                        label: "[[[ return Math.round(parseFloat(entity.state)) + ' Tage'; ]]]"
+
+
+  - title: BitcoinInfo
+    path: bitcoininfo
+    icon: mdi:bitcoin
+    theme: BitGridAI
+    # Eigener Verlauf nur fuer v3/Demo (v1/v2 nutzen weiterhin unveraendert
+    # das gemeinsame BitGridAI-Theme, themes/bitgrid.yaml lovelace-background).
+    # Formale v3-Palette 24.08.2026 (Nutzer-Vorgabe): "Verlauf oben links"
+    # -> "Verlauf unten rechts" = 135deg (to bottom right). Ersetzt jede
+    # vorherige Iteration. Grund laut Vorgabe: Gruen ist Statusfarbe fuer
+    # Zuhause/Akku (--bgai-home-v3), ein gruenstichiger Hintergrund senkt
+    # dort den Kontrast.
+    background: "linear-gradient(135deg, #0E1530 0%, #171A3A 100%)"
+    panel: true
+    # View-scoped Flaechen-/Textfarben (24.08.2026, Nutzer-Vorgabe): CSS-
+    # Custom-Properties auf :host der View gesetzt, vererben sich an alle
+    # Karten darunter (die bereits var(--card-background-color) etc.
+    # referenzieren) — ohne zweites Theme, ohne v1/v2 zu beruehren. Sidebar/
+    # Topbar liegen ausserhalb dieses DOM-Teilbaums und bleiben bewusst
+    # unveraendert (Nutzer-Entscheidung 24.08.2026).
+    card_mod:
+      style: |
+        :host {
+          --card-background-color: var(--bgai-card-bg-v3, #182449);
+          --divider-color: var(--bgai-divider-v3, #26356B);
+          --primary-text-color: var(--bgai-text-primary-v3, #EAEFFB);
+          --secondary-text-color: var(--bgai-text-secondary-v3, #A8B3D4);
+          /* Schrift groesser, nur v3 (Nutzer-Wunsch 02.09.2026): ueberschreibt die
+             Typo-Skala aus themes/bitgrid.yaml view-scoped, exakt dasselbe Muster
+             wie die Flaechen-/Textfarben oben — v1/v2 bleiben unveraendert. Werte
+             deutlich ueber der urspruenglich geplanten +3px-Stufe: die Home-Tab-
+             Inhaltskarten haben ein zusaetzliches zoom:min(1,calc(100vh/1200px))
+             (s. u.), das jede Erhoehung wieder verduennt — kompensiert durch
+             groessere Basiswerte statt zoom-Formel anzufassen. */
+          --bg-fs-label: 0.9375rem;
+          --bg-fs-secondary: 1.1875rem;
+          --bg-fs-body: 1.375rem;
+          --bg-fs-title: 2.125rem;
+          /* Neuer Token, nur fuer group_header-Gruppentitel (02.09.2026,
+             Nutzer-Wunsch "Ueberschriftgroessen fuer alle Gruppen in jedem
+             Tab wie Home"): das geteilte group_header-Template (button_card_
+             templates.yaml, auch von v1 genutzt) las bisher --bg-fs-body
+             (22px), Home hatte zusaetzlich 6x einen Pro-Karte-Override auf
+             1.6875rem (27px) — daher der Groessen-Unterschied zwischen
+             Tabs. Einheitlich in allen v3-Views gesetzt, v1 bleibt
+             unberuehrt (kennt die Variable nicht, Template faellt dort auf
+             --bg-fs-body zurueck). */
+          --bg-fs-group-header: 1rem;
+        }
+    cards:
+      - type: custom:layout-card
+        # 01.09.2026, Nutzer-Wunsch: symmetrische Zeilen statt zwei
+        # unabhaengig durchlaufender Spalten (die vorher an
+        # unterschiedlichen Kartenhoehen aneinander vorbeiliefen).
+        # Gruppierung nach Thema, gleiche Idee wie der Home-Tab:
+        # Zeile 1 = Finanz-Snapshots, Zeile 2 = Trend-Charts (~90 Tage),
+        # Zeile 3 = Aktivitaets-Logs (Tag/Monat).
+        # Ehemalige Zeile 4 "Rueckblick" (views/stats_retro_vergleich.yaml)
+        # am 03.09.2026 auf Nutzer-Wunsch entfernt; die View-Datei bleibt
+        # ungenutzt im Repo liegen, falls sie spaeter wieder gebraucht wird.
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: auto auto auto
+          grid-template-areas: '"r1l r1r" "r2l r2r" "r3l r3r"'
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+
+          # ── Zeile 1 links: POOLERTRÄGE ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: r1l
+            cards:
+              - type: custom:button-card
+                icon: mdi:chart-line
+                name: Poolerträge
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              - !include views/stats_f2pool_results.yaml
+
+          # ── Zeile 1 rechts: HARDWARE-ABZAHLUNG ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: r1r
+            cards:
+              - type: custom:button-card
+                icon: mdi:progress-check
+                name: Hardware-Abzahlung
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              - !include views/stats_hardware_payoff.yaml
+
+          # ── Zeile 2 links: BITCOIN-KURS ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: r2l
+            cards:
+              - type: custom:button-card
+                icon: mdi:currency-eur
+                name: Bitcoin-Kurs
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              - !include views/stats_btc_price.yaml
+
+          # ── Zeile 2 rechts: EFFIZIENZ ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: r2r
+            cards:
+              - type: custom:button-card
+                icon: mdi:chart-line
+                name: Effizienz
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              - !include views/stats_energy_to_sats.yaml
+
+          # ── Zeile 3 links: MINING VERLAUF ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: r3l
+            cards:
+              - type: custom:button-card
+                icon: mdi:calendar-clock
+                name: Mining Verlauf
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              - !include views/mining_log.yaml
+
+          # ── Zeile 3 rechts: LANGZEITBILANZ ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: r3r
+            cards:
+              - type: custom:button-card
+                icon: mdi:chart-bar-stacked
+                name: Langzeitbilanz
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              - !include views/stats_pool_monthly.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB 5: STATISTIK  —  2 Spalten.
+  # Links: Energy-to-Sats-Effizienz-Trend (stats_energy_to_sats.yaml), zeigt
+  # das offizielle 45-sats/kWh-Ziel aus 012_quality_goals.md, siehe ADR 026.
+  # Rechts: kombinierte Energie+Mining Karten + Verlauf (stats_overview.yaml).
+  # Die linke Spalte hatte hier frueher den F2Pool-Live-Snapshot
+  # (stats_pool.yaml/stats_f2pool_live.yaml, weiterhin von v2 genutzt),
+  # 24.08.2026 auf Nutzer-Wunsch durch den Effizienz-Trend ersetzt.
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: EnergieInfo
+    path: energieinfo
+    icon: mdi:lightning-bolt
+    theme: BitGridAI
+    # Eigener Verlauf nur fuer v3/Demo (v1/v2 nutzen weiterhin unveraendert
+    # das gemeinsame BitGridAI-Theme, themes/bitgrid.yaml lovelace-background).
+    background: "linear-gradient(135deg, #0E1530 0%, #171A3A 100%)"
+    panel: true
+    # View-scoped Flaechen-/Textfarben, wie alle uebrigen v3-Tabs.
+    card_mod:
+      style: |
+        :host {
+          --card-background-color: var(--bgai-card-bg-v3, #182449);
+          --divider-color: var(--bgai-divider-v3, #26356B);
+          --primary-text-color: var(--bgai-text-primary-v3, #EAEFFB);
+          --secondary-text-color: var(--bgai-text-secondary-v3, #A8B3D4);
+          /* Schrift groesser, nur v3 (Nutzer-Wunsch 02.09.2026): ueberschreibt die
+             Typo-Skala aus themes/bitgrid.yaml view-scoped, exakt dasselbe Muster
+             wie die Flaechen-/Textfarben oben — v1/v2 bleiben unveraendert. Werte
+             deutlich ueber der urspruenglich geplanten +3px-Stufe: die Home-Tab-
+             Inhaltskarten haben ein zusaetzliches zoom:min(1,calc(100vh/1200px))
+             (s. u.), das jede Erhoehung wieder verduennt — kompensiert durch
+             groessere Basiswerte statt zoom-Formel anzufassen. */
+          --bg-fs-label: 0.9375rem;
+          --bg-fs-secondary: 1.1875rem;
+          --bg-fs-body: 1.375rem;
+          --bg-fs-title: 2.125rem;
+          /* Neuer Token, nur fuer group_header-Gruppentitel (02.09.2026,
+             Nutzer-Wunsch "Ueberschriftgroessen fuer alle Gruppen in jedem
+             Tab wie Home"): das geteilte group_header-Template (button_card_
+             templates.yaml, auch von v1 genutzt) las bisher --bg-fs-body
+             (22px), Home hatte zusaetzlich 6x einen Pro-Karte-Override auf
+             1.6875rem (27px) — daher der Groessen-Unterschied zwischen
+             Tabs. Einheitlich in allen v3-Views gesetzt, v1 bleibt
+             unberuehrt (kennt die Variable nicht, Template faellt dort auf
+             --bg-fs-body zurueck). */
+          --bg-fs-group-header: 1rem;
+        }
+    cards:
+      # 25.08.2026, Nutzer-Vorgabe: "Echtzeitverlauf und Historie in einem
+      # 2er Spaltengrid belassen, aber unter Verbrauch pro Raum soll nur
+      # eine Spalte sein und die ganze Breite benutzen dürfen" — dritte
+      # Grid-Zeile "full" über beide Spalten hinweg, extra Zeile in
+      # grid-template-areas/-rows dafür.
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: auto auto
+          grid-template-areas: '"left right" "full full"'
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+          - type: vertical-stack
+            view_layout:
+              grid-area: left
+            cards:
+              # 25.08.2026, Nutzer-Vorgabe: Abschnittstitel nicht als
+              # gekachelte Markdown-Karte, sondern im transparenten
+              # Gruppentitel-Stil der übrigen Tabs (z. B. "Haus"/"Garage"
+              # im Tab "EnergieInfo", views/geraete.yaml — Karte ohne
+              # Hintergrund/Rand/Schatten, Icon + Großbuchstaben-Label).
+              - type: custom:button-card
+                icon: mdi:flash
+                name: Echtzeitverbrauch
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              # 2 Spalten (Nutzer-Vorgabe 25.08.2026, nach anfänglich 3
+              # gleich breiten Feldern): links Gesamt, rechts Gerätetyp
+              # (7-Zeilen-Liste, von Natur aus am höchsten) — gleicht die
+              # Spaltenhöhen besser aus als 3 gleich breite Felder mit viel
+              # Leerraum links. Ersetzt die vorherige Zeilenliste (views/
+              # echtzeitverbrauch.yaml, Datei bleibt erhalten, aktuell
+              # nirgends eingebunden).
+              # views/verbrauch_nach_raeumen.yaml (03.09.2026 aus der linken
+              # Spalte entfernt, Nutzer-Wunsch): stand vorher gestapelt unter
+              # Gesamt, Datei bleibt erhalten, aktuell nirgends eingebunden.
+              # custom:layout-card ersetzt durch natives horizontal-stack
+              # (02.09.2026, Nutzer-Wunsch "Abstand wie bei den anderen
+              # Tabs"): der eigentliche Root Cause war strukturell — ein
+              # verschachteltes Fremd-Plugin-layout-card als zweites Element
+              # im umgebenden vertical-stack verhaelt sich nachweislich nicht
+              # wie eine normale Karte (mehrere margin-top-Werte, 0 bis
+              # -16px, aenderten sichtbar nichts). horizontal-stack ist aus
+              # derselben nativen Stack-Karten-Familie wie vertical-stack und
+              # fuegt sich daher zuverlaessig in dessen Standard-Abstand ein.
+              # align-items:flex-start (card_mod) ersetzt das vorherige
+              # layout.align-items:start, sonst wuerde horizontal-stacks
+              # Default (stretch) die kuerzere linke Spalte auf die Hoehe
+              # der laengeren Geraetetyp-Liste rechts ziehen.
+              - type: horizontal-stack
+                card_mod:
+                  style: |
+                    :host {
+                      align-items: flex-start !important;
+                    }
+                cards:
+                  - !include views/gesamter_echtzeitverbrauch.yaml
+                  - !include views/verbrauch_nach_geraetetyp.yaml
+          # ── Rechte Spalte: Historie (Verbrauch) ──────────────────────
+          # 25.08.2026, Nutzer-Vorgabe: 2 Spalten statt 3×3 — oben links
+          # Zeitraum-Umschalter, oben rechts Gesamtenergie, darunter ein
+          # Graph pro Raum in derselben Reihenfolge wie im Echtzeitverbrauch-
+          # Abschnitt (verbrauch_nach_raeumen_heute.yaml): Untergeschoss,
+          # Wohnzimmer, Küche, Schlafzimmer, Büro, Hauswirtschaft. Reine
+          # Flächendiagramme ohne Geräte-Liste ("nur graph ohne die anzeigen
+          # wo die geräte untendrunter angezeigt werden").
+          - type: vertical-stack
+            view_layout:
+              grid-area: right
+            cards:
+              # 25.08.2026, Nutzer-Vorgabe (nach mehreren Anläufen mit einem
+              # eingebetteten <select> bzw. 2-Spalten-Titel+Dropdown, siehe
+              # Git-Historie dieser Datei für die gescheiterten Versuche):
+              # Titel wieder normal wie die übrigen Abschnitte (nicht mehr
+              # 2-spaltig), Zeitraum-Umschalter als eigener Pfeil-Cycler
+              # (gleiches Muster wie der Raum-Umschalter darunter), beides
+              # je eine volle Zeile statt einer 2-Spalten-Kopfzeile.
+              - type: custom:button-card
+                icon: mdi:chart-timeline-variant
+                name: Historie
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              - !include views/historie_raeume_cycler.yaml
+              - !include views/historie_zeitraum_cycler.yaml
+
+          # ── Volle Breite darunter: Verbrauch nach Räumen (heute) ──────
+          - type: vertical-stack
+            view_layout:
+              grid-area: full
+            cards:
+              - !include views/verbrauch_nach_raeumen_heute.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB: HEIZUNG  —  zwei Tabellen nebeneinander, Öl-Heizung (links) und
+  # Heizstab/AC-ELWA-2 (rechts). Neu 26.08.2026, Nutzer-Wunsch.
+  # Kein direkter Öl-/Brennwertsensor in HA eingebunden: die linke Tabelle
+  # zeigt den einzigen vorhandenen Messpunkt, den Shelly 1PM Gen4 im
+  # Brenner-Sicherungskreis (elektrische Aufnahme als Laufzeit-Proxy, siehe
+  # Kopfkommentar views/heizung_oel.yaml). Gleicher 2-Spalten-Grid-Aufbau
+  # und dieselben Gruppentitel-Buttoncards wie im Tab "EnergieInfo" (kein
+  # zoom-Lock, normales Scrollen — der Inhalt ist kurz genug).
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Heizung
+    path: heizung
+    # 03.09.2026, Nutzer-Wunsch: Tab aus der Leiste ausgeblendet (visible:
+    # false), View-Config bleibt vollstaendig erhalten, kein Loeschen von
+    # Inhalt — jederzeit reversibel durch Entfernen dieser einen Zeile.
+    visible: false
+    # Tab-Icon (27.08.2026, Nutzer-Wunsch): dasselbe mdi:water wie die
+    # Heizstab-Bubble im Energiefluss auf dem Home-Tab (siehe "individual"-
+    # Eintrag sensor.ac_elwa_2_power1_solar weiter oben in dieser Datei),
+    # nicht mdi:radiator (das bleibt als Icon der Öl-Gruppentitel-Karte
+    # innerhalb des Tabs erhalten, dort semantisch passender).
+    icon: mdi:water
+    theme: BitGridAI
+    # Eigener Verlauf nur fuer v3/Demo (v1/v2 nutzen weiterhin unveraendert
+    # das gemeinsame BitGridAI-Theme, themes/bitgrid.yaml lovelace-background).
+    background: "linear-gradient(135deg, #0E1530 0%, #171A3A 100%)"
+    panel: true
+    # View-scoped Flaechen-/Textfarben, wie alle uebrigen v3-Tabs.
+    card_mod:
+      style: |
+        :host {
+          --card-background-color: var(--bgai-card-bg-v3, #182449);
+          --divider-color: var(--bgai-divider-v3, #26356B);
+          --primary-text-color: var(--bgai-text-primary-v3, #EAEFFB);
+          --secondary-text-color: var(--bgai-text-secondary-v3, #A8B3D4);
+          /* Schrift groesser, nur v3 (Nutzer-Wunsch 02.09.2026): ueberschreibt die
+             Typo-Skala aus themes/bitgrid.yaml view-scoped, exakt dasselbe Muster
+             wie die Flaechen-/Textfarben oben — v1/v2 bleiben unveraendert. Werte
+             deutlich ueber der urspruenglich geplanten +3px-Stufe: die Home-Tab-
+             Inhaltskarten haben ein zusaetzliches zoom:min(1,calc(100vh/1200px))
+             (s. u.), das jede Erhoehung wieder verduennt — kompensiert durch
+             groessere Basiswerte statt zoom-Formel anzufassen. */
+          --bg-fs-label: 0.9375rem;
+          --bg-fs-secondary: 1.1875rem;
+          --bg-fs-body: 1.375rem;
+          --bg-fs-title: 2.125rem;
+          /* Neuer Token, nur fuer group_header-Gruppentitel (02.09.2026,
+             Nutzer-Wunsch "Ueberschriftgroessen fuer alle Gruppen in jedem
+             Tab wie Home"): das geteilte group_header-Template (button_card_
+             templates.yaml, auch von v1 genutzt) las bisher --bg-fs-body
+             (22px), Home hatte zusaetzlich 6x einen Pro-Karte-Override auf
+             1.6875rem (27px) — daher der Groessen-Unterschied zwischen
+             Tabs. Einheitlich in allen v3-Views gesetzt, v1 bleibt
+             unberuehrt (kennt die Variable nicht, Template faellt dort auf
+             --bg-fs-body zurueck). */
+          --bg-fs-group-header: 1rem;
+        }
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: auto
+          grid-template-areas: '"left right"'
+          # Titel+Inhalt jetzt in EINEM vertical-stack pro Spalte statt in
+          # getrennten Grid-Zeilen (02.09.2026, Nutzer-Wunsch "genau so wie
+          # bei den anderen Tabs, kein row-gap") — s. Kopfkommentar bei der
+          # Miner-Spalte im Tab "Steuerung" fuer die volle Begruendung,
+          # identischer Fix hier.
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+
+          # ── Spalte links: HEIZUNG (ÖL), Titel + Inhalt ───────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: left
+            cards:
+              - type: custom:button-card
+                icon: mdi:radiator
+                name: Heizung (Öl)
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              - !include views/heizung_oel_diagramm.yaml
+              - !include views/heizung_oel.yaml
+
+          # ── Spalte rechts: HEIZSTAB (ELEKTRISCH), Titel + Inhalt ─────
+          - type: vertical-stack
+            view_layout:
+              grid-area: right
+            cards:
+              - type: custom:button-card
+                icon: mdi:water-boiler
+                name: Heizstab (elektrisch)
+                show_state: false
+                tap_action:
+                  action: none
+                styles:
+                  card:
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    - padding: 4px 4px 0
+                  grid:
+                    - grid-template-areas: '"i n"'
+                    - grid-template-columns: min-content 1fr
+                    - align-items: center
+                  img_cell:
+                    - justify-content: start
+                    - align-self: center
+                  icon:
+                    - color: var(--secondary-text-color)
+                    - width: 24px
+                    - height: 24px
+                  name:
+                    - font-size: 1rem
+                    - font-weight: 700
+                    - text-transform: uppercase
+                    - letter-spacing: 0.07em
+                    - color: var(--secondary-text-color)
+                    - justify-self: start
+                    - padding-left: 10px
+              - !include views/heizstab_diagramm.yaml
+              - !include views/heizstab.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB 3: GRUNDRISS  —  1 Spalte: Haus-Grundriss oben, Garage-Grundriss
+  # darunter (24.08.2026, Nutzer-Entscheidung: vorher 2 Spalten nebeneinander,
+  # die Raumlisten darunter sind jetzt in den eigenen Tab "EnergieInfo"
+  # gewandert — siehe dort. Hier bleiben nur die beiden Grundriss-Bilder).
+  # Haus: picture-elements auf www/grundriss/base.png, State-Overlays für
+  #       Plugs/Sensoren aus packages/devices.yaml (views/floorplan.yaml).
+  # Garage: eigener Plan/Asset, State-Overlays aus packages/devices.yaml +
+  #       avalonq_miner1/2.yaml (views/garage_floorplan.yaml).
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Grundriss
+    path: floorplan
+    icon: mdi:floor-plan
+    theme: BitGridAI
+    # Eigener Verlauf nur fuer v3/Demo (v1/v2 nutzen weiterhin unveraendert
+    # das gemeinsame BitGridAI-Theme, themes/bitgrid.yaml lovelace-background).
+    # Formale v3-Palette 24.08.2026 (Nutzer-Vorgabe): "Verlauf oben links"
+    # -> "Verlauf unten rechts" = 135deg (to bottom right). Ersetzt jede
+    # vorherige Iteration. Grund laut Vorgabe: Gruen ist Statusfarbe fuer
+    # Zuhause/Akku (--bgai-home-v3), ein gruenstichiger Hintergrund senkt
+    # dort den Kontrast.
+    background: "linear-gradient(135deg, #0E1530 0%, #171A3A 100%)"
+    panel: true
+    # View-scoped Flaechen-/Textfarben (24.08.2026, Nutzer-Vorgabe): CSS-
+    # Custom-Properties auf :host der View gesetzt, vererben sich an alle
+    # Karten darunter (die bereits var(--card-background-color) etc.
+    # referenzieren) — ohne zweites Theme, ohne v1/v2 zu beruehren. Sidebar/
+    # Topbar liegen ausserhalb dieses DOM-Teilbaums und bleiben bewusst
+    # unveraendert (Nutzer-Entscheidung 24.08.2026).
+    card_mod:
+      style: |
+        :host {
+          --card-background-color: var(--bgai-card-bg-v3, #182449);
+          --divider-color: var(--bgai-divider-v3, #26356B);
+          --primary-text-color: var(--bgai-text-primary-v3, #EAEFFB);
+          --secondary-text-color: var(--bgai-text-secondary-v3, #A8B3D4);
+          /* Schrift groesser, nur v3 (Nutzer-Wunsch 02.09.2026), wie in allen
+             uebrigen v3-Tabs (s. Kommentar Home-Tab-Host fuer die Begruendung
+             der Werte). */
+          --bg-fs-label: 0.9375rem;
+          --bg-fs-secondary: 1.1875rem;
+          --bg-fs-body: 1.375rem;
+          --bg-fs-title: 2.125rem;
+          /* Neuer Token, nur fuer group_header-Gruppentitel (02.09.2026,
+             Nutzer-Wunsch "Ueberschriftgroessen fuer alle Gruppen in jedem
+             Tab wie Home"): das geteilte group_header-Template (button_card_
+             templates.yaml, auch von v1 genutzt) las bisher --bg-fs-body
+             (22px), Home hatte zusaetzlich 6x einen Pro-Karte-Override auf
+             1.6875rem (27px) — daher der Groessen-Unterschied zwischen
+             Tabs. Einheitlich in allen v3-Views gesetzt, v1 bleibt
+             unberuehrt (kennt die Variable nicht, Template faellt dort auf
+             --bg-fs-body zurueck). */
+          --bg-fs-group-header: 1rem;
+          /* Nutzer-Wunsch 24.08.2026: Grundriss-Tab soll nie scrollen. Das
+             Bild selbst schrumpft schon per svh-Breitenformel in
+             views/floorplan.yaml / views/garage_floorplan.yaml auf die
+             Fensterhoehe; overflow-y hier ist nur das Sicherheitsnetz falls
+             das Reserviert-Budget dort mal knapp daneben liegt (dann wird
+             im Zweifel 1-2px abgeschnitten statt eine Scrollbar zu zeigen). */
+          overflow-y: hidden;
+        }
+    cards:
+      - type: vertical-stack
+        card_mod:
+          style: |
+            :host {
+              padding: 14px;
+              box-sizing: border-box;
+              overflow-y: hidden;
+            }
+        cards:
+
+          # ── Umschalter Obergeschoss/Untergeschoss ───────────────────────
+          # Ersetzt die frühere Übereinander-Stapelung (Haus 16:9 + Garage
+          # 16:21 hochkant = sehr lange Scroll-Seite, Nutzer-Feedback
+          # 24.08.2026). Ganze Kopfzeile tappbar (nicht nur die Pfeile),
+          # toggelt input_boolean.fp_view_garage (packages/devices.yaml,
+          # Entity-ID unveraendert gelassen, nur die Anzeige-Labels
+          # umbenannt 26.08.2026 — passt zur bestehenden Konvention, die
+          # Keller+Garage im Raum-Modell bereits zu "Untergeschoss"
+          # zusammenlegt, siehe packages/devices.yaml Z.596).
+          # Bei genau 2 Ansichten tun beide Pfeile dasselbe (Vor/Zurück =
+          # Toggle), rein optische Navigations-Metapher.
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            entity: input_boolean.fp_view_garage
+            tap_action:
+              action: toggle
+            styles:
+              card:
+                - background: none
+                - box-shadow: none
+                - border: none
+                - padding: 4px 4px 0
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+            custom_fields:
+              body: >
+                [[[
+                  const showGarage = entity.state === 'on';
+                  const icon = showGarage ? 'mdi:home-floor-b' : 'mdi:home-floor-a';
+                  const label = showGarage ? 'Untergeschoss' : 'Obergeschoss';
+                  return `
+                    <div style="display:flex;align-items:center;justify-content:center;gap:22px;padding:6px 0;cursor:pointer;">
+                      <ha-icon icon="mdi:chevron-left" style="--mdc-icon-size:36px;color:var(--secondary-text-color);"></ha-icon>
+                      <div style="display:flex;align-items:center;gap:12px;min-width:170px;justify-content:center;">
+                        <ha-icon icon="${icon}" style="--mdc-icon-size:30px;color:var(--secondary-text-color);"></ha-icon>
+                        <span style="font-size:1.4875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--secondary-text-color);">${label}</span>
+                      </div>
+                      <ha-icon icon="mdi:chevron-right" style="--mdc-icon-size:36px;color:var(--secondary-text-color);"></ha-icon>
+                    </div>`;
+                ]]]
+
+          - type: conditional
+            conditions:
+              - entity: input_boolean.fp_view_garage
+                state: "off"
+            card:
+              type: vertical-stack
+              cards:
+                - !include views/floorplan.yaml
+
+          - type: conditional
+            conditions:
+              - entity: input_boolean.fp_view_garage
+                state: "on"
+            card:
+              type: vertical-stack
+              cards:
+                - !include views/garage_floorplan.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB (letzter): EINSTELLUNGEN  —  Spiegel von bitgrid_dashboard_v2.yaml,
+  # siehe dort für den vollen Kommentar. Neu 23.08.2026, bewusst als letzter
+  # Tab (Zahnrad-Konvention).
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Einstellungen
+    path: einstellungen
+    icon: mdi:cog
+    theme: BitGridAI
+    # Eigener Verlauf nur fuer v3/Demo (v1/v2 nutzen weiterhin unveraendert
+    # das gemeinsame BitGridAI-Theme, themes/bitgrid.yaml lovelace-background).
+    # Formale v3-Palette 24.08.2026 (Nutzer-Vorgabe): "Verlauf oben links"
+    # -> "Verlauf unten rechts" = 135deg (to bottom right). Ersetzt jede
+    # vorherige Iteration. Grund laut Vorgabe: Gruen ist Statusfarbe fuer
+    # Zuhause/Akku (--bgai-home-v3), ein gruenstichiger Hintergrund senkt
+    # dort den Kontrast.
+    background: "linear-gradient(135deg, #0E1530 0%, #171A3A 100%)"
+    panel: true
+    # View-scoped Flaechen-/Textfarben (24.08.2026, Nutzer-Vorgabe): CSS-
+    # Custom-Properties auf :host der View gesetzt, vererben sich an alle
+    # Karten darunter (die bereits var(--card-background-color) etc.
+    # referenzieren) — ohne zweites Theme, ohne v1/v2 zu beruehren. Sidebar/
+    # Topbar liegen ausserhalb dieses DOM-Teilbaums und bleiben bewusst
+    # unveraendert (Nutzer-Entscheidung 24.08.2026).
+    card_mod:
+      style: |
+        :host {
+          --card-background-color: var(--bgai-card-bg-v3, #182449);
+          --divider-color: var(--bgai-divider-v3, #26356B);
+          --primary-text-color: var(--bgai-text-primary-v3, #EAEFFB);
+          --secondary-text-color: var(--bgai-text-secondary-v3, #A8B3D4);
+          /* Schrift groesser, nur v3 (Nutzer-Wunsch 02.09.2026): ueberschreibt die
+             Typo-Skala aus themes/bitgrid.yaml view-scoped, exakt dasselbe Muster
+             wie die Flaechen-/Textfarben oben — v1/v2 bleiben unveraendert. Werte
+             deutlich ueber der urspruenglich geplanten +3px-Stufe: die Home-Tab-
+             Inhaltskarten haben ein zusaetzliches zoom:min(1,calc(100vh/1200px))
+             (s. u.), das jede Erhoehung wieder verduennt — kompensiert durch
+             groessere Basiswerte statt zoom-Formel anzufassen. */
+          --bg-fs-label: 0.9375rem;
+          --bg-fs-secondary: 1.1875rem;
+          --bg-fs-body: 1.375rem;
+          --bg-fs-title: 2.125rem;
+          /* Neuer Token, nur fuer group_header-Gruppentitel (02.09.2026,
+             Nutzer-Wunsch "Ueberschriftgroessen fuer alle Gruppen in jedem
+             Tab wie Home"): das geteilte group_header-Template (button_card_
+             templates.yaml, auch von v1 genutzt) las bisher --bg-fs-body
+             (22px), Home hatte zusaetzlich 6x einen Pro-Karte-Override auf
+             1.6875rem (27px) — daher der Groessen-Unterschied zwischen
+             Tabs. Einheitlich in allen v3-Views gesetzt, v1 bleibt
+             unberuehrt (kennt die Variable nicht, Template faellt dort auf
+             --bg-fs-body zurueck). */
+          --bg-fs-group-header: 1rem;
+        }
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+          # ── LINKS: alles, was antippbar/aenderbar ist ────────────────────
+          # 26.08.2026, Nutzer-Vorgabe: saemtliche Einstellungen (vorher auf
+          # beide Spalten verteilt) stehen jetzt geschlossen links. Rechts
+          # bleiben nur noch reine Live-Status-Infos ohne input_*-Entities.
+          # Abschnittstitel nutzen ab jetzt das Template `group_header`
+          # (button_card_templates.yaml) statt einer eigenen markdown-Karte:
+          # dieselbe transparente "Titel ueber der Karte"-Optik wie beim
+          # bestehenden Poolertraege-Gruppentitel weiter oben im Dashboard,
+          # damit der Titel nicht wie eine eigene Box aussieht bzw. mit der
+          # Inhalts-Karte darunter verschmilzt (Nutzer-Feedback).
+          - type: vertical-stack
+            cards:
+              # 26.08.2026: die sechs SoC-Schwellen (Hochschalten/Runter-
+              # schalten, vormals hier editierbar) stehen seither NICHT mehr
+              # in den Einstellungen — sie werden von automation.
+              # mvp_saison_automatik (mvp_auto.yaml, feste 12-Monats-Tabelle)
+              # gesetzt und sind nur noch auf dem Steuerung-Tab sichtbar
+              # (Block + Tabelle), Nutzer-Vorgabe. Bearbeiten hier haette
+              # ohnehin nur bis zum naechsten Automatik-Lauf gehalten.
+              # 27.08.2026, Nutzer-Wunsch: Akku-Notbremse/Sicherheit/Nacht-
+              # Sperre/Lueftung sind ebenfalls raus (waren die letzten vier
+              # Gruppen ohne Automatik-Ueberschreibung, aber Bearbeiten ist
+              # jetzt nicht mehr redundant zu Steuerung noetig). Editieren
+              # geht ab jetzt ausschliesslich ueber die Zeilen im Steuerung-
+              # Tab (echte button-cards mit tap_action: more-info, Template
+              # settings_row/settings_row_icon — nicht mehr per onclick in
+              # generiertem HTML, das verschluckte HAs CSP stumm).
+              #
+              # Wieder eingefuehrt 27.08.2026 (ADR 028, dritte Kehrtwende):
+              # die Saison-Automatik ist wieder Live-Formel statt fester
+              # Tabelle, diese beiden Werte sind wieder die einzigen echten
+              # Stellschrauben dafuer. "Saisonale Tabelle" rechts spiegelt
+              # sie live, siehe dort.
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:calendar-sync
+                name: Saisonale Automatik
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: "1fr"
+                  grid-template-rows: repeat(3, auto)
+                  grid-gap: 4px
+                cards:
+                  - type: custom:button-card
+                    template: [settings_row, settings_row_icon]
+                    entity: input_number.mvp_night_baseload_w
+                    name: Nächtliche Grundlast
+                    icon: mdi:weather-night
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' W'; ]]]"
+                    styles:
+                      icon:
+                        - color: "var(--primary-text-color)"
+                      label:
+                        - color: "var(--primary-text-color)"
+                  - type: custom:button-card
+                    template: [settings_row, settings_row_icon]
+                    entity: input_number.battery_capacity_kwh
+                    name: Batterie-Kapazität
+                    icon: mdi:battery-high
+                    label: "[[[ return parseFloat(entity.state).toFixed(1) + ' kWh'; ]]]"
+                    styles:
+                      icon:
+                        - color: "var(--primary-text-color)"
+                      label:
+                        - color: "var(--primary-text-color)"
+                  - type: custom:button-card
+                    template: [settings_row, settings_row_icon]
+                    entity: sensor.mvp_saison_status
+                    name: Block diesen Monat
+                    icon: mdi:calendar-month
+                    label: "[[[ return entity.state; ]]]"
+                    styles:
+                      icon:
+                        - color: "var(--primary-text-color)"
+                      label:
+                        - color: "var(--primary-text-color)"
+              # 25.08.2026, Nutzer-Wunsch: Strompreis/Einspeisevergütung
+              # (beide Entities existierten schon in packages/economics.yaml,
+              # speisen die Finanz-Bilanz-Karte, waren aber bisher nirgends im
+              # Dashboard editierbar) plus neu Investierte Hardware (reines
+              # Eingabefeld, siehe Kommentar in economics.yaml — noch OHNE
+              # Amortisations-/ROI-Berechnung, dafür fehlen Startdatum und die
+              # Festlegung "nur Miner oder ganze Anlage").
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:finance
+                name: Wirtschaftlichkeit
+              - type: custom:layout-card
+                layout_type: custom:grid-layout
+                layout:
+                  grid-template-columns: "1fr"
+                  grid-template-rows: repeat(3, auto)
+                  grid-gap: 4px
+                cards:
+                  - type: custom:button-card
+                    template: [settings_row, settings_row_icon]
+                    entity: input_number.grid_price_ct_kwh
+                    name: Strompreis Netzbezug
+                    icon: mdi:transmission-tower-import
+                    label: "[[[ return parseFloat(entity.state).toFixed(2) + ' ct/kWh'; ]]]"
+                    styles:
+                      icon:
+                        - color: "var(--bg-color-reserve)"
+                      label:
+                        - color: "var(--bg-color-reserve)"
+                  - type: custom:button-card
+                    template: [settings_row, settings_row_icon]
+                    entity: input_number.feed_in_tariff_ct_kwh
+                    name: Einspeisevergütung
+                    icon: mdi:transmission-tower-export
+                    label: "[[[ return parseFloat(entity.state).toFixed(1) + ' ct/kWh'; ]]]"
+                    styles:
+                      icon:
+                        - color: "var(--bg-color-eco)"
+                      label:
+                        - color: "var(--bg-color-eco)"
+                  - type: custom:button-card
+                    template: [settings_row, settings_row_icon]
+                    entity: input_number.hardware_cost_eur
+                    name: Investierte Hardware
+                    icon: mdi:cash-multiple
+                    label: "[[[ return Math.round(parseFloat(entity.state)).toLocaleString('de-DE') + ' €'; ]]]"
+                    styles:
+                      icon:
+                        - color: "var(--primary-text-color)"
+                      label:
+                        - color: "var(--primary-text-color)"
+
+          # ── RECHTS: reine Live-Status-Infos, keine input_*-Entities ──────
+          # 26.08.2026, Nutzer-Vorgabe: rechts stehen nur noch berechnete/
+          # live Zustaende, nichts davon ist antippbar-aenderbar. Batterie-
+          # waechter nutzt ausschliesslich bestehende Sensoren (sensor.
+          # battery_soc_pct, sensor.battery_power_w, binary_sensor.mvp_soc_
+          # kritisch_debounced aus packages/mvp_auto.yaml); die Notbremse-
+          # Aktiv-Anzeige vergleicht live gegen die links gesetzten Schwellen
+          # (input_number.mvp_batt_discharge_*_downgrade_w, R8) direkt per
+          # button-card-JS, ohne einen neuen Template-Sensor anzulegen.
+          # Lüftung-Info nutzt den bereits vorhandenen Shelly-Plug-Schalter
+          # (switch.shellyplusplugs_d4d4daf4eda4, siehe R8/Lüftung-Watchdog
+          # weiter oben in mvp_auto.yaml) und sensor.filterpflege_status
+          # statt die Filterpflege-Faelligkeitslogik hier zu duplizieren.
+          - type: vertical-stack
+            cards:
+              # ── Saisonale Tabelle (live) ───────────────────────────────
+              # 27.08.2026 (ADR 028, dritte Kehrtwende): wieder live aus
+              # Grundlast + Kapazitaet berechnet statt fester Zahlen —
+              # "die naechtliche Grundlast soll die Automatik betreiben"
+              # (Nutzer-Zitat). Rechnet dieselbe Formel wie sensor.
+              # mvp_saison_status/automation.mvp_saison_automatik
+              # (mvp_auto.yaml) unabhaengig nach. namespace(rows=[]) +
+              # join('\n') bewusst so (nicht {% for %} mit Zeilen direkt im
+              # Markdown): einzelne {% set %}-Zeilen zwischen Tabellenzeilen
+              # hinterliessen sonst Leerzeilen, die GFM-Tabellen brechen
+              # (live bestaetigt 27.08.2026, HA trimmt Template-Whitespace
+              # offenbar nicht wie angenommen) — mit dieser Methode sind die
+              # Zeilenumbrueche echte Daten (Python-join), nicht
+              # Template-Whitespace, funktioniert unabhaengig von der
+              # Jinja-Umgebungskonfiguration.
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:table
+                name: Saisonale Tabelle
+              - type: markdown
+                card_mod:
+                  style: |
+                    ha-card { padding: 8px 14px; border-radius: var(--ha-card-border-radius); overflow: hidden; }
+                    table { font-size: 0.9875rem; width: 100%; }
+                    th, td { padding: 3px 6px !important; text-align: right !important; }
+                    th:first-child, td:first-child { text-align: left !important; }
+                    /* 01.09.2026: zwei Versuche, den aktuellen Monat per Hintergrund
+                       hervorzuheben, scheiterten live (inline style="..." auf <tr> wurde
+                       von HAs Markdown-Sanitizer entfernt; ein card_mod-nth-child mit
+                       {{ now().month }}-Template blieb ebenfalls unsichtbar — Sanitizer
+                       oder fehlende Reaktivitaet, nicht weiter verfolgt, Nutzer-Entscheid:
+                       stattdessen simpler Kontrast ueber Schriftfarbe). Alle NICHT
+                       aktuellen Monate werden im Content unten in <em> gewrappt (ueber-
+                       lebt den Sanitizer, ist ein echtes Tag statt eines Attributs) und
+                       hier auf secondary-text-color + font-style:normal gesetzt — der
+                       aktuelle Monat bleibt primary-text-color + fett (<strong>).*/
+                    /* 01.09.2026: erster Versuch ohne !important blieb komplett unsichtbar
+                       (weder Graustufe noch Spaltenfarben noch die groessere Schrift kamen
+                       live an) — HAs eigenes Markdown-Tabellen-CSS setzt color/font-style/
+                       font-size offenbar mit hoeherer Spezifitaet vor, exakt der Grund,
+                       warum padding/text-align oben bereits !important brauchten. Ab hier
+                       konsequent !important, sonst zieht card_mod hier gar nichts. */
+                    td em { color: var(--secondary-text-color) !important; font-style: normal !important; }
+                    td strong { font-size: 1.1em !important; }
+                    /* 01.09.2026, Nutzer-Wunsch: Schwellen-Spalten wie im Regelschwellen-
+                       Chart (Zeile ~1046) einfaerben, gleiche Variablen. nth-child hat
+                       hoehere Spezifitaet als "td em" oben, gewinnt also fuer alle
+                       Monate, nicht nur den aktuellen — bewusst so: die Spalte gehoert
+                       zur Regel, nicht zum Monat. */
+                    th:nth-child(3), td:nth-child(3) { color: var(--bg-color-reserve, #EF5350) !important; }
+                    th:nth-child(4), td:nth-child(4) { color: var(--bg-color-eco, #4CAF50) !important; }
+                    th:nth-child(5), td:nth-child(5),
+                    th:nth-child(6), td:nth-child(6) { color: var(--bg-color-standard, #26C6DA) !important; }
+                    th:nth-child(7), td:nth-child(7),
+                    th:nth-child(8), td:nth-child(8) { color: var(--bg-color-super, #F7931A) !important; }
+                content: |
+                  Grundlage: **{{ '%d'|format(states('input_number.mvp_night_baseload_w')|float(535)) }} W** nächtliche Grundlast / **{{ '%.1f'|format(states('input_number.battery_capacity_kwh')|float(12.5)) }} kWh** Akkukapazität (beide links editierbar) → bestimmt die Hausreserve, daraus folgen alle sechs Schwellen live.
+                  {%- set ns_stunden = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} -%}
+                  {%- set monate = {1:'Januar',2:'Februar',3:'März',4:'April',5:'Mai',6:'Juni',7:'Juli',8:'August',9:'September',10:'Oktober',11:'November',12:'Dezember'} -%}
+                  {%- set gw = states('input_number.mvp_night_baseload_w') | float(535) -%}
+                  {%- set kk = states('input_number.battery_capacity_kwh') | float(12.5) -%}
+                  {%- set ns = namespace(rows=[]) -%}
+                  {%- for m in range(1, 13) -%}
+                  {%- set h = ns_stunden[m] -%}
+                  {%- set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 -%}
+                  {%- set sp = [15 + rp, 95] | min -%}
+                  {%- set is_now = (m == now().month) -%}
+                  {%- set ob = '<strong>' if is_now else '<em>' -%}
+                  {%- set cb = '</strong>' if is_now else '</em>' -%}
+                  {%- set std_off_raw = sp + 20 -%}
+                  {%- set std_raw = sp + 25 -%}
+                  {%- set sup_off_raw = sp + 35 -%}
+                  {%- set sup_raw = sp + 40 -%}
+                  {%- set std_off_s = (std_off_raw | round(0) | int | string ~ '%') if std_raw <= 100 else '—' -%}
+                  {%- set std_s = (std_raw | round(0) | int | string ~ '%') if std_raw <= 100 else '—' -%}
+                  {%- set sup_off_s = (sup_off_raw | round(0) | int | string ~ '%') if sup_raw <= 100 else '—' -%}
+                  {%- set sup_s = (sup_raw | round(0) | int | string ~ '%') if sup_raw <= 100 else '—' -%}
+                  {%- set block_s = 'Voll' if sup_raw <= 100 else ('Eco+Std' if std_raw <= 100 else 'Nur Eco') -%}
+                  {%- set r1_s = (sp | round(0) | int | string) ~ '%' -%}
+                  {%- set r7_s = ([sp+10,100]|min|round(0)|int|string) ~ '%' -%}
+                  {%- set row = '<tr><td>' ~ ob ~ monate[m] ~ cb ~ '</td><td>' ~ ob ~ block_s ~ cb ~ '</td><td>' ~ ob ~ r1_s ~ cb ~ '</td><td>' ~ ob ~ r7_s ~ cb ~ '</td><td>' ~ ob ~ std_off_s ~ cb ~ '</td><td>' ~ ob ~ std_s ~ cb ~ '</td><td>' ~ ob ~ sup_off_s ~ cb ~ '</td><td>' ~ ob ~ sup_s ~ cb ~ '</td></tr>' -%}
+                  {%- set ns.rows = ns.rows + [row] -%}
+                  {%- endfor %}
+
+                  <table>
+                  <thead><tr><th>Monat</th><th>Block</th><th>Hausreserve (R1)</th><th>Eco ab (R7)</th><th>Std endet (R6)</th><th>Std ab (R5)</th><th>Sup endet (R4)</th><th>Sup ab (R3)</th></tr></thead>
+                  <tbody>
+                  {{ ns.rows | join('\n') }}
+                  </tbody>
+                  </table>
+

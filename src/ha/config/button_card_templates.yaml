@@ -14,6 +14,58 @@ miner_header:
   tap_action:
     action: none
   custom_fields:
+    # Gesamtzustand (26.08.2026, Nutzer-Wunsch): eigenes Symbol LINKS vom
+    # bestehenden LAN-Symbol ("status" unten), keine Vermischung der beiden.
+    #   - Rot/Kreuz = TECHNISCHE STOERUNG: etwas, das nicht "nur warm ist",
+    #     sondern kaputt/nicht ansprechbar sein koennte (Shelly-Plug nicht
+    #     erreichbar, kein Pool-Uplink, gemeldete Hardware-/Luefterfehler,
+    #     oder Miner insgesamt nicht verfuegbar). Hat Vorrang vor Gelb: ein
+    #     Hardware-Fehler ist dringlicher als ein Hitze-Hinweis.
+    #   - Gelb/Warndreieck = UEBERHITZUNG: TMax >= 100 °C, dieselbe Schwelle
+    #     wie die bestehende Temperaturfarb-Konvention (gruen < 100, orange
+    #     100-109, rot >= 110 — siehe project_miner_temp_colors-Entscheidung
+    #     11.07.2026). Farbe ist --bg-color-heat (waermeres Orange, kein
+    #     reines Gelb im Theme), aber exakt derselbe Zweck.
+    #   - Gruen/Haken = keins von beidem.
+    # sensor.Xn_heartbeat_age_sec existiert NICHT live (verifiziert
+    # 26.08.2026) — deshalb echte Hardware-/Verbindungssignale statt eines
+    # erfundenen Heartbeat-Schwellwerts.
+    health: >
+      [[[
+        const minerKey = entity.entity_id.match(/miner\d/)?.[0];
+        if (!minerKey) return '';
+        const available   = entity.state === 'on';
+        const shellyOk    = states[`binary_sensor.shelly_${minerKey}_healthy`]?.state !== 'off';
+        const poolOk      = states[`binary_sensor.${minerKey}_pool_status`]?.state !== 'off';
+        // hardware_errors (ohne "r") ist ein reiner Lifetime-Zaehler seit dem
+        // letzten Reboot (Standard-cgminer-API-Verhalten) — bei einer 24/7
+        // laufenden ASIC ist er nach ein paar Betriebsstunden fast immer > 0,
+        // ohne dass etwas kaputt ist. Live verifiziert 26.08.2026: miner2
+        // stand bei "5" (Zaehler) aber "0,0 %" (Rate) — die Rate ist das
+        // aussagekraeftige Signal, nicht der rohe Zaehlerstand. >= 1 % als
+        // Schwelle: deutlich ueber dem beobachteten Normalbereich (< 0,1 %),
+        // aehnliche Groessenordnung wie rejection_rate_pct.
+        const hwErrRate   = parseFloat(states[`sensor.${minerKey}_hardware_errorsr`]?.state) || 0;
+        const fanErrRaw   = states[`sensor.${minerKey}_fanerr`]?.state;
+        const fanErr      = fanErrRaw !== undefined && fanErrRaw !== '0' && fanErrRaw !== 'unknown' && fanErrRaw !== 'unavailable';
+        const tmax        = parseFloat(states[`sensor.${minerKey}_tmax`]?.state);
+
+        let icon, color, title;
+        if (!available || !shellyOk || !poolOk || hwErrRate >= 1 || fanErr) {
+          icon = 'mdi:close-circle';
+          color = 'var(--bg-color-reserve)';
+          title = 'Technische Störung';
+        } else if (!isNaN(tmax) && tmax >= 100) {
+          icon = 'mdi:thermometer-alert';
+          color = 'var(--bg-color-heat)';
+          title = 'Überhitzung (' + tmax.toFixed(0) + ' °C)';
+        } else {
+          icon = 'mdi:check-circle';
+          color = 'var(--bg-color-eco)';
+          title = 'Normalbetrieb';
+        }
+        return `<ha-icon icon="${icon}" title="${title}" style="color:${color}; --mdc-icon-size:22px;"></ha-icon>`;
+      ]]]
     status: >
       [[[
         const on = entity.state === 'on';
@@ -22,8 +74,8 @@ miner_header:
       ]]]
   styles:
     grid:
-      - grid-template-areas: '"n status i"'
-      - grid-template-columns: 1fr auto auto
+      - grid-template-areas: '"n health status i"'
+      - grid-template-columns: 1fr auto auto auto
       - grid-template-rows: 1fr
     card:
       - padding: 12px 16px
@@ -40,9 +92,13 @@ miner_header:
       - height: 22px
       - margin-left: 6px
     custom_fields:
+      health:
+        - display: flex
+        - align-items: center
       status:
         - display: flex
         - align-items: center
+        - margin-left: 8px
 
 miner_btn:
   show_state: true
@@ -173,6 +229,110 @@ settings_spacer:
       - box-shadow: none
       - border: none
       - pointer-events: none
+
+# Flache Listenzeile fuer Schwellenwerte: Label links, Wert rechts, kein
+# Pillen-/Kartenrand. Ersetzt die aeltere "settings_pill"-Kachel-Optik dort,
+# wo eine kompakte, durchscrollbare Liste gebraucht wird (Einstellungen-Tab,
+# Regelschwellen-Karte). tap_action bleibt more-info wie bei settings_pill —
+# das oeffnet den nativen HA-Editor (Slider/Eingabefeld) fuer input_number/
+# input_boolean/input_datetime direkt.
+settings_row:
+  show_name: true
+  show_state: false
+  show_icon: false
+  show_label: true
+  tap_action:
+    action: more-info
+  styles:
+    card:
+      - background: "rgba(255,255,255,0.045)"
+      - border-radius: "7px"
+      - padding: "10px 14px"
+      - cursor: pointer
+      - transition: "background .15s"
+    grid:
+      - grid-template-areas: '"n l"'
+      - grid-template-columns: "1fr auto"
+      - grid-template-rows: "auto"
+      - align-items: center
+      - column-gap: "10px"
+    name:
+      - font-size: "13px"
+      - font-weight: "500"
+      - color: "rgba(255,255,255,.85)"
+      - justify-self: start
+      - text-align: left
+      - white-space: "nowrap"
+    label:
+      - font-size: "14px"
+      - font-weight: "700"
+      - justify-self: end
+      - text-align: right
+      - white-space: "nowrap"
+
+# Icon-Ergaenzung zu settings_row, additiv per `template: [settings_row,
+# settings_row_icon]` kombiniert (25.08.2026, Nutzer-Feedback: Zeilen im
+# Einstellungen-Tab wirkten ohne Icon leer). Nur in bitgrid_dashboard_v3.yaml
+# genutzt: settings_row selbst bleibt unveraendert (show_icon: false), v2
+# nutzt weiterhin nur settings_row pur und ist von dieser Ergaenzung nicht
+# betroffen (gleiches Isolationsprinzip wie beim v3-Farbschema).
+settings_row_icon:
+  show_icon: true
+  styles:
+    grid:
+      - grid-template-areas: '"i n l"'
+      - grid-template-columns: "20px 1fr auto"
+    icon:
+      - width: "16px"
+      - height: "16px"
+      - justify-self: center
+
+# Transparenter Gruppentitel ueber einer Karte: Icon + Name, kein eigener
+# Kasten (background/border/shadow: none). Vorher nur inline in der
+# Poolertraege-Gruppe verwendet (siehe grid-area "tl" weiter unten im
+# Dashboard); hier als Template zentralisiert, damit der Einstellungen-Tab
+# dieselbe Optik nutzt statt Abschnittstitel als eigene markdown-Karte in den
+# Stack zu stecken (26.08.2026, Nutzer-Feedback: Titel gehoert UEBER die
+# Karte, nicht mit hineingemischt).
+group_header:
+  show_state: false
+  tap_action:
+    action: none
+  styles:
+    card:
+      - background: none
+      - box-shadow: none
+      - border: none
+      - padding: 4px 4px 0
+    grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: min-content 1fr
+      - align-items: center
+    img_cell:
+      - justify-content: start
+      - align-self: center
+    icon:
+      - color: var(--secondary-text-color)
+      - width: 24px
+      - height: 24px
+    name:
+      # var(--bg-fs-body) = 1rem, identisch zum vorherigen 1.0rem-Fixwert
+      # (keine sichtbare Aenderung) — jetzt aus der zentralen Typo-Skala
+      # (themes/bitgrid.yaml) statt Magic Number, projektweit ueber dieses
+      # eine geteilte Template (31.08.2026, Nutzer-Wunsch "Schriftgroesse
+      # pro Art").
+      # --bg-fs-group-header mit Fallback auf --bg-fs-body (02.09.2026,
+      # Nutzer-Wunsch "Ueberschriften in jedem Tab wie Home"): v3 setzt
+      # --bg-fs-group-header pro View (bitgrid_dashboard_v3.yaml), v1 kennt
+      # die Variable nicht und faellt automatisch auf --bg-fs-body zurueck —
+      # dieses Template ist mit v1 geteilt, darf sich dort nicht aendern.
+      - font-size: var(--bg-fs-group-header, var(--bg-fs-body))
+      - font-weight: 700
+      - text-transform: uppercase
+      - letter-spacing: 0.07em
+      - color: var(--secondary-text-color)
+      - justify-self: start
+      - padding-left: 10px
 
 # Geräte-Kachel (Tab "Geräte"): Icon + Name + aktuelle Leistung + Tages-kWh.
 # entity = Leistungs-Sensor des Plugs; variables.energy_daily = Entity-ID des

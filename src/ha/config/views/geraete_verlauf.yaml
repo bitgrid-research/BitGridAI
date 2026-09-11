@@ -40,10 +40,10 @@ cards:
         name: Heizung
       - entity: sensor.shellyplusplugs_d4d4daf4eda4_leistung
         name: Lüftung
-      - entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
-        name: Server/NAS
       - entity: sensor.shellyplugsg3_907069492f30_leistung
-        name: Garage
+        name: Server/NAS
+      - entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
+        name: Runtipi Server
 
   - type: statistics-graph
     title: Tagesverbrauch (14 Tage)
@@ -77,7 +77,7 @@ cards:
         name: Heizung
       - entity: sensor.shellyplusplugs_d4d4daf4eda4_energie
         name: Lüftung
-      - entity: sensor.shellyplugsg3_d0cf13db3a00_energie
-        name: Server/NAS
       - entity: sensor.shellyplugsg3_907069492f30_energie
-        name: Garage
+        name: Server/NAS
+      - entity: sensor.shellyplugsg3_d0cf13db3a00_energie
+        name: Runtipi Server

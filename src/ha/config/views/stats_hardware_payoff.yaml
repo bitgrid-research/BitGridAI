@@ -1,0 +1,105 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Hardware-Abzahlung — wie weit haben sich die Miner (2x Avalon Q) aus dem
+# eigenen Mining-Ertrag finanziert. Nutzer-Entscheidung 26.08.2026:
+#   - Umfang: NUR die Miner-Hardware (input_number.hardware_cost_eur,
+#     packages/economics.yaml), NICHT die gesamte PV/Akku-Anlage.
+#   - Start: 23.03.2026 — das reale Mining-Startdatum (bestaetigt vom
+#     Nutzer), NICHT der 25.05.2026 (das ist nur der Start der eigenen
+#     bitgrid.db-Aufzeichnung). Zufaellig auch der aelteste Eintrag in
+#     sensor.pool_balance_btc.payout_history, siehe unten.
+#
+# Datenquelle: sensor.pool_balance_btc.payout_history (F2Pool-API, ~155 Tage
+# rollierend rueckwirkend, deckt den kompletten Zeitraum seit 23.03.2026 ab).
+# Gleiche Quelle wie stats_pool_monthly.yaml/mining_log.yaml. Summe ALLER
+# Eintraege = Gesamtertrag seit Start, keine separate Monats-Aufteilung
+# noetig.
+#
+# EUR-Umrechnung nutzt den AKTUELLEN Kurs fuer die gesamte Historie (wie
+# €/kWh in mining_log.yaml) — zeigt "was die Sats heute wert waeren", nicht
+# den tatsaechlichen Verkaufserloes zum jeweiligen Zeitpunkt.
+#
+# Kein Steuerpfad: reine Anzeige, beeinflusst keine Mining-Entscheidung in
+# core/.
+#
+# Kein eigener Karten-Header: der Abschnittstitel "HARDWARE-ABZAHLUNG" sitzt
+# als eigene Gruppentitel-Karte davor (bitgrid_dashboard_v3.yaml).
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "BitcoinInfo",
+# linke Spalte, unterste Karte.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 14px 18px
+  grid:
+    - grid-template-areas: '"chart"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    chart:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  chart: >
+    [[[
+      const START_DATE = '2026-03-23';
+
+      const payoutHist = states['sensor.pool_balance_btc']?.attributes?.payout_history ?? [];
+      let earnedBtc = 0;
+      payoutHist.forEach(e => {
+        const ts = e[0], desc = e[1], btc = e[2];
+        if (!ts || typeof btc !== 'number' || btc <= 0) return;
+        if (typeof desc === 'string' && !desc.includes('user_payout')) return;
+        if (ts.slice(0, 10) < START_DATE) return;
+        earnedBtc += btc;
+      });
+
+      const hwCostEur = parseFloat(states['input_number.hardware_cost_eur']?.state) || 0;
+      const btcEur = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+      const earnedEur = earnedBtc * btcEur;
+      const pct = hwCostEur > 0 ? Math.min(100, earnedEur / hwCostEur * 100) : 0;
+      const remainingEur = Math.max(0, hwCostEur - earnedEur);
+
+      const fmtEur  = (v) => v.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+      const fmtSats = (btc) => Math.round(btc * 1e8).toLocaleString('de-DE') + ' sats';
+
+      if (hwCostEur <= 0) {
+        return `<div style="padding:20px 0;text-align:center;color:var(--secondary-text-color)">Kein Hardware-Wert hinterlegt (input_number.hardware_cost_eur).</div>`;
+      }
+
+      const headlineColor = pct >= 100 ? '#4CAF50' : 'var(--primary-text-color)';
+
+      return `<div style="width:100%;">
+        <div style="display:flex;align-items:baseline;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <span style="font-size:1.8rem;font-weight:700;color:${headlineColor};">${pct.toFixed(1)} %</span>
+        </div>
+        <div style="width:100%;height:16px;border-radius:8px;background:var(--secondary-background-color);overflow:hidden;margin-bottom:12px;position:relative;">
+          <div style="position:absolute;inset:0;border-radius:8px;background:#FFFFFF;clip-path:inset(0 ${(100 - pct).toFixed(2)}% 0 0);"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;">
+          <div>
+            <div style="font-size:0.8rem;color:var(--secondary-text-color);margin-bottom:3px;">Investition</div>
+            <div style="font-size:1.05rem;font-weight:700;color:var(--secondary-text-color);">${fmtEur(hwCostEur)}</div>
+          </div>
+          <div>
+            <div style="font-size:0.8rem;color:var(--secondary-text-color);margin-bottom:3px;">Ertrag bisher</div>
+            <div style="font-size:1.05rem;font-weight:700;color:var(--secondary-text-color);">${fmtEur(earnedEur)}</div>
+            <div style="font-size:0.78rem;color:var(--secondary-text-color);margin-top:1px;">${fmtSats(earnedBtc)}</div>
+          </div>
+          <div>
+            <div style="font-size:0.8rem;color:var(--secondary-text-color);margin-bottom:3px;">Noch offen</div>
+            <div style="font-size:1.05rem;font-weight:700;color:${remainingEur <= 0 ? '#4CAF50' : 'var(--secondary-text-color)'};">${remainingEur <= 0 ? 'Abbezahlt' : fmtEur(remainingEur)}</div>
+          </div>
+        </div>
+      </div>`;
+    ]]]

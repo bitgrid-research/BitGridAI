@@ -1,0 +1,103 @@
+# ═══════════════════════════════════════════════════════════════════════
+# VERBRAUCH NACH RÄUMEN — Feld 1 von 3 im Abschnitt "Echtzeitverbrauch"
+# (Tab "EnergieInfo"). Ein Balken pro Raum, Summe der aktuellen Leistung
+# aller Verbraucher in diesem Raum (packages/devices.yaml, raum_*_power_w-
+# Sensoren — Raumzuordnung 25.08.2026 live aus HAs Area-Registry verifiziert,
+# nicht aus altem Dateikommentar/​.storage-Spiegel übernommen).
+#
+# 25.08.2026: drei Anläufe mit custom:apexcharts-card sind gescheitert
+# (falsche chart_type-Werte, danach: die Karte ist grundsätzlich für
+# Zeitreihen gebaut, kein sauberer Weg für "mehrere Sensoren als
+# Vergleichsbalken nebeneinander", siehe Recherche). Stattdessen reines
+# SVG in custom:button-card, gleiche bewährte Technik wie die SoC-Band-
+# Visualisierung im Steuerung-Tab (bitgrid_dashboard_v3.yaml) — volle
+# Kontrolle, keine Bibliotheks-Eigenheiten, live per custom_fields-Template.
+#
+# 25.08.2026, Nachtrag "lesbarer machen": vertikale Balken mit auf -40°
+# gekipptem, 9px kleinem Raumnamen unter der Karte durch horizontale Balken
+# ersetzt (Raumname normal lesbar links, Balken + Wert rechts) — das war der
+# eigentliche Lesbarkeits-Killer, nicht primär die Kartenbreite. Kein
+# Achsengitter mehr nötig: die graue Spur hinter jedem Balken liefert den
+# Skalen-Bezug, der Zahlenwert steht direkt am Balkenende in derselben
+# Cyan-Farbe (#4FC3F7) wie die W-Werte in den anderen Feldern dieses
+# Abschnitts (Gerätetyp-Liste, Raum-Kacheln).
+#
+# 25.08.2026, zweiter Nachtrag "schriftgröße wie bei gerätetyp": SVG-<text>
+# mit fest verdrahteter px-Größe kann die tatsächliche CSS-rem-Schriftgröße
+# der Nachbarkarte nicht zuverlässig treffen (SVG skaliert über viewBox
+# relativ zur gerenderten Kartenbreite, das lässt sich nur schätzen, nicht
+# exakt berechnen). Deshalb Zeilen jetzt als normales HTML/Flexbox statt
+# SVG-<text>, mit denselben rem-Werten wie in verbrauch_nach_geraetetyp.yaml
+# (Label 0.92rem/600, Wert 0.95rem/700, Farbe #4FC3F7) — garantiert exakt
+# gleiche Schriftgröße, weil dieselbe CSS-Deklaration, nicht nur Annäherung.
+# Nur der Balken selbst (Skalen-Spur + gefüllter Anteil) bleibt visuell, aber
+# jetzt als zwei verschachtelte <div>s mit Prozent-Breite statt SVG-<rect>.
+#
+# 25.08.2026, dritter Nachtrag "Farbe passt nicht zum Gesamten": Balken-
+# Gradient von Lila (#8a5fae/#C08AD8, Alleingang dieser Karte) auf denselben
+# Cyan→Violett-Verlauf (#4FC3F7 → #7C4DFF) umgestellt, den die Ring-Gauges
+# in den Raum-Kacheln und im Feld "Gerätetyp" bereits nutzen — einheitliche
+# Akzentfarbe über den ganzen Tab.
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 16px 12px
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    body:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  body: >
+    [[[
+      const rooms = [
+        ['Untergeschoss', 'sensor.raum_untergeschoss_power_w'],
+        ['Wohnzimmer', 'sensor.raum_wohnzimmer_power_w'],
+        ['Küche', 'sensor.raum_kueche_power_w'],
+        ['Schlafzimmer', 'sensor.raum_schlafzimmer1_power_w'],
+        ['Büro', 'sensor.raum_buero_power_w'],
+        ['Hauswirtschaft', 'sensor.raum_hauswirtschaft_power_w'],
+      ];
+      const vals = rooms.map(([name, id]) => {
+        const v = parseFloat(states[id]?.state);
+        return [name, isNaN(v) ? 0 : v];
+      });
+
+      const rawMax = Math.max(1, ...vals.map(v => v[1]));
+      // Runde die Skala auf eine "hübsche" Stufe auf (25/50/100/250/500 W ...)
+      const steps = [10, 25, 50, 100, 150, 250, 500, 1000, 2000, 5000, 10000];
+      const step = steps.find(s => rawMax <= s * 4) || Math.ceil(rawMax / 4 / 1000) * 1000;
+      const maxScale = step * 4;
+
+      const rowHtml = vals.map(([name, w]) => {
+        const pct = Math.max(1, (Math.min(w, maxScale) / maxScale) * 100);
+        const valStr = (w < 10 ? w.toFixed(1) : Math.round(w).toLocaleString('de-DE')) + ' W';
+        return `<div style="display:flex;align-items:center;padding:7px 2px;gap:10px;">
+          <span style="flex:0 0 96px;color:var(--secondary-text-color);font-size:0.92rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;">${name}</span>
+          <div style="flex:1;height:14px;border-radius:999px;background:rgba(255,255,255,0.05);overflow:hidden;position:relative;">
+            <div style="position:absolute;inset:0;border-radius:999px;background:linear-gradient(90deg,#4CAF50 0%,#4CAF50 35%,#26C6DA 52.5%,#F7931A 70%,#F7931A 100%);clip-path:inset(0 ${(100 - pct).toFixed(1)}% 0 0);"></div>
+          </div>
+          <span style="flex:0 0 auto;min-width:52px;font-size:0.95rem;font-weight:700;color:var(--secondary-text-color);white-space:nowrap;text-align:right;">${valStr}</span>
+        </div>`;
+      }).join('');
+
+      return `<div style="display:flex;flex-direction:column;width:100%">
+        <div style="font-size:1rem;font-weight:700;color:var(--primary-text-color);margin-bottom:6px;padding-left:2px;">Echtzeitverbrauch nach Räumen</div>
+        ${rowHtml}
+      </div>`;
+    ]]]

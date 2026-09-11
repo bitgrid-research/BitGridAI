@@ -9,12 +9,20 @@ docs/research, docs/status, README.md, CLAUDE.md. Bewusst ausgeschlossen: docs/t
 (separater Overleaf-Workflow), INFRASTRUCTURE.md und .env (Zugangsdaten/IPs,
 gehören nicht in ein Vault, das später ggf. RAG-Agenten wie Bitsy-Home füttert).
 
+Seit 24.07.2026 landet alles unter `RO/` im Vault (RO/RW-Umbau: der Hermes-
+Container mountet `RO/*` read-only, `RW/*` read-write für Neo, siehe
+docker-compose.yml des hermes-agent-Containers). Zusätzlich wird
+`docs/development/36_ai_tooling/` (Meta-Tooling über die KI-Agenten selbst,
+nicht Teil der BitGridAI-Architektur) beim Sammeln explizit übersprungen —
+echte Sperre an der Quelle, nicht nur eine Leseliste-Konvention, die ein
+Modell umgehen könnte.
+
 Jede Vault-Kopie bekommt beim Sync generierte YAML-Frontmatter (title/tags/source/
 updated) vorangestellt — siehe render(). Das Repo selbst bleibt unangetastet: die
 Metadaten sind ein Tooling-Anliegen des Vaults, kein Teil der arc42-Dokumente.
 
-Zusätzlich wird bei jedem Sync ein Codebase-Überblick (docs/status/codebase.md im
-Vault) aus den Modul-Docstrings unter src/ generiert — siehe generate_codebase_
+Zusätzlich wird bei jedem Sync ein Codebase-Überblick (RO/docs/status/codebase.md
+im Vault) aus den Modul-Docstrings unter src/ generiert — siehe generate_codebase_
 overview(). Nur die erste Docstring-Zeile pro Datei, kein Code-Duplikat: der
 Quellcode selbst bleibt Git, nicht Obsidian. Wird bei jedem Lauf frisch erzeugt,
 nicht im Repo committed.
@@ -60,7 +68,7 @@ if isinstance(sys.stdout, io.TextIOWrapper) and sys.stdout.encoding.lower() != "
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SRC_ROOT = REPO_ROOT / "src"
 STATE_FILE = REPO_ROOT / ".obsidian_sync_state.json"
-CODEBASE_REMOTE_REL = "docs/status/codebase.md"
+CODEBASE_REMOTE_REL = "RO/docs/status/codebase.md"
 
 REMOTE_VAULT_ROOT = (
     "/home/umbrel/umbrel/app-data/obsidian/data/config/"
@@ -68,16 +76,20 @@ REMOTE_VAULT_ROOT = (
 )
 
 SOURCE_DIRS = [
-    (REPO_ROOT / "docs" / "architecture", "docs/architecture"),
-    (REPO_ROOT / "docs" / "development", "docs/development"),
-    (REPO_ROOT / "docs" / "research", "docs/research"),
-    (REPO_ROOT / "docs" / "status", "docs/status"),
+    (REPO_ROOT / "docs" / "architecture", "RO/docs/architecture"),
+    (REPO_ROOT / "docs" / "development", "RO/docs/development"),
+    (REPO_ROOT / "docs" / "research", "RO/docs/research"),
+    (REPO_ROOT / "docs" / "status", "RO/docs/status"),
 ]
 SOURCE_FILES = [
-    (REPO_ROOT / "README.md", "README.md"),
-    (REPO_ROOT / "CLAUDE.md", "CLAUDE.md"),
-    (REPO_ROOT / "docs" / "README.md", "docs/README.md"),
+    (REPO_ROOT / "README.md", "RO/README.md"),
+    (REPO_ROOT / "CLAUDE.md", "RO/CLAUDE.md"),
+    (REPO_ROOT / "docs" / "README.md", "RO/docs/README.md"),
 ]
+
+# Meta-Tooling über die Agenten selbst, kein Teil der BitGridAI-Architektur.
+# Wird nie in den Vault synchronisiert (echte Sperre an der Quelle).
+EXCLUDED_DIR_SEGMENTS = {"36_ai_tooling"}
 
 
 def collect_current() -> dict[str, Path]:
@@ -85,6 +97,8 @@ def collect_current() -> dict[str, Path]:
     for local_dir, remote_prefix in SOURCE_DIRS:
         for path in sorted(local_dir.rglob("*.md")):
             rel = path.relative_to(local_dir).as_posix()
+            if EXCLUDED_DIR_SEGMENTS & set(rel.split("/")[:-1]):
+                continue
             mapping[f"{remote_prefix}/{rel}"] = path
     for local_file, remote_rel in SOURCE_FILES:
         if local_file.is_file():
@@ -111,18 +125,21 @@ def _clean_segment(part: str) -> str:
     return _LEADING_NUM_RE.sub("", part).replace("_", "-").lower()
 
 
+_STRUCTURAL_SEGMENTS = {"docs", "RO"}
+
+
 def derive_tags(remote_rel: str) -> list[str]:
     parts = remote_rel.split("/")[:-1]  # Verzeichnis-Segmente, Dateiname weglassen
-    tags = [_clean_segment(p) for p in parts if p != "docs"]
+    tags = [_clean_segment(p) for p in parts if p not in _STRUCTURAL_SEGMENTS]
     tags = [t for t in tags if t]
     return tags or ["root"]
 
 
 def derive_group(remote_rel: str) -> str:
-    """Oberster Ordnername unter docs/ (architecture/development/research), sonst 'root'."""
+    """Oberster Ordnername unter RO/docs/ (architecture/development/research), sonst 'root'."""
     parts = remote_rel.split("/")[:-1]
     for part in parts:
-        if part != "docs":
+        if part not in _STRUCTURAL_SEGMENTS:
             return _clean_segment(part) or "root"
     return "root"
 

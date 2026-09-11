@@ -1,0 +1,140 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Aktueller Bitcoin-Kurs (EUR) + 90-Tage-Verlauf — sensor.btc_eur_price fuer
+# den Momentanwert (packages/pool.yaml), Verlaufsdaten aus
+# src/data/btc_price_history.py (JSON-Artefakt, gleiches Muster wie
+# stats_energy_to_sats.yaml/ki_powerlaw.yaml: fetch('/local/...'), kein
+# Live-Netzwerkzugriff vom Wandtablet aus).
+#
+# Beide Quellen sind seit 26.08.2026 die selbst gehostete Mempool.space-
+# Instanz auf demselben Host wie HA (Port 3006), nicht mehr api.coingecko.com:
+# kein zusaetzlicher externer Request, kein Tracking durch Dritte
+# (Nutzer-Entscheidung). Anders als ki_powerlaw.yaml (USD, seit Genesis,
+# Power-Law-Fit) hier bewusst EUR und nur die juengsten ~90 Tage als reiner
+# linearer Kursverlauf, keine Markteinordnungs-Heuristik.
+#
+# Kein Steuerpfad: reine Anzeige, beeinflusst keine Mining-Entscheidung in
+# core/.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "BitcoinInfo",
+# linke Spalte, unter stats_energy_to_sats.yaml.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 14px 18px
+  grid:
+    - grid-template-areas: '"price"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    price:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  price: >
+    [[[
+      if (!window._bgBtcPrice) window._bgBtcPrice = { status: 'idle', data: null };
+
+      if (window._bgBtcPrice.status === 'idle') {
+        window._bgBtcPrice.status = 'fetching';
+        fetch('/local/btc_price_eur.json?v=' + Date.now())
+          .then(r => r.json())
+          .then(data => { window._bgBtcPrice = { status: 'ok', data }; })
+          .catch(() => { window._bgBtcPrice.status = 'error'; });
+      }
+
+      const btcEur   = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
+      const dayStart = parseFloat(states['input_number.btc_eur_day_start']?.state) || 0;
+      const deltaPct = dayStart > 0 ? ((btcEur - dayStart) / dayStart * 100) : null;
+      const deltaColor = deltaPct === null ? 'var(--secondary-text-color)'
+        : deltaPct >= 0 ? '#4CAF50' : '#ef5350';
+      const deltaStr = deltaPct === null ? '—'
+        : (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + ' % heute';
+
+      // Kein eigener Karten-Header: Abschnittstitel "BITCOIN-KURS" sitzt als
+      // eigene Gruppentitel-Karte davor (bitgrid_dashboard_v3.yaml).
+      const header = `
+        <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+          <span style="font-size:1.6rem;font-weight:700;color:var(--primary-text-color);white-space:nowrap;">${btcEur > 0 ? btcEur.toLocaleString('de-DE') + ' €' : '—'}</span>
+          <span style="font-size:0.85rem;font-weight:600;color:${deltaColor};white-space:nowrap;">${deltaStr}</span>
+        </div>`;
+
+      const wrap = (inner) => `<div style="width:100%;">${header}${inner}</div>`;
+
+      if (window._bgBtcPrice.status !== 'ok') {
+        const msg = window._bgBtcPrice.status === 'error'
+          ? 'Verlauf nicht verfügbar (lokales Artefakt fehlt — python -m src.data.btc_price_history laufen lassen).'
+          : 'Lade Kursverlauf …';
+        return wrap(`<div style="padding:20px 0;text-align:center;color:var(--secondary-text-color)">${msg}</div>`);
+      }
+
+      const days = window._bgBtcPrice.data.days || [];
+      if (days.length < 2) {
+        return wrap(`<div style="padding:20px 0;text-align:center;color:var(--secondary-text-color)">Zu wenig Kursverlauf geladen.</div>`);
+      }
+
+      const W = 640, H = 210, cL = 62, cR = 618, cT = 10, cB = 155;
+      const n = days.length;
+      const xForIdx = (i) => cL + (cR - cL) * i / (n - 1);
+
+      const vals = days.map(d => d[1]);
+      const minV = Math.min(...vals), maxV = Math.max(...vals);
+      const pad = (maxV - minV) * 0.08 || maxV * 0.02;
+      const yMin = minV - pad, yMax = maxV + pad;
+      const yForVal = (v) => cB - (v - yMin) / (yMax - yMin) * (cB - cT);
+
+      const cLine = 'var(--primary-text-color,#EAEFFB)';
+
+      // Feste Hoehe statt breiten-relativer viewBox-Skalierung (03.09.2026,
+      // Nutzer-Wunsch). Bewusst NICHT mehr an die Effizienz-Karte
+      // (stats_energy_to_sats.yaml) angeglichen — die beiden Karten in
+      // dieser Zeile duerfen unterschiedlich hoch sein.
+      // preserveAspectRatio="none": erzwingt die feste Hoehe unabhaengig von
+      // der Kartenbreite (sonst Letterboxing statt Fuellen).
+      let s = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:215px;display:block;overflow:hidden">`;
+      s += `<defs><linearGradient id="btcFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${cLine}" stop-opacity="0.28"/>
+              <stop offset="100%" stop-color="${cLine}" stop-opacity="0"/>
+            </linearGradient></defs>`;
+
+      // Y-Gitter: 4 gleich verteilte Linien.
+      const ySteps = 3;
+      for (let i = 0; i <= ySteps; i++) {
+        const v = yMin + (yMax - yMin) * i / ySteps;
+        const y = yForVal(v);
+        s += `<line x1="${cL}" y1="${y}" x2="${cR}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>`;
+        s += `<text x="${cL - 6}" y="${y + 3.5}" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Roboto,sans-serif" text-anchor="end">${Math.round(v).toLocaleString('de-DE')}</text>`;
+      }
+
+      // Kursverlauf: Linie + Flaechenfuellung.
+      const pts = days.map((d, i) => `${xForIdx(i).toFixed(1)},${yForVal(d[1]).toFixed(1)}`);
+      const areaPts = [`${cL.toFixed(1)},${cB}`, ...pts, `${cR.toFixed(1)},${cB}`].join(' ');
+      s += `<polygon points="${areaPts}" fill="url(#btcFill)"/>`;
+      s += `<polyline points="${pts.join(' ')}" fill="none" stroke="${cLine}" stroke-width="1.8" stroke-linejoin="round"/>`;
+
+      // X-Achse: Datumslabels, ausgeduennt.
+      const labelStep = Math.max(1, Math.ceil(n / 6));
+      days.forEach((d, i) => {
+        if (i % labelStep !== 0 && i !== n - 1) return;
+        const x = xForIdx(i);
+        const label = d[0].slice(8, 10) + '.' + d[0].slice(5, 7);
+        s += `<text x="${x.toFixed(1)}" y="${cB + 13}" fill="rgba(255,255,255,0.45)" font-size="8" font-family="Roboto,sans-serif" text-anchor="middle">${label}</text>`;
+      });
+
+      // Rahmen.
+      s += `<line x1="${cL}" y1="${cT}" x2="${cL}" y2="${cB}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+      s += `<line x1="${cL}" y1="${cB}" x2="${cR}" y2="${cB}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+      s += '</svg>';
+
+      return wrap(s);
+    ]]]

@@ -1,0 +1,229 @@
+# ═══════════════════════════════════════════════════════════════════════
+# SCHLAFZIMMER 1 — Abschnitt "Historie" (Tab "EnergieInfo"). Vier
+# bedingte Varianten (eine pro input_select.historie_zeitraum-Option,
+# configuration.yaml), da apexcharts-card graph_span/statistics nicht aus
+# einer Entity gespeist werden kann.
+#
+# 25.08.2026, Nutzer-Frage: "wird das auch schoen in die DB geschrieben
+# damit es schneller aufgerufen wird" — Nachtrag: die erste Version nutzte
+# group_by (fragt HAs ROHE State-History ab, clientseitig neu gebuckett),
+# das waere bei "30 Tage"/"12 Monate" unnoetig schwer (viele zehntausend
+# Rohdatenpunkte fuer einen State-Klasse-measurement-Sensor). Jetzt
+# stattdessen series.statistics (type: mean, period: hour/day/week) — nutzt
+# HAs vorberechnete Langzeit-Statistik-Tabelle (statistics/
+# statistics_short_term), serverseitig fertig aggregiert, dafuer gebaut.
+# Verifiziert 25.08.2026: recorder.purge_keep_days ist bereits auf 365
+# gesetzt (configuration.yaml). Statistik-Daten fuer diese Sensoren
+# existieren und der Abruf ist schnell (per WS-Call direkt getestet:
+# 0.005s fuer 52 Wochen-Buckets, vs. 0.125s NUR fuer 24h Rohdaten mit
+# 3689 Zeilen bei diesem Sensor — 30 Tage/12 Monate roh waeren um
+# Groessenordnungen schwerer gewesen, das war der eigentliche Grund fuer
+# "im moment laed das sehr lange"). Wichtiger Fund dabei: der WS-Befehl
+# heisst "recorder/statistics_during_period", NICHT "history/..." (Cursor
+# im installierten apexcharts-card.js live bestaetigt) — falls hier je
+# wieder ein eigener JS-Abruf noetig wird, den richtigen Namen verwenden.
+#
+# Eingebunden via !include in historie_raeume_cycler.yaml.
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+  - type: conditional
+    conditions:
+      - entity: input_select.historie_zeitraum
+        state: "Letzte 24 Stunden"
+    card:
+      type: custom:apexcharts-card
+      update_interval: 5min
+      cache: true
+      graph_span: 24h
+      header:
+        show: false
+      series:
+        - entity: sensor.raum_schlafzimmer1_power_w
+          type: area
+          color: "#4FC3F7"
+          curve: smooth
+          opacity: 0.35
+          stroke_width: 2
+          unit: " kW"
+          transform: "return x / 1000;"
+          statistics:
+            type: mean
+            period: hour
+      apex_config:
+        chart:
+          redrawOnParentResize: true
+          redrawOnWindowResize: true
+          height: 220
+          toolbar:
+            show: false
+          zoom:
+            enabled: false
+        dataLabels:
+          enabled: false
+        grid:
+          borderColor: "rgba(255,255,255,0.07)"
+          strokeDashArray: 4
+        xaxis:
+          labels:
+            rotate: -45
+            style:
+              colors: "rgba(255,255,255,0.5)"
+              fontSize: "10px"
+              fontFamily: "Roboto, sans-serif"
+        yaxis:
+          labels:
+            style:
+              colors: "rgba(255,255,255,0.5)"
+              fontSize: "11px"
+              fontFamily: "Roboto, sans-serif"
+  - type: conditional
+    conditions:
+      - entity: input_select.historie_zeitraum
+        state: "Letzte 7 Tage"
+    card:
+      type: custom:apexcharts-card
+      update_interval: 5min
+      cache: true
+      graph_span: 7d
+      header:
+        show: false
+      series:
+        - entity: sensor.raum_schlafzimmer1_power_w
+          type: area
+          color: "#4FC3F7"
+          curve: smooth
+          opacity: 0.35
+          stroke_width: 2
+          unit: " kW"
+          transform: "return x / 1000;"
+          statistics:
+            type: mean
+            period: hour
+      apex_config:
+        chart:
+          redrawOnParentResize: true
+          redrawOnWindowResize: true
+          height: 220
+          toolbar:
+            show: false
+          zoom:
+            enabled: false
+        dataLabels:
+          enabled: false
+        grid:
+          borderColor: "rgba(255,255,255,0.07)"
+          strokeDashArray: 4
+        xaxis:
+          labels:
+            rotate: -45
+            style:
+              colors: "rgba(255,255,255,0.5)"
+              fontSize: "10px"
+              fontFamily: "Roboto, sans-serif"
+        yaxis:
+          labels:
+            style:
+              colors: "rgba(255,255,255,0.5)"
+              fontSize: "11px"
+              fontFamily: "Roboto, sans-serif"
+  - type: conditional
+    conditions:
+      - entity: input_select.historie_zeitraum
+        state: "Letzte 30 Tage"
+    card:
+      type: custom:apexcharts-card
+      update_interval: 5min
+      cache: true
+      graph_span: 30d
+      header:
+        show: false
+      series:
+        - entity: sensor.raum_schlafzimmer1_power_w
+          type: area
+          color: "#4FC3F7"
+          curve: smooth
+          opacity: 0.35
+          stroke_width: 2
+          unit: " kW"
+          transform: "return x / 1000;"
+          statistics:
+            type: mean
+            period: day
+      apex_config:
+        chart:
+          redrawOnParentResize: true
+          redrawOnWindowResize: true
+          height: 220
+          toolbar:
+            show: false
+          zoom:
+            enabled: false
+        dataLabels:
+          enabled: false
+        grid:
+          borderColor: "rgba(255,255,255,0.07)"
+          strokeDashArray: 4
+        xaxis:
+          labels:
+            rotate: -45
+            style:
+              colors: "rgba(255,255,255,0.5)"
+              fontSize: "10px"
+              fontFamily: "Roboto, sans-serif"
+        yaxis:
+          labels:
+            style:
+              colors: "rgba(255,255,255,0.5)"
+              fontSize: "11px"
+              fontFamily: "Roboto, sans-serif"
+  - type: conditional
+    conditions:
+      - entity: input_select.historie_zeitraum
+        state: "Letzte 12 Monate"
+    card:
+      type: custom:apexcharts-card
+      update_interval: 5min
+      cache: true
+      graph_span: 365d
+      header:
+        show: false
+      series:
+        - entity: sensor.raum_schlafzimmer1_power_w
+          type: area
+          color: "#4FC3F7"
+          curve: smooth
+          opacity: 0.35
+          stroke_width: 2
+          unit: " kW"
+          transform: "return x / 1000;"
+          statistics:
+            type: mean
+            period: week
+      apex_config:
+        chart:
+          redrawOnParentResize: true
+          redrawOnWindowResize: true
+          height: 220
+          toolbar:
+            show: false
+          zoom:
+            enabled: false
+        dataLabels:
+          enabled: false
+        grid:
+          borderColor: "rgba(255,255,255,0.07)"
+          strokeDashArray: 4
+        xaxis:
+          labels:
+            rotate: -45
+            style:
+              colors: "rgba(255,255,255,0.5)"
+              fontSize: "10px"
+              fontFamily: "Roboto, sans-serif"
+        yaxis:
+          labels:
+            style:
+              colors: "rgba(255,255,255,0.5)"
+              fontSize: "11px"
+              fontFamily: "Roboto, sans-serif"

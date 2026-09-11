@@ -1,0 +1,114 @@
+# ═══════════════════════════════════════════════════════════════════════
+# GESAMTER ECHTZEITVERBRAUCH — Feld 3 von 3 im Abschnitt "Echtzeitverbrauch"
+# (Tab "EnergieInfo"). 25.08.2026: erst als native type: gauge gebaut
+# (Nutzer-Wunsch "schneller, schlichter"), dann auf eigenes SVG umentschieden
+# (Nutzer-Wunsch "mach es doch als eigene svg") für den weichen Grün-Gelb-
+# Rot-Verlauf, Tick-Striche, Nadel, Chip und Footer aus dem Referenz-
+# Screenshot — gleiche Technik wie Feld 1 ("Verbrauch nach Räumen").
+# Entity: sensor.gesamt_echtzeitverbrauch_w (packages/devices.yaml) =
+# house_load_w (bereits "ohne Miner") + miner_total_power_w, also wirklich
+# alles. max: 6000 W (2× Avalon Q Super ≈ 3350 W + Haus-Spitzenlast) — keine
+# belegte Schwelle für "normal"/"hoch", der Verlauf ist rein dekorativ wie
+# im Referenzbild, keine Aussage über Betriebszustände.
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 16px 12px
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    body:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  body: >
+    [[[
+      const entityId = 'sensor.gesamt_echtzeitverbrauch_w';
+      const min = 0, max = 6000;
+      const raw = parseFloat(states[entityId]?.state);
+      const known = !isNaN(raw);
+      const val = known ? Math.max(min, Math.min(max, raw)) : min;
+      const frac = (val - min) / (max - min);
+
+      const W = 340, H = 210, cx = 170, cy = 190, R = 140, sw = 22;
+      const toRad = (deg) => (deg - 180) * Math.PI / 180;
+      // t: 0 (min, links) .. 1 (max, rechts), Bogen ueber die Oberseite
+      const angleFor = (t) => 180 - t * 180;
+      const pt = (r, t) => {
+        const a = angleFor(t) * Math.PI / 180;
+        return [cx + r * Math.cos(a), cy - r * Math.sin(a)];
+      };
+
+      // Farbverlauf Eco-Gruen -> Standard-Cyan -> Super-Orange (31.08.2026,
+      // Nutzer-Wunsch: an die Modusfarben aus der Steuerung angleichen, statt
+      // dekorativ gruen/gelb/orange/rot). Werte = --bg-color-eco/-standard/
+      // -super aus themes/bitgrid.yaml, als RGB fuer die Interpolation.
+      // Anfangs- und Endfarbe je einmal dupliziert (31.08.2026, Nutzer-
+      // Feedback "Cyan zu dominant"): haelt Gruen/Orange an den Enden 25%
+      // lang flach, komprimiert beide Uebergaenge auf die mittleren 50%
+      // statt ueber die volle Bogenlaenge zu verschmieren.
+      const stops = [[76,175,80], [76,175,80], [38,198,218], [247,147,26], [247,147,26]];
+      const colorAt = (t) => {
+        const n = stops.length - 1;
+        const seg = Math.min(n - 1, Math.floor(t * n));
+        const localT = t * n - seg;
+        const [r1,g1,b1] = stops[seg], [r2,g2,b2] = stops[seg + 1];
+        const r = Math.round(r1 + (r2 - r1) * localT);
+        const g = Math.round(g1 + (g2 - g1) * localT);
+        const b = Math.round(b1 + (b2 - b1) * localT);
+        return `rgb(${r},${g},${b})`;
+      };
+
+      let arcs = '';
+      const N = 48;
+      for (let i = 0; i < N; i++) {
+        const t0 = i / N, t1 = (i + 1) / N;
+        const [x0, y0] = pt(R, t0);
+        const [x1, y1] = pt(R, t1);
+        arcs += `<path d="M ${x0.toFixed(1)},${y0.toFixed(1)} A ${R},${R} 0 0,1 ${x1.toFixed(1)},${y1.toFixed(1)}" stroke="${colorAt((t0 + t1) / 2)}" stroke-width="${sw}" fill="none" stroke-linecap="butt"/>`;
+      }
+
+      // Tick-Striche
+      let ticks = '';
+      for (let i = 0; i <= 8; i++) {
+        const t = i / 8;
+        const [xi, yi] = pt(R - sw / 2 - 4, t);
+        const [xo, yo] = pt(R - sw / 2 - 12, t);
+        ticks += `<line x1="${xi.toFixed(1)}" y1="${yi.toFixed(1)}" x2="${xo.toFixed(1)}" y2="${yo.toFixed(1)}" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>`;
+      }
+
+      // Nadel
+      const [nx, ny] = pt(R - sw - 14, frac);
+      const needle = `<line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="rgba(255,255,255,0.92)" stroke-width="4" stroke-linecap="round"/>
+                       <circle cx="${cx}" cy="${cy}" r="8" fill="rgba(255,255,255,0.92)" stroke="var(--ha-card-background,#1c1c1c)" stroke-width="2"/>`;
+
+      const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:visible">
+        ${arcs}${ticks}${needle}
+        <text x="${cx - R + sw / 2}" y="${cy + 18}" fill="rgba(255,255,255,0.5)" font-size="10" font-family="Roboto,sans-serif" text-anchor="middle">${min}</text>
+        <text x="${cx + R - sw / 2}" y="${cy + 18}" fill="rgba(255,255,255,0.5)" font-size="10" font-family="Roboto,sans-serif" text-anchor="middle">${max}</text>
+      </svg>`;
+
+      const valStr = known ? Math.round(val).toLocaleString('de-DE') : '—';
+
+      return `<div style="display:flex;flex-direction:column;align-items:center;width:100%">
+        <div style="font-size:1rem;font-weight:700;color:var(--primary-text-color);margin-bottom:10px;text-align:center;">Gesamter Echtzeitverbrauch</div>
+        ${svg}
+        <div style="margin-top:-8px;font-size:1.9rem;font-weight:800;color:var(--primary-text-color);line-height:1;">
+          ${valStr}<span style="font-size:0.95rem;font-weight:600;color:var(--secondary-text-color);margin-left:4px;">W</span>
+        </div>
+      </div>`;
+    ]]]

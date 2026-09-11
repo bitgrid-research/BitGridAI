@@ -18,10 +18,12 @@
 #   kuehlschraenke       shellyplugsg3_9070694abdf4 Hauswirtschaft
 #   waschmaschine        shellyplugsg3_d885ac1e9adc Hauswirtschaft
 #   trockner             shellyplugpmg3_9070695bb2a8 Hauswirtschaft
-#   heizung              shelly1pmg4_e4b06377adc0   Keller
-#   lueftung             shellyplusplugs_d4d4daf4eda4 Keller
-#   server               shellyplugsg3_d0cf13db3a00 Keller
-#   garage               shellyplugsg3_907069492f30 Garage
+#   heizung              shelly1pmg4_e4b06377adc0   Garage
+#   lueftung             shellyplusplugs_d4d4daf4eda4 Garage
+#   server               shellyplugsg3_907069492f30 Garage
+#   garage               shellyplugsg3_d0cf13db3a00 Garage (versorgt den Runtipi-Server, Key-Name "garage" bewusst unveraendert)
+# (Keller und Garage sind derselbe Raum, gleiches Stockwerk — Label 2026-08-24 vereinheitlicht)
+# (server/garage Shelly-IDs waren vertauscht — korrigiert 2026-08-24 nach physischer Prüfung)
 #
 # Tages-kWh nach dem Midnight-Baseline-Muster aus packages/stats.yaml
 # (utility_meter wurde in HA 2026.x entfernt). Quelle ist der native
@@ -115,6 +117,100 @@ devices:
       max: 1000000
       step: 0.001
       mode: box
+    # 25.08.2026: Baselines für "Verbrauch nach Räumen (heute)" (Tab
+    # "EnergieInfo") — Miner 1/2 einzeln (bisher nur kombiniert über
+    # mining_energy_daily, ueber die integration-Plattform), GX-10 und
+    # Wohnwand-Beleuchtung hatten bislang GAR keine Tages-kWh. Gleiches
+    # Muster wie alle Geraete oben: native _energie-Zaehler des Shelly-Plugs
+    # minus Mitternachts-Baseline.
+    miner1_energy_midnight:
+      name: "Miner 1 kWh Baseline Mitternacht"
+      min: 0
+      max: 100000000
+      step: 0.001
+      mode: box
+    miner2_energy_midnight:
+      name: "Miner 2 kWh Baseline Mitternacht"
+      min: 0
+      max: 100000000
+      step: 0.001
+      mode: box
+    gx10_energy_midnight:
+      name: "GX-10 kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
+    wohnwand_energy_midnight:
+      name: "Wohnwand-Beleuchtung kWh Baseline Mitternacht"
+      min: 0
+      max: 1000000
+      step: 0.001
+      mode: box
+
+  # Aufklapp-Zustand der Raum-Listen im Tab "Grundriss" (bitgrid_dashboard_v3.
+  # yaml, Grid-Areas "haus"/"garage"). Reiner UI-Zustand, keine Steuerlogik —
+  # analog zu miner1/2_detail_* (avalonq_miner1.yaml) und
+  # mvp_regelschwellen_detail (mvp_auto.yaml).
+  input_boolean:
+    fp_detail_kueche:
+      name: "Grundriss-Detail Küche aufgeklappt"
+      icon: mdi:silverware-fork-knife
+    fp_detail_wohnzimmer:
+      name: "Grundriss-Detail Wohnzimmer aufgeklappt"
+      icon: mdi:sofa
+    fp_detail_schlafzimmer1:
+      name: "Grundriss-Detail Schlafzimmer 1 aufgeklappt"
+      icon: mdi:bed
+    fp_detail_schlafzimmer2:
+      name: "Grundriss-Detail Schlafzimmer 2 aufgeklappt"
+      icon: mdi:bed-outline
+    fp_detail_buero:
+      name: "Grundriss-Detail Büro aufgeklappt"
+      icon: mdi:desk
+    fp_detail_gaestezimmer:
+      name: "Grundriss-Detail Gästezimmer aufgeklappt"
+      icon: mdi:bed-double-outline
+    fp_detail_bad:
+      name: "Grundriss-Detail Bad aufgeklappt"
+      icon: mdi:shower
+    fp_detail_hauswirtschaft:
+      name: "Grundriss-Detail Hauswirtschaft aufgeklappt"
+      icon: mdi:hanger
+    fp_detail_garage:
+      name: "Grundriss-Detail Garage aufgeklappt"
+      icon: mdi:garage
+
+    # Welcher Grundriss im Tab "Grundriss" gerade sichtbar ist (24.08.2026,
+    # Nutzer-Entscheidung: Haus 16:9 + Garage 16:21 hochkant übereinander war
+    # eine sehr lange Scroll-Seite; jetzt nur einer sichtbar, Pfeile oben
+    # schalten um). off = Haus, on = Garage.
+    fp_view_garage:
+      name: "Grundriss zeigt Garage (statt Haus)"
+      icon: mdi:garage
+
+    # Aufklapp-Zustand der Raum-Kacheln in "Verbrauch nach Räumen (heute)"
+    # (Tab "EnergieInfo"). 25.08.2026: erst als custom:bubble-card-Pop-up
+    # gebaut, auf Nutzer-Wunsch ("mach keine bubble cards") auf dasselbe
+    # Akkordeon-Muster wie fp_detail_* oben umgestellt.
+    raumkachel_untergeschoss:
+      name: "Raum-Kachel Untergeschoss aufgeklappt"
+      icon: mdi:home-floor-b
+    raumkachel_wohnzimmer:
+      name: "Raum-Kachel Wohnzimmer aufgeklappt"
+      icon: mdi:sofa
+    raumkachel_kueche:
+      name: "Raum-Kachel Küche aufgeklappt"
+      icon: mdi:countertop
+    raumkachel_schlafzimmer1:
+      name: "Raum-Kachel Schlafzimmer 1 aufgeklappt"
+      icon: mdi:bed
+    raumkachel_buero:
+      name: "Raum-Kachel Büro aufgeklappt"
+      icon: mdi:desk
+    raumkachel_hauswirtschaft:
+      name: "Raum-Kachel Hauswirtschaft aufgeklappt"
+      icon: mdi:washing-machine
 
   template:
     - sensor:
@@ -231,7 +327,7 @@ devices:
           unit_of_measurement: "kWh"
           state_class: measurement
           state: >-
-            {% set cur  = states('sensor.shellyplugsg3_d0cf13db3a00_energie') | float(0) %}
+            {% set cur  = states('sensor.shellyplugsg3_907069492f30_energie') | float(0) %}
             {% set base = states('input_number.server_energy_midnight') | float(0) %}
             {{ (cur - base if cur >= base else cur) | round(3) }}
 
@@ -240,11 +336,68 @@ devices:
           unit_of_measurement: "kWh"
           state_class: measurement
           state: >-
-            {% set cur  = states('sensor.shellyplugsg3_907069492f30_energie') | float(0) %}
+            {% set cur  = states('sensor.shellyplugsg3_d0cf13db3a00_energie') | float(0) %}
             {% set base = states('input_number.garage_energy_midnight') | float(0) %}
             {{ (cur - base if cur >= base else cur) | round(3) }}
 
+        # 25.08.2026: Miner 1/2 einzeln, GX-10, Wohnwand-Beleuchtung — siehe
+        # Baseline-Kommentar oben. Speist die Raum-Tages-Summen weiter unten.
+        - name: "miner1_energy_daily"
+          unique_id: miner1_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shellyplugsg3_dcb4d9c5567c_energie') | float(0) %}
+            {% set base = states('input_number.miner1_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        - name: "miner2_energy_daily"
+          unique_id: miner2_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shellyplugsg3_d0cf13d86254_energie') | float(0) %}
+            {% set base = states('input_number.miner2_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        - name: "gx10_energy_daily"
+          unique_id: gx10_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.shellyplugsg3_dcb4d9c6b46c_energie') | float(0) %}
+            {% set base = states('input_number.gx10_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
+        - name: "wohnwand_energy_daily"
+          unique_id: wohnwand_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          state: >-
+            {% set cur  = states('sensor.wohnwand_beleuchtung_energie') | float(0) %}
+            {% set base = states('input_number.wohnwand_energy_midnight') | float(0) %}
+            {{ (cur - base if cur >= base else cur) | round(3) }}
+
         # Summe über alle 14 Plugs — Kopfkarte im Geräte-Tab und die
+        # Gesamter Echtzeitverbrauch = Hauslast (bereits "ohne Miner",
+        # configuration.yaml/house_load_w) + Miner. Speist die Gauge-Karte
+        # "Gesamter Echtzeitverbrauch" (Feld 3/3, Tab "EnergieInfo",
+        # 25.08.2026, Nutzer-Wunsch). Bewusst NICHT ueber PV/Netz/Batterie
+        # neu hergeleitet — house_load_w macht diese Bilanz schon korrekt
+        # (configuration.yaml, Kommentar "Hauslast: PV + Batterie-Entladung
+        # + Netzbezug - Netzeinspeisung - Miner"), hier nur der Miner-Anteil
+        # wieder addiert, um wirklich ALLES zu erfassen.
+        - name: "gesamt_echtzeitverbrauch_w"
+          unique_id: gesamt_echtzeitverbrauch_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:speedometer
+          state: >-
+            {{ (states('sensor.house_load_w') | float(0)
+                + states('sensor.miner_total_power_w') | float(0)
+            ) | round(0) }}
+
         # "Geräte"-Bubble im Energiefluss (Home). Nicht erreichbare Plugs
         # zählen als 0, damit die Summe nie kippt.
         - name: "geraete_power_w"
@@ -289,6 +442,277 @@ devices:
                 + states('sensor.server_energy_daily') | float(0)
                 + states('sensor.garage_energy_daily') | float(0)
             ) | round(3) }}
+
+        # ── Raum-Summen (aktuelle Leistung) ────────────────────────────
+        # 25.08.2026: Bereichszuordnung live aus HAs Area-Registry verifiziert
+        # (areas()/area_entities() per Template-API, nicht aus diesem Datei-
+        # Kommentarblock oben oder dem lokalen .storage-Spiegel übernommen —
+        # beide waren teils veraltet, 6 Geräte hatten in HA noch gar keinen
+        # Bereich, siehe scripts/ha_assign_areas.py). Speist den Balken-Chart
+        # "Verbrauch nach Räumen" (views/verbrauch_nach_raeumen.yaml, Tab
+        # "EnergieInfo"). Anders als geraete_power_w zaehlt hier ALLES, was
+        # im Raum Strom zieht (inkl. Heizstab, Miner, GX-10-Server), nicht nur
+        # die reinen Haushalts-Plugs — Ziel ist die reale Raumlast, nicht die
+        # PFCP-Datenrolle "Geräte".
+        - name: "raum_wohnzimmer_power_w"
+          unique_id: raum_wohnzimmer_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:sofa
+          state: >-
+            {{ (states('sensor.wohnwand_beleuchtung_leistung') | float(0)
+                + states('sensor.shellyplugsg3_9070694c99d4_leistung') | float(0)
+            ) | round(1) }}
+
+        - name: "raum_kueche_power_w"
+          unique_id: raum_kueche_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:countertop
+          state: >-
+            {{ (states('sensor.shellyplugsg3_9070694b2854_leistung') | float(0)
+                + states('sensor.shellyplugsg3_9070694c577c_leistung') | float(0)
+            ) | round(1) }}
+
+        - name: "raum_buero_power_w"
+          unique_id: raum_buero_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:desk
+          state: >-
+            {{ (states('sensor.shellyplugsg3_9070694a1b6c_leistung') | float(0)
+                + states('sensor.shellyplugsg3_d885ac18c3b4_leistung') | float(0)
+            ) | round(1) }}
+
+        - name: "raum_schlafzimmer1_power_w"
+          unique_id: raum_schlafzimmer1_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:bed
+          state: >-
+            {{ (states('sensor.shellyplugsg3_d0cf13db3a00_leistung') | float(0)
+                + states('sensor.shellyplugsg3_90706947f288_leistung') | float(0)
+                + states('sensor.shellyplugsg3_dcb4d9c6b46c_leistung') | float(0)
+                + states('sensor.shellyplugsg3_9070694d44bc_leistung') | float(0)
+            ) | round(1) }}
+
+        - name: "raum_hauswirtschaft_power_w"
+          unique_id: raum_hauswirtschaft_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:washing-machine
+          state: >-
+            {{ (states('sensor.shellyplugpmg3_9070695bb2a8_leistung') | float(0)
+                + states('sensor.shellyplugsg3_d885ac1e9adc_leistung') | float(0)
+                + states('sensor.shellyplugsg3_9070694abdf4_leistung') | float(0)
+            ) | round(1) }}
+
+        # 25.08.2026, Nutzer-Vorgabe: Keller + Garage zusammengelegt zu einem
+        # Raum "Untergeschoss" (nur im Dashboard — die HA-Areas "Keller" und
+        # "Garage" selbst bleiben unverändert, das ist reine Anzeige-
+        # Zusammenlegung, keine Bereichs-Korrektur wie bei David PC).
+        - name: "raum_untergeschoss_power_w"
+          unique_id: raum_untergeschoss_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:home-floor-b
+          state: >-
+            {{ (states('sensor.ac_elwa_2_power1_solar') | float(0)
+                + states('sensor.ac_elwa_2_power1_grid') | float(0)
+                + states('sensor.shellyplugsg3_dcb4d9c5567c_leistung') | float(0)
+                + states('sensor.shellyplugsg3_d0cf13d86254_leistung') | float(0)
+                + states('sensor.shellyplusplugs_d4d4daf4eda4_leistung') | float(0)
+                + states('sensor.shelly1pmg4_e4b06377adc0_leistung') | float(0)
+                + states('sensor.shellyplugsg3_907069492f30_leistung') | float(0)
+            ) | round(1) }}
+
+        # ── Raum-Summen (Tages-kWh) ──────────────────────────────────────
+        # 25.08.2026: Speist "Verbrauch nach Räumen (heute)" (Tab
+        # "EnergieInfo", 2. Abschnitt links unten). Gleiche Raum-
+        # Gruppierung wie raum_*_power_w oben, nur Tages-kWh statt
+        # Momentanleistung — "garage_energy_daily"/"server_energy_daily" sind
+        # historisch gewachsene Key-Namen (siehe Kommentar oben in dieser
+        # Datei), zeigen aber laut Live-Area-Registry auf Schlafzimmer 1
+        # bzw. Garage, nicht auf ihren Namen.
+        - name: "raum_wohnzimmer_energy_daily"
+          unique_id: raum_wohnzimmer_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          icon: mdi:sofa
+          state: >-
+            {{ (states('sensor.wohnwand_energy_daily') | float(0)
+                + states('sensor.tv_energy_daily') | float(0)
+            ) | round(3) }}
+
+        - name: "raum_kueche_energy_daily"
+          unique_id: raum_kueche_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          icon: mdi:countertop
+          state: >-
+            {{ (states('sensor.spuelmaschine_energy_daily') | float(0)
+                + states('sensor.kuehlschrank_kueche_energy_daily') | float(0)
+            ) | round(3) }}
+
+        - name: "raum_buero_energy_daily"
+          unique_id: raum_buero_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          icon: mdi:desk
+          state: >-
+            {{ (states('sensor.drucker_energy_daily') | float(0)
+                + states('sensor.buero_energy_daily') | float(0)
+            ) | round(3) }}
+
+        - name: "raum_schlafzimmer1_energy_daily"
+          unique_id: raum_schlafzimmer1_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          icon: mdi:bed
+          state: >-
+            {{ (states('sensor.garage_energy_daily') | float(0)
+                + states('sensor.tv_schlafzimmer_energy_daily') | float(0)
+                + states('sensor.gx10_energy_daily') | float(0)
+                + states('sensor.pc_schlafzimmer_energy_daily') | float(0)
+            ) | round(3) }}
+
+        - name: "raum_hauswirtschaft_energy_daily"
+          unique_id: raum_hauswirtschaft_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          icon: mdi:washing-machine
+          state: >-
+            {{ (states('sensor.trockner_energy_daily') | float(0)
+                + states('sensor.waschmaschine_energy_daily') | float(0)
+                + states('sensor.kuehlschraenke_energy_daily') | float(0)
+            ) | round(3) }}
+
+        # Keller + Garage zusammengelegt zu "Untergeschoss", siehe
+        # raum_untergeschoss_power_w oben für die Begründung.
+        - name: "raum_untergeschoss_energy_daily"
+          unique_id: raum_untergeschoss_energy_daily
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          icon: mdi:home-floor-b
+          state: >-
+            {{ (states('sensor.heizstab_energy_daily') | float(0)
+                + states('sensor.miner1_energy_daily') | float(0)
+                + states('sensor.miner2_energy_daily') | float(0)
+                + states('sensor.lueftung_energy_daily') | float(0)
+                + states('sensor.heizung_energy_daily') | float(0)
+                + states('sensor.server_energy_daily') | float(0)
+            ) | round(3) }}
+
+        # ── Gerätetyp-Summen (aktuelle Leistung) ────────────────────────
+        # 25.08.2026: Kategorisierung nach echten Live-Friendly-Names (HA
+        # Template-API abgefragt), nicht nach den Key-Namen aus dem alten
+        # Kommentarblock oben, der teils veraltet war (siehe Raum-Summen-
+        # Kommentar). Speist die Balkenliste "Verbrauch nach Gerätetyp"
+        # (Tab "EnergieInfo", custom:bubble-card). "Lüftung Miner"
+        # bewusst bei Mining (Miner-Support-Infrastruktur), nicht bei
+        # Sonstiges.
+        - name: "typ_mining_power_w"
+          unique_id: typ_mining_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:pickaxe
+          state: >-
+            {{ (states('sensor.shellyplugsg3_dcb4d9c5567c_leistung') | float(0)
+                + states('sensor.shellyplugsg3_d0cf13d86254_leistung') | float(0)
+                + states('sensor.shellyplusplugs_d4d4daf4eda4_leistung') | float(0)
+            ) | round(1) }}
+
+        - name: "typ_computer_power_w"
+          unique_id: typ_computer_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:desktop-tower-monitor
+          state: >-
+            {{ (states('sensor.shellyplugsg3_9070694d44bc_leistung') | float(0)
+                + states('sensor.shellyplugsg3_d885ac18c3b4_leistung') | float(0)
+                + states('sensor.shellyplugsg3_d0cf13db3a00_leistung') | float(0)
+                + states('sensor.shellyplugsg3_907069492f30_leistung') | float(0)
+                + states('sensor.shellyplugsg3_dcb4d9c6b46c_leistung') | float(0)
+            ) | round(1) }}
+
+        - name: "typ_kuehlung_power_w"
+          unique_id: typ_kuehlung_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:fridge-outline
+          state: >-
+            {{ (states('sensor.shellyplugsg3_9070694c577c_leistung') | float(0)
+                + states('sensor.shellyplugsg3_9070694abdf4_leistung') | float(0)
+            ) | round(1) }}
+
+        - name: "typ_unterhaltung_power_w"
+          unique_id: typ_unterhaltung_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:television
+          state: >-
+            {{ (states('sensor.shellyplugsg3_9070694c99d4_leistung') | float(0)
+                + states('sensor.shellyplugsg3_90706947f288_leistung') | float(0)
+            ) | round(1) }}
+
+        # Heizstab (AC-ELWA-2) hat zwei Leistungskanaele (solar-/netzbezogener
+        # Anteil), fuer eine Geraete-Zeile in "Verbrauch nach Räumen" (Feld 2,
+        # Keller-Kachel) als eine Summe gebraucht.
+        - name: "heizstab_power_w"
+          unique_id: heizstab_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:water-boiler
+          state: >-
+            {{ (states('sensor.ac_elwa_2_power1_solar') | float(0)
+                + states('sensor.ac_elwa_2_power1_grid') | float(0)
+            ) | round(1) }}
+
+        - name: "typ_warmwasser_power_w"
+          unique_id: typ_warmwasser_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:water-boiler
+          state: >-
+            {{ (states('sensor.ac_elwa_2_power1_solar') | float(0)
+                + states('sensor.ac_elwa_2_power1_grid') | float(0)
+            ) | round(1) }}
+
+        - name: "typ_haushaltsgeraete_power_w"
+          unique_id: typ_haushaltsgeraete_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:washing-machine
+          state: >-
+            {{ (states('sensor.shellyplugsg3_9070694b2854_leistung') | float(0)
+                + states('sensor.shellyplugsg3_d885ac1e9adc_leistung') | float(0)
+                + states('sensor.shellyplugpmg3_9070695bb2a8_leistung') | float(0)
+            ) | round(1) }}
+
+        - name: "typ_sonstiges_power_w"
+          unique_id: typ_sonstiges_power_w
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          icon: mdi:power-socket-eu
+          state: >-
+            {{ (states('sensor.shellyplugsg3_9070694a1b6c_leistung') | float(0)
+                + states('sensor.shelly1pmg4_e4b06377adc0_leistung') | float(0)
+                + states('sensor.wohnwand_beleuchtung_leistung') | float(0)
+            ) | round(1) }}
 
   automation:
     # Midnight-Reset: Baselines auf aktuelle Plug-Zählerstände setzen.
@@ -390,12 +814,40 @@ devices:
             entity_id: input_number.server_energy_midnight
           data:
             value: >-
-              {{ states('sensor.shellyplugsg3_d0cf13db3a00_energie')
+              {{ states('sensor.shellyplugsg3_907069492f30_energie')
                  | float(states('input_number.server_energy_midnight') | float(0)) }}
         - action: input_number.set_value
           target:
             entity_id: input_number.garage_energy_midnight
           data:
             value: >-
-              {{ states('sensor.shellyplugsg3_907069492f30_energie')
+              {{ states('sensor.shellyplugsg3_d0cf13db3a00_energie')
                  | float(states('input_number.garage_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.miner1_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shellyplugsg3_dcb4d9c5567c_energie')
+                 | float(states('input_number.miner1_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.miner2_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shellyplugsg3_d0cf13d86254_energie')
+                 | float(states('input_number.miner2_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.gx10_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.shellyplugsg3_dcb4d9c6b46c_energie')
+                 | float(states('input_number.gx10_energy_midnight') | float(0)) }}
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.wohnwand_energy_midnight
+          data:
+            value: >-
+              {{ states('sensor.wohnwand_beleuchtung_energie')
+                 | float(states('input_number.wohnwand_energy_midnight') | float(0)) }}

@@ -4,6 +4,10 @@ docs/thesis/
 # Lokale Infrastruktur-Dokumentation (IPs, Passwörter, Geräte)
 INFRASTRUCTURE.md
 
+# KI-Agenten-Tooling: interne Entwicklungsunterlagen (IPs, Ports, Mounts,
+# Personalakten, Ausbildungsunterlagen). Bleibt bewusst lokal.
+docs/development/36_ai_tooling/
+
 # Claude Code Projektanweisungen (nur lokal, nicht öffentlich)
 CLAUDE.md
 
@@ -15,7 +19,20 @@ scripts/deploy_query_server.py
 scripts/watch_hermes.py
 scripts/watch_nachtforscher.py
 
+# Editor-/manuelle Backups (nie einchecken)
+*.bak
+
+# Echter Hausgrundriss (Datenschutz, nicht oeffentlich)
+src/ha/config/www/floorplan/
+src/ha/config/www/garage_floorplan/
+
+# Generierte Dashboard-Datenexporte (regenerierbar via btc_price_history.py /
+# energy_to_sats_export.py, kein Quellcode)
+src/ha/config/www/btc_price_eur.json
+src/ha/config/www/energy_to_sats.json
+
 # BitGridAI — Laufzeit-Daten (nie einchecken)
+vault/
 data/bitgrid.db
 data/*.db
 data/*.db-wal

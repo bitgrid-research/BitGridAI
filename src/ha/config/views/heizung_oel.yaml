@@ -1,0 +1,121 @@
+# ═══════════════════════════════════════════════════════════════════════
+# HEIZUNG (ÖL) — Tabelle im Tab "Heizung" (bitgrid_dashboard_v3.yaml).
+#
+# Kein direkter Öl-/Brennwertsensor vorhanden (kein entsprechendes Gerät in
+# HA eingebunden). Einziger Messpunkt ist der Shelly 1PM Gen4
+# (shelly1pmg4_e4b06377adc0, Key "heizung" in packages/devices.yaml), der im
+# Sicherungskreis des Ölbrenners hängt und dessen elektrische Aufnahme
+# (Brennermotor, Zündung, Steuerung) misst — ein Proxy für "Brenner läuft",
+# nicht der Ölverbrauch selbst. Tagesenergie über das etablierte Midnight-
+# Baseline-Muster (sensor.heizung_energy_daily, packages/devices.yaml),
+# Gesamtzähler direkt vom Plug (total_increasing).
+# Kartenrahmen/Zeilenstil identisch zu views/verbrauch_nach_geraetetyp.yaml
+# (gleicher Tab-Familienstandard), nur ohne Ring-Gauge: die zwei Tabellen
+# in diesem Tab sind keine Anteile einer gemeinsamen Summe.
+#
+# "Anteil Tag aktiv" (26.08.2026, Nutzer-Skizze): echte Tages-Duty-Cycle,
+# aus der HA-History-REST-API berechnet (hass.callApi, Standard-Frontend-
+# API jeder Custom-Card, kein Cloud-Call). Bewusst NICHT als neuer
+# history_stats-Sensor gebaut (Nutzer-Entscheidung 26.08.2026: "client-
+# seitig aus Verlaufsdaten" statt neuer HA-Sensor). Cache in
+# window._bgHeizCache (5 Minuten), da button-card sein custom_field bei
+# JEDER Hass-Aktualisierung neu auswertet (mehrmals pro Minute, wie bei der
+# Hamster-Karte auf dem Home-Tab) — ohne Cache würde das bei jedem Tick neu
+# gegen die History-API fragen. this.requestUpdate() stößt den Redraw an,
+# sobald die Antwort da ist; falls das (button-card-Version) nicht greift,
+# holt der naechste ohnehin haeufige Hass-Tick den Wert nach.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--ha-card-border-radius)
+    - overflow: hidden
+    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
+    - box-shadow: var(--ha-card-box-shadow)
+    - padding: 16px 14px
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    body:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  body: >
+    [[[
+      const fnum = (id) => { const v = parseFloat(states[id]?.state); return isNaN(v) ? null : v; };
+      const powerW = fnum('sensor.shelly1pmg4_e4b06377adc0_leistung');
+      const kwhToday = fnum('sensor.heizung_energy_daily');
+      const kwhTotal = fnum('sensor.shelly1pmg4_e4b06377adc0_energie');
+      const running = powerW !== null && powerW > 5;
+
+      const fmtW = (v) => v === null ? '—' : (v < 10 ? v.toFixed(1) : Math.round(v).toLocaleString('de-DE')) + ' W';
+      const fmtKwh = (v) => v === null ? '—' : v.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kWh';
+      const fmtPct = (v) => v === null || v === undefined ? '…' : v.toLocaleString('de-DE', {maximumFractionDigits: 1}) + ' %';
+
+      // ── Anteil Tag aktiv: echte Duty-Cycle-Berechnung aus der Tages-
+      // History (siehe Kopfkommentar). Threshold identisch zu "running" oben.
+      window._bgHeizCache = window._bgHeizCache || {};
+      const dutyCyclePct = (entityId, threshold, cacheKey) => {
+        const cache = window._bgHeizCache;
+        const now = Date.now();
+        const c = cache[cacheKey];
+        if (!c || now - (c.fetching || 0) > 5 * 60000) {
+          cache[cacheKey] = Object.assign({}, c, { fetching: now });
+          const midnight = new Date(); midnight.setHours(0, 0, 0, 0);
+          hass.callApi('GET', `history/period/${midnight.toISOString()}?filter_entity_id=${entityId}&minimal_response`)
+            .then((resp) => {
+              const samples = (resp && resp[0]) || [];
+              const end = Date.now();
+              let onMs = 0;
+              for (let i = 0; i < samples.length; i++) {
+                const v = parseFloat(samples[i].state);
+                const tStart = new Date(samples[i].last_changed).getTime();
+                const tEnd = i + 1 < samples.length ? new Date(samples[i + 1].last_changed).getTime() : end;
+                if (!isNaN(v) && v > threshold) onMs += Math.max(0, tEnd - tStart);
+              }
+              const totalMs = end - midnight.getTime();
+              cache[cacheKey] = { ts: Date.now(), pct: totalMs > 0 ? (onMs / totalMs) * 100 : null };
+              try { this.requestUpdate && this.requestUpdate(); } catch (e) {}
+            })
+            .catch(() => { cache[cacheKey] = { ts: Date.now(), pct: null }; });
+        }
+        return cache[cacheKey] && cache[cacheKey].pct !== undefined ? cache[cacheKey].pct : undefined;
+      };
+      const dutyPct = dutyCyclePct('sensor.shelly1pmg4_e4b06377adc0_leistung', 5, 'heizung_oel_duty');
+
+      const row = (icon, label, val, color=null) => {
+        const c = color ? `color:${color};` : 'color:var(--primary-text-color);';
+        return `<div style="display:flex;align-items:center;padding:7px 2px;gap:8px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <ha-icon icon="${icon}" style="--mdc-icon-size:15px;color:rgba(255,255,255,0.7);"></ha-icon>
+          </div>
+          <span style="flex:1;min-width:0;color:var(--primary-text-color);font-size:0.92rem;font-weight:600;">${label}</span>
+          <span style="font-size:0.95rem;font-weight:700;${c}white-space:nowrap;">${val}</span>
+        </div>`;
+      };
+      const sep = '<div style="border-top:1px solid rgba(255,255,255,0.06);margin:0 2px;"></div>';
+
+      const rows = [
+        row('mdi:power', 'Status', running ? 'An' : 'Aus', running ? '#4CAF50' : 'var(--secondary-text-color)'),
+        row('mdi:flash', 'Aktuelle Leistung', fmtW(powerW), '#4FC3F7'),
+        row('mdi:counter', 'Energie heute', fmtKwh(kwhToday), '#4FC3F7'),
+        row('mdi:counter', 'Energie gesamt', fmtKwh(kwhTotal)),
+        row('mdi:chart-donut', 'Anteil Tag aktiv', fmtPct(dutyPct), '#8D6E63'),
+      ].join(sep);
+
+      return `<div style="display:flex;flex-direction:column;width:100%">
+        <div style="font-size:1rem;font-weight:700;color:var(--primary-text-color);margin-bottom:6px;padding-left:2px;">Heizung (Öl)</div>
+        ${rows}
+        <div style="font-size:0.72rem;color:var(--secondary-text-color);opacity:0.65;margin-top:8px;padding-left:2px;">
+          Elektrische Aufnahme des Brenners (Shelly-Proxy), kein Ölverbrauch.
+        </div>
+      </div>`;
+    ]]]
