@@ -1,0 +1,15 @@
+# ═══════════════════════════════════════════════════════════════════════
+# BITCOIN-KURS  —  dynamischer EUR/USD/Power-Law-Chart als eigenstaendiges
+# Custom-Element (custom:bitgrid-btc-kurs-chart, www/bitgrid_btc_kurs_chart.js)
+# statt des bisherigen statischen 90-Tage-Inline-SVGs in stats_btc_price.yaml.
+#
+# Gleiches Hausmuster wie views/regelschwellen_chart.yaml: reines Custom-
+# Element, kein button-card-Wrapper. Design/Stil s. Kommentarkopf der JS-
+# Datei. stats_btc_price.yaml bleibt unbenutzt im Repo liegen (gleiche
+# Praxis wie stats_retro_vergleich.yaml, s. Kommentar in
+# bitgrid_dashboard_v3.yaml), falls die schlanke 90-Tage-Variante spaeter
+# wieder gebraucht wird.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "BitcoinInfo".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:bitgrid-btc-kurs-chart

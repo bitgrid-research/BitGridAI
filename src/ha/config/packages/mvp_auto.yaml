@@ -219,14 +219,28 @@ mvp_auto:
     # vollen Begruendung oben. Treibt sensor.miner_1_log/miner_2_log (template:
     # weiter unten in diesem Package): der State-Trigger dort feuert nur bei
     # echtem Wertwechsel dieses Kurzcodes, nicht bei jedem Watchdog-Lauf.
+    #
+    # KEIN initial: hier (27.09.2026). Bis dahin stand hier initial: "", und
+    # das war die Ursache der Log-Schleife: input_text setzt den Wert bei
+    # JEDEM HA-Start auf initial zurueck, der erste Watchdog-Lauf danach
+    # schreibt denselben Kurzcode wieder hinein, und genau dieses
+    # "" -> "R1 Stopp" ist ein echter State-Wechsel, der einen Log-Eintrag
+    # erzeugt. Belegt am 27.09.2026: alle 25 Eintraege im Live-Log liessen
+    # sich 1:1 einem Eintrag in recorder_runs zuordnen, jeweils 0-3 min nach
+    # dem HA-Start (Watchdog hat beim Start-Trigger 1 min delay). Der Log war
+    # damit faktisch ein Neustart-Zaehler, kein Regel-Verlauf. Ohne initial
+    # stellt input_text den letzten Wert per RestoreEntity wieder her
+    # (async_added_to_hass, im Container verifiziert), der Folgeschreibvorgang
+    # ist dann wertgleich und HA unterdrueckt ihn (core.py async_set: bei
+    # gleichem State UND gleichen Attributen nur EVENT_STATE_REPORTED, kein
+    # state_changed — und der State-Trigger haengt ausschliesslich an
+    # state_changed, verifiziert in triggers/state.py).
     mvp_miner1_rule:
       name: "Miner 1 Regel-Kurzcode"
       max: 40
-      initial: ""
     mvp_miner2_rule:
       name: "Miner 2 Regel-Kurzcode"
       max: 40
-      initial: ""
 
   input_datetime:
     mvp_night_block_start:
@@ -344,57 +358,154 @@ mvp_auto:
               —
             {% endif %}
 
-    # Verlaufslog je Miner (31.08.2026, Nutzer-Wunsch): Uhrzeit/Regel/Werte der
-    # letzten 25 Regel-Wechsel, nicht jeder Watchdog-Lauf (die Wortmeldung waere
-    # sonst binnen Minuten von SoC-Rauschen geflutet). Trigger-based Template
-    # Sensor statt input_text: `this.attributes` erlaubt den Ringpuffer OHNE
-    # eigene Automation, und Attribute umgehen das 255-Zeichen-Limit, das jeden
-    # State (auch input_text) in HA hart begrenzt — 25 strukturierte Eintraege
-    # passen dort nicht rein. `entity_id: input_text.mvp_miner1_rule` als Trigger
-    # (nicht z.B. sensor.miner1_workmode_status direkt), weil HA einen State-
-    # Trigger nur bei echtem Wertwechsel feuert: identische Folgewerte werden
-    # unterdrueckt, das erledigt die Entprellung ohne eigene Bedingung. Ueberlebt
-    # HA-Neustarts (Trigger-based Template Sensoren implementieren RestoreEntity).
+    # Verlaufslog je Miner (31.08.2026, Nutzer-Wunsch): Uhrzeit/Ereignis/Werte
+    # der letzten 25 EREIGNISSE. Trigger-based Template Sensor statt input_text:
+    # `this.attributes` erlaubt den Ringpuffer OHNE eigene Automation, und
+    # Attribute umgehen das 255-Zeichen-Limit, das jeden State (auch input_text)
+    # in HA hart begrenzt — 25 strukturierte Eintraege passen dort nicht rein.
+    # Ueberlebt HA-Neustarts (Trigger-based Template Sensoren implementieren
+    # RestoreEntity).
+    #
+    # 27.09.2026, Neufassung nach Nutzer-Befund "Log-Schleifen, ich brauche
+    # nicht fuer jedes Prozent eine Warnung". Zwei Aenderungen:
+    #
+    # 1. URSACHE der Schleife lag NICHT hier, sondern beim initial: "" der
+    #    beiden Kurzcode-input_text (s. Kommentar dort). Alle 25 Eintraege des
+    #    Live-Logs waren Neustart-Artefakte, nachgewiesen ueber recorder_runs.
+    #
+    # 2. LOGGRUNDSATZ geschaerft: geloggt wird, was TATSAECHLICH passiert ist
+    #    (Modus-Wechsel des Miners) und was ihn AKTIV blockiert hat
+    #    (Schutz-Zustaende R1/R2/Raumtemperatur). Reine Wartezustaende
+    #    (Hochschalt-CD, Runterschalt-CD, Eco-Wartezeit, Regulär) erzeugen
+    #    KEINEN Eintrag mehr: ein ablaufender Cooldown ist kein Ereignis,
+    #    sondern ein Zustand, und der steht live in der Begruendungszeile und
+    #    in sensor.minerX_cooldown_status. Sie erzeugten bisher zwei Eintraege
+    #    pro Cooldown-Zyklus, ohne dass sich irgendetwas geaendert hatte.
+    #
+    # Trigger 'modus' haengt bewusst am Ist-Zustand (sensor.minerX_workmode_
+    # status), nicht am Sollwert (select.minerX_workmode_set): geloggt wird,
+    # was der Miner wirklich gemacht hat. Damit stehen auch manuelle
+    # Umschaltungen und nicht befolgte Befehle im Log, statt nur der Wunsch
+    # des Watchdogs.
+    #
+    # Die condition filtert zusaetzlich jeden Uebergang von/zu leer, unknown,
+    # unavailable oder none. Das ist der Guertel zum Hosentraeger aus Punkt 1:
+    # es faengt dieselbe Klasse Neustart-/Ausfall-Artefakte auch dann ab, wenn
+    # sie kuenftig an anderer Stelle entsteht (z.B. Miner-API kurz weg).
     - trigger:
         - platform: state
+          entity_id: sensor.miner1_workmode_status
+          id: modus
+        - platform: state
           entity_id: input_text.mvp_miner1_rule
+          id: regel
+        # Lab replay only (script.lab_demo_reset fires it): empty the log
+        # for a clean study run. Never fired in prod.
+        - platform: event
+          event_type: bgai_miner_log_reset
+          id: reset
+      condition:
+        - condition: template
+          value_template: >
+            {% if trigger.id == 'reset' %}true{% else %}
+            {% set f = trigger.from_state.state if trigger.from_state is not none else none %}
+            {% set t = trigger.to_state.state if trigger.to_state is not none else none %}
+            {% set leer = ['', 'unknown', 'unavailable', 'none', none] %}
+            {% set schutz = ['R1 Stopp', 'R2 Temp-Sperre', 'Raumtemp-Sperre'] %}
+            {{ f not in leer and t not in leer and f != t
+               and (trigger.id == 'modus' or f in schutz or t in schutz) }}
+            {% endif %}
       sensor:
         - name: "Miner 1 Log"
           unique_id: miner1_log
           icon: mdi:text-box-outline
-          state: "{{ trigger.to_state.state }}"
+          state: "{{ states('input_text.mvp_miner1_rule') }}"
           attributes:
             entries: >
+              {# Lab replay: sim date + sim clock (sensor.lab_sim_profile /
+                 lab_sim_clock exist only on the lab), otherwise real time. #}
+              {% set sd = states('sensor.lab_sim_profile') %}
+              {% set sc = states('sensor.lab_sim_clock') %}
+              {% set stamp = (sd[8:10] ~ '.' ~ sd[5:7] ~ '. ' ~ sc)
+                 if is_state('input_boolean.simulation_mode', 'on')
+                    and sd is match('\d{4}-\d{2}-\d{2}$') and sc is match('\d{2}:\d{2}$')
+                 else now().strftime('%d.%m. %H:%M') %}
+              {% if trigger.id == 'reset' %}{{ [] }}{% else %}
               {{ (this.attributes.get('entries', []) + [{
-                    'time': now().strftime('%d.%m. %H:%M'),
+                    'time': stamp,
                     'miner': 'M1',
-                    'rule': trigger.to_state.state,
+                    'rule': (trigger.from_state.state ~ ' → ' ~ trigger.to_state.state)
+                            if trigger.id == 'modus' else trigger.to_state.state,
                     'values': states('input_text.mvp_miner1_debug'),
                   }])[-25:] }}
+              {% endif %}
     - trigger:
         - platform: state
+          entity_id: sensor.miner2_workmode_status
+          id: modus
+        - platform: state
           entity_id: input_text.mvp_miner2_rule
+          id: regel
+        # Lab replay only (script.lab_demo_reset fires it): empty the log
+        # for a clean study run. Never fired in prod.
+        - platform: event
+          event_type: bgai_miner_log_reset
+          id: reset
+      condition:
+        - condition: template
+          value_template: >
+            {% if trigger.id == 'reset' %}true{% else %}
+            {% set f = trigger.from_state.state if trigger.from_state is not none else none %}
+            {% set t = trigger.to_state.state if trigger.to_state is not none else none %}
+            {% set leer = ['', 'unknown', 'unavailable', 'none', none] %}
+            {% set schutz = ['R1 Stopp', 'R2 Temp-Sperre', 'Raumtemp-Sperre'] %}
+            {{ f not in leer and t not in leer and f != t
+               and (trigger.id == 'modus' or f in schutz or t in schutz) }}
+            {% endif %}
       sensor:
         - name: "Miner 2 Log"
           unique_id: miner2_log
           icon: mdi:text-box-outline
-          state: "{{ trigger.to_state.state }}"
+          state: "{{ states('input_text.mvp_miner2_rule') }}"
           attributes:
             entries: >
+              {# Lab replay: sim date + sim clock (sensor.lab_sim_profile /
+                 lab_sim_clock exist only on the lab), otherwise real time. #}
+              {% set sd = states('sensor.lab_sim_profile') %}
+              {% set sc = states('sensor.lab_sim_clock') %}
+              {% set stamp = (sd[8:10] ~ '.' ~ sd[5:7] ~ '. ' ~ sc)
+                 if is_state('input_boolean.simulation_mode', 'on')
+                    and sd is match('\d{4}-\d{2}-\d{2}$') and sc is match('\d{2}:\d{2}$')
+                 else now().strftime('%d.%m. %H:%M') %}
+              {% if trigger.id == 'reset' %}{{ [] }}{% else %}
               {{ (this.attributes.get('entries', []) + [{
-                    'time': now().strftime('%d.%m. %H:%M'),
+                    'time': stamp,
                     'miner': 'M2',
-                    'rule': trigger.to_state.state,
+                    'rule': (trigger.from_state.state ~ ' → ' ~ trigger.to_state.state)
+                            if trigger.id == 'modus' else trigger.to_state.state,
                     'values': states('input_text.mvp_miner2_debug'),
                   }])[-25:] }}
+              {% endif %}
 
     # Saison-Automatik (ADR 028, 27.08.2026, dritte Kehrtwende): wieder
     # Live-Formel statt fester Tabelle — Nutzer-Entscheidung 27.08.2026,
     # kippt die ADR-027-Fixierung vom Vortag erneut. Formel = R2-Logik aus
     # rules.yaml (Kern, dort nur Thesis-Studienmodell, siehe ADR 020): 10%
     # SMA-Tiefentladeschutz-Boden + Reserve fuer die Nacht (Grundlast x
-    # laengste Nacht des Monats, Standort 48,1°N/11,6°O, feste astronomische
-    # Tabelle) + 5% Puffer. Trigger bewusst NICHT stuendlich (Nutzer-Wunsch:
+    # laengste Nacht des Monats, feste astronomische Tabelle fuer den eigenen
+    # Standort, Breitengrad rund 49,5°N; genaue Koordinaten stehen bewusst nur
+    # in der HA-Konfiguration, nicht im Repo) + 5% Puffer.
+    #
+    # Standortangabe am 25.09.2026 korrigiert: hier stand zuvor 48,1°N/11,6°O,
+    # was nicht zum Messort passt. Die ZAHLEN der Tabelle sind davon unberuehrt
+    # und bleiben unveraendert, nur der Kommentar war falsch. Nachgerechnet mit
+    # dem NOAA-Sonnenstandsalgorithmus (gegen sun.sun auf 18 s validiert):
+    # die Tabelle passt zu rund 49,5°N mit 0,3 min mittlerer Abweichung, zu
+    # 48,1°N dagegen mit 7,9 min. Eine Neuberechnung wuerde die Werte um
+    # maximal 0,5 min und die Hausreserve um 0,02 Prozentpunkte verschieben,
+    # also reines Rauschen: dafuer wird dieser Regelpfad nicht angefasst.
+    #
+    # Trigger bewusst NICHT stuendlich (Nutzer-Wunsch:
     # "es reicht die 6 Schwellenwerte einmal zum Monatswechsel zu aendern"),
     # nur taeglich (faengt den Monatswechsel ab) + sofort bei Aenderung der
     # beiden Stellschrauben + bei HA-Start. Reine Anzeige/Diagnose-Sensor:
@@ -409,13 +520,21 @@ mvp_auto:
           entity_id:
             - input_number.mvp_night_baseload_w
             - input_number.battery_capacity_kwh
+        # Lab replay (17.10.2026): month of the replayed day instead of now()
+        # while simulation_mode runs and sensor.lab_sim_profile (lab only)
+        # holds the sim date. Prod has no lab_sim_profile: unchanged.
+        - platform: state
+          entity_id:
+            - input_boolean.simulation_mode
+            - sensor.lab_sim_profile
       sensor:
         - name: "MVP Saison Status"
           unique_id: mvp_saison_status
           icon: mdi:calendar-sync
           state: >
             {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
-            {% set h = ns[now().month] %}
+            {% set p = states('sensor.lab_sim_profile') %}
+            {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
             {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
             {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
             {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
@@ -430,14 +549,16 @@ mvp_auto:
           attributes:
             hausreserve_pct: >
               {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
-              {% set h = ns[now().month] %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
               {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
               {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
               {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
               {{ ([15 + rp, 95] | min) | round(1) }}
             eco_ab_pct: >
               {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
-              {% set h = ns[now().month] %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
               {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
               {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
               {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
@@ -445,7 +566,8 @@ mvp_auto:
               {{ ([sp + 10, 100] | min) | round(1) }}
             standard_endet_pct: >
               {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
-              {% set h = ns[now().month] %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
               {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
               {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
               {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
@@ -453,7 +575,8 @@ mvp_auto:
               {{ ([sp + 20, 100] | min) | round(1) }}
             standard_ab_pct: >
               {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
-              {% set h = ns[now().month] %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
               {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
               {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
               {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
@@ -461,7 +584,8 @@ mvp_auto:
               {{ ([sp + 25, 100] | min) | round(1) }}
             super_endet_pct: >
               {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
-              {% set h = ns[now().month] %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
               {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
               {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
               {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
@@ -469,7 +593,8 @@ mvp_auto:
               {{ ([sp + 35, 100] | min) | round(1) }}
             super_ab_pct: >
               {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
-              {% set h = ns[now().month] %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
               {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
               {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
               {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
@@ -893,12 +1018,29 @@ mvp_auto:
 
             # R3 – Super hochschalten: Akku voll → Super, ganztägig (bis
             # 27.08.2026 nur vormittags per Gate, siehe Kommentar oben).
+            #
+            # BUG-FIX 25.09.2026: soc_super_on kommt aus mvp_saison_automatik
+            # als min(stop_pct+40, 100) — in einer Saison, die Super eigentlich
+            # sperrt ("Eco + Standard"/"Nur Eco" in sensor.mvp_saison_status),
+            # wird die Schwelle dabei nur auf genau 100 GEDECKELT, nicht
+            # wirklich gesperrt. Bei SoC=100% (im Sommer Alltag, s. mining_log-
+            # Historie) griff "soc >= soc_super_on" dann trotzdem und schaltete
+            # Super in einem Monat frei, den die Saisonale Tabelle als gesperrt
+            # ausweist — Live-Befund 25.09.2026 (September, "Eco + Standard").
+            # Der Saison-Status wurde bis dahin nirgends in der Schaltlogik
+            # geprueft, nur in Chart/Tabelle. Fix: explizite Saison-Bedingung,
+            # dieselbe Quelle (sensor.mvp_saison_status), die auch
+            # bitgrid_regelschwellen_chart.js fuer supReachable nutzt — ein
+            # Wahrheitsquelle fuer "darf Super diesen Monat", keine zweite.
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
               sequence:
                 - condition: template
                   value_template: "{{ m1_status != 'Super' }}"
+                - condition: state
+                  entity_id: sensor.mvp_saison_status
+                  state: "Voll (Eco/Standard/Super)"
                 - condition: template
                   value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -950,10 +1092,16 @@ mvp_auto:
             # R5 – Standard hochschalten: SoC im Standard-Bereich → Standard
             # (Eco→Standard, blockiert wenn Downgrade-Cooldown aktiv), ganztägig
             # (bis 27.08.2026 nur vormittags per Gate, siehe Kommentar bei R3).
+            #
+            # BUG-FIX 25.09.2026: derselbe Deckelungs-Fehler wie bei R3 (s.
+            # Kommentar dort), hier fuer "Nur Eco"-Monate — soc_std_on wird
+            # dort ebenfalls nur auf 100 gedeckelt statt gesperrt.
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_std_on and m1_status == 'Eco' }}"
               sequence:
+                - condition: template
+                  value_template: "{{ not is_state('sensor.mvp_saison_status', 'Nur Eco') }}"
                 - condition: template
                   value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -1234,12 +1382,18 @@ mvp_auto:
             # R3 – Super hochschalten: seit 23.08.2026 auch für Miner 2 (Sperre
             # aufgehoben, s.o.) — identisch zu Miner 1, ganztägig (kein
             # Nachmittags-Gate mehr, siehe Kommentar bei Miner 1).
+            #
+            # BUG-FIX 25.09.2026: identisch zu Miner 1, s. dortiger Kommentar
+            # (Deckelung auf 100 statt echter Sperre bei blockierter Saison).
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
               sequence:
                 - condition: template
                   value_template: "{{ m2_status != 'Super' }}"
+                - condition: state
+                  entity_id: sensor.mvp_saison_status
+                  state: "Voll (Eco/Standard/Super)"
                 - condition: template
                   value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -1288,10 +1442,14 @@ mvp_auto:
             # R5 – Standard hochschalten: SoC im Standard-Bereich → Standard
             # (Eco→Standard, blockiert wenn Downgrade-Cooldown aktiv), ganztägig
             # (kein Nachmittags-Gate mehr, siehe Kommentar bei Miner 1).
+            #
+            # BUG-FIX 25.09.2026: identisch zu Miner 1, s. dortiger Kommentar.
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_std_on and m2_status == 'Eco' }}"
               sequence:
+                - condition: template
+                  value_template: "{{ not is_state('sensor.mvp_saison_status', 'Nur Eco') }}"
                 - condition: template
                   value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
                 - condition: state

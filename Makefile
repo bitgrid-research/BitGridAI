@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f infra/docker-compose.yml
 
-.PHONY: check fmt lint test test-unit test-replay build build-ci clean deploy-ha deploy-ha-restart sync-history check-gaps obsidian-sync obsidian-sync-all obsidian-sync-watch
+.PHONY: check fmt lint test test-unit test-replay build build-ci clean deploy-ha deploy-ha-restart sync-history check-gaps repair repair-check data-heal obsidian-sync obsidian-sync-all obsidian-sync-watch
 
 # Vollständiger Qualitätscheck (vor jedem PR)
 check: fmt lint test
@@ -48,6 +48,17 @@ sync-history:
 
 check-gaps:
 	python -m src.data.gap_check --days 7
+
+# Bekannte Erfassungsfehler erkennen (Bericht, aendert nichts)
+repair-check:
+	python -m src.data.auto_repair --days 14
+
+# Dieselben Fehler tatsaechlich reparieren
+repair:
+	python -m src.data.auto_repair --days 14 --apply
+
+# Kompletter Datenlauf: Luecken schliessen, dann reparieren, dann pruefen
+data-heal: sync-history repair check-gaps
 
 update-btc-power-law:
 	python -m src.data.btc_power_law

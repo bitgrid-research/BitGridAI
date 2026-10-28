@@ -406,6 +406,9 @@ devices:
           device_class: power
           state_class: measurement
           state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.geraete_power_sim_w') | float(500) }}
+            {% else %}
             {{ (states('sensor.shellyplugsg3_9070694c577c_leistung') | float(0)
                 + states('sensor.shellyplugsg3_9070694b2854_leistung') | float(0)
                 + states('sensor.shellyplugsg3_9070694c99d4_leistung') | float(0)
@@ -421,6 +424,7 @@ devices:
                 + states('sensor.shellyplugsg3_d0cf13db3a00_leistung') | float(0)
                 + states('sensor.shellyplugsg3_907069492f30_leistung') | float(0)
             ) | round(1) }}
+            {% endif %}
 
         - name: "geraete_energy_daily"
           unique_id: geraete_energy_daily

@@ -82,6 +82,50 @@ def fetch_historical_prices(
     return sorted(out, key=lambda x: x[0])
 
 
+def fetch_historical_prices_dual(
+    base_url: str, timeout: int = 30
+) -> list[tuple[int, float | None, float | None]]:
+    """
+    Wie fetch_historical_prices(), behaelt aber BEIDE Waehrungsfelder aus
+    derselben Antwort (die API liefert EUR und USD unabhaengig vom
+    ?currency=-Parameter in jedem Eintrag). Ein Abruf statt zwei, fuer den
+    dynamischen BitcoinInfo-Kurschart (btc_price_history.py), der EUR und USD
+    parallel anbietet. Ungueltige Werte (-1, fehlend, <=0) werden pro
+    Waehrung einzeln auf None gesetzt statt den ganzen Punkt zu verwerfen,
+    weil USD durchgehend seit Genesis vorliegt, EUR aber erst spaeter
+    einsetzt.
+    """
+    url = f"{base_url}/api/v1/historical-price?currency=EUR"
+    try:
+        with urlopen(url, timeout=timeout) as resp:
+            payload = json.loads(resp.read().decode())
+    except URLError as exc:
+        log.error("Mempool-Instanz nicht erreichbar: %s", exc)
+        return []
+    except json.JSONDecodeError as exc:
+        log.error("Mempool-Antwort kein gueltiges JSON: %s", exc)
+        return []
+
+    def clean(v: object) -> float | None:
+        if not isinstance(v, (int, float)):
+            return None
+        f = float(v)
+        return f if f > 0 else None
+
+    raw = payload.get("prices", [])
+    out: list[tuple[int, float | None, float | None]] = []
+    for entry in raw:
+        ts = entry.get("time")
+        if ts is None:
+            continue
+        eur = clean(entry.get("EUR"))
+        usd = clean(entry.get("USD"))
+        if eur is None and usd is None:
+            continue
+        out.append((int(ts), eur, usd))
+    return sorted(out, key=lambda x: x[0])
+
+
 def downsample_daily(prices: list[tuple[int, float]]) -> list[tuple[date, float]]:
     """Ein Preis pro Kalendertag (UTC), erster Eintrag des Tages gewinnt."""
     by_day: dict[date, float] = {}

@@ -250,6 +250,26 @@ stats:
       start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
       end: "{{ now() }}"
 
+    # Pro-Miner-Laufzeit heute, 25.09.2026 neu: für das STATUS-Panel je
+    # Miner-Karte (views/miner_controls.yaml) — miner_uptime_today_h oben ist
+    # kombiniert (beide Miner OR-verknüpft), hier je Miner einzeln, gebunden
+    # an binary_sensor.miner1_running/miner2_running (configuration.yaml).
+    - platform: history_stats
+      name: "miner1_uptime_today_h"
+      entity_id: binary_sensor.miner1_running
+      state: "on"
+      type: time
+      start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+      end: "{{ now() }}"
+
+    - platform: history_stats
+      name: "miner2_uptime_today_h"
+      entity_id: binary_sensor.miner2_running
+      state: "on"
+      type: time
+      start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+      end: "{{ now() }}"
+
     - platform: history_stats
       name: "miner_super_hours_today"
       entity_id: binary_sensor.miners_in_super
@@ -308,45 +328,98 @@ stats:
           unit_of_measurement: "kWh"
           state_class: measurement
           state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.pv_energy_daily_sim') | float(0) }}
+            {% else %}
             {% set cur  = states('sensor.pv_energy_integral') | float(0) %}
             {% set base = states('input_number.pv_energy_midnight') | float(0) %}
             {{ [cur - base, 0] | max | round(3) }}
+            {% endif %}
+
+        # Tagesertrag direkt aus dem Zaehlerstand des Wechselrichters.
+        # Verlustfrei: das Geraet zaehlt weiter, auch wenn Home Assistant die
+        # Verbindung verliert. Nach einer Erfassungsluecke steht hier sofort
+        # wieder der volle Tageswert, waehrend pv_energy_daily (Integration
+        # ueber die Momentanleistung) die Luecke dauerhaft verliert.
+        # Am 23.-25.09.2026 kostete genau das 66 kWh, siehe data/recovery/.
+        - name: "pv_energy_daily_meter"
+          unique_id: pv_energy_daily_meter
+          unit_of_measurement: "kWh"
+          device_class: energy
+          state_class: total_increasing
+          availability: >-
+            {{ states('sensor.sn_3012953672_daily_yield')
+               not in ['unavailable', 'unknown'] }}
+          state: >-
+            {{ (states('sensor.sn_3012953672_daily_yield') | float(0) / 1000) | round(3) }}
+
+        # Abweichung der integrierten Bilanz vom Zaehlerstand des Geraets.
+        # Im Normalbetrieb wenige Prozent (Riemann-Summe gegen echten Zaehler,
+        # am Kontrolltag 22.09.2026 waren es 1,0 %). Laeuft der Wert weg, hat
+        # die Erfassung eine Luecke, die in der Tagesbilanz fehlt.
+        - name: "pv_energy_daily_drift_kwh"
+          unique_id: pv_energy_daily_drift_kwh
+          unit_of_measurement: "kWh"
+          state_class: measurement
+          availability: >-
+            {{ states('sensor.pv_energy_daily_meter') not in ['unavailable', 'unknown']
+               and states('sensor.pv_energy_daily') not in ['unavailable', 'unknown'] }}
+          state: >-
+            {% set meter = states('sensor.pv_energy_daily_meter') | float(0) %}
+            {% set calc  = states('sensor.pv_energy_daily')       | float(0) %}
+            {{ (meter - calc) | round(3) }}
 
         - name: "mining_energy_daily"
           unique_id: mining_energy_daily
           unit_of_measurement: "kWh"
           state_class: measurement
           state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.mining_energy_daily_sim') | float(0) }}
+            {% else %}
             {% set cur  = states('sensor.mining_energy_integral') | float(0) %}
             {% set base = states('input_number.mining_energy_midnight') | float(0) %}
             {{ [cur - base, 0] | max | round(3) }}
+            {% endif %}
 
         - name: "grid_import_daily"
           unique_id: grid_import_daily
           unit_of_measurement: "kWh"
           state_class: measurement
           state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.grid_import_daily_sim') | float(0) }}
+            {% else %}
             {% set cur  = states('sensor.grid_import_integral') | float(0) %}
             {% set base = states('input_number.grid_import_midnight') | float(0) %}
             {{ [cur - base, 0] | max | round(3) }}
+            {% endif %}
 
         - name: "grid_export_daily"
           unique_id: grid_export_daily
           unit_of_measurement: "kWh"
           state_class: measurement
           state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.grid_export_daily_sim') | float(0) }}
+            {% else %}
             {% set cur  = states('sensor.grid_export_integral') | float(0) %}
             {% set base = states('input_number.grid_export_midnight') | float(0) %}
             {{ [cur - base, 0] | max | round(3) }}
+            {% endif %}
 
         - name: "house_energy_daily"
           unique_id: house_energy_daily
           unit_of_measurement: "kWh"
           state_class: measurement
           state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ states('input_number.house_energy_daily_sim') | float(0) }}
+            {% else %}
             {% set cur  = states('sensor.house_energy_integral') | float(0) %}
             {% set base = states('input_number.house_energy_midnight') | float(0) %}
             {{ [cur - base, 0] | max | round(3) }}
+            {% endif %}
 
         - name: "heizstab_energy_daily"
           unique_id: heizstab_energy_daily

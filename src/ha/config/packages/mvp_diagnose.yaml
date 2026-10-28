@@ -106,7 +106,7 @@ mvp_diagnose:
             {% else %}
               {% set ns.code = 'ok' %}
             {% endif %}
-            {{ ns.code }}
+            {{ 'ok' if is_state('input_boolean.simulation_mode', 'on') else ns.code }}
           attributes:
             summary: >
               {% set soc = states('sensor.battery_soc_pct') | float(-1) %}
@@ -229,7 +229,7 @@ mvp_diagnose:
             {% else %}
               {% set ns.code = 'ok' %}
             {% endif %}
-            {{ ns.code }}
+            {{ 'ok' if is_state('input_boolean.simulation_mode', 'on') else ns.code }}
           attributes:
             summary: >
               {% set soc = states('sensor.battery_soc_pct') | float(-1) %}

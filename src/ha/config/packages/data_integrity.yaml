@@ -1,0 +1,140 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Datenintegritaet: Waechter fuer die Messdatenerfassung
+#
+# Anlass: Am 23.-25.09.2026 fiel die PV-Erfassung drei Tage aus, ohne dass es
+# jemand bemerkte. 66 kWh fehlen dauerhaft in der Bilanz. Davor lief die
+# MQTT-Aufzeichnung wochenlang ins Leere. Gemeinsame Ursache war nicht der
+# Ausfall selbst, sondern dass niemand ihn gemeldet bekam: die bestehenden
+# Meldungen waren persistent_notifications, die man nur sieht, wenn man
+# ohnehin ins Dashboard schaut.
+#
+# Diese Waechter melden deshalb per Push aufs Handy, wie pool.yaml es
+# vormacht. Sie feuern einmal beim Uebergang, nicht periodisch, und geben
+# Entwarnung, wenn sich die Lage normalisiert.
+# ══════════════════════════════════════════════════════════════════════════════
+
+data_integrity:
+
+  script:
+    data_integrity_push:
+      alias: "Datenintegritaet: Push aufs Handy"
+      mode: parallel
+      fields:
+        title:
+          description: "Titel der Meldung"
+        message:
+          description: "Text der Meldung"
+        tag:
+          description: "Gleicher tag ersetzt eine bestehende Meldung statt zu stapeln"
+      sequence:
+        - action: notify.mobile_app_home_glan_munchweiler
+          data:
+            title: "{{ title }}"
+            message: "{{ message }}"
+            data:
+              tag: "{{ tag }}"
+
+  automation:
+    # ── 1. PV-Erfassung ausgefallen ───────────────────────────────────────────
+    # Nur tagsueber: nachts ist der Wechselrichter per Design aus, da ist
+    # unavailable kein Fehler (siehe sma_watchdog.yaml).
+    - id: di_pv_erfassung_tot
+      alias: "Daten: PV-Erfassung ausgefallen"
+      mode: single
+      max_exceeded: silent
+      trigger:
+        - platform: template
+          value_template: >-
+            {{ states('sensor.pv_power_w') in ['unavailable', 'unknown']
+               and state_attr('sun.sun', 'elevation') | float(0) > 5 }}
+          for: "00:30:00"
+      action:
+        - action: script.data_integrity_push
+          data:
+            title: "PV-Erfassung ausgefallen"
+            message: >-
+              sensor.pv_power_w liefert seit 30 Minuten nichts, obwohl die Sonne
+              steht. Jede Minute Ausfall fehlt dauerhaft in der Tagesbilanz.
+              Pruefen: Wechselrichter erreichbar, pysmaplus-Eintrag geladen.
+            tag: "di_pv_dead"
+        - action: persistent_notification.create
+          data:
+            title: "PV-Erfassung ausgefallen"
+            message: >-
+              Seit {{ now().strftime('%d.%m. %H:%M') }} Uhr keine PV-Daten.
+              Steckt der Config Entry in FAILED_UNLOAD, hilft nur ein
+              Home-Assistant-Neustart, kein Reload.
+            notification_id: "di_pv_dead"
+
+    - id: di_pv_erfassung_zurueck
+      alias: "Daten: PV-Erfassung wieder da"
+      mode: single
+      trigger:
+        - platform: template
+          value_template: >-
+            {{ states('sensor.pv_power_w') not in ['unavailable', 'unknown'] }}
+          for: "00:05:00"
+      action:
+        # dismiss auf eine nicht vorhandene ID ist ein No-op, daher ohne Bedingung
+        - action: persistent_notification.dismiss
+          data:
+            notification_id: "di_pv_dead"
+        - action: script.data_integrity_push
+          data:
+            title: "PV-Erfassung wieder da"
+            message: >-
+              sensor.pv_power_w liefert wieder
+              ({{ states('sensor.pv_power_w') }} W). Was waehrend des Ausfalls
+              fehlt, laesst sich aus dem Zaehlerstand des Wechselrichters
+              nachtragen, siehe data/recovery/.
+            tag: "di_pv_dead"
+
+    # ── 2. Bilanz laeuft vom Zaehlerstand weg ─────────────────────────────────
+    # pv_energy_daily integriert die Momentanleistung und verliert jede Luecke.
+    # pv_energy_daily_meter kommt aus dem Zaehler des Geraets und verliert
+    # nichts. Laufen beide auseinander, fehlt genau diese Differenz in der
+    # Bilanz. Im Normalbetrieb liegt sie im Promillebereich.
+    - id: di_bilanz_drift
+      alias: "Daten: Bilanz weicht vom Zaehlerstand ab"
+      mode: single
+      max_exceeded: silent
+      trigger:
+        - platform: template
+          value_template: >-
+            {{ states('sensor.pv_energy_daily_drift_kwh') | float(0) | abs > 2
+               and state_attr('sun.sun', 'elevation') | float(0) > 5 }}
+          for: "00:15:00"
+      action:
+        - action: script.data_integrity_push
+          data:
+            title: "PV-Bilanz driftet"
+            message: >-
+              Tagesbilanz weicht {{ states('sensor.pv_energy_daily_drift_kwh') }} kWh
+              vom Zaehlerstand des Wechselrichters ab. Diese Energie fehlt in
+              pv_energy_daily und damit in MTD und YTD.
+            tag: "di_drift"
+
+    # ── 3. Signalstille ───────────────────────────────────────────────────────
+    # Faengt den Fall ab, dass Werte zwar formal verfuegbar sind, aber niemand
+    # sie mehr aktualisiert (haengende Integration, toter Broker).
+    - id: di_signalstille
+      alias: "Daten: keine neuen Messwerte"
+      mode: single
+      max_exceeded: silent
+      trigger:
+        - platform: time_pattern
+          minutes: "/30"
+      condition:
+        - condition: template
+          value_template: >-
+            {% set s = states.sensor.battery_soc_pct %}
+            {{ s is not none
+               and (now() - (s.last_reported or s.last_updated)).total_seconds() > 7200 }}
+      action:
+        - action: script.data_integrity_push
+          data:
+            title: "Keine neuen Messwerte"
+            message: >-
+              sensor.battery_soc_pct hat seit ueber zwei Stunden nichts mehr
+              gemeldet. Die Messdatenerfassung steht vermutlich still.
+            tag: "di_silence"

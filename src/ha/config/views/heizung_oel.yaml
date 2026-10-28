@@ -33,11 +33,13 @@ tap_action:
   action: none
 styles:
   card:
+    # 17.10.2026: fuellt die Spaltenhoehe (Karten nebeneinander buendig, www/bitgrid_wide.js).
+    - height: 100%
     - background: var(--ha-card-background)
-    - border-radius: var(--ha-card-border-radius)
+    - border-radius: var(--bgai-card-radius-v3)
     - overflow: hidden
-    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
-    - box-shadow: var(--ha-card-box-shadow)
+    - border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3)
+    - box-shadow: var(--bgai-card-shadow-v3)
     - padding: 16px 14px
   grid:
     - grid-template-areas: '"body"'
@@ -52,11 +54,16 @@ custom_fields:
     [[[
       const fnum = (id) => { const v = parseFloat(states[id]?.state); return isNaN(v) ? null : v; };
       const powerW = fnum('sensor.shelly1pmg4_e4b06377adc0_leistung');
-      const kwhToday = fnum('sensor.heizung_energy_daily');
+      // Lab-Replay (17.10.2026): Tageswerte des abgespielten Tages statt Live-
+      // History (window.bgaiSimToday, www/bitgrid_card_shape.js; Prod: null).
+      // sim_step steht hier, damit button-card bei jedem Sim-Block neu rendert.
+      const simT = window.bgaiSimToday && window.bgaiSimToday(hass);
+      const simStepRef = states['input_number.sim_step']?.state;
+      const kwhToday = simT ? simT.kwh('shelly1pmg4_e4b06377adc0') : fnum('sensor.heizung_energy_daily');
       const kwhTotal = fnum('sensor.shelly1pmg4_e4b06377adc0_energie');
       const running = powerW !== null && powerW > 5;
 
-      const fmtW = (v) => v === null ? '—' : (v < 10 ? v.toFixed(1) : Math.round(v).toLocaleString('de-DE')) + ' W';
+      const fmtW = (v) => v === null ? '—' : (v < 10 ? v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) : Math.round(v).toLocaleString('de-DE')) + ' W';
       const fmtKwh = (v) => v === null ? '—' : v.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kWh';
       const fmtPct = (v) => v === null || v === undefined ? '…' : v.toLocaleString('de-DE', {maximumFractionDigits: 1}) + ' %';
 
@@ -89,7 +96,9 @@ custom_fields:
         }
         return cache[cacheKey] && cache[cacheKey].pct !== undefined ? cache[cacheKey].pct : undefined;
       };
-      const dutyPct = dutyCyclePct('sensor.shelly1pmg4_e4b06377adc0_leistung', 5, 'heizung_oel_duty');
+      const dutyPct = simT
+        ? simT.duty(simT.devW('shelly1pmg4_e4b06377adc0'), 5)
+        : dutyCyclePct('sensor.shelly1pmg4_e4b06377adc0_leistung', 5, 'heizung_oel_duty');
 
       const row = (icon, label, val, color=null) => {
         const c = color ? `color:${color};` : 'color:var(--primary-text-color);';
@@ -105,8 +114,8 @@ custom_fields:
 
       const rows = [
         row('mdi:power', 'Status', running ? 'An' : 'Aus', running ? '#4CAF50' : 'var(--secondary-text-color)'),
-        row('mdi:flash', 'Aktuelle Leistung', fmtW(powerW), '#4FC3F7'),
-        row('mdi:counter', 'Energie heute', fmtKwh(kwhToday), '#4FC3F7'),
+        row('mdi:flash', 'Aktuelle Leistung', fmtW(powerW), '#8D6E63'),
+        row('mdi:counter', 'Energie heute', fmtKwh(kwhToday), '#8D6E63'),
         row('mdi:counter', 'Energie gesamt', fmtKwh(kwhTotal)),
         row('mdi:chart-donut', 'Anteil Tag aktiv', fmtPct(dutyPct), '#8D6E63'),
       ].join(sep);

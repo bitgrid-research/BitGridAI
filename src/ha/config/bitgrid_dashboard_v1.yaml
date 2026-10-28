@@ -668,7 +668,7 @@ views:
                       <span style="color:var(--secondary-text-color);font-weight:400;">${greeting}</span>
                     </div>
                     <div style="display:flex;gap:12px;align-items:flex-start">
-                      <img src="/local/${imgSrc}?v=20260426"
+                      <img src="/local/${imgSrc}?v=20260912"
                            style="width:120px;height:120px;border-radius:50%;flex-shrink:0;
                                   object-fit:cover;border:2px solid var(--divider-color)">
                       <div style="flex:1">
@@ -865,7 +865,7 @@ views:
                       <span style="color:var(--secondary-text-color);font-weight:400;">${greeting}</span>
                     </div>
                     <div style="display:flex;gap:12px;align-items:flex-start">
-                      <img src="/local/${imgSrc}?v=20260426"
+                      <img src="/local/${imgSrc}?v=20260912"
                            style="width:120px;height:120px;border-radius:50%;flex-shrink:0;
                                   object-fit:cover;border:2px solid var(--divider-color)">
                       <div style="flex:1">

@@ -546,6 +546,172 @@ Label dynamisch aus dem JSON-Artefakt statt hartkodiertem "45 sats/kWh"-Text.
   nicht als Steuersignal.
 
 ---
+
+## ADR 030 — Saison-Sperre in R3/R5 nachgerüstet: Bug, kein Deploy-Fehler (Detail)
+
+**Kontext.** Live-Befund 25.09.2026 (September, Nutzer-Screenshot): Miner 1 lief in Super,
+obwohl `sensor.mvp_saison_status` für diesen Monat "Eco + Standard" meldet — die Saisonale
+Tabelle (Einstellungen-Tab) und der Regelschwellen-Chart (`bitgrid_regelschwellen_chart.js`,
+`supReachable`) zeigten Super korrekt als gesperrt. Die reale Schaltautomation (`mvp_auto.yaml`,
+R3/R5 in `mvp_miner1_watchdog`/`mvp_miner2_watchdog`) widersprach damit ihrer eigenen Anzeige.
+
+**Root Cause.** `mvp_saison_automatik` (ADR 028) setzt die sechs SoC-Schwellen als
+`min(stop_pct + Offset, 100)`. Ist eine Saison eigentlich gesperrt (z. B. Super in "Eco +
+Standard": `stop_pct + 40 > 100`), wird die Schwelle dabei nur auf **genau 100 gedeckelt**,
+nicht wirklich unerreichbar gemacht. Erreicht der reale SoC 100 % — im Sommer laut
+`project_soc_band_scenarios_constructed`-Historie praktisch täglich, aber auch außerhalb der
+Kernsaison an sonnigen Tagen möglich — griff `soc >= soc_super_on` trotzdem, weil `soc_super_on`
+selbst exakt 100 war. `sensor.mvp_saison_status` wurde bis dahin **nirgends in der Schaltlogik**
+geprüft, nur in Chart/Tabelle: zwei Ansichten derselben Regel, aber nur eine kannte die
+Saison-Sperre wirklich. Strukturell identisch betroffen: R5 (Standard-Start) in "Nur Eco"-
+Monaten, aus demselben Deckelungsmuster — bislang nicht beobachtet, aber nicht durch Logik
+ausgeschlossen.
+
+**Entscheidung.** R3 (beide Miner) bekommt eine explizite zusätzliche Bedingung
+`sensor.mvp_saison_status == "Voll (Eco/Standard/Super)"`, R5 (beide Miner) die Bedingung
+`sensor.mvp_saison_status != "Nur Eco"`. Bewusst **dieselbe Entität**, die auch der
+Regelschwellen-Chart für `supReachable`/`stdReachable` liest — eine Wahrheitsquelle für "darf
+dieser Modus diesen Monat", keine zweite, separat gepflegte. R4/R6 (graceful Exit aus Super/
+Standard) bleiben unverändert: ein Miner, der beim Saisonwechsel noch in einem jetzt gesperrten
+Modus steht, fällt über die bestehende Hysterese-Schwelle (`soc < soc_super_off`/`soc_std_off`)
+gleitend zurück, kein hartes Kappen nötig.
+
+**Konsequenzen.**
+- Kein Kern-Bezug: `core/` enthält diese Automation nicht, betrifft ausschließlich die
+  HA-Live-Steuerung (`src/ha/`), s. ADR 020 (Engine-Strategie: HA spiegelt den Kern, ist aber
+  keine zweite Vollimplementierung mit eigener Determinismus-Garantie).
+- Miner, die zum Deploy-Zeitpunkt bereits (fälschlich) in Super/Standard liefen, werden nicht
+  aktiv zurückgesetzt — sie laufen über R4/R6 aus, sobald der SoC unter die jeweilige
+  Ausstiegsschwelle fällt (in der Praxis: sobald der SoC von 100 % absinkt, meist binnen Minuten).
+- Kein Duplikat-Risiko: die Bedingung liest denselben Sensor, den auch Chart/Tabelle lesen —
+  ändert sich die Saison-Formel (ADR 028) künftig erneut, zieht diese Sperre automatisch mit,
+  ohne dass R3/R5 angefasst werden müssen.
+
+---
+
+## ADR 031 — Bitcoin-Kurs-Chart: dynamisches Custom-Element statt statischem 90-Tage-SVG
+
+**Kontext.** Nutzer-Vorgabe 25.09.2026, Tab "BitcoinInfo": der Kurs-Chart
+(`views/stats_btc_price.yaml`) sollte optisch an den Regelschwellen-Chart angeglichen werden
+(beschriftete Achsen, Legende), dynamisch bis zum aktuellen Tag reichen statt fest auf ein
+90-Tage-Fenster geschnitten zu sein, echte Zeitraum-Buttons (1 Tag ... Max) bekommen und
+zusätzlich zwischen BTC/EUR, BTC/USD und dem bereits bestehenden Power-Law-Chart
+(`views/ki_powerlaw.yaml`, dort nur im toten Tab v2) umschaltbar sein.
+
+**Grundlage.** Transparenz/Nachvollziehbarkeit (kein Blackbox-Chart, Legende zeigt immer, was
+gerade dargestellt wird) und Vorhersagbarkeit (dieselbe Optik über alle Charts hinweg, kein
+Sonderfall). Kein Bezug zu Thesis-Literatur: reine Dashboard-UX-Entscheidung, kein Steuerpfad.
+
+**Entscheidung.**
+- Neues Custom-Element `bitgrid-btc-kurs-chart` (`www/bitgrid_btc_kurs_chart.js`), gleiches
+  Hausmuster wie `bitgrid_regelschwellen_chart.js`/`bitgrid_verlauf_chart.js`: rohes
+  ApexCharts statt Inline-SVG-Template in einer `custom:button-card`, damit der Stil (17px-
+  Achsen in Serienfarbe, Text-Halo, eigene HTML-Legende, gestricheltes Gitter, dropShadow,
+  Custom-Tooltip) strukturell identisch ist statt handgepflegt.
+- Datenpfad erweitert statt ersetzt: `src/data/btc_price_history.py` synct zusätzlich zur
+  bestehenden 90-Tage-EUR-Tageshistorie (`btc_price_daily`) die volle mempool.space-
+  Rohauflösung (stündlich für die jüngsten ~100 Tage, danach täglich/wöchentlich, EUR+USD aus
+  demselben Abruf) nach `btc_price_raw` und exportiert sie ungekürzt als
+  `www/btc_price_full.json`. Die Zeitraum-Buttons filtern **client-seitig** aus dieser einen
+  Reihe — kein Server-Cutoff, kein zweiter Datenabruf pro Zeitraum, kein Live-Netzwerkzugriff
+  vom Wandtablet (unverändertes Prinzip: nur `fetch('/local/...')`).
+- Power-Law-Seite rendert weiterhin klassisches Inline-SVG (Log-Log-Regression), Mathematik
+  1:1 aus `ki_powerlaw.yaml` portiert, nicht auf ApexCharts umgebaut: die Log-Log-Achse mit
+  Regressions-/Support-/Widerstandsgeraden ist dort bereits ausgereift, ein voller
+  Bibliothekswechsel hätte nur Risiko ohne fachlichen Gewinn gebracht.
+
+**Verworfene Alternative.** EUR-Rohauflösung getrennt von USD in zwei Tabellen/Abrufen
+synchronisieren (dem bisherigen Muster von `btc_price_daily` folgend). Verworfen, weil die
+mempool.space-API EUR und USD bereits in derselben Antwort liefert — ein zweiter Abruf hätte
+nur unnötige Netzwerklast auf die self-hosted Instanz erzeugt, ohne einen einzigen zusätzlichen
+Datenpunkt zu gewinnen.
+
+**Konsequenzen.**
+- `views/stats_btc_price.yaml` bleibt unbenutzt im Repo liegen (gleiche Praxis wie
+  `stats_retro_vergleich.yaml`), falls die schlanke 90-Tage-Variante später wieder gebraucht
+  wird. `btc_price_daily`/der 90-Tage-Export laufen unverändert weiter, auch ohne aktuellen
+  Konsumenten — kein Migrationsrisiko für eine bereits wachsende Tabelle.
+- Kein Kern-Bezug: reiner Marktkontext, `core/` unberührt, kein Einfluss auf Mining-
+  Entscheidungen.
+- Item "Mining Verlauf" und "Bitcoin-Kurs" im Tab BitcoinInfo getauscht (Zeile 2 ↔ Zeile 3,
+  linke Spalte): der neue Chart braucht mehr Höhe als die schlanke Historie-Tabelle.
+
+## ADR 032 — Miner-Ereignislog: Ereignisse statt Zustände, Ursache der Log-Schleife
+
+**Kontext.** Nutzer-Befund 27.09.2026 (Screenshot Miner-Karte, Abschnitt DETAILS → Log):
+Das 25-Einträge-Verlaufslog (`sensor.miner_1_log`/`miner_2_log`, `packages/mvp_auto.yaml`)
+zeigte ausschließlich identische Einträge "R1 Stopp / Standby — R1 Sicherheitsstopp: SoC x%",
+in unregelmäßigen Abständen von 2 bis 20 Minuten. Der Verdacht lautete "es wird pro Prozent
+SoC geloggt".
+
+**Root Cause (gemessen, nicht vermutet).** Nicht der SoC, sondern der HA-Neustart.
+Die beiden Kurzcode-Entitäten `input_text.mvp_minerX_rule` trugen `initial: ""`. `input_text`
+setzt den Wert damit bei **jedem** HA-Start auf leer zurück und unterdrückt die
+RestoreEntity-Wiederherstellung. Der erste Watchdog-Lauf nach dem Start (Trigger
+`homeassistant start`, 1 min Delay) schreibt denselben Kurzcode wieder hinein. Genau dieses
+`"" → "R1 Stopp"` ist ein echter State-Wechsel und erzeugt einen Log-Eintrag. Der umgekehrte
+Weg (`"R1 Stopp" → ""`) wird nicht protokolliert, weil der Trigger-Template-Sensor beim
+Startup selbst noch nicht lauscht. Ergebnis: **ein Log-Eintrag pro Neustart**, inhaltlich
+immer derselbe, mit dem SoC des Startzeitpunkts als scheinbarer Variation.
+
+Beleg: alle 25 Live-Einträge ließen sich 1:1 einem Eintrag in `recorder_runs` zuordnen,
+jeweils 0–3 min nach dem HA-Start (25 von 25, inklusive zweier Starts außerhalb des zuerst
+abgefragten Fensters). Seit dem 26.09.2026 00:00 UTC gab es 65 HA-Starts (Dashboard-Arbeit
+mit `deploy_ha.sh --restart`) — das Log war faktisch ein Neustart-Zähler.
+
+Zwei Verhaltensweisen von HA wurden dafür im laufenden Container verifiziert statt aus der
+Erinnerung angenommen: `StateMachine.async_set` (core.py) feuert bei gleichem State **und**
+gleichen Attributen nur `EVENT_STATE_REPORTED` und kein `state_changed`; der State-Trigger
+(`components/homeassistant/triggers/state.py`) hängt ausschließlich an `state_changed`.
+Wertgleiche Watchdog-Läufe können also gar keinen Eintrag erzeugen — was die Neustart-These
+als einzige verbleibende Erklärung erhärtete.
+
+**Entscheidung.** Drei Ebenen, sauber getrennt, und ein Grundsatz:
+**geloggt wird, was passiert ist, nicht was gerade der Fall ist.**
+
+| Ebene | Inhalt | Träger | Aufbewahrung |
+| :--- | :--- | :--- | :--- |
+| 1. Ereignislog | Modus-Wechsel des Miners, Eintritt/Austritt aus Schutz-Zuständen (R1, R2, Raumtemperatur) | `sensor.minerX_log`, Attribut `entries` | Ringpuffer 25, überlebt Neustart |
+| 2. Live-Begründung | warum der Miner gerade tut, was er tut (inkl. Cooldowns, Wartezeiten) | `input_text.mvp_minerX_debug`, `sensor.minerX_cooldown_status` | kein Verlauf, nur Jetzt-Zustand |
+| 3. Diagnose-Trace | jeder einzelne Watchdog-Lauf mit allen Eingangsgrößen | `system_log.write`, Level `debug` | nur bei Bedarf eingeschaltet |
+
+Konkret in `packages/mvp_auto.yaml`:
+
+- `initial: ""` bei `mvp_minerX_rule` entfernt (Ursachenbehebung). Nach einem Neustart stellt
+  `input_text` den letzten Wert wieder her, der Folgeschreibvorgang ist wertgleich und HA
+  unterdrückt ihn.
+- Zweiter Trigger `sensor.minerX_workmode_status` (Ist-Zustand, nicht Sollwert
+  `select.minerX_workmode_set`): damit steht im Log, was der Miner **wirklich** gemacht hat,
+  inklusive manueller Umschaltungen und nicht befolgter Befehle.
+- `condition:`-Filter: kein Eintrag bei Übergängen von/zu leer, `unknown`, `unavailable`,
+  `none` (Gürtel gegen dieselbe Artefakt-Klasse an anderer Stelle, z. B. kurz weggebrochene
+  Miner-API) und kein Eintrag für reine Wartezustände (`Hochschalt-CD`, `Runterschalt-CD`,
+  `Eco-Wartezeit`, `Regulär` unter sich). Ein ablaufender Cooldown ist ein Zustand, kein
+  Ereignis, und erzeugte bisher zwei Einträge pro Zyklus ohne jede Änderung.
+
+**Verworfene Alternative 1.** Entprellen über eine Mindest-Zeitspanne zwischen Einträgen
+(z. B. `for: 00:05:00` am Trigger). Verworfen, weil das die Symptome glättet und dabei echte
+schnelle Ereignisfolgen verschluckt — genau die, die im Störungsfall am meisten zählen. Ein
+Zeitfilter hätte die Neustart-Artefakte außerdem nur ausgedünnt, nicht beseitigt.
+
+**Verworfene Alternative 2.** Den Log auf den Sollwert `select.minerX_workmode_set` triggern.
+Verworfen, weil dann die Absicht des Watchdogs protokolliert würde und nicht das Ergebnis:
+ein Befehl, den der Miner nicht befolgt, stünde als erfolgreicher Moduswechsel im Log. Das
+widerspricht Qualitätsziel Transparenz (ADR 004) und wäre für die Fehlersuche schlechter als
+gar kein Eintrag.
+
+**Konsequenzen.**
+- Kein Kern-Bezug: betrifft ausschließlich die HA-Live-Anzeige (`src/ha/`), `core/` ist
+  unberührt. Der Kern hat sein eigenes, davon unabhängiges DecisionEvent-Log (ADR 012).
+- Das Log wird deutlich stiller. An einem ruhigen Tag ohne Moduswechsel bleibt es leer, und
+  das ist die gewünschte Aussage: es ist nichts passiert.
+- Neustarts sind im Miner-Log nicht mehr sichtbar. Wer sie sehen will, liest `recorder_runs`
+  oder das HA-Systemlog: dort gehören sie hin, nicht in ein Regel-Verlaufslog.
+- Der 25er-Ringpuffer der Neustart-Artefakte wurde einmalig geleert (Sicherung als JSON im
+  Session-Scratchpad), sonst hätte er die neue, seltenere Ereignislage wochenlang überdeckt.
+
+---
+---
 > **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die wichtigsten Qualitätsanforderungen im Detail.
 >
 > 👉 Weiter zu **[10 - Qualitätsszenarien](../10_quality_scenarios/README.md)**

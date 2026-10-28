@@ -15,15 +15,23 @@ bitcoin:
           unique_id: shelly_miner1_healthy
           device_class: connectivity
           icon: mdi:power-plug
+          # 13.10.2026: simulation_mode = simulierte Steckdose gilt als gesund
+          # (sonst rotes 'Technische Stoerung' im Miner-Kopf, obwohl der
+          # simulierte Miner laeuft). In Prod (simulation_mode aus) unveraendert.
           state: >-
-            {{ states('switch.shellyplugsg3_dcb4d9c5567c') not in ['unknown', 'unavailable'] }}
+            {{ is_state('input_boolean.simulation_mode', 'on')
+               or states('switch.shellyplugsg3_dcb4d9c5567c') not in ['unknown', 'unavailable'] }}
 
         - name: "shelly_miner2_healthy"
           unique_id: shelly_miner2_healthy
           device_class: connectivity
           icon: mdi:power-plug
+          # 13.10.2026: simulation_mode = simulierte Steckdose gilt als gesund
+          # (sonst rotes 'Technische Stoerung' im Miner-Kopf, obwohl der
+          # simulierte Miner laeuft). In Prod (simulation_mode aus) unveraendert.
           state: >-
-            {{ states('switch.shellyplugsg3_d0cf13d86254') not in ['unknown', 'unavailable'] }}
+            {{ is_state('input_boolean.simulation_mode', 'on')
+               or states('switch.shellyplugsg3_d0cf13d86254') not in ['unknown', 'unavailable'] }}
 
         - name: "shelly_fan_healthy"
           unique_id: shelly_fan_healthy
@@ -143,10 +151,18 @@ bitcoin:
   #
   # bitcoin_network_difficulty (roher Difficulty-Wert in T, genutzt in
   # packages/stats.yaml + economics.yaml fuer Profitabilitaets-Berechnungen):
-  # mempool hat keinen direkten "aktuelle Difficulty"-Endpunkt, aber
-  # /api/v1/mining/difficulty-adjustments/1w liefert die juengsten Retarget-
-  # Punkte als [timestamp, height, difficulty, change] — der letzte Eintrag
-  # traegt den aktuellen Wert.
+  # Quelle ist /api/v1/mining/hashrate/3d, Feld currentDifficulty (dieselbe
+  # Zahl, die mempool im Mining-Dashboard zeigt).
+  #
+  # Fix 26.09.2026: Vorher /api/v1/mining/difficulty-adjustments/1w mit
+  # value_json[-1][2]. Das Fenster "1w" enthaelt nur Retargets der letzten
+  # 7 Tage, eine Epoche dauert aber ~14 Tage. In der zweiten Epochenhaelfte
+  # kam deshalb "[]" zurueck, der Sensor wurde "unknown", und ueber
+  # mining_value_ct_kwh fiel der Mining-Ertrag in der Finanz-Bilanz still
+  # auf 0,00 € (live verifiziert: letzter Retarget 19.09., am 26.09. leer).
+  # Zusaetzlich ist die Liste absteigend sortiert, [-1] waere bei einem
+  # laengeren Fenster der AELTESTE Retarget gewesen, nicht der aktuelle.
+  # Kein Ersatzwert bei fehlendem Feld: lieber "unknown" als eine falsche 0.
   #
   # bitcoin_difficulty_adjustment + bitcoin_next_halving versorgen die
   # Schwierigkeitsanpassungs-Karte im Analyse-Tab (views/ki_difficulty.yaml)
@@ -155,12 +171,14 @@ bitcoin:
   # 091_adr_de.md). HA aktualisiert das selbst per scan_interval, exakt wie
   # bitcoin_block_height es schon immer tat.
   rest:
-    - resource: !secret mempool_difficulty_adjustments_1w_url
+    - resource: !secret mempool_mining_hashrate_3d_url
       scan_interval: 3600
       sensor:
         - name: "bitcoin_network_difficulty"
           unique_id: bitcoin_network_difficulty
-          value_template: "{{ (value_json[-1][2] | float(0) / 1e12) | round(2) }}"
+          availability: >-
+            {{ value_json is mapping and value_json.currentDifficulty is number }}
+          value_template: "{{ (value_json.currentDifficulty / 1e12) | round(2) }}"
           unit_of_measurement: "T"
           state_class: measurement
           icon: mdi:bitcoin

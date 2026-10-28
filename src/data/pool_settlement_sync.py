@@ -26,6 +26,16 @@ das genau diesen Ausfall — vier Wochen unbemerkt — schon einmal erlebt hat).
     Primaerpfad, der ueber den Unix-Zeitstempel exakt UTC ist. Wird in der
     source-Spalte markiert statt stillschweigend gleichgesetzt.
 
+Fallback-Nullwerte und Nachruecken der Primaerquelle (Fix 26.09.2026): Die
+HA-Automation hinter pool_btc_daily_log protokolliert einen Tag, bevor F2Pool
+ihn abgerechnet hat, und schreibt dann 0.0. Mit INSERT OR IGNORE wurde diese
+Null zum dauerhaften "Rohfakt" (live belegt: 25.09.2026 mit 0.0 aus dem
+Fallback, energy_to_sats 0 statt ~110 im Effizienz-Chart). Seitdem gilt:
+  - Ein Fallback-Wert <= 0 ist "noch nicht abgerechnet", keine Messung, und
+    wird nicht geschrieben.
+  - Die Primaerquelle ersetzt eine vorhandene Fallback-Zeile. Primaerzeilen
+    werden weiterhin nie ueberschrieben, Fallback ueberschreibt nie etwas.
+
 btc_eur_price_approx ist eine reine Kontext-Spalte (der aktuelle Kurs beim
 Sync-Lauf, i. d. R. ~04:00 des Folgetags), nicht der exakte Tagesdurchschnitt
 oder Eroeffnungskurs. Die eigentliche Kennzahl energy_to_sats (siehe
@@ -174,10 +184,12 @@ def sync(
 ) -> tuple[int, int]:
     """
     Synchronisiert F2Pool-Tagesabrechnungen ab `since` (einschliesslich) in
-    bitcoin_daily_settlement. Bestehende Eintraege werden nie ueberschrieben
-    (INSERT OR IGNORE) — ein Rohfakt, kein rekonstruierbares Aggregat.
+    bitcoin_daily_settlement. Primaerzeilen werden nie ueberschrieben (ein
+    Rohfakt, kein rekonstruierbares Aggregat); eine Fallback-Zeile wird durch
+    die Primaerquelle ersetzt, sobald F2Pool den Tag abgerechnet hat.
+    Fallback-Werte <= 0 werden verworfen (s. Modul-Docstring).
 
-    Gibt (neue_tage, uebersprungene_tage) zurueck.
+    Gibt (neue_oder_ersetzte_tage, uebersprungene_tage) zurueck.
     """
     settlement_state = fetch_entity_state(_SETTLEMENT_ENTITY, ha_base_url, token)
     transactions: list[object] = []
@@ -210,7 +222,8 @@ def sync(
         if day >= since_str:
             days[day] = (btc, ths, _SOURCE_PRIMARY)
     for day, btc in fallback_btc.items():
-        if day >= since_str and day not in days:
+        # <= 0: Tag war beim Protokollieren noch nicht abgerechnet, s. oben.
+        if day >= since_str and day not in days and btc > 0:
             days[day] = (btc, fallback_ths.get(day), _SOURCE_FALLBACK)
 
     if not days:
@@ -219,22 +232,42 @@ def sync(
 
     now = datetime.now(timezone.utc).isoformat()
     added = 0
+    replaced = 0
     skipped = 0
     for day, (btc, ths, source) in sorted(days.items()):
+        existing = conn.execute(
+            "SELECT source FROM bitcoin_daily_settlement WHERE day = ?", (day,)
+        ).fetchone()
+        # Upsert nur fuer "Primaer ersetzt Fallback", sonst bleibt die Zeile.
         cur = conn.execute(
-            "INSERT OR IGNORE INTO bitcoin_daily_settlement"
+            "INSERT INTO bitcoin_daily_settlement"
             " (day, earned_btc, pool_ths_avg, btc_eur_price_approx, source, captured_at)"
-            " VALUES (?, ?, ?, ?, ?, ?)",
-            (day, btc, ths, price_now, source, now),
+            " VALUES (?, ?, ?, ?, ?, ?)"
+            " ON CONFLICT(day) DO UPDATE SET"
+            " earned_btc = excluded.earned_btc,"
+            " pool_ths_avg = excluded.pool_ths_avg,"
+            " btc_eur_price_approx = excluded.btc_eur_price_approx,"
+            " source = excluded.source,"
+            " captured_at = excluded.captured_at"
+            " WHERE bitcoin_daily_settlement.source = ? AND excluded.source = ?",
+            (day, btc, ths, price_now, source, now, _SOURCE_FALLBACK, _SOURCE_PRIMARY),
         )
-        if cur.rowcount:
+        if not cur.rowcount:
+            skipped += 1
+        elif existing is None:
             added += 1
         else:
-            skipped += 1
+            replaced += 1
     conn.commit()
 
-    log.info("Settlement-Sync fertig: %d neu, %d bereits vorhanden", added, skipped)
-    return added, skipped
+    log.info(
+        "Settlement-Sync fertig: %d neu, %d Fallback durch F2Pool ersetzt,"
+        " %d bereits vorhanden",
+        added,
+        replaced,
+        skipped,
+    )
+    return added + replaced, skipped
 
 
 def _load_dotenv() -> None:

@@ -1,128 +1,259 @@
 # ═══════════════════════════════════════════════════════════════════════
-# BitGridAI — "Glass"-Theme (iOS-Glassmorphism), gedämpft.
-# Vibranter Farbverlauf als Hintergrund + dunkle, halbtransparente Glas-
-# karten. WICHTIG: Nur die Dashboard-Karten sind transluzent. Dialoge,
-# Menüs, Tooltips und Eingabefelder sind OPAK — transluzente Overlays
-# machten More-Info-Dialoge unlesbar (Inhalt schien durch) und Tooltips
-# weiß-auf-weiß.
+# BitGrid v3 — das Theme des Dashboards.
 #
-# Stellschrauben: lovelace-background (der Verlauf), die Alpha-Werte in
-# ha-card-background (wie stark das Glas durchscheint), ha-card-border-radius.
+# 16.09.2026, Konsolidierung: Dieses Theme trug bis hierhin ZWEI Wertesätze,
+# den dunklen "Glass"-Look von v1/v2 als Wurzelwert und den v3-Look in
+# zusätzlichen "-v3"-Tokens, die jede Karte per zweistufigem var()-Fallback
+# einzeln nachziehen musste. v1/v2 sind seit 12.09.2026 nicht mehr in HA
+# registriert (configuration.yaml), die Doppelung war damit nur noch Ballast
+# und die Ursache eines echten Bugs: der View versuchte die v3-Werte per
+# card_mod ":host" zu setzen, was wirkungslos ist (s. u.).
+#
+# Jetzt gilt: **ein Wertesatz, hier an der Wurzel**. Karten referenzieren die
+# Standard-HA-Namen (--primary-text-color, --ha-card-background, ...) direkt.
+# Projekt-eigene Tokens gibt es nur noch dort, wo HA keinen Standardnamen hat
+# (Datenrollen, Halo, Pillen/Zeilen, Typo-Skala).
+#
+# KARTEN-CHROME, VERIFIZIERT AM LIVE-DOM (16.09.2026): HAs Karten-Wrapper
+# <hui-card> setzt --ha-card-border-width:0 und --ha-card-box-shadow:none.
+# Gemessene Kette: html und hui-panel-view fuehren die Theme-Werte (1px,
+# Outline), ab hui-card stehen 0 und none. Kartenflaeche und Randfarbe erben
+# dagegen unveraendert durch. Deshalb laufen Randbreite, Randfarbe und
+# Schatten ueber eigene bgai-*-Tokens, und card-mod-card stellt die beiden
+# neutralisierten Variablen unterhalb von hui-card wieder her. Wer das auf
+# --ha-card-box-shadow/--ha-card-border-width zurueckbaut, killt die Outline
+# auf allen Karten (genau so passiert und live nachgemessen).
+#
+# OFFEN, nicht verifiziert: warum die frueher im View gesetzte, groessere
+# Typo-Skala nie gerendert hat. Die Theme-Werte erreichen die Karten
+# nachweislich, die View-Variante war es nicht. Vor einer Erhoehung der
+# bg-fs-*-Werte also am besten kurz live gegenmessen.
+#
+# Stellschrauben: lovelace-background (Fallback hinter der Grastextur),
+# ha-card-background (Kartenfläche), ha-card-border-radius, die bg-fs-*-Skala.
 # ═══════════════════════════════════════════════════════════════════════
-BitGridAI:
+BitGrid v3: &bitgrid_v3
   # ── Marken-Akzente ──────────────────────────────────────────────────
   primary-color: "#4CAF50"
   accent-color: "#f59e0b"              # Amber: Standby/Cooldown/Übergangs-Warnung
   text-primary-color: "#ffffff"        # Text auf primary-color (Buttons)
 
-  # ── Semantische Farb-Tokens (eine Quelle für Modus-/Statusfarben) ───
-  # Analog zur Typo-Skala bg-fs-*: Dashboard, Views und www/bitgrid_card_
-  # shape.js referenzieren var(--bg-color-*), statt Hex-Werte zu duplizieren.
-  # Kurs-Chips (positiv/negativ) nutzen eco bzw. reserve mit. Bewusste
-  # Ausnahme: die Pastell-Palette der power-flow-card-plus (siehe Kommentar
-  # dort), die ruhiger wirken soll als die kräftigen Modus-Farben.
+  # ── Semantische Modus-/Statusfarben ─────────────────────────────────
+  # Eine Quelle für Modus- und Statusfarben. Dashboard, Views und
+  # www/bitgrid_card_shape.js referenzieren var(--bg-color-*), statt Hex-Werte
+  # zu duplizieren. Kurs-Chips (positiv/negativ) nutzen eco bzw. reserve mit.
   bg-color-eco: "#4CAF50"        # Eco-Modus / positiv (= primary-color)
   bg-color-standard: "#26C6DA"   # Standard-Modus (Cyan)
   bg-color-super: "#F7931A"      # Super-Modus (Bitcoin-Orange)
   bg-color-reserve: "#EF5350"    # Hausreserve / Warnung / negativ
   bg-color-heat: "#FF7043"       # Temperatur-Warnstufe (100–109 °C, Chip-Temp)
-  bg-color-pv: "#EFB73C"         # PV/Sonne (Gold, = PFCP-Solar-Bubble)
+  bg-color-pv: "#EFB73C"         # PV/Sonne
   bg-color-idle: "#757575"       # aus / inaktiv / unter Schwelle
 
-  # ── Vibranter Verlaufs-Hintergrund (iOS-Look, kein Bild nötig) ──────
-  lovelace-background: "linear-gradient(150deg, #21346f 0%, #4b2da0 46%, #9c3a72 100%)"
-  primary-background-color: "#21346f"
-  divider-color: "rgba(255,255,255,0.14)"
+  # ── Datenrollen (BitHamster-Farbkonzept) ────────────────────────────
+  # Jede Farbe bedeutet dashboard-weit genau eine Sache: PFCP-Kreise,
+  # Chart-Linien, Bilanz-Balken. Werte 12.09.2026 (Nutzer-Referenzpalette).
+  # Das Namenssuffix "-v3" ist historisch (es gab einmal drei Dashboards) und
+  # bleibt nur, um einen 500-Stellen-Rename ohne Funktionsgewinn zu vermeiden.
+  bgai-pv-v3: "#fbb210"        # PV-Ertrag (Nutzer-Vorgabe 16.09.2026)
+  bgai-mining-v3: "#F7931A"    # Mining / Bitcoin
+  bgai-home-v3: "#b3d804"      # Zuhause / Akku (Nutzer-Vorgabe 16.09.2026)
+  bgai-grid-v3: "#1aaccb"      # Netz (Nutzer-Vorgabe 16.09.2026)
+  bgai-geraete-v3: "#f49891"   # Sonstige Geräte (Nutzer-Vorgabe 16.09.2026)
+  bgai-total-v3: "#CBF1FD"     # Summe / Gesamt-Profit (Wolke, neutral)
+  # Geraete mit eigener Farbe: sie sind keine Datenrolle (kein PV/Netz/Akku),
+  # brauchen aber dashboard-weit EINE Farbe, sonst driften Energiefluss, Kachel
+  # und Verlauf auseinander. 26.09.2026 aus Streuwerten zu Tokens gemacht:
+  # der Heizstab lief im Heizungs-Tab als #4FC3F7 und im Energiefluss als
+  # #5C9EE2, die Oelheizung nur literal.
+  bgai-heizstab-v3: "#5C9EE2"       # Heizstab (AC ELWA 2)
+  bgai-heizung-oel-v3: "#8D6E63"    # Oelheizung, Brenner an
+  # Reserviert, aktuell von keinem Element referenziert:
+  bgai-alarm-v3: "#C4442C"      # Alarm / Not-Aus
+  bgai-erklaerung-v3: "#A2EFED" # BitHamster / Erklärung (Mint)
 
-  # ── Typo (hell auf dunklem Glas) ────────────────────────────────────
-  primary-text-color: "#f3f5fb"
-  secondary-text-color: "rgba(233,237,247,0.72)"
-  disabled-text-color: "rgba(233,237,247,0.40)"
-  state-icon-color: "rgba(233,237,247,0.82)"
+  # ── Hintergrund ─────────────────────────────────────────────────────
+  # Der sichtbare View-Hintergrund ist die Pixel-Grastextur, die jeder View
+  # als eigene Vollbildkarte setzt (bitgrid_dashboard_v3.yaml, Tag/Nacht über
+  # sun.sun). Diese Theme-Ebene liegt dahinter und trägt DIESELBE Grastextur als
+  # robusten Fallback: auf Tabs mit funktionierender Gras-Karte wird sie ohnehin
+  # verdeckt, füllt aber die Default-View (Home), falls die card-mod-Karte beim
+  # Erst-Render aussetzt (card-mod-Template-Timing). Der Grünverlauf bleibt als
+  # letzter CSS-Fallback, falls das Bild selbst nicht lädt.
+  lovelace-background: "url('/local/bg_grass.jpg?v=20260930') repeat 0 0 / 800px auto, linear-gradient(150deg, #1a2e1a 0%, #3F6B2E 46%, #5F8F4A 100%)"
+  primary-background-color: "#1a2e1a"
 
-  # ── Typo-Skala (benannte Stufen statt Magic-Numbers in Custom-Cards) ─
-  # Basis: HA-Default-Roboto wie in der clock-weather-card; nur EINE grosse
-  # Stufe (Uhr ~3.5rem). Custom-Cards referenzieren var(--bg-fs-*), damit
-  # Schriftgroessen projektweit aus einer Quelle kommen. Alle Stufen uniform
-  # hochskalieren, falls auf dem Wandtablet aus Distanz zu klein.
-  # 26.08.2026: kurzzeitig um ~20% hochskaliert, auf Nutzer-Wunsch wieder
-  # zurueckgesetzt (BitcoinInfo-Tab sollte dieselbe Groesse wie alle anderen
-  # Tabs haben, nicht projektweit groesser).
-  bg-fs-hero: "3.5rem"        # eine grosse Kennzahl (wie die Uhr)
-  bg-fs-title: "1.75rem"      # Karten-Headline / grosse Stat-Werte
-  bg-fs-body: "1rem"          # Fliesstext (HA-Default)
-  bg-fs-secondary: "0.875rem" # Sekundaertext
-  bg-fs-label: "0.75rem"      # Mini-Labels (UPPERCASE)
-
-  # ── Glaskarten (iOS-Look): dunkel-transluzent, gedämpfter als v1 ────
-  # Original-Glas war 0.58/0.46 (zu durchsichtig), voll opak wirkte tot.
-  # 0.78/0.68 behält den Glas-Effekt, lässt aber weniger durchscheinen.
-  # Dialoge, Menüs und Tooltips (unten) bleiben voll opak, sonst unlesbar.
-  ha-card-background: "linear-gradient(180deg, rgba(38,44,72,0.78) 0%, rgba(24,28,50,0.68) 100%)"
-  card-background-color: "#1e2338"
-  secondary-background-color: "#272d4a"
+  # ── Karten ──────────────────────────────────────────────────────────
+  # Kartenton #313a55 (Nutzer-Vorgabe 16.09.2026, vorher #2C5A78 Blau).
+# Kontrast geprueft: heller Text liegt bei 10,6:1 (primaer) und 8,3:1
+# (sekundaer), beides deutlich ueber den 4,5:1 von WCAG AA. Die hellen
+# Teal-Zwischenstaende vom selben Tag lagen darunter, dieser Ton nicht.
+# Flache, deckende Fläche statt des früheren transluzenten Glases: gegen die
+  # unruhige Grastextur war Transparenz nicht mehr lesbar. Rand und Schatten
+  # bilden zusammen die schwarze 1px-Outline plus weichen Schlagschatten
+  # (Nutzer-Wunsch 12.09.2026, "schwarzer Schatten oder Outline um die Karten").
+  ha-card-background: "#313a55"
+  card-background-color: "#313a55"
+  secondary-background-color: "#465274"   # erhöhte Fläche (Pillen, Hover, Tooltip)
   ha-card-border-radius: "20px"
   ha-card-border-width: "1px"
-  ha-card-border-color: "rgba(255,255,255,0.16)"
-  ha-card-box-shadow: "0 8px 32px rgba(8,10,25,0.30)"
+  ha-card-border-color: "rgba(0,0,0,0.55)"
+  ha-card-box-shadow: "0 0 0 1px rgba(0,0,0,0.7), 0 4px 16px rgba(0,0,0,0.5)"
+  divider-color: "rgba(255,255,255,0.20)"
 
-  # ── Dialoge & Menüs: opake Oberfläche ───────────────────────────────
-  # ha-dialog und mwc-menu ziehen ihre Fläche aus --mdc-theme-surface
-  # (Fallback: card-background-color). Beides explizit opak setzen, sonst
-  # scheint der Dashboard-Inhalt durch den More-Info-Dialog.
-  mdc-theme-surface: "#1e2338"
-  ha-dialog-surface-background: "#1e2338"
+  # ── Karten-Chrome als projekteigene Tokens (Live-Befund 16.09.2026) ──
+  # HAs eigener Karten-Wrapper <hui-card> setzt auf seinem :host
+  # --ha-card-border-width:0 und --ha-card-box-shadow:none. Diese Werte
+  # ueberschreiben den Theme-Wert fuer JEDE Karte darunter, gemessen per
+  # Computed-Style im Browser (Kette html -> hui-panel-view: 1px/Outline,
+  # ab hui-card: 0/none). Rand FARBE und Kartenflaeche sind nicht betroffen,
+  # sie erben normal. Deshalb muessen Randbreite und Schatten ueber eigene
+  # Namen laufen, die HA nicht kennt und darum nicht zuruecksetzt.
+  # NICHT auf --ha-card-border-width/--ha-card-box-shadow zurueckbauen.
+  bgai-card-radius-v3: "20px"
+  bgai-card-border-width-v3: "1px"
+  bgai-card-border-v3: "rgba(0,0,0,0.55)"
+  bgai-card-shadow-v3: "0 0 0 1px rgba(0,0,0,0.7), 0 4px 16px rgba(0,0,0,0.5)"
 
-  # ── Tooltips: dunkel-opak, helle Schrift ────────────────────────────
-  # HA 2026.x nutzt ha-tooltip (Web-Awesome-basiert) mit eigenen Tokens;
-  # ohne sie fällt der Hintergrund auf Weiß zurück, die Schrift kommt
-  # aber hell aus dem Theme → weiß-auf-weiß. paper-tooltip-Variablen
-  # bleiben für ältere Komponenten (z.B. Custom Cards) gesetzt.
-  ha-tooltip-background-color: "#1e2338"
-  ha-tooltip-text-color: "#f3f5fb"
-  paper-tooltip-background: "#1e2338"
-  paper-tooltip-text-color: "#f3f5fb"
+  # ── Typo ────────────────────────────────────────────────────────────
+  primary-text-color: "#F5F8FC"
+  secondary-text-color: "#D3DEEA"
+  disabled-text-color: "rgba(245,248,252,0.40)"
+  state-icon-color: "#F5F8FC"
+
+  # ── Typo-Skala (benannte Stufen statt Magic-Numbers in Custom-Cards) ─
+  # Basis: HA-Default-Roboto, das Theme setzt bewusst keine eigene
+  # font-family. Custom-Cards referenzieren var(--bg-fs-*), damit
+  # Schriftgrößen aus einer Quelle kommen.
+  # Diese Werte sind ab 16.09.2026 die TATSÄCHLICH gerenderten (vorher standen
+  # größere Werte im View, die nie ankamen, s. Kopfkommentar). Eine Erhöhung
+  # fürs Wandtablet ist jetzt genau eine Zeilenänderung hier und wirkt sofort.
+  bg-fs-hero: "3.5rem"           # eine große Kennzahl (aktuell ungenutzt)
+  bg-fs-title: "1.75rem"         # Karten-Headline / große Stat-Werte
+  bg-fs-group-header: "1.4875rem" # Gruppentitel (group_header-Template)
+  bg-fs-body: "1rem"             # Fließtext
+  bg-fs-secondary: "0.875rem"    # Sekundärtext
+  bg-fs-label: "0.75rem"         # Mini-Labels (UPPERCASE)
+
+  # ── Sektionslabels und Halo ─────────────────────────────────────────
+  # Die Gruppentitel stehen auf der Grastextur, nicht auf einer Karte: eine
+  # Flachfarbe allein hat dort nirgends garantierten Kontrast. Der weiche Halo
+  # liegt auf dem Text, die harte Kontur kommt per -webkit-text-stroke bzw.
+  # (beim Icon) als echter SVG-Stroke, siehe button_card_templates.yaml.
+  bgai-section-label-v3: "#FFFFFF"
+  bgai-header-halo-v3: "0 0 3px rgba(0,0,0,0.7)"
+  # Wirkungslos gemachter Icon-Halo: die harte Kontur reicht. ACHTUNG, "none"
+  # ist als letztes Glied einer filter-Kette ungültiges CSS und würde die
+  # gesamte Kette killen, daher ein gültiger Null-Schatten.
+  bgai-header-icon-halo-v3: "drop-shadow(0 0 0 rgba(0,0,0,0))"
+
+  # ── Pillen und Einstellungszeilen (settings_pill/settings_row) ───────
+  # Standen bis 16.09.2026 literal im View-":host", weil ein Wurzelwert sonst
+  # auch in v1 gelandet wäre. v1 existiert nicht mehr, also gehören sie hierher.
+  bgai-card-bg-hover-v3: "#465274"
+  bgai-pill-bg-v3: "rgba(255,255,255,0.12)"
+  bgai-pill-name-color-v3: "rgba(255,255,255,0.55)"
+  bgai-row-bg-v3: "rgba(255,255,255,0.10)"
+  bgai-row-name-color-v3: "rgba(255,255,255,0.85)"
+
+  # ── Dialoge & Menüs ─────────────────────────────────────────────────
+  # Bewusst OPAK (Entscheidung 10.07.2026: transluzente Overlays machten
+  # More-Info-Dialoge unlesbar). 16.09.2026 vom alten Marineblau #1e2338 auf
+  # die Kartenfläche umgestellt, damit ein Dialog nicht mehr als Fremdkörper
+  # aus dem v1-Design über dem Dashboard aufgeht. Opazität bleibt gewahrt.
+  mdc-theme-surface: "#313a55"
+  ha-dialog-surface-background: "#313a55"
+
+  # ── Tooltips: erhöhte Fläche, opak, helle Schrift ───────────────────
+  # HA 2026.x nutzt ha-tooltip (Web-Awesome-basiert) mit eigenen Tokens; ohne
+  # sie fällt der Hintergrund auf Weiß zurück, die Schrift kommt aber hell aus
+  # dem Theme, Ergebnis weiß-auf-weiß. paper-tooltip-* bleibt für ältere
+  # Komponenten (z. B. Custom Cards) gesetzt.
+  ha-tooltip-background-color: "#465274"
+  ha-tooltip-text-color: "#F5F8FC"
+  paper-tooltip-background: "#465274"
+  paper-tooltip-text-color: "#F5F8FC"
   paper-tooltip-opacity: "1"
 
-  # ── Eingabefelder (MWC-Select/TextField) ────────────────────────────
-  # Füllfarbe explizit HELL setzen + Ink dunkel: eine Kombination, die in
-  # jedem Kontext lesbar ist. Ohne explizite Füllfarbe fällt MWC je nach
-  # Kontext auf Weiß oder die dunkle Surface zurück, was weiß-auf-weiß
-  # bzw. schwarz-auf-dunkel erzeugte (unlesbare Textboxen in Dialogen).
-  mdc-text-field-fill-color: "#e9ecf5"
-  mdc-text-field-ink-color: "#1a1a2e"
-  mdc-text-field-label-ink-color: "#3a3a5e"
-  mdc-select-fill-color: "#e9ecf5"
-  mdc-select-ink-color: "#1a1a2e"
-  mdc-select-label-ink-color: "#3a3a5e"
-  mdc-select-dropdown-icon-color: "#1a1a2e"
+  # ── Eingabefelder (MWC-Select/TextField, HA-2026.10-Felder) ─────────
+  # Füllfarbe UND Ink immer beide explizit: ohne explizite Füllfarbe fällt
+  # MWC je nach Kontext auf Weiß oder die dunkle Surface zurück, was
+  # weiß-auf-weiß bzw. schwarz-auf-dunkel erzeugte (unlesbare Textboxen in
+  # Dialogen). 17.10.2026, Nutzer-Wunsch: dunkelblau statt hell (#e9ecf5 mit
+  # dunkler Schrift). #222b47 liegt eine Stufe unter der Kartenfläche #313a55
+  # im selben Blauton (wirkt als eingelassenes Feld), Schrift #F5F8FC 13:1,
+  # Label #D3DEEA 10:1. Dieselben Werte in card-mod-root/-more-info unten und
+  # in www/bitgrid_wide.js (dort für Kontexte ohne card-mod).
+  mdc-text-field-fill-color: "#222b47"
+  mdc-text-field-ink-color: "#FFFFFF"
+  mdc-text-field-label-ink-color: "#D3DEEA"
+  mdc-select-fill-color: "#222b47"
+  mdc-select-ink-color: "#FFFFFF"
+  mdc-select-label-ink-color: "#D3DEEA"
+  mdc-select-dropdown-icon-color: "#D3DEEA"
+  input-fill-color: "#222b47"
+  input-ink-color: "#FFFFFF"
+  input-label-ink-color: "#D3DEEA"
+  input-dropdown-icon-color: "#D3DEEA"
+  # HA 2026.10 hat input_text/input_select-Zeilen, Zeitfelder und Picker auf
+  # ha-input (Web Awesome) bzw. ha-picker-field umgestellt. Die lesen ihre
+  # Fläche NICHT mehr aus den mdc-Tokens oben, sondern aus diesen
+  # (live gemessen 17.10.2026: ohne sie #f3f3f3, fast weiß, das Label kam
+  # dabei hell aus secondary-text-color und war unlesbar).
+  ha-color-form-background: "#222b47"
+  ha-color-form-background-hover: "#2a3452"
+  ha-color-form-background-disabled: "#272d42"
+  wa-form-control-placeholder-color: "rgba(245,248,252,0.55)"
 
   # ── Eingabefelder, harter Fallback (card-mod) ────────────────────────
-  # Die mdc-text-field-*-Tokens oben erreichen offenbar nicht mehr jeden
-  # Kontext (Stand HA 2026.5.3): sowohl input_text-Zeilen (₿itsy-Chat) als
-  # auch die Regelschwellen-Zahlenfelder in den Regler-Dialogen (input_
-  # number more-info) zeigten fast-weiße, unlesbare Schrift auf hellem
-  # Grund — die Tokens oben reichen also gerade NICHT bis in ha-textfield
-  # hinein. card-mod (HACS, bereits als Resource geladen, siehe
-  # configuration.yaml) kann global CSS injizieren statt pro Karte:
+  # Die mdc-text-field-*-Tokens oben erreichen nicht jeden Kontext (Stand HA
+  # 2026.5.3): sowohl input_text-Zeilen (₿itsy-Chat) als auch die
+  # Regelschwellen-Zahlenfelder in den Regler-Dialogen (input_number
+  # more-info) zeigten fast-weiße, unlesbare Schrift auf hellem Grund.
   # card-mod-root wirkt auf JEDE Karte, card-mod-more-info zusätzlich auf
-  # Mehr-Info-Dialoge (dort leben die Regler-Zahlenfelder). $: durchdringt
-  # eine Shadow-DOM-Ebene, damit die Ink-Farbe auch das tatsächliche
-  # <input>-Element trifft, nicht nur die (offenbar ignorierte) Custom
-  # Property.
-  card-mod-theme: "BitGridAI"
+  # Mehr-Info-Dialoge. "$:" durchdringt eine Shadow-DOM-Ebene, damit die
+  # Ink-Farbe auch das tatsächliche <input>-Element trifft.
+  card-mod-theme: "BitGrid v3"
+  # ── Reparatur der hui-card-Neutralisierung (16.09.2026) ─────────────
+  # HAs Karten-Wrapper <hui-card> setzt --ha-card-border-width:0 und
+  # --ha-card-box-shadow:none, wodurch JEDE Karte, die sich auf den
+  # Theme-Standard verlaesst, ohne Rand und Schatten dasteht (im Browser per
+  # Computed-Style verifiziert). card-mod-card wird in jede Karte injiziert,
+  # also UNTERHALB von hui-card, und stellt dort die beiden Variablen wieder
+  # her. Bewusst ueber Variablen und ohne !important: eine Karte, die
+  # absichtlich flach ist (Gruppentitel, Buttons im Stack, Wetter-Merge),
+  # deklariert ihr eigenes box-shadow:none und behaelt es.
+  card-mod-card: |
+    /* :host = das Kartenelement selbst. Damit wirkt die Reparatur auch fuer
+       Karten OHNE ha-card, etwa die eigenen Chart-Module (bitgrid-verlauf-
+       chart, bitgrid-finanz-chart), die ihre Flaeche in einem eigenen div
+       zeichnen. Ohne diese Zeilen lesen sie --ha-card-border-width/-box-shadow
+       und bekommen die von hui-card gesetzten Nullwerte, also weder Rand noch
+       Outline (live nachgemessen 16.09.2026). */
+    :host {
+      --ha-card-border-width: var(--bgai-card-border-width-v3);
+      --ha-card-border-color: var(--bgai-card-border-v3);
+      --ha-card-box-shadow: var(--bgai-card-shadow-v3);
+      --ha-card-border-radius: var(--bgai-card-radius-v3);
+    }
+    ha-card {
+      --ha-card-border-width: var(--bgai-card-border-width-v3);
+      --ha-card-border-color: var(--bgai-card-border-v3);
+      --ha-card-box-shadow: var(--bgai-card-shadow-v3);
+      --ha-card-border-radius: var(--bgai-card-radius-v3);
+    }
   card-mod-root: |
     ha-textfield, mwc-textfield, ha-select, mwc-select {
-      --mdc-text-field-fill-color: #e9ecf5 !important;
-      --mdc-text-field-ink-color: #1a1a2e !important;
-      --mdc-text-field-label-ink-color: #3a3a5e !important;
-      --mdc-select-fill-color: #e9ecf5 !important;
-      --mdc-select-ink-color: #1a1a2e !important;
+      --mdc-text-field-fill-color: #222b47 !important;
+      --mdc-text-field-ink-color: #FFFFFF !important;
+      --mdc-text-field-label-ink-color: #D3DEEA !important;
+      --mdc-select-fill-color: #222b47 !important;
+      --mdc-select-ink-color: #FFFFFF !important;
     }
     ha-textfield $: {
-      .mdc-text-field__input { color: #1a1a2e !important; }
-      .mdc-floating-label { color: #3a3a5e !important; }
-      .mdc-text-field__ripple { background-color: #e9ecf5 !important; }
+      .mdc-text-field__input { color: #FFFFFF !important; }
+      .mdc-floating-label { color: #D3DEEA !important; }
+      .mdc-text-field__ripple { background-color: #222b47 !important; }
     }
     /* input_text-Zeilen in entities-Karten (z.B. "Frag Bitsy") sitzen in
        hui-input-text-entity-row, einer eigenen Shadow-Root-Ebene vor dem
@@ -130,61 +261,45 @@ BitGridAI:
        der zweifach verschachtelte $:-Durchstich hier schon. */
     hui-input-text-entity-row $: {
       ha-textfield {
-        --mdc-text-field-fill-color: #e9ecf5 !important;
-        --mdc-text-field-ink-color: #1a1a2e !important;
-        --mdc-text-field-label-ink-color: #3a3a5e !important;
+        --mdc-text-field-fill-color: #222b47 !important;
+        --mdc-text-field-ink-color: #FFFFFF !important;
+        --mdc-text-field-label-ink-color: #D3DEEA !important;
       }
       ha-textfield $: {
-        .mdc-text-field__input { color: #1a1a2e !important; }
-        .mdc-floating-label { color: #3a3a5e !important; }
-        .mdc-text-field__ripple { background-color: #e9ecf5 !important; }
+        .mdc-text-field__input { color: #FFFFFF !important; }
+        .mdc-floating-label { color: #D3DEEA !important; }
+        .mdc-text-field__ripple { background-color: #222b47 !important; }
       }
     }
   card-mod-more-info: |
     ha-textfield, mwc-textfield {
-      --mdc-text-field-fill-color: #e9ecf5 !important;
-      --mdc-text-field-ink-color: #1a1a2e !important;
-      --mdc-text-field-label-ink-color: #3a3a5e !important;
+      --mdc-text-field-fill-color: #222b47 !important;
+      --mdc-text-field-ink-color: #FFFFFF !important;
+      --mdc-text-field-label-ink-color: #D3DEEA !important;
     }
     ha-textfield $: {
-      .mdc-text-field__input { color: #1a1a2e !important; }
-      .mdc-floating-label { color: #3a3a5e !important; }
-      .mdc-text-field__ripple { background-color: #e9ecf5 !important; }
+      .mdc-text-field__input { color: #FFFFFF !important; }
+      .mdc-floating-label { color: #D3DEEA !important; }
+      .mdc-text-field__ripple { background-color: #222b47 !important; }
     }
 
-  # ── Kopfleiste (transluzent, etwas deckender als v1: 0.30 → 0.55) ───
-  app-header-background-color: "rgba(20,24,44,0.55)"
-  app-header-text-color: "#f3f5fb"
-
-  # ── Sidebar (dunkel, opak) ──────────────────────────────────────────
-  sidebar-background-color: "#101324"
-  sidebar-text-color: "#c8cdda"
-  sidebar-icon-color: "#9aa0b4"
+  # ── Kopfleiste und Sidebar ──────────────────────────────────────────
+  # Der Home-Tab läuft im Panel-Modus, die Kopfleiste ist dort meist nicht
+  # sichtbar. 16.09.2026 trotzdem auf die Design-Blautöne gezogen, damit beim
+  # Verlassen des Kiosk-Modus kein v1-Marineblau mehr auftaucht.
+  app-header-background-color: "rgba(27,58,80,0.55)"
+  app-header-text-color: "#F5F8FC"
+  sidebar-background-color: "#1B3A50"
+  sidebar-text-color: "#D3DEEA"
+  sidebar-icon-color: "#A9BED0"
   sidebar-selected-text-color: "#4CAF50"
   sidebar-selected-icon-color: "#4CAF50"
 
-  # ── v3-Farbpalette (24.08.2026, Nutzer-Vorgabe) ──────────────────────
-  # Bewusst NUR als zusaetzliche, "-v3"-benannte Variablen im BESTEHENDEN
-  # Theme deklariert, kein zweites Theme: v1/v2 referenzieren diese Namen
-  # nirgends, bleiben also unveraendert. Nur bitgrid_dashboard_v3.yaml
-  # und seine !include-Views (energieverlauf_tag.yaml, finanz_bilanz.yaml)
-  # nutzen sie. Sidebar/Topbar bleiben bewusst gemeinsam (Nutzer-Entscheidung
-  # 24.08.2026: strukturell nicht ohne echten Theme-Wechsel pro Dashboard
-  # scopebar, siehe docs/architecture ADR-Notiz falls das nochmal aufkommt).
-  #
-  # Datenrollen — jede Farbe bedeutet dashboard-weit in v3 genau eine Sache:
-  bgai-pv-v3: "#FFD24A"        # PV-Ertrag
-  bgai-mining-v3: "#F7931A"    # Mining / Bitcoin
-  bgai-home-v3: "#3FD07F"      # Zuhause / Akku
-  bgai-grid-v3: "#7C83E8"      # Netz
-  bgai-geraete-v3: "#C08AD8"   # Sonstige Geräte
-  bgai-total-v3: "#C7D0E8"     # Summe / Gesamt-Profit (neutral, kein Rot bei negativ)
-  bgai-alarm-v3: "#FF5C5C"     # Alarm / Not-Aus
-  bgai-erklaerung-v3: "#A3E635" # BitHamster / Erklärung
-
-  # Flächen/Text — nur per View-scoped card-mod in v3 angewendet (siehe
-  # bitgrid_dashboard_v3.yaml je View), NICHT global gesetzt:
-  bgai-card-bg-v3: "#182449"
-  bgai-divider-v3: "#26356B"
-  bgai-text-primary-v3: "#EAEFFB"
-  bgai-text-secondary-v3: "#A8B3D4"
+# ═══════════════════════════════════════════════════════════════════════
+# Alias auf dieselbe Definition (YAML-Anker, keine Wertverdopplung).
+# Grund: der alte Name kann noch in einer Frontend-/Profil-Auswahl oder im
+# Kiosk-Browser gespeichert sein. Ohne diesen Alias liefe diese Auswahl ins
+# Leere und das Dashboard fiele auf das HA-Standardtheme zurueck.
+# Kann entfallen, sobald ueberall "BitGrid v3" ausgewaehlt ist.
+# ═══════════════════════════════════════════════════════════════════════
+BitGridAI: *bitgrid_v3

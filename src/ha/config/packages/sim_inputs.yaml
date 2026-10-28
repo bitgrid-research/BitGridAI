@@ -41,6 +41,15 @@ sim_inputs:
       mode: slider
       icon: mdi:battery-charging
 
+    grid_export_w:
+      name: "Sim: Netzeinspeisung"
+      min: 0
+      max: 15000
+      step: 50
+      unit_of_measurement: W
+      mode: slider
+      icon: mdi:transmission-tower-export
+
   input_boolean:
     miner_relay_sim:
       name: "Sim: Miner-Relais"

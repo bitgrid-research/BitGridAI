@@ -35,27 +35,38 @@ def _insert_daily_kpi(conn, day: str, energy_to_sats: float | None) -> None:
     conn.commit()
 
 
+def _recent_days(n: int) -> list[str]:
+    """Die letzten n Tage aufsteigend, damit Tests nicht am Kalender verrotten."""
+    today = datetime.now(timezone.utc).date()
+    return [(today - timedelta(days=i)).isoformat() for i in range(n, 0, -1)]
+
+
 def test_fetch_series_returns_rolling_average(db_conn):
-    _insert_daily_kpi(db_conn, "2026-08-18", 30.0)
-    _insert_daily_kpi(db_conn, "2026-08-19", 50.0)
-    _insert_daily_kpi(db_conn, "2026-08-20", 60.0)
+    # Relative Tage, nicht fixe Daten: fetch_series filtert auf ein Fenster von
+    # N Tagen, fixe Testdaten fallen mit der Zeit lautlos heraus und der Test
+    # wird gruen-zu-rot ohne Codeaenderung (passiert am 17.09.2026).
+    days = _recent_days(3)
+    _insert_daily_kpi(db_conn, days[0], 30.0)
+    _insert_daily_kpi(db_conn, days[1], 50.0)
+    _insert_daily_kpi(db_conn, days[2], 60.0)
 
     series = fetch_series(db_conn, 30)
 
-    assert [p["day"] for p in series] == ["2026-08-18", "2026-08-19", "2026-08-20"]
+    assert [p["day"] for p in series] == days
     assert series[0]["avg_7d"] == 30.0
     assert series[1]["avg_7d"] == 40.0
     assert series[2]["avg_7d"] == pytest.approx(46.67, abs=0.01)
 
 
 def test_fetch_series_excludes_days_without_settlement(db_conn):
-    _insert_daily_kpi(db_conn, "2026-08-18", 30.0)
-    _insert_daily_kpi(db_conn, "2026-08-19", None)  # keine Abrechnung
-    _insert_daily_kpi(db_conn, "2026-08-20", 60.0)
+    days = _recent_days(3)
+    _insert_daily_kpi(db_conn, days[0], 30.0)
+    _insert_daily_kpi(db_conn, days[1], None)  # keine Abrechnung
+    _insert_daily_kpi(db_conn, days[2], 60.0)
 
     series = fetch_series(db_conn, 30)
 
-    assert [p["day"] for p in series] == ["2026-08-18", "2026-08-20"]
+    assert [p["day"] for p in series] == [days[0], days[2]]
 
 
 def test_fetch_series_respects_days_window(db_conn):

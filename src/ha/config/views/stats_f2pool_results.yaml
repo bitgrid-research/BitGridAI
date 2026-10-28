@@ -29,11 +29,13 @@ tap_action:
   action: none
 styles:
   card:
+    # 17.10.2026: fuellt die Spaltenhoehe (Karten nebeneinander buendig, www/bitgrid_wide.js).
+    - height: 100%
     - background: var(--ha-card-background)
-    - border-radius: var(--ha-card-border-radius)
+    - border-radius: var(--bgai-card-radius-v3)
     - overflow: hidden
-    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
-    - box-shadow: var(--ha-card-box-shadow)
+    - border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3)
+    - box-shadow: var(--bgai-card-shadow-v3)
     - padding: 19px 18px
   grid:
     - grid-template-areas: '"f2pool"'
@@ -53,30 +55,48 @@ custom_fields:
       const todayEstBtc  = parseFloat(states['sensor.pool_revenue_today_est_btc']?.state) || 0;
       const btcEur       = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
 
-      const fmtBtc  = (v) => v.toFixed(8) + ' BTC';
+      const fmtBtc  = (v) => v.toLocaleString('de-DE', {minimumFractionDigits: 8, maximumFractionDigits: 8}) + ' BTC';
       const fmtSats = (v) => Math.round(v * 1e8).toLocaleString('de-DE') + ' sats';
-      const fmtEur  = (v) => btcEur > 0 ? (v * btcEur).toFixed(2) + ' €' : '—';
+      const fmtEur  = (v) => btcEur > 0 ? (v * btcEur).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €' : '—';
 
-      const stat = (label, val, sub, color) =>
-        `<div style="min-width:0;">
-          <div style="font-size:0.68rem;color:var(--secondary-text-color);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${label}</div>
-          <div style="font-size:0.95rem;font-weight:700;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${val}</div>
-          <div style="font-size:0.66rem;color:var(--secondary-text-color);opacity:0.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub}</div>
+      // 26.09.2026, Nutzer-Wunsch "Schrift groesser, vor allem die
+      // Ueberschriften": Groessen jetzt aus der Theme-Typo-Skala statt
+      // 0.66-0.95rem-Magic-Numbers. Ueberschriften (Balance/Gesamteinnahmen/
+      // ...) wachsen am staerksten (0.68 -> 1rem). Platz nachgemessen: Karte
+      // ~780px, je Wert-Spalte ~230px, laengste Ueberschrift "Ertrag heute
+      // (Schaetzung)" braucht bei 1rem ~190px. Ellipsis bleibt als Schutz
+      // fuer schmalere Viewports (Wandtablet).
+      // muted: ganzer Block in --disabled-text-color, fuer Werte, die gerade
+      // keine Aussage haben (Gesamtauszahlung = 0, Nutzer-Wunsch "grau, da
+      // nicht relevant").
+      // pos: explizite Zellenzuweisung im 3x3-Raster rechts (Spalte/Zeile 2
+      // sind die 1px-Trennlinien, siehe unten), damit Auto-Placement die
+      // Divider nicht verschiebt.
+      const stat = (label, val, sub, color, muted = false, pos = '') => {
+        const c = muted ? 'var(--disabled-text-color)' : color;
+        const cs = muted ? 'var(--disabled-text-color)' : 'var(--secondary-text-color)';
+        return `<div style="min-width:0;${pos}">
+          <div style="font-size:var(--bg-fs-body);color:${cs};margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${label}</div>
+          <div style="font-size:1.25rem;font-weight:700;color:${c};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${val}</div>
+          <div style="font-size:var(--bg-fs-secondary);color:${cs};opacity:0.75;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub}</div>
         </div>`;
+      };
 
       return `<div style="width:100%;">
         <div style="display:flex;align-items:stretch;gap:18px;">
           <div style="flex:0 0 auto;display:flex;flex-direction:column;justify-content:center;min-width:0;">
-            <div style="font-size:0.7rem;color:var(--secondary-text-color);margin-bottom:4px;">Balance</div>
-            <div style="font-size:1.5rem;font-weight:700;color:var(--primary-text-color);white-space:nowrap;">${fmtBtc(balBtc)}</div>
-            <div style="font-size:0.7rem;color:var(--secondary-text-color);margin-top:3px;white-space:nowrap;">${fmtSats(balBtc)} · ${fmtEur(balBtc)}</div>
+            <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);margin-bottom:4px;">Balance</div>
+            <div style="font-size:var(--bg-fs-title);font-weight:700;color:var(--primary-text-color);white-space:nowrap;">${fmtBtc(balBtc)}</div>
+            <div style="font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);margin-top:3px;white-space:nowrap;">${fmtSats(balBtc)} · ${fmtEur(balBtc)}</div>
           </div>
           <div style="flex:0 0 1px;background:var(--divider-color);align-self:stretch;"></div>
-          <div style="flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;min-width:0;">
-            ${stat('Gesamteinnahmen', fmtBtc(incomeBtc), fmtEur(incomeBtc), 'var(--primary-text-color)')}
-            ${stat('Gesamtauszahlung', fmtBtc(payoutBtc), fmtEur(payoutBtc), 'var(--primary-text-color)')}
-            ${stat('Ertrag gestern', fmtBtc(yestBtc), fmtSats(yestBtc) + ' · ' + fmtEur(yestBtc), 'var(--primary-text-color)')}
-            ${stat('Ertrag heute (Schätzung)', fmtBtc(todayEstBtc), fmtSats(todayEstBtc) + ' · ' + fmtEur(todayEstBtc), 'var(--primary-text-color)')}
+          <div style="flex:1;display:grid;grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr);grid-template-rows:auto 1px auto;gap:12px 16px;min-width:0;">
+            ${stat('Gesamteinnahmen', fmtBtc(incomeBtc), fmtEur(incomeBtc), 'var(--primary-text-color)', false, 'grid-column:1;grid-row:1;')}
+            ${stat('Gesamtauszahlung', fmtBtc(payoutBtc), fmtEur(payoutBtc), 'var(--primary-text-color)', payoutBtc <= 0, 'grid-column:3;grid-row:1;')}
+            <div style="grid-column:1 / -1;grid-row:2;background:var(--divider-color);"></div>
+            <div style="grid-column:2;grid-row:1 / -1;background:var(--divider-color);"></div>
+            ${stat('Ertrag gestern', fmtBtc(yestBtc), fmtSats(yestBtc) + ' · ' + fmtEur(yestBtc), 'var(--primary-text-color)', false, 'grid-column:1;grid-row:3;')}
+            ${stat('Ertrag heute (Schätzung)', fmtBtc(todayEstBtc), fmtSats(todayEstBtc) + ' · ' + fmtEur(todayEstBtc), 'var(--primary-text-color)', false, 'grid-column:3;grid-row:3;')}
           </div>
         </div>
       </div>`;

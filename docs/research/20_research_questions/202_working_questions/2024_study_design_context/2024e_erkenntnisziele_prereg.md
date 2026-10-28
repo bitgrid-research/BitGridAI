@@ -23,6 +23,52 @@ und das Szenario-Set [2024d](./2024d_scenarios/README.md).
 > und qualitativen Themen fließen als Verbesserungs-Input in die Erklärschicht zurück.
 > **Sitzung auf ~45 Min gestrafft** (Erwartungs-Vorfrage entfällt; Within auf 2–3 Szenarien).
 
+> **Design-Änderung (2026-10-17, vor Datenerhebung; in dieser Datei nachgetragen am
+> 2026-10-28):** Entschieden am 17.10.2026, also vor der ersten Probandensitzung (VP01,
+> 20.10.2026), und mit dem Betreuer (Prof. Wallach) abgestimmt. **Transparenzhinweis:** In
+> diese Datei erst am 28.10.2026 eingetragen. Bis dahin waren 4 von 16 Sitzungen erhoben,
+> aber **nicht ausgewertet** (keine Einsicht in Vertrauenswerte). Die Abschnitte unten
+> geben den Stand vom 12.06. wieder und gelten nur, soweit dieser Nachtrag nichts anderes
+> festlegt.
+>
+> 1. **Manipulation: Sprachstil statt LLM vs. statisch.** Variante A = umgangssprachlich
+>    (Ton des Maskottchens BitHamster), Variante B = technisch (Fachbegriffe, Regel-IDs).
+>    Beide Varianten sind feste Textbausteine, die deterministisch aus den Regelwerten
+>    befüllt werden (`src/ha/config/bitgrid_dashboard_v3.yaml`, Objekt `V.a`/`V.b`;
+>    Übersicht `docs/thesis/studie/hamster_texte_ab_vergleich.md`). Bild, Zustandslogik
+>    und Informationsgehalt sind identisch. Das lokale LLM diente nur zum Entwerfen der
+>    Bausteine; im Stimulus läuft **kein** LLM, damit keine Ausgabevarianz die
+>    Vergleichbarkeit stört.
+> 2. **Stimulus:** Replay eines realen Messtags (11.07.2026, dargestellt als 21.07.2026),
+>    ca. 20 Min, für alle Personen identische Abfolge. Konstruierte Abschnitte
+>    (Sensor-Ausfall, Überhitzungs-Stopp) sind markiert. Ersetzt das Snapshot-Set S1–S10.
+> 3. **Design: within-subjects**, N = 16. Jede Person durchläuft den Replay-Tag zweimal,
+>    einmal mit A, einmal mit B. Die Reihenfolge (AB/BA) wechselt zwischen den Personen
+>    (je 8 beginnen mit A bzw. B), um Lern- und Reihenfolgeeffekte auszubalancieren.
+>    🟦 Festhalten, wie die Reihenfolge je VP bestimmt wird (strikt abwechselnd oder
+>    über die Liste aus `scripts/build_randomisierung.py`, Seed 20261017).
+> 4. **Primäre AV: Trust in Automation nach Körber (2019)** statt Jian (2000), nach jedem
+>    Durchlauf erhoben; Fragebogen vor VP01 vollständig (Item 19 ergänzt). 🟦 Quelle in
+>    `zotero_export.bib` nachtragen. **Nebenmaß:** SUS (deutsche Fassung), ebenfalls
+>    je Durchlauf. Der NASA-TLX wird nicht erhoben.
+> 5. **H1 (neu, primär):** Das Vertrauen unterscheidet sich zwischen A und B.
+>    **Zweiseitig**, weil vor dem 20.10. keine Richtung dokumentiert wurde; eine jetzt
+>    gesetzte Richtung wäre nicht mehr präregistriert. Wilcoxon-Vorzeichen-Rang-Test
+>    (gepaart, zweiseitig) auf die TiA-Werte A vs. B, Effektgröße r, 95 %-KI, N = 16.
+>    Reihenfolgeeffekt wird mitberichtet (Vergleich der Differenzen AB- vs. BA-Personen).
+>    **Sensitivitätsanalyse:** nur der erste Durchlauf je Person als Between-Vergleich
+>    (8 vs. 8, Mann-Whitney-U zweiseitig), weil das Sehen der ersten Variante die
+>    Bewertung der zweiten beeinflussen kann (Carry-over). Die Studie bleibt
+>    hypothesengenerierend. 🟦
+> 6. **FF2 (neu): Faktengleichheit A/B** als Manipulationscheck. Je Zustand prüfen zwei
+>    Rater verblindet, ob A und B dieselben Aussagen treffen (Messwert, Schwelle,
+>    Konsequenz). Ersetzt „Güte der LLM-Ausgaben“; die Rubrik ist entsprechend
+>    anzupassen. 🟦
+> 7. **H2 (Forced-Choice-Direktvergleich am Sitzungsende):** offen, ob er zusätzlich zu
+>    den beiden Durchläufen erhoben wird; vor der Auswertung festzulegen und hier
+>    nachzutragen. 🟦
+> 8. **Einführungsvideo** zu Beginn jeder Sitzung, für alle Personen identisch.
+
 ## Kernfrage
 
 > **Wann vertrauen Nutzer den Erklärtexten mehr?** Erhöht eine **LLM-Erklärung**

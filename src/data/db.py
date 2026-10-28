@@ -132,7 +132,8 @@ CREATE TABLE IF NOT EXISTS override_log (
 -- miner_states KEIN Block-Raster: F2Pool rechnet einmal taeglich ab
 -- (~02:00, siehe packages/pool.yaml), ein 10-Minuten-Raster waere hier
 -- unpassend. Rohfakt, nicht rekonstruierbar (im Gegensatz zu daily_kpi
--- unten) — deshalb INSERT OR IGNORE, nie ueberschrieben. Quelle: HAs
+-- unten) — deshalb nie ueberschrieben, mit einer Ausnahme seit 26.09.2026:
+-- die F2Pool-Abrechnung ersetzt eine vorlaeufige Fallback-Zeile. Quelle: HAs
 -- sensor.pool_settlement_history (F2Pool V2 API), Fallback
 -- input_text.pool_btc_daily_log. Siehe src/data/pool_settlement_sync.py
 -- und ADR 026 (docs/architecture/09_design_decisions/091_adr_de.md).
@@ -160,6 +161,22 @@ CREATE TABLE IF NOT EXISTS bitcoin_daily_settlement (
 CREATE TABLE IF NOT EXISTS btc_price_daily (
     day        TEXT PRIMARY KEY,   -- UTC-Kalendertag (YYYY-MM-DD)
     price_eur  REAL NOT NULL,
+    fetched_at TEXT NOT NULL
+);
+
+-- Roh-Preispunkte in mempool.space-Aufloesung (stuendlich fuer die juengsten
+-- ~100 Tage, taeglich/woechentlich davor, exakt wie von der API geliefert,
+-- s. fetch_historical_prices_dual() in btc_power_law.py). Traegt EUR UND USD
+-- aus demselben Abruf (die API liefert beide Waehrungen in jeder Antwort,
+-- unabhaengig vom ?currency=-Parameter), damit der dynamische BitcoinInfo-
+-- Kurschart (views/btc_kurs_chart.yaml) sowohl 1-Tag/5-Tage-Aufloesung als
+-- auch den EUR/USD-Wechsel aus EINER Quelle bedienen kann, statt zwei
+-- getrennte Tabellen/Abrufe zu pflegen. price_eur ist NULL fuer die fruehen
+-- Jahre, in denen mempool.space keinen EUR-Kurs kennt (Rohwert -1).
+CREATE TABLE IF NOT EXISTS btc_price_raw (
+    ts         INTEGER PRIMARY KEY, -- Unix-Sekunden (UTC)
+    price_eur  REAL,
+    price_usd  REAL,
     fetched_at TEXT NOT NULL
 );
 

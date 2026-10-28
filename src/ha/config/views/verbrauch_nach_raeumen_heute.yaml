@@ -57,15 +57,17 @@ cards:
         - justify-content: start
         - align-self: center
       icon:
-        - color: var(--secondary-text-color)
+        - color: var(--bgai-section-label-v3)
+        - filter: var(--bgai-header-icon-halo-v3)
         - width: 24px
         - height: 24px
       name:
-        - font-size: 1.0rem
+        - font-size: var(--bg-fs-group-header)
         - font-weight: 700
         - text-transform: uppercase
         - letter-spacing: 0.07em
-        - color: var(--secondary-text-color)
+        - color: var(--bgai-section-label-v3)
+        - text-shadow: var(--bgai-header-halo-v3)
         - justify-self: start
         - padding-left: 10px
 

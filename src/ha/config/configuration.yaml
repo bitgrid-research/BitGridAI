@@ -6,13 +6,18 @@ homeassistant:
 
 frontend:
   themes: !include_dir_merge_named themes
-  # Frontend-Modul für runde Ecken der power-flow-card-plus (card-mod ist nicht
-  # installiert). Lädt unabhängig vom Lovelace resource_mode auf jeder Seite.
+  # Frontend-Module fuer runde Ecken (power-flow-card-plus, card-mod ist nicht
+  # installiert) und volle Bildschirmbreite + zentrierter View-Titel. Laden
+  # unabhaengig vom Lovelace resource_mode auf jeder Seite.
   extra_module_url:
-    # ?v= Cache-Bust: bei jeder Änderung an bitgrid_card_shape.js hochzählen,
-    # sonst lädt der Browser bzw. das Wandtablet (Kiosk) die alte gecachte
+    # ?v= Cache-Bust: bei jeder Aenderung an der jeweiligen Datei hochzaehlen,
+    # sonst laedt der Browser bzw. das Wandtablet (Kiosk) die alte gecachte
     # Version. Datum als Versionsstempel.
-    - /local/bitgrid_card_shape.js?v=20260823
+    - /local/bitgrid_card_shape.js?v=20261018a
+    # 12.09.2026: war seit Einfuehrung nie hier eingetragen, deshalb lief die
+    # in bitgrid_dashboard_v2/v3.yaml (Header-Kommentar) behauptete volle
+    # Breite + zentrierter Titel bislang gar nicht, unabhaengig vom Cache.
+    - /local/bitgrid_wide.js?v=20261017e
 
 lovelace:
   resource_mode: yaml
@@ -22,7 +27,7 @@ lovelace:
     # Boxen im Glas-Look, die das Theme über die MDC-Textfield-Füllung nicht
     # erreicht. resource_mode: yaml -> HACS trägt die Resource nicht automatisch
     # ein, daher hier von Hand.
-    - url: /hacsfiles/lovelace-card-mod/card-mod.js
+    - url: /hacsfiles/lovelace-card-mod/card-mod.js?v=20261013
       type: module
     - url: /hacsfiles/power-flow-card-plus/power-flow-card-plus.js
       type: module
@@ -39,7 +44,7 @@ lovelace:
     # verifiziert (ls www/community/): "apexcharts-card", NICHT "lovelace-
     # apexcharts-card" — anders als die HACS-Repo-Namen der übrigen Karten
     # oben (lovelace-card-mod, lovelace-layout-card, ...).
-    - url: /hacsfiles/apexcharts-card/apexcharts-card.js
+    - url: /hacsfiles/apexcharts-card/apexcharts-card.js?v=20260930
       type: module
     # bubble-card (HACS, Clooos/Bubble-Card): Balken-Listen fuer "Verbrauch
     # nach Gerätetyp" (Tab "EnergieInfo"), Nutzer-Wunsch 25.08.2026. War
@@ -48,24 +53,69 @@ lovelace:
     # deshalb bislang ungenutzt. Pfad-Grossschreibung beachten: anders als
     # die anderen HACS-Ordner oben (alle lowercase) heisst dieser exakt
     # "Bubble-Card", 25.08.2026 live per HTTP-Request verifiziert.
-    - url: /hacsfiles/Bubble-Card/bubble-card.js
+    - url: /hacsfiles/Bubble-Card/bubble-card.js?v=20260930
+      type: module
+    # bitgrid-verlauf-chart (eigenes Modul, kein HACS): ersetzt custom:
+    # apexcharts-card NUR fuer die Tages-Verlaufskarte im Home-Tab
+    # (views/energieverlauf_tag.yaml) — Grund: echte 3h-Schritte auf der
+    # Stunden-X-Achse, was mit apexcharts-card nachweislich nicht moeglich
+    # ist (s. Kommentarkopf in www/bitgrid_verlauf_chart.js). apexcharts-card
+    # selbst bleibt oben registriert, andere Verbraucher (Wochen-/Geraete-
+    # Verlaeufe) sind davon unberuehrt. ?v= Cache-Bust wie bei
+    # bitgrid_card_shape.js, bei jeder Aenderung hochzaehlen.
+    - url: /local/bitgrid_verlauf_chart.js?v=60
+      type: module
+    # bitgrid-finanz-chart (eigenes Modul, kein HACS): ersetzt das bisherige
+    # rohe SVG in custom:button-card (views/finanz_bilanz.yaml) — Grund:
+    # echte Pixel-Hoehe statt viewBox-Skalierung, s. Kommentarkopf in
+    # www/bitgrid_finanz_chart.js. ?v= Cache-Bust wie bei den anderen
+    # eigenen Modulen, bei jeder Aenderung hochzaehlen.
+    - url: /local/bitgrid_finanz_chart.js?v=17
+      type: module
+    # bitgrid-regelschwellen-chart (eigenes Modul, kein HACS): ersetzt das
+    # bisherige Inline-SVG im custom_fields.chart-Block einer button-card in
+    # bitgrid_dashboard_v3.yaml — Grund: der Chart sollte auf Nutzer-Vorgabe
+    # (25.09.2026) denselben Stil bekommen wie der Verlauf-Chart und dabei
+    # ein eigenes Custom-Element werden. Volle Begruendung im Kommentarkopf
+    # von www/bitgrid_regelschwellen_chart.js. ?v= Cache-Bust wie bei den
+    # anderen eigenen Modulen, bei jeder Aenderung hochzaehlen.
+    - url: /local/bitgrid_regelschwellen_chart.js?v=17
+      type: module
+    # bitgrid-btc-kurs-chart (eigenes Modul, kein HACS): ersetzt das bisherige
+    # statische 90-Tage-EUR-SVG in views/stats_btc_price.yaml — Grund:
+    # Nutzer-Vorgabe 25.09.2026, gleicher Stil wie der Regelschwellen-Chart
+    # (Legende, beschriftete Achsen), dynamisch bis heute, Zeitraum-Buttons,
+    # EUR/USD/Power-Law umschaltbar. Volle Begruendung im Kommentarkopf von
+    # www/bitgrid_btc_kurs_chart.js. ?v= Cache-Bust wie bei den anderen
+    # eigenen Modulen, bei jeder Aenderung hochzaehlen.
+    - url: /local/bitgrid_btc_kurs_chart.js?v=13
+      type: module
+    # bitgrid-bar-trend-chart (eigenes Modul, kein HACS): ersetzt die
+    # bisherigen statischen Inline-SVGs in stats_energy_to_sats.yaml
+    # (Effizienz) und stats_pool_monthly.yaml (Langzeitbilanz) — ein
+    # geteiltes Element fuer beide, weil beide Karten strukturell identisch
+    # sind (Balken + Ø-Linie + Zeitraum-Paging). Nutzer-Vorgabe 25.09.2026:
+    # Stil wie die uebrigen Custom-Charts, Legende unter dem Chart, Pfeile
+    # zum Blaettern wie beim Historie-Cycler. Volle Begruendung im
+    # Kommentarkopf von www/bitgrid_bar_trend_chart.js. ?v= Cache-Bust wie
+    # bei den anderen eigenen Modulen, bei jeder Aenderung hochzaehlen.
+    - url: /local/bitgrid_bar_trend_chart.js?v=9
+      type: module
+    # bitgrid-historie-chart (eigenes Modul, kein HACS): ersetzt
+    # custom:apexcharts-card im Abschnitt "Historie" (Tab "EnergieInfo",
+    # historie_*.yaml) — Nutzer-Vorgabe 25.09.2026, gleicher Stil wie die
+    # uebrigen eigenen Charts (beschriftete Achsen, Legende, dropShadow).
+    # Volle Begruendung im Kommentarkopf von www/bitgrid_historie_chart.js.
+    # ?v= Cache-Bust wie bei den anderen eigenen Modulen, bei jeder
+    # Aenderung hochzaehlen.
+    - url: /local/bitgrid_historie_chart.js?v=7
       type: module
   dashboards:
-    # 03.09.2026, Nutzer-Wunsch: v1/v2 aus der Sidebar ausgeblendet
-    # (show_in_sidebar: false), Config bleibt vollstaendig aktiv/erreichbar
-    # unter /bitgridai-v1 bzw. /bitgridai-v2 — jederzeit reversibel.
-    bitgridai-v1:
-      mode: yaml
-      filename: bitgrid_dashboard_v1.yaml
-      title: BitGridAI v1
-      icon: mdi:close
-      show_in_sidebar: false
-    bitgridai-v2:
-      mode: yaml
-      filename: bitgrid_dashboard_v2.yaml
-      title: BitGridAI v2
-      icon: mdi:close
-      show_in_sidebar: false
+    # 12.09.2026, Nutzer-Wunsch: v1/v2 komplett aus HA entfernt (nicht mehr
+    # nur show_in_sidebar:false wie seit 03.09.2026), weil HA sonst eines
+    # der registrierten Dashboards als Startseite waehlen konnte statt v3.
+    # Die YAML-Dateien selbst (bitgrid_dashboard_v1.yaml/v2.yaml) bleiben
+    # unangetastet im Repo, sind aber ab jetzt nicht mehr eingebunden.
     # URL-Pfad UND Dateiname 23./24.08.2026 von "demo" auf "v3" umbenannt
     # (Nutzer-Entscheidung, volle Konsistenz mit v1/v2) — bricht das
     # gespeicherte Kiosk-Bookmark auf dem Tischdemo-Geraet, muss dort einmal
@@ -547,7 +597,15 @@ template:
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
-        availability: "true"
+        availability: >-
+          {% set dead = (
+             states('sensor.sma_tripower_pv_power') in ['unavailable', 'unknown']
+          ) %}
+          {# Sim: available unless the replay simulates a sensor outage
+             (input_boolean.sim_sensor_dropout, lab only; absent in prod). #}
+          {{ (is_state('input_boolean.simulation_mode', 'on')
+              and not is_state('input_boolean.sim_sensor_dropout', 'on'))
+             or (not is_state('input_boolean.simulation_mode', 'on') and not dead) }}
         state: >-
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.pv_power_w') | float(0) }}
@@ -561,6 +619,19 @@ template:
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
+        availability: >-
+          {% set dead = (
+             states('sensor.sma_tripower_pv_power') in ['unavailable', 'unknown']
+             or states('sensor.sma_storage_battery_power_discharge_total') in ['unavailable', 'unknown']
+             or states('sensor.sma_storage_battery_power_charge_total') in ['unavailable', 'unknown']
+             or states('sensor.sma_storage_metering_power_absorbed') in ['unavailable', 'unknown']
+             or states('sensor.sma_storage_metering_power_supplied') in ['unavailable', 'unknown']
+          ) %}
+          {# Sim: available unless the replay simulates a sensor outage
+             (input_boolean.sim_sensor_dropout, lab only; absent in prod). #}
+          {{ (is_state('input_boolean.simulation_mode', 'on')
+              and not is_state('input_boolean.sim_sensor_dropout', 'on'))
+             or (not is_state('input_boolean.simulation_mode', 'on') and not dead) }}
         state: >-
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.house_load_w') | float(0) }}
@@ -580,6 +651,15 @@ template:
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
+        availability: >-
+          {% set dead = (
+             states('sensor.sma_storage_metering_power_absorbed') in ['unavailable', 'unknown']
+          ) %}
+          {# Sim: available unless the replay simulates a sensor outage
+             (input_boolean.sim_sensor_dropout, lab only; absent in prod). #}
+          {{ (is_state('input_boolean.simulation_mode', 'on')
+              and not is_state('input_boolean.sim_sensor_dropout', 'on'))
+             or (not is_state('input_boolean.simulation_mode', 'on') and not dead) }}
         state: >-
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.grid_import_w') | float(0) }}
@@ -593,6 +673,15 @@ template:
         unit_of_measurement: "%"
         device_class: battery
         state_class: measurement
+        availability: >-
+          {% set dead = (
+             states('sensor.sma_storage_battery_soc_total') in ['unavailable', 'unknown']
+          ) %}
+          {# Sim: available unless the replay simulates a sensor outage
+             (input_boolean.sim_sensor_dropout, lab only; absent in prod). #}
+          {{ (is_state('input_boolean.simulation_mode', 'on')
+              and not is_state('input_boolean.sim_sensor_dropout', 'on'))
+             or (not is_state('input_boolean.simulation_mode', 'on') and not dead) }}
         state: >-
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.battery_soc_pct') | float(0) }}
@@ -606,6 +695,16 @@ template:
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
+        availability: >-
+          {% set dead = (
+             states('sensor.sma_storage_battery_power_charge_total') in ['unavailable', 'unknown']
+             or states('sensor.sma_storage_battery_power_discharge_total') in ['unavailable', 'unknown']
+          ) %}
+          {# Sim: available unless the replay simulates a sensor outage
+             (input_boolean.sim_sensor_dropout, lab only; absent in prod). #}
+          {{ (is_state('input_boolean.simulation_mode', 'on')
+              and not is_state('input_boolean.sim_sensor_dropout', 'on'))
+             or (not is_state('input_boolean.simulation_mode', 'on') and not dead) }}
         state: >-
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ states('input_number.battery_power_w') | float(0) }}
@@ -622,6 +721,16 @@ template:
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
+        availability: >-
+          {% set dead = (
+             states('sensor.sma_storage_battery_power_charge_total') in ['unavailable', 'unknown']
+             or states('sensor.sma_storage_battery_power_discharge_total') in ['unavailable', 'unknown']
+          ) %}
+          {# Sim: available unless the replay simulates a sensor outage
+             (input_boolean.sim_sensor_dropout, lab only; absent in prod). #}
+          {{ (is_state('input_boolean.simulation_mode', 'on')
+              and not is_state('input_boolean.sim_sensor_dropout', 'on'))
+             or (not is_state('input_boolean.simulation_mode', 'on') and not dead) }}
         state: >-
           {% if is_state('input_boolean.simulation_mode', 'on') %}
             {{ -(states('input_number.battery_power_w') | float(0)) | round(0) }}
@@ -636,6 +745,17 @@ template:
         unique_id: surplus_kw
         unit_of_measurement: "kW"
         state_class: measurement
+        availability: >-
+          {% set dead = (
+             states('sensor.pv_power_w') in ['unavailable', 'unknown']
+             or states('sensor.house_load_w') in ['unavailable', 'unknown']
+             or states('sensor.grid_import_w') in ['unavailable', 'unknown']
+          ) %}
+          {# Sim: available unless the replay simulates a sensor outage
+             (input_boolean.sim_sensor_dropout, lab only; absent in prod). #}
+          {{ (is_state('input_boolean.simulation_mode', 'on')
+              and not is_state('input_boolean.sim_sensor_dropout', 'on'))
+             or (not is_state('input_boolean.simulation_mode', 'on') and not dead) }}
         state: >-
           {% set pv   = states('sensor.pv_power_w') | float(0) %}
           {% set load = states('sensor.house_load_w') | float(0) %}
@@ -648,23 +768,40 @@ template:
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
+        availability: >-
+          {% set dead = (
+             states('sensor.sma_storage_metering_power_supplied') in ['unavailable', 'unknown']
+          ) %}
+          {# Sim: available unless the replay simulates a sensor outage
+             (input_boolean.sim_sensor_dropout, lab only; absent in prod). #}
+          {{ (is_state('input_boolean.simulation_mode', 'on')
+              and not is_state('input_boolean.sim_sensor_dropout', 'on'))
+             or (not is_state('input_boolean.simulation_mode', 'on') and not dead) }}
         state: >-
           {% if is_state('input_boolean.simulation_mode', 'on') %}
-            0
+            {{ states('input_number.grid_export_w') | float(0) }}
           {% else %}
             {{ states('sensor.sma_storage_metering_power_supplied') | float(0) }}
           {% endif %}
 
       # Miner-Gesamtleistung (Shelly Plug S Gen 3 — realer Wandverbrauch AC)
+      # simulation_mode: aus input_number.miner_power_w (Lab-Demo-Replay). Der
+      # Helfer existiert nur auf der Lab-Box (lab_sim_day.yaml); in Prod ist
+      # simulation_mode aus, der Zweig wird nie ausgewertet.
       - name: miner_total_power_w
         unique_id: miner_total_power_w
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
         state: >-
-          {% set m1 = states('sensor.shellyplugsg3_dcb4d9c5567c_leistung') | float(0) %}
-          {% set m2 = states('sensor.shellyplugsg3_d0cf13d86254_leistung') | float(0) %}
-          {{ (m1 + m2) | round(0) }}
+          {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {{ (states('sensor.miner1_sim_power') | float(0)
+                + states('sensor.miner2_sim_power') | float(0)) | round(0) }}
+          {% else %}
+            {% set m1 = states('sensor.shellyplugsg3_dcb4d9c5567c_leistung') | float(0) %}
+            {% set m2 = states('sensor.shellyplugsg3_d0cf13d86254_leistung') | float(0) %}
+            {{ (m1 + m2) | round(0) }}
+          {% endif %}
 
       # Maximale Chip-Temp beider Miner
       - name: miner_max_chip_temp_c
@@ -875,6 +1012,22 @@ template:
         state: >-
           {{ states('sensor.miner1_workmode_status') in ['Eco', 'Standard', 'Super'] or
              states('sensor.miner2_workmode_status') in ['Eco', 'Standard', 'Super'] }}
+
+      # Einzel-Miner läuft, 25.09.2026 neu: bislang gab es nur die kombinierte
+      # miners_any_running (beide Miner OR-verknüpft) — für das neue
+      # STATUS-Panel je Miner-Karte (views/miner_controls.yaml, "Minerlaufzeit
+      # heute") braucht es die Laufzeit PRO Miner, nicht kombiniert. Basis für
+      # sensor.miner1_uptime_today_h / miner2_uptime_today_h (history_stats,
+      # packages/stats.yaml) — analog zum bestehenden Muster dort.
+      - name: miner1_running
+        unique_id: miner1_running
+        state: >-
+          {{ states('sensor.miner1_workmode_status') in ['Eco', 'Standard', 'Super'] }}
+
+      - name: miner2_running
+        unique_id: miner2_running
+        state: >-
+          {{ states('sensor.miner2_workmode_status') in ['Eco', 'Standard', 'Super'] }}
 
       # R5: Deadband — timestamp-Attribut, siehe Begruendung bei safety_lockout_active
       - name: r5_deadband_active

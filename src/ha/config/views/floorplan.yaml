@@ -29,7 +29,14 @@ card_mod:
          (schwarzer Rand). overflow:visible verhindert jedes Clipping durch
          die Karte selbst, hier und auf allen Kindelementen (img/#root),
          unabhaengig davon wie hui-picture-elements-card intern die Hoehe
-         berechnet. */
+         berechnet.
+         26.09.2026, korrigiert nach Live-Check: Fenster-Icons (Punkt 4)
+         liegen bewusst NICHT ausserhalb der 0-100%-Bildflaeche (ein erster
+         Versuch mit top:-4%/104% liess sie ueber die Karte hinaus in die
+         Etagen-Umschalter-Kopfzeile/Legende darunter rutschen — das Bild
+         selbst zeichnet bereits einen Gras-Rand um das Haus, "ausserhalb des
+         Gebaeudes" heisst hier also ein kleiner Versatz weiter Richtung
+         Bildrand, innerhalb 0-100%, nicht ausserhalb der Karte). */
       overflow: visible !important;
     }
     ha-card #root {
@@ -53,536 +60,607 @@ elements:
           action: none
         hold_action:
           action: none
-        image: /local/floorplan/base.png?version=E4592A2C2A4F87DEB8883E14E236B380
+        # Tag/Nacht-Grundriss (26.09.2026, Nutzer-Wunsch): gleiches Kriterium wie
+        # der View-Hintergrund (sun.sun above_horizon), native state_image-Umschaltung
+        # des image-Elements, reaktiv ohne Reload. base_night.png hat identische
+        # Masse und Umrisse wie base.png, alle %-Positionen gelten fuer beide.
+        entity: sun.sun
+        image: /local/floorplan/base.png?version=2350CF723E1CB2BDD4076DF6AC25C59A
+        state_image:
+          above_horizon: /local/floorplan/base.png?version=2350CF723E1CB2BDD4076DF6AC25C59A
+          below_horizon: /local/floorplan/base_night.png?version=63BD476D3D52319852B4400403D2014C
         filter: none
         style:
           left: 50%
           top: 50%
           width: 100%
-  - type: state-label
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # RAUMNAMEN (Punkt 5, Nutzer-Wunsch 26.09.2026) — template: floorplan_
+  # room_label (button_card_templates.yaml). Position = Climate-Entity des
+  # jeweiligen Raums (zuverlaessige 1:1-Raum-Zuordnung), leicht nach oben
+  # versetzt, damit sich Namensschild und Thermostat-Icon nicht ueberlappen.
+  # Bewusst EIN Schild fuer "Wohnzimmer" (nicht zwei fuer Ofen-/Fenster-Zone):
+  # das sind zwei Heizkreise im selben physischen Raum, kein separater Raum
+  # (floorplan_legende.yaml fuehrt beide Zonen inzwischen ebenfalls unter
+  # einem Raumeintrag "Wohnzimmer", nur mit je eigenem Ofen-/Fenster-Label
+  # pro Entity, 26.09.2026 vereinheitlicht).
+  # 26.09.2026 abends, nach Tausch auf das neue base.png (weisse Waende):
+  # ALLE Positionen dieser Datei (Raumnamen, Leistungs-Badges, Heizungs- und
+  # Fenster-Icons) per Overlay-Rendering auf das Bild selbst gelegt, Pixel-
+  # Mittelpunkt des jeweiligen Objekts / 1774x887. Raumnamen liegen jetzt
+  # auf freier Bodenflaeche statt auf Waenden. Fenster-Icons bleiben in
+  # ihrer Aussenreihe, nur die fassadenparallele Koordinate folgt dem
+  # gezeichneten Fenster. Bei einem neuen Grundrissbild alles neu tracen.
+  # ═══════════════════════════════════════════════════════════════════════
+  - type: custom:button-card
+    template: floorplan_room_label
+    name: Wohnzimmer
+    style:
+      # 27.09.2026, Nutzer-Wunsch: erst auf die Hoehe des Heizungs-Icons
+      # (climate.wohnzimmer_ofen, 33.75%) gezogen, war 47.43%. Danach auf
+      # Nutzer-Wunsch weiter nach unten auf die Hoehe der Bubble
+      # "TV Wohnzimmer" (sensor.shellyplugsg3_9070694c99d4_leistung).
+      # Feinjustage: 25 px tiefer in Schritten 10+10+5 (senkrecht
+      # 1 px = 1/887 = 0.113 %), liegt damit nicht mehr in deren Flucht.
+      top: 45.13%
+      left: 70.62%
+      transform: translate(-50%, -50%)
+      # margin-right:-100%: button-card setzt max-width:fit-content, bei
+      # absoluter Position = Restplatz bis zum rechten Bildrand. Ohne das
+      # wird "GAESTEZIMMER" bei ~1400px Fensterbreite zu "GAESTEZI..." gekuerzt.
+      # Der negative Rand vergroessert nur diesen Restplatz, left/translate
+      # (Zentrierung) bleiben unveraendert.
+      margin-right: -100%
+  - type: custom:button-card
+    template: floorplan_room_label
+    name: Küche
+    style:
+      # 27.09.2026, Nutzer-Wunsch: auf exakt dieselbe Hoehe wie das Schild
+      # "Bad" gezogen (war 63.38%), beide stehen jetzt in einer Zeile.
+      top: 59.96%
+      left: 59.01%
+      transform: translate(-50%, -50%)
+      margin-right: -100%
+  - type: custom:button-card
+    template: floorplan_room_label
+    name: Bad
+    style:
+      # 27.09.2026, Nutzer-Wunsch: mit "Schlafzimmer 2" zusammen 10 px
+      # hoeher (senkrecht 1 px = 1/887 = 0.113 %), war 59.96%. "Kueche"
+      # blieb auf Nutzer-Vorgabe bei 59.96% und liegt damit nicht mehr
+      # in derselben Zeile.
+      top: 58.83%
+      left: 34.65%
+      transform: translate(-50%, -50%)
+      margin-right: -100%
+  - type: custom:button-card
+    template: floorplan_room_label
+    name: Hauswirtschaftsraum
+    style:
+      # 27.09.2026, Nutzer-Wunsch: ueber Kuehlschraenke + Waschmaschine
+      # (top 18.36% / 19.85%) gesetzt, war darunter bei 24.41%. Das Schild
+      # liegt jetzt auf dem oberen Wandband, links zentriert ueber beiden
+      # Geraete-Badges (Mittelwert aus 8.60% und 11.88%).
+      # 27.09.2026, Nutzer-Feinjustage in Schritten: 3+3+2+3 px nach rechts
+      # (waagerecht 1 px = 1/1774 = 0.056 %), Ausgangswert war 10.24 %.
+      # Senkrecht in Schritten 3+3 px hoch, dann 2 px runter (senkrecht
+      # 1 px = 1/887 = 0.113 %), Ausgangswert war 11.80 %.
+      top: 11.35%
+      left: 10.86%
+      transform: translate(-50%, -50%)
+      margin-right: -100%
+  - type: custom:button-card
+    template: floorplan_room_label
+    # 27.09.2026, Nutzer-Korrektur: Die beiden Schlafzimmer-Schilder waren
+    # vertauscht. Die Live-Area-Registry von HA fuehrt DAVIDS Raum als
+    # "Schlafzimmer 1" (area_id david_zimmer) und MICHAELS Raum als
+    # "Schlafzimmer 2" (area_id michi_schlafzimmer); der Geraete-Tab
+    # (views/geraete.yaml) folgt derselben Zuordnung. Der Grundriss hatte
+    # es genau andersherum. Hier an die Registry angeglichen.
+    # Dieses Schild sitzt ueber MICHAELS Raum (climate.michaels_schlafzimmer,
+    # links im Bild), heisst laut Registry also "Schlafzimmer 2".
+    name: Schlafzimmer 2
+    style:
+      # 27.09.2026, Nutzer-Wunsch: auf exakt dieselbe Hoehe wie das Schild
+      # "Bad" gezogen (war 57.11%), beide Raeume liegen in derselben Zeile.
+      # 27.09.2026: zusammen mit "Bad" 10 px hoeher, war 59.96%.
+      top: 58.83%
+      left: 15.00%
+      transform: translate(-50%, -50%)
+      margin-right: -100%
+  - type: custom:button-card
+    template: floorplan_room_label
+    # Sitzt ueber DAVIDS Raum (climate.davids_zimmer), laut Registry also
+    # "Schlafzimmer 1" (s. Korrektur-Kommentar beim Schild darueber).
+    name: Schlafzimmer 1
+    style:
+      # 27.09.2026, Nutzer-Wunsch: waagerecht auf dieselbe Mitte wie das
+      # Schild "Bad" darunter gezogen (war 25.31%), beide stehen jetzt
+      # in einer Flucht. Danach auf die Hoehe des Heizungs-Icons an der
+      # rechten Wand (climate.wohnzimmer_ofen, 33.75%) gezogen, war 22.92%
+      # — damit lag es eine Zeit lang mit Wohnzimmer und Gaestezimmer in
+      # einer Zeile. Waagerecht dann mittig unter das eigene Heizungs-Icon
+      # des Raums gezogen (climate.davids_zimmer, left 38.05%), war 34.65%.
+      # 27.09.2026, Nutzer-Wunsch: senkrecht auf die Hoehe der GX-10-Bubble
+      # (sensor.shellyplugsg3_dcb4d9c6b46c_leistung) gezogen, war 33.75%.
+      # Danach waagerecht nach links auf die Flucht der Bubble "David TV"
+      # (sensor.shellyplugsg3_90706947f288_leistung), war 38.05%.
+      # 27.09.2026, Nutzer-Feinjustage: 5 px nach rechts, 20 px nach oben
+      # (in Schritten 5+5+10).
+      # Waagerecht ist 1 px = 1/1774 = 0.056 %, senkrecht 1 px = 1/887 =
+      # 0.113 % (das Bild ist 1774x887, die Prozente beziehen sich je Achse
+      # auf eine andere Kantenlaenge). Liegt damit nicht mehr exakt in der
+      # Flucht der David-TV-Bubble bzw. der GX-10-Bubble.
+      top: 26.37%
+      left: 29.83%
+      transform: translate(-50%, -50%)
+      margin-right: -100%
+  - type: custom:button-card
+    template: floorplan_room_label
+    name: Gästezimmer
+    style:
+      # 27.09.2026, Nutzer-Wunsch: auf die Hoehe des Wohnzimmer-Heizungs-
+      # Icons (climate.wohnzimmer_ofen, top 33.75%) gezogen, war 24.06%.
+      top: 33.75%
+      left: 89.02%
+      transform: translate(-50%, -50%)
+      margin-right: -100%
+  - type: custom:button-card
+    template: floorplan_room_label
+    name: Büro
+    style:
+      top: 67.94%
+      left: 87.33%
+      transform: translate(-50%, -50%)
+      margin-right: -100%
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # LEISTUNGS-/TEMPERATURBUBBLES — template: floorplan_value_badge, ersetzt
+  # die bisherigen nativen state-label-Elemente 1:1 (gleiche Entities,
+  # gleiche Position), nur mit Schatten+Kontur (Punkt 2) statt der alten
+  # reinen rgba-Pille mit dunklem Text.
+  # ═══════════════════════════════════════════════════════════════════════
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugpmg3_9070695bb2a8_leistung
-    title: null
-    style:
-      top: 42.77%
-      left: 8.49%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+    style:
+      top: 41.16%
+      left: 8.32%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_d0cf13db3a00_leistung
-    title: null
-    style:
-      top: 38.51%
-      left: 18.14%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+    style:
+      top: 36.26%
+      left: 18.39%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_9070694a1b6c_leistung
-    title: null
-    style:
-      top: 81.66%
-      left: 92.21%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+    style:
+      top: 76.84%
+      left: 90.89%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.ewelink_snzb_02p_temperatur_2
-    title: null
-    style:
-      top: 51.48%
-      left: 48.42%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: binary_sensor.wohnzimmer_ofen_alarm
-    title: null
     style:
-      top: 12.60%
-      left: 60.83%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: binary_sensor.gastezimmer_alarm
-    title: null
-    style:
-      top: 9.52%
-      left: 88.99%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+      # 27.09.2026, Nutzer-Wunsch: Bubble beruehrte rechts die Flurwand.
+      # Jetzt mittig im Flur (Flurbreite im Bild ca. 44.8-50.2%), damit
+      # beidseitig ~0.6% Luft bleiben. War left 48.47%.
+      # Danach 5 px nach rechts (waagerecht 1 px = 1/1774 = 0.056 %).
+      top: 51.60%
+      left: 47.78%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_9070694c577c_leistung
-    title: null
-    style:
-      top: 67.22%
-      left: 64.20%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: climate.buro_michael
-    title: null
     style:
-      top: 63.54%
-      left: 92.06%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: toggle
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: climate.wohnzimmer_fenster
-    title: null
-    style:
-      top: 81.73%
-      left: 72.03%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: toggle
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: climate.bad
-    title: null
-    style:
-      top: 53.36%
-      left: 26.79%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: toggle
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+      # 27.09.2026, Nutzer-Wunsch "schoen aufeinander setzen": Bubble sass
+      # knapp UNTER dem Kuehlschrank (66.23% / 63.71%), jetzt mittig darauf.
+      # Mitte per Farb-Bounding-Box der gruenen Flaeche im Bild gemessen
+      # (x 62.01-65.22%, y 60.32-66.07%), nicht geschaetzt.
+      top: 63.19%
+      left: 63.61%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_9070694c99d4_leistung
-    title: null
-    style:
-      top: 43.60%
-      left: 78.52%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+    style:
+      top: 42.30%
+      left: 79.12%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_d885ac1e9adc_leistung
-    title: null
-    style:
-      top: 17.49%
-      left: 8.21%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+    style:
+      # 27.09.2026, Nutzer-Wunsch: Waschmaschine und die Nachbar-Bubble
+      # ueberlappten sich. Beide Geraete liegen im Bild dicht nebeneinander
+      # (per Farb-Bounding-Box gemessen), eine rein waagerechte Trennung
+      # reicht deshalb nicht. Diese Bubble sitzt jetzt auf unteren Bereich ihres eigenen Geraetes;
+      # der senkrechte Abstand beider Bubbles ist damit 4.98% und liegt
+      # ueber der Bubble-Hoehe von 4.09%. War 19.85% / 8.60%.
+      top: 22.00%
+      left: 8.99%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_d885ac18c3b4_leistung
-    title: null
-    style:
-      top: 55.56%
-      left: 88.68%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: binary_sensor.kuche_alarm
-    title: null
     style:
-      top: 91.58%
-      left: 59.77%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: binary_sensor.hauswirtschaftsraum_alarm
-    title: null
-    style:
-      top: 27.86%
-      left: 3.54%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+      top: 55.73%
+      left: 88.92%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_9070694d44bc_leistung
-    title: null
-    style:
-      top: 36.59%
-      left: 23.34%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: climate.michaels_schlafzimmer
-    title: null
     style:
-      top: 69.23%
-      left: 8.36%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: toggle
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+      top: 36.26%
+      left: 23.89%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_90706947f288_leistung
-    title: null
-    style:
-      top: 14.47%
-      left: 29.56%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+    style:
+      top: 16.43%
+      left: 29.55%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_9070694b2854_leistung
-    title: null
-    style:
-      top: 71.93%
-      left: 54.36%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: climate.davids_zimmer
-    title: null
     style:
-      top: 18.40%
-      left: 39.07%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: toggle
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: climate.gastezimmer
-    title: null
-    style:
-      top: 17.28%
-      left: 85.75%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: toggle
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: binary_sensor.wohnzimmer_fenster_alarm
-    title: null
-    style:
-      top: 91.43%
-      left: 74.31%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: climate.hauswirtschaftsraum
-    title: null
-    style:
-      top: 31.09%
-      left: 8.38%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: toggle
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: binary_sensor.buro_kleines_fenster_alarm
-    title: null
-    style:
-      top: 89.83%
-      left: 88.80%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+      top: 67.72%
+      left: 55.21%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_9070694abdf4_leistung
-    title: null
-    style:
-      top: 16.45%
-      left: 13.39%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: binary_sensor.michaels_schlafzimmer_alarm
-    title: null
     style:
-      top: 72.74%
-      left: 3.56%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: climate.kuche
-    title: null
-    style:
-      top: 81.51%
-      left: 58.84%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: toggle
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-label
+      # 27.09.2026, Nutzer-Wunsch: Kuehlschraenke und die Nachbar-Bubble
+      # ueberlappten sich. Beide Geraete liegen im Bild dicht nebeneinander
+      # (per Farb-Bounding-Box gemessen), eine rein waagerechte Trennung
+      # reicht deshalb nicht. Diese Bubble sitzt jetzt auf die Mitte ihres eigenen Geraetes;
+      # der senkrechte Abstand beider Bubbles ist damit 4.98% und liegt
+      # ueber der Bubble-Hoehe von 4.09%. War 18.36% / 11.88%.
+      top: 17.02%
+      left: 11.81%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_value_badge
     entity: sensor.shellyplugsg3_dcb4d9c6b46c_leistung
-    title: null
-    style:
-      top: 27.80%
-      left: 18.58%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: binary_sensor.buro_grosses_fenster_alarm
-    title: null
     style:
-      top: 62.24%
-      left: 97.05%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
-    tap_action:
-      action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: climate.wohnzimmer_ofen
-    title: null
-    style:
-      top: 35.46%
-      left: 53.45%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
+      top: 28.62%
+      left: 18.79%
+      transform: translate(-50%, -50%)
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # KLIMA-ICONS — template: floorplan_icon_badge. Icon+Farbe je nach Zustand:
+  # heat -> Heizkoerper-Icon, primary-color (aktiv/normal, gruen); off/idle ->
+  # Thermometer, bg-color-idle (grau); unavailable/unknown -> Fragezeichen-
+  # Raute, accent-color (Uebergangs-Warnung, amber) — Punkt 2+3 Nutzer-Wunsch.
+  # hvac_action wird bewusst NICHT ausgewertet (anders als climate_tile in
+  # button_card_templates.yaml): diese TRVs melden hvac_action nie, jede
+  # darauf gestuetzte Logik waere hier immer im selben (falschen) Zweig
+  # gelandet, siehe Live-API-Check Session 26.09.2026. state=='heat' ist das
+  # einzige tatsaechlich vorhandene Signal.
+  # ═══════════════════════════════════════════════════════════════════════
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: climate.buro_michael
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'heat' ? 'mdi:radiator' : 'mdi:thermometer'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'heat' ? 'var(--primary-color)' : 'var(--bg-color-idle)'); ]]]
     tap_action:
       action: toggle
-    double_tap_action:
-      action: none
-    hold_action:
-      action: more-info
-  - type: state-icon
-    entity: binary_sensor.davids_zimmer_alarm
-    title: null
     style:
-      top: 8.44%
-      left: 37.88%
-      border-radius: 50%
-      text-align: center
-      background-color: rgba(255, 255, 255, 0.3)
-      opacity: 100%
-      transform: translate(-50%, -50%) scale(100%)
+      top: 57.35%
+      left: 92.54%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: climate.wohnzimmer_fenster
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'heat' ? 'mdi:radiator' : 'mdi:thermometer'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'heat' ? 'var(--primary-color)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: toggle
+    style:
+      top: 80.49%
+      left: 72.60%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: climate.bad
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'heat' ? 'mdi:radiator' : 'mdi:thermometer'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'heat' ? 'var(--primary-color)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: toggle
+    style:
+      top: 52.68%
+      left: 27.01%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: climate.michaels_schlafzimmer
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'heat' ? 'mdi:radiator' : 'mdi:thermometer'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'heat' ? 'var(--primary-color)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: toggle
+    style:
+      top: 67.72%
+      left: 7.35%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: climate.davids_zimmer
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'heat' ? 'mdi:radiator' : 'mdi:thermometer'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'heat' ? 'var(--primary-color)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: toggle
+    style:
+      top: 18.02%
+      left: 38.05%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: climate.gastezimmer
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'heat' ? 'mdi:radiator' : 'mdi:thermometer'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'heat' ? 'var(--primary-color)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: toggle
+    style:
+      top: 17.79%
+      left: 88.74%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: climate.hauswirtschaftsraum
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'heat' ? 'mdi:radiator' : 'mdi:thermometer'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'heat' ? 'var(--primary-color)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: toggle
+    style:
+      top: 30.33%
+      left: 7.91%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: climate.kuche
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'heat' ? 'mdi:radiator' : 'mdi:thermometer'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'heat' ? 'var(--primary-color)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: toggle
+    style:
+      top: 80.26%
+      left: 58.44%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: climate.wohnzimmer_ofen
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'heat' ? 'mdi:radiator' : 'mdi:thermometer'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'heat' ? 'var(--primary-color)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: toggle
+    style:
+      top: 33.75%
+      left: 53.73%
+      transform: translate(-50%, -50%)
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # FENSTER-ICONS (Punkt 4, Nutzer-Wunsch 26.09.2026) — template:
+  # floorplan_icon_badge. Icon+Farbe: offen -> bg-color-reserve (Warnung),
+  # zu -> bg-color-idle (neutral), unavailable -> accent-color.
+  #
+  # Position: die zur Fassade SENKRECHTE Koordinate (top fuer Nord/Sued,
+  # left fuer Ost/West) bleibt exakt der bisherige, am Fensterbild
+  # kalibrierte Wert (siehe git-Historie dieser Datei) — nur die dazu
+  # PARALLELE Koordinate wird auf einen einheitlichen Aussen-Versatz
+  # gesetzt, damit alle Fenster derselben Fassade in einer Flucht liegen.
+  # Nord=oben/Sued=unten/West=links/Ost=rechts nach Nutzer-Angabe 26.09.2026
+  # (oben im Bild = Norden).
+  #
+  # Werte ausserhalb 0-100% (top:-4%/104%) funktionieren NICHT: die Icons
+  # rutschen dann ueber die Karte hinaus in die Nachbarkarte. Das Bild zeichnet
+  # ohnehin einen Gras-Rand um das Haus, "ausserhalb des Gebaeudes" liegt also
+  # bereits innerhalb der 0-100%-Bildflaeche.
+  #
+  # 27.09.2026, Nutzer-Wunsch "naeher an die Wand": Aussenreihen von
+  # top 3.60%/96.61% und left 0.82%/99.29% dichter herangezogen. Hergeleitet,
+  # nicht geschaetzt: Hausumriss per Alpha-Bounding-Box = x 3.10-97.01%,
+  # y 9.24-92.00%; das Icon ist feste 40px, bei der ueblichen Renderbreite
+  # 1663px also 2.41% breit und 4.81% hoch (Radius 1.20% / 2.41%). Die neuen
+  # Werte setzen die Icon-Kante damit knapp an die Aussenwand. Die Sued-Reihe
+  # brauchte danach noch 2.50% extra: die Alpha-Bounding-Box schliesst unten
+  # den Schlagschatten des Hauses mit ein, die sichtbare Wandkante liegt also
+  # hoeher als der Alpha-Rand. Alle vier Seiten am Rendering nachgemessen
+  # (Restabstand jeweils 3-4px). ACHTUNG: das
+  # Icon skaliert NICHT mit dem Bild, auf schmaleren Screens (Wandtablet)
+  # ueberlappt es die Wand etwas staerker. Das ist bewusst in Kauf genommen.
+  # 27.09.2026, Nutzer-Wunsch: die Sued-Reihe war danach zu dicht an der Wand,
+  # 10 px tiefer gesetzt (senkrecht 1 px = 1/887 = 0.113 %), 92.10% -> 93.23%.
+  # Nord, West und Ost bleiben unveraendert dicht an ihrer Wand.
+  # ═══════════════════════════════════════════════════════════════════════
+  # Nord-Reihe (top: 6.50%): wohnzimmer_ofen, gastezimmer, davids_zimmer
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: binary_sensor.wohnzimmer_ofen_alarm
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'on' ? 'var(--bg-color-reserve)' : 'var(--bg-color-idle)'); ]]]
     tap_action:
       action: more-info
-    double_tap_action:
-      action: none
-    hold_action:
+    style:
+      top: 6.50%
+      left: 59.96%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: binary_sensor.gastezimmer_alarm
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'on' ? 'var(--bg-color-reserve)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
       action: more-info
+    style:
+      top: 6.50%
+      left: 89.02%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: binary_sensor.davids_zimmer_alarm
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'on' ? 'var(--bg-color-reserve)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: more-info
+    style:
+      top: 6.50%
+      left: 38.05%
+      transform: translate(-50%, -50%)
+
+  # Sued-Reihe (top: 93.23%): kuche, wohnzimmer_fenster, buro_kleines_fenster
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: binary_sensor.kuche_alarm
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'on' ? 'var(--bg-color-reserve)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: more-info
+    style:
+      top: 93.23%
+      left: 58.39%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: binary_sensor.wohnzimmer_fenster_alarm
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'on' ? 'var(--bg-color-reserve)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: more-info
+    style:
+      top: 93.23%
+      left: 72.60%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: binary_sensor.buro_kleines_fenster_alarm
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'on' ? 'var(--bg-color-reserve)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: more-info
+    style:
+      top: 93.23%
+      left: 87.61%
+      transform: translate(-50%, -50%)
+
+  # West-Spalte (left: 1.75%): hauswirtschaftsraum, michaels_schlafzimmer
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: binary_sensor.hauswirtschaftsraum_alarm
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'on' ? 'var(--bg-color-reserve)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: more-info
+    style:
+      top: 29.19%
+      left: 1.75%
+      transform: translate(-50%, -50%)
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: binary_sensor.michaels_schlafzimmer_alarm
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'on' ? 'var(--bg-color-reserve)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: more-info
+    style:
+      top: 67.03%
+      left: 1.75%
+      transform: translate(-50%, -50%)
+
+  # Ost-Spalte (left: 98.35%): buro_grosses_fenster
+  - type: custom:button-card
+    template: floorplan_icon_badge
+    entity: binary_sensor.buro_grosses_fenster_alarm
+    icon: >
+      [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'mdi:help-rhombus-outline' : (entity.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'); ]]]
+    variables:
+      color: >
+        [[[ return (!entity || ['unavailable','unknown'].includes(entity.state)) ? 'var(--accent-color)' : (entity.state === 'on' ? 'var(--bg-color-reserve)' : 'var(--bg-color-idle)'); ]]]
+    tap_action:
+      action: more-info
+    style:
+      top: 57.35%
+      left: 98.35%
+      transform: translate(-50%, -50%)

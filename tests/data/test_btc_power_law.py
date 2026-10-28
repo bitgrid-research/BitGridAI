@@ -18,6 +18,7 @@ from src.data.btc_power_law import (
     build_artifact,
     downsample_daily,
     fetch_historical_prices,
+    fetch_historical_prices_dual,
     fit_power_law,
 )
 
@@ -73,6 +74,56 @@ def test_fetch_historical_prices_network_error_returns_empty(monkeypatch):
     monkeypatch.setattr("src.data.btc_power_law.urlopen", _raise)
 
     assert fetch_historical_prices("http://unreachable:3006") == []
+
+
+# ---------------------------------------------------------------------------
+# fetch_historical_prices_dual
+# ---------------------------------------------------------------------------
+
+
+def test_fetch_historical_prices_dual_keeps_both_currencies_from_one_call(monkeypatch):
+    d1, d2 = date(2020, 1, 1), date(2020, 1, 2)
+    payload = {
+        "prices": [
+            {"time": _ts(d2), "EUR": 80.0, "USD": 100.0},
+            {"time": _ts(d1), "EUR": 70.0, "USD": 90.0},
+        ]
+    }
+    monkeypatch.setattr(
+        "src.data.btc_power_law.urlopen", lambda *a, **k: _FakeResponse(payload)
+    )
+
+    result = fetch_historical_prices_dual("http://mempool.local:3006")
+
+    assert result == [(_ts(d1), 70.0, 90.0), (_ts(d2), 80.0, 100.0)]
+
+
+def test_fetch_historical_prices_dual_none_per_currency_not_whole_point(monkeypatch):
+    # Fruehe Jahre: EUR=-1 (kein Kurs), USD durchgehend vorhanden. Der Punkt
+    # darf nicht komplett verworfen werden, nur die ungueltige Waehrung.
+    payload = {
+        "prices": [
+            {"time": _ts(date(2010, 7, 19)), "EUR": -1, "USD": 0.08584},
+            {"time": _ts(date(2020, 1, 1)), "EUR": 70.0, "USD": 90.0},
+        ]
+    }
+    monkeypatch.setattr(
+        "src.data.btc_power_law.urlopen", lambda *a, **k: _FakeResponse(payload)
+    )
+
+    result = fetch_historical_prices_dual("http://mempool.local:3006")
+
+    assert result[0] == (_ts(date(2010, 7, 19)), None, 0.08584)
+    assert result[1] == (_ts(date(2020, 1, 1)), 70.0, 90.0)
+
+
+def test_fetch_historical_prices_dual_drops_point_if_both_invalid(monkeypatch):
+    payload = {"prices": [{"time": _ts(date(2020, 1, 1)), "EUR": -1, "USD": -1}]}
+    monkeypatch.setattr(
+        "src.data.btc_power_law.urlopen", lambda *a, **k: _FakeResponse(payload)
+    )
+
+    assert fetch_historical_prices_dual("http://mempool.local:3006") == []
 
 
 # ---------------------------------------------------------------------------

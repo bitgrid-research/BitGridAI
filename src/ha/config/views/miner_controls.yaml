@@ -1,7 +1,7 @@
 # ═══════════════════════════════════════════════════════════════════════
 # Miner-Steuerung (lean) — Energie-Status-Buttons (Akku/PV/Überschuss/Netz/
-# Haus/Miner/Heizstab) und die Avalon Q 01 / Q 02 Steuerung (Power/Auto/
-# Display/Reboot + Standby/Eco/Standard/Super + Kennzahlen).
+# Haus/Miner/Heizstab) und die Avalon Q 01 / Q 02 Steuerung (Betrieb/
+# Automatik/Display/Neustart + Standby/Eco/Standard/Super + Kennzahlen).
 #
 # Hamster-Status-Erklärung + Power-Flow wurden nach views/miner_status.yaml
 # ausgelagert (nur Dev-"Miner"-Tab); auf dem Home-Tab stehen sie ohnehin.
@@ -10,6 +10,10 @@
 #                                 (unter miner_status.yaml)
 #   - bitgrid_dashboard_v2.yaml  → Tab "Steuerung", Grid-Area "miner"
 # Single source of truth. Runde Ecken via www/bitgrid_card_shape.js.
+# Button-Bezeichner deutsch seit 13.09.2026 (Nutzer-Wunsch): Power→Betrieb,
+# Auto→Automatik (Kollision mit "Auto"=Fahrzeug), Reboot→Neustart. Eco/
+# Standard/Super bewusst unverändert (an Farb-Tokens gebunden, siehe
+# [[project_color_tokens]]-Entscheidung).
 # ═══════════════════════════════════════════════════════════════════════
 type: vertical-stack
 cards:
@@ -27,33 +31,125 @@ cards:
             :host {
               display: block;
               background: var(--ha-card-background) !important;
-              border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color) !important;
+              border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3) !important;
               border-radius: 20px !important;
-              box-shadow: var(--ha-card-box-shadow) !important;
+              /* box-shadow kommt direkt aus dem Theme (16.09.2026): seit der
+                 Konsolidierung traegt die Wurzel die scharfe v3-Outline, der
+                 fruehere Umweg ueber ein eigenes bgai-Token entfaellt. */
+              box-shadow: var(--bgai-card-shadow-v3) !important;
               overflow: hidden !important;
               contain: paint !important;
               min-width: 0 !important;
+              /* 26.09.2026: seitlicher Innenabstand hier an der Miner-Box
+                 statt als margin 0 8px an jeder inneren button-card (Muster
+                 wie Tab Home, views/steuerung_quick.yaml padding). Grund s.
+                 Kommentar beim STATUS-Abschnitt. */
+              padding: 0 8px !important;
             }
         cards:
 
+          # 26.09.2026, Nutzer-Wunsch "wie im Tab Home": Titel 1.25rem und
+          # Schatten auf jeder Schrift + jedem Icon der Miner-Karte, KEINE
+          # Outline (DESIGN.md "Halo": harte Kontur nur fuer Text auf der
+          # Grastextur; Nutzer-Entscheidung "nur Schatten" fuer die Home-
+          # Miner-Karte am selben Tag). Werte 1:1 wie views/steuerung_quick.yaml
+          # bzw. Energiefluss-Karte, hier einmal als YAML-Anker
+          # (&miner_text_shadow/&miner_icon_shadow), alle styles:-Stellen
+          # dieser Datei nutzen sie per Alias. Die per JS gerenderten
+          # Bereiche (Status/Details, window.bgMinerStatus/bgMinerDetail)
+          # tragen dieselben Werte als Konstanten TS/IS.
           - type: custom:button-card
             template: miner_header
             entity: binary_sensor.miner1_available
-            name: "Miner Avalon Q 01  ›"
+            name: "Miner #1"
             icon: mdi:memory
             styles:
               card:
                 - background: transparent
                 - box-shadow: none
                 - border: none
+              # 16.09.2026, Nutzer-Wunsch "Name und Position von Home
+              # uebernehmen": identisches Muster wie views/steuerung_quick.yaml.
+              # Die Vorlage hat '"n health status i"' mit "n" als einziger
+              # 1fr-Spalte VOR den drei Icon-Spalten — zentrieren innerhalb von
+              # "n" zentriert also nur links der Icons. Eine leere spacer-Spalte
+              # links, etwa so breit wie die Icon-Spalten rechts, macht "n"
+              # symmetrisch zur echten Kartenmitte.
+              grid:
+                - grid-template-areas: '"spacer n health status i"'
+                - grid-template-columns: 50px 1fr auto auto auto
+              icon:
+                - filter: &miner_icon_shadow "drop-shadow(0 0 1.5px rgba(0,0,0,.75))"
+              name:
+                - text-align: center
+                - justify-self: center
+                - font-size: 1.25rem
+                - text-shadow: &miner_text_shadow "0 0 2px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.85)"
+                - overflow: visible
+              # health/status wie im Tab Home: eigener, leichterer Schatten
+              # (Nutzer-Wunsch 12.09.2026 "etwas zu stark, weniger Schatten").
+              custom_fields:
+                health:
+                  - overflow: visible
+                  - filter: "drop-shadow(0 0 1px rgba(0,0,0,0.6))"
+                status:
+                  - overflow: visible
+                  - filter: "drop-shadow(0 0 1px rgba(0,0,0,0.6))"
 
           - type: horizontal-stack
+            # 27.09.2026, Nutzer-Wunsch "Linien wie im Tab Home":
+            # horizontaler Divider unter der Ueberschrift + vertikale
+            # Striche zwischen den Tasten. Traeger ist #root des
+            # horizontal-stacks, exakt wie in views/steuerung_quick.yaml
+            # (dort 12.09.2026 live ausgehandelt): #root hat keinen von
+            # www/bitgrid_card_shape.js erzwungenen Radius, die Linien
+            # rendern deshalb garantiert gerade statt entlang gerundeter
+            # Button-Ecken. Einziger Unterschied zum Home-Tab: dort
+            # zeichnen ::before/::after die zwei vertikalen Striche, hier
+            # sind DREI noetig (vier Tasten statt drei) — zwei Pseudo-
+            # Elemente reichen dafuer nicht, darum alle vier Linien als
+            # Mehrfach-Background-Layer. Verlauf statt echtem border,
+            # weil ein border keine ausgefadeten Enden kann (gleiches
+            # Muster wie ueberall sonst im Tab).
+            card_mod:
+              # ".": |-Punktform (nicht der einfache style: |-String):
+              # vertical-/horizontal-stack-card ist in card-mod ein
+              # Sonderfall, nur so greifen Regeln auf #root. Gleiche
+              # Stelle, gleiche Begruendung wie in steuerung_quick.yaml.
+              style:
+                ".": |
+                  #root {
+                    position: relative;
+                    padding-top: 12px;
+                    background-image:
+                      linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent),
+                      linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent),
+                      linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent),
+                      linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent);
+                    background-repeat: no-repeat;
+                    background-size:
+                      100% 2px,
+                      2px calc(100% - 28px),
+                      2px calc(100% - 28px),
+                      2px calc(100% - 28px);
+                    /* Vier gleich breite Tasten (horizontal-stack gibt
+                       jedem Kind flex:1 1 0) => Grenzen bei 25/50/75 %,
+                       minus 1px, damit der 2px-Strich mittig auf der
+                       Grenze sitzt. Vertikal 8px ueber dem unteren Rand
+                       und 8px unter dem horizontalen Strich (12px
+                       padding-top + 8px = 20px, daher 100% - 28px). */
+                    background-position:
+                      left top,
+                      left calc(25% - 1px) bottom 8px,
+                      left calc(50% - 1px) bottom 8px,
+                      left calc(75% - 1px) bottom 8px;
+                  }
             cards:
 
               - type: custom:button-card
                 template: miner_btn
                 entity: sensor.miner1_workmode_status
-                name: Power
+                name: Betrieb
                 icon: >
                   [[[
                     return entity.state === 'Standby' ? 'mdi:power-sleep' : 'mdi:power';
@@ -76,6 +172,12 @@ cards:
                           if (s === 'Standby') return 'var(--accent-color)';
                           return 'var(--disabled-color)';
                         ]]]
+                    - filter: *miner_icon_shadow
+                  name:
+                    - text-shadow: *miner_text_shadow
+                  state:
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: call-service
                   service: >
@@ -89,7 +191,7 @@ cards:
               - type: custom:button-card
                 template: miner_btn
                 entity: input_boolean.miner1_auto_load_management
-                name: Auto
+                name: Automatik
                 icon: mdi:refresh-auto
                 state_display: >
                   [[[
@@ -104,6 +206,12 @@ cards:
                           return entity.state === 'on'
                             ? 'var(--bg-color-eco)' : 'var(--disabled-color)';
                         ]]]
+                    - filter: *miner_icon_shadow
+                  name:
+                    - text-shadow: *miner_text_shadow
+                  state:
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: toggle
 
@@ -125,12 +233,18 @@ cards:
                           return entity.state === 'on'
                             ? 'var(--bg-color-standard)' : 'var(--disabled-color)';
                         ]]]
+                    - filter: *miner_icon_shadow
+                  name:
+                    - text-shadow: *miner_text_shadow
+                  state:
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: toggle
 
               - type: custom:button-card
                 template: miner_btn
-                name: Reboot
+                name: Neustart
                 icon: mdi:restart
                 show_state: false
                 styles:
@@ -138,10 +252,31 @@ cards:
                     - width: 44px
                     - height: 44px
                     - color: "var(--secondary-text-color)"
+                    - filter: *miner_icon_shadow
+                  name:
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: call-service
                   service: shell_command.miner1_reboot
 
+          # ─────────────────────────────────────────
+          # Stufen Eco/Standard/Super, 26.09.2026 auf Nutzer-Wunsch "genauso
+          # wie beim Tab Home" 1:1 an views/steuerung_quick.yaml angeglichen:
+          # drei echte button-cards, die aktive Kachel hebt sich per eigenem
+          # Hintergrund ab. Ersetzt den gleitenden "Thumb" vom 25.09.2026
+          # (eigene absolut positionierte button-card hinter den Kacheln);
+          # dessen Wrapper-Element nahm weiter am Layout teil und erzeugte den
+          # sichtbaren Spalt unter den Kacheln. Weiterhin keine Drag-Geste,
+          # nur tap_action=select.select_option (CSP schluckt inline onclick
+          # auf generiertem HTML, s. Detail-Ansicht unten).
+          # height:auto !important (26.09.2026, Nutzer-Befund "Kacheln gehen
+          # nicht bis unten, anders als im Tab Home"): HA gibt jeder Stack-
+          # Karte :host{height:100%} (hui-horizontal-stack-card.ts, frontend
+          # dev-Branch geprueft). Der hui-card-Wrapper misst diesen Container
+          # inklusive seines margin-bottom (8px), die 100% machen den
+          # Container dann selbst 8px hoeher als die 80px-Kacheln: genau der
+          # leere Streifen unten. Im Tab Home tritt das nicht auf, weil der
+          # Container dort margin:0 hat.
           - type: horizontal-stack
             card_mod:
               style: |
@@ -149,9 +284,23 @@ cards:
                   display: flex !important;
                   align-items: stretch !important;
                   background: rgba(255,255,255,0.06);
+                  /* 27.09.2026, Nutzer-Wunsch: Striche auch zwischen den
+                     Stufen. Drei gleich breite Kacheln => Grenzen bei
+                     33,333 % und 66,666 %; 8px oben/unten eingerueckt.
+                     background-image NACH der background-Kurzform, sonst
+                     setzt diese die Layer wieder auf none. */
+                  background-image:
+                    linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent),
+                    linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent);
+                  background-repeat: no-repeat;
+                  background-size: 2px calc(100% - 16px);
+                  background-position:
+                    left calc(33.333% - 1px) top 8px,
+                    left calc(66.666% - 1px) top 8px;
                   border-radius: 14px !important;
                   overflow: hidden !important;
-                  margin: 0 8px 8px;
+                  margin: 0 0 8px;
+                  height: auto !important;
                 }
             cards:
               - type: custom:button-card
@@ -172,7 +321,7 @@ cards:
                     - box-shadow: none
                     - border: none
                     - padding: 8px 4px
-                    - height: 72px
+                    - height: 80px
                     - box-sizing: border-box !important
                     - margin: "0 !important"
                   icon:
@@ -180,8 +329,11 @@ cards:
                         [[[return entity.state==='Eco'?'var(--bg-color-eco)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
-                    - font-size: 0.72rem
+                    - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Eco'?'700':'400']]]
                     - color: >
@@ -204,7 +356,7 @@ cards:
                     - box-shadow: none
                     - border: none
                     - padding: 8px 4px
-                    - height: 72px
+                    - height: 80px
                     - box-sizing: border-box !important
                     - margin: "0 !important"
                   icon:
@@ -212,8 +364,11 @@ cards:
                         [[[return entity.state==='Standard'?'var(--bg-color-standard)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
-                    - font-size: 0.72rem
+                    - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Standard'?'700':'400']]]
                     - color: >
@@ -236,7 +391,7 @@ cards:
                     - box-shadow: none
                     - border: none
                     - padding: 8px 4px
-                    - height: 72px
+                    - height: 80px
                     - box-sizing: border-box !important
                     - margin: "0 !important"
                   icon:
@@ -244,12 +399,186 @@ cards:
                         [[[return entity.state==='Super'?'var(--bg-color-super)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
-                    - font-size: 0.72rem
+                    - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Super'?'700':'400']]]
                     - color: >
                         [[[return entity.state==='Super'?'var(--primary-text-color)':'var(--secondary-text-color)']]]
+
+          # ─────────────────────────────────────────
+          # Abschnitts-Überschrift STATUS + kompaktes KPI-Panel, 25.09.2026
+          # neu (Nutzer-Vorgabe: wichtigste Kennzahlen direkt ablesbar, ohne
+          # ein Akkordeon aufklappen zu müssen). Drei Live-Werte
+          # (Temperatur-Max, Ist-Leistung, Laufzeit heute) + eine Zeile mit
+          # den drei Modus-Chips (frei/gesperrt diese Saison).
+          #
+          # Ist-Leistung nutzt bewusst sensor.miner1_cur_load (AvalonQ-eigener
+          # Wert), NICHT den Shelly-Wert (sensor.shellyplugsg3_..._leistung):
+          # dieselbe Entität, die bereits in der "Stromversorgung"-Detailliste
+          # als "Ist-Leistung:" steht (Zeile ~383) — sonst würden zwei
+          # unterschiedliche Leistungswerte an zwei Stellen derselben Karte
+          # stehen, genau die Abweichung, die ausdrücklich vermieden werden
+          # sollte.
+          #
+          # Modus-Sperre liest ausschließlich sensor.mvp_saison_status —
+          # dieselbe Entität wie bitgrid_regelschwellen_chart.js
+          # (supReachable/stdReachable) und die R3/R5-Saisonsperre in
+          # mvp_auto.yaml (ADR 030). EINE Wahrheitsquelle für "welcher Modus
+          # darf diesen Monat", keine zweite, separat gepflegte Ableitung.
+          #
+          # Seitenabstand (26.09.2026, Nutzer-Befund "rechts ausgerichtet /
+          # rechts abgeschnitten / nicht mittig"): die Status-/Details-Karten
+          # hatten margin 0 8px. button-card setzt ha-card.button-card-main
+          # {width:100%} (im Bundle verifiziert), die Karten lagen dadurch 8px
+          # nach rechts versetzt und 8px ueber dem Rand. Zwei Breiten-Overrides
+          # scheiterten live: width:auto UND width:calc(100% - 16px) liessen die
+          # Karten jeweils auf ihren Inhalt schrumpfen (vermutete Ursache:
+          # button-card legt die ha-card in ein <div id="aspect-ratio"> mit
+          # display:inline, nicht abschliessend geklaert). Loesung wie im Tab
+          # Home: die Karten behalten ihre Standardbreite und haben KEINEN
+          # seitlichen margin, den Abstand zum Kartenrand liefert padding
+          # 0 8px an der Miner-Box (:host oben).
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            styles:
+              card:
+                - background: transparent
+                - box-shadow: none
+                - border: none
+                - border-top: 1px solid rgba(255,255,255,0.08)
+                - margin: 4px 0 0
+                - padding: 10px 2px 4px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  return `<div style="font-size:1.125rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--secondary-text-color);opacity:0.65;text-shadow:0 0 2px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.85);">Status</div>`;
+                ]]]
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            styles:
+              card:
+                - background: transparent
+                - box-shadow: none
+                - border: none
+                - margin: 0 0 4px
+                - padding: 0
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  // v2 (26.09.2026): Schatten auf Schrift + Icons, TS/IS mit
+                  // denselben Werten wie &miner_text_shadow/&miner_icon_shadow
+                  // oben (text-shadow vererbt sich, darum an den Zeilen-
+                  // Containern; filter nicht, darum an jedem ha-icon).
+                  // Versionspruefung statt nur !window.bgMinerStatus: sonst
+                  // bliebe nach einem Config-Reload ohne Seiten-Reload die alte
+                  // Fassung im window aktiv.
+                  if (!window.bgMinerStatus || window.bgMinerStatus.v !== 2) {
+                    window.bgMinerStatus = function(tempMax, powerW, uptimeH, season) {
+                      const TS = 'text-shadow:0 0 2px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.85);';
+                      const IS = 'filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));';
+                      const t = parseFloat(tempMax);
+                      let tColor = 'var(--bg-color-eco)';
+                      if (!isNaN(t) && t >= 110) tColor = 'var(--bg-color-reserve)';
+                      else if (!isNaN(t) && t >= 100) tColor = 'var(--bg-color-heat)';
+                      const tText = isNaN(t) ? '—' : t.toFixed(0) + ' °C';
+
+                      const p = parseFloat(powerW);
+                      const pText = isNaN(p) ? '—' : Math.round(p).toLocaleString('de-DE') + ' W';
+
+                      const h = parseFloat(uptimeH);
+                      let upText = '—';
+                      if (!isNaN(h)) {
+                        const hh = Math.floor(h);
+                        const mm = Math.round((h - hh) * 60);
+                        upText = `${hh}h ${mm}m`;
+                      }
+
+                      const stat = (icon, value, color, label) => `
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;">
+                          <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:${color};${IS}"></ha-icon>
+                          <span style="font-size:var(--bg-fs-secondary);font-weight:700;color:var(--primary-text-color);white-space:nowrap;">${value}</span>
+                          <span style="font-size:10px;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:0.03em;white-space:nowrap;">${label}</span>
+                        </div>`;
+
+                      const statsRow = `
+                        <div style="display:flex;justify-content:space-around;padding:6px 4px 10px;${TS}">
+                          ${stat('mdi:thermometer-high', tText, tColor, 'Temp (max)')}
+                          ${stat('mdi:flash', pText, 'var(--primary-text-color)', 'Ist-Leistung')}
+                          ${stat('mdi:timer-outline', upText, 'var(--primary-text-color)', 'Laufzeit heute')}
+                        </div>`;
+
+                      const modes = [
+                        ['Eco', 'mdi:leaf', 'var(--bg-color-eco)'],
+                        ['Standard', 'mdi:gauge', 'var(--bg-color-standard)'],
+                        ['Super', 'mdi:rocket-launch', 'var(--bg-color-super)'],
+                      ];
+                      const allowed = {
+                        Eco: true,
+                        Standard: season !== 'Nur Eco',
+                        Super: season === 'Voll (Eco/Standard/Super)',
+                      };
+                      const chips = modes.map(([name, icon, color]) => {
+                        const ok = allowed[name];
+                        return `
+                          <div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:10px;background:${ok ? `color-mix(in srgb, ${color} 16%, transparent)` : 'rgba(255,255,255,0.04)'};opacity:${ok ? '1' : '0.55'};">
+                            <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${ok ? color : 'var(--secondary-text-color)'};${IS}"></ha-icon>
+                            <span style="font-size:11px;font-weight:600;color:${ok ? 'var(--primary-text-color)' : 'var(--secondary-text-color)'};">${name}</span>
+                            <ha-icon icon="${ok ? 'mdi:check' : 'mdi:lock'}" style="--mdc-icon-size:12px;color:${ok ? color : 'var(--secondary-text-color)'};${IS}"></ha-icon>
+                          </div>`;
+                      }).join('');
+
+                      const chipsRow = `
+                        <div style="display:flex;justify-content:center;gap:6px;padding:0 4px 8px;flex-wrap:wrap;${TS}">
+                          ${chips}
+                        </div>`;
+
+                      return statsRow + chipsRow;
+                    };
+                    window.bgMinerStatus.v = 2;
+                  }
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  return window.bgMinerStatus(
+                    g('sensor.miner1_tmax'),
+                    g('sensor.miner1_cur_load'),
+                    // Lab-Replay (17.10.2026): Laufzeit des abgespielten Tages aus dem
+                    // Profil (abgeschlossene 10-min-Bloecke mit Stufe > 0 bis zum
+                    // aktuellen Block). Prod hat kein lab_sim_profile: history_stats.
+                    (() => {
+                      const prof = states['input_boolean.simulation_mode']?.state === 'on' ? states['sensor.lab_sim_profile'] : null;
+                      const steps = prof?.attributes?.steps;
+                      const i = parseInt(states['input_number.sim_step']?.state, 10);
+                      if (!Array.isArray(steps) || isNaN(i)) return g('sensor.miner1_uptime_today_h');
+                      let blocks = 0;
+                      for (let k = 0; k < i && k < steps.length; k++) if (steps[k][12] > 0) blocks++;
+                      return blocks / 6;
+                    })(),
+                    g('sensor.mvp_saison_status')
+                  );
+                ]]]
 
           # ─────────────────────────────────────────
           # Abschnitts-Überschrift vor den Detail-Listen
@@ -264,7 +593,7 @@ cards:
                 - box-shadow: none
                 - border: none
                 - border-top: 1px solid rgba(255,255,255,0.08)
-                - margin: 4px 8px 0
+                - margin: 4px 0 0
                 - padding: 10px 2px 4px
               grid:
                 - grid-template-areas: '"body"'
@@ -277,7 +606,7 @@ cards:
             custom_fields:
               body: >
                 [[[
-                  return `<div style="font-size:var(--bg-fs-label);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--secondary-text-color);opacity:0.65;">Details</div>`;
+                  return `<div style="font-size:1.125rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--secondary-text-color);opacity:0.65;text-shadow:0 0 2px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.85);">Komponenten</div>`;
                 ]]]
 
           # ─────────────────────────────────────────
@@ -314,7 +643,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -327,8 +656,18 @@ cards:
             custom_fields:
               body: >
                 [[[
-                  if (!window.bgMinerDetail) {
+                  // v2 (26.09.2026): Schatten auf Schrift + Icons (TS/IS, s.
+                  // window.bgMinerStatus oben), Versionspruefung aus demselben
+                  // Grund. ok: true = OK (gruener Haken), false = echte
+                  // Stoerung (rotes Ausrufezeichen), Objekt {icon,color,title}
+                  // = neutraler Status (Log: aktive Regel, keine Stoerung).
+                  if (!window.bgMinerDetail || window.bgMinerDetail.v !== 2) {
                     window.bgMinerDetail = function(icon, title, ok, open, rows) {
+                      const TS = 'text-shadow:0 0 2px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.85);';
+                      const IS = 'filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));';
+                      const st = ok === true ? {icon: 'mdi:check-circle', color: 'var(--bg-color-eco)', title: 'OK'}
+                        : ok === false ? {icon: 'mdi:alert-circle', color: 'var(--bg-color-reserve)', title: 'Störung'}
+                        : ok;
                       const rowHtml = rows.map((row) => {
                         const [ic, label, val, col] = row;
                         if (ic === 'text') {
@@ -336,20 +675,21 @@ cards:
                         }
                         return `
                         <div style="display:flex;align-items:center;padding:4px 2px;">
-                          <ha-icon icon="${ic}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;margin-right:8px;"></ha-icon>
+                          <ha-icon icon="${ic}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;margin-right:8px;${IS}"></ha-icon>
                           <span style="flex:1;color:var(--secondary-text-color);font-size:var(--bg-fs-secondary);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
                           <span style="font-size:var(--bg-fs-secondary);font-weight:600;text-align:right;white-space:nowrap;padding-left:8px;color:${col || 'var(--primary-text-color)'};">${val}</span>
                         </div>`;
                       }).join('');
                       return `
-                        <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;">
-                          <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;"></ha-icon>
+                        <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;${TS}">
+                          <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;${IS}"></ha-icon>
                           <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bg-fs-body);font-weight:700;color:var(--secondary-text-color);text-align:left;">${title}</span>
-                          <ha-icon icon="${ok ? 'mdi:check-circle' : 'mdi:alert-circle'}" style="--mdc-icon-size:18px;color:${ok ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'};margin-right:6px;flex-shrink:0;"></ha-icon>
-                          <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                          <ha-icon icon="${st.icon}" title="${st.title}" style="--mdc-icon-size:18px;color:${st.color};margin-right:6px;flex-shrink:0;${IS}"></ha-icon>
+                          <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;${IS}"></ha-icon>
                         </div>
-                        ${open ? `<div style="padding:0 2px 8px;">${rowHtml}</div>` : ''}`;
+                        ${open ? `<div style="padding:0 2px 8px;${TS}">${rowHtml}</div>` : ''}`;
                     };
+                    window.bgMinerDetail.v = 2;
                   }
                   const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
                   const num = (id, d) => { const v = parseFloat(g(id)); return v===null||isNaN(v) ? '—' : v.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d}); };
@@ -377,7 +717,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -423,7 +763,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -475,7 +815,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -514,7 +854,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -565,7 +905,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -580,7 +920,19 @@ cards:
                 [[[
                   const open = entity.state === 'on';
                   const rule = states['input_text.mvp_miner1_rule']?.state ?? '';
-                  const ok = !['R1 Stopp', 'R2 Temp-Sperre'].includes(rule);
+                  // 26.09.2026, Nutzer-Befund "Fehler im Log ist kein richtiger
+                  // Fehler": R1 (Hausreserve) und R2 (Temperatur-Sperre) sind
+                  // regulaere, deterministische Regel-Ergebnisse (mvp_auto.yaml),
+                  // keine Stoerung. Statt rotem Ausrufezeichen ein neutraler
+                  // Status in denselben Farben wie der Rest der Karte: Pause in
+                  // Amber wie "Betrieb: Standby", Thermometer in Heat wie das
+                  // Ueberhitzungs-Badge im Header. Rot bleibt echten technischen
+                  // Stoerungen vorbehalten (die anderen fuenf Listen).
+                  const ok = rule === 'R1 Stopp'
+                    ? {icon: 'mdi:pause-circle', color: 'var(--accent-color)', title: 'R1 Hausreserve: Miner pausiert, Akku lädt'}
+                    : rule === 'R2 Temp-Sperre'
+                      ? {icon: 'mdi:thermometer-alert', color: 'var(--bg-color-heat)', title: 'R2 Temperatur-Sperre'}
+                      : true;
                   const entries = (states['sensor.miner_1_log']?.attributes?.entries || []).slice().reverse();
                   const rows = entries.length ? entries.map((e) => `
                     <div style="display:flex;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
@@ -619,33 +971,112 @@ cards:
             :host {
               display: block;
               background: var(--ha-card-background) !important;
-              border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color) !important;
+              border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3) !important;
               border-radius: 20px !important;
-              box-shadow: var(--ha-card-box-shadow) !important;
+              /* box-shadow aus dem Theme, s. Kommentar bei Miner 1 oben. */
+              box-shadow: var(--bgai-card-shadow-v3) !important;
               overflow: hidden !important;
               contain: paint !important;
               min-width: 0 !important;
+              /* 26.09.2026: seitlicher Innenabstand hier an der Miner-Box
+                 statt als margin 0 8px an jeder inneren button-card (Muster
+                 wie Tab Home, views/steuerung_quick.yaml padding). Grund s.
+                 Kommentar beim STATUS-Abschnitt. */
+              padding: 0 8px !important;
             }
         cards:
 
           - type: custom:button-card
             template: miner_header
             entity: binary_sensor.miner2_available
-            name: "Miner Avalon Q 02  ›"
+            name: "Miner #2"
             icon: mdi:memory
             styles:
               card:
                 - background: transparent
                 - box-shadow: none
                 - border: none
+              # 16.09.2026, Nutzer-Wunsch "Name und Position von Home
+              # uebernehmen": identisches Muster wie views/steuerung_quick.yaml.
+              # Die Vorlage hat '"n health status i"' mit "n" als einziger
+              # 1fr-Spalte VOR den drei Icon-Spalten — zentrieren innerhalb von
+              # "n" zentriert also nur links der Icons. Eine leere spacer-Spalte
+              # links, etwa so breit wie die Icon-Spalten rechts, macht "n"
+              # symmetrisch zur echten Kartenmitte.
+              grid:
+                - grid-template-areas: '"spacer n health status i"'
+                - grid-template-columns: 50px 1fr auto auto auto
+              # Titelgroesse + Schatten wie Miner 1 (Anker s. dort).
+              icon:
+                - filter: *miner_icon_shadow
+              name:
+                - text-align: center
+                - justify-self: center
+                - font-size: 1.25rem
+                - text-shadow: *miner_text_shadow
+                - overflow: visible
+              custom_fields:
+                health:
+                  - overflow: visible
+                  - filter: "drop-shadow(0 0 1px rgba(0,0,0,0.6))"
+                status:
+                  - overflow: visible
+                  - filter: "drop-shadow(0 0 1px rgba(0,0,0,0.6))"
 
           - type: horizontal-stack
+            # 27.09.2026, Nutzer-Wunsch "Linien wie im Tab Home":
+            # horizontaler Divider unter der Ueberschrift + vertikale
+            # Striche zwischen den Tasten. Traeger ist #root des
+            # horizontal-stacks, exakt wie in views/steuerung_quick.yaml
+            # (dort 12.09.2026 live ausgehandelt): #root hat keinen von
+            # www/bitgrid_card_shape.js erzwungenen Radius, die Linien
+            # rendern deshalb garantiert gerade statt entlang gerundeter
+            # Button-Ecken. Einziger Unterschied zum Home-Tab: dort
+            # zeichnen ::before/::after die zwei vertikalen Striche, hier
+            # sind DREI noetig (vier Tasten statt drei) — zwei Pseudo-
+            # Elemente reichen dafuer nicht, darum alle vier Linien als
+            # Mehrfach-Background-Layer. Verlauf statt echtem border,
+            # weil ein border keine ausgefadeten Enden kann (gleiches
+            # Muster wie ueberall sonst im Tab).
+            card_mod:
+              # ".": |-Punktform (nicht der einfache style: |-String):
+              # vertical-/horizontal-stack-card ist in card-mod ein
+              # Sonderfall, nur so greifen Regeln auf #root. Gleiche
+              # Stelle, gleiche Begruendung wie in steuerung_quick.yaml.
+              style:
+                ".": |
+                  #root {
+                    position: relative;
+                    padding-top: 12px;
+                    background-image:
+                      linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent),
+                      linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent),
+                      linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent),
+                      linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent);
+                    background-repeat: no-repeat;
+                    background-size:
+                      100% 2px,
+                      2px calc(100% - 28px),
+                      2px calc(100% - 28px),
+                      2px calc(100% - 28px);
+                    /* Vier gleich breite Tasten (horizontal-stack gibt
+                       jedem Kind flex:1 1 0) => Grenzen bei 25/50/75 %,
+                       minus 1px, damit der 2px-Strich mittig auf der
+                       Grenze sitzt. Vertikal 8px ueber dem unteren Rand
+                       und 8px unter dem horizontalen Strich (12px
+                       padding-top + 8px = 20px, daher 100% - 28px). */
+                    background-position:
+                      left top,
+                      left calc(25% - 1px) bottom 8px,
+                      left calc(50% - 1px) bottom 8px,
+                      left calc(75% - 1px) bottom 8px;
+                  }
             cards:
 
               - type: custom:button-card
                 template: miner_btn
                 entity: sensor.miner2_workmode_status
-                name: Power
+                name: Betrieb
                 icon: >
                   [[[
                     return entity.state === 'Standby' ? 'mdi:power-sleep' : 'mdi:power';
@@ -668,6 +1099,12 @@ cards:
                           if (s === 'Standby') return 'var(--accent-color)';
                           return 'var(--disabled-color)';
                         ]]]
+                    - filter: *miner_icon_shadow
+                  name:
+                    - text-shadow: *miner_text_shadow
+                  state:
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: call-service
                   service: >
@@ -681,7 +1118,7 @@ cards:
               - type: custom:button-card
                 template: miner_btn
                 entity: input_boolean.miner2_auto_load_management
-                name: Auto
+                name: Automatik
                 icon: mdi:refresh-auto
                 state_display: >
                   [[[
@@ -696,6 +1133,12 @@ cards:
                           return entity.state === 'on'
                             ? 'var(--bg-color-eco)' : 'var(--disabled-color)';
                         ]]]
+                    - filter: *miner_icon_shadow
+                  name:
+                    - text-shadow: *miner_text_shadow
+                  state:
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: toggle
 
@@ -717,12 +1160,18 @@ cards:
                           return entity.state === 'on'
                             ? 'var(--bg-color-standard)' : 'var(--disabled-color)';
                         ]]]
+                    - filter: *miner_icon_shadow
+                  name:
+                    - text-shadow: *miner_text_shadow
+                  state:
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: toggle
 
               - type: custom:button-card
                 template: miner_btn
-                name: Reboot
+                name: Neustart
                 icon: mdi:restart
                 show_state: false
                 styles:
@@ -730,10 +1179,17 @@ cards:
                     - width: 44px
                     - height: 44px
                     - color: "var(--secondary-text-color)"
+                    - filter: *miner_icon_shadow
+                  name:
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: call-service
                   service: shell_command.miner2_reboot
 
+          # ─────────────────────────────────────────
+          # Stufen Eco/Standard/Super — identisch zu Miner 1 (Home-Struktur,
+          # inkl. height:auto gegen den 8px-Streifen), s. dortiger Kommentar.
+          # ─────────────────────────────────────────
           - type: horizontal-stack
             card_mod:
               style: |
@@ -741,9 +1197,23 @@ cards:
                   display: flex !important;
                   align-items: stretch !important;
                   background: rgba(255,255,255,0.06);
+                  /* 27.09.2026, Nutzer-Wunsch: Striche auch zwischen den
+                     Stufen. Drei gleich breite Kacheln => Grenzen bei
+                     33,333 % und 66,666 %; 8px oben/unten eingerueckt.
+                     background-image NACH der background-Kurzform, sonst
+                     setzt diese die Layer wieder auf none. */
+                  background-image:
+                    linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent),
+                    linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent);
+                  background-repeat: no-repeat;
+                  background-size: 2px calc(100% - 16px);
+                  background-position:
+                    left calc(33.333% - 1px) top 8px,
+                    left calc(66.666% - 1px) top 8px;
                   border-radius: 14px !important;
                   overflow: hidden !important;
-                  margin: 0 8px 8px;
+                  margin: 0 0 8px;
+                  height: auto !important;
                 }
             cards:
               - type: custom:button-card
@@ -764,7 +1234,7 @@ cards:
                     - box-shadow: none
                     - border: none
                     - padding: 8px 4px
-                    - height: 72px
+                    - height: 80px
                     - box-sizing: border-box !important
                     - margin: "0 !important"
                   icon:
@@ -772,8 +1242,11 @@ cards:
                         [[[return entity.state==='Eco'?'var(--bg-color-eco)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
-                    - font-size: 0.72rem
+                    - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Eco'?'700':'400']]]
                     - color: >
@@ -796,7 +1269,7 @@ cards:
                     - box-shadow: none
                     - border: none
                     - padding: 8px 4px
-                    - height: 72px
+                    - height: 80px
                     - box-sizing: border-box !important
                     - margin: "0 !important"
                   icon:
@@ -804,8 +1277,11 @@ cards:
                         [[[return entity.state==='Standard'?'var(--bg-color-standard)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
-                    - font-size: 0.72rem
+                    - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Standard'?'700':'400']]]
                     - color: >
@@ -828,7 +1304,7 @@ cards:
                     - box-shadow: none
                     - border: none
                     - padding: 8px 4px
-                    - height: 72px
+                    - height: 80px
                     - box-sizing: border-box !important
                     - margin: "0 !important"
                   icon:
@@ -836,12 +1312,86 @@ cards:
                         [[[return entity.state==='Super'?'var(--bg-color-super)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
-                    - font-size: 0.72rem
+                    - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Super'?'700':'400']]]
                     - color: >
                         [[[return entity.state==='Super'?'var(--primary-text-color)':'var(--secondary-text-color)']]]
+
+          # ─────────────────────────────────────────
+          # Abschnitts-Überschrift STATUS + KPI-Panel — identisch zu Miner 1,
+          # window.bgMinerStatus ist dort definiert, hier nur genutzt.
+          # ─────────────────────────────────────────
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            styles:
+              card:
+                - background: transparent
+                - box-shadow: none
+                - border: none
+                - border-top: 1px solid rgba(255,255,255,0.08)
+                - margin: 4px 0 0
+                - padding: 10px 2px 4px
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  return `<div style="font-size:1.125rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--secondary-text-color);opacity:0.65;text-shadow:0 0 2px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.85);">Status</div>`;
+                ]]]
+          - type: custom:button-card
+            show_name: false
+            show_icon: false
+            show_state: false
+            styles:
+              card:
+                - background: transparent
+                - box-shadow: none
+                - border: none
+                - margin: 0 0 4px
+                - padding: 0
+              grid:
+                - grid-template-areas: '"body"'
+                - grid-template-columns: 1fr
+              custom_fields:
+                body:
+                  - width: 100%
+                  - justify-self: stretch
+                  - box-sizing: border-box
+            custom_fields:
+              body: >
+                [[[
+                  const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
+                  return window.bgMinerStatus(
+                    g('sensor.miner2_tmax'),
+                    g('sensor.miner2_cur_load'),
+                    // Lab-Replay (17.10.2026): Laufzeit des abgespielten Tages aus dem
+                    // Profil (abgeschlossene 10-min-Bloecke mit Stufe > 0 bis zum
+                    // aktuellen Block). Prod hat kein lab_sim_profile: history_stats.
+                    (() => {
+                      const prof = states['input_boolean.simulation_mode']?.state === 'on' ? states['sensor.lab_sim_profile'] : null;
+                      const steps = prof?.attributes?.steps;
+                      const i = parseInt(states['input_number.sim_step']?.state, 10);
+                      if (!Array.isArray(steps) || isNaN(i)) return g('sensor.miner2_uptime_today_h');
+                      let blocks = 0;
+                      for (let k = 0; k < i && k < steps.length; k++) if (steps[k][13] > 0) blocks++;
+                      return blocks / 6;
+                    })(),
+                    g('sensor.mvp_saison_status')
+                  );
+                ]]]
 
           # ─────────────────────────────────────────
           # Abschnitts-Überschrift vor den Detail-Listen
@@ -856,7 +1406,7 @@ cards:
                 - box-shadow: none
                 - border: none
                 - border-top: 1px solid rgba(255,255,255,0.08)
-                - margin: 4px 8px 0
+                - margin: 4px 0 0
                 - padding: 10px 2px 4px
               grid:
                 - grid-template-areas: '"body"'
@@ -869,7 +1419,7 @@ cards:
             custom_fields:
               body: >
                 [[[
-                  return `<div style="font-size:var(--bg-fs-label);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--secondary-text-color);opacity:0.65;">Details</div>`;
+                  return `<div style="font-size:1.125rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--secondary-text-color);opacity:0.65;text-shadow:0 0 2px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.85);">Komponenten</div>`;
                 ]]]
 
           # ─────────────────────────────────────────
@@ -890,7 +1440,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -903,8 +1453,18 @@ cards:
             custom_fields:
               body: >
                 [[[
-                  if (!window.bgMinerDetail) {
+                  // v2 (26.09.2026): Schatten auf Schrift + Icons (TS/IS, s.
+                  // window.bgMinerStatus oben), Versionspruefung aus demselben
+                  // Grund. ok: true = OK (gruener Haken), false = echte
+                  // Stoerung (rotes Ausrufezeichen), Objekt {icon,color,title}
+                  // = neutraler Status (Log: aktive Regel, keine Stoerung).
+                  if (!window.bgMinerDetail || window.bgMinerDetail.v !== 2) {
                     window.bgMinerDetail = function(icon, title, ok, open, rows) {
+                      const TS = 'text-shadow:0 0 2px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.85);';
+                      const IS = 'filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));';
+                      const st = ok === true ? {icon: 'mdi:check-circle', color: 'var(--bg-color-eco)', title: 'OK'}
+                        : ok === false ? {icon: 'mdi:alert-circle', color: 'var(--bg-color-reserve)', title: 'Störung'}
+                        : ok;
                       const rowHtml = rows.map((row) => {
                         const [ic, label, val, col] = row;
                         if (ic === 'text') {
@@ -912,20 +1472,21 @@ cards:
                         }
                         return `
                         <div style="display:flex;align-items:center;padding:4px 2px;">
-                          <ha-icon icon="${ic}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;margin-right:8px;"></ha-icon>
+                          <ha-icon icon="${ic}" style="--mdc-icon-size:16px;color:var(--secondary-text-color);flex-shrink:0;margin-right:8px;${IS}"></ha-icon>
                           <span style="flex:1;color:var(--secondary-text-color);font-size:var(--bg-fs-secondary);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
                           <span style="font-size:var(--bg-fs-secondary);font-weight:600;text-align:right;white-space:nowrap;padding-left:8px;color:${col || 'var(--primary-text-color)'};">${val}</span>
                         </div>`;
                       }).join('');
                       return `
-                        <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;">
-                          <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;"></ha-icon>
+                        <div style="display:flex;align-items:center;padding:10px 6px 10px 2px;cursor:pointer;${TS}">
+                          <ha-icon icon="${icon}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);margin-right:10px;flex-shrink:0;${IS}"></ha-icon>
                           <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--bg-fs-body);font-weight:700;color:var(--secondary-text-color);text-align:left;">${title}</span>
-                          <ha-icon icon="${ok ? 'mdi:check-circle' : 'mdi:alert-circle'}" style="--mdc-icon-size:18px;color:${ok ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'};margin-right:6px;flex-shrink:0;"></ha-icon>
-                          <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;"></ha-icon>
+                          <ha-icon icon="${st.icon}" title="${st.title}" style="--mdc-icon-size:18px;color:${st.color};margin-right:6px;flex-shrink:0;${IS}"></ha-icon>
+                          <ha-icon icon="${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}" style="--mdc-icon-size:20px;color:var(--secondary-text-color);flex-shrink:0;${IS}"></ha-icon>
                         </div>
-                        ${open ? `<div style="padding:0 2px 8px;">${rowHtml}</div>` : ''}`;
+                        ${open ? `<div style="padding:0 2px 8px;${TS}">${rowHtml}</div>` : ''}`;
                     };
+                    window.bgMinerDetail.v = 2;
                   }
                   const g = (id) => { const s = states[id]?.state; return (s===undefined||s==='unknown'||s==='unavailable') ? null : s; };
                   const num = (id, d) => { const v = parseFloat(g(id)); return v===null||isNaN(v) ? '—' : v.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d}); };
@@ -953,7 +1514,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -999,7 +1560,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -1051,7 +1612,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -1090,7 +1651,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -1138,7 +1699,7 @@ cards:
                 - border: none
                 - border-radius: 14px
                 - overflow: hidden
-                - margin: 0 8px 6px
+                - margin: 0 0 6px
                 - padding: 2px 12px
               grid:
                 - grid-template-areas: '"body"'
@@ -1153,7 +1714,12 @@ cards:
                 [[[
                   const open = entity.state === 'on';
                   const rule = states['input_text.mvp_miner2_rule']?.state ?? '';
-                  const ok = !['R1 Stopp', 'R2 Temp-Sperre'].includes(rule);
+                  // Neutraler Regel-Status statt Stoerung, s. Log bei Miner 1.
+                  const ok = rule === 'R1 Stopp'
+                    ? {icon: 'mdi:pause-circle', color: 'var(--accent-color)', title: 'R1 Hausreserve: Miner pausiert, Akku lädt'}
+                    : rule === 'R2 Temp-Sperre'
+                      ? {icon: 'mdi:thermometer-alert', color: 'var(--bg-color-heat)', title: 'R2 Temperatur-Sperre'}
+                      : true;
                   const entries = (states['sensor.miner_2_log']?.attributes?.entries || []).slice().reverse();
                   const rows = entries.length ? entries.map((e) => `
                     <div style="display:flex;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.06);">

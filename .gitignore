@@ -29,6 +29,7 @@ src/ha/config/www/garage_floorplan/
 # Generierte Dashboard-Datenexporte (regenerierbar via btc_price_history.py /
 # energy_to_sats_export.py, kein Quellcode)
 src/ha/config/www/btc_price_eur.json
+src/ha/config/www/btc_price_full.json
 src/ha/config/www/energy_to_sats.json
 
 # BitGridAI — Laufzeit-Daten (nie einchecken)
@@ -384,5 +385,9 @@ recordings/
 *.csv
 reports/
 scripts/deploy_ha_paramiko.py
+scripts/deploy_ha_lab.py
 temp_data
 .github/copilot-instructions.md
+
+# Lab-only Pakete (Demo-Simulation, nicht Teil des Prod-Produkts)
+src/ha/lab_only/

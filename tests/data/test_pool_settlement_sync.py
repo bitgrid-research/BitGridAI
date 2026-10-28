@@ -386,3 +386,95 @@ def test_sync_no_data_returns_zero(db_conn, monkeypatch):
 
     added, skipped = sync(db_conn, "http://ha.local:8123", "tok", date(2026, 8, 1))
     assert (added, skipped) == (0, 0)
+
+
+# ---------------------------------------------------------------------------
+# Fallback-Nullwerte / Primaer ersetzt Fallback (Fix 26.09.2026)
+# ---------------------------------------------------------------------------
+
+
+def _primary_payload(day_after: tuple[int, int, int], amount: str) -> dict:
+    import datetime as dt
+
+    settled = dt.datetime(*day_after, 2, 0, 0, tzinfo=timezone.utc)
+    return _state_payload(
+        "1",
+        {
+            "transactions": [
+                {
+                    "amount": amount,
+                    "mining_extra": {
+                        "hash_rate": 30e12,
+                        "mining_date": settled.timestamp(),
+                    },
+                }
+            ]
+        },
+    )
+
+
+def test_sync_skips_zero_fallback_value(db_conn, monkeypatch):
+    # Live-Fall 25.09.2026: Tag protokolliert, bevor F2Pool abgerechnet hatte.
+    _mock_urlopen(
+        monkeypatch,
+        {
+            "sensor.pool_settlement_history": _state_payload("0", {"transactions": []}),
+            "input_text.pool_btc_daily_log": _state_payload(
+                "2026-09-24,0.00000279|2026-09-25,0.0"
+            ),
+            "input_text.pool_ths_daily_log": _state_payload(""),
+            "sensor.btc_eur_price": _state_payload("73658"),
+        },
+    )
+
+    added, _ = sync(db_conn, "http://ha.local:8123", "tok", date(2026, 9, 1))
+    assert added == 1
+    days = [r[0] for r in db_conn.execute("SELECT day FROM bitcoin_daily_settlement")]
+    assert days == ["2026-09-24"]
+
+
+def test_sync_primary_replaces_existing_fallback_row(db_conn, monkeypatch):
+    responses = {
+        "sensor.pool_settlement_history": _state_payload("0", {"transactions": []}),
+        "input_text.pool_btc_daily_log": _state_payload("2026-09-25,0.00001"),
+        "input_text.pool_ths_daily_log": _state_payload(""),
+        "sensor.btc_eur_price": _state_payload("73658"),
+    }
+    _mock_urlopen(monkeypatch, responses)
+    sync(db_conn, "http://ha.local:8123", "tok", date(2026, 9, 1))
+
+    responses["sensor.pool_settlement_history"] = _primary_payload(
+        (2026, 9, 26), "0.00001568"
+    )
+    _mock_urlopen(monkeypatch, responses)
+    added, skipped = sync(db_conn, "http://ha.local:8123", "tok", date(2026, 9, 1))
+    assert (added, skipped) == (1, 0)
+
+    row = db_conn.execute(
+        "SELECT earned_btc, source FROM bitcoin_daily_settlement WHERE day = '2026-09-25'"
+    ).fetchone()
+    assert row == (0.00001568, "ha:pool_settlement_history")
+
+
+def test_sync_never_overwrites_primary_row(db_conn, monkeypatch):
+    responses = {
+        "sensor.pool_settlement_history": _primary_payload((2026, 9, 26), "0.00001568"),
+        "input_text.pool_btc_daily_log": _state_payload(""),
+        "input_text.pool_ths_daily_log": _state_payload(""),
+        "sensor.btc_eur_price": _state_payload("73658"),
+    }
+    _mock_urlopen(monkeypatch, responses)
+    sync(db_conn, "http://ha.local:8123", "tok", date(2026, 9, 1))
+
+    # Spaeterer Lauf: F2Pool liefert fuer denselben Tag einen anderen Betrag.
+    responses["sensor.pool_settlement_history"] = _primary_payload(
+        (2026, 9, 26), "0.00009999"
+    )
+    _mock_urlopen(monkeypatch, responses)
+    added, skipped = sync(db_conn, "http://ha.local:8123", "tok", date(2026, 9, 1))
+    assert (added, skipped) == (0, 1)
+
+    row = db_conn.execute(
+        "SELECT earned_btc FROM bitcoin_daily_settlement WHERE day = '2026-09-25'"
+    ).fetchone()
+    assert row == (0.00001568,)

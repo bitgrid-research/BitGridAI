@@ -21,13 +21,7 @@
 # (durch das groessere Padding/Gap bereits vergroesserten) Hoehe, wie vor
 # diesem Versuch.
 # ═══════════════════════════════════════════════════════════════════════
-# zoom-Kommentar s. bitgrid_dashboard_v3.yaml, Hamster-Karte (Home-Tab).
 type: horizontal-stack
-card_mod:
-  style: |
-    :host {
-      zoom: calc(min(1, calc(100vh / 1200px)) * 0.90) !important;
-    }
 cards:
 
       # ─────────────────────────────────────────────
@@ -53,9 +47,9 @@ cards:
               flex-direction: column !important;
               gap: 16px !important;
               background: var(--ha-card-background) !important;
-              border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color) !important;
+              border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3) !important;
               border-radius: 20px !important;
-              box-shadow: var(--ha-card-box-shadow) !important;
+              box-shadow: var(--bgai-card-shadow-v3) !important;
               overflow: hidden !important;
               contain: paint !important;
               padding: 8px 14px 14px 14px !important;
@@ -67,54 +61,177 @@ cards:
             # Schrift groesser, nur diese Quick-Action-Karte (Nutzer-Wunsch
             # 02.09.2026): miner_header/miner_btn sind geteilte Templates
             # (button_card_templates.yaml, auch von v1 genutzt), darum hier
-            # lokal per card_mod statt am Template selbst — v1 bleibt
+            # lokal ueber styles: statt am Template selbst — v1 bleibt
             # unveraendert. Feste Card-Hoehe (Template: 56px) mit erhoeht,
             # sonst schneidet die groessere Schrift oben/unten ab. Diese
             # Zeile ist NICHT an Finanzen gestretcht (align-self:start, s.
             # bitgrid_dashboard_v3.yaml g3l), darum kein Ueberlauf-Risiko wie
             # bei Hamster/Wetter.
-            card_mod:
-              style: |
-                .name {
-                  font-size: 1.5rem !important;
-                }
-                ha-card {
-                  height: 68px !important;
-                }
+            # 26.09.2026, Nutzer-Befund "Schatten fehlt" (Schrift + Icons der
+            # ganzen Miner-Karte): die Icons referenzierten --bgai-header-
+            # icon-halo-v3, das seit 16.09.2026 (themes/bitgrid.yaml) ein
+            # bewusster NO-OP ist, die Schrift nur den schwachen globalen
+            # Halo. Nutzer-Entscheidung nach mehreren Runden: KEINE Outline
+            # (weder -webkit-text-stroke noch SVG-Stroke), NUR Schatten, und
+            # zwar 1:1 wie in der Energiefluss-Karte (bitgrid_dashboard_v3.
+            # yaml, PFCP-:host, dort am 12.09.2026 ausgehandelt). Beide Werte
+            # stehen genau EINMAL hier als YAML-Anker (&miner_text_shadow,
+            # &miner_icon_shadow) und werden in allen Miner-Buttons dieser
+            # Datei per Alias (*...) wiederverwendet. Bewusst ueber styles:
+            # (button-cards eigener, live bestaetigter Weg) statt ueber einen
+            # :host-Variablen-Override am Stack, der die Vererbung bis in
+            # jede Button-Karte voraussetzen wuerde.
             entity: binary_sensor.miner1_available
-            name: "Miner Avalon Q 01  ›"
+            name: "Miner #1"
             icon: mdi:memory
             styles:
               card:
                 - background: transparent
                 - box-shadow: none
                 - border: none
+                # 12.09.2026: Divider unter dem Header per border-bottom hier
+                # versucht + wieder entfernt (gleiche gerundete-Enden-Ursache
+                # wie bei Power/Auto/Reboot, s. Kommentar am Pseudo-Element-
+                # Divider unten bei den Button-Reihen) — lebt jetzt als
+                # border-top auf #root des Power/Auto/Reboot-horizontal-
+                # stacks direkt darunter, unabhaengig von diesem Buttons
+                # eigenem Radius.
                 - padding: 0
+                - height: 68px
+              # 12.09.2026, Nutzer-Wunsch "Name groesser + mittig": das
+              # gleichnamige card_mod-Override (text-align/justify-self)
+              # zeigte im Live-Test keine Wirkung — button-cards eigener
+              # styles:-Mechanismus (dieselbe Stelle, an der Template und
+              # Instanz gemergt werden) ist der zuverlaessige Weg, genau wie
+              # bei den Eco/Standard/Super-Buttons bereits erprobt. Danach
+              # Nutzer-Praezisierung "ueber den Autobutton zentrieren": die
+              # Vorlage hat grid-template-areas '"n health status i"' mit
+              # "n" (Name) als einzige 1fr-Spalte VOR den drei Icon-Spalten —
+              # Zentrieren innerhalb von "n" zentriert also nur im Bereich
+              # LINKS der Icons, nicht ueber die volle Kartenbreite (wo Auto
+              # als mittlerer von drei Buttons sitzt). Fix: eine leere
+              # "spacer"-Spalte links, ungefaehr so breit wie die drei Icon-
+              # Spalten rechts zusammen (~90px geschaetzt, kein Messwert) —
+              # macht "n" wieder symmetrisch zur echten Kartenmitte.
+              grid:
+                - grid-template-areas: '"spacer n health status i"'
+                - grid-template-columns: 50px 1fr auto auto auto
+              # button-card haengt Instanz-Arrays an die Template-Arrays an
+              # (concat, im Bundle verifiziert), spaetere Eintraege gewinnen
+              # je Property — hier reicht darum der eine filter-Eintrag, Farbe/
+              # Groesse kommen weiter aus dem miner_header-Template.
+              icon:
+                - filter: &miner_icon_shadow "drop-shadow(0 0 1.5px rgba(0,0,0,.75))"
+              name:
+                - text-align: center
+                - justify-self: center
+                # 26.09.2026, Nutzer-Korrektur: 1.75rem wirkte im Live-Test
+                # zu gross ("Ueberschrift wurde groesser gemacht"), bleibt
+                # bei 1.25rem.
+                - font-size: 1.25rem
+                - text-shadow: &miner_text_shadow "0 0 2px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.85)"
+                # 12.09.2026, Nutzer-Befund "Schatten links abgeschnitten":
+                # dieselbe Ursache wie bei den Status-Badges direkt darunter —
+                # die "n"-Grid-Spalte clippt den Schatten, wenn der Text
+                # breiter als die berechnete Spaltenbreite ist.
+                - overflow: visible
+              # 12.09.2026, Nutzer-Befund "Schatten an den Boxen abgeschnitten":
+              # dieselbe Ursache wie beim Karten-Box-Shadow weiter oben in
+              # dieser Datei — ein Eltern-Wrapper mit overflow:hidden clippt
+              # den drop-shadow-Filter eines Kindes. Hier direkt overflow:
+              # visible auf den Badge-Wrapper selbst erzwungen.
+              custom_fields:
+                health:
+                  - overflow: visible
+                  # 12.09.2026, Nutzer-Wunsch "etwas zu stark, weniger
+                  # Schatten": eigener, leichterer Wert nur fuer diese
+                  # kleinen Badges statt des globalen icon-halo-Tokens.
+                  - filter: "drop-shadow(0 0 1px rgba(0,0,0,0.6))"
+                status:
+                  - overflow: visible
+                  - filter: "drop-shadow(0 0 1px rgba(0,0,0,0.6))"
+                  # 12.09.2026, Nutzer-Befund "rechts abgeschnitten": diese
+                  # Karte hat styles.card.padding:0 (Instanz ueberschreibt das
+                  # Template), also keinen Puffer zum Kartenrand — status ist
+                  # das Element am naechsten dran. Statt das knapp bemessene
+                  # Gesamt-Padding zu erhoehen (Hoehe/Layout andernorts
+                  # abgestimmt), nur hier ein kleiner Rand.
+                  - margin-right: 8px
 
           - type: horizontal-stack
             card_mod:
-              style: |
-                :host {
-                  margin: 0 !important;
-                }
+              # 12.09.2026, Nutzer-Wunsch "Divider zwischen Power/Auto/Reboot,
+              # aber ein Strich und keine Border auf den Buttons selbst":
+              # border-left auf den Button-Karten (versucht + wieder
+              # entfernt) verlief immer entlang von deren eigenem, von
+              # bitgrid_card_shape.js erzwungenem border-radius, dadurch die
+              # gerundeten Enden. Unabhaengige Linie stattdessen, exakt
+              # dasselbe Pseudo-Element-Muster wie beim Wetter-Uhr-Divider
+              # (bitgrid_dashboard_v3.yaml, clock-weather-card-today::before)
+              # — auf #root des horizontal-stacks selbst, komplett losgeloest
+              # vom Radius/Box-Model der einzelnen Buttons. ".": |-Punktform
+              # noetig (nicht der einfache style:|-String), s. Begruendung
+              # beim Wetter-Merge weiter oben in diesem Projekt: vertical-/
+              # horizontal-stack-card gilt in card-mod als Sonderfall.
+              style:
+                ".": |
+                  :host {
+                    margin: 0 !important;
+                  }
+                  #root {
+                    position: relative;
+                    /* Horizontaler Divider (12.09.2026): border-top statt am
+                       Miner-Header selbst (dort gleiche gerundete-Enden-
+                       Ursache wie bei den vertikalen Strichen) — #root hier
+                       hat keinen von shape.js erzwungenen Radius (nur
+                       BUTTON-CARD steht in dessen SHAPED_CARDS-Set, nicht
+                       HUI-HORIZONTAL-STACK-CARD), daher rendert die Linie
+                       garantiert gerade. Ausgefadet (Nutzer-Wunsch, gleiches
+                       Muster wie ueberall sonst im Tab): border-top kann
+                       keinen Verlauf haben, daher Gradient-Hintergrund statt
+                       echtem Rahmen. */
+                    background-image: linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent);
+                    background-repeat: no-repeat;
+                    background-size: 100% 2px;
+                    background-position: top;
+                    padding-top: 12px;
+                  }
+                  #root::before,
+                  #root::after {
+                    content: "";
+                    position: absolute;
+                    top: 8px;
+                    bottom: 8px;
+                    width: 2px;
+                    background: linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent);
+                  }
+                  #root::before {
+                    left: 33.333%;
+                  }
+                  #root::after {
+                    left: 66.666%;
+                  }
             cards:
 
               - type: custom:button-card
                 template: miner_btn
                 # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
-                card_mod:
-                  style: |
-                    .name {
-                      font-size: 1.125rem !important;
-                    }
-                    .state {
-                      font-size: 1rem !important;
-                    }
-                    ha-card {
-                      height: 122px !important;
-                    }
+                # 12.09.2026, Nutzer-Befund "Schatten fehlt komplett": das
+                # card_mod-basierte text-shadow/filter unten (jetzt entfernt)
+                # zeigte im Live-Test keine Wirkung — genau wie beim Miner-
+                # Header ist button-cards eigener styles:-Mechanismus (s.
+                # unten bei icon:/name:/state:) der zuverlaessige Weg.
+                # 26.09.2026: nur Schatten, keine Outline (Nutzer-Entscheidung),
+                # Werte per Alias aus den Ankern am Miner-#1-Header (s. dort).
+                # Hoehe/Radius stehen jetzt in styles.card statt im frueheren
+                # card_mod-ha-card-Block. button-card haengt Instanz-Arrays an
+                # die Template-Arrays an (concat, im Bundle verifiziert),
+                # darum reichen hier die zwei abweichenden Werte, der Rest
+                # (background/border/padding) kommt weiter aus dem miner_btn-
+                # Template. Den 0-Radius erzwingt ohnehin bitgrid_card_shape.js
+                # per Namens-Erkennung (isSquareMinerBtn).
                 entity: sensor.miner1_workmode_status
-                name: Power
+                name: Betrieb
                 icon: >
                   [[[
                     return entity.state === 'Standby' ? 'mdi:power-sleep' : 'mdi:power';
@@ -127,9 +244,14 @@ cards:
                     return 'Aus';
                   ]]]
                 styles:
+                  card:
+                    - border-radius: 0
+                    - height: 122px
                   icon:
                     - width: 76px
                     - height: 76px
+                    - overflow: visible
+                    - filter: *miner_icon_shadow
                     - color: >
                         [[[
                           const s = entity.state;
@@ -137,6 +259,14 @@ cards:
                           if (s === 'Standby') return 'var(--accent-color)';
                           return 'var(--disabled-color)';
                         ]]]
+                  name:
+                    - font-size: 1.125rem
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
+                  state:
+                    - font-size: 1rem
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: call-service
                   service: >
@@ -150,58 +280,71 @@ cards:
               - type: custom:button-card
                 template: miner_btn
                 # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
-                card_mod:
-                  style: |
-                    .name {
-                      font-size: 1.125rem !important;
-                    }
-                    .state {
-                      font-size: 1rem !important;
-                    }
-                    ha-card {
-                      height: 122px !important;
-                    }
+                # 12.09.2026, Nutzer-Befund "Schatten fehlt komplett": das
+                # card_mod-basierte text-shadow/filter unten (jetzt entfernt)
+                # zeigte im Live-Test keine Wirkung — genau wie beim Miner-
+                # Header ist button-cards eigener styles:-Mechanismus (s.
+                # unten bei icon:/name:/state:) der zuverlaessige Weg.
+                # 26.09.2026, Schatten-Fix: s. Betrieb-Button oben fuer die
+                # volle Begruendung (Outline zurueckgebaut auf nur Schatten).
                 entity: input_boolean.miner1_auto_load_management
-                name: Auto
+                name: Automatik
                 icon: mdi:refresh-auto
                 state_display: >
                   [[[
                     return entity.state === 'on' ? 'Ein' : 'Aus';
                   ]]]
                 styles:
+                  card:
+                    - border-radius: 0
+                    - height: 122px
                   icon:
                     - width: 76px
                     - height: 76px
+                    - overflow: visible
+                    - filter: *miner_icon_shadow
                     - color: >
                         [[[
                           return entity.state === 'on'
                             ? 'var(--bg-color-eco)' : 'var(--disabled-color)';
                         ]]]
+                  name:
+                    - font-size: 1.125rem
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
+                  state:
+                    - font-size: 1rem
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: toggle
 
               - type: custom:button-card
                 template: miner_btn
                 # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
-                card_mod:
-                  style: |
-                    .name {
-                      font-size: 1.125rem !important;
-                    }
-                    .state {
-                      font-size: 1rem !important;
-                    }
-                    ha-card {
-                      height: 122px !important;
-                    }
-                name: Reboot
+                # 12.09.2026, Nutzer-Befund "Schatten fehlt komplett": das
+                # card_mod-basierte text-shadow/filter unten (jetzt entfernt)
+                # zeigte im Live-Test keine Wirkung — genau wie beim Miner-
+                # Header ist button-cards eigener styles:-Mechanismus (s.
+                # unten bei icon:/name:/state:) der zuverlaessige Weg.
+                # 26.09.2026, Schatten-Fix: s. Betrieb-Button oben fuer die
+                # volle Begruendung (Outline zurueckgebaut auf nur Schatten).
+                name: Neustart
                 icon: mdi:restart
                 show_state: false
                 styles:
+                  card:
+                    - border-radius: 0
+                    - height: 122px
                   icon:
                     - width: 44px
                     - height: 44px
+                    - overflow: visible
+                    - filter: *miner_icon_shadow
                     - color: "var(--secondary-text-color)"
+                  name:
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: call-service
                   service: shell_command.miner1_reboot
@@ -223,6 +366,9 @@ cards:
                 name: Eco
                 icon: mdi:leaf
                 show_state: false
+                # 26.09.2026, Nutzer-Korrektur: Outline (SVG-Stroke am Icon,
+                # Text-Stroke) war live zu viel — zurueckgebaut auf nur
+                # Schatten. Kein card_mod mehr noetig.
                 tap_action:
                   action: call-service
                   service: select.select_option
@@ -244,8 +390,15 @@ cards:
                         [[[return entity.state==='Eco'?'var(--bg-color-eco)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
                     - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    # 12.09.2026, Nutzer-Befund "links/rechts abgeschnitten":
+                    # gleiche Ursache wie beim Miner-Header-Namen — die
+                    # name-Zelle clippt den Schatten, wenn der Text breiter
+                    # als die Zelle ist.
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Eco'?'700':'400']]]
                     - color: >
@@ -255,6 +408,8 @@ cards:
                 name: Standard
                 icon: mdi:gauge
                 show_state: false
+                # 26.09.2026, Schatten-Fix: s. Eco-Button oben fuer die
+                # volle Begruendung.
                 tap_action:
                   action: call-service
                   service: select.select_option
@@ -276,8 +431,15 @@ cards:
                         [[[return entity.state==='Standard'?'var(--bg-color-standard)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
                     - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    # 12.09.2026, Nutzer-Befund "links/rechts abgeschnitten":
+                    # gleiche Ursache wie beim Miner-Header-Namen — die
+                    # name-Zelle clippt den Schatten, wenn der Text breiter
+                    # als die Zelle ist.
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Standard'?'700':'400']]]
                     - color: >
@@ -287,6 +449,8 @@ cards:
                 name: Super
                 icon: mdi:rocket-launch
                 show_state: false
+                # 26.09.2026, Schatten-Fix: s. Eco-Button oben fuer die
+                # volle Begruendung.
                 tap_action:
                   action: call-service
                   service: select.select_option
@@ -308,8 +472,15 @@ cards:
                         [[[return entity.state==='Super'?'var(--bg-color-super)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
                     - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    # 12.09.2026, Nutzer-Befund "links/rechts abgeschnitten":
+                    # gleiche Ursache wie beim Miner-Header-Namen — die
+                    # name-Zelle clippt den Schatten, wenn der Text breiter
+                    # als die Zelle ist.
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Super'?'700':'400']]]
                     - color: >
@@ -345,9 +516,9 @@ cards:
               flex-direction: column !important;
               gap: 16px !important;
               background: var(--ha-card-background) !important;
-              border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color) !important;
+              border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3) !important;
               border-radius: 20px !important;
-              box-shadow: var(--ha-card-box-shadow) !important;
+              box-shadow: var(--bgai-card-shadow-v3) !important;
               overflow: hidden !important;
               contain: paint !important;
               padding: 8px 14px 14px 14px !important;
@@ -365,48 +536,131 @@ cards:
             # Zeile ist NICHT an Finanzen gestretcht (align-self:start, s.
             # bitgrid_dashboard_v3.yaml g3l), darum kein Ueberlauf-Risiko wie
             # bei Hamster/Wetter.
-            card_mod:
-              style: |
-                .name {
-                  font-size: 1.5rem !important;
-                }
-                ha-card {
-                  height: 68px !important;
-                }
+            # 26.09.2026, nur Schatten (keine Outline), Werte per Alias aus
+            # den Ankern am Miner-#1-Header, s. dort fuer die Begruendung.
             entity: binary_sensor.miner2_available
-            name: "Miner Avalon Q 02  ›"
+            name: "Miner #2"
             icon: mdi:memory
             styles:
               card:
                 - background: transparent
                 - box-shadow: none
                 - border: none
+                # 12.09.2026: Divider unter dem Header per border-bottom hier
+                # versucht + wieder entfernt (gleiche gerundete-Enden-Ursache
+                # wie bei Power/Auto/Reboot, s. Kommentar am Pseudo-Element-
+                # Divider unten bei den Button-Reihen) — lebt jetzt als
+                # border-top auf #root des Power/Auto/Reboot-horizontal-
+                # stacks direkt darunter, unabhaengig von diesem Buttons
+                # eigenem Radius.
                 - padding: 0
+                - height: 68px
+              grid:
+                - grid-template-areas: '"spacer n health status i"'
+                - grid-template-columns: 50px 1fr auto auto auto
+              icon:
+                - filter: *miner_icon_shadow
+              name:
+                - text-align: center
+                - justify-self: center
+                - font-size: 1.25rem
+                - text-shadow: *miner_text_shadow
+                # 12.09.2026, Nutzer-Befund "Schatten links abgeschnitten":
+                # dieselbe Ursache wie bei den Status-Badges direkt darunter —
+                # die "n"-Grid-Spalte clippt den Schatten, wenn der Text
+                # breiter als die berechnete Spaltenbreite ist.
+                - overflow: visible
+              # 12.09.2026, Nutzer-Befund "Schatten an den Boxen abgeschnitten":
+              # dieselbe Ursache wie beim Karten-Box-Shadow weiter oben in
+              # dieser Datei — ein Eltern-Wrapper mit overflow:hidden clippt
+              # den drop-shadow-Filter eines Kindes. Hier direkt overflow:
+              # visible auf den Badge-Wrapper selbst erzwungen.
+              custom_fields:
+                health:
+                  - overflow: visible
+                  # 12.09.2026, Nutzer-Wunsch "etwas zu stark, weniger
+                  # Schatten": eigener, leichterer Wert nur fuer diese
+                  # kleinen Badges statt des globalen icon-halo-Tokens.
+                  - filter: "drop-shadow(0 0 1px rgba(0,0,0,0.6))"
+                status:
+                  - overflow: visible
+                  - filter: "drop-shadow(0 0 1px rgba(0,0,0,0.6))"
+                  # 12.09.2026, Nutzer-Befund "rechts abgeschnitten": diese
+                  # Karte hat styles.card.padding:0 (Instanz ueberschreibt das
+                  # Template), also keinen Puffer zum Kartenrand — status ist
+                  # das Element am naechsten dran. Statt das knapp bemessene
+                  # Gesamt-Padding zu erhoehen (Hoehe/Layout andernorts
+                  # abgestimmt), nur hier ein kleiner Rand.
+                  - margin-right: 8px
 
           - type: horizontal-stack
             card_mod:
-              style: |
-                :host {
-                  margin: 0 !important;
-                }
+              # 12.09.2026, Nutzer-Wunsch "Divider zwischen Power/Auto/Reboot,
+              # aber ein Strich und keine Border auf den Buttons selbst":
+              # border-left auf den Button-Karten (versucht + wieder
+              # entfernt) verlief immer entlang von deren eigenem, von
+              # bitgrid_card_shape.js erzwungenem border-radius, dadurch die
+              # gerundeten Enden. Unabhaengige Linie stattdessen, exakt
+              # dasselbe Pseudo-Element-Muster wie beim Wetter-Uhr-Divider
+              # (bitgrid_dashboard_v3.yaml, clock-weather-card-today::before)
+              # — auf #root des horizontal-stacks selbst, komplett losgeloest
+              # vom Radius/Box-Model der einzelnen Buttons. ".": |-Punktform
+              # noetig (nicht der einfache style:|-String), s. Begruendung
+              # beim Wetter-Merge weiter oben in diesem Projekt: vertical-/
+              # horizontal-stack-card gilt in card-mod als Sonderfall.
+              style:
+                ".": |
+                  :host {
+                    margin: 0 !important;
+                  }
+                  #root {
+                    position: relative;
+                    /* Horizontaler Divider (12.09.2026): border-top statt am
+                       Miner-Header selbst (dort gleiche gerundete-Enden-
+                       Ursache wie bei den vertikalen Strichen) — #root hier
+                       hat keinen von shape.js erzwungenen Radius (nur
+                       BUTTON-CARD steht in dessen SHAPED_CARDS-Set, nicht
+                       HUI-HORIZONTAL-STACK-CARD), daher rendert die Linie
+                       garantiert gerade. Ausgefadet (Nutzer-Wunsch, gleiches
+                       Muster wie ueberall sonst im Tab): border-top kann
+                       keinen Verlauf haben, daher Gradient-Hintergrund statt
+                       echtem Rahmen. */
+                    background-image: linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent);
+                    background-repeat: no-repeat;
+                    background-size: 100% 2px;
+                    background-position: top;
+                    padding-top: 12px;
+                  }
+                  #root::before,
+                  #root::after {
+                    content: "";
+                    position: absolute;
+                    top: 8px;
+                    bottom: 8px;
+                    width: 2px;
+                    background: linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent);
+                  }
+                  #root::before {
+                    left: 33.333%;
+                  }
+                  #root::after {
+                    left: 66.666%;
+                  }
             cards:
 
               - type: custom:button-card
                 template: miner_btn
                 # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
-                card_mod:
-                  style: |
-                    .name {
-                      font-size: 1.125rem !important;
-                    }
-                    .state {
-                      font-size: 1rem !important;
-                    }
-                    ha-card {
-                      height: 122px !important;
-                    }
+                # 12.09.2026, Nutzer-Befund "Schatten fehlt komplett": das
+                # card_mod-basierte text-shadow/filter unten (jetzt entfernt)
+                # zeigte im Live-Test keine Wirkung — genau wie beim Miner-
+                # Header ist button-cards eigener styles:-Mechanismus (s.
+                # unten bei icon:/name:/state:) der zuverlaessige Weg.
+                # 26.09.2026, Schatten-Fix: s. Betrieb-Button (Miner 1) oben
+                # fuer die volle Begruendung (Outline zurueckgebaut auf nur
+                # Schatten, kein card_mod mehr noetig).
                 entity: sensor.miner2_workmode_status
-                name: Power
+                name: Betrieb
                 icon: >
                   [[[
                     return entity.state === 'Standby' ? 'mdi:power-sleep' : 'mdi:power';
@@ -419,9 +673,14 @@ cards:
                     return 'Aus';
                   ]]]
                 styles:
+                  card:
+                    - border-radius: 0
+                    - height: 122px
                   icon:
                     - width: 76px
                     - height: 76px
+                    - overflow: visible
+                    - filter: *miner_icon_shadow
                     - color: >
                         [[[
                           const s = entity.state;
@@ -429,6 +688,14 @@ cards:
                           if (s === 'Standby') return 'var(--accent-color)';
                           return 'var(--disabled-color)';
                         ]]]
+                  name:
+                    - font-size: 1.125rem
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
+                  state:
+                    - font-size: 1rem
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: call-service
                   service: >
@@ -442,58 +709,71 @@ cards:
               - type: custom:button-card
                 template: miner_btn
                 # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
-                card_mod:
-                  style: |
-                    .name {
-                      font-size: 1.125rem !important;
-                    }
-                    .state {
-                      font-size: 1rem !important;
-                    }
-                    ha-card {
-                      height: 122px !important;
-                    }
+                # 12.09.2026, Nutzer-Befund "Schatten fehlt komplett": das
+                # card_mod-basierte text-shadow/filter unten (jetzt entfernt)
+                # zeigte im Live-Test keine Wirkung — genau wie beim Miner-
+                # Header ist button-cards eigener styles:-Mechanismus (s.
+                # unten bei icon:/name:/state:) der zuverlaessige Weg.
+                # 26.09.2026, Schatten-Fix: s. Betrieb-Button (Miner 1) oben
+                # fuer die volle Begruendung.
                 entity: input_boolean.miner2_auto_load_management
-                name: Auto
+                name: Automatik
                 icon: mdi:refresh-auto
                 state_display: >
                   [[[
                     return entity.state === 'on' ? 'Ein' : 'Aus';
                   ]]]
                 styles:
+                  card:
+                    - border-radius: 0
+                    - height: 122px
                   icon:
                     - width: 76px
                     - height: 76px
+                    - overflow: visible
+                    - filter: *miner_icon_shadow
                     - color: >
                         [[[
                           return entity.state === 'on'
                             ? 'var(--bg-color-eco)' : 'var(--disabled-color)';
                         ]]]
+                  name:
+                    - font-size: 1.125rem
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
+                  state:
+                    - font-size: 1rem
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: toggle
 
               - type: custom:button-card
                 template: miner_btn
                 # Schrift groesser, gleicher Vorbehalt wie miner_header oben.
-                card_mod:
-                  style: |
-                    .name {
-                      font-size: 1.125rem !important;
-                    }
-                    .state {
-                      font-size: 1rem !important;
-                    }
-                    ha-card {
-                      height: 122px !important;
-                    }
-                name: Reboot
+                # 12.09.2026, Nutzer-Befund "Schatten fehlt komplett": das
+                # card_mod-basierte text-shadow/filter unten (jetzt entfernt)
+                # zeigte im Live-Test keine Wirkung — genau wie beim Miner-
+                # Header ist button-cards eigener styles:-Mechanismus (s.
+                # unten bei icon:/name:/state:) der zuverlaessige Weg.
+                # 26.09.2026, Schatten-Fix: s. Betrieb-Button (Miner 1) oben
+                # fuer die volle Begruendung.
+                name: Neustart
                 icon: mdi:restart
                 show_state: false
                 styles:
+                  card:
+                    - border-radius: 0
+                    - height: 122px
                   icon:
                     - width: 44px
                     - height: 44px
+                    - overflow: visible
+                    - filter: *miner_icon_shadow
                     - color: "var(--secondary-text-color)"
+                  name:
+                    - overflow: visible
+                    - text-shadow: *miner_text_shadow
                 tap_action:
                   action: call-service
                   service: shell_command.miner2_reboot
@@ -515,6 +795,8 @@ cards:
                 name: Eco
                 icon: mdi:leaf
                 show_state: false
+                # 26.09.2026, Schatten-Fix: s. Eco-Button (Miner 1) oben fuer
+                # die volle Begruendung.
                 tap_action:
                   action: call-service
                   service: select.select_option
@@ -536,8 +818,15 @@ cards:
                         [[[return entity.state==='Eco'?'var(--bg-color-eco)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
                     - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    # 12.09.2026, Nutzer-Befund "links/rechts abgeschnitten":
+                    # gleiche Ursache wie beim Miner-Header-Namen — die
+                    # name-Zelle clippt den Schatten, wenn der Text breiter
+                    # als die Zelle ist.
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Eco'?'700':'400']]]
                     - color: >
@@ -547,6 +836,8 @@ cards:
                 name: Standard
                 icon: mdi:gauge
                 show_state: false
+                # 26.09.2026, Schatten-Fix: s. Eco-Button (Miner 1) oben fuer
+                # die volle Begruendung.
                 tap_action:
                   action: call-service
                   service: select.select_option
@@ -568,8 +859,15 @@ cards:
                         [[[return entity.state==='Standard'?'var(--bg-color-standard)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
                     - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    # 12.09.2026, Nutzer-Befund "links/rechts abgeschnitten":
+                    # gleiche Ursache wie beim Miner-Header-Namen — die
+                    # name-Zelle clippt den Schatten, wenn der Text breiter
+                    # als die Zelle ist.
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Standard'?'700':'400']]]
                     - color: >
@@ -579,6 +877,8 @@ cards:
                 name: Super
                 icon: mdi:rocket-launch
                 show_state: false
+                # 26.09.2026, Schatten-Fix: s. Eco-Button (Miner 1) oben fuer
+                # die volle Begruendung.
                 tap_action:
                   action: call-service
                   service: select.select_option
@@ -600,8 +900,15 @@ cards:
                         [[[return entity.state==='Super'?'var(--bg-color-super)':'rgba(255,255,255,0.3)']]]
                     - width: 24px
                     - height: 24px
+                    - filter: *miner_icon_shadow
                   name:
                     - font-size: 1.125rem
+                    - text-shadow: *miner_text_shadow
+                    # 12.09.2026, Nutzer-Befund "links/rechts abgeschnitten":
+                    # gleiche Ursache wie beim Miner-Header-Namen — die
+                    # name-Zelle clippt den Schatten, wenn der Text breiter
+                    # als die Zelle ist.
+                    - overflow: visible
                     - font-weight: >
                         [[[return entity.state==='Super'?'700':'400']]]
                     - color: >

@@ -13,7 +13,9 @@ tap_action:
   action: toggle
 styles:
   card:
-    - background: rgba(255,255,255,0.045)
+    # 16.09.2026: war 4,5 % Weiss. Das las sich auf dem frueheren dunklen
+    # Grund wie eine Karte, auf der Grastextur ist es schlicht durchsichtig.
+    - background: var(--ha-card-background)
     - border-radius: 14px
     - padding: 6px 14px
   grid:

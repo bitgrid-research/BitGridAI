@@ -147,7 +147,7 @@ cards:
           const dayStart  = parseFloat(states['input_number.btc_eur_day_start']?.state) || 0;
 
           const fmtSats = (btc) => Math.round(btc * 1e8).toLocaleString('de-DE');
-          const fmtThs  = (v) => v > 0 ? v.toFixed(1) + ' TH/s' : '—';
+          const fmtThs  = (v) => v > 0 ? v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' TH/s' : '—';
 
           const thsDeltaPct = (yestThs > 0 && liveThs > 0) ? ((liveThs - yestThs) / yestThs * 100) : null;
           const thsDeltaStr = thsDeltaPct === null ? ''
@@ -162,7 +162,7 @@ cards:
           const priceColor = priceDeltaPct === null ? 'var(--secondary-text-color)'
             : priceDeltaPct >= 0 ? '#4CAF50' : '#ef5350';
           const priceDeltaStr = priceDeltaPct === null ? ''
-            : (priceDeltaPct >= 0 ? ' (+' : ' (') + priceDeltaPct.toFixed(1) + '% heute)';
+            : (priceDeltaPct >= 0 ? ' (+' : ' (') + priceDeltaPct.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '% heute)';
 
           const row = (icon, label, val, iconColor) =>
             `<div style="display:flex;align-items:center;padding:3px 0;gap:6px;width:100%;">
@@ -177,12 +177,12 @@ cards:
               <ha-icon icon="mdi:pickaxe" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
               <span style="font-size:0.88rem;font-weight:700;">F2Pool Live</span>
             </div>
-            ${row('mdi:wallet-outline', 'Balance', balBtc.toFixed(8) + ' BTC', '#F7931A')}
+            ${row('mdi:wallet-outline', 'Balance', balBtc.toLocaleString('de-DE', {minimumFractionDigits: 8, maximumFractionDigits: 8}) + ' BTC', '#F7931A')}
             ${row('mdi:bitcoin', 'Sats heute', fmtSats(earnedBtc) + ' sats', '#F7931A')}
             ${row('mdi:server-network', 'Worker aktiv', workers, 'var(--secondary-text-color)')}
             ${sep()}
             ${row('mdi:speedometer', 'Hashrate (1h)', fmtThs(liveThs) + thsDeltaStr, thsDeltaColor)}
-            ${row('mdi:alert-circle-outline', 'Stale-Rate', isNaN(stalePct) ? '—' : stalePct.toFixed(2) + ' %', staleColor)}
+            ${row('mdi:alert-circle-outline', 'Stale-Rate', isNaN(stalePct) ? '—' : stalePct.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' %', staleColor)}
             ${sep()}
             ${row('mdi:currency-eur', 'BTC/EUR', btcEur > 0 ? btcEur.toLocaleString('de-DE') + ' €' + priceDeltaStr : '—', priceColor)}
           </div>`;

@@ -37,10 +37,10 @@ tap_action:
 styles:
   card:
     - background: var(--ha-card-background)
-    - border-radius: var(--ha-card-border-radius)
+    - border-radius: var(--bgai-card-radius-v3)
     - overflow: hidden
-    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
-    - box-shadow: var(--ha-card-box-shadow)
+    - border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3)
+    - box-shadow: var(--bgai-card-shadow-v3)
     - padding: 14px 18px
   grid:
     - grid-template-areas: '"chart"'

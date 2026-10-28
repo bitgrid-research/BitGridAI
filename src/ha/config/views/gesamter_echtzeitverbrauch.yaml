@@ -10,6 +10,13 @@
 # alles. max: 6000 W (2× Avalon Q Super ≈ 3350 W + Haus-Spitzenlast) — keine
 # belegte Schwelle für "normal"/"hoch", der Verlauf ist rein dekorativ wie
 # im Referenzbild, keine Aussage über Betriebszustände.
+# 26.09.2026, gegen HA-History geprueft (27.08.-26.09.2026, 44.794 Zustands-
+# wechsel, nicht zeitgewichtet): Median 719 W, p99 4.424 W, p99,9 5.875 W,
+# Maximum 8.716 W (28.08.2026 mittags, Hauslast, nicht Miner). 6000 W liegt
+# damit knapp ueber p99,9 und bleibt als feste Skala: eine dynamische Skala
+# wuerde die Nadelposition zwischen Tagen unvergleichbar machen. Werte ueber
+# max kappen NUR die Nadel, die Zahl zeigt seit diesem Datum den echten Wert
+# (vorher wurde auch die Zahl auf 6.000 W abgeschnitten).
 # Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:button-card
@@ -20,12 +27,17 @@ tap_action:
   action: none
 styles:
   card:
-    - background: var(--ha-card-background)
-    - border-radius: var(--ha-card-border-radius)
+    # 27.09.2026, Nutzer-Wunsch "aus zwei Karten eine machen": eigener
+    # Kartenrahmen entfaellt, den zeichnet jetzt der umgebende vertical-stack
+    # in bitgrid_dashboard_v3.yaml (gemeinsame Karte mit der Geraetetyp-Liste).
+    - background: none
+    - border-radius: 0
     - overflow: hidden
-    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
-    - box-shadow: var(--ha-card-box-shadow)
-    - padding: 16px 12px
+    - border: none
+    - box-shadow: none
+    # 27.09.2026, Nutzer-Wunsch "Karte etwas flacher": Innenabstand oben/
+    # unten von 16 auf 11px.
+    - padding: 11px 12px
   grid:
     - grid-template-areas: '"body"'
     - grid-template-columns: 1fr
@@ -45,6 +57,12 @@ custom_fields:
       const frac = (val - min) / (max - min);
 
       const W = 340, H = 210, cx = 170, cy = 190, R = 140, sw = 22;
+      // 27.09.2026, Nutzer-Wunsch "Karte etwas flacher": ueber dem Bogen stand
+      // leerer Raum. Der Bogen beginnt bei y = cy - R - sw/2 = 39, die viewBox
+      // aber bei 0. TOP schneidet diesen leeren Streifen weg (5px Rest als
+      // Luft), ohne den Tacho selbst zu verkleinern: Seitenverhaeltnis 340:176
+      // statt 340:210, bei 480px Breite sind das 249px statt 296px Hoehe.
+      const TOP = 34;
       const toRad = (deg) => (deg - 180) * Math.PI / 180;
       // t: 0 (min, links) .. 1 (max, rechts), Bogen ueber die Oberseite
       const angleFor = (t) => 180 - t * 180;
@@ -57,11 +75,14 @@ custom_fields:
       // Nutzer-Wunsch: an die Modusfarben aus der Steuerung angleichen, statt
       // dekorativ gruen/gelb/orange/rot). Werte = --bg-color-eco/-standard/
       // -super aus themes/bitgrid.yaml, als RGB fuer die Interpolation.
+      // 26.09.2026, Nutzer-Wunsch: zurueck auf Gruen -> Gelb -> Rot. Gruen =
+      // --bg-color-eco #4CAF50, Rot = --bg-color-reserve #EF5350, Gelb #FDD835
+      // (kein Gelb-Token im Theme; --bg-color-pv #EFB73C wirkt neben Rot orange).
       // Anfangs- und Endfarbe je einmal dupliziert (31.08.2026, Nutzer-
       // Feedback "Cyan zu dominant"): haelt Gruen/Orange an den Enden 25%
       // lang flach, komprimiert beide Uebergaenge auf die mittleren 50%
       // statt ueber die volle Bogenlaenge zu verschmieren.
-      const stops = [[76,175,80], [76,175,80], [38,198,218], [247,147,26], [247,147,26]];
+      const stops = [[76,175,80], [76,175,80], [253,216,53], [239,83,80], [239,83,80]];
       const colorAt = (t) => {
         const n = stops.length - 1;
         const seg = Math.min(n - 1, Math.floor(t * n));
@@ -96,19 +117,19 @@ custom_fields:
       const needle = `<line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="rgba(255,255,255,0.92)" stroke-width="4" stroke-linecap="round"/>
                        <circle cx="${cx}" cy="${cy}" r="8" fill="rgba(255,255,255,0.92)" stroke="var(--ha-card-background,#1c1c1c)" stroke-width="2"/>`;
 
-      const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:visible">
+      const svg = `<svg viewBox="0 ${TOP} ${W} ${H - TOP}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:visible">
         ${arcs}${ticks}${needle}
         <text x="${cx - R + sw / 2}" y="${cy + 18}" fill="rgba(255,255,255,0.5)" font-size="10" font-family="Roboto,sans-serif" text-anchor="middle">${min}</text>
         <text x="${cx + R - sw / 2}" y="${cy + 18}" fill="rgba(255,255,255,0.5)" font-size="10" font-family="Roboto,sans-serif" text-anchor="middle">${max}</text>
       </svg>`;
 
-      const valStr = known ? Math.round(val).toLocaleString('de-DE') : '—';
+      const valStr = known ? Math.round(raw).toLocaleString('de-DE') : '—';
 
       return `<div style="display:flex;flex-direction:column;align-items:center;width:100%">
-        <div style="font-size:1rem;font-weight:700;color:var(--primary-text-color);margin-bottom:10px;text-align:center;">Gesamter Echtzeitverbrauch</div>
-        ${svg}
-        <div style="margin-top:-8px;font-size:1.9rem;font-weight:800;color:var(--primary-text-color);line-height:1;">
-          ${valStr}<span style="font-size:0.95rem;font-weight:600;color:var(--secondary-text-color);margin-left:4px;">W</span>
+        <div style="font-size:1.25rem;font-weight:700;color:var(--primary-text-color);margin-bottom:8px;text-align:center;">Gesamter Echtzeitverbrauch</div>
+        <div style="width:100%;max-width:480px;">${svg}</div>
+        <div style="margin-top:-4px;font-size:2.4rem;font-weight:800;color:var(--primary-text-color);line-height:1;">
+          ${valStr}<span style="font-size:1.15rem;font-weight:600;color:var(--secondary-text-color);margin-left:5px;">W</span>
         </div>
       </div>`;
     ]]]

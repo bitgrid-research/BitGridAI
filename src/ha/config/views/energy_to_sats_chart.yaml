@@ -1,0 +1,15 @@
+# ═══════════════════════════════════════════════════════════════════════
+# EFFIZIENZ — dynamischer Energy-to-Sats-Balkenchart (Woche/Monat-Paging),
+# eigenstaendiges Custom-Element (custom:bitgrid-bar-trend-chart,
+# www/bitgrid_bar_trend_chart.js) statt des bisherigen statischen Inline-SVGs
+# in stats_energy_to_sats.yaml.
+#
+# Gleiches Hausmuster wie views/btc_kurs_chart.yaml/regelschwellen_chart.yaml:
+# reines Custom-Element, kein button-card-Wrapper. Design/Stil s.
+# Kommentarkopf der JS-Datei. stats_energy_to_sats.yaml bleibt unbenutzt im
+# Repo liegen (gleiche Praxis wie stats_retro_vergleich.yaml).
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "BitcoinInfo".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:bitgrid-bar-trend-chart
+mode: efficiency

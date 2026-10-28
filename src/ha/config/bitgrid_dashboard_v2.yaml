@@ -360,7 +360,7 @@ views:
                         </style>
                         <div style="display:flex;flex-direction:column;height:100%;width:100%">
                           <div style="display:flex;gap:24px;align-items:center">
-                            <img src="/local/${img}?v=20260625"
+                            <img src="/local/${img}?v=20260912"
                                  style="width:24%;max-width:135px;aspect-ratio:1;border-radius:50%;flex-shrink:0;
                                         object-fit:cover;border:2px solid var(--divider-color)">
                             <div style="flex:1;min-width:0">
@@ -388,14 +388,14 @@ views:
                     # Neutrales Glas, identisch zu Wetter/Horizont: alle Werte
                     # aus dem Theme (ha-card-*), kein Modus-Tint mehr.
                     - background: var(--ha-card-background)
-                    - border-radius: var(--ha-card-border-radius)
+                    - border-radius: var(--bgai-card-radius-v3)
                     # Der sichtbare Radius wird (wie bei den anderen Karten) hart
                     # von www/bitgrid_card_shape.js erzwungen (BUTTON-CARD im Set);
                     # styles.card border-radius allein greift hier nicht sichtbar.
                     # overflow:hidden clippt zusaetzlich den Inhalt auf den Radius.
                     - overflow: hidden
-                    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
-                    - box-shadow: var(--ha-card-box-shadow)
+                    - border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3)
+                    - box-shadow: var(--bgai-card-shadow-v3)
                     - padding: 20px
                   grid:
                     - grid-template-areas: '"hamster"'
@@ -692,9 +692,9 @@ views:
                   style: |
                     :host {
                       background: var(--ha-card-background) !important;
-                      border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color) !important;
+                      border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3) !important;
                       border-radius: 20px !important;
-                      box-shadow: var(--ha-card-box-shadow) !important;
+                      box-shadow: var(--bgai-card-shadow-v3) !important;
                       overflow: hidden !important;
                       contain: paint !important;
                     }

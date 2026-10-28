@@ -24,7 +24,21 @@
 #
 # Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
 # ═══════════════════════════════════════════════════════════════════════
-type: horizontal-stack
+# 16.09.2026, Nutzer-Befund "STUNDEN abgeschnitten": vorher type:
+# horizontal-stack. Der verteilt seinen Platz zu gleichen Teilen (flex:1 1 0),
+# die Titelzelle bekam also ein Drittel und schnitt den Text ab. Zwei Versuche,
+# das per card_mod auf #root zu korrigieren, blieben wirkungslos (live
+# nachgemessen: das echte Flex-Item ist das button-card eine Ebene unter der
+# hui-card, die display:contents ist, und die Regel kam dort nicht an).
+# Jetzt custom:layout-card mit festen Spalten: Pfeile auf Inhaltsbreite, Titel
+# bekommt den Rest. layout-card ist ohnehin Projekt-Standard fuer Raster.
+type: custom:layout-card
+layout_type: custom:grid-layout
+layout:
+  grid-template-columns: auto minmax(0, 1fr) auto
+  align-items: center
+  grid-gap: 0px
+  padding: 0px
 cards:
   - type: custom:button-card
     icon: mdi:chevron-left
@@ -43,7 +57,8 @@ cards:
         - border: none
         - flex: "0 0 auto"
       icon:
-        - color: var(--secondary-text-color)
+        - color: var(--bgai-section-label-v3)
+        - filter: var(--bgai-header-icon-halo-v3)
         - width: 32px
         - height: 32px
 
@@ -59,7 +74,13 @@ cards:
         - background: none
         - box-shadow: none
         - border: none
-        - padding: 4px 4px 0
+        # 27.09.2026, Nutzer-Befund "Pfeile und Text sind nicht ausgerichtet":
+        # diese Titelzelle hatte oben 4px Polster und der Text darin
+        # zusaetzlich margin-top:10px. Das Raster zentriert zwar alle drei
+        # Zellen (align-items:center), die rund 14px Versatz lagen aber
+        # INNERHALB der Titelzelle und schoben den Text gegenueber den
+        # Pfeilen nach unten. Beides entfernt.
+        - padding: 0
         - flex: "1 1 auto"
       grid:
         - grid-template-areas: '"body"'
@@ -71,7 +92,7 @@ cards:
     custom_fields:
       body: >
         [[[
-          return `<div style="text-align:center;font-size:1.0rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--secondary-text-color);margin-top:10px;">${entity.state}</div>`;
+          return `<div style="text-align:center;font-size:var(--bg-fs-group-header);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--bgai-section-label-v3);text-shadow:var(--bgai-header-halo-v3);">${entity.state}</div>`;
         ]]]
 
   - type: custom:button-card
@@ -91,6 +112,7 @@ cards:
         - border: none
         - flex: "0 0 auto"
       icon:
-        - color: var(--secondary-text-color)
+        - color: var(--bgai-section-label-v3)
+        - filter: var(--bgai-header-icon-halo-v3)
         - width: 32px
         - height: 32px

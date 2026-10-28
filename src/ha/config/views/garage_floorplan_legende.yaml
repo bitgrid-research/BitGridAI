@@ -1,0 +1,175 @@
+# ═══════════════════════════════════════════════════════════════════════
+# GRUNDRISS-LEGENDE UNTERGESCHOSS — Gegenstueck zu floorplan_legende.yaml
+# (siehe dort fuer die volle Begruendung, Farb-/Schwellenwert-Konvention,
+# das 2-Spalten-Sektionskarten-Layout und window.bgFloorplanLegend-
+# Definition, die HIER per if-Guard nicht erneut definiert wird). Seit
+# 26.09.2026 steht die Legende rechts neben dem Grundriss und fuellt ihre
+# Spalte (Raster im Dashboard), eine bildgebundene Breitenformel entfaellt.
+#
+# Untergeschoss (= Keller+Garage, ha-seitig ein Raum, siehe packages/
+# devices.yaml) hat KEINE Fenster- oder Heizungs-Entities und keine
+# austauschbaren Kleinbatterien (Zigbee-Sensoren) — nur Leistungs-/Temperatur-
+# sensoren und den Haus-Batteriespeicher (SMA). "Offene Fenster",
+# "Aktive Heizungen" und "Batterie wechseln" sind hier deshalb strukturell
+# nicht anwendbar (rooms-Eintrag liefert dafuer keine Entities) und bleiben
+# in der gerenderten Legende komplett weg statt eine leere/erfundene Zeile zu
+# zeigen. "Fehlende Geräte" bleibt die einzige Kategorie und deckt alle 9
+# Sensoren dieses Grundrisses ab (garage_floorplan.yaml) — bei nur einer
+# anwendbaren Kategorie rendert window.bgFloorplanLegend automatisch
+# einspaltig (kein leeres zweites Grid-Feld).
+#
+# Labels bewusst hart codiert statt live friendly_name verwendet: der ELWA-
+# Heizstab meldet seine eigene IP im friendly_name (Geraet, nicht Repo-Code —
+# kein Git-Leak, aber in der UI vermeidbar), siehe Session-Notiz 26.09.2026.
+# Batteriespeicher (SoC/Leistung) zaehlt hier nur als "verbunden/fehlend"
+# (SMA-Session faellt real gelegentlich aus, siehe
+# project_sma_failed_unload_watchdog-Memory), NICHT als Akku-zum-Wechseln —
+# das ist ein Batteriespeicher, kein Zigbee-Knopfzellen-Sensor.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: 14px
+    - padding: 16px
+    # 26.09.2026, Nutzer-Wunsch: Legende rechts neben dem Grundriss
+    # (1/4 der Breite, Raster im Dashboard), fuellt daher ihre Spalte.
+    - margin: 0
+    - width: 100%
+    - box-sizing: border-box
+    - overflow: visible
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    body:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+      - overflow: visible
+custom_fields:
+  body: >
+    [[[
+      if (!window.bgFloorplanLegend) {
+        window.bgFloorplanLegend = function(rooms) {
+          const heatColor = 'var(--primary-color)';
+          const warnColor = 'var(--bg-color-reserve)';
+          const cautionColor = 'var(--accent-color)';
+
+          const openWindows = [];
+          const activeHeating = [];
+          const missing = [];
+          const lowBattery = [];
+          let anyWindow = false, anyClimate = false, anyBattery = false, anySensor = false;
+
+          rooms.forEach(r => {
+            (r.windows || []).forEach(w => {
+              anyWindow = true;
+              const st = states[w.id];
+              const label = w.label ? ` – ${w.label}` : '';
+              if (!st || ['unavailable', 'unknown'].includes(st.state)) {
+                missing.push(`${r.name}${label} (Fenster)`);
+              } else if (st.state === 'on') {
+                openWindows.push(`${r.name}${label}`);
+              }
+            });
+            (r.climates || []).forEach(c => {
+              anyClimate = true;
+              const st = states[c.id];
+              const label = c.label ? ` – ${c.label}` : '';
+              if (!st || ['unavailable', 'unknown'].includes(st.state)) {
+                missing.push(`${r.name}${label} (Heizung)`);
+              } else if (st.state === 'heat') {
+                const t = st.attributes?.current_temperature;
+                const tStr = (t === undefined || t === null) ? '' :
+                  ` (${Number(t).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})} °C)`;
+                activeHeating.push(`${r.name}${label}${tStr}`);
+              }
+            });
+            (r.batteries || []).forEach(b => {
+              anyBattery = true;
+              const st = states[b.id];
+              const label = b.label ? ` – ${b.label}` : '';
+              if (!st || ['unavailable', 'unknown'].includes(st.state)) {
+                missing.push(`${r.name}${label} (Batterie)`);
+                return;
+              }
+              const pct = parseInt(st.state);
+              if (!isNaN(pct) && pct <= 50) {
+                lowBattery.push({ text: `${r.name}${label} ${pct}%`, critical: pct <= 20 });
+              }
+            });
+            (r.sensors || []).forEach(s => {
+              anySensor = true;
+              const st = states[s.id];
+              const label = s.label ? ` – ${s.label}` : '';
+              if (!st || ['unavailable', 'unknown'].includes(st.state)) {
+                missing.push(`${r.name}${label}`);
+              }
+            });
+          });
+
+          const chip = (text, color) => `<span style="display:inline-flex;align-items:center;
+            padding:4px 10px;border-radius:10px;background:rgba(255,255,255,0.06);
+            border:1px solid ${color};color:var(--primary-text-color);font-size:0.78rem;
+            font-weight:600;white-space:normal;overflow-wrap:anywhere;max-width:100%;box-sizing:border-box;">${text}</span>`;
+
+          const section = (icon, title, color, items, emptyText, applicable) => {
+            if (!applicable) return '';
+            return `<div style="background:var(--secondary-background-color);border-radius:12px;
+              padding:12px 14px;box-sizing:border-box;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+                <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.10);
+                  display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color};"></ha-icon>
+                </div>
+                <span style="font-size:0.78rem;font-weight:700;text-transform:uppercase;
+                  letter-spacing:0.05em;color:var(--secondary-text-color);">${title}</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                ${items.length ? items.join('') :
+                  `<span style="font-size:0.85rem;color:var(--secondary-text-color);">${emptyText}</span>`}
+              </div>
+            </div>`;
+          };
+
+          const sections = [
+            section('mdi:window-open-variant', 'Offene Fenster', warnColor,
+              openWindows.map(t => chip(t, warnColor)), '✓ Alle Fenster geschlossen', anyWindow),
+            section('mdi:radiator', 'Aktive Heizungen', heatColor,
+              activeHeating.map(t => chip(t, heatColor)), 'Keine Heizung aktiv', anyClimate),
+            section('mdi:lan-disconnect', 'Fehlende Geräte', cautionColor,
+              missing.map(t => chip(t, cautionColor)), '✓ Alle Geräte verbunden',
+              anyWindow || anyClimate || anyBattery || anySensor),
+            section('mdi:battery-alert-variant-outline', 'Batterie wechseln', warnColor,
+              lowBattery.map(b => chip(b.text, b.critical ? warnColor : cautionColor)),
+              '✓ Alle Batterien ausreichend geladen', anyBattery),
+          ].filter(html => html !== '');
+
+          // 26.09.2026: auto-fit statt fester 2 Spalten, damit dieselbe Funktion
+          // in der schmalen Seitenspalte (Obergeschoss, 1/4 Breite) einspaltig
+          // und unter dem Garagen-Plan weiter zweispaltig rendert.
+          return `<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 240px), 1fr));gap:12px;">
+            ${sections.join('')}</div>`;
+        };
+      }
+      return window.bgFloorplanLegend([
+        { name: 'Untergeschoss',
+          sensors: [
+            { id: 'sensor.ewelink_snzb_01p_temperatur', label: 'Temperatur' },
+            { id: 'sensor.shellyplugsg3_d0cf13d86254_leistung', label: 'BitGridAI-02' },
+            { id: 'sensor.shelly1pmg4_e4b06377adc0_leistung', label: 'Heizung' },
+            { id: 'sensor.ac_elwa_2_power1_solar', label: 'Heizstab (ELWA)' },
+            { id: 'sensor.shellyplusplugs_d4d4daf4eda4_leistung', label: 'Lüftung Miner' },
+            { id: 'sensor.shellyplugsg3_dcb4d9c5567c_leistung', label: 'BitGridAI-01' },
+            { id: 'sensor.shellyplugsg3_907069492f30_leistung', label: 'FritzBox/Modem/PC/NAS' },
+            { id: 'sensor.battery_soc_pct', label: 'Batteriespeicher SoC' },
+            { id: 'sensor.battery_power_w', label: 'Batteriespeicher Leistung' },
+          ] },
+      ]);
+    ]]]

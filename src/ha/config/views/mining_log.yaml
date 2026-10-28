@@ -23,6 +23,27 @@
 # Klick-Ziele pro Element haben, nur die ganze Karte).
 # ═════════════════════════════════════════════════════════
 type: vertical-stack
+# 16.09.2026, Fund beim Outline-Angleich an Home: diese Karte ist ein reiner
+# vertical-stack, jedes innere Element setzt bewusst background/border/box-
+# shadow:none (siehe Kommentare unten), in der Annahme, ein AEUSSERER Wrapper
+# liefere den Kartenhintergrund. Den gab es nirgends (weder hier noch an den
+# beiden Einbindungsstellen v1-Dev-"Miner"-Tab, v3-BitcoinInfo) — die Karte
+# stand deshalb ohne Panel direkt auf dem View-Hintergrund (v3: auf der
+# Gras-Textur sichtbar, Nutzer-Befund "Mining Verlauf schaut noch anders
+# aus"). Fix direkt hier an der Quelle statt an den Einbindungsstellen, damit
+# beide Nutzungen konsistent den gleichen Rahmen bekommen (identisches Muster
+# zu den Miner-1/2-Karten in miner_controls.yaml).
+card_mod:
+  style: |
+    :host {
+      display: block;
+      background: var(--ha-card-background) !important;
+      border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3) !important;
+      border-radius: 20px !important;
+      box-shadow: var(--bgai-card-shadow-v3) !important;
+      overflow: hidden !important;
+      contain: paint !important;
+    }
 cards:
 
   # ── Zeitraum-Typ: Woche / Monat ──────────────────────────────────────
@@ -48,7 +69,7 @@ cards:
             - border: none
             - padding: 6px
           name:
-            - font-size: 0.85rem
+            - font-size: var(--bg-fs-secondary)
             - font-weight: 700
             - color: >-
                 [[[ return entity.state === 'Woche' ? 'var(--primary-text-color)' : 'var(--secondary-text-color)' ]]]
@@ -72,7 +93,7 @@ cards:
             - border: none
             - padding: 6px
           name:
-            - font-size: 0.85rem
+            - font-size: var(--bg-fs-secondary)
             - font-weight: 700
             - color: >-
                 [[[ return entity.state === 'Monat' ? 'var(--primary-text-color)' : 'var(--secondary-text-color)' ]]]
@@ -129,7 +150,10 @@ cards:
             [[[
               const periode = states['input_select.mining_log_periode']?.state ?? 'Woche';
               const offset = parseInt(entity.state) || 0;
-              const today = new Date();
+              // Lab-Replay (15.10.2026): "heute" = Sim-Datum (sensor.lab_sim_profile,
+              // nur im Lab und nur bei simulation_mode), sonst das echte Datum.
+              const simDay = states['input_boolean.simulation_mode']?.state === 'on' ? (states['sensor.lab_sim_profile']?.state ?? '') : '';
+              const today = /^\d{4}-\d{2}-\d{2}$/.test(simDay) ? new Date(+simDay.slice(0, 4), +simDay.slice(5, 7) - 1, +simDay.slice(8, 10)) : new Date();
               const fmt = (d) => d.toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'});
               let label;
               if (periode === 'Monat') {
@@ -142,7 +166,7 @@ cards:
                 label = `${fmt(monday)} – ${fmt(sunday)} ${sunday.getFullYear()}`;
               }
               const tag = offset === 0 ? ' (aktuell)' : '';
-              return `<div style="text-align:center;font-size:0.95rem;font-weight:700;color:var(--primary-text-color);margin-top:13px;">${label}${tag}</div>`;
+              return `<div style="text-align:center;font-size:var(--bg-fs-body);font-weight:700;color:var(--primary-text-color);margin-top:13px;">${label}${tag}</div>`;
             ]]]
 
       - type: custom:button-card
@@ -173,6 +197,15 @@ cards:
     show_state: false
     styles:
       card:
+        # 26.09.2026, Nutzer-Befund "dickere Outline, die sich ueberlagert,
+        # etwa zwei Pixel nach unten": diese Tabellen-Karte war die einzige
+        # innere Karte ohne eigenes background/border/box-shadow (s. Kopf-
+        # kommentar, alle anderen setzen es bewusst). Das Theme (card-mod-card)
+        # gab ihr darum die volle Karten-Outline samt 0 4px 16px-Schlagschatten,
+        # zusaetzlich zur Outline der aeusseren Karte.
+        - background: transparent
+        - box-shadow: none
+        - border: none
         - padding: 12px 16px
       grid:
         - grid-template-areas: '"mining_log"'
@@ -250,9 +283,16 @@ cards:
           const fmtDt  = (iso) => (iso && iso.length >= 10) ? iso.slice(8,10)+'.'+iso.slice(5,7) : '—';
           const fmtT   = (dt)  => (!dt || !dt.includes(' ')) ? '–' : dt.split(' ')[1].slice(0,5);
           const fmtHm  = (v)   => { const n=parseFloat(v); if(!n||n<=0) return '0h'; const h=Math.floor(n),m=Math.round((n-h)*60); return m>0?`${h}h${m}m`:`${h}h`; };
-          const fmtH1  = (v)   => { const n=parseFloat(v); return isNaN(n)?'—':n.toFixed(1); };
+          const fmtH1  = (v)   => { const n=parseFloat(v); return isNaN(n)?'—':n.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}); };
           const fmtSat = (btc) => (!btc || btc <= 0) ? '—' : Math.round(btc * 1e8);
-          const _d = new Date(); const todayIso = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
+          // Lab-Replay (15.10.2026): "heute" = Sim-Datum, die Heute-Zeile kommt dann
+          // aus dem Tagesprofil bis zur Sim-Uhr (Stufen von Miner 1 wie die
+          // Vortage im Generator), spaetere Tage werden nicht gezeigt.
+          const simOn  = states['input_boolean.simulation_mode']?.state === 'on';
+          const simDay = simOn ? (states['sensor.lab_sim_profile']?.state ?? '') : '';
+          const simSteps = /^\d{4}-\d{2}-\d{2}$/.test(simDay) ? states['sensor.lab_sim_profile']?.attributes?.steps : null;
+          const _d = Array.isArray(simSteps) ? new Date(+simDay.slice(0, 4), +simDay.slice(5, 7) - 1, +simDay.slice(8, 10)) : new Date();
+          const todayIso = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
           const startDt  = states['input_datetime.last_start_at']?.state ?? '';
           const stopDt   = states['input_datetime.last_stop_at']?.state ?? '';
           const startTime = startDt.startsWith(todayIso) ? fmtT(startDt) : '–';
@@ -266,6 +306,21 @@ cards:
             kw:  parseFloat(states['sensor.mining_energy_daily']?.state)||0,
             live: true
           };
+          if (Array.isArray(simSteps) && simSteps.length) {
+            const si = Math.min(parseInt(states['input_number.sim_step']?.state) || 0, simSteps.length - 1);
+            const hhmm = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+            let n = 0, ec = 0, st = 0, sp = 0, first = -1, last = -1;
+            for (let i = 0; i <= si; i++) {
+              const r = simSteps[i];
+              if (r[12] > 0 || r[13] > 0) { n++; if (first < 0) first = i; last = i; }
+              if (r[12] === 1) ec++; else if (r[12] === 2) st++; else if (r[12] === 3) sp++;
+            }
+            const runningNow = simSteps[si][12] > 0 || simSteps[si][13] > 0;
+            todayRow.on  = first >= 0 ? hhmm(simSteps[first][9]) : '–';
+            todayRow.off = (last >= 0 && !runningNow) ? hhmm(simSteps[last][9] + 10) : '–';
+            todayRow.tot = n / 6; todayRow.ec = ec / 6; todayRow.st = st / 6; todayRow.sp = sp / 6;
+            todayRow.kw  = simSteps[si][15];
+          }
 
           // Woche/Monat-Fenster statt fixem 30-Tage-Cutoff (26.08.2026,
           // Nutzer-Wunsch, ersetzt die rollierende Ansicht komplett).
@@ -285,41 +340,58 @@ cards:
           const rangeStartIso = isoOf(rangeStart);
           const rangeEndIso = isoOf(rangeEnd);
 
-          const parsedEntries = logEntries.map(parseEntry).filter(r => r.d >= rangeStartIso && r.d <= rangeEndIso && r.d !== todayIso);
+          const parsedEntries = logEntries.map(parseEntry).filter(r => r.d >= rangeStartIso && r.d <= rangeEndIso && r.d < todayIso);
           const todayInRange = todayIso >= rangeStartIso && todayIso <= rangeEndIso;
           const allRows = todayInRange ? [todayRow, ...parsedEntries] : parsedEntries;
 
           const cols = '50px 42px 42px 54px 36px 36px 40px 44px 44px 44px 50px 46px';
-          const th = (t,r) => `<div style="font-size:0.62rem;color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
-          const headers = `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;border-bottom:1px solid var(--divider-color);margin-bottom:2px;">
+          // 26.09.2026, Nutzer-Wunsch "leichte Trennlinien zwischen den
+          // Feldern": Spalten-Trenner als border-right je Zelle (ausser der
+          // letzten), per <style> im eigenen Shadow-Root dieser Karte (gleiches
+          // Muster wie die @keyframes der Hamster-Karte). Das Zeilen-Padding
+          // sitzt dafuer in den Zellen statt auf der Zeile, damit die Linien
+          // ueber die volle Zeilenhoehe laufen und von Zeile zu Zeile
+          // durchgehen. Farbe rgba(255,255,255,0.08) = der im Dashboard
+          // uebliche dezente Trenner (z. B. Status/Details, Miner-Karten).
+          // 27.09.2026, Nutzer-Wunsch "Tabellenlinien 1px dicker": Spalten-
+          // Trenner und Kopf-Unterlinie auf 2px. box-sizing explizit auf
+          // border-box, damit der breitere Rand die fixen Spaltenbreiten aus
+          // cols nicht aufblaeht (Default waere content-box, die Zelle liefe
+          // dann in den 4px-Gap).
+          const gridCss = `<style>
+            .bgml-row > div { padding: 4px 4px 4px 0; box-sizing: border-box; }
+            .bgml-row > div:not(:last-child) { border-right: 2px solid rgba(255,255,255,0.08); }
+          </style>`;
+          const th = (t,r) => `<div style="font-size:var(--bg-fs-label);color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
+          const headers = `<div class="bgml-row" style="display:grid;grid-template-columns:${cols};gap:4px;padding:0 2px;border-bottom:2px solid var(--divider-color);">
             ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Ges.',1)}${th('Eco',1)}${th('Std',1)}${th('Sup',1)}${th('kWh',1)}${th('TH/s',1)}${th('SATs',1)}${th('S/kWh',1)}${th('€/kWh',1)}
           </div>`;
           const rowHtml = (r) => {
             const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
             const dc = r.live ? 'var(--primary-text-color)' : 'var(--secondary-text-color)';
             const fw = r.live ? '600' : '400';
-            const c  = (v,color) => `<div style="font-size:0.82rem;text-align:right;color:${color};">${v}</div>`;
+            const c  = (v,color) => `<div style="font-size:var(--bg-fs-secondary);text-align:right;color:${color};">${v}</div>`;
             const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
-            const ths    = settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? (r.live ? liveThs : null) ?? '—';
+            const ths    = String(settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? (r.live ? liveThs : null) ?? '—').replace('.', ',');
             const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
             const sPerKwh = (satNum !== null && r.kw > 0) ? Math.round(satNum / r.kw) : '—';
             const earnedEur = (satNum !== null && r.kw > 0 && btcEur > 0)
               ? satNum * btcEur / 1e8 / r.kw : null;
-            const eurStr   = earnedEur !== null ? earnedEur.toFixed(3) : '—';
+            const eurStr   = earnedEur !== null ? earnedEur.toLocaleString('de-DE', {minimumFractionDigits: 3, maximumFractionDigits: 3}) : '—';
             const eurColor = earnedEur === null ? 'var(--secondary-text-color)'
               : earnedEur >= 0.156 ? '#F7931A'
               : earnedEur >= 0.125 ? '#26C6DA'
               : earnedEur >= 0.100 ? '#4CAF50'
               : earnedEur >= 0.078 ? '#FFFFFF'
               : '#9E9E9E';
-            return `<div style="display:grid;grid-template-columns:${cols};gap:4px;padding:4px 2px;${hl}">
-              <div style="font-size:0.82rem;color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
+            return `<div class="bgml-row" style="display:grid;grid-template-columns:${cols};gap:4px;padding:0 2px;${hl}">
+              <div style="font-size:var(--bg-fs-secondary);color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
               ${c(r.on,'inherit')}${c(r.off,'inherit')}
               ${c(fmtHm(r.tot),'var(--primary-text-color)')}
               ${c(fmtH1(r.ec)+'h','#4CAF50')}
               ${c(fmtH1(r.st)+'h','#26C6DA')}
               ${c(fmtH1(r.sp)+'h','#F7931A')}
-              ${c(r.kw.toFixed(2),'white')}
+              ${c(r.kw.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}),'white')}
               ${c(ths,'#FFFFFF')}
               ${c(sat,'#F7931A')}
               ${c(sPerKwh,'#F7931A')}
@@ -333,7 +405,7 @@ cards:
           // Nutzer-Wunsch): die Tabelle ist jetzt ohnehin auf hoechstens
           // eine Woche (7 Zeilen) oder einen Monat (bis zu 31 Zeilen)
           // begrenzt, kein Bedarf mehr fuer eine interne Scrollbar.
-          return `<div style="width:100%;overflow-x:auto;">
+          return `${gridCss}<div style="width:100%;overflow-x:auto;">
             <div style="min-width:620px;">
               ${headers}
               ${allRows.map(rowHtml).join('')}

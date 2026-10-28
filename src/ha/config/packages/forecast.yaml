@@ -6,18 +6,24 @@
 
 forecast_openmeteo:
   input_number:
+    # step 25.09.2026 von 0.001 auf 0.000001 verfeinert: 0.001 Grad begrenzte die
+    # Eingabe auf rund 110 m (Breite) bzw. 70 m (Länge) und hätte den exakten
+    # Standort gar nicht abbilden können. Ehrlich dazugesagt: Open-Meteo rechnet
+    # auf einem Modellgitter von mehreren Kilometern, ein Gewinn an Prognosegüte
+    # entsteht dadurch NICHT. Die Feinheit kostet aber nichts und nimmt der
+    # Eingabe eine künstliche Schranke.
     forecast_lat:
       name: "Forecast: Breitengrad"
       min: -90
       max: 90
-      step: 0.001
+      step: 0.000001
       mode: box
       icon: mdi:latitude
     forecast_lon:
       name: "Forecast: Längengrad"
       min: -180
       max: 180
-      step: 0.001
+      step: 0.000001
       mode: box
       icon: mdi:longitude
     forecast_kwp:
@@ -34,8 +40,28 @@ forecast_openmeteo:
         unique_id: pv_forecast_openmeteo_kw
         unit_of_measurement: kW
         scan_interval: 3600
+        # 25.09.2026: Der Sensor liefert nur noch etwas, wenn die Standort-Helper
+        # tatsächlich gesetzt sind.
+        #
+        # Vorgeschichte: Die Helper standen seit jeher auf ihrem Startwert, der
+        # Sensor griff deshalb still auf den Fallback 48,1°N/11,6°O zurück und
+        # holte die Einstrahlung 341 km entfernt im Raum München. Sichtbar wurde
+        # das nie, weil ein plausibel aussehender kW-Wert herauskam. Genau das
+        # ist der gefährliche Fall: ein falscher Wert, der wie ein richtiger
+        # aussieht, und über recording.yaml als forecast_kw im Event-Log landet,
+        # also im Forschungsdatensatz der Thesis.
+        #
+        # Deshalb jetzt zwei Sicherungen statt eines bequemen Defaults: der
+        # Fallback im Kommando unten ist 0 (kein realer Standort), und diese
+        # availability blendet den Sensor aus, solange kein Standort gesetzt
+        # ist. Lieber ein fehlender Wert als ein stillschweigend falscher.
+        availability: >-
+          {{ states('input_number.forecast_lat') not in ['unknown', 'unavailable', 'none']
+             and states('input_number.forecast_lon') not in ['unknown', 'unavailable', 'none']
+             and (states('input_number.forecast_lat') | float(0) != 0
+                  or states('input_number.forecast_lon') | float(0) != 0) }}
         command: >-
-          python3 -c "import json,urllib.request,urllib.parse;from datetime import datetime,timedelta,timezone;lat={{ states('input_number.forecast_lat')|float(48.1) }};lon={{ states('input_number.forecast_lon')|float(11.6) }};kwp={{ states('input_number.forecast_kwp')|float(10.0) }};q=urllib.parse.urlencode({'latitude':lat,'longitude':lon,'hourly':'global_tilted_irradiance','tilt':35,'azimuth':0,'timezone':'UTC','forecast_days':1});d=json.load(urllib.request.urlopen('https://api.open-meteo.com/v1/forecast?'+q,timeout=10));t=d['hourly']['time'];g=d['hourly']['global_tilted_irradiance'];tg=datetime.now(timezone.utc)+timedelta(minutes=60);i=min(range(len(t)),key=lambda k:abs((datetime.fromisoformat(t[k]).replace(tzinfo=timezone.utc)-tg).total_seconds()));print(round((g[i] or 0)/1000.0*kwp*0.75,2))"
+          python3 -c "import json,urllib.request,urllib.parse;from datetime import datetime,timedelta,timezone;lat={{ states('input_number.forecast_lat')|float(0) }};lon={{ states('input_number.forecast_lon')|float(0) }};kwp={{ states('input_number.forecast_kwp')|float(10.0) }};q=urllib.parse.urlencode({'latitude':lat,'longitude':lon,'hourly':'global_tilted_irradiance','tilt':35,'azimuth':0,'timezone':'UTC','forecast_days':1});d=json.load(urllib.request.urlopen('https://api.open-meteo.com/v1/forecast?'+q,timeout=10));t=d['hourly']['time'];g=d['hourly']['global_tilted_irradiance'];tg=datetime.now(timezone.utc)+timedelta(minutes=60);i=min(range(len(t)),key=lambda k:abs((datetime.fromisoformat(t[k]).replace(tzinfo=timezone.utc)-tg).total_seconds()));print(round((g[i] or 0)/1000.0*kwp*0.75,2))"
 
   automation:
     - id: forecast_publish_pv_kw

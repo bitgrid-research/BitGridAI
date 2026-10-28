@@ -844,6 +844,19 @@ def main() -> None:
     else:
         end = now
 
+    # Nie ueber die Gegenwart hinaus synchronisieren. Fuer die Zukunft liefert
+    # die HA-History nichts, der Resampler haelt dann aber den letzten bekannten
+    # Wert fest und schreibt ihn als quality="ok" fort. Am 25.09.2026 entstanden
+    # so 74 erfundene Bloecke mit konstant 5937 W, die den Tagesertrag von 22 auf
+    # 95 kWh aufblaehten.
+    if end > now:
+        log.info(
+            "Enddatum %s liegt in der Zukunft, wird auf jetzt (%s) begrenzt",
+            end.strftime("%Y-%m-%d %H:%M"),
+            now.strftime("%Y-%m-%d %H:%M"),
+        )
+        end = now
+
     conn = get_connection(args.db)
     try:
         added, skipped = sync(start, end, conn, ha_url, token)

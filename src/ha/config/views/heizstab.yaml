@@ -27,11 +27,13 @@ tap_action:
   action: none
 styles:
   card:
+    # 17.10.2026: fuellt die Spaltenhoehe (Karten nebeneinander buendig, www/bitgrid_wide.js).
+    - height: 100%
     - background: var(--ha-card-background)
-    - border-radius: var(--ha-card-border-radius)
+    - border-radius: var(--bgai-card-radius-v3)
     - overflow: hidden
-    - border: var(--ha-card-border-width) solid var(--ha-card-border-color)
-    - box-shadow: var(--ha-card-box-shadow)
+    - border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3)
+    - box-shadow: var(--bgai-card-shadow-v3)
     - padding: 16px 14px
   grid:
     - grid-template-areas: '"body"'
@@ -45,16 +47,28 @@ custom_fields:
   body: >
     [[[
       const fnum = (id) => { const v = parseFloat(states[id]?.state); return isNaN(v) ? null : v; };
-      const modeRaw = states['sensor.ac_elwa_2_screen_mode']?.state;
+      // Lab-Replay (17.10.2026): der Geraetemodus ist dort nur ein Prod-
+      // Schnappschuss ("Standby"), die aufgezeichnete Leistung laeuft aber; die
+      // Karte zeigte "Standby" bei 3.402 W. Im Replay daher aus der Leistung,
+      // Schwelle wie "Anteil Tag aktiv" unten (> 5 W). Prod: Geraetemodus.
+      const simRow = window.bgaiSimToday && window.bgaiSimToday(hass);
+      const modeRaw = simRow ? (Number(simRow.row[24]) > 5 ? 'Heizt' : 'Standby')
+        : states['sensor.ac_elwa_2_screen_mode']?.state;
       const mode = (!modeRaw || modeRaw === 'unavailable' || modeRaw === 'unknown') ? '—' : modeRaw;
       const modeColor = mode === '—' ? 'var(--secondary-text-color)' : (mode === 'Standby' ? 'var(--secondary-text-color)' : '#4CAF50');
       const tempC = fnum('sensor.ac_elwa_2_temperatur_1');
       const pSolar = fnum('sensor.ac_elwa_2_power1_solar');
       const pGrid = fnum('sensor.ac_elwa_2_power1_grid');
       const pTotal = fnum('sensor.heizstab_power_w');
-      const kwhToday = fnum('sensor.heizstab_energy_daily');
+      // Lab-Replay (17.10.2026): Tageswerte des abgespielten Tages statt Live-
+      // History (window.bgaiSimToday, www/bitgrid_card_shape.js; Prod: null).
+      // sim_step steht hier, damit button-card bei jedem Sim-Block neu rendert.
+      const simT = window.bgaiSimToday && window.bgaiSimToday(hass);
+      const simStepRef = states['input_number.sim_step']?.state;
+      // Profil-Spalte 40 = aufgezeichnete Heizstab-kWh seit 00:00.
+      const kwhToday = simT ? Number(simT.row[40]) : fnum('sensor.heizstab_energy_daily');
 
-      const fmtW = (v) => v === null ? '—' : (v < 10 ? v.toFixed(1) : Math.round(v).toLocaleString('de-DE')) + ' W';
+      const fmtW = (v) => v === null ? '—' : (v < 10 ? v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) : Math.round(v).toLocaleString('de-DE')) + ' W';
       const fmtC = (v) => v === null ? '—' : v.toLocaleString('de-DE', {maximumFractionDigits: 1}) + ' °C';
       const fmtKwh = (v) => v === null ? '—' : v.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kWh';
       const fmtPct = (v) => v === null || v === undefined ? '…' : v.toLocaleString('de-DE', {maximumFractionDigits: 1}) + ' %';
@@ -66,7 +80,7 @@ custom_fields:
 
       // Anteil Tag aktiv: Duty-Cycle wie bei heizung_oel.yaml, threshold
       // identisch zur Netz-/Solar-Detektion oben (> 5 W = "läuft").
-      const dutyPct = (() => {
+      const dutyPct = simT ? simT.duty(simT.steps.map((r) => r[24]), 5) : (() => {
         const key = 'heizstab_duty';
         const cache = window._bgHeizCache;
         const now = Date.now();
@@ -95,7 +109,9 @@ custom_fields:
       // Kopfkommentar. Zwei getrennte History-Requests statt eines mit
       // filter_entity_id=a,b: die HA-REST-API dokumentiert die Reihenfolge
       // der zurückgegebenen Arrays bei mehreren Entities nicht verlässlich.
-      const pvSharePct = (() => {
+      // Replay: die Aufzeichnung kennt keine Solar/Netz-Aufteilung, die Lab-
+      // Ersatzwerte fuehren den Heizstab komplett als Solar (Netz = 0).
+      const pvSharePct = simT ? (simT.steps.slice(0, simT.step + 1).some((r) => r[24] > 5) ? 100 : null) : (() => {
         const key = 'heizstab_pv_share';
         const cache = window._bgHeizCache;
         const now = Date.now();
@@ -146,9 +162,9 @@ custom_fields:
         row('mdi:thermometer-water', 'Temperatur', fmtC(tempC)),
         row('mdi:solar-power', 'Leistung Solar', fmtW(pSolar), pSolar > 0 ? '#4CAF50' : null),
         row('mdi:transmission-tower', 'Leistung Netz', fmtW(pGrid), pGrid > 0 ? '#f59e0b' : null),
-        row('mdi:flash', 'Leistung gesamt', fmtW(pTotal), '#4FC3F7'),
-        row('mdi:counter', 'Energie heute', fmtKwh(kwhToday), '#4FC3F7'),
-        row('mdi:chart-donut', 'Anteil Tag aktiv', fmtPct(dutyPct), '#4FC3F7'),
+        row('mdi:flash', 'Leistung gesamt', fmtW(pTotal), '#5C9EE2'),
+        row('mdi:counter', 'Energie heute', fmtKwh(kwhToday), '#5C9EE2'),
+        row('mdi:chart-donut', 'Anteil Tag aktiv', fmtPct(dutyPct), '#5C9EE2'),
         row('mdi:solar-power', 'PV-Anteil', fmtPct(pvSharePct), '#4CAF50'),
       ].join(sep);
 

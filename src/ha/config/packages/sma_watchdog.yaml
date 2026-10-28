@@ -1,6 +1,32 @@
 sma_watchdog:
 
+  counter:
+    sma_watchdog_attempts:
+      name: "SMA Watchdog: Reload-Versuche"
+      icon: mdi:restart-alert
+      initial: 0
+      step: 1
+      minimum: 0
+      maximum: 99
+      restore: true
+
+  input_datetime:
+    sma_last_auto_restart:
+      name: "SMA: letzter Auto-Neustart"
+      icon: mdi:restart
+      has_date: true
+      has_time: true
+      # Ohne initial legt Home Assistant den Wert auf heute 00:00. Die
+      # 22-Stunden-Sperre unten liest das als "heute schon neu gestartet" und
+      # blockiert den Auto-Neustart am ersten Tag, obwohl er nie lief.
+      initial: "2020-01-01 00:00:00"
+
   automation:
+    # Eingriff erst, wenn die Selbstheilung von pysmaplus nachweislich versagt
+    # hat. Belegt am 22.-24.09.2026: der Storage-Wechselrichter verlor dreimal
+    # die Verbindung und kam jedes Mal ohne Zutun zurueck. Ein frueher Reload
+    # heilt also nichts, er trifft nur die Integration mitten in ihre laufenden
+    # Verbindungsversuche.
     - id: sma_session_watchdog
       alias: "SMA: Session Watchdog — Auto-Reload bei unavailable"
       mode: single
@@ -10,25 +36,167 @@ sma_watchdog:
           entity_id: sensor.sma_tripower_pv_power
           to: "unavailable"
           for:
-            minutes: 2
-        # Wiederholter Trigger: der State-Trigger oben feuert nur EINMAL beim
-        # Übergang. Bleibt der Sensor unavailable (Reload hat nicht gegriffen),
-        # würde die Automation sonst nie wieder auslösen. Deshalb zusätzlich
-        # periodisch prüfen, solange der Zustand anhält.
+            minutes: 30
+        # Der State-Trigger feuert nur beim Uebergang. Bleibt der Sensor
+        # unavailable, muss periodisch nachgeprueft werden.
         - platform: time_pattern
-          minutes: "/10"
+          minutes: "/30"
       condition:
         - condition: state
           entity_id: sensor.sma_tripower_pv_power
           state: "unavailable"
+        # Nachts ist der Wechselrichter per Design aus, unavailable ist dann
+        # kein Fehler. Genau in dieser Phase (23.09.2026, 01:49 Uhr) riss der
+        # alte Watchdog den Config Entry in ConfigEntryState.FAILED_UNLOAD:
+        # der Unload schlug fehl, und der Entry war bis zum Neustart tot.
+        - condition: numeric_state
+          entity_id: sun.sun
+          attribute: elevation
+          above: 5
+        # Nach drei erfolglosen Reloads hilft nur noch ein Neustart. Weiter zu
+        # probieren erzeugt nur Logspam: der alte Watchdog lief 350-mal in
+        # denselben Fehler, ohne dass es jemand bemerkte.
+        - condition: numeric_state
+          entity_id: counter.sma_watchdog_attempts
+          below: 3
       action:
+        - action: counter.increment
+          target:
+            entity_id: counter.sma_watchdog_attempts
+        # continue_on_error, weil ein Reload auf einen Entry in FAILED_UNLOAD
+        # wirft. Ohne das bricht die Automation ab und die Pruefung unten
+        # liefe nie.
         - action: homeassistant.reload_config_entry
+          continue_on_error: true
           target:
             entity_id: sensor.sma_tripower_pv_power
+        - delay:
+            seconds: 90
+        # Ergebnis pruefen, statt Erfolg zu behaupten. Die alte Fassung meldete
+        # "Session wiederhergestellt", ohne das je zu verifizieren.
+        - choose:
+            - conditions:
+                - condition: template
+                  value_template: >
+                    {{ states('sensor.sma_tripower_pv_power')
+                       not in ['unavailable', 'unknown', 'none', ''] }}
+              sequence:
+                - action: persistent_notification.create
+                  data:
+                    title: "SMA: Verbindung wiederhergestellt"
+                    message: >
+                      Der Tripower liefert nach Reload-Versuch
+                      {{ states('counter.sma_watchdog_attempts') }} wieder Daten
+                      ({{ now().strftime('%d.%m. %H:%M') }} Uhr).
+                    notification_id: sma_watchdog
+          default:
+            - action: persistent_notification.create
+              data:
+                title: "SMA: Reload erfolglos"
+                message: >
+                  Versuch {{ states('counter.sma_watchdog_attempts') }} von 3 um
+                  {{ now().strftime('%d.%m. %H:%M') }} Uhr hat den Tripower nicht
+                  zurueckgeholt.
+                  {% if states('counter.sma_watchdog_attempts') | int(0) >= 3 %}
+                  Limit erreicht, es wird nicht weiter probiert. Steckt der
+                  Config Entry in FAILED_UNLOAD, heilt das kein Reload: dann
+                  hilft nur ein Home-Assistant-Neustart
+                  (bash scripts/deploy_ha.sh --restart).
+                  {% endif %}
+                notification_id: sma_watchdog
+
+    # Zaehler zuruecksetzen, sobald der Tripower wieder stabil liefert. Ohne das
+    # bliebe das Versuchslimit nach dem ersten Vorfall dauerhaft blockiert.
+    - id: sma_session_watchdog_reset
+      alias: "SMA: Session Watchdog Zaehler zuruecksetzen"
+      mode: single
+      max_exceeded: silent
+      trigger:
+        - platform: state
+          entity_id: sensor.sma_tripower_pv_power
+          from: "unavailable"
+          for:
+            minutes: 5
+      condition:
+        - condition: template
+          value_template: >
+            {{ states('sensor.sma_tripower_pv_power')
+               not in ['unavailable', 'unknown', 'none', ''] }}
+        - condition: numeric_state
+          entity_id: counter.sma_watchdog_attempts
+          above: 0
+      action:
+        - action: counter.reset
+          target:
+            entity_id: counter.sma_watchdog_attempts
+
+    # ── Letzte Stufe: kontrollierter Neustart ─────────────────────────────────
+    # ConfigEntryState.FAILED_UNLOAD ist der einzige bekannte Zustand, den kein
+    # Reload heilt: Home Assistant fuehrt den Eintrag als "non recoverable", und
+    # jeder weitere Reload wirft dieselbe Exception. Am 23.09.2026 blieb der
+    # Tripower deshalb drei Tage tot, 66 kWh fehlen dauerhaft in der Bilanz.
+    #
+    # Ein Neustart ist ein Eingriff in den laufenden Hausbetrieb und kostet eine
+    # der vier SMA-Sessions, deshalb sitzt er hinter vier Sperren zugleich:
+    #   1. drei Reload-Versuche sind nachweislich gescheitert
+    #   2. der Sensor ist immer noch tot
+    #   3. es ist Tag, der Ausfall kostet also gerade echte Ertragsdaten
+    #   4. heute gab es noch keinen Auto-Neustart
+    # Der Zeitstempel wird VOR dem Neustart gesetzt. Andernfalls entstuende nach
+    # dem Hochfahren sofort wieder dieselbe Lage und damit eine Neustartschleife,
+    # also genau der Fehler, den der alte Watchdog gemacht hat.
+    - id: sma_failed_unload_auto_restart
+      alias: "SMA: Auto-Neustart wenn Reload nicht mehr hilft"
+      mode: single
+      max_exceeded: silent
+      trigger:
+        - platform: time_pattern
+          minutes: "/15"
+      condition:
+        - condition: state
+          entity_id: sensor.sma_tripower_pv_power
+          state: "unavailable"
+        - condition: numeric_state
+          entity_id: sun.sun
+          attribute: elevation
+          above: 5
+        - condition: numeric_state
+          entity_id: counter.sma_watchdog_attempts
+          above: 2
+        # 22 statt 24 Stunden, damit die Sperre nicht durch Tagesdrift
+        # dauerhaft einen Tag ueberspringt.
+        - condition: template
+          value_template: >-
+            {% set last = state_attr('input_datetime.sma_last_auto_restart',
+                                     'timestamp') %}
+            {{ last is none or (now().timestamp() - last) > 79200 }}
+      action:
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.sma_last_auto_restart
+          data:
+            timestamp: "{{ now().timestamp() | int }}"
         - action: persistent_notification.create
           data:
-            title: "SMA Session wiederhergestellt"
-            message: >
-              pysmaplus wurde automatisch neu geladen um
-              {{ now().strftime('%H:%M') }} Uhr.
-            notification_id: sma_watchdog
+            title: "SMA: Auto-Neustart"
+            message: >-
+              Drei Reload-Versuche sind gescheitert, der Tripower liefert
+              weiterhin nichts. Home Assistant startet um
+              {{ now().strftime('%d.%m. %H:%M') }} Uhr neu, weil
+              FAILED_UNLOAD nur so behoben werden kann. Naechster
+              Auto-Neustart fruehestens in 22 Stunden.
+            notification_id: sma_auto_restart
+        # Das Skript liegt in data_integrity.yaml. continue_on_error, weil eine
+        # fehlgeschlagene Benachrichtigung die Reparatur nicht verhindern darf.
+        - action: script.data_integrity_push
+          continue_on_error: true
+          data:
+            title: "SMA: Home Assistant startet neu"
+            message: >-
+              Der PV-Wechselrichter war nach drei Reload-Versuchen immer noch
+              tot. Neustart laeuft, das dauert etwa eine Minute.
+            tag: "sma_auto_restart"
+        # Kurz warten, damit die Meldung das Handy erreicht, bevor HA weg ist.
+        - delay:
+            seconds: 15
+        - action: homeassistant.restart

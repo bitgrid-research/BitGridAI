@@ -80,6 +80,12 @@ miner_header:
     card:
       - padding: 12px 16px
       - height: 56px
+      # 12.09.2026, Nutzer-Wunsch "auch bei den Minern Divider wie ueberall
+      # sonst": HIER wirkungslos versucht, weil jede Instanz (steuerung_
+      # quick.yaml) ihr eigenes styles.card.border:none NACH dem Template
+      # mergt und den border-bottom damit wieder zuruecksetzt — die Regel
+      # lebt deshalb an der Instanz selbst (dort, wo border:none steht),
+      # nicht hier im Template.
     name:
       - font-size: 1.1rem
       - font-weight: bold
@@ -187,9 +193,26 @@ settings_pill:
   show_label: true
   tap_action:
     action: more-info
+  # Hover nur bei echtem Zeigegeraet (11.09.2026, "Karte erhoeht"-Rolle aus
+  # dem BitHamster-Farbkonzept, themes/bitgrid.yaml): @media (hover: hover)
+  # macht das auf dem Touch-Wandtablet zum No-op (dort feuert :hover nie),
+  # greift aber bei Maus-/Browserzugriff. Nur wirksam, solange keine Instanz
+  # ihren eigenen card_mod setzt (button-card ueberschreibt den Schluessel
+  # sonst komplett statt ihn zu mergen) — aktuell tut das keine settings_pill-
+  # Nutzung im Repo.
+  card_mod:
+    style: |
+      @media (hover: hover) {
+        ha-card:hover {
+          background: var(--bgai-card-bg-hover-v3) !important;
+        }
+      }
   styles:
     card:
-      - background: "rgba(255,255,255,0.055)"
+      # var()-Fallback = alter Literal-Wert, damit v1 (kennt --bgai-pill-bg-v3
+      # nicht) unveraendert bleibt; v3 ueberschreibt die Variable pro View
+      # (bitgrid_dashboard_v3.yaml :host, 12.09.2026 Hell-Umbau).
+      - background: "var(--bgai-pill-bg-v3)"
       - border-radius: "9px"
       - padding: "7px 8px"
       - cursor: pointer
@@ -204,7 +227,7 @@ settings_pill:
       - font-weight: "600"
       - text-transform: "uppercase"
       - letter-spacing: ".6px"
-      - color: "rgba(255,255,255,.4)"
+      - color: "var(--bgai-pill-name-color-v3)"
       - justify-self: center
       - white-space: "nowrap"
       - overflow: "hidden"
@@ -243,9 +266,31 @@ settings_row:
   show_label: true
   tap_action:
     action: more-info
+  # Hover-Kommentar s. settings_pill oben (identisches Muster). Verifiziert
+  # (11.09.2026): keine der 26 settings_row(-icon)-Nutzungen in
+  # bitgrid_dashboard_v3.yaml setzt einen eigenen card_mod, der das hier
+  # ueberschreiben wuerde.
+  card_mod:
+    style: |
+      @media (hover: hover) {
+        ha-card:hover {
+          background: var(--bgai-card-bg-hover-v3) !important;
+        }
+      }
   styles:
     card:
-      - background: "rgba(255,255,255,0.045)"
+      # var()-Fallback = alter Literal-Wert, s. Kommentar bei settings_pill.
+      - background: "var(--bgai-row-bg-v3)"
+      # 26.09.2026, Nutzer-Befund "viel zu dicke Outline" an den aufgeklappten
+      # Regelwerk-Zeilen: seit der Theme-Konsolidierung (16.09.2026) stellt
+      # card-mod-card Rand + Outline-Schatten auf JEDER Karte wieder her, die
+      # nicht selbst box-shadow/border setzt (DESIGN.md, "Karten-Chrome").
+      # Diese Zeile ist laut Kopfkommentar bewusst flach ("kein Pillen-/
+      # Kartenrand"), hat das aber nie selbst deklariert und bekam darum die
+      # volle Karten-Outline. Betrifft alle settings_row-Nutzungen (Regelwerk
+      # UND Einstellungen-Tab).
+      - box-shadow: none
+      - border: none
       - border-radius: "7px"
       - padding: "10px 14px"
       - cursor: pointer
@@ -259,7 +304,7 @@ settings_row:
     name:
       - font-size: "13px"
       - font-weight: "500"
-      - color: "rgba(255,255,255,.85)"
+      - color: "var(--bgai-row-name-color-v3)"
       - justify-self: start
       - text-align: left
       - white-space: "nowrap"
@@ -304,15 +349,36 @@ group_header:
       - box-shadow: none
       - border: none
       - padding: 4px 4px 0
+      # overflow:visible (12.09.2026, Nutzer-Wunsch "Schatten nie
+      # abschneiden"): button-card setzt auf .card sonst kein overflow,
+      # aber explizit statt implizit, damit der Icon-Filter (Halo + neue
+      # Outline unten, beide bleeden ueber die 24x24px-Box hinaus) nirgends
+      # an einer Kartenkante gekappt wird.
+      - overflow: visible
     grid:
       - grid-template-areas: '"i n"'
       - grid-template-columns: min-content 1fr
       - align-items: center
+      - overflow: visible
     img_cell:
       - justify-content: start
       - align-self: center
+      - overflow: visible
     icon:
-      - color: var(--secondary-text-color)
+      - color: var(--bgai-section-label-v3)
+      # 12.09.2026, Nutzer-Wunsch: dunkler Schatten/Halo, damit die weissen
+      # Gruppentitel gegen die Gras-Textur (v3-Hintergrund) unabhaengig vom
+      # jeweiligen hellen/dunklen Gruenton lesbar bleiben. Fallback "none":
+      # bgai-header-icon-halo-v3 ist am Theme-Root definiert, dieses
+      # Template ist mit v1 geteilt.
+      # 13.09.2026, Nutzer-Wunsch "nur 1px Outline, kein Schatten": mehrere
+      # Anlaeufe mit gestapelten drop-shadow()s (4, dann 8 Richtungen)
+      # blieben trotz 0 Blur optisch ein weicher Schatten statt einer
+      # scharfen Kontur, weil drop-shadow() auf der (anti-aliasten) Alpha-
+      # Maske der Icon-Silhouette arbeitet - kein echter Vektor-Stroke wie
+      # -webkit-text-stroke beim Text unten. filter: komplett entfernt,
+      # echter Stroke stattdessen per card_mod direkt auf dem SVG-<path>
+      # (s. card_mod-Block unten in diesem Template).
       - width: 24px
       - height: 24px
     name:
@@ -322,17 +388,64 @@ group_header:
       # eine geteilte Template (31.08.2026, Nutzer-Wunsch "Schriftgroesse
       # pro Art").
       # --bg-fs-group-header mit Fallback auf --bg-fs-body (02.09.2026,
-      # Nutzer-Wunsch "Ueberschriften in jedem Tab wie Home"): v3 setzt
-      # --bg-fs-group-header pro View (bitgrid_dashboard_v3.yaml), v1 kennt
-      # die Variable nicht und faellt automatisch auf --bg-fs-body zurueck —
-      # dieses Template ist mit v1 geteilt, darf sich dort nicht aendern.
-      - font-size: var(--bg-fs-group-header, var(--bg-fs-body))
+      # Nutzer-Wunsch "Ueberschriften in jedem Tab wie Home"): sollte ueber
+      # eine View-:host-Umleitung in bitgrid_dashboard_v3.yaml wirken — genau
+      # dieser Mechanismus erreicht tief verschachtelte Custom-Cards laut
+      # 12.09.2026-Befund (s. DESIGN.md im Repo-Root) nachweislich NICHT, v1 und v3 landen
+      # hier also faktisch schon auf demselben (Root-)Wert. bgai-header-
+      # font-size-v3 (Root-Token, wie bgai-section-label-v3) erzwingt jetzt
+      # zuverlaessig "gleiche Groesse wie der Etagen-Umschalter" (Nutzer-
+      # Wunsch 12.09.2026), alte Kette bleibt als Fallback dahinter stehen.
+      - font-size: var(--bg-fs-group-header)
       - font-weight: 700
       - text-transform: uppercase
       - letter-spacing: 0.07em
-      - color: var(--secondary-text-color)
+      - color: var(--bgai-section-label-v3)
+      # Dunkler Schatten, s. Kommentar bei "icon" oben (dasselbe Halo-Prinzip,
+      # text-shadow statt filter, da text-shadow auf SVG-Icons nicht greift).
+      - text-shadow: var(--bgai-header-halo-v3)
+      # 12.09.2026, Nutzer-Wunsch "schwarze Outline": der weiche Blur-Halo
+      # oben reicht gegen die unruhige Gras-Textur nicht immer, -webkit-
+      # text-stroke zieht zusaetzlich eine scharfe Kontur um jeden
+      # Buchstaben (Chromium-Kiosk-Display, -webkit-Praefix unproblematisch).
+      # paint-order sorgt dafuer, dass die Kontur HINTER der Fuellfarbe
+      # liegt, sonst wirken duenne Buchstaben (I, T) zugekleistert.
+      # Wert in Anfuehrungszeichen (Bug, erster Deploy blieb wirkungslos):
+      # YAML wertet ein unquotiertes "#" nach einem Leerzeichen als
+      # Kommentar-Start, "1px #000000" verlor dadurch die Farbe.
+      # 16.09.2026, Nutzer-Wunsch "1px dicker, aber nur die Ueberschrift, nicht
+      # das Icon": 1px -> 2px. Der Icon-Stroke im card_mod unten bleibt
+      # unveraendert bei 1.5px.
+      - -webkit-text-stroke: "2px #000000"
+      - paint-order: stroke fill
       - justify-self: start
       - padding-left: 10px
+  # 13.09.2026, Nutzer-Wunsch "echter 1px Outline am Icon, kein Schatten":
+  # das Icon-Filter oben (drop-shadow-Stapel) simulierte nur eine Kontur,
+  # sah aber wegen anti-aliasten Icon-Kanten immer weich aus. Echter Fix:
+  # card_mod durchdringt drei Shadow-DOM-Ebenen bis zum eigentlichen
+  # SVG-<path> (verifiziert gegen home-assistant/frontend-Quellcode:
+  # button-card rendert <ha-state-icon>, dessen render() bei gesetztem
+  # icon-Override <ha-icon> erzeugt, dessen render() fuer mdi:-Icons
+  # <ha-svg-icon> erzeugt, dessen Template <svg><g><path class="primary-
+  # path"> ist) und setzt dort einen echten SVG-Stroke, exakt analog zu
+  # -webkit-text-stroke beim Titel-Text (Name-Styles oben).
+  # Zwei vorherige Versuche mit einem flachen "a $ b $ c"-Selector-String
+  # blieben wirkungslos: das ist kein card-mod-Syntax. Laut card-mod-README
+  # muss "style:" dafuer ein Dictionary sein, jeder Shadow-Root-Hop ein
+  # eigener Key im Format "selector $", verschachtelt bis zur Zielebene
+  # (dort README-empfohlenes Aufbrechen in einzelne Schritte statt eines
+  # langen Ketten-Keys, robuster gegen Custom-Element-Upgrade-Timing).
+  card_mod:
+    style:
+      "ha-state-icon $":
+        "ha-icon $":
+          "ha-svg-icon $": |
+            svg path {
+              stroke: #000000;
+              stroke-width: 1.5px;
+              paint-order: stroke fill;
+            }
 
 # Geräte-Kachel (Tab "Geräte"): Icon + Name + aktuelle Leistung + Tages-kWh.
 # entity = Leistungs-Sensor des Plugs; variables.energy_daily = Entity-ID des
@@ -557,3 +670,161 @@ switch_tile:
       - margin-bottom: 2px
     label:
       - justify-self: center
+
+# ═══════════════════════════════════════════════════════════════════════
+# GRUNDRISS-BUBBLES (Tab "Grundriss", views/floorplan.yaml + garage_floorplan.
+# yaml) — 26.09.2026, Nutzer-Wunsch "Icons im Grundriss lesbar wie im Tab
+# Home": ersetzen die bisherigen nativen state-icon/state-label-Elemente.
+# Schatten/Kontur 1:1 aus group_header uebernommen (weisser Text/Icon, dunkler
+# Halo + echte SVG-/Text-Kontur), damit dieselbe Lesbarkeits-Konvention gilt,
+# egal ob die Bubble auf dem Rauminneren (heller Boden) oder ausserhalb des
+# Hauses (Grastextur) liegt. Farben kommen ausschliesslich aus bestehenden
+# Theme-Tokens (themes/bitgrid.yaml), keine neuen Hex-Werte: var(--bg-color-
+# reserve) = Warnung/negativ (Fenster offen, Batterie kritisch), var(--accent-
+# color) = Uebergangs-Warnung (Geraet nicht verfuegbar, Batterie schwach),
+# var(--primary-color) = aktiv/normal (Heizung an), var(--bg-color-idle) =
+# aus/neutral. Icon- und Farblogik je Entity-Domäne steht bewusst NICHT hier
+# im Template (das bliebe sonst an binary_sensor/climate gebunden), sondern
+# wird pro Instanz in floorplan.yaml/garage_floorplan.yaml per icon:/
+# variables.color-Template berechnet — dieses Template ist reine Optik.
+# ═══════════════════════════════════════════════════════════════════════
+floorplan_icon_badge:
+  show_name: false
+  show_state: false
+  show_label: false
+  styles:
+    card:
+      - width: 40px
+      - height: 40px
+      - min-width: 40px
+      - border-radius: 50%
+      - background: rgba(255, 255, 255, 0.3)
+      - padding: 0
+      - overflow: visible
+    grid:
+      - grid-template-areas: '"i"'
+      - place-items: center
+      - overflow: visible
+    img_cell:
+      - overflow: visible
+    icon:
+      - width: 22px
+      - height: 22px
+      - color: "[[[ return variables?.color || 'var(--state-icon-color)'; ]]]"
+  # Echter SVG-Stroke, siehe group_header weiter oben fuer die volle
+  # Begruendung (drei Shadow-Root-Hops bis zum <svg><path>).
+  card_mod:
+    style:
+      "ha-state-icon $":
+        "ha-icon $":
+          "ha-svg-icon $": |
+            svg path {
+              stroke: #000000;
+              stroke-width: 1.5px;
+              paint-order: stroke fill;
+            }
+
+# Wertebubble (Leistung/Temperatur/Prozent) fuer den Grundriss — ersetzt
+# state-label. Einheiten-Logik generisch ueber unit_of_measurement, damit ein
+# Template W/°C/% gleichermassen bedient (keine Kopien pro Sensor-Typ).
+# entity: sensor.*
+floorplan_value_badge:
+  show_name: false
+  show_icon: false
+  show_state: false
+  show_label: true
+  styles:
+    card:
+      # 27.09.2026, Nutzer-Wunsch "Schrift zu klein": Schrift 0.82rem -> 1.05rem
+      # (+28%). Die Pille waechst proportional mit (Hoehe 28->34, Radius 14->17,
+      # Padding 9->11, min-width 40->46), sonst klebt der groessere Text am Rand.
+      # Kontur 1.25->1.5px, damit der schwarze Halo bei groesserer Schrift gleich
+      # stark wirkt. Positionen bleiben unveraendert: die Pille ist per
+      # translate(-50%, -50%) um ihren Mittelpunkt zentriert und waechst
+      # symmetrisch. Wirkt auch im Grundriss-Tab von v2 (gleiches Template).
+      - min-width: 46px
+      - height: 34px
+      - padding: 0 11px
+      - border-radius: 17px
+      - background: rgba(255, 255, 255, 0.3)
+      - overflow: visible
+    grid:
+      - grid-template-areas: '"l"'
+      - place-items: center
+      - overflow: visible
+    label:
+      - font-size: 1.05rem
+      - font-weight: 700
+      - color: "#FFFFFF"
+      - text-shadow: var(--bgai-header-halo-v3)
+      - -webkit-text-stroke: "1.5px #000000"
+      - paint-order: stroke fill
+      - white-space: nowrap
+  label: >
+    [[[
+      if (!entity || ['unavailable', 'unknown'].includes(entity.state)) return '—';
+      const unit = entity.attributes?.unit_of_measurement || '';
+      const v = parseFloat(entity.state);
+      if (isNaN(v)) return entity.state;
+      if (unit === '°C' || unit === '%') {
+        return v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' ' + unit;
+      }
+      const rounded = Math.round(v).toLocaleString('de-DE');
+      return unit ? rounded + ' ' + unit : rounded;
+    ]]]
+
+# Statisches Raumnamens-Schild fuer den Grundriss (Nutzer-Wunsch Punkt 5).
+# Kein entity noetig, name: wird pro Instanz literal gesetzt.
+floorplan_room_label:
+  show_name: true
+  show_icon: false
+  show_state: false
+  tap_action:
+    action: none
+  styles:
+    card:
+      - width: auto
+      - padding: 3px 11px
+      - border-radius: 10px
+      - background: rgba(0, 0, 0, 0.28)
+      - overflow: visible
+    grid:
+      - grid-template-areas: '"n"'
+      - overflow: visible
+    name:
+      - font-size: var(--bg-fs-secondary)
+      - font-weight: 700
+      - text-transform: uppercase
+      - letter-spacing: 0.05em
+      - color: var(--bgai-section-label-v3)
+      - text-shadow: var(--bgai-header-halo-v3)
+      - -webkit-text-stroke: "1.5px #000000"
+      - paint-order: stroke fill
+      - white-space: nowrap
+
+# Zeilen, die FREI auf dem View-Hintergrund stehen (Tab "Einstellungen"),
+# statt wie im Steuerung-Tab innerhalb einer Karte zu sitzen. settings_row
+# fuellt transluzent weiss, was auf einer Karte als leichte Erhoehung wirkt,
+# auf der Grastextur aber schlicht durchsichtig ist. Diese Variante setzt
+# stattdessen die Kartenflaeche. Immer NACH settings_row listen, button-card
+# mergt Templates in Listen-Reihenfolge.
+# Bewusst hier und nicht per View-":host": eine Umleitung auf View-Ebene
+# erreicht die Karten nicht (mehrfach live geprueft, s. DESIGN.md).
+settings_row_solid:
+  styles:
+    card:
+      - background: var(--ha-card-background)
+
+# Randlose Pillen-Zeile im Stil der Regelwerk-Gruppenkoepfe im Steuerung-Tab
+# (Hochstufen/Runterstufen/Nacht-Sperre: rgba(255,255,255,0.04), Radius 14px,
+# kein Rand, kein Schatten). 26.09.2026, Nutzer-Wunsch fuer die Zeilen im
+# Einstellungen-Tab, die innerhalb einer gemeinsamen Karte sitzen. Immer NACH
+# settings_row listen (Merge-Reihenfolge, s. settings_row_solid). Hover aus
+# settings_row bleibt erhalten, der Rahmen-Reset dort ebenfalls.
+settings_row_soft:
+  styles:
+    card:
+      - background: "rgba(255,255,255,0.04)"
+      - border-radius: "14px"
+      - box-shadow: none
+      - border: none

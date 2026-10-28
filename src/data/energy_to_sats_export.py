@@ -17,6 +17,13 @@ ueberhaupt an, siehe ADR 026.
 CLI:
     python -m src.data.energy_to_sats_export
     python -m src.data.energy_to_sats_export --days 21 --db data/bitgrid.db
+
+Default-Fenster seit 25.09.2026 auf 400 Tage angehoben (vorher 30): die
+Effizienz-Karte (views/energy_to_sats_chart.yaml) blaettert seit diesem Datum
+per Woche/Monat-Pfeilen durch die Historie, ein 30-Tage-Export liesse dabei
+nach der ersten Seite ins Leere laufen. 400 statt z.B. 365, damit auch beim
+naechsten Jahreswechsel noch ein voller Dezember sichtbar bleibt, ohne das
+Skript sofort wieder anpassen zu muessen.
 """
 
 from __future__ import annotations
@@ -101,7 +108,7 @@ def _parse_args() -> argparse.Namespace:
         description="Exportiert energy_to_sats aus bitgrid.db als JSON fuer den Statistik-Tab"
     )
     parser.add_argument(
-        "--days", type=int, default=30, help="Zeitfenster in Tagen (default: 30)"
+        "--days", type=int, default=400, help="Zeitfenster in Tagen (default: 400)"
     )
     parser.add_argument("--db", default="data/bitgrid.db")
     parser.add_argument(

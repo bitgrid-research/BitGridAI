@@ -50,7 +50,10 @@ log = logging.getLogger("bitcoin_kpi_sync")
 # HA-Sensoren) automatisch aufzuholen, ohne bei jedem Lauf die komplette
 # Historie neu zu berechnen (das macht schon nightly.py separat um 00:20).
 _REBUILD_DAYS = 10
-_EXPORT_DAYS = 30
+# 400 statt 30 seit 26.09.2026: gleicher Wert wie der CLI-Default von
+# energy_to_sats_export.py. Mit 30 Tagen lief das Woche/Monat-Blaettern der
+# Effizienz-Karte nach einer Seite ins Leere (live: Export ab 27.08.).
+_EXPORT_DAYS = 400
 
 
 def main() -> None:
