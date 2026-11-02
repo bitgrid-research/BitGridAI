@@ -49,15 +49,7 @@
       "effect": "Miner läuft weiter — Mindestlaufzeit einhalten",
       "options": "Stopp frühestens nach 3 Intervallen"
     },
-    "group_b_reference": {
-      "energie": "Der Miner bleibt an — er läuft erst seit einem von drei Pflicht-Intervallen, so vermeiden wir ständiges Ein- und Ausschalten.",
-      "waerme": "Dein Gerät heizt weiter: Erst eines von drei Intervallen ist um — kurzes An-Aus würde nur die Wärme stören.",
-      "tech": "NOOP_R5_MIN_RUNTIME_NOT_REACHED: R5-Stabilität, 1 von 3 min_runtime-Blöcken (je 10 min), kein Stop."
-    },
-    "group_b": {
-      "energie": "Der Miner bleibt an, da er erst eines der drei erforderlichen Intervalle gelaufen hat.",
-      "waerme": "Dein Gerät heizt gerade mit kostenloser Wärme aus deinem Solarüberschuss, da die Mindestlaufzeit von einem Drittel der Zeit erfüllt ist.",
-      "tech": "NOOP_R5_MIN_RUNTIME_NOT_REACHED: R5-Stabilität, da nur ein Drittel der erforderlichen Laufzeit erreicht wurde."
-    }
+    "group_b_reference": "Der Miner bleibt an, er läuft erst seit einem von drei Pflicht-Intervallen, so vermeiden wir ständiges Ein- und Ausschalten.",
+    "group_b": null
   }
 }

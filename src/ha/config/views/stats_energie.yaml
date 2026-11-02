@@ -1,0 +1,194 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Energie-Statistik (linke Spalte) — Heute / Monat / 2026 nebeneinander.
+# Eingebunden via !include in:
+#   - bitgrid_dashboard_v2.yaml  → Tab "Statistik", grid-area: energie
+# ═══════════════════════════════════════════════════════════════════════
+type: horizontal-stack
+cards:
+
+  # ── Energie Heute ────────────────────────────────────────────────────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - padding: 12px 16px
+      custom_fields:
+        stats_energie_heute:
+          - width: 100%
+          - justify-self: stretch
+          - box-sizing: border-box
+    custom_fields:
+      stats_energie_heute: >
+        [[[
+          const pvKwh      = states['sensor.pv_energy_daily']?.state ?? '—';
+          const pvExpKwh   = states['sensor.grid_export_daily']?.state ?? '—';
+          const gridImpKwh = states['sensor.grid_import_daily']?.state ?? '—';
+          const hausKwh    = states['sensor.house_energy_daily']?.state ?? '—';
+          const hzKwh      = states['sensor.heizstab_energy_daily']?.state ?? '—';
+          const pvN   = parseFloat(pvKwh);
+          const pvExpN = parseFloat(pvExpKwh);
+          const impN  = parseFloat(gridImpKwh);
+          const hausN = parseFloat(hausKwh);
+          const pvSelfUse = (!isNaN(pvN) && !isNaN(pvExpN) && pvN > 0)
+            ? Math.max(0, pvN - pvExpN) : null;
+          const autarkie = (!isNaN(hausN) && !isNaN(impN) && hausN > 0)
+            ? Math.max(0, Math.min(100, (hausN - impN) / hausN * 100)) : null;
+          const fmtKwh = v => { const n = parseFloat(v); return isNaN(n) ? '—' : n.toFixed(2) + ' kWh'; };
+          const fmtPct = v => v !== null ? v.toFixed(0) + ' %' : '—';
+          const autColor = autarkie === null ? 'var(--secondary-text-color)'
+            : autarkie >= 80 ? '#4CAF50' : autarkie >= 50 ? '#f59e0b' : '#ef5350';
+          const row = (icon, label, val, iconColor) =>
+            `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+              <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+              <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+              <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+            </div>`;
+          return `<div style="width:100%;padding:2px 0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+              <ha-icon icon="mdi:chart-bar" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+              <span style="font-size:0.88rem;font-weight:700;">Heute</span>
+            </div>
+            <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+              ${row('mdi:solar-power', 'PV erzeugt', fmtKwh(pvKwh), '#4CAF50')}
+              ${row('mdi:home-lightning-bolt-outline', 'PV Eigenverbrauch', pvSelfUse !== null ? fmtKwh(pvSelfUse.toFixed(2)) : '—', '#f59e0b')}
+              ${row('mdi:shield-sun', 'Autarkie', fmtPct(autarkie), autColor)}
+              ${row('mdi:transmission-tower-export', 'Eingespeist', fmtKwh(pvExpKwh), '#8BC34A')}
+              ${row('mdi:transmission-tower-import', 'Netzbezug', fmtKwh(gridImpKwh), '#5C6BC0')}
+            </div>
+            <div>
+              ${row('mdi:home-lightning-bolt', 'Hausverbrauch', fmtKwh(hausKwh), '#f59e0b')}
+              ${row('mdi:water-boiler', 'Heizstab', fmtKwh(hzKwh), '#2196F3')}
+            </div>
+          </div>`;
+        ]]]
+
+  # ── Energie Monat ────────────────────────────────────────────────────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - padding: 12px 16px
+      custom_fields:
+        stats_energie_monat:
+          - width: 100%
+          - justify-self: stretch
+          - box-sizing: border-box
+    custom_fields:
+      stats_energie_monat: >
+        [[[
+          const pv   = parseFloat(states['input_number.pv_kwh_mtd']?.state ?? '0')
+                     + parseFloat(states['sensor.pv_energy_daily']?.state ?? '0');
+          const exp  = parseFloat(states['input_number.grid_export_mtd']?.state ?? '0')
+                     + parseFloat(states['sensor.grid_export_daily']?.state ?? '0');
+          const imp  = parseFloat(states['input_number.grid_import_mtd']?.state ?? '0')
+                     + parseFloat(states['sensor.grid_import_daily']?.state ?? '0');
+          const haus = parseFloat(states['input_number.house_kwh_mtd']?.state ?? '0')
+                     + parseFloat(states['sensor.house_energy_daily']?.state ?? '0');
+          const hz   = parseFloat(states['input_number.heizstab_kwh_mtd']?.state ?? '0')
+                     + parseFloat(states['sensor.heizstab_energy_daily']?.state ?? '0');
+          const pvSelfUse = pv > 0 ? Math.max(0, pv - exp) : null;
+          const autarkie  = haus > 0 ? Math.max(0, Math.min(100, (haus - imp) / haus * 100)) : null;
+          const fmtKwh = v => {
+            const n = parseFloat(v);
+            if (isNaN(n)) return '—';
+            return n >= 1000 ? (n / 1000).toFixed(2) + ' MWh' : n.toFixed(1) + ' kWh';
+          };
+          const fmtPct = v => v !== null ? v.toFixed(0) + ' %' : '—';
+          const autColor = autarkie === null ? 'var(--secondary-text-color)'
+            : autarkie >= 80 ? '#4CAF50' : autarkie >= 50 ? '#f59e0b' : '#ef5350';
+          const row = (icon, label, val, iconColor) =>
+            `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+              <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+              <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+              <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+            </div>`;
+          const month = new Date().toLocaleString('de-DE', {month: 'long'});
+          return `<div style="width:100%;padding:2px 0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+              <ha-icon icon="mdi:calendar-month" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+              <span style="font-size:0.88rem;font-weight:700;">${month}</span>
+            </div>
+            <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+              ${row('mdi:solar-power', 'PV erzeugt', fmtKwh(pv), '#4CAF50')}
+              ${row('mdi:home-lightning-bolt-outline', 'PV Eigenverbrauch', pvSelfUse !== null ? fmtKwh(pvSelfUse) : '—', '#f59e0b')}
+              ${row('mdi:shield-sun', 'Autarkie', fmtPct(autarkie), autColor)}
+              ${row('mdi:transmission-tower-export', 'Eingespeist', fmtKwh(exp), '#8BC34A')}
+              ${row('mdi:transmission-tower-import', 'Netzbezug', fmtKwh(imp), '#5C6BC0')}
+            </div>
+            <div>
+              ${row('mdi:home-lightning-bolt', 'Hausverbrauch', fmtKwh(haus), '#f59e0b')}
+              ${row('mdi:water-boiler', 'Heizstab', fmtKwh(hz), '#2196F3')}
+            </div>
+          </div>`;
+        ]]]
+
+  # ── Energie 2026 gesamt ──────────────────────────────────────────────
+  - type: custom:button-card
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    styles:
+      card:
+        - padding: 12px 16px
+      custom_fields:
+        stats_energie_ytd:
+          - width: 100%
+          - justify-self: stretch
+          - box-sizing: border-box
+    custom_fields:
+      stats_energie_ytd: >
+        [[[
+          const pv   = parseFloat(states['input_number.pv_kwh_ytd']?.state ?? '0')
+                     + parseFloat(states['sensor.pv_energy_daily']?.state ?? '0');
+          const exp  = parseFloat(states['input_number.grid_export_ytd']?.state ?? '0')
+                     + parseFloat(states['sensor.grid_export_daily']?.state ?? '0');
+          const imp  = parseFloat(states['input_number.grid_import_ytd']?.state ?? '0')
+                     + parseFloat(states['sensor.grid_import_daily']?.state ?? '0');
+          const haus = parseFloat(states['input_number.house_kwh_ytd']?.state ?? '0')
+                     + parseFloat(states['sensor.house_energy_daily']?.state ?? '0');
+          const hz   = parseFloat(states['input_number.heizstab_kwh_ytd']?.state ?? '0')
+                     + parseFloat(states['sensor.heizstab_energy_daily']?.state ?? '0');
+          const pvSelfUse = pv > 0 ? Math.max(0, pv - exp) : null;
+          const autarkie  = haus > 0 ? Math.max(0, Math.min(100, (haus - imp) / haus * 100)) : null;
+          const fmtKwh = v => {
+            const n = parseFloat(v);
+            if (isNaN(n)) return '—';
+            return n >= 1000 ? (n / 1000).toFixed(2) + ' MWh' : n.toFixed(1) + ' kWh';
+          };
+          const fmtPct = v => v !== null ? v.toFixed(0) + ' %' : '—';
+          const autColor = autarkie === null ? 'var(--secondary-text-color)'
+            : autarkie >= 80 ? '#4CAF50' : autarkie >= 50 ? '#f59e0b' : '#ef5350';
+          const row = (icon, label, val, iconColor) =>
+            `<div style="display:flex;align-items:center;padding:2px 0;gap:6px;width:100%;">
+              <ha-icon icon="${icon}" style="--mdc-icon-size:14px;color:${iconColor};flex-shrink:0;"></ha-icon>
+              <span style="color:var(--secondary-text-color);font-size:0.78rem;flex:1;min-width:0;">${label}</span>
+              <span style="font-size:0.85rem;font-weight:600;white-space:nowrap;">${val}</span>
+            </div>`;
+          return `<div style="width:100%;padding:2px 0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+              <ha-icon icon="mdi:calendar-today" style="--mdc-icon-size:17px;color:var(--primary-text-color);"></ha-icon>
+              <span style="font-size:0.88rem;font-weight:700;">2026 gesamt</span>
+            </div>
+            <div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--divider-color);">
+              ${row('mdi:solar-power', 'PV erzeugt', fmtKwh(pv), '#4CAF50')}
+              ${row('mdi:home-lightning-bolt-outline', 'PV Eigenverbrauch', pvSelfUse !== null ? fmtKwh(pvSelfUse) : '—', '#f59e0b')}
+              ${row('mdi:shield-sun', 'Autarkie', fmtPct(autarkie), autColor)}
+              ${row('mdi:transmission-tower-export', 'Eingespeist', fmtKwh(exp), '#8BC34A')}
+              ${row('mdi:transmission-tower-import', 'Netzbezug', fmtKwh(imp), '#5C6BC0')}
+            </div>
+            <div>
+              ${row('mdi:home-lightning-bolt', 'Hausverbrauch', fmtKwh(haus), '#f59e0b')}
+              ${row('mdi:water-boiler', 'Heizstab', fmtKwh(hz), '#2196F3')}
+            </div>
+          </div>`;
+        ]]]

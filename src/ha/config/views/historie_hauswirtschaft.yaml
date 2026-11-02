@@ -1,0 +1,58 @@
+# ═══════════════════════════════════════════════════════════════════════
+# HAUSWIRTSCHAFT — Abschnitt "Historie" (Tab "EnergieInfo"). Vier bedingte
+# Varianten (eine pro input_select.historie_zeitraum-Option), s.
+# historie_untergeschoss.yaml fuer die volle Begruendung (Custom-Element-
+# Wechsel 25.09.2026, Statistics-Datenweg).
+#
+# Eingebunden via !include in historie_raeume_cycler.yaml.
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+cards:
+  - type: conditional
+    conditions:
+      - entity: input_select.historie_zeitraum
+        state: "Letzte 24 Stunden"
+    card:
+      type: custom:bitgrid-historie-chart
+      entity: sensor.raum_hauswirtschaft_power_w
+      name: Hauswirtschaft
+      icon: mdi:washing-machine
+      color: "#f49891"
+      span: 24h
+      period: hour
+  - type: conditional
+    conditions:
+      - entity: input_select.historie_zeitraum
+        state: "Letzte 7 Tage"
+    card:
+      type: custom:bitgrid-historie-chart
+      entity: sensor.raum_hauswirtschaft_power_w
+      name: Hauswirtschaft
+      icon: mdi:washing-machine
+      color: "#f49891"
+      span: 7d
+      period: hour
+  - type: conditional
+    conditions:
+      - entity: input_select.historie_zeitraum
+        state: "Letzte 30 Tage"
+    card:
+      type: custom:bitgrid-historie-chart
+      entity: sensor.raum_hauswirtschaft_power_w
+      name: Hauswirtschaft
+      icon: mdi:washing-machine
+      color: "#f49891"
+      span: 30d
+      period: day
+  - type: conditional
+    conditions:
+      - entity: input_select.historie_zeitraum
+        state: "Letzte 12 Monate"
+    card:
+      type: custom:bitgrid-historie-chart
+      entity: sensor.raum_hauswirtschaft_power_w
+      name: Hauswirtschaft
+      icon: mdi:washing-machine
+      color: "#f49891"
+      span: 365d
+      period: week

@@ -38,7 +38,7 @@ git status
 | Core trifft falsche Decisions | [C – Core & Regeln](#c--core--regeln) |
 | MQTT-Nachrichten fehlen | [B – Stack & Laufzeit](#b--stack--laufzeit) |
 | Tests schlagen fehl | [D – Tests & CI](#d--tests--ci) |
-| ₿itsy antwortet nicht | [E – ₿itsy / OpenClaw](#e--bitsy--openclaw) |
+| ₿itsy antwortet nicht | [E – ₿itsy / Hermes Agent](#e--bitsy--hermes-agent) |
 
 &nbsp;
 
@@ -352,13 +352,20 @@ Häufig: fehlende System-Dependencies im Dockerfile, oder `requirements.txt` nic
 
 ---
 
-## E — ₿itsy / OpenClaw
+## E — ₿itsy / Hermes Agent
 
 ### Agent antwortet nicht
 
 ```bash
-# OpenClaw läuft?
-curl -s http://umbrel.local:18789/health
+# Hermes Agent laeuft?
+curl -s -o /dev/null -w '%{http_code}
+' http://umbrel.local:18790/
+
+# Ollama (KI-Instanz) erreichbar und Modell vorhanden?
+curl -s http://<OLLAMA-HOST>:11434/api/tags
+
+# Bitsy-Status/Chat-Dienst laeuft?
+curl -s -X POST http://umbrel.local:8766/trigger
 
 # Umbrel-Dienst prüfen
 ssh bitgrid "docker ps | grep openclaw"
@@ -368,48 +375,30 @@ ssh bitgrid "docker ps | grep openclaw"
 
 ### Falsches Modell geladen
 
-In OpenClaw-Einstellungen prüfen:
+In den Hermes-Agent-Einstellungen prüfen:
 
 | Workspace | Erwartetes Modell |
 |-----------|------------------|
-| `bitsy-dev` | `qwen3:14b` |
-| `bitsy-home` | `qwen3:4b` |
-| `bitsy-study` | `qwen3:14b` |
+| `neo` | `gemma4:e4b` |
 
-Wenn das falsche Modell aktiv ist: in der OpenClaw-Oberfläche manuell wechseln.
+Auf `.104` läuft seit 2026-08-06 verifiziert nur noch `gemma4:e4b` und
+`bge-m3:latest`, siehe `CLAUDE.md`.
 
-&nbsp;
-
-### Workspace nicht initialisiert (₿itsy kennt das Projekt nicht)
-
-`BOOTSTRAP.md` prüfen — falls noch vorhanden, wurde der erste Start nicht abgeschlossen.
-Datei manuell durchlaufen lassen oder Agent neu starten mit BOOTSTRAP-Anweisung.
+Wenn das falsche Modell aktiv ist: in der Hermes Agent-Oberfläche manuell wechseln.
 
 &nbsp;
 
-### ₿itsy-Home / Study schreibt trotzdem Aktorbefehle vor
-
-Das ist ein Konfigurationsfehler im SOUL.md oder AGENTS.md des Workspaces.
-
-Sofortmaßnahme: Session beenden.
-Dann `SOUL.md` und `AGENTS.md` des betroffenen Workspaces prüfen —
-die Red Lines müssen explizit stehen:
-
-```
-- Keine Aktorbefehle. Niemals.
-- Kein POST /override. Kein POST /cmd.
-```
-
-&nbsp;
-
-### MEMORY.md wächst zu groß (₿itsy-Dev)
+### Neos `kurzzeit.md` wächst zu groß
 
 ```bash
-wc -l docs/development/36_ai_tooling/bitsy-dev/MEMORY.md
+ssh bitgrid "wc -l /pfad/zu/memory_neo/kurzzeit.md"
 ```
 
-Wenn > 200 Zeilen: destillieren. Tagesnotizen in `memory/` lesen,
-das wirklich Wichtige in MEMORY.md behalten, den Rest archivieren oder löschen.
+Wenn deutlich über ein paar hundert Zeilen: destillieren. Das wirklich
+Wichtige nach `langzeit/JJJJ-MM.md` verschieben, `kurzzeit.md` auf den
+aktuellen Arbeitsstand kürzen. Neo darf das selbst tun, SOUL.md sagt ihm
+explizit, wie die drei Dateien (`kurzzeit.md`, `langzeit/*.md`, `gedanken.md`)
+zusammenspielen.
 
 &nbsp;
 

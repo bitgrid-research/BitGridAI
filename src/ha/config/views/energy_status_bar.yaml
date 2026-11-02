@@ -1,0 +1,215 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Energie-Status-Leiste — Akku/PV/Überschuss/Netzbezug/Haus/Miner/Heizstab.
+# Single source of truth. Eingebunden in:
+#   - bitgrid_dashboard_v1.yaml  → Miner-Tab (vor miner_controls.yaml)
+#   - views/stats_pool.yaml      → Tab 3 Statistik, F2Pool-Spalte (oben)
+# ═══════════════════════════════════════════════════════════════════════
+type: horizontal-stack
+cards:
+
+  - type: custom:button-card
+    entity: sensor.battery_soc_pct
+    name: Akku
+    icon: mdi:battery-charging
+    show_state: true
+    styles:
+      card:
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+        - padding: 12px 4px
+      icon:
+        - width: 36px
+        - height: 36px
+        - color: >
+            [[[
+              const v = parseFloat(entity.state);
+              if (v <= 20) return '#F44336';
+              if (v <= 40) return '#f59e0b';
+              if (v <= 90) return '#4CAF50';
+              return '#26A69A';
+            ]]]
+      name:
+        - font-size: 0.8rem
+        - color: var(--secondary-text-color)
+      state:
+        - font-size: 0.9rem
+        - font-weight: 600
+    tap_action:
+      action: more-info
+
+  - type: custom:button-card
+    entity: sensor.pv_power_w
+    name: PV
+    icon: mdi:solar-power
+    show_state: true
+    styles:
+      card:
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+        - padding: 12px 4px
+      icon:
+        - width: 36px
+        - height: 36px
+        - color: >
+            [[[
+              const v = parseFloat(entity.state);
+              if (!v || v === 0) return 'var(--secondary-text-color)';
+              if (v < 800)  return '#f59e0b';
+              if (v < 1600) return '#8BC34A';
+              if (v < 3400) return '#4CAF50';
+              return '#FFD600';
+            ]]]
+      name:
+        - font-size: 0.8rem
+        - color: var(--secondary-text-color)
+      state:
+        - font-size: 0.9rem
+        - font-weight: 600
+    tap_action:
+      action: more-info
+
+  - type: custom:button-card
+    entity: sensor.grid_export_w
+    name: Überschuss
+    icon: mdi:transmission-tower-export
+    show_state: true
+    styles:
+      card:
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+        - padding: 12px 4px
+      icon:
+        - width: 36px
+        - height: 36px
+        - color: >
+            [[[
+              const v = parseFloat(entity.state);
+              if (!v || v === 0) return 'var(--secondary-text-color)';
+              if (v <= 500) return '#8BC34A';
+              return '#4CAF50';
+            ]]]
+      name:
+        - font-size: 0.8rem
+        - color: var(--secondary-text-color)
+      state:
+        - font-size: 0.9rem
+        - font-weight: 600
+    tap_action:
+      action: more-info
+
+  - type: custom:button-card
+    entity: sensor.grid_import_w
+    name: Netzbezug
+    icon: mdi:transmission-tower-import
+    show_state: true
+    styles:
+      card:
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+        - padding: 12px 4px
+      icon:
+        - width: 36px
+        - height: 36px
+        - color: >
+            [[[
+              const v = parseFloat(entity.state);
+              if (!v || v === 0) return 'var(--secondary-text-color)';
+              if (v <= 100) return '#4CAF50';
+              if (v <= 500) return '#f59e0b';
+              return '#5C6BC0';
+            ]]]
+      name:
+        - font-size: 0.8rem
+        - color: var(--secondary-text-color)
+      state:
+        - font-size: 0.9rem
+        - font-weight: 600
+    tap_action:
+      action: more-info
+
+  - type: custom:button-card
+    entity: sensor.house_load_w
+    name: Haus
+    icon: mdi:home-lightning-bolt
+    show_state: true
+    styles:
+      card:
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+        - padding: 12px 4px
+      icon:
+        - width: 36px
+        - height: 36px
+        - color: >
+            [[[
+              const v = parseFloat(entity.state);
+              if (!v || v === 0) return 'var(--secondary-text-color)';
+              if (v <= 2500) return '#80DEEA';
+              if (v <= 4000) return '#26C6DA';
+              return '#00838F';
+            ]]]
+      name:
+        - font-size: 0.8rem
+        - color: var(--secondary-text-color)
+      state:
+        - font-size: 0.9rem
+        - font-weight: 600
+    tap_action:
+      action: more-info
+
+  - type: custom:button-card
+    entity: sensor.miner_total_power_w
+    name: Miner
+    icon: mdi:pickaxe
+    show_state: true
+    styles:
+      card:
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+        - padding: 12px 4px
+      icon:
+        - width: 36px
+        - height: 36px
+        - color: >
+            [[[
+              const v = parseFloat(entity.state);
+              if (!v || v < 30) return 'var(--secondary-text-color)';
+              if (v < 400)  return '#f59e0b';
+              return '#4CAF50';
+            ]]]
+      name:
+        - font-size: 0.8rem
+        - color: var(--secondary-text-color)
+      state:
+        - font-size: 0.9rem
+        - font-weight: 600
+    tap_action:
+      action: more-info
+
+  - type: custom:button-card
+    entity: sensor.ac_elwa_2_power1_solar
+    name: Heizstab
+    icon: mdi:water-boiler
+    show_state: true
+    styles:
+      card:
+        - background: var(--secondary-background-color)
+        - border-radius: 12px
+        - padding: 12px 4px
+      icon:
+        - width: 36px
+        - height: 36px
+        - color: >
+            [[[
+              const v = parseFloat(entity.state);
+              if (!v || v === 0) return 'var(--secondary-text-color)';
+              return '#2196F3';
+            ]]]
+      name:
+        - font-size: 0.8rem
+        - color: var(--secondary-text-color)
+      state:
+        - font-size: 0.9rem
+        - font-weight: 600
+    tap_action:
+      action: more-info

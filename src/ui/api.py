@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from src.data.event_store import EventStore
     from src.explain.explain_agent import ExplainAgent
 
-app = FastAPI(title="BitGridAI API", version="0.3.0")
+app = FastAPI(title="BitGridAI API", version="0.3.2")
 
 # ---------------------------------------------------------------------------
 # Dependency-Injection via Setter (wird vom ProductionRunner befüllt)

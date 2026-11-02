@@ -7,6 +7,7 @@ Idempotenz: gleiche command_id → keine zweite Nachricht.
 from __future__ import annotations
 
 import logging
+import uuid
 from collections import deque
 from dataclasses import dataclass
 from typing import Callable
@@ -14,6 +15,15 @@ from typing import Callable
 log = logging.getLogger(__name__)
 
 _DEDUP_CACHE_SIZE = 10
+
+
+def new_command_id() -> str:
+    """Frische Surrogat-ID für ein dispatchtes Kommando.
+
+    Dient als Idempotenz-Schlüssel (Dedup) und als PK im EventStore. Wird an der
+    Boundary erzeugt, damit der deterministische Kern frei von uuid bleibt.
+    """
+    return str(uuid.uuid4())
 
 
 @dataclass

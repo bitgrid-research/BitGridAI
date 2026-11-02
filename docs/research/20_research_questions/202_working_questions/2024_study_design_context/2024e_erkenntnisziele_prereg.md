@@ -7,92 +7,194 @@ und das Szenario-Set [2024d](./2024d_scenarios/README.md).
 
 > **Markierung:** 🟦 = mit Betreuer final bestätigen (Studien-Design-Entscheidung).
 
-> **Design-Änderung (2026-06-05, vor Datenerhebung):** Die Persona-Achse in Gruppe B
-> wurde von **Vorwissens-Stufen** (Laie → Experte) auf **Interesse-Typen**
-> (`energie`/`waerme`/`tech`) umgestellt — zur Konsistenz mit der Implementierung
-> (`ExplainAgent`, `study_freeze.py`), die diese Typen bereits nutzt. Folge: **H3**
-> ist nun **ungerichtet** (Persona-Typen statt Novize>Experte); Vorwissen wird als
-> deskriptive Kovariate weitergeführt. Änderung erfolgt **vor** jeder Erhebung (kein
-> HARKing) und ist 🟦 mit dem Betreuer zu bestätigen.
+> **Design-Änderung (2026-06-11, vor Datenerhebung):** Auf Empfehlung des Betreuers
+> wird die Studie auf einen **reinen A/B-Vertrauensvergleich ohne Personas** umgestellt.
+> Der **Persona-Faktor entfällt vollständig** (Gruppe B nutzt eine einzige, generische
+> LLM-Stimme; `_PERSONA_INSTRUCTIONS`/`OLLAMA_PERSONA` aus dem Code entfernt). Die
+> **primäre AV wechselt von Regelverständnis auf Nutzervertrauen** (Automation Trust
+> Scale, Jian 2000). Zwei Forschungsfragen: **FF1** (Vertrauen, A vs. B) und **FF2**
+> (Güte der LLM-Ausgaben, objektiv). Das Design wird **mixed**: Between-Trust (primär)
+> plus Within-Direktvergleich am Sitzungsende. Änderung erfolgt **vor** jeder Erhebung
+> (kein HARKing) und ist 🟦 mit dem Betreuer abgestimmt.
+
+> **Design-Änderung (2026-06-12, vor Datenerhebung):** Einordnung als **Design Science
+> Research** (Artefakt BitGridAI + Evaluation + Feedback-Schleife). Die Studie ist
+> formative Evaluation **mit** konfirmatorischem A/B-Kern (H1/H2); die Güte-Befunde (FF2)
+> und qualitativen Themen fließen als Verbesserungs-Input in die Erklärschicht zurück.
+> **Sitzung auf ~45 Min gestrafft** (Erwartungs-Vorfrage entfällt; Within auf 2–3 Szenarien).
+
+> **Design-Änderung (2026-10-17, vor Datenerhebung; in dieser Datei nachgetragen am
+> 2026-10-28):** Entschieden am 17.10.2026, also vor der ersten Probandensitzung (VP01,
+> 20.10.2026), und mit dem Betreuer (Prof. Wallach) abgestimmt. **Transparenzhinweis:** In
+> diese Datei erst am 28.10.2026 eingetragen. Bis dahin waren 4 von 16 Sitzungen erhoben,
+> aber **nicht ausgewertet** (keine Einsicht in Vertrauenswerte). Die Abschnitte unten
+> geben den Stand vom 12.06. wieder und gelten nur, soweit dieser Nachtrag nichts anderes
+> festlegt.
+>
+> 1. **Manipulation: Sprachstil statt LLM vs. statisch.** Variante A = umgangssprachlich
+>    (Ton des Maskottchens BitHamster), Variante B = technisch (Fachbegriffe, Regel-IDs).
+>    Beide Varianten sind feste Textbausteine, die deterministisch aus den Regelwerten
+>    befüllt werden (`src/ha/config/bitgrid_dashboard_v3.yaml`, Objekt `V.a`/`V.b`;
+>    Übersicht `docs/thesis/studie/hamster_texte_ab_vergleich.md`). Bild, Zustandslogik
+>    und Informationsgehalt sind identisch. Das lokale LLM diente nur zum Entwerfen der
+>    Bausteine; im Stimulus läuft **kein** LLM, damit keine Ausgabevarianz die
+>    Vergleichbarkeit stört.
+> 2. **Stimulus:** Replay eines realen Messtags (11.07.2026, dargestellt als 21.07.2026),
+>    ca. 20 Min, für alle Personen identische Abfolge. Konstruierte Abschnitte
+>    (Sensor-Ausfall, Überhitzungs-Stopp) sind markiert. Ersetzt das Snapshot-Set S1–S10.
+> 3. **Design: within-subjects**, N = 16. Jede Person durchläuft den Replay-Tag zweimal,
+>    einmal mit A, einmal mit B. Die Reihenfolge (AB/BA) wechselt zwischen den Personen
+>    (je 8 beginnen mit A bzw. B), um Lern- und Reihenfolgeeffekte auszubalancieren.
+>    Laut Studienplan (Annika Dietrich) werden die Bedingungen im Wechsel zugewiesen.
+>    🟦 Im Sitzungsprotokoll prüfen, ob das in VP01 bis VP04 so lief oder die Liste aus
+>    `scripts/build_randomisierung.py` (Seed 20261017, Blöcke à 4) genutzt wurde.
+> 4. **Primäre AV: Vertrauen in das automatisierte System**, SoSci-Block „Automation des
+>    Systems“, 5-stufig (1 = stimme gar nicht zu bis 5 = stimme voll zu) plus „keine
+>    Angabe“, statt Jian (2000). Die Itemformulierungen (u. a. „Das System ist imstande,
+>    Situationen richtig einzuschätzen“, „Ich kenne bereits ähnliche Systeme“, „Die
+>    Entwickler sind vertrauenswürdig“) entsprechen dem Trust-in-Automation-Fragebogen
+>    nach Körber (2019). 🟦 Gegen die Originalquelle prüfen, Itemzahl, Umpolung und
+>    Subskalen festhalten, Umgang mit „keine Angabe“ festlegen (fehlender Wert, nicht 0),
+>    Quelle in `zotero_export.bib` aufnehmen. Der Studienplan nennt „KIT, 1–7“; der
+>    eingesetzte Bogen ist 5-stufig. **Nebenmaße:** SUS (deutsche Fassung, 5-stufig), subjektive
+>    Verständlichkeit der Erklärtexte (Likert-Skala), Vorwissen zu PV und Bitcoin-Mining
+>    (Kovariate), Teach-Back am Sitzungsende (qualitatives Systemverständnis, erklärt
+>    gegenüber der Studienleitung). Der NASA-TLX wird nicht erhoben. Die im Studienplan
+>    erwogene Element-Checkliste wurde in VP01 bis VP04 nicht erhoben; ein Index für das
+>    Textverständnis ist noch nicht festgelegt. Beide werden nur aufgenommen, wenn sie
+>    für alle 16 Personen gleich erhoben werden können. 🟦
+> 5. **H1 (neu, primär):** Das Vertrauen unterscheidet sich zwischen A und B.
+>    **Zweiseitig**, weil vor dem 20.10. keine Richtung dokumentiert wurde; eine jetzt
+>    gesetzte Richtung wäre nicht mehr präregistriert. Wilcoxon-Vorzeichen-Rang-Test
+>    (gepaart, zweiseitig) auf die Vertrauenswerte A vs. B, Effektgröße r, 95 %-KI, N = 16.
+>    Reihenfolgeeffekt wird mitberichtet (Vergleich der Differenzen AB- vs. BA-Personen).
+>    **Sensitivitätsanalyse:** nur der erste Durchlauf je Person als Between-Vergleich
+>    (8 vs. 8, Mann-Whitney-U zweiseitig), weil das Sehen der ersten Variante die
+>    Bewertung der zweiten beeinflussen kann (Carry-over). Die Studie bleibt
+>    hypothesengenerierend. 🟦
+> 6. **FF2 (neu): Faktengleichheit A/B** als Manipulationscheck. Je Zustand prüfen zwei
+>    Rater verblindet, ob A und B dieselben Aussagen treffen (Messwert, Schwelle,
+>    Konsequenz). Ersetzt „Güte der LLM-Ausgaben“; die Rubrik ist entsprechend
+>    anzupassen. 🟦
+> 7. **H2 (Forced-Choice-Direktvergleich am Sitzungsende):** offen, ob er zusätzlich zu
+>    den beiden Durchläufen erhoben wird; vor der Auswertung festzulegen und hier
+>    nachzutragen. 🟦
+> 8. **Ablauf (SoSci, Stand der Erhebung):** Einführungsvideo (2:05, für alle identisch),
+>    Demografie und Vorkenntnisse PV/Bitcoin-Mining (5-stufig), freie Erkundung mit
+>    lautem Denken, Begriffserklärung Miner, Aufgabe 1 (Schwellenwert ändern), SUS,
+>    Vertrauen, Teach-Back, Aufgabe 2 (Ausgabe erfassen), SUS, Vertrauen. Die Aufgaben
+>    sind an die Position gebunden (Aufgabe 1 immer im ersten, Aufgabe 2 immer im zweiten
+>    Durchlauf) und werden über die wechselnde Reihenfolge der Varianten ausbalanciert.
+>    Das Teach-Back liegt zwischen den Durchläufen und bezieht sich damit nur auf die
+>    zuerst gesehene Variante (Vergleich A vs. B dort between, 8 vs. 8).
+>    Die Instruktion kündigt „eine weitere Testperson“ an; erklärt wird tatsächlich der
+>    Studienleitung. 🟦 Im Debriefing auflösen und im Ethik-/Einwilligungsteil benennen.
 
 ## Kernfrage
 
-> Verbessert **persona-adaptive LLM-Erklärung** (Gruppe B) gegenüber **statischem
-> Regeltext** (Gruppe A) das **Regelverständnis** *und* die **angemessene
-> Override-Reaktion** von Laien — **bei gewahrter Treue** zur deterministischen
-> Entscheidung?
+> **Wann vertrauen Nutzer den Erklärtexten mehr?** Erhöht eine **LLM-Erklärung**
+> (Gruppe B) gegenüber **statischem Regeltext** (Gruppe A) das **Nutzervertrauen**, und
+> ist ein etwaiges Vertrauens-Plus durch die objektive **Güte** der Ausgaben **gedeckt**
+> (Kalibrierung) oder Über-Vertrauen?
 
 Der USP: Da der Kern **deterministisch + auditierbar** ist, ist Faithfulness
-*messbar* (siehe `study_faithfulness.py`) — das ist der wissenschaftliche Beitrag,
-nicht „LLM erklärt schöner".
+*messbar* (siehe `study_faithfulness.py`). FF2 ist damit der Riegel gegen „LLM erklärt
+nur schöner": ein Vertrauensgewinn ohne Güte-Deckung ist Über-Vertrauen, kein Fortschritt.
 
-## Hypothesen (🟦 zu bestätigen)
+## Forschungsfragen und Hypothesen (🟦 zu bestätigen)
+
+- **FF1 (Vertrauen):** Erhöht B gegenüber A das Nutzervertrauen?
+- **FF2 (Güte):** Wie ist die objektive Güte der LLM-Ausgaben, und deckt sie ein
+  Vertrauens-Plus (Kalibrierung)?
 
 | ID | Hypothese | Richtung |
 |---|---|---|
-| **H1** (primär) | Gruppe B erzielt einen höheren **Regelverständnis-Score (0–12)** als Gruppe A. | gerichtet, einseitig |
-| **H2** | Gruppe B zeigt häufiger **angemessene** Override-Reaktionen (S4 akzeptieren, S9 begründet). | gerichtet |
-| **H3** (explorativ) 🟦 | Das Regelverständnis in Gruppe B unterscheidet sich zwischen den drei **Persona-Typen** (energie/waerme/tech). Vorwissen wird zusätzlich deskriptiv als Kovariate betrachtet. | explorativ, ungerichtet, n=5/Typ |
-| **H0** | Kein Unterschied im Verständnis-Score zwischen A und B. | Nullhypothese |
+| **H1** (primär, between) | Gruppe B berichtet ein höheres **Vertrauen** (Jian-Summe 12–84) als Gruppe A. | gerichtet, einseitig |
+| **H2** (within) | Im Direktvergleich wird B häufiger als vertrauenswürdiger gewählt als per Zufall, und das Vergleichsrating liegt über der neutralen Mitte. | gerichtet |
+| **FF2** (deskriptiv) | Faithfulness-Rate und Rubrik-Güte von B (A als treue Referenz); Auswertung als Kalibrierung gegen FF1, keine klassische Nullhypothese. | deskriptiv/objektiv |
+| **H0** | Kein Unterschied im Vertrauen zwischen A und B. | Nullhypothese |
 
 ## Operationalisierung
 
-- **Primär-AV — Regelverständnis-Score (0–12)** nach Rubrik (unten), aus den offenen Fragen, blind doppelt bewertet (Interrater-κ).
-- **Sekundär — Override-Angemessenheit:** kategorial (angemessen / Disuse / Misuse) je Override-Aufgabe; Ground-Truth unten.
-- **Optional — Vertrauen:** Automation Trust Scale; ggf. SUS / Raw-NASA-TLX.
-- **Manipulation:** Gruppe A = `explanation.group_a` (statisch), Gruppe B = `explanation.group_b.<persona>` (LLM) aus dem **eingefrorenen** Studien-Set (`src/sim/study_set/`).
+- **Primär-AV — Nutzervertrauen (12–84):** Automation Trust Scale (Jian 2000), auf die
+  gesehene Variante, **vor** dem Reveal.
+- **Within (H2):** je verglichenem Szenario Forced-Choice (A/B) + 7-stufiges
+  Vergleichsrating (4 = gleich), nach dem Reveal, über alle N = 16.
+- **FF2 — Güte:** objektive Faithfulness (`study_faithfulness.py`) + verblindetes
+  2-Rater-Rubrik-Rating (`study_guete.py`) gegen die Gold-Referenz.
+- **Optional/Nebenmaße:** SUS, Raw-NASA-TLX; behaviorale Override-/Verhaltensspur.
+- **Manipulation:** Gruppe A = `explanation.group_a` (statisch), Gruppe B =
+  `explanation.group_b` (ein LLM-Satz, ohne Personas) aus dem **eingefrorenen**
+  Studien-Set (`src/sim/study_set/`).
 
-## Rubrik — Regelverständnis-Score (0–12) (🟦 im Pilot kalibrieren)
+## Rubrik — Güte der Erklärtexte (FF2) (🟦 im Pilot kalibrieren)
 
-4 Dimensionen × 0–3 Punkte:
+3 Dimensionen × 0–2 Punkte (Güte-Summe 0–6) + Halluzinations-Flag (0/1); zwei
+verblindete Rater, Interrater-κ (gewichtet). Vollständig in
+[Anhang G](../../../../thesis/kapitel/99_anhang/99g_kodierleitfaden_v2.tex):
 
-| Dimension | 0 | 3 |
+| Dimension | 0 | 2 |
 |---|---|---|
-| **Regel-Identifikation** (R1–R5) | falsch/keine | korrekte Regel + Bedingung |
-| **Prioritätskette** (R3>R2>R4>R5>R1) | kein Verständnis | erklärt, warum Sicherheit/Autarkie vorgeht |
-| **Zentralkonzept „Steuern statt Einspeisen"** | nicht erfasst | artikuliert Eigenverbrauch-vor-Einspeisung |
-| **Übertragung** (neue Situation) | rät | wendet Regel korrekt an |
+| **Korrektheit / Faithfulness** | widerspricht der Entscheidung / falsch | stimmt mit der deterministischen Entscheidung überein |
+| **Vollständigkeit** | weder Auslöser noch Messwert | Auslöser + relevanter Messwert genannt |
+| **Klarheit** | unverständlich / Fachjargon | laienverständlich, ein Satz, klare Alltagssprache |
 
-## Override-Ground-Truth je Szenario
+A ist konstruktionsbedingt treu (Template-Interpolation) und dient als Referenz/Decke;
+die Rubrik prüft vor allem, ob B diese Güte **hält**.
 
-Definiert, welche Override-Reaktion **angemessen** ist (Voraussetzung für sauberes
-Misuse/Disuse-Coding):
+## Within-Vergleich und behaviorale Spur (Szenario-Auswahl)
+
+Für den Within-Direktvergleich werden 2–3 repräsentative Szenarien gezeigt, darunter
+die kontraintuitiven Items **S4** (Sicherheitsstopp) und **S9** (Forecast-Veto). Die
+optionale Override-/Verhaltensspur nutzt dieselben Items als objektive Verlässlichkeits-
+Triangulation des Selbstberichts (angemessen / Disuse / Misuse je Szenario):
 
 | Szenario | System | Angemessen | Override = |
 |---|---|---|---|
-| S1 START | mint | akzeptieren | unnötig |
-| S2 NOOP (kein Überschuss) | wartet | akzeptieren | Misuse (kein Überschuss) |
-| S3 NOOP (Preis) 🟦 | wartet | nuanciert (Nutzerpräferenz) | offen |
 | **S4 STOP (Übertemp)** | stoppt | **akzeptieren (Safety)** | **Misuse** (Hauptitem) |
-| S5 STOP (Comm) | stoppt | akzeptieren (Safety) | Misuse |
-| S6 NOOP (soft) | wartet | akzeptieren | mildes Misuse (Reserve) |
+| **S9 NOOP (Forecast)** | wartet | begründet akzeptieren | **Disuse/Misuse** (Hauptitem) |
 | S7 STOP (hard) | stoppt | akzeptieren (Batterie) | Misuse |
 | S8 STOP (Netzbezug) | stoppt | akzeptieren (kein Netz-Mining) | Misuse |
-| **S9 NOOP (Forecast)** | wartet | begründet akzeptieren | **Disuse/Misuse** (Hauptitem) |
-| S10 NOOP (Deadband) | hält | akzeptieren | mildes Misuse (Flapping) |
 
 ## Analyseplan (festgeschrieben)
 
-- **Test:** Mann-Whitney-U (einseitig) auf den Verständnis-Score, A (n=5) vs. gepoolt B (n=15); Welch-/t-Test bei erfüllten Voraussetzungen (Shapiro-Wilk, Levene). Implementiert in `src/sim/study_analysis.py`.
-- **Immer berichten:** Effektgröße **r** (bzw. Cohen's *d*), **95 %-KI**, **N** — **p nie isoliert**.
-- **Persona-Typen:** rein explorativ/deskriptiv (n=5/Zelle, energie/waerme/tech); ungerichtet, da Interesse-Personas keine a-priori-Ordnung des Verständnisses begründen.
-- **Qualitativ:** thematische Analyse (Braun & Clarke) der offenen Antworten + Override-Begründungen.
-- **Triangulation:** Score × Themen × Verhaltensspur (Logs).
+- **Primär (H1, between):** Mann-Whitney-U (einseitig) auf das Vertrauen, A (n=8) vs.
+  B (n=8); Welch-/t-Test bei erfüllten Voraussetzungen (Shapiro-Wilk, Levene).
+  Implementiert in `src/sim/study_analysis.py`.
+- **Within (H2):** Binomial-/Vorzeichentest auf Forced-Choice (B vs. Zufall) und
+  Wilcoxon-Vorzeichen-Rang-Test des Vergleichsratings gegen die Mitte 4, über alle N=16.
+- **Güte (FF2):** Faithfulness-Raten deskriptiv; Rubrik-Mittelwerte + Interrater-κ
+  (`study_guete.py`); Kalibrierungs-Gegenüberstellung Vertrauen × Güte.
+- **Immer berichten:** Effektgröße **r** (bzw. Cohen's *d*), **95 %-KI**, **N** —
+  **p nie isoliert**.
+- **Qualitativ:** thematische Analyse (Braun & Clarke) der offenen Vertrauensbegründungen.
+- **Triangulation:** Trust × Within-Vergleich × Güte × Verhaltensspur (Logs).
 
 ## Voraussetzungen vor Erhebung
 
 - [x] **Szenario-Set eingefroren** (`study_freeze.py`, 10/10 verifiziert).
 - [x] **Faithfulness-Vorprüfung** (Gruppe A 10/10) — Gruppe B nach Ollama-Anbindung.
-- [ ] **Gruppe-B-Texte generiert + eingefroren** (externer Ollama-Rechner).
-- [ ] **Rubrik im Pilot kalibriert** (2–3 Durchläufe) + Interrater-κ.
+- [ ] **Gruppe-B-Text generiert + eingefroren** (externer Ollama-Rechner).
+- [ ] **Güte-Rubrik im Pilot kalibriert** (2–3 Texte) + Interrater-κ; zweiter Rater.
+- [ ] **Trust-Bogen + Within-Vergleichsbogen** im Pilot validiert.
 - [ ] **Hypothesen 🟦 + Ethikantrag** final.
 
 ## Limitationen (vorab, ehrlich)
 
-- **N = 20** → nur **große** Effekte detektierbar (d ≈ 0,8 → Power ~55 %). Studie **hypothesen-generierend**, Triangulation > p-Wert.
+- **N = 16** (balanciert 8 vs. 8) → der **between**-Primärtest erkennt nur **große**
+  Effekte (d ≈ 0,8). Power hängt vom Verfahren ab: t-Test-Näherung ~45 %, aber das
+  primär geplante **Mann-Whitney-U** liegt real bei nur ~40 % (einseitig; nachgerechnet
+  11.08.2026 per Monte-Carlo-Simulation, 200.000 Wiederholungen: t-Test 45,1 %,
+  Mann-Whitney-U 39,5 % ± 0,2 Prozentpunkte). Für 80 % Power wären n=20/Gruppe (N=40)
+  nötig. Der **within**-Vergleich (gepaart, N=16) trägt mehr Power und beantwortet die
+  Leitfrage direkter. Studie **hypothesen-generierend**, Triangulation > p-Wert.
+- **Within-Reveal:** weil jede Person beide Varianten sieht, drohen Reihenfolge-/Demand-
+  Effekte → Permutation der Reihenfolge, Trennung primär (vor Reveal)/within (nach Reveal),
+  verblindete Auswertung.
+- **Asymmetrische Güte:** A ist konstruktionsbedingt treu; FF2 prüft vor allem, ob B die
+  Treue hält, nicht ob B treuer ist als A.
 - **Saison-Bias:** Szenarien aus Spätfrühlings-Daten; Häufigkeiten sommer-spezifisch.
-- **Kern-Angleichung (offen):** Das **Energielabor** bildet den Realbetrieb (2× Avalon Q) **maßstabsgetreu** nach — gleiches SoC-Band-Schema, gleiche Modi (Eco/Std/Super), nur **leistungsskaliert** auf die kleinen Miner (Bitaxe/NerdQaxe); die SoC-Schwellen (50/58/80/90 %) sind **identisch**. Offen bleibt allein die Angleichung des **deterministischen Kerns** (`RuleEngineConfig`, kW-Überschuss-Logik R1; R4/R5 nicht im HA-Template) an dieses Schema → spätere Arbeit (ADR 020). Werte-Gegenüberstellung: [2024d](./2024d_scenarios/README.md).
-- **Faithfulness automatisch nur Vorstufe** — manuelle Bewertung bleibt nötig.
+- **Faithfulness automatisch nur Vorstufe** — das manuelle Rubrik-Rating bleibt nötig.
 
 ---
 

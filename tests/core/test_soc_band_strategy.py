@@ -26,8 +26,9 @@ def _state(
     temp: float = 42.0,
     grid: float = 0.0,
     heartbeat: float = 5.0,
+    forecast: float | None = None,
 ) -> EnergyState:
-    """EnergyState mit frei wählbarem SoC/PV; übrige Signale unkritisch."""
+    """EnergyState mit frei wählbarem SoC/PV/Forecast; übrige Signale unkritisch."""
     return EnergyState(
         block_id="2026-06-05T12:00:00",
         window_start=datetime(2026, 6, 5, 12, 0, tzinfo=timezone.utc),
@@ -42,7 +43,7 @@ def _state(
         quality="ok",
         missing_signals=(),
         energy_price_ct_kwh=None,
-        pv_forecast_kw=None,
+        pv_forecast_kw=forecast,
     )
 
 
@@ -147,3 +148,106 @@ def test_default_strategy_still_surplus() -> None:
     event = rule_engine.evaluate(state)  # Default-Config
     assert event.decision.action == "START"
     assert event.decision_code == "START_R1_SURPLUS_OK"
+
+
+# ── Nachtsperre (opt-in, nur soc_band) ───────────────────────────────────────────
+
+_SB_NIGHT = RuleEngineConfig(strategy="soc_band", night_block_enabled=True)
+_NIGHT = datetime(2026, 6, 15, 23, 0, tzinfo=timezone.utc)
+_NOON = datetime(2026, 6, 15, 12, 0, tzinfo=timezone.utc)
+
+
+def test_night_block_suspends_mining() -> None:
+    """Nachtfenster: kein Mining, SoC-unabhängig (auch bei vollem Akku)."""
+    event = rule_engine.evaluate(_state(soc=95.0, pv=8000.0), _SB_NIGHT, now=_NIGHT)
+    assert event.decision.action == "NOOP"
+    assert event.decision_code == "NOOP_NIGHT_BLOCK"
+
+
+def test_night_block_inactive_by_day() -> None:
+    """Tagsüber greift die Nachtsperre nicht — die SoC-Bänder entscheiden."""
+    event = rule_engine.evaluate(_state(soc=95.0, pv=8000.0), _SB_NIGHT, now=_NOON)
+    assert event.decision_code == "START_R1_SUPER"
+
+
+def test_night_block_off_by_default() -> None:
+    """Ohne night_block_enabled bleibt die Sperre aus (additiv)."""
+    event = rule_engine.evaluate(_state(soc=95.0, pv=8000.0), _SB, now=_NIGHT)
+    assert event.decision_code == "START_R1_SUPER"
+
+
+def test_reserve_stop_beats_night_block() -> None:
+    """Schützender Reserve-Stop hat Vorrang vor der Nachtsperre."""
+    event = rule_engine.evaluate(_state(soc=45.0), _SB_NIGHT, now=_NIGHT)
+    assert event.decision.action == "STOP"
+    assert event.decision_code == "STOP_R1_SOC_RESERVE_STOP"
+
+
+def test_r3_safety_beats_night_block() -> None:
+    """R3 Safety überstimmt auch die Nachtsperre."""
+    event = rule_engine.evaluate(_state(soc=70.0, temp=92.0), _SB_NIGHT, now=_NIGHT)
+    assert event.decision.action == "STOP"
+    assert "R3" in event.decision_code
+
+
+# ── R4 Forecast-Veto (opt-in, nur soc_band, nur Eco-Frischstart) ─────────────────
+
+_SB_R4 = RuleEngineConfig(
+    strategy="soc_band", forecast_veto_enabled=True, forecast_sustain_pv_kw=3.0
+)
+
+
+def test_r4_vetoes_fresh_eco_start_when_forecast_weak() -> None:
+    """Eco-Frischstart: SoC + aktuelle PV reichen, aber Prognose kippt → R4 NOOP."""
+    event = rule_engine.evaluate(
+        _state(soc=65.0, pv=6500.0, forecast=1.0), _SB_R4, last_action=None
+    )
+    assert event.decision.action == "NOOP"
+    assert event.decision_code == "NOOP_R4_FORECAST_PV_INSUFFICIENT"
+    assert event.params["min_predicted_surplus_kw"] == 3.0
+
+
+def test_r4_allows_fresh_eco_start_when_forecast_ok() -> None:
+    """Prognose über Schwelle → kein Veto, der Eco-Frischstart läuft."""
+    event = rule_engine.evaluate(
+        _state(soc=65.0, pv=6500.0, forecast=5.0), _SB_R4, last_action=None
+    )
+    assert event.decision_code == "THROTTLE_R1_ECO"
+
+
+def test_r4_does_not_veto_running_miner() -> None:
+    """Laufender Miner: R4 greift nicht (kein Frischstart), bleibt im Eco."""
+    event = rule_engine.evaluate(
+        _state(soc=65.0, pv=500.0, forecast=0.0),
+        _SB_R4,
+        last_action="THROTTLE",
+        blocks_since_last_change=5,
+    )
+    assert event.decision_code == "THROTTLE_R1_ECO"
+
+
+def test_r4_does_not_veto_standard_band() -> None:
+    """Standard speist aus der Batteriereserve → PV-Prognose irrelevant, kein Veto."""
+    event = rule_engine.evaluate(
+        _state(soc=85.0, forecast=0.0), _SB_R4, last_action=None
+    )
+    assert event.decision_code == "START_R1_STANDARD"
+
+
+def test_r4_off_by_default_in_soc_band() -> None:
+    """Ohne forecast_veto_enabled wird die Prognose ignoriert (additiv, Produktiv-Default)."""
+    event = rule_engine.evaluate(
+        _state(soc=65.0, pv=6500.0, forecast=0.0), _SB, last_action=None
+    )
+    assert event.decision_code == "THROTTLE_R1_ECO"
+
+
+def test_r5_takes_precedence_over_r4() -> None:
+    """R5 (Min-Pause) schlägt R4: bei frischem Stopp gewinnt die Stabilität, nicht die Prognose."""
+    event = rule_engine.evaluate(
+        _state(soc=65.0, pv=6500.0, forecast=0.0),
+        _SB_R4,
+        last_action="STOP",
+        blocks_since_last_change=0,
+    )
+    assert event.decision_code == "NOOP_R5_MIN_PAUSE_NOT_REACHED"

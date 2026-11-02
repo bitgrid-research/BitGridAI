@@ -38,12 +38,26 @@ def test_comm_timeout_triggers_stop(nominal_state: EnergyState) -> None:
 def test_absolute_safety_limit_cannot_be_overridden(nominal_state: EnergyState) -> None:
     """Auch wenn config max_chip_temp_c > Absolut-Limit gesetzt wird, greift R3 trotzdem."""
     hot_state = EnergyState(
-        **{**nominal_state.__dict__, "miner_temp_c": 97.0}  # type: ignore[arg-type]
+        **{**nominal_state.__dict__, "miner_temp_c": 122.0}  # type: ignore[arg-type]
     )
-    # Config-Schwelle höher als Absolut-Limit (95°C)
-    vote = r3_safety.evaluate(hot_state, max_chip_temp_c=100.0)
+    # Config-Schwelle höher als Absolut-Limit (120°C)
+    vote = r3_safety.evaluate(hot_state, max_chip_temp_c=130.0)
     assert vote is not None
     assert vote.action == "STOP"
+
+
+def test_real_operating_envelope_does_not_trigger(nominal_state: EnergyState) -> None:
+    """Regressionstest zum Befund 2026-07-17: das reale Betriebsfenster der
+    Avalon Q (Mittel 90.8 °C, Max 113 °C ueber 7 Tage) darf R3 NICHT ausloesen.
+    Das alte Hardcap von 95 °C hat hier gestoppt und haette den Miner im
+    Normalbetrieb dauerhaft abgeschaltet."""
+    for temp in (90.8, 95.0, 105.0, 113.0):
+        state = EnergyState(
+            **{**nominal_state.__dict__, "miner_temp_c": temp}  # type: ignore[arg-type]
+        )
+        assert (
+            r3_safety.evaluate(state, max_chip_temp_c=115.0) is None
+        ), f"{temp} °C liegt im gemessenen Normalbetrieb, R3 darf nicht stoppen"
 
 
 def test_confidence_is_one_for_safety(overtemp_state: EnergyState) -> None:

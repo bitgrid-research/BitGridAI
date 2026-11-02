@@ -88,10 +88,13 @@
   - condition: state
     entity_id: input_boolean.override_active
     state: 'on'
+  # state_attr timestamp statt as_timestamp(states(...)): letzteres liest den
+  # naiven input_datetime-String als UTC, das Override waere 2 h zu spaet
+  # abgelaufen (derselbe Bug wie safety_lockout_active, belegt 2026-07-17).
   - condition: template
-    value_template: "{% set until = states('input_datetime.override_valid_until')
-      %} {% if until in ['unknown', 'unavailable', ''] %}\n  false\n{% else %}\n  {{
-      as_timestamp(now()) >= as_timestamp(until) }}\n{% endif %}"
+    value_template: "{% set until_ts = state_attr('input_datetime.override_valid_until',
+      'timestamp') %} {% if until_ts is none %}\n  false\n{% else %}\n  {{
+      now().timestamp() >= until_ts | float(0) }}\n{% endif %}"
   action:
   - service: input_boolean.turn_off
     target:

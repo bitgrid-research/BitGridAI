@@ -15,7 +15,7 @@ EnergyState(
 - **Entscheidung:** `START_R1_SURPLUS_OK`
 - **Lehrziel:** Grundprinzip — überschüssige PV wird in die flexible Last **gesteuert**, statt sie einzuspeisen.
 - **Verständnisfrage:** „Warum läuft der Miner jetzt an?"
-- **Persona:** Energie-Optimierer (Eigenverbrauchsquote), Bitcoin-Nerd (Hashrate aus Sonne).
+- **Vertrauensfrage:** „Wie sehr vertraust du dieser Start-Entscheidung, und woran liegt das?"
 - **Override-Eignung:** gering (System verhält sich erwartungskonform).
 - **Realer Beispielblock:** 01.06. 12:50 · Überschuss **+7,82 kW** · SoC 98 % · 13 ct (123× in 11 Tagen).
 

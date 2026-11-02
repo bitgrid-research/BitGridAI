@@ -10,6 +10,7 @@ import pytest
 
 from src.core.override_handler import OverrideHandler
 from src.data.db import get_connection
+from src.data.override_store import SqliteOverrideStore
 
 
 @pytest.fixture
@@ -67,7 +68,7 @@ def test_max_override_duration_clamped() -> None:
 
 
 def test_override_persisted_to_db(db_conn) -> None:
-    handler = OverrideHandler(conn=db_conn)
+    handler = OverrideHandler(store=SqliteOverrideStore(db_conn))
     cid = str(uuid.uuid4())
     handler.request("START", duration_min=10, command_id=cid)
 
@@ -81,11 +82,11 @@ def test_override_persisted_to_db(db_conn) -> None:
 def test_override_loaded_from_db_on_init(db_conn) -> None:
     cid = str(uuid.uuid4())
     now = datetime(2030, 1, 1, 12, 0, tzinfo=timezone.utc)
-    handler = OverrideHandler(conn=db_conn)
+    handler = OverrideHandler(store=SqliteOverrideStore(db_conn))
     handler.request("STOP", duration_min=60, command_id=cid, now=now)
 
     # Neue Instanz mit derselben DB — soll Override wiederherstellen
-    handler2 = OverrideHandler(conn=db_conn)
+    handler2 = OverrideHandler(store=SqliteOverrideStore(db_conn))
     active = handler2.get_active(now=now)
     assert active is not None
     assert active.command_id == cid
@@ -95,16 +96,16 @@ def test_override_loaded_from_db_on_init(db_conn) -> None:
 def test_expired_override_not_loaded_from_db(db_conn) -> None:
     cid = str(uuid.uuid4())
     past = datetime(2020, 1, 1, 12, 0, tzinfo=timezone.utc)
-    handler = OverrideHandler(conn=db_conn)
+    handler = OverrideHandler(store=SqliteOverrideStore(db_conn))
     handler.request("STOP", duration_min=1, command_id=cid, now=past)
 
     # Neue Instanz — Override ist abgelaufen, darf nicht geladen werden
-    handler2 = OverrideHandler(conn=db_conn)
+    handler2 = OverrideHandler(store=SqliteOverrideStore(db_conn))
     assert handler2.get_active() is None
 
 
 def test_clear_removes_from_db(db_conn) -> None:
-    handler = OverrideHandler(conn=db_conn)
+    handler = OverrideHandler(store=SqliteOverrideStore(db_conn))
     cid = str(uuid.uuid4())
     handler.request("NOOP", duration_min=30, command_id=cid)
     handler.clear()
@@ -117,7 +118,7 @@ def test_clear_removes_from_db(db_conn) -> None:
 
 def test_get_active_expired_deletes_from_db(db_conn) -> None:
     now = datetime(2024, 6, 1, 10, 0, tzinfo=timezone.utc)
-    handler = OverrideHandler(conn=db_conn)
+    handler = OverrideHandler(store=SqliteOverrideStore(db_conn))
     cid = str(uuid.uuid4())
     handler.request("START", duration_min=5, command_id=cid, now=now)
 

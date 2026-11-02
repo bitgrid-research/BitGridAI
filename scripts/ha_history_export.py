@@ -69,11 +69,35 @@ def _token(cli: str | None) -> str:
     raise SystemExit("Kein Token: --token oder BITGRIDAI_HA_TOKEN/.env setzen")
 
 
-def _fetch(base: str, token: str, entity: str, start: datetime, end: datetime) -> list[tuple[datetime, float]]:
+def _host(cli: str | None) -> str:
+    if cli:
+        return cli
+    env = os.environ.get("UMBREL_HOST")
+    port = os.environ.get("HA_PORT", "8123")
+    if not env:
+        env_file = Path(__file__).resolve().parent.parent / ".env"
+        if env_file.exists():
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                if line.startswith("UMBREL_HOST="):
+                    env = line.split("=", 1)[1].strip().strip('"')
+                elif line.startswith("HA_PORT="):
+                    port = line.split("=", 1)[1].strip().strip('"') or port
+    if not env:
+        raise SystemExit("Kein Host: --host oder UMBREL_HOST/.env setzen")
+    return f"http://{env}:{port}"
+
+
+def _fetch(
+    base: str, token: str, entity: str, start: datetime, end: datetime
+) -> list[tuple[datetime, float]]:
     """Holt (timestamp, value)-Punkte einer Entity im Fenster [start, end)."""
     path = urllib.parse.quote(start.isoformat())
     q = urllib.parse.urlencode(
-        {"end_time": end.isoformat(), "filter_entity_id": entity, "minimal_response": ""}
+        {
+            "end_time": end.isoformat(),
+            "filter_entity_id": entity,
+            "minimal_response": "",
+        }
     )
     url = f"{base}/api/history/period/{path}?{q}"
     req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
@@ -97,7 +121,9 @@ def _fetch(base: str, token: str, entity: str, start: datetime, end: datetime) -
 
 
 def _floor(ts: datetime) -> datetime:
-    return ts.replace(minute=(ts.minute // BLOCK_MIN) * BLOCK_MIN, second=0, microsecond=0)
+    return ts.replace(
+        minute=(ts.minute // BLOCK_MIN) * BLOCK_MIN, second=0, microsecond=0
+    )
 
 
 def _resample_day(
@@ -134,7 +160,9 @@ def _resample_day(
 
 def _write(rows: list[dict[str, Any]], out: Path, date: str) -> int:
     filled = sum(
-        1 for r in rows if r.get("pv_power_w") is not None and r.get("battery_soc_pct") is not None
+        1
+        for r in rows
+        if r.get("pv_power_w") is not None and r.get("battery_soc_pct") is not None
     )
     lines = [
         "# ha_history_export (REST-API)",
@@ -162,8 +190,15 @@ def main() -> None:
         sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
     except (AttributeError, ValueError):
         pass
-    p = argparse.ArgumentParser(description="HA-History via API → Szenario-CSVs (pro Tag)")
-    p.add_argument("--host", default="http://192.168.178.62:8123")
+    p = argparse.ArgumentParser(
+        description="HA-History via API → Szenario-CSVs (pro Tag)"
+    )
+    p.add_argument(
+        "--host",
+        default=None,
+        help="HA-Basis-URL, z.B. http://umbrel.local:8123 "
+        "(Default aus UMBREL_HOST/HA_PORT in .env)",
+    )
     p.add_argument("--token", default=None)
     p.add_argument("--days", type=int, help="Letzte N volle Tage (UTC)")
     p.add_argument("--start", help="Startdatum YYYY-MM-DD (UTC)")
@@ -171,8 +206,11 @@ def main() -> None:
     p.add_argument("--out-dir", default="src/sim/scenarios")
     args = p.parse_args()
 
+    host = _host(args.host)
     token = _token(args.token)
-    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today = datetime.now(timezone.utc).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
     if args.days:
         start = today - timedelta(days=args.days)
         end = today
@@ -188,20 +226,22 @@ def main() -> None:
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    print(f"→ Host: {args.host}   Zeitraum: {start.date()} – {(end - timedelta(days=1)).date()}")
+    print(
+        f"→ Host: {host}   Zeitraum: {start.date()} – {(end - timedelta(days=1)).date()}"
+    )
 
     day = start
     while day < end:
         nxt = day + timedelta(days=1)
-        raw = {
-            col: _fetch(args.host, token, ent, day, nxt) for ent, col in ENTITIES.items()
-        }
+        raw = {col: _fetch(host, token, ent, day, nxt) for ent, col in ENTITIES.items()}
         rows = _resample_day(raw, day)
         date_str = day.strftime("%Y-%m-%d")
         out_path = out_dir / f"real_{date_str}.csv"
         filled = _write(rows, out_path, date_str)
         pts = sum(len(v) for v in raw.values())
-        print(f"  ✓ {date_str}: {filled}/144 Blöcke befüllt ({pts} Rohpunkte) → {out_path.name}")
+        print(
+            f"  ✓ {date_str}: {filled}/144 Blöcke befüllt ({pts} Rohpunkte) → {out_path.name}"
+        )
         day = nxt
 
 

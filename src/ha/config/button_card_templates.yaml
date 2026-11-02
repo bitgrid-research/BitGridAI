@@ -1,0 +1,830 @@
+# ═══════════════════════════════════════════════════════
+# Geteilte custom:button-card-Templates
+# ═══════════════════════════════════════════════════════
+# button_card_templates ist ein Pro-Dashboard-Root-Key. Da views/miner_controls.yaml
+# (single source of truth) sowohl in bitgrid_dashboard_v1.yaml als auch in
+# bitgrid_dashboard_v2.yaml per !include eingebunden ist, müssen seine Templates
+# in BEIDEN Dashboards verfügbar sein. Daher hier zentral, in beiden Dashboards
+# via `button_card_templates: !include button_card_templates.yaml` eingehängt.
+# Fehlt das Include in einem Dashboard, rendert button-card "Konfigurationsfehler".
+
+miner_header:
+  show_state: false
+  show_icon: true
+  tap_action:
+    action: none
+  custom_fields:
+    # Gesamtzustand (26.08.2026, Nutzer-Wunsch): eigenes Symbol LINKS vom
+    # bestehenden LAN-Symbol ("status" unten), keine Vermischung der beiden.
+    #   - Rot/Kreuz = TECHNISCHE STOERUNG: etwas, das nicht "nur warm ist",
+    #     sondern kaputt/nicht ansprechbar sein koennte (Shelly-Plug nicht
+    #     erreichbar, kein Pool-Uplink, gemeldete Hardware-/Luefterfehler,
+    #     oder Miner insgesamt nicht verfuegbar). Hat Vorrang vor Gelb: ein
+    #     Hardware-Fehler ist dringlicher als ein Hitze-Hinweis.
+    #   - Gelb/Warndreieck = UEBERHITZUNG: TMax >= 100 °C, dieselbe Schwelle
+    #     wie die bestehende Temperaturfarb-Konvention (gruen < 100, orange
+    #     100-109, rot >= 110 — siehe project_miner_temp_colors-Entscheidung
+    #     11.07.2026). Farbe ist --bg-color-heat (waermeres Orange, kein
+    #     reines Gelb im Theme), aber exakt derselbe Zweck.
+    #   - Gruen/Haken = keins von beidem.
+    # sensor.Xn_heartbeat_age_sec existiert NICHT live (verifiziert
+    # 26.08.2026) — deshalb echte Hardware-/Verbindungssignale statt eines
+    # erfundenen Heartbeat-Schwellwerts.
+    health: >
+      [[[
+        const minerKey = entity.entity_id.match(/miner\d/)?.[0];
+        if (!minerKey) return '';
+        const available   = entity.state === 'on';
+        const shellyOk    = states[`binary_sensor.shelly_${minerKey}_healthy`]?.state !== 'off';
+        const poolOk      = states[`binary_sensor.${minerKey}_pool_status`]?.state !== 'off';
+        // hardware_errors (ohne "r") ist ein reiner Lifetime-Zaehler seit dem
+        // letzten Reboot (Standard-cgminer-API-Verhalten) — bei einer 24/7
+        // laufenden ASIC ist er nach ein paar Betriebsstunden fast immer > 0,
+        // ohne dass etwas kaputt ist. Live verifiziert 26.08.2026: miner2
+        // stand bei "5" (Zaehler) aber "0,0 %" (Rate) — die Rate ist das
+        // aussagekraeftige Signal, nicht der rohe Zaehlerstand. >= 1 % als
+        // Schwelle: deutlich ueber dem beobachteten Normalbereich (< 0,1 %),
+        // aehnliche Groessenordnung wie rejection_rate_pct.
+        const hwErrRate   = parseFloat(states[`sensor.${minerKey}_hardware_errorsr`]?.state) || 0;
+        const fanErrRaw   = states[`sensor.${minerKey}_fanerr`]?.state;
+        const fanErr      = fanErrRaw !== undefined && fanErrRaw !== '0' && fanErrRaw !== 'unknown' && fanErrRaw !== 'unavailable';
+        const tmax        = parseFloat(states[`sensor.${minerKey}_tmax`]?.state);
+
+        let icon, color, title;
+        if (!available || !shellyOk || !poolOk || hwErrRate >= 1 || fanErr) {
+          icon = 'mdi:close-circle';
+          color = 'var(--bg-color-reserve)';
+          title = 'Technische Störung';
+        } else if (!isNaN(tmax) && tmax >= 100) {
+          icon = 'mdi:thermometer-alert';
+          color = 'var(--bg-color-heat)';
+          title = 'Überhitzung (' + tmax.toFixed(0) + ' °C)';
+        } else {
+          icon = 'mdi:check-circle';
+          color = 'var(--bg-color-eco)';
+          title = 'Normalbetrieb';
+        }
+        return `<ha-icon icon="${icon}" title="${title}" style="color:${color}; --mdc-icon-size:22px;"></ha-icon>`;
+      ]]]
+    status: >
+      [[[
+        const on = entity.state === 'on';
+        return `<ha-icon icon="${on ? 'mdi:ethernet' : 'mdi:alert-circle'}"
+          style="color:${on ? 'var(--bg-color-eco)' : 'var(--bg-color-reserve)'}; --mdc-icon-size:22px;"></ha-icon>`;
+      ]]]
+  styles:
+    grid:
+      - grid-template-areas: '"n health status i"'
+      - grid-template-columns: 1fr auto auto auto
+      - grid-template-rows: 1fr
+    card:
+      - padding: 12px 16px
+      - height: 56px
+      # 12.09.2026, Nutzer-Wunsch "auch bei den Minern Divider wie ueberall
+      # sonst": HIER wirkungslos versucht, weil jede Instanz (steuerung_
+      # quick.yaml) ihr eigenes styles.card.border:none NACH dem Template
+      # mergt und den border-bottom damit wieder zuruecksetzt — die Regel
+      # lebt deshalb an der Instanz selbst (dort, wo border:none steht),
+      # nicht hier im Template.
+    name:
+      - font-size: 1.1rem
+      - font-weight: bold
+      - text-align: left
+      - justify-self: start
+      - padding-right: 8px
+    icon:
+      - color: var(--primary-text-color)
+      - width: 22px
+      - height: 22px
+      - margin-left: 6px
+    custom_fields:
+      health:
+        - display: flex
+        - align-items: center
+      status:
+        - display: flex
+        - align-items: center
+        - margin-left: 8px
+
+miner_btn:
+  show_state: true
+  styles:
+    card:
+      - background: transparent
+      - box-shadow: none
+      - border: none
+      - border-radius: 12px
+      - padding: 20px 6px
+      - height: 110px
+    icon:
+      - width: 44px
+      - height: 44px
+    name:
+      - font-size: 0.9rem
+      - font-weight: 600
+      - color: var(--primary-text-color)
+      - white-space: unset
+      - text-overflow: unset
+      - overflow: visible
+      - margin-top: 6px
+    state:
+      - font-size: 0.78rem
+      - color: var(--secondary-text-color)
+      - margin-top: 2px
+
+weather_forecast_6h:
+  entity: sensor.weather_forecast_6h
+  show_name: false
+  show_icon: false
+  show_state: false
+  tap_action:
+    action: none
+  custom_fields:
+    row: >
+      [[[
+        const f = entity?.attributes?.forecast ?? [];
+        const icons = {
+          'clear-night':     'mdi:weather-night',
+          'sunny':           'mdi:weather-sunny',
+          'partlycloudy':    'mdi:weather-partly-cloudy',
+          'cloudy':          'mdi:weather-cloudy',
+          'fog':             'mdi:weather-fog',
+          'rainy':           'mdi:weather-rainy',
+          'pouring':         'mdi:weather-pouring',
+          'lightning':       'mdi:weather-lightning',
+          'lightning-rainy': 'mdi:weather-lightning-rainy',
+          'snowy':           'mdi:weather-snowy',
+          'snowy-rainy':     'mdi:weather-snowy-rainy',
+          'windy':           'mdi:weather-windy',
+          'windy-variant':   'mdi:weather-windy-variant',
+          'hail':            'mdi:weather-hail',
+          'exceptional':     'mdi:alert-circle-outline',
+        };
+        const blocks = f.map(h => {
+          const dt   = new Date(h.datetime);
+          const time = dt.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+          const icon = icons[h.condition] ?? 'mdi:weather-partly-cloudy';
+          const temp = Math.round(h.temperature);
+          return `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex:1">
+              <span style="font-size:.75rem;color:var(--secondary-text-color);font-weight:500">${time}</span>
+              <ha-icon icon="${icon}" style="--mdc-icon-size:28px;color:var(--primary-text-color)"></ha-icon>
+              <span style="font-size:.95rem;font-weight:600">${temp}°C</span>
+            </div>`;
+        }).join('');
+        return `<div style="display:flex;width:100%;padding:4px 0">${blocks}</div>`;
+      ]]]
+  styles:
+    card:
+      - padding: 12px 16px
+      - background: var(--secondary-background-color)
+      - border-radius: 12px
+    grid:
+      - grid-template-areas: '"row"'
+      - grid-template-columns: 1fr
+    custom_fields:
+      row:
+        - width: 100%
+
+settings_pill:
+  show_name: true
+  show_state: false
+  show_icon: false
+  show_label: true
+  tap_action:
+    action: more-info
+  # Hover nur bei echtem Zeigegeraet (11.09.2026, "Karte erhoeht"-Rolle aus
+  # dem BitHamster-Farbkonzept, themes/bitgrid.yaml): @media (hover: hover)
+  # macht das auf dem Touch-Wandtablet zum No-op (dort feuert :hover nie),
+  # greift aber bei Maus-/Browserzugriff. Nur wirksam, solange keine Instanz
+  # ihren eigenen card_mod setzt (button-card ueberschreibt den Schluessel
+  # sonst komplett statt ihn zu mergen) — aktuell tut das keine settings_pill-
+  # Nutzung im Repo.
+  card_mod:
+    style: |
+      @media (hover: hover) {
+        ha-card:hover {
+          background: var(--bgai-card-bg-hover-v3) !important;
+        }
+      }
+  styles:
+    card:
+      # var()-Fallback = alter Literal-Wert, damit v1 (kennt --bgai-pill-bg-v3
+      # nicht) unveraendert bleibt; v3 ueberschreibt die Variable pro View
+      # (bitgrid_dashboard_v3.yaml :host, 12.09.2026 Hell-Umbau).
+      - background: "var(--bgai-pill-bg-v3)"
+      - border-radius: "9px"
+      - padding: "7px 8px"
+      - cursor: pointer
+      - transition: "background .15s"
+    grid:
+      - grid-template-areas: '"n" "l"'
+      - grid-template-columns: "1fr"
+      - grid-template-rows: "auto auto"
+      - justify-items: center
+    name:
+      - font-size: "8px"
+      - font-weight: "600"
+      - text-transform: "uppercase"
+      - letter-spacing: ".6px"
+      - color: "var(--bgai-pill-name-color-v3)"
+      - justify-self: center
+      - white-space: "nowrap"
+      - overflow: "hidden"
+      - text-overflow: "ellipsis"
+      - margin-bottom: "3px"
+    label:
+      - font-size: "15px"
+      - font-weight: "700"
+      - justify-self: center
+      - line-height: "1.1"
+      - white-space: "nowrap"
+
+settings_spacer:
+  show_name: false
+  show_state: false
+  show_icon: false
+  tap_action:
+    action: none
+  styles:
+    card:
+      - background: transparent
+      - box-shadow: none
+      - border: none
+      - pointer-events: none
+
+# Flache Listenzeile fuer Schwellenwerte: Label links, Wert rechts, kein
+# Pillen-/Kartenrand. Ersetzt die aeltere "settings_pill"-Kachel-Optik dort,
+# wo eine kompakte, durchscrollbare Liste gebraucht wird (Einstellungen-Tab,
+# Regelschwellen-Karte). tap_action bleibt more-info wie bei settings_pill —
+# das oeffnet den nativen HA-Editor (Slider/Eingabefeld) fuer input_number/
+# input_boolean/input_datetime direkt.
+settings_row:
+  show_name: true
+  show_state: false
+  show_icon: false
+  show_label: true
+  tap_action:
+    action: more-info
+  # Hover-Kommentar s. settings_pill oben (identisches Muster). Verifiziert
+  # (11.09.2026): keine der 26 settings_row(-icon)-Nutzungen in
+  # bitgrid_dashboard_v3.yaml setzt einen eigenen card_mod, der das hier
+  # ueberschreiben wuerde.
+  card_mod:
+    style: |
+      @media (hover: hover) {
+        ha-card:hover {
+          background: var(--bgai-card-bg-hover-v3) !important;
+        }
+      }
+  styles:
+    card:
+      # var()-Fallback = alter Literal-Wert, s. Kommentar bei settings_pill.
+      - background: "var(--bgai-row-bg-v3)"
+      # 26.09.2026, Nutzer-Befund "viel zu dicke Outline" an den aufgeklappten
+      # Regelwerk-Zeilen: seit der Theme-Konsolidierung (16.09.2026) stellt
+      # card-mod-card Rand + Outline-Schatten auf JEDER Karte wieder her, die
+      # nicht selbst box-shadow/border setzt (DESIGN.md, "Karten-Chrome").
+      # Diese Zeile ist laut Kopfkommentar bewusst flach ("kein Pillen-/
+      # Kartenrand"), hat das aber nie selbst deklariert und bekam darum die
+      # volle Karten-Outline. Betrifft alle settings_row-Nutzungen (Regelwerk
+      # UND Einstellungen-Tab).
+      - box-shadow: none
+      - border: none
+      - border-radius: "7px"
+      - padding: "10px 14px"
+      - cursor: pointer
+      - transition: "background .15s"
+    grid:
+      - grid-template-areas: '"n l"'
+      - grid-template-columns: "1fr auto"
+      - grid-template-rows: "auto"
+      - align-items: center
+      - column-gap: "10px"
+    name:
+      - font-size: "13px"
+      - font-weight: "500"
+      - color: "var(--bgai-row-name-color-v3)"
+      - justify-self: start
+      - text-align: left
+      - white-space: "nowrap"
+    label:
+      - font-size: "14px"
+      - font-weight: "700"
+      - justify-self: end
+      - text-align: right
+      - white-space: "nowrap"
+
+# Icon-Ergaenzung zu settings_row, additiv per `template: [settings_row,
+# settings_row_icon]` kombiniert (25.08.2026, Nutzer-Feedback: Zeilen im
+# Einstellungen-Tab wirkten ohne Icon leer). Nur in bitgrid_dashboard_v3.yaml
+# genutzt: settings_row selbst bleibt unveraendert (show_icon: false), v2
+# nutzt weiterhin nur settings_row pur und ist von dieser Ergaenzung nicht
+# betroffen (gleiches Isolationsprinzip wie beim v3-Farbschema).
+settings_row_icon:
+  show_icon: true
+  styles:
+    grid:
+      - grid-template-areas: '"i n l"'
+      - grid-template-columns: "20px 1fr auto"
+    icon:
+      - width: "16px"
+      - height: "16px"
+      - justify-self: center
+
+# Transparenter Gruppentitel ueber einer Karte: Icon + Name, kein eigener
+# Kasten (background/border/shadow: none). Vorher nur inline in der
+# Poolertraege-Gruppe verwendet (siehe grid-area "tl" weiter unten im
+# Dashboard); hier als Template zentralisiert, damit der Einstellungen-Tab
+# dieselbe Optik nutzt statt Abschnittstitel als eigene markdown-Karte in den
+# Stack zu stecken (26.08.2026, Nutzer-Feedback: Titel gehoert UEBER die
+# Karte, nicht mit hineingemischt).
+group_header:
+  show_state: false
+  tap_action:
+    action: none
+  styles:
+    card:
+      - background: none
+      - box-shadow: none
+      - border: none
+      - padding: 4px 4px 0
+      # overflow:visible (12.09.2026, Nutzer-Wunsch "Schatten nie
+      # abschneiden"): button-card setzt auf .card sonst kein overflow,
+      # aber explizit statt implizit, damit der Icon-Filter (Halo + neue
+      # Outline unten, beide bleeden ueber die 24x24px-Box hinaus) nirgends
+      # an einer Kartenkante gekappt wird.
+      - overflow: visible
+    grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: min-content 1fr
+      - align-items: center
+      - overflow: visible
+    img_cell:
+      - justify-content: start
+      - align-self: center
+      - overflow: visible
+    icon:
+      - color: var(--bgai-section-label-v3)
+      # 12.09.2026, Nutzer-Wunsch: dunkler Schatten/Halo, damit die weissen
+      # Gruppentitel gegen die Gras-Textur (v3-Hintergrund) unabhaengig vom
+      # jeweiligen hellen/dunklen Gruenton lesbar bleiben. Fallback "none":
+      # bgai-header-icon-halo-v3 ist am Theme-Root definiert, dieses
+      # Template ist mit v1 geteilt.
+      # 13.09.2026, Nutzer-Wunsch "nur 1px Outline, kein Schatten": mehrere
+      # Anlaeufe mit gestapelten drop-shadow()s (4, dann 8 Richtungen)
+      # blieben trotz 0 Blur optisch ein weicher Schatten statt einer
+      # scharfen Kontur, weil drop-shadow() auf der (anti-aliasten) Alpha-
+      # Maske der Icon-Silhouette arbeitet - kein echter Vektor-Stroke wie
+      # -webkit-text-stroke beim Text unten. filter: komplett entfernt,
+      # echter Stroke stattdessen per card_mod direkt auf dem SVG-<path>
+      # (s. card_mod-Block unten in diesem Template).
+      - width: 24px
+      - height: 24px
+    name:
+      # var(--bg-fs-body) = 1rem, identisch zum vorherigen 1.0rem-Fixwert
+      # (keine sichtbare Aenderung) — jetzt aus der zentralen Typo-Skala
+      # (themes/bitgrid.yaml) statt Magic Number, projektweit ueber dieses
+      # eine geteilte Template (31.08.2026, Nutzer-Wunsch "Schriftgroesse
+      # pro Art").
+      # --bg-fs-group-header mit Fallback auf --bg-fs-body (02.09.2026,
+      # Nutzer-Wunsch "Ueberschriften in jedem Tab wie Home"): sollte ueber
+      # eine View-:host-Umleitung in bitgrid_dashboard_v3.yaml wirken — genau
+      # dieser Mechanismus erreicht tief verschachtelte Custom-Cards laut
+      # 12.09.2026-Befund (s. DESIGN.md im Repo-Root) nachweislich NICHT, v1 und v3 landen
+      # hier also faktisch schon auf demselben (Root-)Wert. bgai-header-
+      # font-size-v3 (Root-Token, wie bgai-section-label-v3) erzwingt jetzt
+      # zuverlaessig "gleiche Groesse wie der Etagen-Umschalter" (Nutzer-
+      # Wunsch 12.09.2026), alte Kette bleibt als Fallback dahinter stehen.
+      - font-size: var(--bg-fs-group-header)
+      - font-weight: 700
+      - text-transform: uppercase
+      - letter-spacing: 0.07em
+      - color: var(--bgai-section-label-v3)
+      # Dunkler Schatten, s. Kommentar bei "icon" oben (dasselbe Halo-Prinzip,
+      # text-shadow statt filter, da text-shadow auf SVG-Icons nicht greift).
+      - text-shadow: var(--bgai-header-halo-v3)
+      # 12.09.2026, Nutzer-Wunsch "schwarze Outline": der weiche Blur-Halo
+      # oben reicht gegen die unruhige Gras-Textur nicht immer, -webkit-
+      # text-stroke zieht zusaetzlich eine scharfe Kontur um jeden
+      # Buchstaben (Chromium-Kiosk-Display, -webkit-Praefix unproblematisch).
+      # paint-order sorgt dafuer, dass die Kontur HINTER der Fuellfarbe
+      # liegt, sonst wirken duenne Buchstaben (I, T) zugekleistert.
+      # Wert in Anfuehrungszeichen (Bug, erster Deploy blieb wirkungslos):
+      # YAML wertet ein unquotiertes "#" nach einem Leerzeichen als
+      # Kommentar-Start, "1px #000000" verlor dadurch die Farbe.
+      # 16.09.2026, Nutzer-Wunsch "1px dicker, aber nur die Ueberschrift, nicht
+      # das Icon": 1px -> 2px. Der Icon-Stroke im card_mod unten bleibt
+      # unveraendert bei 1.5px.
+      - -webkit-text-stroke: "2px #000000"
+      - paint-order: stroke fill
+      - justify-self: start
+      - padding-left: 10px
+  # 13.09.2026, Nutzer-Wunsch "echter 1px Outline am Icon, kein Schatten":
+  # das Icon-Filter oben (drop-shadow-Stapel) simulierte nur eine Kontur,
+  # sah aber wegen anti-aliasten Icon-Kanten immer weich aus. Echter Fix:
+  # card_mod durchdringt drei Shadow-DOM-Ebenen bis zum eigentlichen
+  # SVG-<path> (verifiziert gegen home-assistant/frontend-Quellcode:
+  # button-card rendert <ha-state-icon>, dessen render() bei gesetztem
+  # icon-Override <ha-icon> erzeugt, dessen render() fuer mdi:-Icons
+  # <ha-svg-icon> erzeugt, dessen Template <svg><g><path class="primary-
+  # path"> ist) und setzt dort einen echten SVG-Stroke, exakt analog zu
+  # -webkit-text-stroke beim Titel-Text (Name-Styles oben).
+  # Zwei vorherige Versuche mit einem flachen "a $ b $ c"-Selector-String
+  # blieben wirkungslos: das ist kein card-mod-Syntax. Laut card-mod-README
+  # muss "style:" dafuer ein Dictionary sein, jeder Shadow-Root-Hop ein
+  # eigener Key im Format "selector $", verschachtelt bis zur Zielebene
+  # (dort README-empfohlenes Aufbrechen in einzelne Schritte statt eines
+  # langen Ketten-Keys, robuster gegen Custom-Element-Upgrade-Timing).
+  card_mod:
+    style:
+      "ha-state-icon $":
+        "ha-icon $":
+          "ha-svg-icon $": |
+            svg path {
+              stroke: #000000;
+              stroke-width: 1.5px;
+              paint-order: stroke fill;
+            }
+
+# Geräte-Kachel (Tab "Geräte"): Icon + Name + aktuelle Leistung + Tages-kWh.
+# entity = Leistungs-Sensor des Plugs; variables.energy_daily = Entity-ID des
+# zugehörigen Tages-kWh-Sensors (packages/devices.yaml). variables.accent_color =
+# Hex-Farbe der zugehörigen Linie im "Leistung (24h)"-Verlaufschart (geraete_
+# verlauf.yaml), damit Kachel-Icon und Chart-Legende visuell zusammengehören.
+# Icon zeigt immer die volle Gerätefarbe, unabhängig vom aktuellen Verbrauch
+# (analog zur Chart-Legende, die auch bei 0 W eingefärbt bleibt). Fallback
+# ohne accent_color: Lavendel (alte Einheitsfarbe). Bei unavailable/unknown
+# bleibt nur die Karten-Opacity gedimmt (siehe styles.card.opacity unten).
+device_tile:
+  show_name: true
+  show_icon: true
+  show_state: false
+  show_label: true
+  tap_action:
+    action: more-info
+  label: >
+    [[[
+      const fmtW = v => {
+        const n = parseFloat(v);
+        if (isNaN(n)) return '—';
+        return n >= 1000
+          ? (n / 1000).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kW'
+          : Math.round(n).toLocaleString('de-DE') + ' W';
+      };
+      const fmtKwh = v => {
+        const n = parseFloat(v);
+        return isNaN(n) ? '—'
+          : n.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' kWh';
+      };
+      const eDaily = variables?.energy_daily ? states[variables.energy_daily]?.state : null;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <span style="font-size:1.2rem;font-weight:700;line-height:1.1">${fmtW(entity?.state)}</span>
+        <span style="font-size:0.72rem;color:var(--secondary-text-color)">Heute: ${fmtKwh(eDaily)}</span>
+      </div>`;
+    ]]]
+  styles:
+    card:
+      - padding: 9px 10px
+      - opacity: "[[[ return ['unavailable','unknown'].includes(entity?.state) ? '0.45' : '1'; ]]]"
+    grid:
+      - grid-template-areas: '"i" "n" "l"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto auto auto
+      - justify-items: center
+    icon:
+      - width: 24px
+      - height: 24px
+      - color: "[[[ return variables?.accent_color || '#A6A2D8'; ]]]"
+    name:
+      - font-size: 0.85rem
+      - font-weight: 600
+      - margin-top: 3px
+      - margin-bottom: 2px
+    label:
+      - justify-self: center
+
+# ─── Raum-Überschrift (dedupliziert; Farbe via variables.accent_color) ───────
+room_header:
+  show_name: true
+  show_icon: true
+  show_state: false
+  tap_action:
+    action: none
+  styles:
+    card:
+      - background: none
+      - box-shadow: none
+      - border: none
+      - padding: 8px 4px 0
+    grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: min-content 1fr
+      - align-items: center
+    img_cell:
+      - justify-content: start
+    icon:
+      - color: "[[[ return variables?.accent_color || '#A6A2D8'; ]]]"
+      - width: 20px
+      - height: 20px
+    name:
+      - font-size: 0.82rem
+      - font-weight: 700
+      - text-transform: uppercase
+      - letter-spacing: 0.06em
+      - color: "[[[ return variables?.accent_color || '#A6A2D8'; ]]]"
+      - justify-self: start
+      - padding-left: 8px
+
+# ─── Thermostat-Kachel: Ist-Temperatur groß, Heizzustand + Batterie klein ────
+#   entity: climate.*   variables: battery (sensor.*_batterie), accent_color
+climate_tile:
+  show_name: true
+  show_icon: true
+  show_state: false
+  show_label: true
+  tap_action:
+    action: more-info
+  icon: >
+    [[[ return (entity?.attributes?.hvac_action === 'heating') ? 'mdi:radiator' : 'mdi:thermometer'; ]]]
+  label: >
+    [[[
+      const t = entity?.attributes?.current_temperature;
+      const temp = (t === undefined || t === null)
+        ? '—'
+        : Number(t).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '°';
+      const heating = entity?.attributes?.hvac_action === 'heating';
+      const heatStr = heating ? 'heizt' : (entity?.state === 'off' ? 'aus' : 'bereit');
+      const heatCol = heating ? '#E6893B' : 'var(--secondary-text-color)';
+      const bs = variables?.battery ? states[variables.battery] : null;
+      const b = bs ? parseInt(bs.state) : NaN;
+      const bCol = isNaN(b) ? 'var(--secondary-text-color)'
+        : (b <= 20 ? '#e66767' : (b <= 50 ? '#E6A100' : 'var(--secondary-text-color)'));
+      const bStr = isNaN(b) ? '' : `<span style="color:${bCol}">🔋${b}%</span>`;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <span style="font-size:1.2rem;font-weight:700;line-height:1.1">${temp}</span>
+        <span style="font-size:0.72rem"><span style="color:${heatCol}">${heatStr}</span>${bStr ? ' · ' + bStr : ''}</span>
+      </div>`;
+    ]]]
+  styles:
+    card:
+      - padding: 9px 10px
+      - opacity: "[[[ return ['unavailable','unknown'].includes(entity?.state) ? '0.45' : '1'; ]]]"
+    grid:
+      - grid-template-areas: '"i" "n" "l"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto auto auto
+      - justify-items: center
+    icon:
+      - width: 24px
+      - height: 24px
+      - color: "[[[ return (entity?.attributes?.hvac_action === 'heating') ? '#E6893B' : (variables?.accent_color || '#A6A2D8'); ]]]"
+    name:
+      - font-size: 0.85rem
+      - font-weight: 600
+      - margin-top: 3px
+      - margin-bottom: 2px
+    label:
+      - justify-self: center
+
+# ─── Fensterkontakt-Kachel: OFFEN/zu prominent + Batterie ────────────────────
+#   entity: binary_sensor.*_alarm   variables: battery, accent_color
+window_tile:
+  show_name: true
+  show_icon: true
+  show_state: false
+  show_label: true
+  tap_action:
+    action: more-info
+  icon: >
+    [[[ return entity?.state === 'on' ? 'mdi:window-open-variant' : 'mdi:window-closed-variant'; ]]]
+  label: >
+    [[[
+      const open = entity?.state === 'on';
+      const stStr = open
+        ? '<span style="color:#e66767;font-weight:700">OFFEN</span>'
+        : '<span style="color:var(--secondary-text-color);font-weight:700">zu</span>';
+      const bs = variables?.battery ? states[variables.battery] : null;
+      const b = bs ? parseInt(bs.state) : NaN;
+      const bCol = isNaN(b) ? 'var(--secondary-text-color)'
+        : (b <= 20 ? '#e66767' : (b <= 50 ? '#E6A100' : 'var(--secondary-text-color)'));
+      const bStr = isNaN(b) ? '' : `<span style="color:${bCol}">🔋${b}%</span>`;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <span style="font-size:1.05rem;line-height:1.1">${stStr}</span>
+        <span style="font-size:0.72rem">${bStr}</span>
+      </div>`;
+    ]]]
+  styles:
+    card:
+      - padding: 9px 10px
+      - opacity: "[[[ return ['unavailable','unknown'].includes(entity?.state) ? '0.45' : '1'; ]]]"
+    grid:
+      - grid-template-areas: '"i" "n" "l"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto auto auto
+      - justify-items: center
+    icon:
+      - width: 24px
+      - height: 24px
+      - color: "[[[ return entity?.state === 'on' ? '#e66767' : (variables?.accent_color || '#A6A2D8'); ]]]"
+    name:
+      - font-size: 0.85rem
+      - font-weight: 600
+      - margin-top: 3px
+      - margin-bottom: 2px
+    label:
+      - justify-self: center
+
+# ─── Schaltbare Last (Lampe/Steckdose): an/aus, Tap toggelt ──────────────────
+#   entity: light.* | switch.*   variables: accent_color
+switch_tile:
+  show_name: true
+  show_icon: true
+  show_state: false
+  show_label: true
+  tap_action:
+    action: toggle
+  label: >
+    [[[
+      const on = entity?.state === 'on';
+      const col = on ? (variables?.accent_color || '#199E70') : 'var(--secondary-text-color)';
+      return `<span style="font-size:0.95rem;font-weight:700;color:${col}">${on ? 'an' : 'aus'}</span>`;
+    ]]]
+  styles:
+    card:
+      - padding: 9px 10px
+      - opacity: "[[[ return ['unavailable','unknown'].includes(entity?.state) ? '0.45' : '1'; ]]]"
+    grid:
+      - grid-template-areas: '"i" "n" "l"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto auto auto
+      - justify-items: center
+    icon:
+      - width: 24px
+      - height: 24px
+      - color: "[[[ return entity?.state === 'on' ? (variables?.accent_color || '#A6A2D8') : 'var(--disabled-text-color, #6b6b6b)'; ]]]"
+    name:
+      - font-size: 0.85rem
+      - font-weight: 600
+      - margin-top: 3px
+      - margin-bottom: 2px
+    label:
+      - justify-self: center
+
+# ═══════════════════════════════════════════════════════════════════════
+# GRUNDRISS-BUBBLES (Tab "Grundriss", views/floorplan.yaml + garage_floorplan.
+# yaml) — 26.09.2026, Nutzer-Wunsch "Icons im Grundriss lesbar wie im Tab
+# Home": ersetzen die bisherigen nativen state-icon/state-label-Elemente.
+# Schatten/Kontur 1:1 aus group_header uebernommen (weisser Text/Icon, dunkler
+# Halo + echte SVG-/Text-Kontur), damit dieselbe Lesbarkeits-Konvention gilt,
+# egal ob die Bubble auf dem Rauminneren (heller Boden) oder ausserhalb des
+# Hauses (Grastextur) liegt. Farben kommen ausschliesslich aus bestehenden
+# Theme-Tokens (themes/bitgrid.yaml), keine neuen Hex-Werte: var(--bg-color-
+# reserve) = Warnung/negativ (Fenster offen, Batterie kritisch), var(--accent-
+# color) = Uebergangs-Warnung (Geraet nicht verfuegbar, Batterie schwach),
+# var(--primary-color) = aktiv/normal (Heizung an), var(--bg-color-idle) =
+# aus/neutral. Icon- und Farblogik je Entity-Domäne steht bewusst NICHT hier
+# im Template (das bliebe sonst an binary_sensor/climate gebunden), sondern
+# wird pro Instanz in floorplan.yaml/garage_floorplan.yaml per icon:/
+# variables.color-Template berechnet — dieses Template ist reine Optik.
+# ═══════════════════════════════════════════════════════════════════════
+floorplan_icon_badge:
+  show_name: false
+  show_state: false
+  show_label: false
+  styles:
+    card:
+      - width: 40px
+      - height: 40px
+      - min-width: 40px
+      - border-radius: 50%
+      - background: rgba(255, 255, 255, 0.3)
+      - padding: 0
+      - overflow: visible
+    grid:
+      - grid-template-areas: '"i"'
+      - place-items: center
+      - overflow: visible
+    img_cell:
+      - overflow: visible
+    icon:
+      - width: 22px
+      - height: 22px
+      - color: "[[[ return variables?.color || 'var(--state-icon-color)'; ]]]"
+  # Echter SVG-Stroke, siehe group_header weiter oben fuer die volle
+  # Begruendung (drei Shadow-Root-Hops bis zum <svg><path>).
+  card_mod:
+    style:
+      "ha-state-icon $":
+        "ha-icon $":
+          "ha-svg-icon $": |
+            svg path {
+              stroke: #000000;
+              stroke-width: 1.5px;
+              paint-order: stroke fill;
+            }
+
+# Wertebubble (Leistung/Temperatur/Prozent) fuer den Grundriss — ersetzt
+# state-label. Einheiten-Logik generisch ueber unit_of_measurement, damit ein
+# Template W/°C/% gleichermassen bedient (keine Kopien pro Sensor-Typ).
+# entity: sensor.*
+floorplan_value_badge:
+  show_name: false
+  show_icon: false
+  show_state: false
+  show_label: true
+  styles:
+    card:
+      # 27.09.2026, Nutzer-Wunsch "Schrift zu klein": Schrift 0.82rem -> 1.05rem
+      # (+28%). Die Pille waechst proportional mit (Hoehe 28->34, Radius 14->17,
+      # Padding 9->11, min-width 40->46), sonst klebt der groessere Text am Rand.
+      # Kontur 1.25->1.5px, damit der schwarze Halo bei groesserer Schrift gleich
+      # stark wirkt. Positionen bleiben unveraendert: die Pille ist per
+      # translate(-50%, -50%) um ihren Mittelpunkt zentriert und waechst
+      # symmetrisch. Wirkt auch im Grundriss-Tab von v2 (gleiches Template).
+      - min-width: 46px
+      - height: 34px
+      - padding: 0 11px
+      - border-radius: 17px
+      - background: rgba(255, 255, 255, 0.3)
+      - overflow: visible
+    grid:
+      - grid-template-areas: '"l"'
+      - place-items: center
+      - overflow: visible
+    label:
+      - font-size: 1.05rem
+      - font-weight: 700
+      - color: "#FFFFFF"
+      - text-shadow: var(--bgai-header-halo-v3)
+      - -webkit-text-stroke: "1.5px #000000"
+      - paint-order: stroke fill
+      - white-space: nowrap
+  label: >
+    [[[
+      if (!entity || ['unavailable', 'unknown'].includes(entity.state)) return '—';
+      const unit = entity.attributes?.unit_of_measurement || '';
+      const v = parseFloat(entity.state);
+      if (isNaN(v)) return entity.state;
+      if (unit === '°C' || unit === '%') {
+        return v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' ' + unit;
+      }
+      const rounded = Math.round(v).toLocaleString('de-DE');
+      return unit ? rounded + ' ' + unit : rounded;
+    ]]]
+
+# Statisches Raumnamens-Schild fuer den Grundriss (Nutzer-Wunsch Punkt 5).
+# Kein entity noetig, name: wird pro Instanz literal gesetzt.
+floorplan_room_label:
+  show_name: true
+  show_icon: false
+  show_state: false
+  tap_action:
+    action: none
+  styles:
+    card:
+      - width: auto
+      - padding: 3px 11px
+      - border-radius: 10px
+      - background: rgba(0, 0, 0, 0.28)
+      - overflow: visible
+    grid:
+      - grid-template-areas: '"n"'
+      - overflow: visible
+    name:
+      - font-size: var(--bg-fs-secondary)
+      - font-weight: 700
+      - text-transform: uppercase
+      - letter-spacing: 0.05em
+      - color: var(--bgai-section-label-v3)
+      - text-shadow: var(--bgai-header-halo-v3)
+      - -webkit-text-stroke: "1.5px #000000"
+      - paint-order: stroke fill
+      - white-space: nowrap
+
+# Zeilen, die FREI auf dem View-Hintergrund stehen (Tab "Einstellungen"),
+# statt wie im Steuerung-Tab innerhalb einer Karte zu sitzen. settings_row
+# fuellt transluzent weiss, was auf einer Karte als leichte Erhoehung wirkt,
+# auf der Grastextur aber schlicht durchsichtig ist. Diese Variante setzt
+# stattdessen die Kartenflaeche. Immer NACH settings_row listen, button-card
+# mergt Templates in Listen-Reihenfolge.
+# Bewusst hier und nicht per View-":host": eine Umleitung auf View-Ebene
+# erreicht die Karten nicht (mehrfach live geprueft, s. DESIGN.md).
+settings_row_solid:
+  styles:
+    card:
+      - background: var(--ha-card-background)
+
+# Randlose Pillen-Zeile im Stil der Regelwerk-Gruppenkoepfe im Steuerung-Tab
+# (Hochstufen/Runterstufen/Nacht-Sperre: rgba(255,255,255,0.04), Radius 14px,
+# kein Rand, kein Schatten). 26.09.2026, Nutzer-Wunsch fuer die Zeilen im
+# Einstellungen-Tab, die innerhalb einer gemeinsamen Karte sitzen. Immer NACH
+# settings_row listen (Merge-Reihenfolge, s. settings_row_solid). Hover aus
+# settings_row bleibt erhalten, der Rahmen-Reset dort ebenfalls.
+settings_row_soft:
+  styles:
+    card:
+      - background: "rgba(255,255,255,0.04)"
+      - border-radius: "14px"
+      - box-shadow: none
+      - border: none

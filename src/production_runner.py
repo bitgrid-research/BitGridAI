@@ -14,10 +14,11 @@ from __future__ import annotations
 import logging
 import sqlite3
 import time
+from dataclasses import replace
 from datetime import datetime, timezone
 from typing import Any, Callable, Literal
 
-from src.adapters.actuation_writer import ActuationWriter
+from src.adapters.actuation_writer import ActuationWriter, new_command_id
 from src.adapters.telemetry_ingest import TelemetryIngest, raw_from_ingest
 from src.core import block_scheduler, rule_engine
 from src.core.energy_context import build_energy_state
@@ -98,6 +99,10 @@ class ProductionRunner:
             blocks_since_last_change=self._blocks_since_change,
             now=now,
         )
+        # Boundary: Surrogat-command_id hier vergeben (Idempotenz + EventStore-PK).
+        # Der Kern bleibt rein; die ID ist nicht Teil der replayten Entscheidung.
+        command_id = new_command_id()
+        event = replace(event, decision=replace(event.decision, command_id=command_id))
         decision_latency_ms = (time.monotonic() - t0) * 1000
 
         # Override: manuelle Eingriffe, aber nie gegen R3
@@ -127,9 +132,7 @@ class ProductionRunner:
             self._miner_runtime_blocks += 1
 
         # Relay-Kommando senden
-        cmd = self._writer.decision_to_command(
-            effective_action, event.decision.command_id
-        )
+        cmd = self._writer.decision_to_command(effective_action, command_id)
         if cmd is not None:
             self._writer.write(cmd, self._relay_topic)
 

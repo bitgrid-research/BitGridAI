@@ -27,9 +27,9 @@ sodass der Entscheidungskern per **Replay** exakt reproduzierbar denselben
 
 ## Designprinzipien
 
-1. **Ein Lehrziel pro Szenario** — sauber zuordenbar zum Regelverständnis-Score (0–12, siehe [2024b](../2024b_tasks_instruments_metrics.md)).
+1. **Ein Lehrziel pro Szenario** — jede Entscheidung ist eindeutig (klarer Faithfulness-Ground-Truth, siehe [2024b](../2024b_tasks_instruments_metrics.md)).
 2. **Reproduzierbar** — definierter `EnergyState` + Engine-Inputs → deterministischer `decision_code`.
-3. **Diskriminierend** — die kontraintuitiven Fälle (S3, S6, S9) trennen statische von persona-adaptiver Erklärung.
+3. **Diskriminierend** — die kontraintuitiven Fälle (S3, S6, S9) trennen statische von LLM-Erklärung.
 4. **Vollständige Abdeckung** — alle Regeln R1–R5 **und** die Prioritätskette R3 > R2 > R4 > R5 > R1.
 5. **Zentralkonzept „Steuern statt Einspeisen"** wird mehrfach berührt (S1, S3, S8).
 
@@ -168,14 +168,14 @@ zu verzerren. Live-Sensoren: `mining_value_ct_kwh`, `mining_vs_feedin_ct_kwh`,
 ## Nutzung in beiden Tracks (Studie ≠ Simulation)
 
 Die 10 Szenarien sind bewusst **unabhängige, kontrollierte Replay-Vektoren**
-(Unit-Test-Fixtures): jeder Block isoliert genau eine Regel → **saubere Attribution**
-im Verständnis-Score. Der „Mining-Tag" ist eine **didaktische Rahmung**, keine
+(Unit-Test-Fixtures): jeder Block isoliert genau eine Regel → **klare Entscheidung als
+Faithfulness-Ground-Truth** (FF2). Der „Mining-Tag" ist eine **didaktische Rahmung**, keine
 durchgängige Batteriesimulation.
 
-| Aspekt | **Studie** (WQ1–WQ3) | **Simulation** (SIM-Track) |
+| Aspekt | **Studie** (FF1/FF2) | **Simulation** (SIM-Track) |
 |---|---|---|
 | Datenquelle | 10 isolierte Vektoren, Replay des Kerns | durchgängige Tageskurve |
-| Ziel | saubere Regel-Attribution, Verständnis-Score | Realismus, Verhalten über Zeit |
+| Ziel | klare Entscheidung, Faithfulness-Ground-Truth | Realismus, Verhalten über Zeit |
 | Reihenfolge | **fix chronologisch** | physikalisch fortlaufend |
 | S4/S5/S7 | reguläre Items | **Fault-/Stress-Injektion** |
 
@@ -199,9 +199,9 @@ durchgängige Batteriesimulation.
 
 ## Bezug zur Auswertung
 
-- **Verständnis-Score (0–12):** Progression Basis (S1/S2) → Priorität R2>R1 (S6/S7) → kontraintuitiv (S3/S9) → Safety-Sonderrolle (S4/S5). ⚑ = diskriminierende Items.
-- **Override-Angemessenheit:** beobachtet an S4 (Safety, nicht überstimmbar → Misuse-Test) und S9 (Forecast, überstimmbar → Disuse/Misuse-Test).
-- **Persona-Adaptivität (Gruppe B):** S3, S6, S9 erfordern je nach Persona unterschiedliche Begründungstiefe.
+- **Vertrauen / Within-Vergleich:** Progression Basis (S1/S2) → Priorität R2>R1 (S6/S7) → kontraintuitiv (S3/S9) → Safety-Sonderrolle (S4/S5). ⚑ = diskriminierende Items, geeignet für den Direktvergleich.
+- **Behaviorale Verlässlichkeit (optional):** beobachtet an S4 (Safety, nicht überstimmbar → Misuse-Test) und S9 (Forecast, überstimmbar → Disuse/Misuse-Test).
+- **Güte (FF2):** die klare Entscheidung je Szenario erlaubt eine objektive Faithfulness-Prüfung des LLM-Texts (Gruppe B).
 - **Replay:** Die 10 Blöcke werden als gescriptete Sequenz aus dem deterministischen Kern eingespielt — identisch für alle Probanden.
 
 ---
@@ -229,9 +229,9 @@ durchgängige Batteriesimulation.
 
 ### Studiendurchführung (aus 2024a–c)
 
-- [ ] **Erklärtexte** Gruppe A (statisch) vs. B (persona-adaptiv, LLM) je Szenario.
-- [ ] **Rubrik (0–12) + Interrater-κ** kalibrieren.
-- [ ] **Override-Aufgabe** operationalisieren (S4 Misuse-, S9 Disuse-Test).
+- [ ] **Erklärtexte** Gruppe A (statisch) vs. B (LLM, ohne Personas) je Szenario.
+- [ ] **Güte-Rubrik (0–6) + Interrater-κ** kalibrieren; Trust-/Within-Bogen validieren.
+- [ ] **Within-Vergleich** operationalisieren (S4, S9 als kontraintuitive Items).
 - [ ] **Ethikantrag-Status** klären.
 
 ---

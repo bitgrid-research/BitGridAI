@@ -1,0 +1,243 @@
+# ═══════════════════════════════════════════════════════════════════════
+# GRUNDRISS-LEGENDE OBERGESCHOSS — 26.09.2026, Nutzer-Wunsch Punkt 1: unter
+# dem Grundriss-Bild eine Zusammenfassung "wo ist ein Fenster offen, welche
+# Heizung ist an (+Temperatur), welche Geraete fehlen (nicht verbunden),
+# welche Batterien muessen gewechselt werden". Eine Kategorie wird nur
+# angezeigt, wenn im rooms-Array unten tatsaechlich Entities dafuer
+# hinterlegt sind (applicable-Flag in window.bgFloorplanLegend) — sonst gibt
+# es dafuer gar keinen Abschnitt statt einer erfundenen "leer"-Meldung.
+# Innerhalb einer anwendbaren Kategorie heisst eine leere Liste "alles ok".
+#
+# 26.09.2026, Nachbesserung nach Live-Check ("schöner machen"): war eine
+# einzige Reihe pro Kategorie mit inline-block-Chips ohne Flex-Wrap-Garantie
+# UND einer Kartenbreite (max-width:900px), die neben der viel breiteren
+# Grundriss-Karte im selben vertical-stack nicht wie gedacht griff — Chips
+# liefen dadurch ueber den sichtbaren Bereich hinaus statt umzubrechen.
+# Fix: Breite jetzt exakt dieselbe min()-Formel wie das Grundrissbild
+# (views/floorplan.yaml), macht beide Karten deckungsgleich statt zwei
+# unabhaengige, potenziell abweichende Breiten zu pflegen. Layout jetzt ein
+# 2-Spalten-Grid aus vier eigenstaendigen Sektions-Karten (sekundaere
+# Kartenflaeche wie an anderer Stelle im Dashboard, kein loser Text mehr auf
+# dem Kartenhintergrund), Chips in einem echten flex-wrap-Container.
+#
+# Bewusst NICHT jeden Shelly-Leistungssensor (Steckdosen) hier mit
+# aufgenommen: deren Entity-IDs sind MAC-basiert, eine Raum-Zuordnung waere
+# geraten statt belegt. Fehlende-Geraete-Pruefung bleibt auf die Entities
+# beschraenkt, die ueber ihren Namen eindeutig einem Raum/Geraet zugeordnet
+# sind (Fenster/Heizung/Batterie) — siehe garage_floorplan_legende.yaml fuer
+# das Untergeschoss, wo umgekehrt genau die Leistungssensoren die einzige
+# verfuegbare Kategorie sind.
+#
+# Batterie-Schwellenwert (<=20% kritisch, <=50% Warnstufe) 1:1 aus
+# button_card_templates.yaml climate_tile/window_tile uebernommen (bestehende
+# Projekt-Konvention), nur auf Theme-Tokens statt Magic-Hex umgestellt.
+# Farben ausschliesslich aus themes/bitgrid.yaml: var(--bg-color-reserve)
+# (Warnung/negativ), var(--accent-color) (Uebergangs-Warnung), var(--primary-
+# color) (aktiv/normal). Gemeinsame Render-Funktion window.bgFloorplanLegend
+# lebt identisch in floorplan_legende.yaml UND garage_floorplan_legende.yaml
+# (Muster wie window.bgRoomKachel in den raumkachel_*.yaml: gemeinsamer
+# globaler Scope im selben Dashboard, keine Doppel-Definition noetig, die
+# zweite Datei ueberspringt die Definition ueber den if-Guard).
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: 14px
+    - padding: 16px
+    # 26.09.2026, Nutzer-Wunsch: Legende steht rechts neben dem Grundriss
+    # (1/4 der Breite, Raster im Dashboard), fuellt daher ihre Spalte.
+    - margin: 0
+    - width: 100%
+    - box-sizing: border-box
+    - overflow: visible
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    body:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+      - overflow: visible
+custom_fields:
+  body: >
+    [[[
+      if (!window.bgFloorplanLegend) {
+        window.bgFloorplanLegend = function(rooms) {
+          const heatColor = 'var(--primary-color)';
+          const warnColor = 'var(--bg-color-reserve)';
+          const cautionColor = 'var(--accent-color)';
+
+          const openWindows = [];
+          const activeHeating = [];
+          const missing = [];
+          const lowBattery = [];
+          let anyWindow = false, anyClimate = false, anyBattery = false, anySensor = false;
+
+          rooms.forEach(r => {
+            (r.windows || []).forEach(w => {
+              anyWindow = true;
+              const st = states[w.id];
+              const label = w.label ? ` – ${w.label}` : '';
+              if (!st || ['unavailable', 'unknown'].includes(st.state)) {
+                missing.push(`${r.name}${label} (Fenster)`);
+              } else if (st.state === 'on') {
+                openWindows.push(`${r.name}${label}`);
+              }
+            });
+            (r.climates || []).forEach(c => {
+              anyClimate = true;
+              const st = states[c.id];
+              const label = c.label ? ` – ${c.label}` : '';
+              if (!st || ['unavailable', 'unknown'].includes(st.state)) {
+                missing.push(`${r.name}${label} (Heizung)`);
+              } else if (st.state === 'heat') {
+                const t = st.attributes?.current_temperature;
+                const tStr = (t === undefined || t === null) ? '' :
+                  ` (${Number(t).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})} °C)`;
+                activeHeating.push(`${r.name}${label}${tStr}`);
+              }
+            });
+            (r.batteries || []).forEach(b => {
+              anyBattery = true;
+              const st = states[b.id];
+              const label = b.label ? ` – ${b.label}` : '';
+              if (!st || ['unavailable', 'unknown'].includes(st.state)) {
+                missing.push(`${r.name}${label} (Batterie)`);
+                return;
+              }
+              const pct = parseInt(st.state);
+              if (!isNaN(pct) && pct <= 50) {
+                lowBattery.push({ text: `${r.name}${label} ${pct}%`, critical: pct <= 20 });
+              }
+            });
+            (r.sensors || []).forEach(s => {
+              anySensor = true;
+              const st = states[s.id];
+              const label = s.label ? ` – ${s.label}` : '';
+              if (!st || ['unavailable', 'unknown'].includes(st.state)) {
+                missing.push(`${r.name}${label}`);
+              }
+            });
+          });
+
+          const chip = (text, color) => `<span style="display:inline-flex;align-items:center;
+            padding:4px 10px;border-radius:10px;background:rgba(255,255,255,0.06);
+            border:1px solid ${color};color:var(--primary-text-color);font-size:0.78rem;
+            font-weight:600;white-space:normal;overflow-wrap:anywhere;max-width:100%;box-sizing:border-box;">${text}</span>`;
+
+          const section = (icon, title, color, items, emptyText, applicable) => {
+            if (!applicable) return '';
+            return `<div style="background:var(--secondary-background-color);border-radius:12px;
+              padding:12px 14px;box-sizing:border-box;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+                <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.10);
+                  display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color};"></ha-icon>
+                </div>
+                <span style="font-size:0.78rem;font-weight:700;text-transform:uppercase;
+                  letter-spacing:0.05em;color:var(--secondary-text-color);">${title}</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                ${items.length ? items.join('') :
+                  `<span style="font-size:0.85rem;color:var(--secondary-text-color);">${emptyText}</span>`}
+              </div>
+            </div>`;
+          };
+
+          const sections = [
+            section('mdi:window-open-variant', 'Offene Fenster', warnColor,
+              openWindows.map(t => chip(t, warnColor)), '✓ Alle Fenster geschlossen', anyWindow),
+            section('mdi:radiator', 'Aktive Heizungen', heatColor,
+              activeHeating.map(t => chip(t, heatColor)), 'Keine Heizung aktiv', anyClimate),
+            section('mdi:lan-disconnect', 'Fehlende Geräte', cautionColor,
+              missing.map(t => chip(t, cautionColor)), '✓ Alle Geräte verbunden',
+              anyWindow || anyClimate || anyBattery || anySensor),
+            section('mdi:battery-alert-variant-outline', 'Batterie wechseln', warnColor,
+              lowBattery.map(b => chip(b.text, b.critical ? warnColor : cautionColor)),
+              '✓ Alle Batterien ausreichend geladen', anyBattery),
+          ].filter(html => html !== '');
+
+          // 26.09.2026: auto-fit statt fester 2 Spalten, damit dieselbe Funktion
+          // in der schmalen Seitenspalte (Obergeschoss, 1/4 Breite) einspaltig
+          // und unter dem Garagen-Plan weiter zweispaltig rendert.
+          return `<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 240px), 1fr));gap:12px;">
+            ${sections.join('')}</div>`;
+        };
+      }
+      return window.bgFloorplanLegend([
+        { name: 'Wohnzimmer',
+          windows: [
+            { id: 'binary_sensor.wohnzimmer_ofen_alarm', label: 'Ofen' },
+            { id: 'binary_sensor.wohnzimmer_fenster_alarm', label: 'Fenster' },
+          ],
+          climates: [
+            { id: 'climate.wohnzimmer_ofen', label: 'Ofen' },
+            { id: 'climate.wohnzimmer_fenster', label: 'Fenster' },
+          ],
+          batteries: [
+            { id: 'sensor.wohnzimmer_ofen_batterie', label: 'Ofen-Heizung' },
+            { id: 'sensor.wohnzimmer_ofen_batterie_2', label: 'Ofen-Heizung 2' },
+            { id: 'sensor.wohnzimmer_fenster_batterie', label: 'Fenster-Heizung' },
+            { id: 'sensor.wohnzimmer_fenster_batterie_2', label: 'Fenster-Heizung 2' },
+          ] },
+        { name: 'Küche',
+          windows: [{ id: 'binary_sensor.kuche_alarm' }],
+          climates: [{ id: 'climate.kuche' }],
+          batteries: [
+            { id: 'sensor.kuche_batterie', label: 'Heizung' },
+            { id: 'sensor.kuche_batterie_2', label: 'Fenster' },
+          ] },
+        { name: 'Bad',
+          climates: [{ id: 'climate.bad' }],
+          batteries: [
+            { id: 'sensor.bad_batterie', label: 'Heizung' },
+            { id: 'sensor.bad_taster_batterie', label: 'Taster' },
+          ] },
+        { name: 'Hauswirtschaftsraum',
+          windows: [{ id: 'binary_sensor.hauswirtschaftsraum_alarm' }],
+          climates: [{ id: 'climate.hauswirtschaftsraum' }],
+          batteries: [
+            { id: 'sensor.hauswirtschaftsraum_batterie', label: 'Heizung' },
+            { id: 'sensor.hauswirtschaftsraum_batterie_2', label: 'Fenster' },
+          ] },
+        { name: 'Schlafzimmer 2',
+          windows: [{ id: 'binary_sensor.michaels_schlafzimmer_alarm' }],
+          climates: [{ id: 'climate.michaels_schlafzimmer' }],
+          batteries: [
+            { id: 'sensor.michaels_schlafzimmer_batterie', label: 'Heizung' },
+            { id: 'sensor.michaels_schlafzimmer_batterie_2', label: 'Fenster' },
+          ] },
+        { name: 'Schlafzimmer 1',
+          windows: [{ id: 'binary_sensor.davids_zimmer_alarm' }],
+          climates: [{ id: 'climate.davids_zimmer' }],
+          batteries: [
+            { id: 'sensor.davids_zimmer_batterie', label: 'Heizung' },
+            { id: 'sensor.davids_zimmer_batterie_2', label: 'Fenster' },
+          ] },
+        { name: 'Gästezimmer',
+          windows: [{ id: 'binary_sensor.gastezimmer_alarm' }],
+          climates: [{ id: 'climate.gastezimmer' }],
+          batteries: [
+            { id: 'sensor.gastezimmer_batterie', label: 'Heizung' },
+            { id: 'sensor.gastezimmer_batterie_2', label: 'Fenster' },
+          ] },
+        { name: 'Büro',
+          windows: [
+            { id: 'binary_sensor.buro_grosses_fenster_alarm', label: 'großes Fenster' },
+            { id: 'binary_sensor.buro_kleines_fenster_alarm', label: 'kleines Fenster' },
+          ],
+          climates: [{ id: 'climate.buro_michael' }],
+          batteries: [
+            { id: 'sensor.buro_michael_batterie', label: 'Heizung' },
+            { id: 'sensor.buro_grosses_fenster_batterie', label: 'großes Fenster' },
+            { id: 'sensor.buro_kleines_fenster_batterie', label: 'kleines Fenster' },
+          ] },
+      ]);
+    ]]]

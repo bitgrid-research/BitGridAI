@@ -8,7 +8,7 @@ Repo-Config. Standard ist **Dry-Run** (zeigt nur den Plan); mit ``--apply``
 werden die Renames live ausgeführt.
 
 Token: aus --token, sonst $BITGRIDAI_HA_TOKEN, sonst aus .env.
-Host:  aus --host (Default http://192.168.178.62:8123).
+Host:  aus --host, sonst UMBREL_HOST/HA_PORT aus .env.
 
   python scripts/ha_rename_entities.py            # Dry-Run
   python scripts/ha_rename_entities.py --apply     # ausführen
@@ -55,6 +55,24 @@ def _load_token(cli_token: str | None) -> str:
                 if line.startswith(f"{key}="):
                     return line.split("=", 1)[1].strip().strip('"')
     raise SystemExit("Kein Token: --token oder BITGRIDAI_HA_TOKEN/.env setzen")
+
+
+def _load_host(cli_host: str | None) -> str:
+    if cli_host:
+        return cli_host
+    env = os.environ.get("UMBREL_HOST")
+    port = os.environ.get("HA_PORT", "8123")
+    if not env:
+        env_file = Path(__file__).resolve().parent.parent / ".env"
+        if env_file.exists():
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                if line.startswith("UMBREL_HOST="):
+                    env = line.split("=", 1)[1].strip().strip('"')
+                elif line.startswith("HA_PORT="):
+                    port = line.split("=", 1)[1].strip().strip('"') or port
+    if not env:
+        raise SystemExit("Kein Host: --host oder UMBREL_HOST/.env setzen")
+    return f"http://{env}:{port}"
 
 
 def _ws_url(host: str) -> str:
@@ -147,13 +165,19 @@ def main() -> None:
     except (AttributeError, ValueError):
         pass
     parser = argparse.ArgumentParser(description="HA-Entities serienfrei umbenennen")
-    parser.add_argument("--host", default="http://192.168.178.62:8123")
+    parser.add_argument(
+        "--host",
+        default=None,
+        help="HA-Basis-URL, z.B. http://umbrel.local:8123 "
+        "(Default aus UMBREL_HOST/HA_PORT in .env)",
+    )
     parser.add_argument("--token", default=None)
     parser.add_argument("--apply", action="store_true", help="Renames live ausführen")
     args = parser.parse_args()
 
+    host = _load_host(args.host)
     token = _load_token(args.token)
-    rc = asyncio.run(_run(args.host, token, args.apply))
+    rc = asyncio.run(_run(host, token, args.apply))
     sys.exit(rc)
 
 

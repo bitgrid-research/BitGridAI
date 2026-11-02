@@ -1,0 +1,121 @@
+# ═══════════════════════════════════════════════════════════════════════
+# VERBRAUCH NACH GERÄTETYP — Feld 2 von 3 im Abschnitt "Echtzeitverbrauch"
+# (Tab "EnergieInfo").
+#
+# 25.08.2026, Kurskorrektur: erster Anlauf war eine Kette aus 7 einzelnen
+# custom:bubble-card-Pillen unter einem separaten Markdown-Header (siehe
+# Git-Historie) — Nutzer-Feedback: "die in eine kachel bündeln damit das
+# design und bezeichner nicht aus der reihe fallen soll so aussehen wie bei
+# den anderen kacheln". Jetzt EINE Karte im selben Kartenrahmen wie die
+# direkten Nachbarfelder in diesem Abschnitt (Feld 1 "Verbrauch nach
+# Räumen", verbrauch_nach_raeumen.yaml; Feld 3 "Gesamter Echtzeitverbrauch",
+# gesamter_echtzeitverbrauch.yaml — beide var(--ha-card-background) mit
+# Standard-HA-Rahmen, Titel oben links im Karteninneren), Bubble Card damit
+# hier nicht mehr genutzt. Die einzelnen Zeilen (Icon-Kreis, Label, Wert,
+# Ring-Gauge) übernehmen dieselbe Optik wie die Geräte-Zeilen in den
+# Raum-Kacheln (raumkachel_*.yaml, window.bgRoomKachel) für ein
+# durchgängiges Bild über den ganzen Tab.
+#
+# Ring-Anteil je Kategorie = Kategorie-W / Summe aller 7 Kategorien-W (nicht
+# gegen Gesamtenergie, das zeigt Feld 3 bereits direkt daneben).
+# Kategorien/Sensoren: packages/devices.yaml, typ_*_power_w — Zuordnung nach
+# den echten Live-Friendly-Names der Shelly-Plugs, nicht nach altem
+# Kommentarblock in devices.yaml.
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+styles:
+  card:
+    # 27.09.2026, Nutzer-Wunsch "aus zwei Karten eine machen": eigener
+    # Kartenrahmen entfaellt, den zeichnet jetzt der umgebende vertical-stack
+    # in bitgrid_dashboard_v3.yaml. Nur die obere Kante bleibt als Trennlinie
+    # zwischen Tacho-Abschnitt und Geraetetyp-Abschnitt stehen. border-top
+    # MUSS nach border stehen, button-card wendet die Liste in Reihenfolge an.
+    - background: none
+    - border-radius: 0
+    - overflow: hidden
+    - border: none
+    - border-top: 1px solid rgba(255, 255, 255, 0.10)
+    - box-shadow: none
+    - padding: 14px 14px 16px
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    body:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  body: >
+    [[[
+      const categories = [
+        ['mdi:pickaxe', 'Mining', 'sensor.typ_mining_power_w'],
+        ['mdi:desktop-tower-monitor', 'Computer', 'sensor.typ_computer_power_w'],
+        ['mdi:fridge-outline', 'Kühlung', 'sensor.typ_kuehlung_power_w'],
+        ['mdi:television', 'Unterhaltung', 'sensor.typ_unterhaltung_power_w'],
+        ['mdi:water-boiler', 'Warmwasserbereiter', 'sensor.typ_warmwasser_power_w'],
+        ['mdi:washing-machine', 'Haushaltsgeräte', 'sensor.typ_haushaltsgeraete_power_w'],
+        ['mdi:power-socket-eu', 'Sonstiges', 'sensor.typ_sonstiges_power_w'],
+      ];
+      const vals = categories.map(([, , id]) => {
+        const w = parseFloat(states[id]?.state);
+        return isNaN(w) ? 0 : w;
+      });
+      const total = vals.reduce((a, b) => a + b, 0);
+
+      // 27.09.2026, Nutzer-Wunsch: Zeilen als Bubble-Card-Pillen (Vorbild:
+      // Nutzer-Screenshot "Verbrauch Nach Geraetetyp"). Der farbige Balken
+      // laeuft von links proportional zum ANTEIL der Kategorie am Summen-
+      // verbrauch aller sieben Kategorien voll (derselbe Anteil, den vorher
+      // der Ring rechts zeigte; der Ring ist damit ueberfluessig und raus).
+      // Bewusst NICHT steuerbar: keine tap_action, kein Chevron, kein
+      // Hover-Effekt. Das sind reine Anzeigen, ein Klick haette nichts zu tun.
+      // Eine Farbe je Kategorie, alle aus themes/bitgrid.yaml (keine neuen
+      // Hexwerte): Mining = Bitcoin-Orange, Warmwasser = Waermefarbe,
+      // Sonstiges = Inaktiv-Grau, die uebrigen der Reihe nach aus der Palette.
+      // min-width am Balken, damit auch 0.0 W noch eine farbige Kante zeigt
+      // und die Zeile nicht farblos wirkt. Label und Wert bekommen einen
+      // dunklen Textschatten: bei hohem Anteil laeuft der farbige Balken unter
+      // beide durch, ohne den Schatten sinkt dort der Kontrast sichtbar ab.
+      const colors = [
+        'var(--bg-color-super)', 'var(--bg-color-standard)', 'var(--bg-color-eco)',
+        'var(--bg-color-pv)', 'var(--bg-color-heat)', 'var(--bg-color-reserve)',
+        'var(--bg-color-idle)',
+      ];
+
+      const rowHtml = categories.map(([ic, label], i) => {
+        const val = vals[i];
+        const pct = total > 0 ? (val / total * 100) : 0;
+        const col = colors[i % colors.length];
+        const valStr = (val < 10 ? val.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1}) : Math.round(val).toLocaleString('de-DE')) + ' W';
+        return `<div style="position:relative;display:flex;align-items:center;gap:10px;
+            height:44px;border-radius:22px;background:rgba(255,255,255,0.05);
+            overflow:hidden;padding:0 16px 0 6px;box-sizing:border-box;">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:${pct.toFixed(2)}%;
+            min-width:6px;background:${col};opacity:0.55;"></div>
+          <div style="position:relative;width:32px;height:32px;border-radius:11px;
+            background:rgba(0,0,0,0.38);display:flex;align-items:center;
+            justify-content:center;flex-shrink:0;">
+            <ha-icon icon="${ic}" style="--mdc-icon-size:18px;color:var(--primary-text-color);"></ha-icon>
+          </div>
+          <span style="position:relative;flex:1;min-width:0;text-align:left;
+            color:var(--primary-text-color);font-size:0.95rem;font-weight:700;
+            text-shadow:0 1px 2px rgba(0,0,0,0.65);
+            overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
+          <span style="position:relative;font-size:0.95rem;font-weight:700;
+            color:var(--primary-text-color);text-shadow:0 1px 2px rgba(0,0,0,0.65);
+            white-space:nowrap;">${valStr}</span>
+        </div>`;
+      }).join('<div style="height:8px;"></div>');
+
+      return `<div style="display:flex;flex-direction:column;width:100%">
+        <div style="font-size:1.25rem;font-weight:700;color:var(--primary-text-color);margin-bottom:6px;padding-left:2px;">Echtzeitverbrauch nach Gerätetyp</div>
+        ${rowHtml}
+      </div>`;
+    ]]]

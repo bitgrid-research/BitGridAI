@@ -144,8 +144,8 @@ liegt im Studiendesign-Kontext:
 | **S10** | Anti-Flapping | R5 | `NOOP_R5_MIN_RUNTIME_NOT_REACHED` | [S10](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/S10_anti_flapping.md) |
 
 ⚑ = diskriminierende Items (kontraintuitiv) — sie trennen die statische von der
-persona-adaptiven Erklärung. Die Szenarien decken alle Regeln R1–R5 und die
-Prioritätskette R3 > R2 > R4 > R5 > R1 ab.
+LLM-Erklärung und eignen sich für den Within-Direktvergleich des Vertrauens. Die
+Szenarien decken alle Regeln R1–R5 und die Prioritätskette R3 > R2 > R4 > R5 > R1 ab.
 
 &nbsp;
 

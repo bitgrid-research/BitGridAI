@@ -1,31 +1,33 @@
-# 27 – Evaluationsrahmen (v1)
+# 27 – Evaluationsrahmen (v2)
 
 Dieses Kapitel beschreibt den **Evaluationsrahmen**, mit dem BitGridAI in einer empirischen Studie untersucht wird.
-Ziel ist es, die Wirkung des **Erklärformats** auf das **Regelverständnis** von Laiennutzern zu bewerten: Eine **adaptive, persona-basierte LLM-Erklärung** wird mit einem **statischen, regelbasierten Erklärtext** verglichen.
+Ziel ist es, die Wirkung des **Erklärformats** auf das **Nutzervertrauen** zu bewerten: Eine **LLM-Erklärung** (ohne Personas) wird mit einem **statischen, regelbasierten Erklärtext** verglichen. Ergänzend wird die **Güte** der LLM-Ausgaben objektiv gemessen.
 
-Der Fokus liegt auf dem **Verständnis der Entscheidungslogik** (mentales Modell), insbesondere auf dem zentralen Lernziel **energiebewusstes Steuern statt Einspeisen**. Ergänzend werden die **Angemessenheit manueller Eingriffe** (Override) und optional **Vertrauen** betrachtet.
+Der Fokus liegt auf zwei Forschungsfragen: **FF1** (Vertrauen, A vs. B) und **FF2** (Güte der Ausgaben). Verbindendes Konzept ist die **Vertrauens-Kalibrierung**: Ist ein etwaiges Vertrauens-Plus der LLM-Variante durch die objektive Güte gedeckt, oder liegt Über-Vertrauen vor?
+
+Methodisch ordnet sich die Arbeit in die **Design Science Research** ein (Artefakt BitGridAI + Evaluation + Feedback-Schleife): Die Studie ist eine **formative Evaluation** mit konfirmatorischem A/B-Kern; die Güte-Befunde (FF2) und die qualitativen Themen fließen als konkreter Verbesserungs-Input in die Erklärschicht (Prompt, Templates, Gold-Referenzen) zurück.
 
 &nbsp;
 
 ## Überblick
 
-Die Evaluation ist als **Between-Subjects-Studie** in einer **Einzelsitzung** angelegt, in der zwei Erklärformate verglichen werden. Beide Varianten zeigen einen Erklärbereich — der Unterschied liegt allein in der *Art* der Erklärung:
+Die Evaluation ist als **Mixed-Design** in einer **Einzelsitzung** angelegt: ein Between-Vergleich (A/B) für die primäre Trust-Messung plus ein Within-Direktvergleich am Sitzungsende. Beide Varianten zeigen einen Erklärbereich — der Unterschied liegt allein in der *Art* der Erklärung:
 
-* **Gruppe A – statisch** (n = 5): regelbasiert erzeugte, für alle Probanden wortgleiche Erklärtexte (kein Sprachmodell).
-* **Gruppe B – adaptiv** (n = 15): natürlichsprachliche LLM-Erklärung in einem von **drei Persona-Typen** (`energie` Eigenverbrauch · `waerme` Wärmegewinn · `tech` technische Transparenz), je n = 5, zugewiesen nach dem im Intake erhobenen Nutzertyp, gemäß Kapitel 24. 🟦
+* **Gruppe A – statisch** (n = 8): regelbasiert erzeugte, für alle Probanden wortgleiche Erklärtexte (kein Sprachmodell).
+* **Gruppe B – LLM** (n = 8): natürlichsprachliche LLM-Erklärung in **einer einzigen, generischen Stimme ohne Personas**. Die Faktenbasis (R1–R5) ist identisch zu A; variiert wird nur die Formulierung. 🟦
 
-Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score) mit **qualitativen Erhebungen** (offene Fragen, Override-Aufgabe).
+Die Studie kombiniert die **quantitative Hauptmessung** (Nutzervertrauen) mit einem **Within-Direktvergleich**, **qualitativen Vertrauensbegründungen** und einer **objektiven Güte-Bewertung** der Ausgaben.
 
 &nbsp;
 
 ## Evaluationsziele
 
-1. **Regelverständnis messen (primär)**
-   Verstehen Nutzer die Regeln (R1–R5) und ihr Zusammenspiel — und erkennen sie, dass das System Eigenverbrauch dem Einspeisen vorzieht?
-2. **Override-Angemessenheit bewerten (sekundär)**
-   Greifen Nutzer mit besserem Verständnis angemessener in die Automatik ein (kein vorschnelles Disuse, kein blindes Misuse)?
-3. **Vertrauen erfassen (optional)**
-   Unterscheidet sich das Vertrauen in die Automatisierung zwischen den Bedingungen?
+1. **Vertrauen messen (FF1, primär)**
+   Erhöht die LLM-Erklärung (B) gegenüber dem statischen Regeltext (A) das Nutzervertrauen, between und im Within-Direktvergleich?
+2. **Güte bewerten (FF2)**
+   Wie ist die objektive Güte der LLM-Ausgaben (Faithfulness gegen den deterministischen Kern, Rubrik), und deckt sie ein Vertrauens-Plus (Kalibrierung)?
+3. **Behaviorale Verlässlichkeit (optional)**
+   Greifen Nutzer angemessen in die Automatik ein (kein vorschnelles Disuse, kein blindes Misuse)?
 4. **Transparenz validieren (Systemcheck)**
    Sind UI-Begründungen und Systemlogs (DecisionEvents) konsistent?
 
@@ -33,20 +35,22 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 
 ## Studiendesign
 
-* **Design:** Between-Subjects (Gruppe A statisch vs. Gruppe B adaptiv)
-* **Stichprobe:** N = 20 — Gruppe A (statisch) n = 5, Gruppe B (adaptiv) n = 15 in 3 Persona-Typen (energie/waerme/tech) à n = 5; heterogener Hintergrund; Ausschluss von Domänen-Experten (Energie-/Regelungstechnik, Informatik) zur Vermeidung eines Ceiling-Effekts
-* **Format:** Einzelsitzung, ca. 60–90 Minuten pro Proband (kein Längsschnitt)
-* **Statistik:** t-Test für unabhängige Stichproben (einseitig) auf den Regelverständnis-Score; Primärvergleich Gruppe A vs. **gepoolte** Gruppe B (Cohen's *d*, 95 %-KI). Der Vergleich der drei Persona-Typen (n = 5 je Typ) bleibt **explorativ/deskriptiv** (keine gerichtete Hypothese).
+* **Design:** Mixed (Between-Faktor Gruppe A/B + Within-Direktvergleich)
+* **Stichprobe:** N = 16 — Gruppe A (statisch) n = 8, Gruppe B (LLM) n = 8, **ohne Persona-Untergliederung**; heterogener Hintergrund; Ausschluss von Domänen-Experten (Energie-/Regelungstechnik, Informatik)
+* **Format:** Einzelsitzung, ca. 45 Minuten pro Proband (kein Längsschnitt)
+* **Statistik:** Mann-Whitney-U (einseitig) auf das Vertrauen, Gruppe A (n = 8) vs. B (n = 8); Welch-/t-Test bei erfüllten Voraussetzungen (r bzw. Cohen's *d*, 95 %-KI). Within: Binomial-/Vorzeichentest (Forced-Choice) und Wilcoxon (Vergleichsrating gegen die Mitte).
 * **Standardisierung:** identische, gescriptete Szenario-Abfolge für alle Probanden — eingespielt per **Replay** des deterministischen Regelkerns (die zehn Szenarien S01–S10: [Übersicht in Kapitel 26](../26_scenarios_and_use_cases/README.md#deterministische-studienszenarien-s01s10), kanonische Spezifikation in [20.2.4.4](../20_research_questions/202_working_questions/2024_study_design_context/2024d_scenarios/README.md))
 
 ### Sitzungsablauf
 
 1. Einwilligung
-2. Demographie + **Nutzertyp-Einstufung** (bestimmt in Gruppe B den Persona-Typ; Vorwissen separat erhoben)
-3. Erwartungs-Vorfrage (naives Ausgangsmodell, qualitativ)
-4. Lern-/Szenariophase am Dashboard (gescriptete Sequenz: R2-START bei Überschuss, R3-STOP, R4-Prognose, R5-Hysterese, Prioritätskonflikt)
-5. **Offene Verständnisfragen** (primäre Erhebung, audioaufgezeichnet)
-6. Override-Aufgabe + Abschluss (optional Trust, Verständlichkeits-Feedback)
+2. Demographie + Vorwissen (Technikaffinität, BTC-Vorwissen)
+3. Szenariophase am Dashboard mit der **zugewiesenen** Variante (gescriptete Sequenz S01–S10, Schwerpunkt diskriminierende Items)
+4. **Trust-Messung (primär)** + offene Vertrauensfragen, audioaufgezeichnet, **vor** dem Reveal
+5. **Reveal** der anderen Variante + **Within-Vergleich** (2–3 Szenarien; Forced-Choice + Vergleichsrating)
+6. Abschluss + Debrief
+
+> Die frühere Erwartungs-Vorfrage entfällt zugunsten der kompakten 45-Min-Sitzung.
 
 ### Setting
 
@@ -60,10 +64,11 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 
 | Ebene                    | Methode                                      | Ziel                                              |
 | ------------------------ | -------------------------------------------- | ------------------------------------------------- |
-| **Nutzerebene**          | Offene Verständnisfragen (Rater-kodiert)     | Regelverständnis / mentales Modell (primäre AV)   |
-| **Interaktionsebene**    | Override-Aufgabe, Verhaltensspur im Log      | Angemessenheit manueller Eingriffe                |
-| **Qualitative Analyse**  | Thematische Analyse (Braun & Clarke)         | Muster und Fehlvorstellungen im Verständnis       |
-| **Quantitative Analyse** | t-Test (Cohen's *d*, KI), Interrater-κ       | Gruppenvergleich des Regelverständnis-Scores      |
+| **Nutzerebene**          | Automation Trust Scale + offene Fragen       | Nutzervertrauen (primäre AV, FF1)                 |
+| **Within-Vergleich**     | Forced-Choice + Vergleichsrating             | Direktvergleich des Vertrauens (H2)               |
+| **Output-Ebene**         | Faithfulness + Rubrik (2 Rater, κ)           | Objektive Güte der LLM-Ausgaben (FF2)             |
+| **Qualitative Analyse**  | Thematische Analyse (Braun & Clarke)         | Wann/warum erzeugt ein Text mehr Vertrauen        |
+| **Quantitative Analyse** | Mann-Whitney/Wilcoxon/Binomial (r, KI)       | Gruppen- und Within-Vergleich des Vertrauens      |
 | **Systemebene**          | Logging, Log↔UI-Abgleich                     | Transparenz-/Konsistenzprüfung                    |
 
 &nbsp;
@@ -79,9 +84,9 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 
 ### Software & KI
 
-* Lokales Dashboard in zwei UI-Varianten (statisch / adaptiv)
-* Lokales LLM via Ollama (**qwen3.5:9b**), persona-adaptiver Prompt
-* Deterministisches Template-Fallback bei LLM-Nichtverfügbarkeit
+* Lokales Dashboard in zwei UI-Varianten (statisch / LLM)
+* Lokales LLM via Ollama (**qwen3.5:9b**), eine generische Erklär-Instruktion (ohne Personas)
+* Deterministisches Template-Fallback bei LLM-Nichtverfügbarkeit; Ausgaben werden eingefroren
 
 ### Datenbasis
 
@@ -93,10 +98,12 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 
 ## Erhebungsinstrumente
 
-* **Offene Verständnisfragen** (primär): „Wie funktioniert das System? · Erwartungen? · wichtigste Einflussregeln? · Warum Steuern statt Einspeisen?“ — audioaufgezeichnet, transkribiert
-* **Demographie + Nutzertyp-/Vorwissens-Einstufung**: Technikaffinität, Energie-/EMS-Vorwissen, Bitcoin-Vorwissen, Wärme-Nutzungsabsicht — daraus wird in Gruppe B der Persona-Typ zugewiesen (`waerme` ← Wärme-Nutzungsabsicht, `tech` ← Technik-/Bitcoin-Affinität, sonst `energie`); Vorwissen bleibt zusätzlich als deskriptive Kovariate
-* **Override-Aufgabe**: beobachtetes Eingriffsverhalten + mündliche Begründung
-* **Optionale Skalen (einmalig)**: Automation Trust Scale; ergänzend SUS, Raw NASA-TLX
+* **Automation Trust Scale** (primär): Jian 2000, 12 Items, auf die gesehene Variante, vor dem Reveal
+* **Offene Vertrauensfragen**: „Hast du vertraut? · bei welchen Entscheidungen mehr/weniger? · haben die Texte das Vertrauen beeinflusst? · gab es einen unglaubwürdigen Text?“ — audioaufgezeichnet, transkribiert
+* **Within-Vergleichsbogen**: Forced-Choice (A/B) + 7-stufiges Vergleichsrating + offene Begründung
+* **Demographie + Vorwissen** (deskriptive Kovariaten; keine Persona-Steuerung)
+* **Optionale Skalen (einmalig)**: SUS, Raw NASA-TLX
+* **Güte-Rubrik (FF2)**: verblindetes 2-Rater-Rating der eingefrorenen Erklärtexte (kein Probandenbezug)
 * **Systemlogs**: DecisionEvents, Override-Ereignisse, Template-Fallback-Vorkommen
 
 &nbsp;
@@ -105,9 +112,10 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 
 | Kategorie             | Metrik                                  | Beschreibung                                                        |
 | --------------------- | --------------------------------------- | ------------------------------------------------------------------ |
-| **Regelverständnis**  | Score 0–12 (Rubrik, 2 Rater, κ)         | Korrektheit der erklärten Regeln + Konzept „Steuern statt Einspeisen“ (primäre AV) |
-| **Override**          | Angemessenheit (kategorial)             | angemessen / Disuse-Tendenz / Misuse-Tendenz; Verständnis der R3-Sperre |
-| **Vertrauen (opt.)**  | Automation Trust Scale (Likert)         | subjektives Vertrauen, einmalig                                    |
+| **Vertrauen (FF1)**   | Automation Trust Scale (12–84)          | subjektives Vertrauen, primäre AV (between)                        |
+| **Within (H2)**       | Forced-Choice + Vergleichsrating (1–7)  | Direktvergleich des Vertrauens beider Varianten                    |
+| **Güte (FF2)**        | Faithfulness + Rubrik 0–6 (2 Rater, κ)  | Korrektheit, Vollständigkeit, Klarheit; Halluzinations-Flag        |
+| **Verlässlichkeit (opt.)** | Override-Angemessenheit (kategorial) | angemessen / Disuse-Tendenz / Misuse-Tendenz; Verständnis der R3-Sperre |
 | **Usability (opt.)**  | SUS, NASA-TLX                           | Usability bzw. kognitive Belastung, einmalig                       |
 | **Transparenz**       | Log-Konsistenz                          | Übereinstimmung DecisionEvent ↔ UI-Begründung                      |
 
@@ -115,19 +123,21 @@ Die Studie kombiniert die **quantitative Hauptmessung** (Regelverständnis-Score
 
 ## Auswertung & Dokumentation
 
-* Primäranalyse: t-Test (Gruppe A vs. B) auf den Regelverständnis-Score; Voraussetzungsprüfung (Shapiro-Wilk, Levene → Welch/Mann-Whitney als Fallback)
-* **p-Werte nie isoliert** — stets mit Effektgröße (Cohen's *d*), 95 %-KI und N
-* Qualitativ: thematische Analyse der offenen Antworten und Override-Begründungen
-* Triangulation aus Verständnis-Score, qualitativen Themen und Verhaltensspur
+* Primäranalyse: Mann-Whitney-U (Gruppe A vs. B) auf das Vertrauen; Voraussetzungsprüfung (Shapiro-Wilk, Levene → Welch/t-Test)
+* Within: Binomial-/Vorzeichentest (Forced-Choice) und Wilcoxon (Vergleichsrating gegen die Mitte)
+* Güte (FF2): Faithfulness-Raten + Rubrik-Mittelwerte + Interrater-κ; Kalibrierung Vertrauen × Güte
+* **p-Werte nie isoliert** — stets mit Effektgröße (r bzw. Cohen's *d*), 95 %-KI und N
+* Qualitativ: thematische Analyse der offenen Vertrauensbegründungen
+* Triangulation aus Trust-Score, Within-Vergleich, Güte und Verhaltensspur
 * Dokumentation in internen Notebooks; Rohdaten- und Log-Export für Auditierbarkeit
 
-Der Schwerpunkt liegt auf der **Erklärqualität** und ihrem Einfluss auf das **Regelverständnis**.
+Der Schwerpunkt liegt auf dem **Vertrauen** und seiner **Kalibrierung** gegen die objektive **Güte** der Erklärungen.
 
 &nbsp;
 
 ## Zusammenfassung
 
-Der Evaluationsrahmen vergleicht in einer Einzelsitzung ein **statisches** mit einem **persona-adaptiven** Erklärformat und misst primär das **Regelverständnis** von Laiennutzern. Er verbindet die quantitative Hauptmessung mit qualitativen Erhebungen und einer beobachteten Override-Aufgabe — und liefert damit eine fundierte Grundlage für die Bewertung transparenter, lokal ausgeführter Energiemanagementsysteme.
+Der Evaluationsrahmen vergleicht in einer Einzelsitzung ein **statisches** mit einem **LLM-basierten** Erklärformat (ohne Personas) und misst primär das **Nutzervertrauen**. Er kombiniert die Between-Hauptmessung mit einem Within-Direktvergleich, qualitativen Vertrauensbegründungen und einer objektiven **Güte-Bewertung** der Ausgaben — und liefert damit eine fundierte Grundlage für die Bewertung transparenter, lokal ausgeführter Energiemanagementsysteme.
 
 &nbsp;
 

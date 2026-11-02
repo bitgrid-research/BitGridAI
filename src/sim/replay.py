@@ -22,15 +22,22 @@ from src.sim.scenario_loader import (
 
 
 def replay_fixture(fixture_path: str | Path) -> dict[str, Any]:
-    """Replayed ein einzelnes JSON-Fixture und gibt das DecisionEvent als Dict zurück."""
+    """Replayed ein einzelnes JSON-Fixture und gibt das DecisionEvent als Dict zurück.
+
+    ``now`` wird aus der aufgezeichneten ``window_start`` injiziert, nicht aus der
+    Wanduhr gelesen: sonst haengen zeitabhaengige Regeln (Nachtsperre) und
+    ``valid_until`` am Replay-Zeitpunkt statt am Aufzeichnungszeitpunkt und der
+    Replay waere nicht reproduzierbar (Qualitaetsziel Reproduzierbarkeit).
+    """
     data = load_fixture(fixture_path)
     state = _dict_to_energy_state(data)
-    event = rule_engine.evaluate(state)
+    event = rule_engine.evaluate(state, now=state.window_start)
     return {
         "fixture": str(fixture_path),
         "action": event.decision.action,
         "decision_code": event.decision_code,
         "reason": event.reason,
+        "valid_until": event.decision.valid_until.isoformat(),
     }
 
 
@@ -47,6 +54,7 @@ def replay_scenario(csv_path: str | Path) -> list[dict[str, Any]]:
             state,
             last_action=last_action,
             blocks_since_last_change=blocks_since_change,
+            now=state.window_start,
         )
         if event.decision.action != last_action:
             blocks_since_change = 0
@@ -60,6 +68,7 @@ def replay_scenario(csv_path: str | Path) -> list[dict[str, Any]]:
                 "action": event.decision.action,
                 "decision_code": event.decision_code,
                 "reason": event.reason,
+                "valid_until": event.decision.valid_until.isoformat(),
             }
         )
     return results

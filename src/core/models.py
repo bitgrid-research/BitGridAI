@@ -9,7 +9,6 @@ RuleVote     — Stimmabgabe einer einzelnen Regel
 
 from __future__ import annotations
 
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Literal, NamedTuple
@@ -48,8 +47,21 @@ class EnergyState:
     grid_export_w: float | None = None
     miner_power_w: float | None = None
     heizstab_power_w: float | None = None
+    # Batterie-Lade-/Entladeleistung (negativ = Entladung). Nur Telemetrie,
+    # keine Kernregel liest dieses Feld — siehe R8 (mvp_p3b) in mvp_auto.yaml,
+    # das den entsprechenden Live-Sensor bereits als Entscheidungssignal nutzt.
+    battery_power_w: float | None = None
     energy_price_ct_kwh: float | None = None
     pv_forecast_kw: float | None = None
+    # Wetter/Heizlast — reine Telemetrie fuer saisonale Analysen (nicht Teil
+    # des Entscheidungspfads). Erst ab Juli 2026 verfuegbar (siehe
+    # ha_history_sync.py ENTITY_MAP-Kommentar).
+    cloud_coverage_pct: float | None = None
+    outdoor_temp_c: float | None = None
+    outdoor_humidity_pct: float | None = None
+    heizung_energy_kwh_today: float | None = None
+    sun_azimuth_deg: float | None = None
+    sun_elevation_deg: float | None = None
     # Dynamischer Mining-Ertrag pro kWh (ct) — für R1-Break-Even gegen die
     # Einspeisevergütung. None = Break-Even-Prüfung inaktiv (rückwärtskompatibel).
     mining_value_ct_kwh: float | None = None
@@ -66,7 +78,11 @@ class Decision:
 
     action: Literal["START", "STOP", "THROTTLE", "NOOP"]
     valid_until: datetime
-    command_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    # Surrogat-/Korrelations-ID (Idempotenz beim Aktuieren + PK im EventStore).
+    # Bewusst NICHT Teil der deterministischen Entscheidung: wird an der Boundary
+    # (Runner) vergeben, nicht im Kern. Replay vergleicht action/decision_code,
+    # nicht diese ID. Siehe ADR 021.
+    command_id: str | None = None
 
 
 # ---------------------------------------------------------------------------

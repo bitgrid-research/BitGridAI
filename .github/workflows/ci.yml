@@ -16,10 +16,9 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install -e ".[dev]"
-      - name: Black format check
-        run: black --check src/ tests/
-      - name: mypy type check
-        run: mypy src/
+      # Single source of truth: same target as the local pre-PR gate (make check).
+      - name: Lint (black --check + mypy --strict)
+        run: make lint
 
   test:
     name: Tests
@@ -30,10 +29,10 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install -e ".[dev]"
-      - name: Unit Tests
-        run: pytest tests/core/ tests/ops/ tests/data/ tests/sim/ -v --cov=src --cov-report=term-missing
-      - name: Replay Tests
-        run: pytest tests/replay/ -v
+      # Runs the full suite (incl. adapters/ui/explain/integration/replay) and
+      # enforces the coverage floor from pyproject. Same target as make check.
+      - name: Tests (full suite + coverage gate)
+        run: make test
 
   build:
     name: Docker Build
@@ -41,7 +40,5 @@ jobs:
     needs: [lint, test]
     steps:
       - uses: actions/checkout@v4
-      - name: Build Core Image
-        run: docker build -t bitgrid-core:ci -f src/core/Dockerfile .
-      - name: Build UI Image
-        run: docker build -t bitgrid-ui:ci -f src/ui/Dockerfile .
+      - name: Build core + UI images
+        run: make build-ci

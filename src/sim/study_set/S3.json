@@ -53,15 +53,7 @@
       "effect": "Miner bleibt gestoppt — Preisschutz aktiv",
       "options": "Miner startet wenn Preis unter 25,0 ct/kWh sinkt"
     },
-    "group_b_reference": {
-      "energie": "Der Miner wartet trotz Sonne — der Strompreis liegt mit 28,0 ct/kWh über deinem Limit von 25,0 ct.",
-      "waerme": "Keine Wärme jetzt: Trotz 2,5 kW Überschuss ist der Strompreis mit 28,0 ct/kWh über der Grenze von 25,0 ct.",
-      "tech": "NOOP_R1_PRICE_TOO_HIGH: R1-Preisschranke greift, 28,0 ct/kWh > price_max 25,0 ct/kWh, trotz Überschuss 2,5 kW."
-    },
-    "group_b": {
-      "energie": "Der Miner bleibt gestoppt, da der aktuelle Strompreis von 28,0 ct/kWh dein Limit von 25,0 ct/kWh überschreitet.",
-      "waerme": "Bei aktuellem Preisschutz von 28,0 ct/kWh wird kein Überschuss genutzt und keine kostenlose Wärme erzeugt.",
-      "tech": "NOOP_R1_PRICE_TOO_HIGH: R1-Preisschranke greift bei 28,0 ct/kWh Strompreis trotz 2,5 kW Überschuss."
-    }
+    "group_b_reference": "Der Miner wartet trotz Sonne, der Strompreis liegt mit 28,0 ct/kWh über deinem Limit von 25,0 ct.",
+    "group_b": null
   }
 }

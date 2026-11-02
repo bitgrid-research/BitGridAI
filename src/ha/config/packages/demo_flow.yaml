@@ -1,0 +1,53 @@
+# demo_flow.yaml — sim-aware per-miner power for the energy-flow card.
+#
+# The power-flow-card-plus shows Miner #1/#2 as individual nodes bound to the two
+# Shelly plug sensors. On the lab those plugs are offline (unavailable), so the
+# nodes never appear. While simulation_mode is on these template sensors report
+# the wall power for the miner's current simulated mode (input_select.minerN_mode,
+# lab_miner_sim.yaml) — Avalon Q prod values: Standby/Off 0 W, Eco 800, Standard
+# 1300, Super 1674. Otherwise they pass the real Shelly sensor straight through,
+# so prod is unchanged. The flow card's two miner entities are repointed at these.
+demo_flow:
+  template:
+    - sensor:
+        - name: "miner1_sim_power"
+          unique_id: miner1_sim_power
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {# Lab replay: recorded wall power of the replayed day while
+               Automatik follows the replay; a manually clicked stage has no
+               recording, there the Avalon Q nominal power applies. #}
+            {% set s = state_attr('sensor.lab_sim_profile', 'steps') %}
+            {% set i = states('input_number.sim_step') | int(0) %}
+            {% if s and i < s | length and is_state('input_boolean.miner1_auto_load_management', 'on') %}
+            {{ s[i][33] }}
+            {% else %}
+            {{ {'Standby': 0, 'Off': 0, 'Eco': 800, 'Standard': 1300, 'Super': 1674}[states('input_select.miner1_mode')] | default(0) }}
+            {% endif %}
+            {% else %}
+            {{ states('sensor.shellyplugsg3_dcb4d9c5567c_leistung') | float(0) }}
+            {% endif %}
+
+        - name: "miner2_sim_power"
+          unique_id: miner2_sim_power
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          state: >-
+            {% if is_state('input_boolean.simulation_mode', 'on') %}
+            {# Lab replay: recorded wall power of the replayed day while
+               Automatik follows the replay; a manually clicked stage has no
+               recording, there the Avalon Q nominal power applies. #}
+            {% set s = state_attr('sensor.lab_sim_profile', 'steps') %}
+            {% set i = states('input_number.sim_step') | int(0) %}
+            {% if s and i < s | length and is_state('input_boolean.miner2_auto_load_management', 'on') %}
+            {{ s[i][34] }}
+            {% else %}
+            {{ {'Standby': 0, 'Off': 0, 'Eco': 800, 'Standard': 1300, 'Super': 1674}[states('input_select.miner2_mode')] | default(0) }}
+            {% endif %}
+            {% else %}
+            {{ states('sensor.shellyplugsg3_d0cf13d86254_leistung') | float(0) }}
+            {% endif %}

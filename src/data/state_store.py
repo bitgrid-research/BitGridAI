@@ -25,9 +25,11 @@ class StateStore:
             (block_id, window_start, window_end, pv_power_w, house_load_w,
              grid_import_w, battery_soc_pct, miner_temp_c, miner_heartbeat_age_sec,
              surplus_kw, quality, missing_signals_json,
-             grid_export_w, miner_power_w, heizstab_power_w,
-             energy_price_ct_kwh, pv_forecast_kw)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             grid_export_w, miner_power_w, heizstab_power_w, battery_power_w,
+             energy_price_ct_kwh, pv_forecast_kw, cloud_coverage_pct,
+             outdoor_temp_c, outdoor_humidity_pct, heizung_energy_kwh_today,
+             sun_azimuth_deg, sun_elevation_deg)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 state.block_id,
@@ -45,8 +47,15 @@ class StateStore:
                 state.grid_export_w,
                 state.miner_power_w,
                 state.heizstab_power_w,
+                state.battery_power_w,
                 state.energy_price_ct_kwh,
                 state.pv_forecast_kw,
+                state.cloud_coverage_pct,
+                state.outdoor_temp_c,
+                state.outdoor_humidity_pct,
+                state.heizung_energy_kwh_today,
+                state.sun_azimuth_deg,
+                state.sun_elevation_deg,
             ),
         )
         self._conn.commit()
@@ -85,6 +94,13 @@ class StateStore:
             grid_export_w=row.get("grid_export_w"),
             miner_power_w=row.get("miner_power_w"),
             heizstab_power_w=row.get("heizstab_power_w"),
+            battery_power_w=row.get("battery_power_w"),
             energy_price_ct_kwh=row.get("energy_price_ct_kwh"),
             pv_forecast_kw=row.get("pv_forecast_kw"),
+            cloud_coverage_pct=row.get("cloud_coverage_pct"),
+            outdoor_temp_c=row.get("outdoor_temp_c"),
+            outdoor_humidity_pct=row.get("outdoor_humidity_pct"),
+            heizung_energy_kwh_today=row.get("heizung_energy_kwh_today"),
+            sun_azimuth_deg=row.get("sun_azimuth_deg"),
+            sun_elevation_deg=row.get("sun_elevation_deg"),
         )

@@ -34,9 +34,7 @@ Hier bringen wir zusammen, was Architektur und Forschung vorbereitet haben: konk
 &nbsp;
 
 * [36 - AI-Agenten & Tooling](./36_ai_tooling/README.md)
-  * [₿itsy-Dev](./36_ai_tooling/bitsy-dev/SOUL.md) — Projektassistent für Entwicklung
-  * [₿itsy-Home](./36_ai_tooling/bitsy-home/SOUL.md) — Erklärung für Heimnutzer
-  * [₿itsy-Study](./36_ai_tooling/bitsy-study/SOUL.md) — Erklärung für Forscher & Studie
+  * [Neo](./36_ai_tooling/neo/SOUL.md) — Nachtforscher, nächtliche Energie-/Mining-Musteranalyse
 &nbsp;
 
 * [37 - Troubleshooting & FAQ](./37_troubleshooting/README.md)

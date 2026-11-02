@@ -57,6 +57,7 @@ def main(rules_path: str, db_path: str) -> None:
     from src.production_runner import ProductionRunner
     from src.data.db import get_connection
     from src.data.event_store import EventStore
+    from src.data.override_store import SqliteOverrideStore
     from src.data.state_store import StateStore
     from src.explain.explain_agent import ExplainAgent
     from src.ops.config_loader import ConfigLoader, rules_to_engine_config
@@ -169,7 +170,7 @@ def main(rules_path: str, db_path: str) -> None:
     # ------------------------------------------------------------------
     # Override-Handler + API-Wiring
     # ------------------------------------------------------------------
-    override_handler = OverrideHandler(conn)
+    override_handler = OverrideHandler(store=SqliteOverrideStore(conn))
 
     def _on_tick(
         event: DecisionEvent, state: EnergyState, explain_short: str = ""
@@ -217,10 +218,9 @@ def main(rules_path: str, db_path: str) -> None:
         explain_agent = ExplainAgent()
         explainer = explain_agent.explain_short
         log.info(
-            "ExplainAgent aktiv — %s model=%s persona=%s",
+            "ExplainAgent aktiv — %s model=%s",
             os.getenv("OLLAMA_HOST"),
             explain_agent._ollama_model,
-            explain_agent.persona,
         )
     else:
         log.debug("ExplainAgent nicht gestartet — OLLAMA_HOST fehlt")

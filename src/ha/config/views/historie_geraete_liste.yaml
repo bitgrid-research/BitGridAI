@@ -1,0 +1,310 @@
+# ═══════════════════════════════════════════════════════════════════════
+# HISTORIE — GERÄTE-LISTE — Abschnitt "Historie" (Tab "EnergieInfo").
+# 25.09.2026, Nutzer-Vorgabe: die Geräte-Aufschlüsselung aus "Verbrauch nach
+# Räumen (heute)" (verbrauch_nach_raeumen_heute.yaml, raumkachel_*.yaml) soll
+# NICHT mehr nur Echtzeit-Watt zeigen, sondern in die Historie-Karte wandern
+# und dort den kumulierten Verbrauch (kWh) für den gerade gewählten Zeitraum
+# zeigen — reine Liste, ausdrücklich KEIN zusätzlicher Graph (Nutzer-Wahl bei
+# Rückfrage zur Darstellung). Sitzt unterhalb des Zeitraum-Umschalters
+# (historie_zeitraum_cycler.yaml), gleiche Zeilenoptik wie die bisherigen
+# Raum-Kacheln (Icon-Kreis + Label + Ring-Gauge), aber ohne Akkordeon-Toggle
+# und ohne Live-Watt.
+#
+# Warum eine einzelne Datei statt 6 Dateien wie bei den raumkachel_*.yaml
+# (Projekt-Konvention wäre eigentlich 1 Datei pro Raum): der Raumwechsel läuft
+# bereits über EIN input_select (historie_raum), eine Kopie derselben
+# render-Funktion in 6 Dateien hätte hier keinen Mehrwert gebracht — nur
+# 6x denselben Code gepflegt. Geräte-Tabelle pro Raum steht stattdessen als
+# ein Lookup-Objekt in der Funktion selbst.
+#
+# Technik — warum kein apexcharts-card-Trick ("Chart ausblenden, nur Header
+# zeigen"): unklar/unbelegt, ob das zuverlässig funktioniert, und ein
+# generischer apexcharts-Header hätte ohnehin nicht die Ring-Gauge-Optik der
+# Raum-Kacheln treffen können. Stattdessen derselbe WS-Callback-Pfad, der in
+# dieser Codebase bereits produktiv läuft (bitgrid_dashboard_v2.yaml, SoC-
+# Tagesverlauf: hass.callWS mit connection.sendMessagePromise-Fallback,
+# Cache auf window, kein manueller Re-Render-Trigger — der nächste normale
+# hass-Tick, hier durch die vielen sich staendig aktualisierenden Watt-
+# Sensoren praktisch garantiert innerhalb weniger Sekunden, uebernimmt das
+# von selbst). Recorder-WS-Befehl "recorder/statistics_during_period" ist
+# in dieser Codebase bereits verifiziert (s. historie_untergeschoss.yaml).
+#
+# Fenster sind rollierend ("letzte 24h ab jetzt", nicht Kalendertag) — dafür
+# gibt es in HA keinen fertigen Sensor/Helfer (utility_meter/history_stats
+# arbeiten kalenderausgerichtet), nur der direkte Statistics-Abruf liefert
+# das. Berechnung: sum-Wert des letzten Buckets minus sum-Wert des ersten
+# Buckets im Fenster (total_increasing-Statistik). Kleine Unschärfe an der
+# Fenstergrenze (bis zu einer Bucket-Breite, hier max. 1h) ist bewusst in
+# Kauf genommen — gleiche Präzisionsklasse wie der bestehende Flächengraph
+# in historie_*.yaml, der ebenfalls nur Stunden-/Tages-Buckets kennt. Keine
+# wissenschaftliche Messgröße, reine Dashboard-Orientierung.
+#
+# BEKANNTE LÜCKE (nicht durch diese Änderung verursacht, hier nur sichtbar
+# gemacht): "Heizstab" nutzt sensor.heizstab_energy_integral, ein Integral-
+# Sensor NUR über den Solar-Kanal (source: sensor.ac_elwa_2_power1_solar,
+# configuration.yaml). Der Netzbezugs-Kanal (ac_elwa_2_power1_grid), der in
+# heizstab_power_w mitgezählt wird, hat kein eigenes Integral — Heizstab-kWh
+# hier (wie auch im bestehenden sensor.heizstab_energy_daily) sind bei
+# Netzbezugsanteil zu niedrig. Eigenständiger Befund, nicht Teil dieses
+# Auftrags, bewusst nicht mitgefixt (zweite Integration-Sensor-Quelle wäre
+# ein separater Eingriff mit eigener Einschwingzeit).
+#
+# Zweiter Schritt (noch NICHT ausgeführt, laut Nutzer-Vorgabe erst nach
+# Live-Verifikation): sobald diese Liste auf dem Tablet nachweislich korrekt
+# pro Raum trackt, entfällt der Abschnitt "Verbrauch nach Räumen (heute)"
+# (bitgrid_dashboard_v3.yaml, grid-area "full", verbrauch_nach_raeumen_heute.
+# yaml + raumkachel_*.yaml + zugehörige input_boolean.raumkachel_*-Toggles).
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo",
+# direkt nach views/historie_zeitraum_cycler.yaml (innerhalb derselben
+# Historie-Kartenhülle).
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+entity: input_select.historie_raum
+# 27.09.2026, Live-Befund: die Zeilen blieben beim ersten Anzeigen einer
+# Raum/Zeitraum-Kombination auf "…" stehen. Ursache: der Statistik-Abruf
+# fuellt den Cache asynchron, die Karte rendert aber nur neu, wenn sich ihre
+# entity aendert — also beim Raumwechsel. Der im Kopfkommentar unterstellte
+# "naechste normale hass-Tick" trifft eine button-card mit gesetzter entity
+# nicht. triggers_update nimmt zusaetzlich den Zeitraum-Umschalter und einen
+# sich ohnehin sekuendlich aendernden Sensor auf: damit rendert die Karte
+# kurz nach dem Eintreffen der Daten von selbst neu. Bewusst NICHT
+# triggers_update wurde zuerst als Entity-Liste und dann als "all" probiert,
+# beides live gemessen und beides WIRKUNGSLOS: der aufgefuehrte Sensor aenderte
+# sich nachweislich alle ~10s, die Zeilen blieben trotzdem auf "…". Deshalb
+# entfaellt es wieder; das Neuzeichnen stoesst jetzt der Abruf selbst an
+# (requestUpdate im finally-Zweig von fetch, siehe dort).
+tap_action:
+  action: none
+styles:
+  card:
+    - background: none
+    - box-shadow: none
+    - border: none
+    - padding: 0
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+  custom_fields:
+    body:
+      - width: 100%
+      - justify-self: stretch
+      - box-sizing: border-box
+custom_fields:
+  body: >
+    [[[
+      if (!window.bgHistoryDeviceList) {
+        window.bgHistoryDeviceList = {
+          cache: {},
+          pending: {},
+          rooms: {
+            'Untergeschoss': [
+              ['mdi:pickaxe', 'Miner #1', 'sensor.shellyplugsg3_dcb4d9c5567c_energie'],
+              ['mdi:pickaxe', 'Miner #2', 'sensor.shellyplugsg3_d0cf13d86254_energie'],
+              ['mdi:fan', 'Lüftung Miner', 'sensor.shellyplusplugs_d4d4daf4eda4_energie'],
+              ['mdi:water-boiler', 'Heizstab', 'sensor.heizstab_energy_integral'],
+              ['mdi:radiator', 'Heizung', 'sensor.shelly1pmg4_e4b06377adc0_energie'],
+              ['mdi:router-wireless', 'FritzBox/Modem/NAS', 'sensor.shellyplugsg3_907069492f30_energie']
+            ],
+            'Wohnzimmer': [
+              ['mdi:television', 'TV Wohnzimmer', 'sensor.shellyplugsg3_9070694c99d4_energie'],
+              ['mdi:ceiling-light', 'Wohnwand-Beleuchtung', 'sensor.wohnwand_beleuchtung_energie']
+            ],
+            'Küche': [
+              ['mdi:fridge-outline', 'Kühlschrank', 'sensor.shellyplugsg3_9070694c577c_energie'],
+              ['mdi:dishwasher', 'Spülmaschine', 'sensor.shellyplugsg3_9070694b2854_energie']
+            ],
+            'Schlafzimmer': [
+              ['mdi:desktop-tower-monitor', 'PC Schlafzimmer', 'sensor.shellyplugsg3_9070694d44bc_energie'],
+              ['mdi:server', 'Kleiner Server', 'sensor.shellyplugsg3_d0cf13db3a00_energie'],
+              ['mdi:desktop-tower-monitor', 'Großer Server', 'sensor.shellyplugsg3_dcb4d9c6b46c_energie'],
+              ['mdi:television', 'TV Schlafzimmer', 'sensor.shellyplugsg3_90706947f288_energie']
+            ],
+            'Büro': [
+              ['mdi:desktop-tower-monitor', 'PC Büro', 'sensor.shellyplugsg3_d885ac18c3b4_energie'],
+              ['mdi:printer-3d', '3D Drucker etc.', 'sensor.shellyplugsg3_9070694a1b6c_energie']
+            ],
+            'Hauswirtschaft': [
+              ['mdi:fridge-outline', 'Kühlschränke', 'sensor.shellyplugsg3_9070694abdf4_energie'],
+              ['mdi:tumble-dryer', 'Trockner', 'sensor.shellyplugpmg3_9070695bb2a8_energie'],
+              ['mdi:washing-machine', 'Waschmaschine', 'sensor.shellyplugsg3_d885ac1e9adc_energie']
+            ]
+          },
+          zeitraeume: {
+            'Letzte 24 Stunden': { hours: 24, period: 'hour' },
+            'Letzte 7 Tage': { hours: 24 * 7, period: 'hour' },
+            'Letzte 30 Tage': { hours: 24 * 30, period: 'day' },
+            'Letzte 12 Monate': { hours: 24 * 365, period: 'day' }
+          },
+          fetch: function(hass, room, zeitraum, card) {
+            var store = window.bgHistoryDeviceList;
+            var key = room + '|' + zeitraum;
+            if (store.pending[key]) return;
+            var devices = store.rooms[room];
+            var zr = store.zeitraeume[zeitraum];
+            if (!devices || !zr) return;
+            store.pending[key] = true;
+            var end = new Date();
+            var start = new Date(end.getTime() - zr.hours * 3600 * 1000);
+            var ids = devices.map(function(d) { return d[2]; });
+            var wsFn = (hass && hass.callWS) ? hass.callWS.bind(hass) : function(msg) {
+              return hass && hass.connection && hass.connection.sendMessagePromise
+                ? hass.connection.sendMessagePromise(msg) : null;
+            };
+            var p = wsFn({
+              type: 'recorder/statistics_during_period',
+              start_time: start.toISOString(),
+              end_time: end.toISOString(),
+              statistic_ids: ids,
+              period: zr.period,
+              types: ['sum']
+            });
+            if (!p) { delete store.pending[key]; return; }
+            p.then(function(result) {
+              var data = {};
+              ids.forEach(function(id) {
+                var rows = result ? result[id] : null;
+                if (rows && rows.length >= 2) {
+                  var delta = rows[rows.length - 1].sum - rows[0].sum;
+                  data[id] = delta > 0 ? delta : 0;
+                } else {
+                  data[id] = null;
+                }
+              });
+              store.cache[key] = { ts: Date.now(), data: data };
+            }).catch(function() {
+              store.cache[key] = { ts: Date.now(), data: {} };
+            }).finally(function() {
+              delete store.pending[key];
+              // 27.09.2026: ohne dieses Neuzeichnen blieben die Zeilen auf "…"
+              // stehen, bis zufaellig der Raum gewechselt wurde. Weder ein
+              // hass-Tick noch triggers_update (Liste UND "all", beides live
+              // gemessen) bringen button-card dazu, das custom_fields-Template
+              // erneut auszufuehren. Die Karte ist ein LitElement, deshalb
+              // direkt requestUpdate() auf dem Element, das den Abruf angestossen
+              // hat. Mit Guards, damit ein geaendertes button-card-Innenleben
+              // hier nur den alten Zustand ergibt statt einen Fehler zu werfen.
+              try {
+                if (card && typeof card.requestUpdate === 'function') card.requestUpdate();
+              } catch (e) { /* bewusst ignoriert, reine Anzeige-Optimierung */ }
+            });
+          }
+        };
+      }
+
+      var store = window.bgHistoryDeviceList;
+      var room = states['input_select.historie_raum'] ? states['input_select.historie_raum'].state : null;
+      var zeitraum = states['input_select.historie_zeitraum'] ? states['input_select.historie_zeitraum'].state : null;
+      var devices = store.rooms[room];
+      if (!devices || !store.zeitraeume[zeitraum]) {
+        return '';
+      }
+
+      var key = room + '|' + zeitraum;
+      var cached = store.cache[key];
+      var maxAgeMs = 5 * 60 * 1000;
+      // Lab-Replay (17.10.2026): kWh des abgespielten Tages bis zum Sim-Block statt
+      // Langzeit-Statistik (window.bgaiSimToday, www/bitgrid_card_shape.js; Prod:
+      // null). Im Replay gibt es nur diesen einen Tag, laengere Zeitraeume bleiben
+      // leer. sim_step steht hier, damit button-card je Sim-Block neu rendert.
+      var simT = window.bgaiSimToday ? window.bgaiSimToday(hass) : null;
+      var simStepRef = states['input_number.sim_step'] ? states['input_number.sim_step'].state : null;
+      var simOneDay = simT && store.zeitraeume[zeitraum].hours === 24;
+      if (!simT && (!cached || (Date.now() - cached.ts) > maxAgeMs)) {
+        // "this" ist in button-card-Templates das Karten-Element selbst.
+        store.fetch(hass, room, zeitraum, typeof this !== 'undefined' ? this : null);
+      }
+      var data = cached ? cached.data : {};
+      if (simT) {
+        data = {};
+        devices.forEach(function(d) {
+          var obj = d[2].replace(/^sensor\.(lab_)?/, '').replace(/_energie$/, '');
+          if (!simOneDay) { data[d[2]] = null; return; }
+          // Miner-Steckdosen: aufgezeichnete Leistung je Miner (Profil-Spalte 33/34)
+          // ueber die abgeschlossenen 10-min-Bloecke aufsummiert. Heizstab: aufgezeichnete
+          // Tages-kWh (Spalte 40). Uebrige Geraete: sensor.lab_sim_devices.
+          if (obj === 'shellyplugsg3_dcb4d9c5567c' || obj === 'shellyplugsg3_d0cf13d86254') {
+            var col = obj === 'shellyplugsg3_dcb4d9c5567c' ? 33 : 34;
+            var wh = 0;
+            for (var k = 0; k < simT.step; k++) wh += Number(simT.steps[k][col]) * 10 / 60;
+            data[d[2]] = wh / 1000;
+          } else if (obj === 'heizstab_energy_integral') {
+            data[d[2]] = Number(simT.row[40]);
+          } else {
+            data[d[2]] = simT.kwh(obj);
+          }
+        });
+        cached = { ts: Date.now(), data: data };
+      }
+
+      var totalKwh = 0;
+      devices.forEach(function(d) {
+        var v = data[d[2]];
+        if (typeof v === 'number') totalKwh += v;
+      });
+
+      // 27.09.2026, Nutzer-Wunsch: gleiche Bubble-Card-Optik wie in
+      // views/verbrauch_nach_geraetetyp.yaml (dort zuerst umgesetzt, siehe
+      // Begruendung in der Datei). Der farbige Balken laeuft von links
+      // proportional zum ANTEIL des Geraets am Summenverbrauch ALLER Geraete
+      // dieses Raums im gewaehlten Zeitraum, also genau der Anteil, den vorher
+      // der Ring rechts zeigte. Ring damit ueberfluessig und entfernt.
+      // Nicht steuerbar: keine tap_action, kein Chevron (reine Anzeige).
+      // Farben zyklisch aus derselben Theme-Palette wie die Geraetetyp-Karte,
+      // damit beide Listen im selben Tab gleich aussehen. Anders als dort ist
+      // die Zeilenzahl hier nicht fest (2 bis 6 Geraete je Raum), deshalb
+      // Modulo statt fester Zuordnung Kategorie -> Farbe.
+      // min-width am Balken: auch 0,00 kWh und noch nicht geladene Zeilen
+      // zeigen so eine farbige Kante statt einer farblosen Pille.
+      var colors = [
+        'var(--bg-color-super)', 'var(--bg-color-standard)', 'var(--bg-color-eco)',
+        'var(--bg-color-pv)', 'var(--bg-color-heat)', 'var(--bg-color-reserve)',
+        'var(--bg-color-idle)'
+      ];
+
+      var rowHtml = devices.map(function(d, i) {
+        var ic = d[0], label = d[1], id = d[2];
+        var v = data[id];
+        var known = typeof v === 'number';
+        var pct = (totalKwh > 0 && known) ? (v / totalKwh * 100) : 0;
+        var col = colors[i % colors.length];
+        var valStr = known
+          ? v.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' kWh'
+          : (cached ? '–' : '…');
+        return '<div style="position:relative;display:flex;align-items:center;gap:10px;' +
+          'height:44px;border-radius:22px;background:rgba(255,255,255,0.05);' +
+          'overflow:hidden;padding:0 16px 0 6px;box-sizing:border-box;">' +
+          '<div style="position:absolute;left:0;top:0;bottom:0;width:' + pct.toFixed(2) + '%;' +
+          'min-width:6px;background:' + col + ';opacity:0.55;"></div>' +
+          '<div style="position:relative;width:32px;height:32px;border-radius:11px;' +
+          'background:rgba(0,0,0,0.38);display:flex;align-items:center;' +
+          'justify-content:center;flex-shrink:0;">' +
+          '<ha-icon icon="' + ic + '" style="--mdc-icon-size:18px;color:var(--primary-text-color);"></ha-icon>' +
+          '</div>' +
+          '<span style="position:relative;flex:1;min-width:0;text-align:left;' +
+          'color:var(--primary-text-color);font-size:0.95rem;font-weight:700;' +
+          'text-shadow:0 1px 2px rgba(0,0,0,0.65);' +
+          'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + label + '</span>' +
+          '<span style="position:relative;font-size:0.95rem;font-weight:700;' +
+          'color:var(--primary-text-color);text-shadow:0 1px 2px rgba(0,0,0,0.65);' +
+          'white-space:nowrap;">' + valStr + '</span>' +
+          '</div>';
+      }).join('<div style="height:8px;"></div>');
+
+      return '<div style="padding:10px 14px 4px;">' +
+        /* 26.09.2026, Nutzer-Wunsch: Ueberschrift im Stil von REGELWERK im
+           Steuerung-Tab (1.25rem, 700, .06em, secondary-text, opacity .65)
+           statt 0.78rem, dazu 12px statt 4px Abstand zur ersten Geraetezeile. */
+        '<div style="text-align:center;font-size:1.25rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--secondary-text-color);opacity:0.65;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;">' +
+        'Geräteverbrauch' +
+        '</div>' +
+        (simT && !simOneDay
+          ? '<div style="text-align:center;margin-top:8px;font-size:0.85rem;color:var(--secondary-text-color);">' +
+            'Im Replay gibt es nur den abgespielten Tag, bitte 24 Stunden wählen.</div>'
+          : '') +
+        '<div style="margin-top:12px;">' + rowHtml + '</div>' +
+        '</div>';
+    ]]]

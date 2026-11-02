@@ -1,0 +1,25 @@
+# ═══════════════════════════════════════════════════════════════════════
+# LANGZEITBILANZ — dynamischer Sats-Balkenchart, Pfeile blaettern zyklisch
+# zwischen Monatsansicht (12-Monats-Fenster) und Jahresansicht (nur volle
+# Kalenderjahre, seit 26.09.2026), eigenstaendiges Custom-Element (custom:bitgrid-bar-trend-
+# chart, www/bitgrid_bar_trend_chart.js) statt des bisherigen statischen
+# Inline-SVGs in stats_pool_monthly.yaml.
+#
+# Gleiches Hausmuster wie views/btc_kurs_chart.yaml/regelschwellen_chart.yaml:
+# reines Custom-Element, kein button-card-Wrapper. Liest hass.states direkt
+# (sensor.pool_monthly_history/sensor.pool_balance_btc), kein JSON-Artefakt
+# noetig — identische Quelle wie zuvor in stats_pool_monthly.yaml.
+# stats_pool_monthly.yaml bleibt unbenutzt im Repo liegen (gleiche Praxis wie
+# stats_retro_vergleich.yaml).
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "BitcoinInfo".
+# ═══════════════════════════════════════════════════════════════════════
+# height 210 statt der Vorgabe 260 (27.09.2026, Nutzer-Wunsch): die Karte soll
+# so hoch sein wie "Mining Verlauf" daneben in derselben Grid-Zeile. Dessen
+# Hoehe haengt an der Zeilenzahl der Tabelle (Wochenansicht = 7 Zeilen), ist
+# also kein fester Wert — dieser Wert ist auf die Wochenansicht abgestimmt und
+# hier bewusst als Konfiguration gesetzt, damit er ohne Code-Aenderung
+# nachjustiert werden kann.
+type: custom:bitgrid-bar-trend-chart
+mode: monthly
+height: 210

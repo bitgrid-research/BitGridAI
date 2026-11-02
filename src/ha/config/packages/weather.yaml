@@ -1,21 +1,30 @@
-template:
-  - trigger:
-      - platform: time_pattern
-        minutes: "/30"
-      - platform: homeassistant
-        event: start
-    action:
-      - action: weather.get_forecast
-        data:
-          type: hourly
-        target:
-          entity_id: weather.forecast_home
-        response_variable: forecast_resp
-    sensor:
-      - name: weather_forecast_6h
-        unique_id: weather_forecast_6h
-        state: "{{ now().strftime('%H:%M') }}"
-        attributes:
-          forecast: "{{ forecast_resp['weather.forecast_home']['forecast'][:6] }}"
-          updated_at: "{{ now().isoformat() }}"
-          source_entity: weather.forecast_home
+# weather.yaml — Wetter-Vorhersage-Templates (HA-Package).
+# Top-Level-Key = eindeutiger Package-Name (Konvention wie mvp_auto.yaml: erst der
+# Package-Name, darunter eingerueckt die Domains). Frueher lag template: auf
+# Spalte 0; dann ist der Package-Name "template" mit einem Listenwert, HA verlangt
+# pro Package aber ein Dict ("Invalid package definition 'template': expected a
+# dictionary") und ueberspringt es. Zusaetzlich kollidierte der gleiche Top-Level-
+# Key template: mit weather_sun_tracking.yaml (zwei Dateien, ein Key). Beides
+# behoben durch den Wrapper hier.
+weather_forecast:
+  template:
+    - trigger:
+        - platform: time_pattern
+          minutes: "/30"
+        - platform: homeassistant
+          event: start
+      action:
+        - action: weather.get_forecast
+          data:
+            type: hourly
+          target:
+            entity_id: weather.forecast_home
+          response_variable: forecast_resp
+      sensor:
+        - name: weather_forecast_6h
+          unique_id: weather_forecast_6h
+          state: "{{ now().strftime('%H:%M') }}"
+          attributes:
+            forecast: "{{ forecast_resp['weather.forecast_home']['forecast'][:6] }}"
+            updated_at: "{{ now().isoformat() }}"
+            source_entity: weather.forecast_home

@@ -53,15 +53,7 @@
       "effect": "Miner gestartet — nutzt deinen Solarüberschuss",
       "options": ""
     },
-    "group_b_reference": {
-      "energie": "Der Miner läuft — deine Solaranlage erzeugt 3,0 kW mehr, als dein Haus braucht, und nutzt diesen Überschuss selbst statt ihn einzuspeisen.",
-      "waerme": "Dein Gerät heizt jetzt mit 3,0 kW Solarüberschuss — kostenlose Wärme aus der Sonne, statt den Strom ungenutzt einzuspeisen.",
-      "tech": "START_R1_SURPLUS_OK: R1 startet bei 3,0 kW Überschuss (PV 4500 W − Haus 1500 W), über der Schwelle 1,5 kW."
-    },
-    "group_b": {
-      "energie": "Der Miner läuft jetzt und nutzt deinen Solarüberschuss von genau 3,0 Kilowatt für die Blockchain.",
-      "waerme": "Dein Gerät heizt jetzt mit 3,0 kW Solarüberschuss — kostenlose Wärme aus der Sonne statt ungenutzter Einspeisung.",
-      "tech": "START_R1_SURPLUS_OK: R1 startet bei 3,0 kW Solarüberschuss (PV 4500 W minus Hausverbrauch 1500 W), über der Schwelle von 1,5 kW."
-    }
+    "group_b_reference": "Der Miner läuft, deine Solaranlage erzeugt 3,0 kW mehr, als dein Haus braucht, und nutzt diesen Überschuss selbst statt ihn einzuspeisen.",
+    "group_b": null
   }
 }

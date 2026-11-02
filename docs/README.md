@@ -6,6 +6,8 @@ BitGridAI ist ein offenes Energiemanagementsystem, das lokale Automatisierung so
 
 Lass uns loslegen!
 
+> 🧭 Wo stehen wir gerade? **[Projektstatus](./status/README.md)** — Cross-Track-Überblick über DEV, THESIS und SIM.
+
 <img src="./media/doku.png" alt="Status" width="1000" />
 
 &nbsp;

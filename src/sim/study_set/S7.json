@@ -51,15 +51,7 @@
       "effect": "Miner gestoppt — Batterie schützen",
       "options": "Miner startet wieder ab 58 % · Prognose 1,5 kW"
     },
-    "group_b_reference": {
-      "energie": "Der Miner wurde gestoppt, um deinen Hausspeicher zu schützen — er ist auf 45 % gefallen, die Reserve liegt bei 50 %.",
-      "waerme": "Heizen vorerst beendet: Der Speicher ist auf 45 % gesunken, unter die Reserve von 50 % — Schutz geht vor.",
-      "tech": "STOP_R2_SOC_HARD_MIN: R2-Hard-Stop, SoC 45 % ≤ hard_min 50 % (Hausreserve)."
-    },
-    "group_b": {
-      "energie": "Der Miner wurde gestoppt, um deinen Speicher zu schonen, da er bei 45 % unter der sicheren Grenze von 50 % liegt.",
-      "waerme": "Heizen eingestellt, da die Batterie bei 45 % unter das Sicherheitsminimum von 50 % gefallen ist.",
-      "tech": "STOP_R2_SOC_HARD_MIN wurde ausgelöst, da SoC bei 45 % das Minimum von 50 % unterschritt."
-    }
+    "group_b_reference": "Der Miner wurde gestoppt, um deinen Hausspeicher zu schützen, er ist auf 45 % gefallen, die Reserve liegt bei 50 %.",
+    "group_b": null
   }
 }

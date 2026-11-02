@@ -8,7 +8,7 @@ mvp_auto:
       max: 100
       step: 1
       mode: box
-      initial: 58
+      initial: 70
       icon: mdi:battery-charging-60
 
     mvp_pv_start_w:
@@ -26,17 +26,8 @@ mvp_auto:
       max: 100
       step: 1
       mode: box
-      initial: 80
+      initial: 85
       icon: mdi:battery-70
-
-    mvp_soc_std_stop_pct:
-      name: "Standard-Stop SoC (%)"
-      min: 50
-      max: 100
-      step: 1
-      mode: box
-      initial: 75
-      icon: mdi:battery-arrow-down-outline
 
     mvp_soc_super_pct:
       name: "Super-Start SoC (%)"
@@ -44,17 +35,8 @@ mvp_auto:
       max: 100
       step: 5
       mode: box
-      initial: 90
+      initial: 100
       icon: mdi:battery
-
-    mvp_soc_super_stop_pct:
-      name: "Super-Stop SoC (%)"
-      min: 50
-      max: 100
-      step: 5
-      mode: box
-      initial: 85
-      icon: mdi:battery-arrow-down
 
     mvp_soc_stop_pct:
       name: "Stop SoC (%)"
@@ -62,9 +44,52 @@ mvp_auto:
       max: 100
       step: 1
       mode: box
-      initial: 50
+      initial: 60
       icon: mdi:battery-alert
 
+    # ── Neu 23.08.2026: echte Hysterese statt geteilter/verdeckter Werte ────
+    # Vorher stand hier keine eigene Schwelle: soc_super_off griff intern auf
+    # mvp_soc_std_pct zurueck (Zufalls-Kollision bei 85%), Super fiel dadurch
+    # ohne Standard-Zwischenschritt direkt auf Eco. Siehe
+    # docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md.
+    mvp_soc_super_off_pct:
+      name: "Super-Ausstieg SoC (%)"
+      min: 50
+      max: 100
+      step: 1
+      mode: box
+      initial: 95
+      icon: mdi:battery-80
+
+    mvp_soc_std_off_pct:
+      name: "Standard-Ausstieg SoC (%)"
+      min: 50
+      max: 100
+      step: 1
+      mode: box
+      initial: 83
+      icon: mdi:battery-60
+
+    # Akku-reaktiver Notabstieg (R8, vormals "P3b"): loest unabhaengig von SoC
+    # und Uhrzeit aus, sobald der Akku anhaltend mit mehr als diesem Betrag
+    # entlaedt. Ersetzt den entfernten zeitbasierten Nachmittags-Cap.
+    mvp_batt_discharge_super_downgrade_w:
+      name: "Super→Eco Entladeschutz (W)"
+      min: -3000
+      max: 0
+      step: 50
+      mode: box
+      initial: -800
+      icon: mdi:battery-arrow-down
+
+    mvp_batt_discharge_std_downgrade_w:
+      name: "Standard→Eco Entladeschutz (W)"
+      min: -3000
+      max: 0
+      step: 50
+      mode: box
+      initial: -400
+      icon: mdi:battery-arrow-down
 
     mvp_tmax_std_threshold_c:
       name: "TMax Standard-Sicherheitsschwelle (°C)"
@@ -81,7 +106,7 @@ mvp_auto:
       max: 40
       step: 0.5
       mode: box
-      initial: 31
+      initial: 40
       icon: mdi:home-thermometer-outline
 
     battery_capacity_kwh:
@@ -90,14 +115,132 @@ mvp_auto:
       max: 30
       step: 0.5
       mode: box
-      initial: 10
+      # 12,5 kWh = nutzbare Energie am Wechselrichterausgang ueber einen
+      # vollen SoC-Hub, gemessen 2026-07-21 ueber 8 Entladenaechte
+      # (Median, Streuung 10,9 bis 13,0). Nennkapazitaet der Anlage sind
+      # 15,0 kWh: zwei SMA-Batterien a 7,5 kWh an Strang A und C des
+      # Sunny Boy Storage (Slot B unbelegt). Der Unterschied ist der
+      # Round-Trip-Wirkungsgrad, den die Lebensdauerzaehler des Geraets
+      # mit 4196/5181 kWh = 81 % bestaetigen.
+      #
+      # Hier gehoert der GEMESSENE Wert hin, nicht der Nennwert: die
+      # Reichweitenrechnung wuerde sonst 20 % zu viel Energie annehmen,
+      # und der Fehler ginge in die unangenehme Richtung (Speicher frueher
+      # leer als geplant). Bis 2026-07-21 stand hier 10 kWh.
+      initial: 12.5
       icon: mdi:battery-high
+
+    # Wieder eingefuehrt 27.08.2026 (dritte Kehrtwende in 24h, siehe ADR 028
+    # in 091_adr_de.md): treibt zusammen mit battery_capacity_kwh wieder live
+    # die Saison-Automatik (automation mvp_saison_automatik unten). Die
+    # zwischenzeitliche feste 12-Monats-Tabelle (ADR 027 Revision, "das ist
+    # die Tabelle die zaehlt") ist damit nicht mehr die Quelle der sechs
+    # Live-Schwellen, bleibt aber sinngemaess als deren damaliger Startwert
+    # erhalten: 550 W hier als Default, keine neue Messung.
+    mvp_night_baseload_w:
+      name: "Nächtliche Grundlast (W)"
+      min: 100
+      max: 2000
+      step: 10
+      mode: box
+      initial: 535
+      icon: mdi:weather-night
+
+    mvp_filter_interval_days:
+      name: "Filterpflege-Intervall (Tage)"
+      min: 7
+      max: 90
+      step: 1
+      initial: 21
+      unit_of_measurement: "d"
+      icon: mdi:calendar-clock
+      # Default 21 Tage (Untergeschoss/Garagenaufstellung, staubig) nach
+      # Web-Recherche 26.08.2026 (AsicMarketplace, D-Central: 2-3 Wochen in
+      # staubigen Raeumen, 1-2 Monate in sauberen). Frei anpassbar, falls
+      # sich in der Praxis ein anderer Rhythmus als richtig erweist.
 
   input_boolean:
     mvp_night_block_enabled:
       name: "Nacht-Sperre (Mining)"
       icon: mdi:weather-night
       initial: true
+
+    # Aufklapp-Zustand der "Übersicht"-Gruppen im Steuerung-Tab
+    # (bitgrid_dashboard_v3.yaml, Grid-Area "regel"). Reiner UI-Zustand,
+    # keine Steuerlogik — analog zu den miner1/2_detail_*-Helfern in
+    # packages/avalonq_miner1.yaml. Ersetzt seit 26.08.2026 das einzelne
+    # mvp_regelschwellen_detail (eine Liste mit 11 Punkten) durch sechs
+    # unabhaengig aufklappbare Gruppen, gleiche Kategorisierung wie die
+    # editierbare Einstellungen-Seite (Hochschalten/Runterschalten/
+    # Notbremse/Sicherheit/Nacht-Sperre).
+    mvp_detail_hochschalten:
+      name: "Übersicht Hochschalten aufgeklappt"
+      icon: mdi:trending-up
+    mvp_detail_runterschalten:
+      name: "Übersicht Runterschalten aufgeklappt"
+      icon: mdi:trending-down
+    mvp_detail_notbremse:
+      name: "Übersicht Notbremse aufgeklappt"
+      icon: mdi:battery-alert
+    mvp_detail_temperatur:
+      name: "Übersicht Temperatur aufgeklappt"
+      icon: mdi:thermometer-alert
+    mvp_detail_nachtsperre:
+      name: "Übersicht Nacht-Sperre aufgeklappt"
+      icon: mdi:weather-night
+    mvp_detail_lueftung:
+      name: "Übersicht Lüftung aufgeklappt"
+      icon: mdi:fan
+
+  input_text:
+    batt_soc_trace:
+      name: "Batterie SoC Tagesverlauf"
+      max: 255
+      initial: ""
+
+    # Neu 27.08.2026, Nutzer-Wunsch: lesbare Begruendung, warum der Watchdog
+    # gerade in diesem Modus ist bzw. nicht hochgeschaltet hat — Anlass war
+    # ein Live-Fall (SoC 99%, weit ueber der Standard-Schwelle, Miner blieb
+    # trotzdem in Eco), Ursache das damals nicht in den Regelschwellen
+    # sichtbare binary_sensor.mvp_nachmittag_aktiv-Gate auf R3/R5 (noch am
+    # selben Tag entfernt, siehe Kommentar bei R3 in mvp_miner1_watchdog).
+    # Wird von mvp_miner1_watchdog/mvp_miner2_watchdog bei jedem Lauf neu
+    # gesetzt, rein informativ, keine Rueckwirkung auf die Schaltlogik selbst.
+    mvp_miner1_debug:
+      name: "Miner 1 Debug-Begründung"
+      max: 255
+      initial: ""
+    mvp_miner2_debug:
+      name: "Miner 2 Debug-Begründung"
+      max: 255
+      initial: ""
+
+    # Kurzcode der aktiven Regel (z.B. "R1 Stopp", "Regulär"), separat von der
+    # vollen Begruendung oben. Treibt sensor.miner_1_log/miner_2_log (template:
+    # weiter unten in diesem Package): der State-Trigger dort feuert nur bei
+    # echtem Wertwechsel dieses Kurzcodes, nicht bei jedem Watchdog-Lauf.
+    #
+    # KEIN initial: hier (27.09.2026). Bis dahin stand hier initial: "", und
+    # das war die Ursache der Log-Schleife: input_text setzt den Wert bei
+    # JEDEM HA-Start auf initial zurueck, der erste Watchdog-Lauf danach
+    # schreibt denselben Kurzcode wieder hinein, und genau dieses
+    # "" -> "R1 Stopp" ist ein echter State-Wechsel, der einen Log-Eintrag
+    # erzeugt. Belegt am 27.09.2026: alle 25 Eintraege im Live-Log liessen
+    # sich 1:1 einem Eintrag in recorder_runs zuordnen, jeweils 0-3 min nach
+    # dem HA-Start (Watchdog hat beim Start-Trigger 1 min delay). Der Log war
+    # damit faktisch ein Neustart-Zaehler, kein Regel-Verlauf. Ohne initial
+    # stellt input_text den letzten Wert per RestoreEntity wieder her
+    # (async_added_to_hass, im Container verifiziert), der Folgeschreibvorgang
+    # ist dann wertgleich und HA unterdrueckt ihn (core.py async_set: bei
+    # gleichem State UND gleichen Attributen nur EVENT_STATE_REPORTED, kein
+    # state_changed — und der State-Trigger haengt ausschliesslich an
+    # state_changed, verifiziert in triggers/state.py).
+    mvp_miner1_rule:
+      name: "Miner 1 Regel-Kurzcode"
+      max: 40
+    mvp_miner2_rule:
+      name: "Miner 2 Regel-Kurzcode"
+      max: 40
 
   input_datetime:
     mvp_night_block_start:
@@ -118,6 +261,26 @@ mvp_auto:
       has_time: true
       icon: mdi:timer-off
       initial: "1970-01-01 00:00:00"
+
+    # Filterpflege (26.08.2026, Nutzer-Wunsch): Kalender-Intervall statt
+    # Laufzeit-Zaehlung, da fuer Staubfilter an Mining-Hardware in Garagen-/
+    # Kelleraufstellung (hier: "Untergeschoss") Web-Empfehlungen durchgehend
+    # ein festes Zeitintervall nennen, keine Betriebsstunden — siehe
+    # AsicMarketplace/D-Central-Recherche 26.08.2026: alle 2-3 Wochen in
+    # staubigen Raeumen (Garage/Keller/Farm), alle 1-2 Monate in saubereren
+    # Raeumen. Reset erfolgt manuell ueber den Button in Einstellungen
+    # (Tab "Einstellungen", Abschnitt "Lüftung"), sobald der Filter wirklich
+    # gereinigt wurde — kein automatischer Sensor kann das echte Reinigen
+    # selbst erkennen.
+    mvp_filter_last_cleaned:
+      name: "Filter zuletzt gereinigt"
+      has_date: true
+      has_time: false
+      icon: mdi:air-filter
+      # Startwert = Einbautag der Funktion (26.08.2026): der tatsaechliche
+      # letzte Reinigungstermin davor ist nicht bekannt, "heute" ist die
+      # ehrlichste Annahme (Uhr startet jetzt), keine erfundene Vergangenheit.
+      initial: "2026-08-26"
     mvp_miner1_last_upgrade:
       name: "Miner 1 letzter Upgrade"
       has_date: true
@@ -195,6 +358,249 @@ mvp_auto:
               —
             {% endif %}
 
+    # Verlaufslog je Miner (31.08.2026, Nutzer-Wunsch): Uhrzeit/Ereignis/Werte
+    # der letzten 25 EREIGNISSE. Trigger-based Template Sensor statt input_text:
+    # `this.attributes` erlaubt den Ringpuffer OHNE eigene Automation, und
+    # Attribute umgehen das 255-Zeichen-Limit, das jeden State (auch input_text)
+    # in HA hart begrenzt — 25 strukturierte Eintraege passen dort nicht rein.
+    # Ueberlebt HA-Neustarts (Trigger-based Template Sensoren implementieren
+    # RestoreEntity).
+    #
+    # 27.09.2026, Neufassung nach Nutzer-Befund "Log-Schleifen, ich brauche
+    # nicht fuer jedes Prozent eine Warnung". Zwei Aenderungen:
+    #
+    # 1. URSACHE der Schleife lag NICHT hier, sondern beim initial: "" der
+    #    beiden Kurzcode-input_text (s. Kommentar dort). Alle 25 Eintraege des
+    #    Live-Logs waren Neustart-Artefakte, nachgewiesen ueber recorder_runs.
+    #
+    # 2. LOGGRUNDSATZ geschaerft: geloggt wird, was TATSAECHLICH passiert ist
+    #    (Modus-Wechsel des Miners) und was ihn AKTIV blockiert hat
+    #    (Schutz-Zustaende R1/R2/Raumtemperatur). Reine Wartezustaende
+    #    (Hochschalt-CD, Runterschalt-CD, Eco-Wartezeit, Regulär) erzeugen
+    #    KEINEN Eintrag mehr: ein ablaufender Cooldown ist kein Ereignis,
+    #    sondern ein Zustand, und der steht live in der Begruendungszeile und
+    #    in sensor.minerX_cooldown_status. Sie erzeugten bisher zwei Eintraege
+    #    pro Cooldown-Zyklus, ohne dass sich irgendetwas geaendert hatte.
+    #
+    # Trigger 'modus' haengt bewusst am Ist-Zustand (sensor.minerX_workmode_
+    # status), nicht am Sollwert (select.minerX_workmode_set): geloggt wird,
+    # was der Miner wirklich gemacht hat. Damit stehen auch manuelle
+    # Umschaltungen und nicht befolgte Befehle im Log, statt nur der Wunsch
+    # des Watchdogs.
+    #
+    # Die condition filtert zusaetzlich jeden Uebergang von/zu leer, unknown,
+    # unavailable oder none. Das ist der Guertel zum Hosentraeger aus Punkt 1:
+    # es faengt dieselbe Klasse Neustart-/Ausfall-Artefakte auch dann ab, wenn
+    # sie kuenftig an anderer Stelle entsteht (z.B. Miner-API kurz weg).
+    - trigger:
+        - platform: state
+          entity_id: sensor.miner1_workmode_status
+          id: modus
+        - platform: state
+          entity_id: input_text.mvp_miner1_rule
+          id: regel
+        # Lab replay only (script.lab_demo_reset fires it): empty the log
+        # for a clean study run. Never fired in prod.
+        - platform: event
+          event_type: bgai_miner_log_reset
+          id: reset
+      condition:
+        - condition: template
+          value_template: >
+            {% if trigger.id == 'reset' %}true{% else %}
+            {% set f = trigger.from_state.state if trigger.from_state is not none else none %}
+            {% set t = trigger.to_state.state if trigger.to_state is not none else none %}
+            {% set leer = ['', 'unknown', 'unavailable', 'none', none] %}
+            {% set schutz = ['R1 Stopp', 'R2 Temp-Sperre', 'Raumtemp-Sperre'] %}
+            {{ f not in leer and t not in leer and f != t
+               and (trigger.id == 'modus' or f in schutz or t in schutz) }}
+            {% endif %}
+      sensor:
+        - name: "Miner 1 Log"
+          unique_id: miner1_log
+          icon: mdi:text-box-outline
+          state: "{{ states('input_text.mvp_miner1_rule') }}"
+          attributes:
+            entries: >
+              {# Lab replay: sim date + sim clock (sensor.lab_sim_profile /
+                 lab_sim_clock exist only on the lab), otherwise real time. #}
+              {% set sd = states('sensor.lab_sim_profile') %}
+              {% set sc = states('sensor.lab_sim_clock') %}
+              {% set stamp = (sd[8:10] ~ '.' ~ sd[5:7] ~ '. ' ~ sc)
+                 if is_state('input_boolean.simulation_mode', 'on')
+                    and sd is match('\d{4}-\d{2}-\d{2}$') and sc is match('\d{2}:\d{2}$')
+                 else now().strftime('%d.%m. %H:%M') %}
+              {% if trigger.id == 'reset' %}{{ [] }}{% else %}
+              {{ (this.attributes.get('entries', []) + [{
+                    'time': stamp,
+                    'miner': 'M1',
+                    'rule': (trigger.from_state.state ~ ' → ' ~ trigger.to_state.state)
+                            if trigger.id == 'modus' else trigger.to_state.state,
+                    'values': states('input_text.mvp_miner1_debug'),
+                  }])[-25:] }}
+              {% endif %}
+    - trigger:
+        - platform: state
+          entity_id: sensor.miner2_workmode_status
+          id: modus
+        - platform: state
+          entity_id: input_text.mvp_miner2_rule
+          id: regel
+        # Lab replay only (script.lab_demo_reset fires it): empty the log
+        # for a clean study run. Never fired in prod.
+        - platform: event
+          event_type: bgai_miner_log_reset
+          id: reset
+      condition:
+        - condition: template
+          value_template: >
+            {% if trigger.id == 'reset' %}true{% else %}
+            {% set f = trigger.from_state.state if trigger.from_state is not none else none %}
+            {% set t = trigger.to_state.state if trigger.to_state is not none else none %}
+            {% set leer = ['', 'unknown', 'unavailable', 'none', none] %}
+            {% set schutz = ['R1 Stopp', 'R2 Temp-Sperre', 'Raumtemp-Sperre'] %}
+            {{ f not in leer and t not in leer and f != t
+               and (trigger.id == 'modus' or f in schutz or t in schutz) }}
+            {% endif %}
+      sensor:
+        - name: "Miner 2 Log"
+          unique_id: miner2_log
+          icon: mdi:text-box-outline
+          state: "{{ states('input_text.mvp_miner2_rule') }}"
+          attributes:
+            entries: >
+              {# Lab replay: sim date + sim clock (sensor.lab_sim_profile /
+                 lab_sim_clock exist only on the lab), otherwise real time. #}
+              {% set sd = states('sensor.lab_sim_profile') %}
+              {% set sc = states('sensor.lab_sim_clock') %}
+              {% set stamp = (sd[8:10] ~ '.' ~ sd[5:7] ~ '. ' ~ sc)
+                 if is_state('input_boolean.simulation_mode', 'on')
+                    and sd is match('\d{4}-\d{2}-\d{2}$') and sc is match('\d{2}:\d{2}$')
+                 else now().strftime('%d.%m. %H:%M') %}
+              {% if trigger.id == 'reset' %}{{ [] }}{% else %}
+              {{ (this.attributes.get('entries', []) + [{
+                    'time': stamp,
+                    'miner': 'M2',
+                    'rule': (trigger.from_state.state ~ ' → ' ~ trigger.to_state.state)
+                            if trigger.id == 'modus' else trigger.to_state.state,
+                    'values': states('input_text.mvp_miner2_debug'),
+                  }])[-25:] }}
+              {% endif %}
+
+    # Saison-Automatik (ADR 028, 27.08.2026, dritte Kehrtwende): wieder
+    # Live-Formel statt fester Tabelle — Nutzer-Entscheidung 27.08.2026,
+    # kippt die ADR-027-Fixierung vom Vortag erneut. Formel = R2-Logik aus
+    # rules.yaml (Kern, dort nur Thesis-Studienmodell, siehe ADR 020): 10%
+    # SMA-Tiefentladeschutz-Boden + Reserve fuer die Nacht (Grundlast x
+    # laengste Nacht des Monats, feste astronomische Tabelle fuer den eigenen
+    # Standort, Breitengrad rund 49,5°N; genaue Koordinaten stehen bewusst nur
+    # in der HA-Konfiguration, nicht im Repo) + 5% Puffer.
+    #
+    # Standortangabe am 25.09.2026 korrigiert: hier stand zuvor 48,1°N/11,6°O,
+    # was nicht zum Messort passt. Die ZAHLEN der Tabelle sind davon unberuehrt
+    # und bleiben unveraendert, nur der Kommentar war falsch. Nachgerechnet mit
+    # dem NOAA-Sonnenstandsalgorithmus (gegen sun.sun auf 18 s validiert):
+    # die Tabelle passt zu rund 49,5°N mit 0,3 min mittlerer Abweichung, zu
+    # 48,1°N dagegen mit 7,9 min. Eine Neuberechnung wuerde die Werte um
+    # maximal 0,5 min und die Hausreserve um 0,02 Prozentpunkte verschieben,
+    # also reines Rauschen: dafuer wird dieser Regelpfad nicht angefasst.
+    #
+    # Trigger bewusst NICHT stuendlich (Nutzer-Wunsch:
+    # "es reicht die 6 Schwellenwerte einmal zum Monatswechsel zu aendern"),
+    # nur taeglich (faengt den Monatswechsel ab) + sofort bei Aenderung der
+    # beiden Stellschrauben + bei HA-Start. Reine Anzeige/Diagnose-Sensor:
+    # die Automation mvp_saison_automatik unten rechnet unabhaengig nach.
+    - trigger:
+        - platform: time_pattern
+          hours: 0
+          minutes: 5
+        - platform: homeassistant
+          event: start
+        - platform: state
+          entity_id:
+            - input_number.mvp_night_baseload_w
+            - input_number.battery_capacity_kwh
+        # Lab replay (17.10.2026): month of the replayed day instead of now()
+        # while simulation_mode runs and sensor.lab_sim_profile (lab only)
+        # holds the sim date. Prod has no lab_sim_profile: unchanged.
+        - platform: state
+          entity_id:
+            - input_boolean.simulation_mode
+            - sensor.lab_sim_profile
+      sensor:
+        - name: "MVP Saison Status"
+          unique_id: mvp_saison_status
+          icon: mdi:calendar-sync
+          state: >
+            {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
+            {% set p = states('sensor.lab_sim_profile') %}
+            {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
+            {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
+            {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
+            {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
+            {% set sp = [15 + rp, 95] | min %}
+            {% if (sp + 40) <= 100 %}
+              Voll (Eco/Standard/Super)
+            {% elif (sp + 25) <= 100 %}
+              Eco + Standard
+            {% else %}
+              Nur Eco
+            {% endif %}
+          attributes:
+            hausreserve_pct: >
+              {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
+              {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
+              {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
+              {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
+              {{ ([15 + rp, 95] | min) | round(1) }}
+            eco_ab_pct: >
+              {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
+              {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
+              {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
+              {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
+              {% set sp = [15 + rp, 95] | min %}
+              {{ ([sp + 10, 100] | min) | round(1) }}
+            standard_endet_pct: >
+              {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
+              {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
+              {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
+              {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
+              {% set sp = [15 + rp, 95] | min %}
+              {{ ([sp + 20, 100] | min) | round(1) }}
+            standard_ab_pct: >
+              {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
+              {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
+              {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
+              {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
+              {% set sp = [15 + rp, 95] | min %}
+              {{ ([sp + 25, 100] | min) | round(1) }}
+            super_endet_pct: >
+              {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
+              {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
+              {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
+              {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
+              {% set sp = [15 + rp, 95] | min %}
+              {{ ([sp + 35, 100] | min) | round(1) }}
+            super_ab_pct: >
+              {% set ns = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85} %}
+              {% set p = states('sensor.lab_sim_profile') %}
+              {% set h = ns[(p[5:7] | int) if is_state('input_boolean.simulation_mode', 'on') and p | regex_match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') else now().month] %}
+              {% set gw = states('input_number.mvp_night_baseload_w') | float(535) %}
+              {% set kk = states('input_number.battery_capacity_kwh') | float(12.5) %}
+              {% set rp = (gw * h / 1000 / kk * 100) if kk > 0 else 100 %}
+              {% set sp = [15 + rp, 95] | min %}
+              {{ ([sp + 40, 100] | min) | round(1) }}
+
     - sensor:
         - name: "Lüftung Status"
           unique_id: lueftung_status_display
@@ -204,8 +610,12 @@ mvp_auto:
             {% set m2 = states('sensor.miner2_workmode_status') in ['Eco', 'Standard', 'Super'] %}
             {% if m1 or m2 %}
               Aktiv
-            {% elif states('switch.shellyplugsg3_dcb4d9c6b46c') == 'on' %}
-              {% set remaining = (as_timestamp(states('input_datetime.lueftung_cooldown_end'), 0) - now().timestamp()) | int %}
+            {% elif states('switch.shellyplusplugs_d4d4daf4eda4') == 'on' %}
+              {# state_attr timestamp, nicht as_timestamp(states(...)): letzteres liest
+                 den naiven input_datetime-String als UTC und zeigte die Restzeit
+                 dadurch 2 h zu lang an (belegt 2026-07-17). Das Abschalten selbst
+                 haengt am delay unten und war nie betroffen, nur diese Anzeige. #}
+              {% set remaining = (state_attr('input_datetime.lueftung_cooldown_end', 'timestamp') | float(0) - now().timestamp()) | int %}
               {% if remaining > 0 %}
                 {{ '%d:%02d' | format(remaining // 60, remaining % 60) }}
               {% else %}
@@ -213,6 +623,23 @@ mvp_auto:
               {% endif %}
             {% else %}
               Aus
+            {% endif %}
+
+        # Filterpflege-Faelligkeit: Tage bis zum naechsten Reinigungstermin
+        # (negativ = ueberfaellig). Kalender-Intervall ab input_datetime.
+        # mvp_filter_last_cleaned, siehe Kommentar dort zur Herleitung.
+        - name: "Filterpflege Status"
+          unique_id: mvp_filter_status_days
+          icon: mdi:air-filter
+          unit_of_measurement: "d"
+          state: >
+            {% set last = state_attr('input_datetime.mvp_filter_last_cleaned', 'timestamp') %}
+            {% set interval = states('input_number.mvp_filter_interval_days') | float(21) %}
+            {% if last is none %}
+              unknown
+            {% else %}
+              {% set days_since = (now().timestamp() - last) / 86400 %}
+              {{ (interval - days_since) | round(0) }}
             {% endif %}
 
     - binary_sensor:
@@ -234,6 +661,20 @@ mvp_auto:
               {% endif %}
             {% endif %}
 
+        - name: "MVP SoC kritisch (debounced)"
+          unique_id: mvp_soc_kritisch
+          device_class: problem
+          icon: mdi:battery-alert
+          delay_on: "00:04:00"
+          delay_off: "00:00:00"
+          state: >
+            {% set soc = states('sensor.battery_soc_pct') %}
+            {% if soc in ['unknown', 'unavailable'] %}
+              false
+            {% else %}
+              {{ soc | float < (states('input_number.mvp_soc_stop_pct') | float(60)) }}
+            {% endif %}
+
         - name: "MVP Nacht-Sperre aktiv"
           unique_id: mvp_night_block_active
           icon: mdi:weather-night
@@ -252,12 +693,126 @@ mvp_auto:
 
   automation:
 
+    # ═══════════════════════════════════════════════════════════════════════
+    # Regeln R1-R8 — Reihenfolge = Priorität (choose: prüft von oben nach
+    # unten, die erste zutreffende Regel gewinnt). R1-R7 stehen je einmal im
+    # choose-Block von mvp_miner1_watchdog und mvp_miner2_watchdog unten,
+    # seit 23.08.2026 identisch (Super-Sperre für Miner 2 aufgehoben, Test ob
+    # R2 Temperatur-Sperre auch dort sauber greift). R8 ist eine eigene,
+    # immer aktive Automation (mvp_p3b_pv_reactive_downgrade), unabhängig vom
+    # SoC-Takt der anderen. Details/Herleitung:
+    # docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md
+    #
+    #   R1  Sicherheitsstopp     SoC < Stop (60%), 4 Min. anhaltend → Standby
+    #   R2  Temperatur-Sperre    Chip-Temp-Lockout aktiv + Super       → Standard
+    #   R3  Super hochschalten   SoC ≥ Super-Start (100%), vormittags  → Super
+    #   R4  Super runterschalten SoC < Super-Aus (95%)                 → Standard
+    #   R5  Standard hochschalten SoC ≥ Standard-Start (85%)           → Standard
+    #   R6  Standard runterschalten SoC < Standard-Aus (83%)           → Eco
+    #   R7  Start aus Standby    SoC ≥ Eco-Start (70%) oder PV-Bypass  → Eco
+    #   R8  Akku-Notbremse       Entladung anhaltend > Schwelle (5min) → Eco
+    #                            (Super: 800W / Standard: 400W, eigene Automation,
+    #                            reagiert auf den Akku-Zustand, nicht auf die Uhrzeit)
+    #
+    # Die SoC-Schwellen fuer R1/R3-R7 (input_number.mvp_soc_*) werden seit
+    # 26.08.2026 nicht mehr von Hand gepflegt, sondern monatlich von der
+    # Automation mvp_saison_automatik neu gesetzt, siehe dort.
+    # ═══════════════════════════════════════════════════════════════════════
+
+    # ── Saison-Automatik (ADR 028, 27.08.2026, dritte Kehrtwende) ──────────
+    # Setzt die sechs SoC-Schwellen R1/R3-R7 aus battery_capacity_kwh +
+    # mvp_night_baseload_w live neu, ganzjaehrig inkl. Winter — bewusste
+    # Revision der ADR-025-Entscheidung "Winter-Stop bleibt unveraendert,
+    # keine echten Winterdaten". Wieder Live-Formel statt der ADR-027-Tabelle
+    # vom Vortag (Nutzer-Entscheidung 27.08.2026). Formel identisch zu
+    # sensor.mvp_saison_status oben, hier unabhaengig neu gerechnet (keine
+    # Lesereihenfolge-Abhaengigkeit). Trigger bewusst nicht stuendlich
+    # (Nutzer-Wunsch: taeglich reicht, faengt den Monatswechsel ab) plus
+    # sofort bei Aenderung der beiden Stellschrauben. Herleitung/Quelle:
+    # docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md,
+    # 091_adr_de.md ADR 028.
+    - id: mvp_saison_automatik
+      alias: "MVP: Saisonale Schwellen-Automatik"
+      description: >
+        Berechnet aus battery_capacity_kwh + mvp_night_baseload_w und der
+        laengsten Nacht des aktuellen Monats die Ziel-SoC fuer Hausreserve
+        (R1) und leitet daraus Eco/Standard/Super-Schwellen (R3-R7) ab
+        (Abstaende +10/+20/+25/+35/+40 ueber R1, auf 100% gekappt). Standard-
+        Deadband am 27.08.2026 von +23 auf +20 vergroessert (Nutzer-Wunsch:
+        mindestens 5 Prozentpunkte Abstand zwischen Runter- und Hochschalten,
+        vorher waren es nur 2pp zwischen Standard-Ende und Standard-Start —
+        Super hatte mit 35/40 schon 5pp und blieb unveraendert). Ersetzt die
+        manuelle Pflege dieser sechs Werte.
+      mode: single
+      trigger:
+        - platform: time_pattern
+          hours: 0
+          minutes: 10
+        - platform: homeassistant
+          event: start
+        - platform: state
+          entity_id:
+            - input_number.mvp_night_baseload_w
+            - input_number.battery_capacity_kwh
+      action:
+        - variables:
+            ns: {1: 15.75, 2: 14.5833, 3: 12.9667, 4: 11.0667, 5: 9.3167, 6: 8.0, 7: 8.8167, 8: 10.5, 9: 12.3167, 10: 14.1333, 11: 15.5167, 12: 15.85}
+            stunden: "{{ ns[now().month] }}"
+            grundlast_w: "{{ states('input_number.mvp_night_baseload_w') | float(535) }}"
+            kap_kwh: "{{ states('input_number.battery_capacity_kwh') | float(12.5) }}"
+            reserve_pct: "{{ (grundlast_w * stunden / 1000 / kap_kwh * 100) if kap_kwh > 0 else 100 }}"
+            stop_pct: "{{ [15 + reserve_pct, 95] | min | round(0) }}"
+            eco_pct: "{{ [stop_pct + 10, 100] | min | round(0) }}"
+            std_off_pct: "{{ [stop_pct + 20, 100] | min | round(0) }}"
+            std_pct: "{{ [stop_pct + 25, 100] | min | round(0) }}"
+            super_off_pct: "{{ [stop_pct + 35, 100] | min | round(0) }}"
+            super_pct: "{{ [stop_pct + 40, 100] | min | round(0) }}"
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.mvp_soc_stop_pct
+          data:
+            value: "{{ stop_pct }}"
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.mvp_soc_eco_start_pct
+          data:
+            value: "{{ eco_pct }}"
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.mvp_soc_std_off_pct
+          data:
+            value: "{{ std_off_pct }}"
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.mvp_soc_std_pct
+          data:
+            value: "{{ std_pct }}"
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.mvp_soc_super_off_pct
+          data:
+            value: "{{ super_off_pct }}"
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.mvp_soc_super_pct
+          data:
+            value: "{{ super_pct }}"
+    # ═══════════════════════════════════════════════════════════════════════
+
     # ── Miner 1: Steuerungs-Automation ────────────────────────────────────
     - id: mvp_miner1_watchdog
       alias: "MVP: Miner 1 Watchdog"
       description: >
-        Prüft SoC/PV und setzt Workmode von Miner 1.
-        Priorität: Stop > Super > Super-Downgrade > Eco-Start
+        Prüft SoC/PV und setzt Workmode von Miner 1. Regeln R1-R7, siehe
+        Kommentare je choose-Zweig. Priorität: R1 Stop > R2 Temp-Sperre >
+        R3 Super-Start > R4 Super-Ausstieg > R5 Standard-Start >
+        R6 Standard-Ausstieg > R7 Eco-Start.
+        Der frühere zeitbasierte Nachmittags-Cap ("P0a") wurde am 23.08.2026
+        entfernt (Altlast — kappte auch bei vollem Überschuss): der
+        akku-reaktive Notabstieg (R8, eigene Automation mvp_p3b_pv_reactive_
+        downgrade) übernimmt diese Funktion jetzt anhand des echten
+        Batteriezustands statt der Uhrzeit. Details:
+        docs/architecture/09_design_decisions/092_soc_saison_schwellen_vorschlag_de.md
       mode: single
       trigger:
         - platform: time_pattern
@@ -272,6 +827,18 @@ mvp_auto:
         - condition: state
           entity_id: input_boolean.miner1_auto_load_management
           state: "on"
+        # R3-Vorrang (2026-07-17). Solange ein Sicherheits-Stopp oder sein
+        # Lockout steht, haelt sich dieser Watchdog komplett raus. Ohne das Gate
+        # kaempfen zwei Regler um select.miner1_workmode_set: script.bg_stop
+        # setzt auf Standby, dieser Watchdog 2 Minuten spaeter wieder hoch,
+        # endlos. Bewusst fail-open formuliert (nur ein explizites 'on' sperrt):
+        # steht der Sensor auf unknown/unavailable, z.B. kurz nach Neustart,
+        # laeuft die Automatik normal weiter. Der TMax-Schutz (112 °C) und die
+        # Hardware liegen ohnehin darunter.
+        - condition: template
+          value_template: >
+            {{ not (is_state('binary_sensor.r3_safety_override', 'on')
+                    or is_state('binary_sensor.safety_lockout_active', 'on')) }}
       action:
         - if:
             - condition: template
@@ -286,19 +853,22 @@ mvp_auto:
             soc: "{{ states('sensor.battery_soc_pct') | float(0) }}"
             pv: "{{ states('sensor.pv_power_w') | float(0) }}"
             bat_w: "{{ states('sensor.battery_power_w') | float(0) }}"
-            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(58) }}"
+            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(70) }}"
             pv_start: "{{ states('input_number.mvp_pv_start_w') | float(6000) }}"
-            soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(80) }}"
-            soc_std_off: "{{ states('input_number.mvp_soc_std_stop_pct') | float(75) }}"
-            soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(90) }}"
-            soc_super_off: "{{ states('input_number.mvp_soc_super_stop_pct') | float(85) }}"
-            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(50) }}"
+            soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(85) }}"
+            soc_std_collapse: "{{ states('input_number.mvp_soc_std_off_pct') | float(83) }}"
+            soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(100) }}"
+            soc_super_off: "{{ states('input_number.mvp_soc_super_off_pct') | float(95) }}"
+            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(60) }}"
             m1_status: "{{ states('sensor.miner1_workmode_status') }}"
             m1_select: "{{ states('select.miner1_workmode_set') }}"
             m1_up_ts: "{{ state_attr('input_datetime.mvp_miner1_last_upgrade', 'timestamp') | float(0) }}"
             m1_dn_ts: "{{ state_attr('input_datetime.mvp_miner1_last_downgrade', 'timestamp') | float(0) }}"
             now_ts: "{{ now().timestamp() }}"
             cooldown_sec: 3600
+            up_cd: "{{ [0, (m1_up_ts + 3600 - now_ts) | int] | max }}"
+            dn_cd: "{{ [0, (m1_dn_ts + 3600 - now_ts) | int] | max }}"
+            temp_locked: "{{ now_ts < (state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0)) }}"
 
         - action: system_log.write
           data:
@@ -310,18 +880,81 @@ mvp_auto:
               up_cd={{ [0, (m1_up_ts + cooldown_sec - now_ts) | int] | max }}s
               dn_cd={{ [0, (m1_dn_ts + cooldown_sec - now_ts) | int] | max }}s
               pv_bypass_in={{ [0, (m1_dn_ts + 900 - now_ts) | int] | max }}s
-            level: warning
+            # Pro-Durchlauf-Trace: feuert bei jeder SoC/PV-Änderung (~alle 5s) und
+            # flutet sonst home-assistant.log. Auf debug → im Normalbetrieb (Default
+            # info) unsichtbar, per `logger:` auf debug bei Bedarf wieder sichtbar.
+            # Die echten Moduswechsel/Sicherheits-Events unten bleiben auf info/warning.
+            level: debug
+
+        # Lesbare Begruendung fuers Dashboard (input_text.mvp_miner1_debug,
+        # siehe Kommentar dort). Rein informativ, wirkt sich nicht auf die
+        # Schaltlogik unten aus — reine Anzeige-Ableitung derselben
+        # Variablen, die der choose-Block gleich auswertet.
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.mvp_miner1_debug
+          data:
+            value: >
+              {% if is_state('binary_sensor.mvp_soc_kritisch_debounced', 'on') %}
+                {{ m1_status }} — R1 Sicherheitsstopp: SoC {{ soc|round(0) }}% < Stop {{ soc_stop|round(0) }}%
+              {% elif temp_locked and m1_status == 'Super' %}
+                {{ m1_status }} — R2 Temp-Sperre aktiv bis {{ states('input_datetime.mvp_miner1_temp_lockout_until') }}
+              {% elif m1_status == 'Eco' and soc >= soc_std_on and dn_cd > 0 %}
+                Eco — SoC {{ soc|round(0) }}% ≥ Standard {{ soc_std_on|round(0) }}%, aber Runterschalt-Cooldown noch {{ (dn_cd/60)|round(0,'ceil') }} min
+              {% elif is_state('binary_sensor.raumtemperatur_zu_heiss', 'on') %}
+                {{ m1_status }} — Raum zu warm, Hochschalten gesperrt
+              {% elif up_cd > 0 %}
+                {{ m1_status }} — Hochschalt-Cooldown noch {{ (up_cd/60)|round(0,'ceil') }} min
+              {% elif dn_cd > 0 %}
+                {{ m1_status }} — Runterschalt-Cooldown noch {{ (dn_cd/60)|round(0,'ceil') }} min
+              {% else %}
+                {{ m1_status }} — regulär (SoC {{ soc|round(0) }}%)
+              {% endif %}
+
+        # Kurzcode der aktiven Regel (input_text.mvp_miner1_rule), separat von der
+        # Begruendung oben. Zweck: sensor.miner_1_log (template-Sensor unten im
+        # gleichen Package) triggert NUR auf einen State-Wechsel dieses Kurzcodes
+        # (HA unterdrueckt Events bei identischem Folgewert), nicht auf jeden
+        # der ~alle 5s wiederkehrenden Watchdog-Laeufe. Reihenfolge wichtig: MUSS
+        # nach dem obigen mvp_miner1_debug gesetzt werden, damit der Log-Eintrag
+        # dessen bereits aktualisierten Wert einliest (31.08.2026, Nutzer-Wunsch:
+        # echtes Verlaufslog mit Uhrzeit/Regel/Werten statt nur Live-Text).
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.mvp_miner1_rule
+          data:
+            value: >
+              {% if is_state('binary_sensor.mvp_soc_kritisch_debounced', 'on') %}
+                R1 Stopp
+              {% elif temp_locked and m1_status == 'Super' %}
+                R2 Temp-Sperre
+              {% elif m1_status == 'Eco' and soc >= soc_std_on and dn_cd > 0 %}
+                Eco-Wartezeit
+              {% elif is_state('binary_sensor.raumtemperatur_zu_heiss', 'on') %}
+                Raumtemp-Sperre
+              {% elif up_cd > 0 %}
+                Hochschalt-CD
+              {% elif dn_cd > 0 %}
+                Runterschalt-CD
+              {% else %}
+                Regulär
+              {% endif %}
 
         - choose:
-            # P1: SoC zu niedrig → Standby (kein Cooldown — Sicherheit geht vor)
+            # R1 – Sicherheitsstopp: SoC < Stop → Standby. Kein Cooldown, aber seit
+            # 23.08.2026 ueber binary_sensor.mvp_soc_kritisch_debounced (4 Min.
+            # anhaltend), damit ein kurzer SoC-Sensor-Ausreisser (beobachtet:
+            # Sprung 90%→0%→90% binnen Minuten) nicht mehr sofort einen echten
+            # Stop+Neustart-Zyklus ausloest.
             - conditions:
-                - condition: template
-                  value_template: "{{ soc < soc_stop }}"
+                - condition: state
+                  entity_id: binary_sensor.mvp_soc_kritisch_debounced
+                  state: "on"
               sequence:
                 - action: system_log.write
                   data:
                     message: >
-                      [mvp-miner1] P1 Stop: soc={{ soc }}% < {{ soc_stop }}% bat={{ bat_w | round(0) }}W
+                      [mvp-miner1] R1 Stop: soc={{ soc }}% < {{ soc_stop }}% bat={{ bat_w | round(0) }}W
                       — status={{ m1_status }} → Standby (PV-Bypass gesperrt für 15min)
                     level: warning
                 - condition: template
@@ -347,33 +980,67 @@ mvp_auto:
                       data:
                         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P1b: Temp-Sperre aktiv → Eco erzwingen (level-triggered, kein Cooldown)
+            # R2 – Temperatur-Sperre: 3h-Lockout aktiv + Status=Super → Standard
+            # (level-triggered, kein Cooldown).
             - conditions:
                 - condition: template
                   value_template: >
                     {{ now_ts < state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0)
-                       and m1_status in ['Super', 'Standard'] }}
+                       and m1_status == 'Super' }}
               sequence:
                 - action: system_log.write
                   data:
                     message: >
-                      [mvp-miner1] P1b Temp-Sperre: lockout bis
+                      [mvp-miner1] R2 Temp-Sperre: lockout bis
                       {{ states('input_datetime.mvp_miner1_temp_lockout_until') }}
-                      — status={{ m1_status }} → Eco
+                      — status={{ m1_status }} → Standard
                     level: warning
                 - action: select.select_option
                   target:
                     entity_id: select.miner1_workmode_set
                   data:
-                    option: Eco
+                    option: Standard
 
-            # P2: Eco-Cap (Super + Standard deaktiviert — Testmodus)
+            # Altlast entfernt 23.08.2026: der frühere "P0a Nachmittag-Cap" zwang
+            # Standard/Super unconditional auf Eco, sobald die Sonne den Zenit
+            # überschritt — unabhängig davon, wie viel PV-Überschuss noch da war.
+            # Analyse (docs/architecture/09_design_decisions/092_...md, Abschnitt 3.3)
+            # zeigt: an 84-87% der betroffenen Nachmittagsblöcke war noch genug
+            # Überschuss für Standard/Super da. Ersetzt durch R8 (eigene Automation
+            # mvp_p3b_pv_reactive_downgrade), die auf den echten Akku-Zustand statt
+            # die Uhrzeit reagiert. Das verbliebene Aufwärts-Gate (binary_sensor.
+            # mvp_nachmittag_aktiv auf R3/R5) war Altlast aus genau derselben
+            # zeitbasierten Logik — am 27.08.2026 ebenfalls entfernt (Nutzer-
+            # Entscheidung: "nur noch die saisonale Automation soll eine Rolle
+            # spielen", d.h. SoC-Schwellen statt Uhrzeit). Live-Fall, der das
+            # aufdeckte: SoC 99%, Miner blieb trotzdem in Eco haengen, sichtbar
+            # gemacht ueber input_text.mvp_miner1_debug/mvp_miner2_debug.
+
+            # R3 – Super hochschalten: Akku voll → Super, ganztägig (bis
+            # 27.08.2026 nur vormittags per Gate, siehe Kommentar oben).
+            #
+            # BUG-FIX 25.09.2026: soc_super_on kommt aus mvp_saison_automatik
+            # als min(stop_pct+40, 100) — in einer Saison, die Super eigentlich
+            # sperrt ("Eco + Standard"/"Nur Eco" in sensor.mvp_saison_status),
+            # wird die Schwelle dabei nur auf genau 100 GEDECKELT, nicht
+            # wirklich gesperrt. Bei SoC=100% (im Sommer Alltag, s. mining_log-
+            # Historie) griff "soc >= soc_super_on" dann trotzdem und schaltete
+            # Super in einem Monat frei, den die Saisonale Tabelle als gesperrt
+            # ausweist — Live-Befund 25.09.2026 (September, "Eco + Standard").
+            # Der Saison-Status wurde bis dahin nirgends in der Schaltlogik
+            # geprueft, nur in Chart/Tabelle. Fix: explizite Saison-Bedingung,
+            # dieselbe Quelle (sensor.mvp_saison_status), die auch
+            # bitgrid_regelschwellen_chart.js fuer supReachable nutzt — ein
+            # Wahrheitsquelle fuer "darf Super diesen Monat", keine zweite.
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
               sequence:
                 - condition: template
-                  value_template: "{{ m1_status != 'Eco' }}"
+                  value_template: "{{ m1_status != 'Super' }}"
+                - condition: state
+                  entity_id: sensor.mvp_saison_status
+                  state: "Voll (Eco/Standard/Super)"
                 - condition: template
                   value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -383,20 +1050,24 @@ mvp_auto:
                   value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0) }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P2 Eco-Cap: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m1_status }} (Super+Standard gesperrt)"
+                    message: "[mvp-miner1] R3 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m1_status }}"
                     level: info
                 - action: select.select_option
                   target:
                     entity_id: select.miner1_workmode_set
                   data:
-                    option: Eco
+                    option: Super
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.mvp_miner1_last_upgrade
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P3: Super-Deadband unterschritten → Standard (blockiert wenn Upgrade-Cooldown aktiv)
+            # R4 – Super verlassen (graceful): SoC < eigene Super-Ausstiegsschwelle
+            # (mvp_soc_super_off_pct, 95%) → jetzt Standard statt Eco (bis 23.08.2026:
+            # Sprung direkt auf Eco, weil soc_super_off versehentlich mit soc_std_on
+            # identisch war — echte Hysterese-Kaskade Super⇄Standard⇄Eco statt Kollaps).
+            # Blockiert wenn Upgrade-Cooldown aktiv.
             - conditions:
                 - condition: template
                   value_template: "{{ soc < soc_super_off and m1_status == 'Super' }}"
@@ -405,7 +1076,7 @@ mvp_auto:
                   value_template: "{{ (now_ts - m1_up_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P3 Super→Standard: soc={{ soc }}% < {{ soc_super_off }}% — Deadband unterschritten"
+                    message: "[mvp-miner1] R4 Super→Standard: soc={{ soc }}% < {{ soc_super_off }}% — graceful auslaufen"
                     level: info
                 - action: select.select_option
                   target:
@@ -418,22 +1089,54 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P2.5: Eco→Standard-Upgrade gesperrt (Testmodus — nur Eco erlaubt)
+            # R5 – Standard hochschalten: SoC im Standard-Bereich → Standard
+            # (Eco→Standard, blockiert wenn Downgrade-Cooldown aktiv), ganztägig
+            # (bis 27.08.2026 nur vormittags per Gate, siehe Kommentar bei R3).
+            #
+            # BUG-FIX 25.09.2026: derselbe Deckelungs-Fehler wie bei R3 (s.
+            # Kommentar dort), hier fuer "Nur Eco"-Monate — soc_std_on wird
+            # dort ebenfalls nur auf 100 gedeckelt statt gesperrt.
             - conditions:
                 - condition: template
-                  value_template: "{{ false }}"
-              sequence: []
+                  value_template: "{{ soc >= soc_std_on and m1_status == 'Eco' }}"
+              sequence:
+                - condition: template
+                  value_template: "{{ not is_state('sensor.mvp_saison_status', 'Nur Eco') }}"
+                - condition: template
+                  value_template: "{{ (now_ts - m1_dn_ts) >= cooldown_sec }}"
+                - condition: state
+                  entity_id: binary_sensor.raumtemperatur_zu_heiss
+                  state: "off"
+                - condition: template
+                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner1_temp_lockout_until', 'timestamp') | float(0) }}"
+                - action: system_log.write
+                  data:
+                    message: "[mvp-miner1] R5 Standard: soc={{ soc }}% >= {{ soc_std_on }}% — Eco→Standard"
+                    level: info
+                - action: select.select_option
+                  target:
+                    entity_id: select.miner1_workmode_set
+                  data:
+                    option: Standard
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.mvp_miner1_last_upgrade
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P3.5: Standard-Deadband unterschritten → Eco (blockiert wenn Upgrade-Cooldown aktiv)
+            # R6 – Standard verlassen (graceful): SoC < eigene Standard-Ausstiegsschwelle
+            # (mvp_soc_std_off_pct, 83%) → Eco. Greift nur wenn der Miner in Standard
+            # blieb (Tages-Peak unter Super). Abstand zur Standard-Ein-Schwelle (85),
+            # damit R5 nicht dagegen flattert.
             - conditions:
                 - condition: template
-                  value_template: "{{ soc < soc_std_off and m1_status == 'Standard' }}"
+                  value_template: "{{ soc < soc_std_collapse and m1_status == 'Standard' }}"
               sequence:
                 - condition: template
                   value_template: "{{ (now_ts - m1_up_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner1] P3.5 Standard→Eco: soc={{ soc }}% < {{ soc_std_off }}% — Deadband unterschritten"
+                    message: "[mvp-miner1] R6 Standard→Eco: soc={{ soc }}% < {{ soc_std_collapse }}% — effizient auslaufen"
                     level: info
                 - action: select.select_option
                   target:
@@ -446,9 +1149,9 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P4: SoC >= Schwelle, Miner aus → Eco starten
+            # R7 – Start aus Standby: SoC >= Eco-Start, Miner aus → Eco starten.
             # SoC ist immer Pflicht. PV >= pv_start erlaubt Cooldown-Bypass nach min. 15 min seit letztem Stop.
-            # Mindest-15min verhindert P1→P4-Flapping bei kurzen Solareinbrüchen.
+            # Mindest-15min verhindert R1→R7-Flapping bei kurzen Solareinbrüchen.
             # Temp-Lockout blockiert immer — auch wenn Miner intern durch Hardware-Schutz abgeschaltet hat.
             - conditions:
                 - condition: state
@@ -468,7 +1171,7 @@ mvp_auto:
                 - action: system_log.write
                   data:
                     message: >
-                      [mvp-miner1] P4 Eco-Start: soc={{ soc }}% pv={{ pv }}W bat={{ bat_w | round(0) }}W
+                      [mvp-miner1] R7 Eco-Start: soc={{ soc }}% pv={{ pv }}W bat={{ bat_w | round(0) }}W
                       — via={{ 'PV-Bypass(>15min)' if (pv >= pv_start and (now_ts - m1_dn_ts) >= 900) else '1h-Cooldown' }}
                       — status={{ m1_status }}
                     level: info
@@ -497,8 +1200,15 @@ mvp_auto:
     - id: mvp_miner2_watchdog
       alias: "MVP: Miner 2 Watchdog"
       description: >
-        Prüft SoC/PV und setzt Workmode von Miner 2.
-        Priorität: Stop > Super > Super-Downgrade > Eco-Start
+        Prüft SoC/PV und setzt Workmode von Miner 2. Regeln R1-R8, identisch zu
+        Miner 1, Priorität: R1 Stop > R2 Temp-Sperre > R3 Super-Start >
+        R4 Super-Ausstieg > R5 Standard-Start > R6 Standard-Ausstieg > R7 Eco-Start.
+        Super-Sperre für Miner 2 (Nutzer-Entscheidung 2026-07-12) am 23.08.2026
+        aufgehoben, um R2 (Temperatur-Sperre) auch für Miner 2 in Super testen
+        zu können — select.miner2_workmode_set bietet Super jetzt immer an
+        (avalonq_miner2.yaml), Sicherheitsnetz mvp_miner2_super_lockout entfernt.
+        Der frühere zeitbasierte Nachmittags-Cap ("P0a") wurde am 23.08.2026
+        entfernt — siehe mvp_miner1_watchdog-Beschreibung für die Begründung.
       mode: single
       trigger:
         - platform: time_pattern
@@ -513,6 +1223,11 @@ mvp_auto:
         - condition: state
           entity_id: input_boolean.miner2_auto_load_management
           state: "on"
+        # R3-Vorrang, siehe ausfuehrliche Begruendung bei mvp_miner1_watchdog.
+        - condition: template
+          value_template: >
+            {{ not (is_state('binary_sensor.r3_safety_override', 'on')
+                    or is_state('binary_sensor.safety_lockout_active', 'on')) }}
       action:
         - if:
             - condition: template
@@ -527,19 +1242,22 @@ mvp_auto:
             soc: "{{ states('sensor.battery_soc_pct') | float(0) }}"
             pv: "{{ states('sensor.pv_power_w') | float(0) }}"
             bat_w: "{{ states('sensor.battery_power_w') | float(0) }}"
-            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(58) }}"
+            soc_start: "{{ states('input_number.mvp_soc_eco_start_pct') | float(70) }}"
             pv_start: "{{ states('input_number.mvp_pv_start_w') | float(6000) }}"
-            soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(80) }}"
-            soc_std_off: "{{ states('input_number.mvp_soc_std_stop_pct') | float(75) }}"
-            soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(90) }}"
-            soc_super_off: "{{ states('input_number.mvp_soc_super_stop_pct') | float(85) }}"
-            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(50) }}"
+            soc_std_on: "{{ states('input_number.mvp_soc_std_pct') | float(85) }}"
+            soc_std_collapse: "{{ states('input_number.mvp_soc_std_off_pct') | float(83) }}"
+            soc_super_on: "{{ states('input_number.mvp_soc_super_pct') | float(100) }}"
+            soc_super_off: "{{ states('input_number.mvp_soc_super_off_pct') | float(95) }}"
+            soc_stop: "{{ states('input_number.mvp_soc_stop_pct') | float(60) }}"
             m2_status: "{{ states('sensor.miner2_workmode_status') }}"
             m2_select: "{{ states('select.miner2_workmode_set') }}"
             m2_up_ts: "{{ state_attr('input_datetime.mvp_miner2_last_upgrade', 'timestamp') | float(0) }}"
             m2_dn_ts: "{{ state_attr('input_datetime.mvp_miner2_last_downgrade', 'timestamp') | float(0) }}"
             now_ts: "{{ now().timestamp() }}"
             cooldown_sec: 3600
+            up_cd: "{{ [0, (m2_up_ts + 3600 - now_ts) | int] | max }}"
+            dn_cd: "{{ [0, (m2_dn_ts + 3600 - now_ts) | int] | max }}"
+            temp_locked: "{{ now_ts < (state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0)) }}"
 
         - action: system_log.write
           data:
@@ -551,18 +1269,68 @@ mvp_auto:
               up_cd={{ [0, (m2_up_ts + cooldown_sec - now_ts) | int] | max }}s
               dn_cd={{ [0, (m2_dn_ts + cooldown_sec - now_ts) | int] | max }}s
               pv_bypass_in={{ [0, (m2_dn_ts + 900 - now_ts) | int] | max }}s
-            level: warning
+            # Pro-Durchlauf-Trace: siehe mvp_miner1_watchdog — auf debug gesetzt,
+            # damit home-assistant.log nicht alle 5s geflutet wird.
+            level: debug
+
+        # Lesbare Begruendung fuers Dashboard, siehe mvp_miner1_watchdog fuer
+        # den Anlass/die Begruendung.
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.mvp_miner2_debug
+          data:
+            value: >
+              {% if is_state('binary_sensor.mvp_soc_kritisch_debounced', 'on') %}
+                {{ m2_status }} — R1 Sicherheitsstopp: SoC {{ soc|round(0) }}% < Stop {{ soc_stop|round(0) }}%
+              {% elif temp_locked and m2_status == 'Super' %}
+                {{ m2_status }} — R2 Temp-Sperre aktiv bis {{ states('input_datetime.mvp_miner2_temp_lockout_until') }}
+              {% elif m2_status == 'Eco' and soc >= soc_std_on and dn_cd > 0 %}
+                Eco — SoC {{ soc|round(0) }}% ≥ Standard {{ soc_std_on|round(0) }}%, aber Runterschalt-Cooldown noch {{ (dn_cd/60)|round(0,'ceil') }} min
+              {% elif is_state('binary_sensor.raumtemperatur_zu_heiss', 'on') %}
+                {{ m2_status }} — Raum zu warm, Hochschalten gesperrt
+              {% elif up_cd > 0 %}
+                {{ m2_status }} — Hochschalt-Cooldown noch {{ (up_cd/60)|round(0,'ceil') }} min
+              {% elif dn_cd > 0 %}
+                {{ m2_status }} — Runterschalt-Cooldown noch {{ (dn_cd/60)|round(0,'ceil') }} min
+              {% else %}
+                {{ m2_status }} — regulär (SoC {{ soc|round(0) }}%)
+              {% endif %}
+
+        # Kurzcode der aktiven Regel, siehe ausfuehrlicher Kommentar bei
+        # mvp_miner1_watchdog. MUSS nach mvp_miner2_debug gesetzt werden.
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.mvp_miner2_rule
+          data:
+            value: >
+              {% if is_state('binary_sensor.mvp_soc_kritisch_debounced', 'on') %}
+                R1 Stopp
+              {% elif temp_locked and m2_status == 'Super' %}
+                R2 Temp-Sperre
+              {% elif m2_status == 'Eco' and soc >= soc_std_on and dn_cd > 0 %}
+                Eco-Wartezeit
+              {% elif is_state('binary_sensor.raumtemperatur_zu_heiss', 'on') %}
+                Raumtemp-Sperre
+              {% elif up_cd > 0 %}
+                Hochschalt-CD
+              {% elif dn_cd > 0 %}
+                Runterschalt-CD
+              {% else %}
+                Regulär
+              {% endif %}
 
         - choose:
-            # P1: SoC zu niedrig → Standby (kein Cooldown — Sicherheit geht vor)
+            # R1 – Sicherheitsstopp: SoC < Stop → Standby. Debounced ueber
+            # binary_sensor.mvp_soc_kritisch_debounced, siehe mvp_miner1_watchdog.
             - conditions:
-                - condition: template
-                  value_template: "{{ soc < soc_stop }}"
+                - condition: state
+                  entity_id: binary_sensor.mvp_soc_kritisch_debounced
+                  state: "on"
               sequence:
                 - action: system_log.write
                   data:
                     message: >
-                      [mvp-miner2] P1 Stop: soc={{ soc }}% < {{ soc_stop }}% bat={{ bat_w | round(0) }}W
+                      [mvp-miner2] R1 Stop: soc={{ soc }}% < {{ soc_stop }}% bat={{ bat_w | round(0) }}W
                       — status={{ m2_status }} → Standby (PV-Bypass gesperrt für 15min)
                     level: warning
                 - condition: template
@@ -588,33 +1356,44 @@ mvp_auto:
                       data:
                         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P1b: Temp-Sperre aktiv → Eco erzwingen (level-triggered, kein Cooldown)
+            # R2 – Temperatur-Sperre: 3h-Lockout aktiv + Status=Super → Standard.
             - conditions:
                 - condition: template
                   value_template: >
                     {{ now_ts < state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0)
-                       and m2_status in ['Super', 'Standard'] }}
+                       and m2_status == 'Super' }}
               sequence:
                 - action: system_log.write
                   data:
                     message: >
-                      [mvp-miner2] P1b Temp-Sperre: lockout bis
+                      [mvp-miner2] R2 Temp-Sperre: lockout bis
                       {{ states('input_datetime.mvp_miner2_temp_lockout_until') }}
-                      — status={{ m2_status }} → Eco
+                      — status={{ m2_status }} → Standard
                     level: warning
                 - action: select.select_option
                   target:
                     entity_id: select.miner2_workmode_set
                   data:
-                    option: Eco
+                    option: Standard
 
-            # P2: Eco-Cap (Super + Standard deaktiviert — Testmodus)
+            # Altlast entfernt 23.08.2026: frueherer "P0a Nachmittag-Cap" — siehe
+            # Begruendung bei mvp_miner1_watchdog.
+
+            # R3 – Super hochschalten: seit 23.08.2026 auch für Miner 2 (Sperre
+            # aufgehoben, s.o.) — identisch zu Miner 1, ganztägig (kein
+            # Nachmittags-Gate mehr, siehe Kommentar bei Miner 1).
+            #
+            # BUG-FIX 25.09.2026: identisch zu Miner 1, s. dortiger Kommentar
+            # (Deckelung auf 100 statt echter Sperre bei blockierter Saison).
             - conditions:
                 - condition: template
                   value_template: "{{ soc >= soc_super_on }}"
               sequence:
                 - condition: template
-                  value_template: "{{ m2_status != 'Eco' }}"
+                  value_template: "{{ m2_status != 'Super' }}"
+                - condition: state
+                  entity_id: sensor.mvp_saison_status
+                  state: "Voll (Eco/Standard/Super)"
                 - condition: template
                   value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
                 - condition: state
@@ -624,20 +1403,21 @@ mvp_auto:
                   value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0) }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P2 Eco-Cap: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }} (Super+Standard gesperrt)"
+                    message: "[mvp-miner2] R3 Super: soc={{ soc }}% >= {{ soc_super_on }}% — status={{ m2_status }}"
                     level: info
                 - action: select.select_option
                   target:
                     entity_id: select.miner2_workmode_set
                   data:
-                    option: Eco
+                    option: Super
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.mvp_miner2_last_upgrade
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P3: Super-Deadband unterschritten → Standard (blockiert wenn Upgrade-Cooldown aktiv)
+            # R4 – Super verlassen (graceful): identisch zu Miner 1, seit
+            # 23.08.2026 real erreichbar (Super-Sperre aufgehoben, s.o.).
             - conditions:
                 - condition: template
                   value_template: "{{ soc < soc_super_off and m2_status == 'Super' }}"
@@ -646,7 +1426,7 @@ mvp_auto:
                   value_template: "{{ (now_ts - m2_up_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P3 Super→Standard: soc={{ soc }}% < {{ soc_super_off }}% — Deadband unterschritten"
+                    message: "[mvp-miner2] R4 Super→Standard: soc={{ soc }}% < {{ soc_super_off }}% — graceful auslaufen"
                     level: info
                 - action: select.select_option
                   target:
@@ -659,22 +1439,51 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P2.5: Eco→Standard-Upgrade gesperrt (Testmodus — nur Eco erlaubt)
+            # R5 – Standard hochschalten: SoC im Standard-Bereich → Standard
+            # (Eco→Standard, blockiert wenn Downgrade-Cooldown aktiv), ganztägig
+            # (kein Nachmittags-Gate mehr, siehe Kommentar bei Miner 1).
+            #
+            # BUG-FIX 25.09.2026: identisch zu Miner 1, s. dortiger Kommentar.
             - conditions:
                 - condition: template
-                  value_template: "{{ false }}"
-              sequence: []
+                  value_template: "{{ soc >= soc_std_on and m2_status == 'Eco' }}"
+              sequence:
+                - condition: template
+                  value_template: "{{ not is_state('sensor.mvp_saison_status', 'Nur Eco') }}"
+                - condition: template
+                  value_template: "{{ (now_ts - m2_dn_ts) >= cooldown_sec }}"
+                - condition: state
+                  entity_id: binary_sensor.raumtemperatur_zu_heiss
+                  state: "off"
+                - condition: template
+                  value_template: "{{ now_ts >= state_attr('input_datetime.mvp_miner2_temp_lockout_until', 'timestamp') | float(0) }}"
+                - action: system_log.write
+                  data:
+                    message: "[mvp-miner2] R5 Standard: soc={{ soc }}% >= {{ soc_std_on }}% — Eco→Standard"
+                    level: info
+                - action: select.select_option
+                  target:
+                    entity_id: select.miner2_workmode_set
+                  data:
+                    option: Standard
+                - action: input_datetime.set_datetime
+                  target:
+                    entity_id: input_datetime.mvp_miner2_last_upgrade
+                  data:
+                    datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P3.5: Standard-Deadband unterschritten → Eco (blockiert wenn Upgrade-Cooldown aktiv)
+            # R6 – Standard verlassen (graceful): SoC < eigene Standard-Ausstiegsschwelle
+            # (mvp_soc_std_off_pct, 83%) → Eco. Abstand zur Standard-Ein-Schwelle (85),
+            # damit R5 nicht dagegen flattert.
             - conditions:
                 - condition: template
-                  value_template: "{{ soc < soc_std_off and m2_status == 'Standard' }}"
+                  value_template: "{{ soc < soc_std_collapse and m2_status == 'Standard' }}"
               sequence:
                 - condition: template
                   value_template: "{{ (now_ts - m2_up_ts) >= cooldown_sec }}"
                 - action: system_log.write
                   data:
-                    message: "[mvp-miner2] P3.5 Standard→Eco: soc={{ soc }}% < {{ soc_std_off }}% — Deadband unterschritten"
+                    message: "[mvp-miner2] R6 Standard→Eco: soc={{ soc }}% < {{ soc_std_collapse }}% — effizient auslaufen"
                     level: info
                 - action: select.select_option
                   target:
@@ -687,9 +1496,9 @@ mvp_auto:
                   data:
                     datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            # P4: SoC >= Schwelle, Miner aus → Eco starten
+            # R7 – Start aus Standby: SoC >= Eco-Start, Miner aus → Eco starten.
             # SoC ist immer Pflicht. PV >= pv_start erlaubt Cooldown-Bypass nach min. 15 min seit letztem Stop.
-            # Mindest-15min verhindert P1→P4-Flapping bei kurzen Solareinbrüchen.
+            # Mindest-15min verhindert R1→R7-Flapping bei kurzen Solareinbrüchen.
             # Temp-Lockout blockiert immer — auch wenn Miner intern durch Hardware-Schutz abgeschaltet hat.
             - conditions:
                 - condition: state
@@ -709,7 +1518,7 @@ mvp_auto:
                 - action: system_log.write
                   data:
                     message: >
-                      [mvp-miner2] P4 Eco-Start: soc={{ soc }}% pv={{ pv }}W bat={{ bat_w | round(0) }}W
+                      [mvp-miner2] R7 Eco-Start: soc={{ soc }}% pv={{ pv }}W bat={{ bat_w | round(0) }}W
                       — via={{ 'PV-Bypass(>15min)' if (pv >= pv_start and (now_ts - m2_dn_ts) >= 900) else '1h-Cooldown' }}
                       — status={{ m2_status }}
                     level: info
@@ -734,20 +1543,37 @@ mvp_auto:
                       data:
                         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-    # ── P3b: PV-reaktiver Super→Eco Downgrade ────────────────────────────
+    # Automation "MVP: Miner 2 Super-Sperre" (mvp_miner2_super_lockout) am
+    # 23.08.2026 entfernt — Sperre selbst aufgehoben (s.o., avalonq_miner2.yaml
+    # + R3 unten), das Sicherheitsnetz dafuer ist damit gegenstandslos.
+
+    # ── R8: Akku-reaktiver Notabstieg (vormals "P3b", 23.08.2026 generalisiert) ──
     - id: mvp_p3b_pv_reactive_downgrade
-      alias: "MVP: P3b PV-reaktiver Super→Eco Downgrade"
+      alias: "MVP: R8 Akku-reaktiver Notabstieg (Super/Standard→Eco)"
       description: >
-        Downgrades Miner von Super→Eco wenn der Akku >800W sustained für 5 min abgibt.
-        Bypasses den normalen Upgrade-Cooldown (P3 wäre blockiert).
-        Setzt last_downgrade → verhindert sofortigen P2-Re-Upgrade für 1h.
-        Typischer Auslöser: Solareinbruch am Abend, PV kann Super-Modus nicht mehr tragen.
+        Downgraded auf Eco, sobald der Akku anhaltend mehr abgibt als der
+        jeweilige Entladeschutz-Schwellwert erlaubt: Super bei
+        mvp_batt_discharge_super_downgrade_w (Default -800W, 5min sustained,
+        unveraendert seit Einfuehrung), seit 23.08.2026 zusaetzlich Standard bei
+        mvp_batt_discharge_std_downgrade_w (Default -400W, 5min sustained — neu,
+        noch nicht feldgetestet, ueber das Dashboard nachjustierbar).
+        Reagiert auf den echten Akku-Zustand statt auf die Uhrzeit und ersetzt
+        damit den entfernten zeitbasierten Nachmittags-Cap ("P0a") — greift auch
+        bei einem ploetzlichen Wolkendurchzug, nicht nur nach Sonnenmittag.
+        Bypasses den normalen Upgrade-Cooldown (R4/R6 wären blockiert).
+        Setzt last_downgrade → verhindert sofortigen Re-Upgrade für 1h.
       mode: single
       trigger:
         - platform: numeric_state
           entity_id: sensor.battery_power_w
-          below: -800
+          below: input_number.mvp_batt_discharge_super_downgrade_w
           for: "00:05:00"
+          id: super_trigger
+        - platform: numeric_state
+          entity_id: sensor.battery_power_w
+          below: input_number.mvp_batt_discharge_std_downgrade_w
+          for: "00:05:00"
+          id: std_trigger
       action:
         - variables:
             m1_status: "{{ states('sensor.miner1_workmode_status') }}"
@@ -755,18 +1581,23 @@ mvp_auto:
             bat_w: "{{ states('sensor.battery_power_w') | float(0) }}"
             m1_auto: "{{ is_state('input_boolean.miner1_auto_load_management', 'on') }}"
             m2_auto: "{{ is_state('input_boolean.miner2_auto_load_management', 'on') }}"
+            # super_trigger: nur Super faellt (schwererer Entladefall, Sprung
+            # direkt auf Eco bleibt bewusst wie bisher). std_trigger: nur
+            # Standard faellt — Super hat mit seiner eigenen (haerteren)
+            # Schwelle noch Spielraum, bevor es selbst reagieren muss.
+            targets: "{{ ['Standard'] if trigger.id == 'std_trigger' else ['Super'] }}"
         - condition: template
-          value_template: "{{ m1_status == 'Super' or m2_status == 'Super' }}"
+          value_template: "{{ (m1_status in targets and m1_auto) or (m2_status in targets and m2_auto) }}"
         - action: system_log.write
           data:
             message: >
-              [mvp-p3b] PV-reaktiver Super→Eco: bat={{ bat_w | round(0) }}W < -800W (5min sustained)
-              — m1={{ m1_status }} m2={{ m2_status }} → Eco
-              (Upgrade-Cooldown überbrückt, last_downgrade gesetzt — P2 gesperrt für 1h)
+              [mvp-r8] Akku-reaktiver Notabstieg ({{ trigger.id }}): bat={{ bat_w | round(0) }}W
+              — m1={{ m1_status }} m2={{ m2_status }} → Eco (Ziel-Modi: {{ targets }})
+              (Upgrade-Cooldown überbrückt, last_downgrade gesetzt — 1h gesperrt)
             level: warning
         - if:
             - condition: template
-              value_template: "{{ m1_status == 'Super' and m1_auto }}"
+              value_template: "{{ m1_status in targets and m1_auto }}"
           then:
             - action: select.select_option
               target:
@@ -780,7 +1611,7 @@ mvp_auto:
                 datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
         - if:
             - condition: template
-              value_template: "{{ m2_status == 'Super' and m2_auto }}"
+              value_template: "{{ m2_status in targets and m2_auto }}"
           then:
             - action: select.select_option
               target:
@@ -797,7 +1628,7 @@ mvp_auto:
     - id: mvp_lueftung_watchdog
       alias: "MVP: Lüftung Watchdog"
       description: >
-        Schaltet Lüftungs-Shelly (shellyplugsg3_dcb4d9c6b46c) ein sobald
+        Schaltet Lüftungs-Shelly (shellyplusplugs_d4d4daf4eda4) ein sobald
         irgendein Miner läuft. Nach Miner-Stop: 30 min Nachlaufzeit, dann aus.
         mode: restart → Neustart des Miners während Cooldown bricht Abschaltung ab.
       mode: restart
@@ -824,7 +1655,7 @@ mvp_auto:
                     level: info
                 - action: switch.turn_on
                   target:
-                    entity_id: switch.shellyplugsg3_dcb4d9c6b46c
+                    entity_id: switch.shellyplusplugs_d4d4daf4eda4
                 - action: input_datetime.set_datetime
                   target:
                     entity_id: input_datetime.lueftung_cooldown_end
@@ -833,7 +1664,7 @@ mvp_auto:
           default:
             # Cooldown nur wenn Plug gerade wirklich an ist — verhindert Fehlstart beim HA-Boot
             - condition: state
-              entity_id: switch.shellyplugsg3_dcb4d9c6b46c
+              entity_id: switch.shellyplusplugs_d4d4daf4eda4
               state: "on"
             - action: system_log.write
               data:
@@ -852,7 +1683,7 @@ mvp_auto:
                 level: info
             - action: switch.turn_off
               target:
-                entity_id: switch.shellyplugsg3_dcb4d9c6b46c
+                entity_id: switch.shellyplusplugs_d4d4daf4eda4
             - action: input_datetime.set_datetime
               target:
                 entity_id: input_datetime.lueftung_cooldown_end
@@ -930,15 +1761,16 @@ mvp_auto:
           data:
             datetime: "{{ (now() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') }}"
 
-    # ── TMax-Stufe 1: Super → Standard bei 112°C ─────────────────────────
-    # Erster Schritt des Temperatur-Kaskade: Super → Standard sobald TMax
-    # mvp_tmax_std_threshold_c (112°C) überschreitet. Gibt dem Miner die
-    # Chance sich auf Standard zu kühlen bevor Stufe 2 (Standard → Eco) greift.
+    # ── TMax-Sicherheit: Super → Standard bei 112°C ──────────────────────
+    # Super → Standard sobald TMax mvp_tmax_std_threshold_c (112°C) erreicht.
+    # Der 3h-Temp-Lockout blockiert danach Super (R2/R3), Standard bleibt
+    # erlaubt. Letzte Instanz darunter ist der interne Hardware-Schutz des
+    # Miners (Selbstabschaltung, siehe tmax_lockout_on_selfstop).
     - id: mvp_miner1_tmax_std_safety
       alias: "MVP: Miner 1 TMax → Standard"
       description: >
         Drosselt Miner 1 von Super auf Standard sobald TMax >= mvp_tmax_std_threshold_c (112°C).
-        Stufe 1 der Kaskade: 112°C → Standard, 113°C → Eco.
+        Setzt 3h Temp-Lockout: blockiert Super, Standard bleibt erlaubt.
         Kein Cooldown — Sicherheit hat Vorrang.
         Trigger static 99°C (< min. Schwelle 100°C) — Condition prüft konfigurierten Wert.
       mode: single
@@ -982,7 +1814,7 @@ mvp_auto:
       alias: "MVP: Miner 2 TMax → Standard"
       description: >
         Drosselt Miner 2 von Super auf Standard sobald TMax >= mvp_tmax_std_threshold_c (112°C).
-        Stufe 1 der Kaskade: 112°C → Standard, 113°C → Eco.
+        Setzt 3h Temp-Lockout: blockiert Super, Standard bleibt erlaubt.
         Kein Cooldown — Sicherheit hat Vorrang.
         Trigger static 99°C (< min. Schwelle 100°C) — Condition prüft konfigurierten Wert.
       mode: single
@@ -1032,7 +1864,7 @@ mvp_auto:
       description: >
         Setzt 3h Temp-Lockout wenn Miner 1 von aktiver Workmode nach Standby/Off
         wechselt und TMax erhöht ist oder die API nicht mehr antwortet.
-        95°C statt Schwelle (113°C): interner Hardware-Schutz greift früher;
+        95°C statt Schwelle (112°C): interner Hardware-Schutz greift früher;
         unavailable fängt den Fall ab wo die API beim Übertemperatur-Stop schon
         abgestürzt ist und float(0) die Bedingung sonst fälschlicherweise killen würde.
       mode: single
@@ -1076,7 +1908,7 @@ mvp_auto:
       description: >
         Setzt 3h Temp-Lockout wenn Miner 2 von aktiver Workmode nach Standby/Off
         wechselt und TMax erhöht ist oder die API nicht mehr antwortet.
-        95°C statt Schwelle (113°C): interner Hardware-Schutz greift früher;
+        95°C statt Schwelle (112°C): interner Hardware-Schutz greift früher;
         unavailable fängt den Fall ab wo die API beim Übertemperatur-Stop schon
         abgestürzt ist und float(0) die Bedingung sonst fälschlicherweise killen würde.
       mode: single
@@ -1233,3 +2065,38 @@ mvp_auto:
             entity_id: input_datetime.last_stop_at
           data:
             datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    - alias: "MVP: Batterie SoC Tagesverlauf — 30-Min-Snapshot"
+      id: mvp_batt_soc_trace_update
+      trigger:
+        - platform: time_pattern
+          minutes: "/30"
+      action:
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.batt_soc_trace
+          data:
+            value: >-
+              {% set h = (now().hour + now().minute / 60) | round(2) %}
+              {% set soc = states('sensor.battery_soc_pct') | float(0) | round(1) %}
+              {% set today = now().strftime('%Y-%m-%d') %}
+              {% set raw = states('input_text.batt_soc_trace') %}
+              {% set parts = raw.split('|') if '|' in raw else [None] %}
+              {% if parts | length == 2 and parts[0] == today %}
+                {% set arr = parts[1] | from_json %}
+              {% else %}
+                {% set arr = [] %}
+              {% endif %}
+              {{ today + '|' + (arr + [[h, soc]])[-15:] | to_json }}
+
+    - alias: "MVP: Batterie SoC Tagesverlauf — Mitternacht Reset"
+      id: mvp_batt_soc_trace_reset
+      trigger:
+        - platform: time
+          at: "00:01:00"
+      action:
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.batt_soc_trace
+          data:
+            value: ""

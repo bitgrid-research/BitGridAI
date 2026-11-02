@@ -1,0 +1,30 @@
+# ═══════════════════════════════════════════════════════════════════════
+# REGELSCHWELLEN  —  schematischer Batterie-Tagesgang mit den SoC-Schwellen
+# für Hoch-/Runterschalten, reale Sonnenkurve und echter SoC-Verlauf des
+# laufenden Tages.
+#
+# Seit 25.09.2026 ein eigenes Custom-Element (custom:bitgrid-regelschwellen-
+# chart, www/bitgrid_regelschwellen_chart.js) statt eines ~180-zeiligen
+# Inline-SVG-Templates im custom_fields.chart-Block einer custom:button-card
+# direkt in bitgrid_dashboard_v3.yaml. Zwei Nutzer-Vorgaben desselben Tages:
+#   - "Regelschwellen soll aussehen wie beim Verlauf vom Stil her": der
+#     Verlauf-Chart hat den durchgearbeiteten Stil (17px-Achsen in
+#     Serienfarbe, Text-Halo, eigene HTML-Legende mit ha-icon, gestricheltes
+#     Gitter, dropShadow, Custom-Tooltip). Mit derselben Bibliothek und
+#     denselben Options-Blöcken ist die Stilgleichheit strukturell da, statt
+#     jeden Wert ein zweites Mal im SVG von Hand nachzupflegen.
+#   - "regelschwellen soll eigenes custom element sein".
+# Gleiches Hausmuster wie schon zweimal gegangen: views/finanz_bilanz.yaml
+# und views/energieverlauf_tag.yaml. Volle Begründung inklusive der bewusst
+# in Kauf genommenen Unterschiede (keine Führungslinie zwischen Marker-Label
+# und -Punkt, 3h- statt 1h-Beschriftung, Debug-Text nur noch auf Wunsch) im
+# Kommentarkopf von www/bitgrid_regelschwellen_chart.js.
+#
+# standalone bleibt aus (Default): die Karte sitzt in bitgrid_dashboard_v3.yaml
+# als erste Karte in einem vertical-stack, der per card_mod bereits EINEN
+# gemeinsamen Rahmen um Chart und alle Detailgruppen zieht. Ein eigener
+# Rahmen ergäbe dort Rahmen-im-Rahmen.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Steuerung".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:bitgrid-regelschwellen-chart

@@ -81,6 +81,6 @@ Wenn du eine Regel änderst, muss der zugehörige Replay-Test weiterhin grün bl
 
 ## Ansprechpartner & Workflow
 
-- Fragen zur Architektur → ₿itsy-Dev (`docs/development/36_ai_tooling/`)
+- Fragen zur Architektur → arc42-Docs (`docs/architecture/`) oder direkt GiGi
 - Workflow & Branching → `docs/development/32_workflow/README.md`
 - PR öffnen → Checkliste im PR-Template ausfüllen, 1 Approval abwarten

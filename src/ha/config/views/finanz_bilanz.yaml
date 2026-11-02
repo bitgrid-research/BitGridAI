@@ -1,0 +1,31 @@
+# ═══════════════════════════════════════════════════════════════════════
+# FINANZ-BILANZ  —  Balkendiagramm: Ersparnis PV-Eigennutzung, Mining-Ertrag,
+# Netzbezugskosten (negativ), Gesamt-Profit heute (Summe der ersten drei).
+# Sensoren: packages/economics.yaml (pv_self_use_savings_eur,
+# mining_revenue_today_eur, grid_import_cost_eur, total_profit_today_eur).
+#
+# Umstellung 12.09.2026 (Nutzer-Wunsch "lass uns daraus einfach ein
+# Apexchart bauen") von rohem SVG in custom:button-card auf
+# custom:bitgrid-finanz-chart (www/bitgrid_finanz_chart.js, rohes
+# ApexCharts.js, gleiches Muster wie www/bitgrid_verlauf_chart.js). Grund:
+# die SVG-Variante skalierte ihre Hoehe ausschliesslich ueber das
+# viewBox-Seitenverhaeltnis (kein fester Pixel-Wert), dadurch scheiterten
+# mehrere Versuche im Lauf des Tages, die Kartenhoehe per CSS-Grid-Stretch
+# an Miner anzugleichen — button-cards eingebautes #container{display:grid;
+# height:100%;align-items:center} hebelte jeden Stretch-Versuch aus, der
+# Chart landete "oben links" statt zentriert. ApexCharts hat wie beim
+# Verlauf-Chart einen echten chart.height in Pixeln, unabhaengig von der
+# Kartenbreite.
+#
+# Die komplette Tuning-Historie der SVG-Variante (Achsenschrift, cL/cR/cT/
+# cB-Feinabstimmung, Schatten, Divider, ...) ist in der Git-Historie dieser
+# Datei erhalten, hier bewusst nicht in die neue, schlanke Konfiguration
+# uebernommen — die neue Karte startet mit vernuenftigen Defaults und wird
+# bei Bedarf wieder live nachjustiert.
+#
+# Kein Titel im Chart (Nutzer-Entscheidung 23.08.2026: die Karte braucht
+# keine eigene Überschrift, der Gruppentitel "Finanzen (heute)" in
+# bitgrid_dashboard_v3.yaml uebernimmt das).
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Home".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:bitgrid-finanz-chart

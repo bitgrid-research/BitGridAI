@@ -16,7 +16,7 @@ Die Use Cases verfolgen drei Ziele:
 2. **Vergleichbarkeit der Evaluation**
    Alle Teilnehmenden bearbeiten identische Aufgaben.
 3. **Messbarkeit des Erklärformat-Effekts**
-   Unterschiede zwischen statischem und adaptivem (persona-basiertem) Erklärformat werden sichtbar.
+   Unterschiede zwischen statischem und LLM-Erklärformat werden sichtbar.
 
 &nbsp;
 
@@ -117,15 +117,15 @@ Die Use Cases werden in zwei Erklärformaten geprüft — beide zeigen einen Erk
 
 * **Gruppe A – statisch**
   regelbasiert erzeugte, für alle Probanden wortgleiche Erklärtexte (kein Sprachmodell).
-* **Gruppe B – adaptiv**
-  persona-basierte LLM-Erklärung, an den Nutzertyp (energie/waerme/tech) angepasst, gemäß Kapitel 24.
+* **Gruppe B – LLM**
+  LLM-Erklärung in einer einzigen, generischen Stimme (ohne Personas); gleiche Faktenbasis wie A.
 
 Verglichen werden u. a.:
 
-* Regelverständnis (primär),
-* Angemessenheit manueller Eingriffe (Override),
-* optional Vertrauen,
-* Log↔UI-Konsistenz.
+* Nutzervertrauen (primär, FF1),
+* Güte der LLM-Ausgaben (FF2: Faithfulness + Rubrik),
+* Direktvergleich beider Varianten (Within),
+* optional behaviorale Verlässlichkeit (Override), Log↔UI-Konsistenz.
 
 &nbsp;
 

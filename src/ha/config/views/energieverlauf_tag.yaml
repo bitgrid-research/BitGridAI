@@ -1,0 +1,41 @@
+# ═══════════════════════════════════════════════════════════════════════
+# VERLAUF (HEUTE)  —  PV-Leistung / Verbrauch / Batteriestand für den laufenden
+# Tag, 00:00–24:00 Uhr.
+#
+# Zweiter, diesmal bewusst dauerhafter Wechsel auf custom:bitgrid-verlauf-chart
+# (www/bitgrid_verlauf_chart.js, rohes ApexCharts.js) statt custom:apexcharts-
+# card (12.09.2026). Der erste Anlauf mit dieser Karte wurde noch am selben
+# Tag auf Nutzer-Wunsch zurueckgebaut ("Verlauf wieder zuruecksetzen"), weil
+# er gegenueber dem damaligen 2h-Zustand kein sichtbarer Fortschritt war.
+# Danach zwei weitere Versuche direkt in apexcharts-card:
+#   - xaxis.labels.formatter auf der datetime-Achse: bestaetigter Upstream-Bug
+#     (github.com/apexcharts/apexcharts.js/issues/164, vom Maintainer selbst
+#     als Bug markiert) — nur der erste Tick rendert korrekt.
+#   - DOM-Post-Processing (bitgrid_card_shape.js), das ApexCharts' eigene
+#     native Ticks nachtraeglich ausblendet: funktional zu schwach, weil die
+#     native datetime-Achse fuer einen 24h-Span selbst nur ein 2h-Raster
+#     erzeugt (00,02,04,...) — davon sind nur 0/6/12/18 auch Vielfache von 3,
+#     die "krummen" Werte 03/09/15/21 kommen im nativen Raster gar nicht vor.
+#     Bestenfalls 6h- statt der gewuenschten 3h-Schritte.
+# Einzige verbleibende Loesung fuer ECHTE 0/3/6/9/12/15/18/21/24-Schritte:
+# eine category-Achse (24 Stunden + 1 synthetischer "24:00"-Randpunkt fuer
+# den letzten Tick). category wertet labels.formatter zuverlaessig aus (der
+# #164-Bug betrifft ausschliesslich datetime-Achsen) — apexcharts-card selbst
+# liefert laut eigener Doku (data_generator-Abschnitt) aber JEDE Serie
+# zwingend als [timestamp, value]-Paare, es gibt dort keinen dokumentierten
+# Weg auf echte Kategorie-Labels umzustellen. Daher zwangslaeufig ein eigenes
+# Custom-Element statt eines weiteren Config-Versuchs in apexcharts-card.
+#
+# Optik (Farben, Dash-Muster, Legenden-Divider-Fade, Text-Halo, Kartenhoehe
+# 330px) ist 1:1 aus dem bisherigen apexcharts-card-Stand uebernommen, lebt
+# jetzt komplett im JS (kein card_mod mehr noetig, das Custom-Element stylt
+# sein eigenes Shadow-DOM direkt). Datenaufloesung weiterhin stuendliche
+# Mittelwerte, identisch zum bisherigen group_by: {func: avg, duration: 1h}.
+#
+# Bekannter, akzeptierter Unterschied: die "jetzt"-Linie rastet nur noch auf
+# die volle aktuelle Stunde ein (nicht mehr minutengenau), weil eine
+# category-Achse keine gebrochenen Zwischenpositionen kennt.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Home".
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:bitgrid-verlauf-chart
