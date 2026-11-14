@@ -828,3 +828,12 @@ settings_row_soft:
       - border-radius: "14px"
       - box-shadow: none
       - border: none
+
+# 13.11.2026: Status der Forschungs-DB (Tab "Forschung"), ein Template mit
+# zwei Abschnitten ueber variables.section (status | gaps). Inhalt und
+# Begruendung in der eingebundenen Datei.
+bgai_recording_status: !include views/aufzeichnung_status.yaml
+
+# 13.11.2026: Forschungs-KPI (Tab "Forschung"), zwei Abschnitte ueber
+# variables.section (nights | forecast): Nachtbilanz und Prognose gegen Ist.
+bgai_research_kpi: !include views/forschung_kpi.yaml

@@ -31,8 +31,10 @@ type: custom:button-card
 show_name: false
 show_icon: false
 show_state: false
+# 13.11.2026: oeffnet die Geraeteliste (www/bitgrid_hardware_card.js).
 tap_action:
-  action: none
+  action: navigate
+  navigation_path: "#hardware"
 styles:
   card:
     # 17.10.2026: fuellt die Spaltenhoehe (Karten nebeneinander buendig, www/bitgrid_wide.js).
@@ -65,6 +67,10 @@ custom_fields:
         if (ts.slice(0, 10) < START_DATE) return;
         earnedBtc += btc;
       });
+      // 13.11.2026: F2Pools Gesamteinnahmen sind die Referenz (wie Poolertraege);
+      // dem Tagesjournal fehlt der 14.04.2026. Journal nur noch als Ersatz.
+      const incomeBtc = parseFloat(states['sensor.pool_total_income_btc']?.state);
+      if (Number.isFinite(incomeBtc) && incomeBtc > earnedBtc) earnedBtc = incomeBtc;
 
       const hwCostEur = parseFloat(states['input_number.hardware_cost_eur']?.state) || 0;
       const btcEur = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
@@ -73,7 +79,7 @@ custom_fields:
       const remainingEur = Math.max(0, hwCostEur - earnedEur);
 
       const fmtEur  = (v) => v.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
-      const fmtSats = (btc) => Math.round(btc * 1e8).toLocaleString('de-DE') + ' sats';
+      const fmtSats = (btc) => Math.round(btc * 1e8).toLocaleString('de-DE') + ' Sats';
 
       if (hwCostEur <= 0) {
         return `<div style="padding:20px 0;text-align:center;color:var(--secondary-text-color)">Kein Hardware-Wert hinterlegt (input_number.hardware_cost_eur).</div>`;
@@ -86,7 +92,7 @@ custom_fields:
              Seitliche margins identisch zum Balken darunter (3px), damit die
              Zahl exakt auf dessen Mitte sitzt und nicht auf der Kartenmitte. -->
         <div style="display:flex;align-items:baseline;justify-content:center;margin:0 3px 10px;flex-wrap:wrap;gap:8px;">
-          <span style="font-size:1.8rem;font-weight:700;color:${headlineColor};">${pct.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})} %</span>
+          <span style="font-size:var(--bg-fs-title);font-weight:700;color:${headlineColor};">${pct.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1})} %</span>
         </div>
         <!-- Pixel-Akku statt durchgehendem Balken (26.09.2026, Nutzer-Vorgabe
              mit Beispielbild): Rahmen mit gestuften Pixel-Ecken (4 versetzte
@@ -96,22 +102,22 @@ custom_fields:
         <div style="margin:3px 3px 15px;padding:4px;box-shadow:0 -3px 0 0 #FFFFFF,0 3px 0 0 #FFFFFF,-3px 0 0 0 #FFFFFF,3px 0 0 0 #FFFFFF;display:flex;gap:4px;">
           ${Array.from({length: 10}, (_, i) => {
             const fill = Math.max(0, Math.min(1, (pct - i * 10) / 10));
-            return `<div style="flex:1 1 0;height:20px;background:linear-gradient(to right,#FFFFFF ${(fill * 100).toFixed(1)}%,transparent ${(fill * 100).toFixed(1)}%);"></div>`;
+            return `<div style="flex:1 1 0;height:20px;background:linear-gradient(to right,#F7931A ${(fill * 100).toFixed(1)}%,transparent ${(fill * 100).toFixed(1)}%);"></div>`;
           }).join('')}
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;">
           <div>
-            <div style="font-size:0.8rem;color:var(--secondary-text-color);margin-bottom:3px;">Investition</div>
-            <div style="font-size:1.05rem;font-weight:700;color:var(--secondary-text-color);">${fmtEur(hwCostEur)}</div>
+            <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);margin-bottom:3px;">Investition</div>
+            <div style="font-size:1.25rem;font-weight:700;color:var(--primary-text-color);">${fmtEur(hwCostEur)}</div>
           </div>
           <div>
-            <div style="font-size:0.8rem;color:var(--secondary-text-color);margin-bottom:3px;">Ertrag bisher</div>
-            <div style="font-size:1.05rem;font-weight:700;color:var(--secondary-text-color);">${fmtEur(earnedEur)}</div>
-            <div style="font-size:0.78rem;color:var(--secondary-text-color);margin-top:1px;">${fmtSats(earnedBtc)}</div>
+            <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);margin-bottom:3px;">Ertrag bisher</div>
+            <div style="font-size:1.25rem;font-weight:700;color:var(--primary-text-color);">${fmtEur(earnedEur)}</div>
+            <div style="font-size:var(--bg-fs-secondary);color:var(--secondary-text-color);margin-top:1px;">${fmtSats(earnedBtc)}</div>
           </div>
           <div>
-            <div style="font-size:0.8rem;color:var(--secondary-text-color);margin-bottom:3px;">Noch offen</div>
-            <div style="font-size:1.05rem;font-weight:700;color:${remainingEur <= 0 ? '#4CAF50' : 'var(--secondary-text-color)'};">${remainingEur <= 0 ? 'Abbezahlt' : fmtEur(remainingEur)}</div>
+            <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);margin-bottom:3px;">Noch offen</div>
+            <div style="font-size:1.25rem;font-weight:700;color:${remainingEur <= 0 ? '#4CAF50' : 'var(--primary-text-color)'};">${remainingEur <= 0 ? 'Abbezahlt' : fmtEur(remainingEur)}</div>
           </div>
         </div>
       </div>`;

@@ -36,12 +36,12 @@ from datetime import datetime, timedelta, timezone
 
 from src.data.db import get_connection
 
-# Saisonal gestaffelt seit 01.09.2026 (ADR 029, docs/architecture/09_design_
+# Saisonal gestaffelt seit 01.09.2026 (ADR 033, docs/architecture/09_design_
 # decisions/091_adr_de.md) statt fest 45 sats/kWh (ADR 026) — der feste Wert
 # war seit Wochen um Faktor ~2,8 unterboten und damit kein Ziel mehr. Nur der
 # "Voll"-Tarif (Mai-Aug) ist an 17 echte Tagesmessungen kalibriert, die beiden
 # anderen sind Modellschaetzungen (Eco ist pro kWh effizienter als Super,
-# siehe ADR 029), ausdruecklich vorlaeufig bis echte Daten aus den jeweiligen
+# siehe ADR 033), ausdruecklich vorlaeufig bis echte Daten aus den jeweiligen
 # Monaten vorliegen. Tier-Zuordnung folgt sensor.mvp_saison_status (ADR 028).
 _SEASONAL_TARGETS: dict[int, float] = {
     1: 135.0,

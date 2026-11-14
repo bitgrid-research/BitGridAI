@@ -254,18 +254,87 @@ CREATE TABLE IF NOT EXISTS daily_miner_kpi (
 );
 
 -- ---------------------------------------------------------------------------
+-- Entscheidungsprotokoll der PRODUKTIVEN Steuerung (HA-YAML, mvp_auto.yaml).
+--
+-- Bewusst NICHT in decision_events: jene Tabelle gehoert dem Python-Kern
+-- (Regeln R1-R5, Trigger BLOCK_TICK). Die HA-Steuerung hat eigene Regeln
+-- (R1-R8) mit anderer Bedeutung; beide in einer Tabelle wuerden zwei
+-- Entscheidungssysteme vermischen. Quelle sind Sensoren, die HA ohnehin
+-- aufzeichnet; ha_decision_sync.py holt sie nachtraeglich (nur lesend an HA,
+-- INSERT OR IGNORE hier).
+-- ---------------------------------------------------------------------------
+-- Ein Eintrag je Ereignis aus sensor.miner_N_log (seit 31.08.2026):
+-- kind='mode' = gemeldeter Moduswechsel (from_state -> to_state),
+-- kind='rule' = Wechsel der aktiven Regel (to_state = Regel-Kurzcode).
+-- rule_active = Regel-Kurzcode im Moment des Ereignisses, reason = die
+-- Begruendung, die der Watchdog selbst geschrieben hat (nicht nachberechnet).
+CREATE TABLE IF NOT EXISTS ha_decision_log (
+    id          TEXT PRIMARY KEY,   -- "<miner>|<timestamp>"
+    timestamp   TEXT NOT NULL,      -- UTC, ISO
+    block_id    TEXT NOT NULL,
+    miner       TEXT NOT NULL,
+    kind        TEXT NOT NULL,
+    from_state  TEXT,
+    to_state    TEXT NOT NULL,
+    rule_active TEXT,
+    reason      TEXT,
+    soc_pct     REAL                -- aus reason gelesen, NULL wenn nicht genannt
+);
+CREATE INDEX IF NOT EXISTS idx_ha_decision_block ON ha_decision_log (block_id);
+
+-- Soll/Ist-Diagnose je Miner aus sensor.miner_N_auto_diagnose, ein Eintrag
+-- je Zustandsaenderung. code: ok | cooldown | anomaly | auto_off (Automatik
+-- aus = Handbetrieb) | unavailable | ... (siehe packages/mvp_diagnose.yaml).
+CREATE TABLE IF NOT EXISTS ha_diagnose_log (
+    timestamp   TEXT NOT NULL,
+    block_id    TEXT NOT NULL,
+    miner       TEXT NOT NULL,
+    code        TEXT NOT NULL,
+    actual_mode TEXT,
+    target_mode TEXT,
+    summary     TEXT,
+    night_block INTEGER,
+    PRIMARY KEY (miner, timestamp)
+);
+CREATE INDEX IF NOT EXISTS idx_ha_diagnose_block ON ha_diagnose_log (block_id);
+
+-- Steuerparameter ueber die Zeit: ein Eintrag je AENDERUNG eines Werts.
+-- source='history' = aus der HA-History (exakter Zeitpunkt),
+-- source='snapshot' = beim Sync gelesener aktueller Stand (Zeitpunkt = Sync,
+-- der Wert kann schon laenger gelten). Ohne diese Tabelle laesst sich fuer
+-- einen vergangenen Tag nicht sagen, welche Schwelle galt.
+CREATE TABLE IF NOT EXISTS settings_history (
+    timestamp   TEXT NOT NULL,
+    entity      TEXT NOT NULL,
+    key         TEXT NOT NULL,      -- 'state' oder Attributname
+    value       TEXT NOT NULL,
+    source      TEXT NOT NULL,
+    PRIMARY KEY (entity, key, timestamp)
+);
+
+-- ---------------------------------------------------------------------------
 -- Views: das Fachvokabular liegt in der DB, nicht im Prompt.
 --
 -- Damit brauchen die Analyse-Werkzeuge kein frei formuliertes SQL. Ein
 -- Sprachmodell waehlt eine View und einen Zeitraum, nicht Joins und
 -- Spaltennamen. Das haelt die Abfragen reproduzierbar und die Antworten klein.
 -- ---------------------------------------------------------------------------
+-- Schaltfehler = gewollter und gemeldeter Modus weichen ab, ABER nicht wenn
+-- beide Ruhezustaende sind (Standby/Off/Idle). "Standby gewollt, Off gemeldet"
+-- heisst: niemand wollte minen und es wurde nicht gemint; das ist kein Fehler.
+-- Bis 13.11.2026 zaehlte die View auch diese Paare: 650 von 653 Eintraegen seit
+-- Aufzeichnungsbeginn waren Standby/Off, nur 2 echte Schaltfehler. Geaendert auf
+-- Nutzer-Entscheidung 13.11.2026, daily_kpi danach komplett neu berechnet.
+-- Migration bestehender DBs: _migrate_views() (CREATE VIEW IF NOT EXISTS
+-- ersetzt eine vorhandene View nicht).
 CREATE VIEW IF NOT EXISTS v_schaltfehler AS
 SELECT block_id, miner, workmode_set, workmode_status
 FROM miner_states
 WHERE workmode_set IS NOT NULL
   AND workmode_status IS NOT NULL
-  AND workmode_set <> workmode_status;
+  AND workmode_set <> workmode_status
+  AND NOT (workmode_set IN ('Standby', 'Off', 'Idle')
+           AND workmode_status IN ('Standby', 'Off', 'Idle'));
 
 CREATE VIEW IF NOT EXISTS v_ungenutzter_ueberschuss AS
 SELECT block_id, grid_export_w, miner_power_w, battery_soc_pct, pv_power_w
@@ -378,8 +447,25 @@ def _migrate_soc_bands(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+# Marker der aktuellen v_schaltfehler-Definition (13.11.2026: Ruhezustaende
+# ausgenommen). Fehlt er in der gespeicherten View, wird sie neu angelegt.
+_V_SCHALTFEHLER_MARKER = "workmode_status IN ('Standby', 'Off', 'Idle')"
+
+
+def _migrate_views(conn: sqlite3.Connection) -> None:
+    """Replace views whose stored definition predates a semantic change."""
+    row = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'view' AND name = 'v_schaltfehler'"
+    ).fetchone()
+    if row and _V_SCHALTFEHLER_MARKER not in (row[0] or ""):
+        conn.execute("DROP VIEW v_schaltfehler")
+        conn.executescript(_SCHEMA)
+        conn.commit()
+
+
 def _migrate(conn: sqlite3.Connection) -> None:
     _migrate_soc_bands(conn)
+    _migrate_views(conn)
 
     existing_kpi = {
         row[1] for row in conn.execute("PRAGMA table_info(kpi_log)").fetchall()

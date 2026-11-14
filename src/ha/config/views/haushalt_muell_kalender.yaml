@@ -1,0 +1,308 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Haushalt: Abfuhrkalender als Monatsansicht mit Tonnen-Symbolen.
+#
+# Aufbau wie views/aufzeichnung_kalender.yaml:
+#   1. Monats-Navigation: Pfeile + Monatsname, blaettert ueber
+#      input_number.muell_month_offset (packages/haushalt.yaml, 0 = laufender
+#      Monat, nur vorwaerts). tap_action auf echten button-cards, weil HA
+#      inline-onclick in erzeugtem HTML stumm blockiert.
+#   2. Kalender: ein Feld je Tag, Abholtage umrandet, darin je Abfallart ein
+#      Symbol in Tonnenfarbe. Heute ist hervorgehoben.
+#
+# Datenquelle wie views/haushalt_muell_liste.yaml: Attribute der Sensoren
+# sensor.mullabfuhr_* (Schluessel YYYY-MM-DD), synchron gelesen, kein
+# Netzabruf. Namen/Farben dort begruendet und hier identisch gehalten.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Abfall",
+# linke Spalte.
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+card_mod:
+  style: |
+    #root {
+      background: var(--ha-card-background) !important;
+      border-radius: var(--bgai-card-radius-v3) !important;
+      border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3) !important;
+      box-shadow: var(--bgai-card-shadow-v3) !important;
+      overflow: hidden !important;
+      gap: 0 !important;
+      padding: 6px 0 10px 0 !important;
+      box-sizing: border-box !important;
+    }
+    /* Kalender waechst auf die Hoehe der Nachbarkarte (Spalten sind per
+       bitgrid_wide.js buendig gestreckt, dieser Stapel fuellt seine Spalte). */
+    #root > :last-child {
+      flex: 1 1 auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    #root > :last-child > * { flex: 1 1 auto !important; }
+cards:
+
+  # ── Monats-Navigation (in der Karte, Stil wie Verbrauchsverlauf) ──
+  # Tipp auf den Monatsnamen springt zum laufenden Monat.
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      # Arrows take all remaining width as tap area (finger on the 10" Pi
+      # display), the month title only as wide as its text, so a tap meant
+      # for an arrow does not hit the title (13.11.2026, Nutzer-Wunsch).
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr)
+      align-items: stretch
+      grid-gap: 0px
+      padding: 0px
+    cards:
+      - type: custom:button-card
+        icon: mdi:chevron-left
+        show_name: false
+        show_icon: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: input_number.decrement
+          service_data:
+            entity_id: input_number.muell_month_offset
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - flex: "0 0 auto"
+          img_cell:
+            - justify-self: start
+            - width: auto
+            - padding: 0 10px
+          icon:
+            - color: var(--bgai-section-label-v3)
+            - filter: var(--bgai-header-icon-halo-v3)
+            - width: 32px
+            - height: 32px
+
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        entity: input_number.muell_month_offset
+        tap_action:
+          action: call-service
+          service: input_number.set_value
+          service_data:
+            entity_id: input_number.muell_month_offset
+            value: 0
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - padding: 0 18px
+            - flex: "1 1 auto"
+            # Stretched to the row height set by the arrow cells (nav grid
+            # align-items: stretch) with the text centred in it, so month name
+            # and arrows share one centre line (13.11.2026).
+            - height: 100%
+            - box-sizing: border-box
+          grid:
+            - grid-template-areas: '"body"'
+            - grid-template-columns: 1fr
+            - grid-template-rows: 1fr
+            - height: 100%
+            - align-items: center
+          custom_fields:
+            body:
+              - width: 100%
+              - justify-self: stretch
+              - align-self: center
+        custom_fields:
+          body: >
+            [[[
+              const offset = parseInt(entity.state) || 0;
+              const n = new Date();
+              const m = new Date(n.getFullYear(), n.getMonth() + offset, 1);
+              const label = m.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+              return `<div style="text-align:center;white-space:nowrap;font-size:var(--bg-fs-group-header);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--bgai-section-label-v3);text-shadow:var(--bgai-header-halo-v3);">${label}</div>`;
+            ]]]
+
+      - type: custom:button-card
+        icon: mdi:chevron-right
+        show_name: false
+        show_icon: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: input_number.increment
+          service_data:
+            entity_id: input_number.muell_month_offset
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - flex: "0 0 auto"
+          img_cell:
+            - justify-self: end
+            - width: auto
+            - padding: 0 10px
+          icon:
+            - color: var(--bgai-section-label-v3)
+            - filter: var(--bgai-header-icon-halo-v3)
+            - width: 32px
+            - height: 32px
+
+  # ── Monatskalender ───────────────────────────────────────────────────
+  # entity = der Blaetter-Helfer: button-card zeichnet die Karte damit bei
+  # jedem Klick auf die Pfeile von selbst neu.
+  - type: custom:button-card
+    entity: input_number.muell_month_offset
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    custom_fields:
+      body: >
+        [[[
+          const TYPES = [
+            ['sensor.mullabfuhr_bioabfall',   'Bioabfall',   'mdi:trash-can',     'var(--bg-color-eco, #4CAF50)'],
+            ['sensor.mullabfuhr_restmull',    'Restmüll',    'mdi:trash-can',     'var(--sidebar-icon-color, #A9BED0)'],
+            ['sensor.mullabfuhr_lvp_abfalle', 'Gelber Sack', 'mdi:sack',          'var(--bgai-pv-v3, #fbb210)'],
+            ['sensor.mullabfuhr_papier',      'Blaue Tonne', 'mdi:trash-can',     'var(--bgai-grid-v3, #1aaccb)'],
+            ['sensor.mullabfuhr_glas',        'Glas',        'mdi:bottle-wine',   'var(--bgai-total-v3, #CBF1FD)'],
+            ['sensor.mullabfuhr_umweltmobil', 'Umweltmobil', 'mdi:truck-outline', 'var(--bg-color-heat, #FF7043)'],
+          ];
+          const pad = (n) => String(n).padStart(2, '0');
+          const byDay = {};
+          for (const [id, name, icon, color] of TYPES) {
+            const st = states[id];
+            if (!st) continue;
+            for (const key of Object.keys(st.attributes || {})) {
+              if (/^\d{4}-\d{2}-\d{2}$/.test(key)) (byDay[key] = byDay[key] || []).push({ name, icon, color });
+            }
+          }
+
+          const offset = parseInt(entity.state) || 0;
+          const now = new Date();
+          const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+          const first = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+          const y = first.getFullYear(), m = first.getMonth();
+          const daysInMonth = new Date(y, m + 1, 0).getDate();
+          const lead = (first.getDay() + 6) % 7;  // Montag = 0
+
+          const dim = 'var(--secondary-text-color)';
+          const white = 'var(--primary-text-color)';
+          const accent = 'var(--accent-color, #F7931A)';
+          const tint = (c, pct) => `color-mix(in srgb, ${c} ${pct}%, transparent)`;
+          // Tile background in the bin colours of that day (two bins = diagonal blend).
+          const binBg = (items, pct) => {
+            const cs = items.map(it => tint(it.color, pct));
+            return cs.length === 1 ? cs[0] : `linear-gradient(135deg, ${cs.join(', ')})`;
+          };
+          // Next pickup from today on (across months): strongest highlight.
+          const nextKey = Object.keys(byDay).filter(k => k >= todayKey).sort()[0] || null;
+
+          const cells = [];
+          for (let i = 0; i < lead; i++) cells.push('<div></div>');
+          let pickupDays = 0;
+          for (let day = 1; day <= daysInMonth; day++) {
+            const key = `${y}-${pad(m + 1)}-${pad(day)}`;
+            const items = byDay[key] || [];
+            const isToday = key === todayKey;
+            const isNext = key === nextKey;
+            const past = key < todayKey;
+            if (items.length) pickupDays++;
+            const iconPx = isNext ? 34 : 26;
+            const icons = items.map(it =>
+              `<ha-icon icon="${it.icon}" title="${it.name}" style="--mdc-icon-size:${iconPx}px;width:${iconPx}px;height:${iconPx}px;color:${it.color};filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));"></ha-icon>`).join('');
+
+            let bg = 'rgba(255,255,255,0.03)';
+            let border = '1px solid transparent';
+            let extra = '';
+            if (items.length && !past) {
+              bg = binBg(items, isNext ? 38 : 16);
+              border = `${isNext ? 2 : 1}px solid ${isNext ? items[0].color : tint(items[0].color, 70)}`;
+            } else if (items.length) {
+              bg = 'rgba(255,255,255,0.08)';
+              border = '1px solid rgba(255,255,255,0.35)';
+            }
+            if (isNext) extra += `box-shadow:0 0 14px ${tint(items[0].color, 65)};`;
+            if (isToday) {
+              // Today: larger tile (scaled over its neighbours) in the accent colour.
+              if (!items.length) bg = tint(accent, 30);
+              border = `2px solid ${accent}`;
+              extra += `transform:scale(1.12);z-index:2;position:relative;box-shadow:0 0 16px ${tint(accent, 70)};`;
+            }
+            // Short label: the tiles are narrow since the KW column; wraps instead of clipping.
+            const label = isNext ? 'nächste' : (isToday ? 'heute' : '');
+            const labelColor = isToday && !isNext ? accent : white;
+            cells.push(`
+              <div title="${items.map(it => it.name).join(', ')}" style="opacity:${past ? 0.45 : 1};text-align:center;padding:5px 1px;border-radius:8px;background:${bg};border:${border};min-width:0;min-height:4em;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;box-sizing:border-box;${extra}">
+                <div style="font-weight:${isToday || isNext ? 800 : 600};font-size:${isToday ? 1.55 : 1.3}em;color:${isToday ? accent : white};">${day}</div>
+                <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:3px;min-height:26px;margin-top:3px;">${icons}</div>
+                ${label ? `<div style="margin-top:auto;font-size:0.8em;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;line-height:1.1;color:${labelColor};white-space:normal;overflow-wrap:anywhere;max-width:100%;padding:0 2px;">${label}</div>` : ''}
+              </div>`);
+          }
+          // Always 6 week rows: every month has the same height, the card does
+          // not jump when paging between 4-, 5- and 6-week months.
+          const weeks = 6;
+          while (cells.length < weeks * 7) cells.push('<div></div>');
+
+          // ISO 8601 calendar week (Monday start, week with the year's first Thursday = KW 1).
+          const isoWeek = (d) => {
+            const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+            return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+          };
+          const todayKw = isoWeek(now);
+          const todayKwYear = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3 - ((now.getDay() + 6) % 7)).getFullYear();
+          // Calendar-week column in front of each row (Monday of that row decides).
+          const rows = [];
+          for (let w = 0; w < weeks; w++) {
+            const monday = new Date(y, m, 1 - lead + 7 * w);
+            const kw = isoWeek(monday);
+            const thursdayYear = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 3).getFullYear();
+            const current = kw === todayKw && thursdayYear === todayKwYear;
+            const inMonth = new Date(y, m, 1 - lead + 7 * w + 6) >= first && w * 7 - lead < daysInMonth;
+            rows.push(`<div style="display:flex;align-items:center;justify-content:center;margin-right:6px;background:linear-gradient(to bottom, transparent, ${current ? accent : 'var(--divider-color)'} 15%, ${current ? accent : 'var(--divider-color)'} 85%, transparent) right / 2px 100% no-repeat;font-size:1.05em;font-weight:${current ? 800 : 600};color:${current ? accent : dim};opacity:${inMonth ? 1 : 0};">${kw}</div>`);
+            rows.push(cells.slice(w * 7, w * 7 + 7).join(''));
+          }
+
+          const wd = `<div style="text-align:center;font-size:0.85em;font-weight:600;color:${dim};margin-right:6px;">KW</div>`
+            + ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(t => `<div style="text-align:center;font-size:1em;font-weight:600;color:${dim};padding-bottom:4px;">${t}</div>`).join('');
+          const legend = TYPES.map(([, name, icon, color]) =>
+            `<span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><ha-icon icon="${icon}" style="--mdc-icon-size:22px;width:22px;height:22px;color:${color};filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));"></ha-icon>${name}</span>`).join('');
+          const note = !pickupDays && offset > 0
+            ? `<div style="margin-top:8px;color:${dim};font-size:0.85em;text-align:center;">Für diesen Monat liegen noch keine Termine vor. Der Landkreis veröffentlicht den Kalender jahresweise.</div>`
+            : '';
+
+          // Week rows share the free height (1fr), so the calendar fills the
+          // card down to the legend (cards stretch to the screen bottom).
+          return `<div style="font-size:var(--bg-fs-body, 1rem);line-height:1.3;color:${white};text-align:left;height:100%;display:flex;flex-direction:column;">
+            <div style="flex:1 1 auto;display:grid;grid-template-columns:2.6em repeat(7, minmax(0, 1fr));grid-template-rows:auto repeat(${weeks}, minmax(4em, 1fr));gap:5px;padding:4px 0;">${wd}${rows.join('')}</div>
+            ${note}
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:center;font-size:1.05em;color:${dim};">${legend}</div>
+          </div>`;
+        ]]]
+    styles:
+      card:
+        - background: none
+        - box-shadow: none
+        - border: none
+        - border-radius: 0
+        - padding: 16px 18px 4px 14px
+        - overflow: hidden
+        - height: 100%
+        - box-sizing: border-box
+      grid:
+        - grid-template-areas: '"body"'
+        - grid-template-columns: 1fr
+        - grid-template-rows: 1fr
+        - height: 100%
+      custom_fields:
+        body:
+          - width: 100%
+          - height: 100%
+          - align-self: stretch
+          - justify-self: stretch
+          - box-sizing: border-box
+          - white-space: normal
+          - overflow: visible
+          - text-overflow: clip

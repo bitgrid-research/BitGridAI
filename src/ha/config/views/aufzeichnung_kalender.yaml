@@ -1,0 +1,303 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Forschung: Monatskalender der Datenaufzeichnung.
+#
+# 13.11.2026, Nutzer-Wunsch "Kalender auf die rechte Seite oben": aus
+# views/aufzeichnung_status.yaml herausgeloest. Aufbau:
+#   1. Monats-Navigation: Pfeile + Monatsname, blaettert ueber
+#      input_number.recording_month_offset (0 = laufender Monat), tap_action
+#      auf echten button-cards wie views/mining_log.yaml (HA blockiert
+#      inline-onclick in erzeugtem HTML stumm).
+#   2. Kalender: ein Feld je Tag mit Blockzahl und Farbe.
+#
+# Holt selbst nichts: liest window._bgRecStatus, das die Statuskarte
+# (views/aufzeichnung_status.yaml, linke Spalte) befuellt und nach jedem
+# Abruf alle angemeldeten Karten neu zeichnen laesst. Steht die Statuskarte
+# nicht auf derselben Seite, bleibt der Kalender auf "Lade ...".
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Forschung",
+# rechte Spalte oben.
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+card_mod:
+  style: |
+    /* 14.11.2026: no shell of its own any more. The calendar is the middle
+       part of the one card "Datenaufzeichnung" (bitgrid_dashboard_v3.yaml,
+       area g1r), whose inner stack draws background, border and radius. Only
+       the divider to the status part above remains here. */
+    #root {
+      border-top: 1px solid var(--divider-color) !important;
+      gap: 0 !important;
+      padding: 6px 0 10px 0 !important;
+      box-sizing: border-box !important;
+    }
+cards:
+
+  # ── Monats-Navigation (in der Karte, Stil wie Verbrauchsverlauf) ──
+  # Tipp auf den Monatsnamen springt zum laufenden Monat.
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      # Arrows take all remaining width as tap area (finger on the 10" Pi
+      # display), the month title only as wide as its text, so a tap meant
+      # for an arrow does not hit the title (13.11.2026, Nutzer-Wunsch).
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr)
+      align-items: stretch
+      grid-gap: 0px
+      padding: 0px
+    cards:
+      - type: custom:button-card
+        icon: mdi:chevron-left
+        show_name: false
+        show_icon: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: input_number.increment
+          service_data:
+            entity_id: input_number.recording_month_offset
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - flex: "0 0 auto"
+          img_cell:
+            - justify-self: start
+            - width: auto
+            - padding: 0 10px
+          icon:
+            - color: var(--bgai-section-label-v3)
+            - filter: var(--bgai-header-icon-halo-v3)
+            - width: 32px
+            - height: 32px
+
+      - type: custom:button-card
+        show_name: false
+        show_icon: false
+        show_state: false
+        entity: input_number.recording_month_offset
+        tap_action:
+          action: call-service
+          service: input_number.set_value
+          service_data:
+            entity_id: input_number.recording_month_offset
+            value: 0
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - padding: 0 18px
+            - flex: "1 1 auto"
+            # Stretched to the row height set by the arrow cells (nav grid
+            # align-items: stretch) with the text centred in it, so month name
+            # and arrows share one centre line (13.11.2026).
+            - height: 100%
+            - box-sizing: border-box
+          grid:
+            - grid-template-areas: '"body"'
+            - grid-template-columns: 1fr
+            - grid-template-rows: 1fr
+            - height: 100%
+            - align-items: center
+          custom_fields:
+            body:
+              - width: 100%
+              - justify-self: stretch
+              - align-self: center
+        custom_fields:
+          body: >
+            [[[
+              const offset = parseInt(entity.state) || 0;
+              const n = new Date();
+              const m = new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth() - offset, 1));
+              const label = m.toLocaleDateString('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+              return `<div style="text-align:center;white-space:nowrap;font-size:var(--bg-fs-group-header);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--bgai-section-label-v3);text-shadow:var(--bgai-header-halo-v3);">${label}</div>`;
+            ]]]
+
+      - type: custom:button-card
+        icon: mdi:chevron-right
+        show_name: false
+        show_icon: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: input_number.decrement
+          service_data:
+            entity_id: input_number.recording_month_offset
+        styles:
+          card:
+            - background: none
+            - box-shadow: none
+            - border: none
+            - flex: "0 0 auto"
+          img_cell:
+            - justify-self: end
+            - width: auto
+            - padding: 0 10px
+          icon:
+            - color: var(--bgai-section-label-v3)
+            - filter: var(--bgai-header-icon-halo-v3)
+            - width: 32px
+            - height: 32px
+
+  # ── Monatskalender ───────────────────────────────────────────────────
+  # entity = der Blaetter-Helfer: button-card zeichnet die Karte damit bei
+  # jedem Klick auf die Pfeile von selbst neu.
+  - type: custom:button-card
+    entity: input_number.recording_month_offset
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    custom_fields:
+      body: >
+        [[[
+          if (!window._bgRecStatus) window._bgRecStatus = { state: 'idle', data: null, fetchedAt: 0, failed: false, cards: new Set() };
+          const S = window._bgRecStatus;
+          S.cards.add(this);
+
+          const okC = 'var(--bg-color-eco, #4CAF50)';
+          const warnC = 'var(--bg-color-heat, #FB8C00)';
+          const errC = 'var(--bg-color-reserve, #EF5350)';
+          // 14.11.2026: "fraglich" (gespeichert, nicht gemessen) gelb, getrennt
+          // vom Orange fuer "unvollstaendig".
+          const suspC = 'var(--bgai-pv-v3, #fbb210)';
+          const dim = 'var(--secondary-text-color)';
+          const white = 'var(--primary-text-color)';
+          const wrap = (inner) => `<div style="font-size:var(--bg-fs-body, 1rem);line-height:1.35;color:${white};text-align:left;">${inner}</div>`;
+          const note = (t) => wrap(`<div style="padding:14px 0;text-align:center;color:${dim};">${t}</div>`);
+
+          const d = S.data;
+          if (S.failed) return note('Kein Kalender: Statusdatei nicht lesbar.');
+          if (!d) return note('Lade Monatsübersicht …');
+          const h = d.history;
+          if (!h || !h.blocks_by_day) return note('Noch keine abgeschlossenen Tage in der Datenbank.');
+
+          const FULL = 144;
+          const pad = (n) => String(n).padStart(2, '0');
+          const offset = parseInt(entity.state) || 0;
+          const n = new Date();
+          const first = new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth() - offset, 1));
+          const y = first.getUTCFullYear(), m = first.getUTCMonth();
+          const daysInMonth = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+          const lead = (first.getUTCDay() + 6) % 7;  // Montag = 0
+          const accent = 'var(--accent-color, #f59e0b)';
+          const tint = (c, pct) => `color-mix(in srgb, ${c} ${pct}%, transparent)`;
+
+          // "Laeuft" ist der Tag, an dem der Bericht erzeugt wurde: nur bis
+          // dorthin gibt es eine Aussage. Sein Zwischenstand steht in d.days.
+          // Hervorgehoben (Rahmen, groesser) wird der echte heutige Tag.
+          const reportDay = String(d.generated_at || '').slice(0, 10);
+          const todayKey = n.toISOString().slice(0, 10);
+          const running = (Array.isArray(d.days) ? d.days : []).find(x => x.date === reportDay);
+
+          // Tiles in the style of the waste calendar (views/haushalt_muell_
+          // kalender.yaml): day number on top, block count below, tile tinted
+          // in its status colour, today scaled up with an accent frame.
+          let nOk = 0, nPartial = 0, nMissing = 0, nSuspect = 0;
+          // 14.11.2026: Tage mit gespeicherten, aber nicht gemessenen Bloecken
+          // (gehaltene Werte oder Hausverbrauch 0 W, recording_status.py).
+          // Ab einer Stunde gilt der Tag nicht mehr als vollstaendig.
+          const SUSPECT_MIN = 6;
+          const suspect = h.suspect_by_day || {};
+          const cells = [];
+          for (let i = 0; i < lead; i++) cells.push('<div></div>');
+          for (let day = 1; day <= daysInMonth; day++) {
+            const key = `${y}-${pad(m + 1)}-${pad(day)}`;
+            const isToday = key === todayKey;
+            let value = '', color = white, bg = 'rgba(255,255,255,0.03)', border = '1px solid transparent', label = '', op = 0.45;
+            if (key < h.first_day || key > reportDay) {
+              // before recording start or still in the future: empty tile
+            } else if (key === reportDay) {
+              value = `<ha-icon icon="mdi:timer-sand" style="--mdc-icon-size:1.3em;width:1.3em;height:1.3em;"></ha-icon>`; label = 'läuft'; bg = 'rgba(255,255,255,0.08)'; op = 1;
+            } else {
+              const b = Number(h.blocks_by_day[key]) || 0;
+              value = b; op = 1;
+              if (key === h.first_day && b < FULL) { label = 'Beginn'; bg = 'rgba(255,255,255,0.08)'; }
+              // 13.11.2026: Symbol statt Blockzahl (144 sagte nichts aus); unvollstaendig in Prozent.
+              else if (b >= FULL && (Number(suspect[key]) || 0) >= SUSPECT_MIN) { const sh = Number(suspect[key]) / 6; value = `<ha-icon icon="mdi:alert-outline" style="--mdc-icon-size:1.3em;width:1.3em;height:1.3em;"></ha-icon>`; color = suspC; bg = tint(suspC, 14); border = `1px dashed ${tint(suspC, 80)}`; label = (sh >= 10 ? Math.round(sh) : sh.toLocaleString('de-DE', { maximumFractionDigits: 1 })) + ' h fragl.'; nSuspect++; }
+              else if (b >= FULL) { value = `<ha-icon icon="mdi:check-bold" style="--mdc-icon-size:1.3em;width:1.3em;height:1.3em;"></ha-icon>`; color = okC; bg = tint(okC, 16); border = `1px solid ${tint(okC, 70)}`; nOk++; }
+              else if (b > 0) { value = Math.floor(b / FULL * 100) + ' %'; color = warnC; bg = tint(warnC, 20); border = `1px solid ${tint(warnC, 75)}`; label = 'unvollst.'; nPartial++; }
+              else { value = `<ha-icon icon="mdi:close-thick" style="--mdc-icon-size:1.3em;width:1.3em;height:1.3em;"></ha-icon>`; color = errC; bg = tint(errC, 24); border = `1px solid ${tint(errC, 80)}`; label = 'fehlt'; nMissing++; }
+            }
+            let extra = '';
+            if (isToday) {
+              // Wie im Muellkalender: heute in der Akzentfarbe eingefaerbt.
+              bg = tint(accent, 30);
+              border = `2px solid ${accent}`;
+              extra = `transform:scale(1.12);z-index:2;position:relative;box-shadow:0 0 16px ${tint(accent, 70)};`;
+              op = 1;
+              label = 'heute';
+            }
+            cells.push(`
+              <div style="opacity:${op};text-align:center;padding:5px 1px;border-radius:8px;background:${bg};border:${border};min-width:0;min-height:3.6em;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;${extra}">
+                <div style="font-weight:${isToday ? 800 : 600};font-size:${isToday ? 1.5 : 1.3}em;color:${isToday ? accent : white};">${day}</div>
+                <div style="font-weight:700;font-size:1.05em;color:${color};min-height:1.3em;">${value}</div>
+                ${label ? `<div style="margin-top:auto;font-size:0.75em;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;line-height:1.1;color:${isToday ? accent : dim};">${label}</div>` : ''}
+              </div>`);
+          }
+          // Always 6 week rows: same card height in every month.
+          const weeks = 6;
+          while (cells.length < weeks * 7) cells.push('<div></div>');
+
+          // ISO 8601 calendar week, same column as the waste calendar.
+          const isoWeek = (dt) => {
+            const t = new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()));
+            t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+            return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+          };
+          const todayMonday = new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate() - ((n.getUTCDay() + 6) % 7)));
+          const rows = [];
+          for (let w = 0; w < weeks; w++) {
+            const monday = new Date(Date.UTC(y, m, 1 - lead + 7 * w));
+            const current = monday.getTime() === todayMonday.getTime();
+            const inMonth = w * 7 - lead < daysInMonth;
+            const lineC = current ? accent : 'var(--divider-color)';
+            rows.push(`<div style="display:flex;align-items:center;justify-content:center;margin-right:6px;background:linear-gradient(to bottom, transparent, ${lineC} 15%, ${lineC} 85%, transparent) right / 2px 100% no-repeat;font-size:1em;font-weight:${current ? 800 : 600};color:${current ? accent : dim};opacity:${inMonth ? 1 : 0};">${isoWeek(monday)}</div>`);
+            rows.push(cells.slice(w * 7, w * 7 + 7).join(''));
+          }
+          const wd = `<div style="text-align:center;font-size:0.85em;font-weight:600;color:${dim};margin-right:6px;">KW</div>`
+            + ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(t => `<div style="text-align:center;font-weight:600;color:${dim};padding-bottom:4px;">${t}</div>`).join('');
+
+          // Legend with this month's counts (replaces the summary line above
+          // the grid), plus the meaning of the number.
+          const monthEnd = `${y}-${pad(m + 1)}-${pad(daysInMonth)}`;
+          const startTxt = new Date(h.first_day + 'T00:00:00Z').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+          const sw = (c, label) => `<span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;"><span style="width:14px;height:14px;border-radius:4px;background:${tint(c, 35)};border:1px solid ${c};"></span>${label}</span>`;
+          const legend = monthEnd < h.first_day
+            ? `<span>Vor Aufzeichnungsbeginn (${startTxt}).</span>`
+            : `${sw(okC, nOk + ' vollständig')}${nSuspect ? sw(suspC, nSuspect + ' fraglich') : ''}${sw(warnC, nPartial + ' unvollständig')}${sw(errC, nMissing + (nMissing === 1 ? ' fehlt' : ' fehlen'))}`;
+
+          return `<div style="font-size:calc(var(--bg-fs-body, 1rem) * 1.1);line-height:1.3;color:${white};text-align:left;height:100%;display:flex;flex-direction:column;">
+            <div style="flex:1 1 auto;display:grid;grid-template-columns:2.6em repeat(7, minmax(0, 1fr));grid-template-rows:auto repeat(${weeks}, minmax(3.6em, 1fr));gap:5px;padding:4px 0;">${wd}${rows.join('')}</div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:center;font-size:0.95em;color:${dim};">${legend}</div>
+            <div style="margin-top:4px;color:${dim};font-size:0.9em;text-align:center;">Häkchen = Tag vollständig aufgezeichnet (alle 144 Zehn-Minuten-Blöcke, UTC), Warnzeichen = gespeichert, aber stundenweise nicht gemessen, Prozent = unvollständig, Kreuz = fehlt.</div>
+          </div>`;
+        ]]]
+    styles:
+      card:
+        - background: none
+        - box-shadow: none
+        - border: none
+        - border-radius: 0
+        - padding: 16px 18px 4px 14px
+        - overflow: hidden
+        - height: 100%
+        - box-sizing: border-box
+      grid:
+        - grid-template-areas: '"body"'
+        - grid-template-columns: 1fr
+        - grid-template-rows: 1fr
+        - height: 100%
+      custom_fields:
+        body:
+          - width: 100%
+          - height: 100%
+          - align-self: stretch
+          - justify-self: stretch
+          - box-sizing: border-box
+          - white-space: normal
+          - overflow: visible
+          - text-overflow: clip

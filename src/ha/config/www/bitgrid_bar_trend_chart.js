@@ -92,7 +92,7 @@ const COLOR_WHITE = "#FFFFFF"; // Effizienz-Balken (Nutzer-Vorgabe 26.09.2026)
 
 const MONATE = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 const MONTH_WINDOW = 12;
-const X_TITLE_STYLE = { color: "rgba(255,255,255,0.55)", fontSize: "15px", fontFamily: "Roboto, sans-serif", fontWeight: 400 };
+const X_TITLE_STYLE = { color: "rgba(255,255,255,0.55)", fontSize: "17px", fontFamily: "Roboto, sans-serif", fontWeight: 400 };
 
 // Obergrenze + Tick-Anzahl fuer eine Y-Achse ab 0, die `top` sicher
 // einschliesst (Schrittweite 1/2/2,5/5 x 10^n). targetTicks steuert, wie
@@ -118,7 +118,12 @@ const monthKey = (y, m) => `${y}-${String(m).padStart(2, "0")}`;
 //   months:        [{ y, m, btc, live }] chronologisch, nur Monate mit Ertrag
 //                  oder der laufende Monat (wie bisher)
 //   years:         [{ y, btc }] nur abgeschlossene, lueckenlos erfasste Jahre
-function buildMonthlyData(rawRows, payoutHist, now) {
+//   totalIncome: sensor.pool_total_income_btc (F2Pools eigene Gesamtsumme).
+//                13.11.2026: der Pool-Journal fehlt der 14.04.2026 (2.119 Sats),
+//                dadurch zeigte diese Karte weniger als Poolertraege. Die Differenz
+//                zur Gesamtsumme wird dem Monat des fehlenden Tages zugeschlagen,
+//                damit alle Karten im Tab Bitcoin dieselbe Summe zeigen.
+function buildMonthlyData(rawRows, payoutHist, now, totalIncome) {
   const csvMap = {};
   if (rawRows && rawRows !== "unknown" && rawRows !== "unavailable") {
     rawRows
@@ -142,6 +147,17 @@ function buildMonthlyData(rawRows, payoutHist, now) {
     payoutMap[k] = (payoutMap[k] || 0) + btc;
     if (firstTs === null || ts < firstTs) firstTs = ts;
   });
+  const histSum = Object.values(payoutMap).reduce((a, b) => a + b, 0);
+  const gap = (Number(totalIncome) || 0) - histSum;
+  if (gap > 0.5e-8 && firstTs !== null) {
+    const days = new Set((payoutHist || []).map((e) => String(e[0] || "").slice(0, 10)));
+    const last = [...days].sort().pop();
+    let gapMonth = null;
+    for (let d = new Date(firstTs.slice(0, 10) + "T12:00:00Z"); d.toISOString().slice(0, 10) <= last; d.setUTCDate(d.getUTCDate() + 1)) {
+      if (!days.has(d.toISOString().slice(0, 10))) { gapMonth = d.toISOString().slice(0, 7); break; }
+    }
+    if (gapMonth) payoutMap[gapMonth] = (payoutMap[gapMonth] || 0) + gap;
+  }
 
   // Erster Monat, den die Gutschriften vollstaendig abdecken. Der Monat der
   // ersten Gutschrift zaehlt nur, wenn sie am 1. liegt, sonst ist er
@@ -257,7 +273,7 @@ const SHARED_STYLE = `
     background-image: linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent);
     background-repeat: no-repeat; background-size: 100% 2px; background-position: top;
   }
-  .bgai-legend-item { display: flex; align-items: center; gap: 6px; font-size: 16px; font-family: Roboto, sans-serif; font-weight: 400; text-shadow: 0 0 4px rgba(0,0,0,.9), 0 0 4px rgba(0,0,0,.9); }
+  .bgai-legend-item { display: flex; align-items: center; gap: 6px; font-size: var(--bg-fs-body); font-family: Roboto, sans-serif; font-weight: 400; text-shadow: 0 0 4px rgba(0,0,0,.9), 0 0 4px rgba(0,0,0,.9); }
   .bgai-legend-dot { --mdc-icon-size: 20px; width: 20px; height: 20px; flex: 0 0 auto; filter: drop-shadow(0 0 3px rgba(0,0,0,.9)) drop-shadow(0 0 3px rgba(0,0,0,.9)); }
   .apexcharts-text, .apexcharts-xaxis-annotation-label, .apexcharts-yaxis-annotation-label { text-shadow: 0 0 4px rgba(0,0,0,.9), 0 0 4px rgba(0,0,0,.9) !important; }
 `;
@@ -462,7 +478,10 @@ class BitgridBarTrendChart extends HTMLElement {
     if (n > 0) {
       const diff = avgVal - target;
       const pct = Math.round((diff / target) * 100);
-      this._legendItem("mdi:chart-line", COLOR_STD, "Tagesdurchschnitt:", `${fmt1(avgVal)} sats/kWh`);
+      // 13.11.2026: Euro je kWh zum aktuellen Kurs, grau wie in der Langzeitbilanz.
+      const btcEur = parseFloat(this._hass?.states["sensor.btc_eur_price"]?.state) || 0;
+      const eurKwh = btcEur > 0 ? `· ${(avgVal / 1e8 * btcEur).toLocaleString("de-DE", { minimumFractionDigits: 3, maximumFractionDigits: 3 })} €/kWh` : null;
+      this._legendItem("mdi:chart-line", COLOR_STD, "Tagesdurchschnitt:", `${fmt1(avgVal)} Sats/kWh`, eurKwh);
       this._legendItem(
         "mdi:flag-checkered",
         COLOR_ECO,
@@ -470,7 +489,7 @@ class BitgridBarTrendChart extends HTMLElement {
         `${hits} von ${n} ${n === 1 ? "Tag" : "Tagen"} erreicht · Ø ${fmt1(Math.abs(diff))} ${diff >= 0 ? "darüber" : "darunter"} (${pct >= 0 ? "+" : "−"}${Math.abs(pct)} %)`
       );
     } else {
-      this._legendItem("mdi:flag-checkered", COLOR_ECO, "Ziel:", `${target} sats/kWh`);
+      this._legendItem("mdi:flag-checkered", COLOR_ECO, "Ziel:", `${target} Sats/kWh`);
     }
 
     const yLines = [{ y: target, color: COLOR_ECO, dash: 0, label: `Ziel ${target}` }];
@@ -480,10 +499,10 @@ class BitgridBarTrendChart extends HTMLElement {
       series,
       categories,
       colors: [COLOR_WHITE],
-      yTitle: "sats/kWh",
-      xTitle: "Tag",
+      yTitle: "Sats/kWh",
+      xTitle: "",
       yLines,
-      unit: " sats/kWh",
+      unit: " Sats/kWh",
       yWhite: true,
       // Kurze Labels brauchen keine Drehung mehr, auch nicht bei 31 Tagen.
       rotateLabels: 0,
@@ -504,7 +523,8 @@ class BitgridBarTrendChart extends HTMLElement {
     const data = buildMonthlyData(
       hass.states["sensor.pool_monthly_history"]?.attributes?.rows ?? "",
       hass.states["sensor.pool_balance_btc"]?.attributes?.payout_history ?? [],
-      simToday(hass) || new Date()
+      simToday(hass) || new Date(),
+      parseFloat(hass.states["sensor.pool_total_income_btc"]?.state)
     );
     const pages = ["y"];
     for (let i = Math.ceil(data.months.length / MONTH_WINDOW) - 1; i >= 0; i--) pages.push("m" + i);
@@ -576,15 +596,18 @@ class BitgridBarTrendChart extends HTMLElement {
     // Hochrechnung.
     const n = months.length;
     this._legendEl.innerHTML = "";
-    this._legendItem("mdi:chart-bar", COLOR_MINING, "Monatsertrag:", `${sumSats.toLocaleString("de-DE")} Sats (${n} ${n === 1 ? "Monat" : "Monate"})`);
-    if (avgSats > 0) this._legendItem("mdi:chart-line", COLOR_STD, "Monatsdurchschnitt:", `${Math.round(avgSats).toLocaleString("de-DE")} Sats`);
+    // 13.11.2026, Nutzer-Wunsch: Euro-Umrechnung zum aktuellen Kurs (sensor.btc_eur_price).
+    const btcEur = parseFloat(this._hass?.states["sensor.btc_eur_price"]?.state) || 0;
+    const eurOf = (sats) => (btcEur > 0 ? `· ${(sats / 1e8 * btcEur).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "");
+    this._legendItem("mdi:chart-bar", COLOR_MINING, "Monatsertrag:", `${sumSats.toLocaleString("de-DE")} Sats`, [eurOf(sumSats), `(${n} ${n === 1 ? "Monat" : "Monate"})`].filter(Boolean).join(" "));
+    if (avgSats > 0) this._legendItem("mdi:chart-line", COLOR_STD, "Monatsdurchschnitt:", `${Math.round(avgSats).toLocaleString("de-DE")} Sats`, eurOf(avgSats) || null);
 
     this._renderApexBars({
       series,
       categories,
       colors: [COLOR_MINING],
       yTitle: "Sats",
-      xTitle: "Monat",
+      xTitle: "",
       yLines: avgSats > 0 ? [{ y: avgSats, color: COLOR_STD, dash: 4, label: `Ø ${Math.round(avgSats).toLocaleString("de-DE")}` }] : [],
       unit: " Sats",
       yWhite: true,
@@ -691,7 +714,7 @@ class BitgridBarTrendChart extends HTMLElement {
   // vom Farbcode der Serie abheben. Icon und Beschriftung tragen weiter die
   // Serienfarbe (die Zuordnung Legende -> Balken/Linie haengt daran), der
   // Wert dahinter steht in Weiss und etwas fetter.
-  _legendItem(icon, color, text, value = null) {
+  _legendItem(icon, color, text, value = null, extra = null) {
     const item = document.createElement("span");
     item.className = "bgai-legend-item";
     const dot = document.createElement("ha-icon");
@@ -709,6 +732,13 @@ class BitgridBarTrendChart extends HTMLElement {
       val.style.fontWeight = "600";
       val.textContent = value;
       item.appendChild(val);
+    }
+    if (extra) {
+      // 13.11.2026: Zusatz (z. B. Euro-Wert) in Grau, wie die Nebenzeilen der Poolertraege.
+      const ex = document.createElement("span");
+      ex.style.color = "var(--secondary-text-color)";
+      ex.textContent = extra;
+      item.appendChild(ex);
     }
     this._legendEl.appendChild(item);
   }
@@ -750,12 +780,12 @@ class BitgridBarTrendChart extends HTMLElement {
       xaxis: {
         categories,
         title: {
-          text: xTitle,
+          text: xTitle || undefined,
           offsetY: -4,
           style: X_TITLE_STYLE,
         },
         labels: {
-          style: { colors: "#FFFFFF", fontSize: "13px", fontFamily: "Roboto, sans-serif", fontWeight: 400 },
+          style: { colors: "#FFFFFF", fontSize: "17px", fontFamily: "Roboto, sans-serif", fontWeight: 400 },
           rotate: rotateLabels !== null ? rotateLabels : categories.length > 10 ? -45 : 0,
           // Falls es doch zu eng wird (schmales Tablet, 31 Tage): ApexCharts
           // laesst einzelne Beschriftungen weg, statt sie uebereinander zu
@@ -791,7 +821,7 @@ class BitgridBarTrendChart extends HTMLElement {
             position: "right",
             offsetX: -4,
             borderColor: "transparent",
-            style: { color: l.color, background: "transparent", fontSize: "13px", fontWeight: 600, fontFamily: "Roboto, sans-serif" },
+            style: { color: l.color, background: "transparent", fontSize: "16px", fontWeight: 600, fontFamily: "Roboto, sans-serif" },
           },
         })),
       },

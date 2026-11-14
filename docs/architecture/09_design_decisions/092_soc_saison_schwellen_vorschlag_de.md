@@ -73,6 +73,13 @@ Zeitraum) misst etwas anderes (`workmode_set != workmode_status`, also
 Kommando-vs-Hardware-Verzögerung) und darf nicht als Flapping-Beleg zitiert werden —
 das war in der bisherigen Recherche unklar getrennt.
 
+> **Nachtrag 13.11.2026:** `v_schaltfehler` zählt seitdem keine Paare zweier
+> Ruhezustände mehr (Standby gewollt, Off/Idle gemeldet). Von 653 Einträgen seit
+> Aufzeichnungsbeginn waren nur 2 echte Schaltfehler, der Rest war "Standby gewollt,
+> Off gemeldet", also weder befohlenes noch tatsächliches Minen. `daily_kpi` und
+> `daily_miner_kpi` wurden mit der neuen Definition komplett neu berechnet
+> (Summe vorher 645, nachher 1; DB-Sicherung `bitgrid.db.bak-20261113-schaltfehler`).
+
 **Wahrscheinlicher Mechanismus:** P0a (Nachmittags-Cap) und P1 (Stop) laufen beide
 **ohne Cooldown**, per Design ("Sicherheit vor Cooldown"). Genau das öffnet die Tür für
 kurze Auf-Ab-Auf-Sequenzen, wenn ein Trigger kurz an- und wieder abspringt — exakt das
@@ -337,3 +344,73 @@ deterministisch: feste Schwellen, feste Zeitfenster, feste Tageslängen-Berechnu
 überwiegend zeitpunkt- statt SoC-getrieben sind (Ø 94,2% SoC bei Austritt). Was würde
 diesen Befund widerlegen — anders gesagt: welches Muster in den Live-Logs würde dich
 überzeugen, dass der Nachmittags-Cap doch nicht der Hauptverursacher ist?
+
+---
+
+## 11. Nachtrag 13.11.2026: erste Messung der Formel aus ADR 028
+
+ADR 028 wurde ohne Herbst- und Winterdaten entschieden. Seit 28.08.2026 läuft die
+Live-Formel (Hausreserve = Nacht-Grundlast × längste Nacht ÷ Akku + 15 %), damit lässt
+sie sich jetzt an echten Nächten prüfen. Berechnet mit
+`src/explain/bithamster_season.py` (`night_check`), nur lesend auf `energy_states`,
+Nacht = letzter bis erster Block mit PV ≥ 20 W, Tage mit unter 140 von 144 Blöcken
+ausgeschlossen.
+
+| Monat | Nächte | davon nach Mining | Abschaltung an der Schwelle (±3 %) | Akku morgens nach Mining-Tagen | Netzbezug nachts gesamt | davon nach Mining-Tagen |
+|---|---:|---:|---:|---:|---:|---:|
+| September (Schwelle 68 %) | 27 | 26 | 26 von 26 | 6 % | 17,6 kWh | 14,3 kWh |
+| Oktober (Schwelle 75 %) | 31 | 10 | 9 von 10 | 2 % | 124,7 kWh | 15,0 kWh |
+| November (Schwelle 81 %, bis 12.11.) | 11 | 0 | nicht bewertbar | nicht bewertbar | 66,1 kWh | 0 kWh |
+
+Nacht-Grundlast gemessen: 579 W über 69 Nächte (Oktober 615 W), eingestellt 535 W.
+
+**Befunde:**
+1. Die Regel selbst hält: Die Miner schalten fast immer genau an der Hausreserve ab.
+2. Das Ziel der Formel (15 % Rest am Morgen) wird verfehlt, im Oktober ist der Akku
+   nach Mining-Tagen praktisch leer. Ursachen nach Messung: höhere Nachtlast als
+   eingestellt, und der Verbrauch zwischen Miner-Stopp und Dunkelheit (1 bis 2 h) steht
+   nicht in der Formel. Akkuverluste kommen hinzu.
+3. Die Größenordnung ist klein: Vermeidbar wären rund 29 kWh Netzbezug in zwei Monaten.
+   Der große nächtliche Netzbezug im Oktober und November fällt in Nächten ohne
+   Mining an und hat mit der Automatik nichts zu tun.
+
+**Abwägung (Entscheidung beim Nutzer, nicht umgesetzt):** Eine höhere Grundlast
+(z. B. 600 W statt 535 W) hebt die Hausreserve im Herbst und vermeidet diesen
+Netzbezug. Dafür läuft am Nachmittag weniger Mining aus dem Akku. Fachlich ist der
+vermiedene Netzbezug das stärkere Argument: Akku-Mining, das nachts mit Netzstrom
+ausgeglichen wird, ist mittelbar Netz-Mining und widerspricht R1/R2. Wegen der kleinen
+Menge ist das aber keine dringende Änderung.
+
+**Grenzen:** Der Abschalt-Vergleich nutzt die Schwelle, die die Formel mit den
+heutigen Einstellungen ergibt; vor dem 28.08. galten andere Schwellen, deshalb erst ab
+dann. Gefüllte Blöcke bei HA-Ausfällen sind nicht erkennbar (Vorwärtsfüllung). Für
+Dezember bis Februar gibt es noch keine Messung, die Winterzeilen der Tabelle bleiben
+Projektion.
+
+### 11.1 Entscheidung 13.11.2026: Grundlast 600 W
+
+Nutzer-Entscheidung nach Abschnitt 11: `input_number.mvp_night_baseload_w` von 535 auf
+600 W (auch `initial` und alle Rückfallwerte). Live geprüft: Hausreserve November
+81 → 89 %, Eco-Start 91 → 99 %. Bewusst in Kauf genommen und vorab benannt: mit 600 W
+ist Super im August gesperrt (60 → 65 %, +40 > 100) und Standard im März (77 %, +25 >
+100); im August ist das genau der Zustand, der am 27.08.2026 (ADR 027) abgelehnt wurde.
+**Wiedervorlage Februar 2027** mit den Winternächten, bevor März und August relevant
+werden.
+
+Zusatzbefunde, die diese Wahl stützen:
+- **Nachtlast hängt nicht von der Außentemperatur ab** (101 Nächte, 4 bis 28 °C,
+  r = −0,01, Steigung −0,1 W/K; je 4-K-Klasse 533 bis 605 W). Ölheizung, kein
+  elektrischer Wärmebedarf in der Nacht. Eine je Jahreszeit eigene Grundlast hätte
+  keine Grundlage; jahreszeitlich ändert sich nur die Nachtlänge, und die steht schon
+  monatsgenau in der Formel. Unter 4 °C gibt es noch keine Messung.
+- Die gemessene Nachtlast liegt bei rund 555 bis 580 W. Die restliche Lücke zu 600 W
+  deckt die Zeit zwischen Miner-Stopp und Dunkelheit sowie Akkuverluste, die die
+  Formel nicht kennt.
+
+### 11.2 Abgelöst am selben Tag: neue Formel (ADR 033)
+
+Die 600 W aus 11.1 waren ein Mischwert. Seit ADR 033 (091_adr_de.md) gilt
+Hausreserve = Grundlast × (Nacht + Abendlücke) ÷ (Akku × Wirkungsgrad) + Boden mit
+gemessenen 570 W, 0,75 h, 80 % und Boden 5 % (die SMA entlädt bis 0 %). Live geprüft
+13.11.2026: November Hausreserve 95 % (gedeckelt), Eco ab 100 %. Wiedervorlage Februar
+2027 bleibt.

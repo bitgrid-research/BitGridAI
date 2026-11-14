@@ -67,7 +67,7 @@ BitGrid v3: &bitgrid_v3
   # der Heizstab lief im Heizungs-Tab als #4FC3F7 und im Energiefluss als
   # #5C9EE2, die Oelheizung nur literal.
   bgai-heizstab-v3: "#5C9EE2"       # Heizstab (AC ELWA 2)
-  bgai-heizung-oel-v3: "#8D6E63"    # Oelheizung, Brenner an
+  bgai-heizung-oel-v3: "#fbb210"    # Oelheizung, Brenner an (13.11.2026 Nutzer-Wunsch: Gelb wie PV in der Uebersicht, statt Braun #8D6E63)
   # Reserviert, aktuell von keinem Element referenziert:
   bgai-alarm-v3: "#C4442C"      # Alarm / Not-Aus
   bgai-erklaerung-v3: "#A2EFED" # BitHamster / Erklärung (Mint)
@@ -289,7 +289,9 @@ BitGrid v3: &bitgrid_v3
   # Verlassen des Kiosk-Modus kein v1-Marineblau mehr auftaucht.
   app-header-background-color: "rgba(27,58,80,0.55)"
   app-header-text-color: "#F5F8FC"
-  sidebar-background-color: "#1B3A50"
+  # 13.11.2026 (Nutzer-Wunsch): Seitenleiste in der Kartenfarbe statt im
+  # eigenen Blau, damit sie aufgeklappt wie eine Karte ueber dem Rasen liegt.
+  sidebar-background-color: "#313a55"
   sidebar-text-color: "#D3DEEA"
   sidebar-icon-color: "#A9BED0"
   sidebar-selected-text-color: "#4CAF50"

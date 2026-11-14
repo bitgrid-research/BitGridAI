@@ -13,11 +13,11 @@ frontend:
     # ?v= Cache-Bust: bei jeder Aenderung an der jeweiligen Datei hochzaehlen,
     # sonst laedt der Browser bzw. das Wandtablet (Kiosk) die alte gecachte
     # Version. Datum als Versionsstempel.
-    - /local/bitgrid_card_shape.js?v=20261018a
+    - /local/bitgrid_card_shape.js?v=20261114a
     # 12.09.2026: war seit Einfuehrung nie hier eingetragen, deshalb lief die
     # in bitgrid_dashboard_v2/v3.yaml (Header-Kommentar) behauptete volle
     # Breite + zentrierter Titel bislang gar nicht, unabhaengig vom Cache.
-    - /local/bitgrid_wide.js?v=20261017e
+    - /local/bitgrid_wide.js?v=20261114b
 
 lovelace:
   resource_mode: yaml
@@ -27,24 +27,24 @@ lovelace:
     # Boxen im Glas-Look, die das Theme über die MDC-Textfield-Füllung nicht
     # erreicht. resource_mode: yaml -> HACS trägt die Resource nicht automatisch
     # ein, daher hier von Hand.
-    - url: /hacsfiles/lovelace-card-mod/card-mod.js?v=20261013
+    - url: /local/community/lovelace-card-mod/card-mod.js?v=20261013
       type: module
-    - url: /hacsfiles/power-flow-card-plus/power-flow-card-plus.js
+    - url: /local/community/power-flow-card-plus/power-flow-card-plus.js
       type: module
-    - url: /hacsfiles/button-card/button-card.js
+    - url: /local/community/button-card/button-card.js
       type: module
-    - url: /hacsfiles/lovelace-layout-card/layout-card.js
+    - url: /local/community/lovelace-layout-card/layout-card.js
       type: module
-    - url: /hacsfiles/clock-weather-card/clock-weather-card.js
+    - url: /local/community/clock-weather-card/clock-weather-card.js
       type: module
-    - url: /hacsfiles/lovelace-horizon-card/lovelace-horizon-card.js
+    - url: /local/community/lovelace-horizon-card/lovelace-horizon-card.js
       type: module
     # apexcharts-card (HACS): Wochen-Verlaufschart (PV/Verbrauch/Akku) auf dem
     # Demo-Home-Tab, scrollbar/zoombar über 7 Tage. Ordnername auf dem Server
     # verifiziert (ls www/community/): "apexcharts-card", NICHT "lovelace-
     # apexcharts-card" — anders als die HACS-Repo-Namen der übrigen Karten
     # oben (lovelace-card-mod, lovelace-layout-card, ...).
-    - url: /hacsfiles/apexcharts-card/apexcharts-card.js?v=20260930
+    - url: /local/community/apexcharts-card/apexcharts-card.js?v=20260930
       type: module
     # bubble-card (HACS, Clooos/Bubble-Card): Balken-Listen fuer "Verbrauch
     # nach Gerätetyp" (Tab "EnergieInfo"), Nutzer-Wunsch 25.08.2026. War
@@ -53,7 +53,11 @@ lovelace:
     # deshalb bislang ungenutzt. Pfad-Grossschreibung beachten: anders als
     # die anderen HACS-Ordner oben (alle lowercase) heisst dieser exakt
     # "Bubble-Card", 25.08.2026 live per HTTP-Request verifiziert.
-    - url: /hacsfiles/Bubble-Card/bubble-card.js?v=20260930
+    - url: /local/community/Bubble-Card/bubble-card.js?v=20260930
+      type: module
+    # bitgrid-hardware-card (eigenes Modul, 13.11.2026): Geraeteliste im
+    # Popup "Investierte Hardware" (Tab Einstellungen), Daten in todo.hardware.
+    - url: /local/bitgrid_hardware_card.js?v=20261113b
       type: module
     # bitgrid-verlauf-chart (eigenes Modul, kein HACS): ersetzt custom:
     # apexcharts-card NUR fuer die Tages-Verlaufskarte im Home-Tab
@@ -63,7 +67,7 @@ lovelace:
     # selbst bleibt oben registriert, andere Verbraucher (Wochen-/Geraete-
     # Verlaeufe) sind davon unberuehrt. ?v= Cache-Bust wie bei
     # bitgrid_card_shape.js, bei jeder Aenderung hochzaehlen.
-    - url: /local/bitgrid_verlauf_chart.js?v=60
+    - url: /local/bitgrid_verlauf_chart.js?v=61
       type: module
     # bitgrid-finanz-chart (eigenes Modul, kein HACS): ersetzt das bisherige
     # rohe SVG in custom:button-card (views/finanz_bilanz.yaml) — Grund:
@@ -99,7 +103,7 @@ lovelace:
     # zum Blaettern wie beim Historie-Cycler. Volle Begruendung im
     # Kommentarkopf von www/bitgrid_bar_trend_chart.js. ?v= Cache-Bust wie
     # bei den anderen eigenen Modulen, bei jeder Aenderung hochzaehlen.
-    - url: /local/bitgrid_bar_trend_chart.js?v=9
+    - url: /local/bitgrid_bar_trend_chart.js?v=15
       type: module
     # bitgrid-historie-chart (eigenes Modul, kein HACS): ersetzt
     # custom:apexcharts-card im Abschnitt "Historie" (Tab "EnergieInfo",
@@ -123,7 +127,7 @@ lovelace:
     bitgridai-v3:
       mode: yaml
       filename: bitgrid_dashboard_v3.yaml
-      title: BitGridAI v3
+      title: BitGridAI v3.3
       icon: mdi:bitcoin
       show_in_sidebar: true
 
@@ -142,6 +146,34 @@ scene: !include scenes.yaml
 #   - Prognose- und Hilfssensoren (aus Rohdaten rekonstruierbar)
 recorder:
   purge_keep_days: 365
+  # Steuerparameter und Automatik-Schalter trotz Domain-Ausschluss unten
+  # aufzeichnen (14.11.2026). Ohne ihre Historie laesst sich fuer einen
+  # vergangenen Tag nicht sagen, welche Schwelle galt oder ob ein Miner im
+  # Handbetrieb lief. src/data/ha_decision_sync.py holt sie in
+  # settings_history. Nur einzelne Entities, KEINE include-domains/-globs:
+  # sobald ein Include-Domain oder -Glob gesetzt ist, zeichnet HA nur noch
+  # das Eingeschlossene auf. Liste = SETTING_ENTITIES in ha_decision_sync.py.
+  include:
+    entities:
+      - input_number.mvp_soc_eco_start_pct
+      - input_number.mvp_pv_start_w
+      - input_number.mvp_soc_std_pct
+      - input_number.mvp_soc_super_pct
+      - input_number.mvp_soc_stop_pct
+      - input_number.mvp_soc_super_off_pct
+      - input_number.mvp_soc_std_off_pct
+      - input_number.mvp_batt_discharge_super_downgrade_w
+      - input_number.mvp_batt_discharge_std_downgrade_w
+      - input_number.mvp_tmax_std_threshold_c
+      - input_number.mvp_room_temp_eco_threshold_c
+      - input_number.battery_capacity_kwh
+      - input_number.mvp_night_baseload_w
+      - input_number.mvp_evening_gap_h
+      - input_number.mvp_battery_efficiency_pct
+      - input_number.mvp_reserve_floor_pct
+      - input_boolean.mvp_night_block_enabled
+      - input_boolean.miner1_auto_load_management
+      - input_boolean.miner2_auto_load_management
   exclude:
     domains:
       - input_number
@@ -246,63 +278,6 @@ mqtt:
       unit_of_measurement: "kW"
       state_class: measurement
       expire_after: 7200
-
-    # ── ₿itsy: Andockpunkt der Erklärschicht (Tab "₿itsy" in v2) ─────────
-    # Kontrakt für src/explain/bitsy_status.py (Ollama/Qwen im lokalen Netz,
-    # direkt angebunden, kein Agenten-Framework).
-    # Muss HIER stehen, nicht in packages/: mqtt im Package-Merge liefert
-    # "required key 'platform' not provided" (HA-Version unterstützt das
-    # Mergen des mqtt-Keys aus Packages nicht).
-    # bitsy_status.py publiziert (retained, explizit bei jedem Lauf, kein
-    # LWT: das Skript läuft als kurzlebiger Batch-Job ohne Dauerverbindung):
-    #   bitgrid/explain/bitsy/status → "online"|"offline"
-    #   bitgrid/explain/bitsy/advice → JSON:
-    #     {"headline": "...", "text": "...", "mood": "...",
-    #      "model": "qwen3:14b", "generated_at": "ISO-8601"}
-    #   bitgrid/explain/bitsy/chat → JSON (nur bei einer Frage, ask()):
-    #     {"question": "...", "answer": "...", "answered_at": "ISO-8601"}
-    # Read-only-Prinzip: kein Steuerpfad, nur Erklärung/Beratung. Solange
-    # nichts publiziert wurde, ist der Sensor unavailable und der Tab zeigt
-    # die deterministische, regelbasierte Sicht.
-    - name: "Bitsy Advice"
-      unique_id: bitsy_advice
-      state_topic: "bitgrid/explain/bitsy/advice"
-      # State = headline; HA-States sind auf 255 Zeichen begrenzt, deshalb
-      # hart gekappt. Der Volltext lebt in den Attributen (text).
-      value_template: "{{ (value_json.headline | default(''))[:250] }}"
-      json_attributes_topic: "bitgrid/explain/bitsy/advice"
-      availability_topic: "bitgrid/explain/bitsy/status"
-      payload_available: "online"
-      payload_not_available: "offline"
-      icon: mdi:rodent
-
-    # ── ₿itsy-Chat: Freitextantwort (Baustein 3, packages/bitsy_chat.yaml) ──
-    # Ersetzt input_text.bitsy_answer (255-Zeichen-Hardlimit der input_text-
-    # Domain in HA, nicht erhöhbar): State bleibt aus Konsistenzgründen
-    # ebenso gekappt, aber die Attribute (answer/question) sind unbegrenzt,
-    # genau wie bei "Bitsy Advice" oben.
-    - name: "Bitsy Chat"
-      unique_id: bitsy_chat
-      state_topic: "bitgrid/explain/bitsy/chat"
-      value_template: "{{ (value_json.answer | default(''))[:250] }}"
-      json_attributes_topic: "bitgrid/explain/bitsy/chat"
-      icon: mdi:comment-text-outline
-
-# ── ₿itsy: "Jetzt aktualisieren"-Button (₿itsy-Tab, ki_beratung.yaml) ────────
-# Ruft src/explain/bitsy_trigger_server.py auf, Docker-Container bitgrid-bitsy
-# (infra/docker-compose.yml), laeuft auf DIESEM Host (.62, network_mode: host,
-# daher localhost statt LAN-IP) mit restart:unless-stopped. Der Container laesst
-# daraufhin src/explain/bitsy_status.py einmal durchlaufen (HA lesen, Ollama
-# fragen, MQTT publizieren) und macht das intern zusaetzlich alle 10 Minuten
-# von selbst. Kein Steuerpfad: startet nur einen Lese-/Erklaer-Durchlauf,
-# core/ bleibt unberuehrt.
-# Port 8766, NICHT 8765 (das ist fuer den geplanten bitgrid-ui-Dienst
-# reserviert, siehe infra/docker-compose.override.yml).
-rest_command:
-  bitsy_trigger:
-    url: "http://localhost:8766/trigger"
-    method: POST
-    timeout: 30
 
 # ── BitGridAI Entscheidungs-Logik ─────────────────────────────────────────────
 # Alle Regelparameter als editierbare Helper

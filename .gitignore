@@ -394,3 +394,12 @@ src/ha/lab_only/
 
 # Local Portainer API temp files (tokens, endpoint lists): never commit
 .pa_*.tmp.*
+
+# Local helper: reads the private thesis folder, knows the server path
+scripts/thesis_open_export.py
+data/thesis_open.json
+
+# Local helper for the thesis window: read-only HA screenshots/states
+# (token of the non-admin user thesis-leser from the thesis .env)
+scripts/ha_view.py
+data/ha_shots/

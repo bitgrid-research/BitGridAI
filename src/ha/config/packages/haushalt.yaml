@@ -1,0 +1,25 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Helfer fuer den Dashboard-Tab "Abfall" (bitgrid_dashboard_v3.yaml; Paket-
+# und Dateiname "haushalt" stammen vom urspruenglichen Tabnamen).
+#
+# Kein Teil des Energiemanagements und keine Steuerung. Die Muelltermine selbst
+# kommen aus der Integration "Waste Collection Schedule" (Marketplace, Quelle
+# landkreis_kusel_de, Ortsgemeinde Glan-Muenchweiler, eingerichtet 13.11.2026
+# ueber die Oberflaeche): calendar.mullabfuhr_landkreis_kusel und je Abfallart
+# ein Sensor sensor.mullabfuhr_* mit allen kommenden Terminen als Attribute
+# (Schluessel YYYY-MM-DD).
+# ══════════════════════════════════════════════════════════════════════════════
+
+haushalt:
+
+  input_number:
+    # Blaetter-Helfer fuer den Abfuhrkalender (views/haushalt_muell_kalender.
+    # yaml). 0 = laufender Monat, 1 = naechster Monat usw. Nur vorwaerts: die
+    # Quelle liefert keine vergangenen Termine.
+    muell_month_offset:
+      name: "Haushalt: Abfuhrkalender Monats-Versatz"
+      icon: mdi:calendar-arrow-right
+      min: 0
+      max: 12
+      step: 1
+      mode: box

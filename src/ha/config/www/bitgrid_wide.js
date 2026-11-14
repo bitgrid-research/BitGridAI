@@ -340,17 +340,50 @@ function walkAll(node) {
 // (per Playwright gemessen bis hinunter zu <html>), die Textur auf <html> scheint
 // also durch; Dashboards decken sie mit ihrem eigenen Hintergrund ab. Gleiche
 // Datei und Kachelung wie lovelace-background in themes/bitgrid.yaml.
+// 14.11.2026: Hintergrund je Jahreszeit, gleiche Monate wie die Emojis in
+// Einstellungen (Saisonale Schwellwerte) und wie bitgrid_dashboard_v3.yaml.
+function seasonSuffix(month) {
+  if ([12, 1, 2].includes(month)) return '_winter';
+  if ([3, 4, 5].includes(month)) return '_fruehling';
+  if ([9, 10, 11].includes(month)) return '_herbst';
+  return '';
+}
+function grassUrl(night) {
+  const sfx = seasonSuffix(new Date().getMonth() + 1);
+  return `url('/local/bg_grass${sfx}${night ? '_night' : ''}.jpg?v=20261114') repeat 0 0 / 800px auto`;
+}
 function injectRootBackground() {
-  if (document.getElementById('bitgrid-wide-root')) return;
-  const s = document.createElement('style');
-  s.id = 'bitgrid-wide-root';
-  s.textContent = "html { background: url('/local/bg_grass.jpg?v=20260930') repeat 0 0 / 800px auto, var(--primary-background-color, #1a2e1a) !important; }";
-  document.head.appendChild(s);
+  let s = document.getElementById('bitgrid-wide-root');
+  if (!s) {
+    s = document.createElement('style');
+    s.id = 'bitgrid-wide-root';
+    document.head.appendChild(s);
+  }
+  s.textContent = `html { background: ${grassUrl(false)}, var(--primary-background-color, #1a2e1a) !important; }`;
+}
+
+// 13.11.2026, Befund Abfall-Tab: wird die Dashboard-Konfiguration bei offener
+// Seite neu geladen (HA-Ereignis lovelace_updated, z. B. nach einem Deploy mit
+// erzwungenem Neuladen), baut HA die Views neu auf. Die neuen Shadow-Roots
+// bekamen dieses CSS bisher erst beim naechsten Tabwechsel, bis dahin waren
+// nebeneinander stehende Karten nicht mehr buendig. Einmal abonnieren und
+// danach mehrfach nachziehen (der Neuaufbau laeuft asynchron).
+function watchLovelaceUpdates() {
+  if (window._bgaiLovelaceWatch) return;
+  const ha = document.querySelector('home-assistant');
+  const conn = ha && ha.hass && ha.hass.connection;
+  if (!conn) return;
+  window._bgaiLovelaceWatch = true;
+  conn.subscribeEvents(() => {
+    [300, 1000, 2500, 5000].forEach((ms) => setTimeout(apply, ms));
+  }, 'lovelace_updated').catch(() => { window._bgaiLovelaceWatch = false; });
 }
 
 function apply() {
   injectRootBackground();
   walkAll(document.querySelector('home-assistant'));
+  applyKiosk();
+  watchLovelaceUpdates();
 }
 
 // Hinweis (16.09.2026): Hier lebte eine Automatik, die alle 15 s die PFCP-
@@ -360,6 +393,54 @@ function apply() {
 // die Miner-Bubbles bei Standby ausgeblendet sind, traf das Grau die
 // Geraete-Bubble. Auf Nutzer-Wunsch entfernt: die Bubbles behalten ihre
 // konfigurierten Farben, nichts wird mehr dynamisch umgefaerbt.
+
+// 13.11.2026, Nutzer-Wunsch: auf dem Raspberry-Pi-Display (.64, Chromium-Kiosk)
+// keine aufklappbare Seitenleiste. Nur fuer dieses Geraet, nicht fuer andere
+// Browser: der Pi ruft das Dashboard mit "?kiosk" auf, das wird hier in seinem
+// localStorage gemerkt (die Tab-Navigation verliert den Query-Parameter).
+// Dann (1) Seitenleiste per HA-eigenem Event "hass-dock-sidebar" dauerhaft
+// ausblenden (dieselbe Einstellung wie im Profil "Seitenleiste immer
+// ausblenden", HA speichert sie selbst) und (2) den Hamburger-Knopf, der sie
+// wieder aufklappen wuerde, per CSS entfernen. "?kiosk=0" schaltet es ab.
+const KIOSK_KEY = 'bgai_kiosk';
+const KIOSK_CSS = 'ha-menu-button { display: none !important; }';
+
+function kioskEnabled() {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    if (q.has('kiosk')) {
+      if (q.get('kiosk') === '0') localStorage.removeItem(KIOSK_KEY);
+      else localStorage.setItem(KIOSK_KEY, '1');
+    }
+    return localStorage.getItem(KIOSK_KEY) === '1';
+  } catch (e) {
+    return false;
+  }
+}
+
+function applyKiosk() {
+  if (!kioskEnabled()) return;
+  const ha = document.querySelector('home-assistant');
+  if (!ha) return;
+  let docked = null;
+  try { docked = JSON.parse(localStorage.getItem('dockedSidebar') || 'null'); } catch (e) { /* ignore */ }
+  if (docked !== 'always_hidden') {
+    ha.dispatchEvent(new CustomEvent('hass-dock-sidebar', {
+      detail: { dock: 'always_hidden' }, bubbles: true, composed: true,
+    }));
+  }
+  (function walk(node) {
+    if (!node || !node.shadowRoot) return;
+    const r = node.shadowRoot;
+    if (!r.querySelector('#bitgrid-kiosk')) {
+      const s = document.createElement('style');
+      s.id = 'bitgrid-kiosk';
+      s.textContent = KIOSK_CSS;
+      r.appendChild(s);
+    }
+    r.querySelectorAll('*').forEach(walk);
+  })(ha);
+}
 
 // ── Startup ──────────────────────────────────────────────────────────────────
 let n = 0;
@@ -375,3 +456,97 @@ window.addEventListener('location-changed', () => {
 document.addEventListener('visibilitychange', () => {
   setTimeout(apply, 500);
 });
+
+// ── Rasen-Hintergrund auch ausserhalb des Dashboards ─────────────────────────
+// 13.11.2026, Nutzer-Wunsch: Profil, Einstellungen, Benachrichtigungen zeigten
+// nur die flache primary-background-color. Das Dashboard legt den Rasen als
+// eigene Karte hinter die Ansicht (bitgrid_dashboard_v3.yaml, gleiche Bilder,
+// Tag/Nacht nach sun.sun). Hier dieselbe Ebene fuer alle Seiten: ein fester
+// div ganz hinten, primary-background-color durchsichtig, damit er durch-
+// scheint. Im Dashboard liegt die Dashboard-Karte darueber, nichts doppelt.
+const GRASS = {
+  day: () => `${grassUrl(false)}, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%)`,
+  night: () => `${grassUrl(true)}, linear-gradient(135deg, #16232f 0%, #0d151c 100%)`,
+};
+function applyGrass() {
+  if (!document.getElementById('bgai-grass-style')) {
+    const st = document.createElement('style');
+    st.id = 'bgai-grass-style';
+    // !important in a stylesheet beats the theme's inline custom property.
+    st.textContent = 'html { --primary-background-color: transparent !important; }';
+    document.head.appendChild(st);
+  }
+  let layer = document.getElementById('bgai-grass');
+  if (!layer) {
+    layer = document.createElement('div');
+    layer.id = 'bgai-grass';
+    layer.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;';
+    document.body.prepend(layer);
+  }
+  const hass = document.querySelector('home-assistant')?.hass;
+  const sun = hass?.states?.['sun.sun']?.state;
+  // Mode key includes the season, so the layer also switches at a month change.
+  const mode = `${sun || ''}${seasonSuffix(new Date().getMonth() + 1)}`;
+  if (layer.dataset.mode !== mode) {
+    layer.style.background = sun === 'above_horizon' ? GRASS.day() : GRASS.night();
+    layer.dataset.mode = mode;
+  }
+}
+applyGrass();
+setInterval(applyGrass, 60 * 1000);
+window.addEventListener('location-changed', () => setTimeout(applyGrass, 300));
+
+// ── Uhr in der Tab-Leiste (13.11.2026, Nutzer-Wunsch "Uhrzeit in jedem Tab") ──
+// Sitzt rechts neben dem ⋮-Menue (Nutzer-Wunsch 13.11.2026) im Kopf von hui-root, damit sie in allen
+// Tabs erscheint. Geraetezeit, Aktualisierung zum Minutenwechsel, keine Last
+// auf HA. Die Kopfleiste wird beim Navigieren neu gerendert, daher prueft ein
+// Intervall, ob die Uhr noch drin ist.
+function findHuiRoot(node, depth = 0) {
+  if (!node || depth > 12) return null;
+  if (node.tagName === 'HUI-ROOT') return node;
+  const kids = node.shadowRoot ? node.shadowRoot.querySelectorAll('*') : [];
+  for (const k of kids) {
+    if (k.tagName === 'HUI-ROOT') return k;
+    if (k.shadowRoot) {
+      const f = findHuiRoot(k, depth + 1);
+      if (f) return f;
+    }
+  }
+  return null;
+}
+
+function clockText() {
+  return new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+
+function applyClock() {
+  const hui = findHuiRoot(document.querySelector('home-assistant'));
+  const r = hui && hui.shadowRoot;
+  if (!r) return;
+  let clock = r.getElementById('bgai-clock');
+  if (!clock) {
+    const anchor = r.querySelector('.action-items') || r.querySelector('.toolbar');
+    if (!anchor) return;
+    clock = document.createElement('div');
+    clock.id = 'bgai-clock';
+    clock.style.cssText =
+      'display:flex;align-items:center;padding:2px 14px;margin:0 10px 0 4px;flex:0 0 auto;' +
+      // 14.11.2026, Nutzer-Wunsch: Rahmen wie die Karten, gegen den Rasen.
+      'background:var(--ha-card-background);border-radius:999px;' +
+      'border:var(--bgai-card-border-width-v3, 1px) solid var(--bgai-card-border-v3, rgba(0,0,0,.55));' +
+      // Outline like the cards (1px border + 1px ring), no soft shadow: the
+      // card token's 0 4px 16px looked like a thick dark halo here.
+      'box-shadow:0 0 0 1px rgba(0,0,0,.7);' +
+      'font-size:calc(var(--bg-fs-body, 1rem) * 1.5);font-weight:700;letter-spacing:0.04em;' +
+      'color:var(--app-header-text-color, var(--primary-text-color));' +
+      // No drop-shadow halo here: on the capsule it thickened the frame;
+      // the card background already gives the contrast (14.11.2026).
+      'font-variant-numeric:tabular-nums;white-space:nowrap;';
+    anchor.append(clock);
+  }
+  const t = clockText();
+  if (clock.textContent !== t) clock.textContent = t;
+}
+
+setInterval(applyClock, 2000);
+applyClock();

@@ -22,4 +22,4 @@
 # nachjustiert werden kann.
 type: custom:bitgrid-bar-trend-chart
 mode: monthly
-height: 210
+height: 280

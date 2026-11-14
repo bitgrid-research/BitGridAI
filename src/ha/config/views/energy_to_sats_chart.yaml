@@ -13,3 +13,5 @@
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:bitgrid-bar-trend-chart
 mode: efficiency
+# 13.11.2026: hoeher, damit die Karte die Hoehe von Bitcoin-Kurs nutzt.
+height: 330

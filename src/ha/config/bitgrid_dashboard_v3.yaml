@@ -1,4 +1,4 @@
-title: BitGridAI v3
+title: BitGridAI v3.3
 # Hinweis (16.09.2026): HA cached den Parse dieses Dashboards und prueft dafuer
 # die Zeitstempel der !include-Dateien offenbar NICHT. Wer nur eine Datei unter
 # views/ deployt, sieht die Aenderung erst, nachdem auch diese Wurzeldatei
@@ -194,10 +194,12 @@ views:
                   border: none;
                   box-shadow: none;
                   border-radius: 0;
+                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
+                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
                   {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
+                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
                   {% else %}
-                  background: url('/local/bg_grass_night.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
+                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
                   {% endif %}
                 }
 
@@ -478,7 +480,7 @@ views:
                         key  = 'stop';
                         head = 'Sicherheits-Stopp: zu heiß';
                         sub  = `Die höchste Chip-Temperatur liegt mit ${pct(chipV)}\u00a0°C auf oder über der Stopp-Grenze von ${pct(chipStop)}\u00a0°C.<br>`
-                             + 'Beide Miner werden gestoppt, das ist nicht überstimmbar (Regel R3).<br>'
+                             + 'Beide Miner werden gestoppt, das ist nicht überstimmbar.<br>'
                              // 17.10.2026 gegen scripts.yaml bg_stop geprueft: die Sperre laeuft
                              // 15 min ab dem Stopp, zusaetzlich gesperrt solange >= Grenze
                              // (binary_sensor.r3_overtemp), nicht "15 min nach dem Abkuehlen".
@@ -576,7 +578,7 @@ views:
                       // die 115-Grad-Abschaltung hat dort keine R-Nummer und steht nur mit Namen).
                       // Die Variante haengt am Dashboard: nur das Lab registriert /bitgridai-a/ und
                       // /bitgridai-b/ auf diese Datei; v3 und Prod behalten die bisherigen Texte.
-                      // ENTWURF, Freigabe durch den Nutzer steht aus.
+                      // Freigegeben 14.11.2026 (Fassung 17.10.2026 abends).
                       // Verblindung (17.10.2026): das Probanden-Dashboard /bitgridai-home/ (nur Lab,
                       // Titel "BitGridAI") ist fuer beide Gruppen dasselbe; die Variante kommt dort aus
                       // input_select.lab_studie_gruppe (lab_only/lab_studie.yaml), gesetzt von der
@@ -848,6 +850,95 @@ views:
                       // Stundenstreifens im Wetter (gemessen 69,7 px = .forecast, Rand 12 px
                       // in beiden Karten identisch). Angegeben in CSS-px dieser Karte, die
                       // im 0,87-Spaltenzoom 0,87 sichtbare px ergeben: 80,1 x 0,87 = 69,7.
+                      // 13.11.2026, BitHamster (Nutzer-Wunsch): KI-Zone UNTER dem regelbasierten
+                      // Text. head/sub oben bleiben Erklaertext A (deterministisch, Thesis-Kern);
+                      // die KI-Zeile ist klar gekennzeichnet und kommt aus www/bithamster_ki.json
+                      // (src/explain/bithamster_ki.py, Cron auf dem HA-Host, nur lesend, Modell
+                      // auf GX10). Gezeigt nur bei ok und hoechstens 2 h alt, sonst gar nicht:
+                      // veralteter KI-Text waere schlimmer als keiner. Abruf wie die Status-
+                      // karte im Forschungs-Tab: ein Cache je Browser, Neuzeichnen per
+                      // _updateTimerMS (button-card v7 verwirft ein nacktes requestUpdate).
+                      // 13.11.2026, Nutzer-Wunsch: Winter-Hamster (Muetze, Schal) von November
+                      // bis Februar in den beiden Ruhe-Zustaenden, die den Winter praegen
+                      // (Akku laedt zuerst, Halteband). Schlaf, Hitze und Mining behalten
+                      // ihre eigenen Bilder, die zeigen einen anderen Zustand.
+                      if ([11, 12, 1, 2].includes(new Date().getMonth() + 1) && (key === 'charge' || key === 'hold')) {
+                        img = 'bithamster_winter.png';
+                      }
+                      if (!window._bgHamsterKi) window._bgHamsterKi = { data: null, fetchedAt: 0, busy: false, cards: new Set() };
+                      const KI = window._bgHamsterKi;
+                      KI.cards.add(this);
+                      if (!KI.busy && Date.now() - KI.fetchedAt > 5 * 60 * 1000) {
+                        KI.busy = true;
+                        fetch('/local/bithamster_ki.json?v=' + Date.now(), { cache: 'no-store' })
+                          .then(r => r.ok ? r.json() : null).catch(() => null)
+                          .then(d => {
+                            KI.data = d; KI.fetchedAt = Date.now(); KI.busy = false;
+                            KI.cards.forEach(c => {
+                              if (!c.isConnected) { KI.cards.delete(c); return; }
+                              try { c._updateTimerMS = Date.now(); c.requestUpdate && c.requestUpdate(); } catch (e) {}
+                            });
+                          });
+                      }
+                      const kiEsc = (t) => String(t || '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+                      let kiHtml = '';
+                      const kd = KI.data;
+                      const kiAgeMin = kd && kd.generated_at ? (Date.now() - Date.parse(kd.generated_at)) / 60000 : Infinity;
+                      // 13.11.2026 abends (Nutzer-Wunsch): Regeltext (head/sub) nur noch als
+                      // Ersatz, wenn kein gueltiger KI-Text da ist (LLM nicht erreichbar, Lauf
+                      // fehlgeschlagen, aelter als 2 h oder Lage geaendert). Ersetzt die
+                      // fruehere Festlegung "Text A bleibt immer sichtbar".
+                      // 13.11.2026 (Nutzer-Wunsch): der KI-Text laeuft halbstuendlich. Er gilt
+                      // nur, solange die Lage dieselbe ist wie beim Erzeugen (facts.live im
+                      // JSON): gleiche Miner-Modi und der Akku auf derselben Seite von Stop-
+                      // und Eco-Start-Schwelle. Sonst ist seine Aussage evtl. falsch, dann
+                      // zeigt die Karte den Regeltext. Der Akkustand im Text ist ein
+                      // Platzhalter ({akku}, src/explain/bithamster_ki.py live_soc_template)
+                      // und kommt live aus HA.
+                      const kf = (kd && kd.facts && kd.facts.live) || null;
+                      const thr = (label) => { const t = kf && (kf.thresholds || []).find(x => x.label === label); return t ? t.value : null; };
+                      const side = (v, t) => (v === null || t === null || v === undefined) ? 0 : (v >= t ? 1 : -1);
+                      const kiSoc = kf && kf.live ? kf.live.soc_pct : null;
+                      const kiSame = !!kf && kf.live
+                        && kf.live.miner1_mode === states['sensor.miner1_workmode_status']?.state
+                        && kf.live.miner2_mode === states['sensor.miner2_workmode_status']?.state
+                        && side(kiSoc, thr('Stop-Schwelle Akku (Hausreserve)')) === side(socV, thr('Stop-Schwelle Akku (Hausreserve)'))
+                        && side(kiSoc, thr('Eco-Start Akku')) === side(socV, thr('Eco-Start Akku'));
+                      const kiText = kd && kd.lage
+                        ? (kd.lage.text_live && socV !== null && socV !== undefined
+                            ? kd.lage.text_live.split('{akku}').join(Math.round(socV).toLocaleString('de-DE'))
+                            : kd.lage.text)
+                        : '';
+                      // 13.11.2026 (Nutzer-Wunsch): Meta-Zeile UNTER den Text, mit dem Modell,
+                      // das Bitsy nutzt; Farbe wie die Sekundaertexte des Designs statt Tuerkis.
+                      // Ohne gueltigen KI-Text sagt sie, warum der Regeltext steht.
+                      const kiModel = kd && kd.model ? kiEsc(kd.model) : '';
+                      const kiMeta = (icon, left, right) => `
+                            <div style="display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:6px;margin-top:2.2em;font-size:var(--bg-fs-label);
+                                        line-height:1.2;color:var(--secondary-text-color);${halo}">
+                              <span style="display:inline-flex;align-items:center;gap:6px;flex:0 1 auto;min-width:0;">
+                                <ha-icon icon="${icon}" style="--mdc-icon-size:16px;width:16px;height:16px;margin:0;padding:0;"></ha-icon>${left}</span>
+                              <span style="margin-left:auto;padding-left:12px;text-align:right;">${right}</span>
+                            </div>`;
+                      let kiFoot = '';
+                      if (kd && kd.ok && kd.lage && kiAgeMin <= 120 && !simOn && kiSame) {
+                        const nOpt = Array.isArray(kd.optimierungen) ? kd.optimierungen.length : 0;
+                        const ageTxt = kiAgeMin < 1 ? 'gerade eben' : 'vor ' + Math.round(kiAgeMin) + ' min';
+                        const optTxt = nOpt ? ` · ${nOpt} ${nOpt === 1 ? 'Idee' : 'Ideen'} im Tab Forschung` : '';
+                        kiHtml = `
+                          <div style="margin-top:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.05);
+                                      border-left:3px solid var(--divider-color);text-align:left;">
+                            <div style="font-size:var(--bg-fs-body);color:var(--primary-text-color);line-height:1.3;
+                                        white-space:normal;overflow-wrap:break-word;${halo}">${kiEsc(kiText)}</div>
+                            ${kiMeta(kiModel ? 'mdi:robot-happy-outline' : 'mdi:robot-off-outline', kiModel ? `Bitsy (${kiModel})` : 'Bitsy · kein Modell geladen', `nur lesend · ${ageTxt}${optTxt}`)}
+                          </div>`;
+                      } else if (!simOn) {
+                        const why = !kd || !kd.ok ? 'kein Sprachmodell erreichbar'
+                          : kiAgeMin > 120 ? 'letzter Text zu alt'
+                          : 'Lage hat sich geändert, neuer Text folgt';
+                        kiFoot = kiMeta('mdi:robot-off-outline', `Bitsy · ${why}`, 'Regeltext');
+                      }
+
                       const footMin = 80.1;
                       return `
                         <style>
@@ -869,9 +960,9 @@ views:
                             <div style="flex:2;min-width:0">
                               <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1.1;
                                           white-space:normal;overflow-wrap:break-word;
-                                          color:var(--primary-text-color);margin-bottom:6px;${halo}">${head}</div>
-                              <div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.3;
-                                          white-space:normal;overflow-wrap:break-word;${halo}">${sub}</div>
+                                          color:var(--primary-text-color);margin-bottom:6px;${halo}">${kiHtml && kd.lage.headline ? kiEsc(kd.lage.headline) : head}</div>
+                              ${kiHtml || `<div style="font-size:var(--bg-fs-body);color:var(--secondary-text-color);line-height:1.3;
+                                          white-space:normal;overflow-wrap:break-word;${halo}">${sub}</div>${kiFoot}`}
                             </div>
                           </div>
                           <div style="display:flex;padding-top:8px;box-sizing:border-box;min-height:${footMin}px;
@@ -1618,14 +1709,62 @@ views:
                     time_format: '24'
                     date_pattern: 'cccc, dd.LL.yyyy'
                     weather_icon_type: fill
+                    # v2-Schalter (bis v2.x). Bleiben stehen: v3 ignoriert sie,
+                    # und bei einem Zurueckstufen auf v2 greifen sie wieder.
                     animated_icon: false
                     hide_today_section: false
                     hide_forecast_section: true
                     hide_clock: false
                     hide_date: false
+                    # 13.11.2026: Der Marketplace hat die Karte am 12.11. um
+                    # 23:00 auf v3.1.0 gehoben. v3 hat ein neues, verschachteltes
+                    # Schema (sections.header/forecast_strip/forecast_list) und
+                    # ignoriert die v2-Schalter oben, deshalb erschienen ploetzlich
+                    # Stundenstreifen und Tagesbalken mitten in der Karte. Nutzer-
+                    # Wunsch: Mittelteil weg, wie vorher. Der stuendliche Ausblick
+                    # kommt weiter aus der weather-forecast-Karte darunter.
+                    # Kopf nachgebaut wie in v2: Wetterlage + Temperatur, grosse
+                    # Uhr, Datum. Grenze: www/bitgrid_card_shape.js (Pixel-Icon,
+                    # Farben) zielt auf die v2-Struktur (clock-weather-card-today*)
+                    # und greift bei v3 nicht, das Icon ist deshalb das der Karte.
+                    sections:
+                      header:
+                        hide: false
+                        animated_icons: false
+                        weather_icon_type: fill
+                        # 13.11.2026, Nutzer: "Sonne etwas kleiner". v3-Standard
+                        # ist rund ein Drittel der Kartenbreite (~250 px), v2
+                        # deckelte auf 114 px. 8rem liegt in der Hoehe der
+                        # drei Textzeilen daneben.
+                        weather_icon_size: 8rem
+                        rows:
+                          - alignment: center
+                            segments:
+                              - type: weather
+                              - type: text
+                                text: ","
+                              - type: weather
+                                attribute: temperature
+                          - alignment: center
+                            font_size: 4rem
+                            segments:
+                              - type: time
+                          - alignment: center
+                            segments:
+                              - type: date
+                                date_pattern: 'cccc, dd.LL.yyyy'
+                      forecast_strip:
+                        hide: true
+                      forecast_list:
+                        hide: true
 
-                  # Eingebaute weather-forecast-Karte, stündlich: horizontaler
-                  # Zeitstrahl. show_current aus, weil die Karte darüber (Uhr) die
+                  # Eingebaute weather-forecast-Karte, seit 13.11.2026 TAEGLICH
+                  # (Nutzer-Wunsch "Tagesvorhersage fuer die naechsten 5 Tage
+                  # statt Stunden"): Wochentag, Icon, Hoechst-/Tiefstwert,
+                  # forecast_slots begrenzt auf 5 Spalten. Die Pixel-Icons holt
+                  # www/bitgrid_card_shape.js je Entity UND forecast_type
+                  # (Cache-Schluessel "entity|daily"), sonst bekaemen die Tages-
+                  # spalten die Icons der naechsten Stunden. show_current aus, weil die Karte darüber (Uhr) die
                   # aktuelle Lage schon zeigt. Runde Ecken: in
                   # www/bitgrid_card_shape.js mit aufgenommen (HUI-WEATHER-
                   # FORECAST-CARD), damit sie wie die anderen garantiert auf den
@@ -1710,7 +1849,8 @@ views:
                           height: 42.12px !important;
                         }
                     entity: weather.forecast_home
-                    forecast_type: hourly
+                    forecast_type: daily
+                    forecast_slots: 5
                     show_current: false
                     show_forecast: true
                     # 12.09.2026, Nutzer-Wunsch "keine Nachkommastelle": echtes
@@ -1899,10 +2039,12 @@ views:
                   border: none;
                   box-shadow: none;
                   border-radius: 0;
+                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
+                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
                   {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
+                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
                   {% else %}
-                  background: url('/local/bg_grass_night.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
+                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
                   {% endif %}
                 }
 
@@ -2803,10 +2945,12 @@ views:
                   border: none;
                   box-shadow: none;
                   border-radius: 0;
+                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
+                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
                   {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
+                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
                   {% else %}
-                  background: url('/local/bg_grass_night.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
+                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
                   {% endif %}
                 }
 
@@ -2976,10 +3120,12 @@ views:
                   border: none;
                   box-shadow: none;
                   border-radius: 0;
+                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
+                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
                   {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
+                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
                   {% else %}
-                  background: url('/local/bg_grass_night.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
+                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
                   {% endif %}
                 }
           - type: vertical-stack
@@ -3130,10 +3276,8 @@ views:
   # ═══════════════════════════════════════════════════════════════════════
   - title: Heizung
     path: heizung
-    # 03.09.2026, Nutzer-Wunsch: Tab aus der Leiste ausgeblendet (visible:
-    # false), View-Config bleibt vollstaendig erhalten, kein Loeschen von
-    # Inhalt — jederzeit reversibel durch Entfernen dieser einen Zeile.
-    visible: false
+    # 03.09.2026 ausgeblendet (visible: false), 13.11.2026 auf Nutzer-Wunsch
+    # wieder eingeblendet.
     # Tab-Icon (27.08.2026, Nutzer-Wunsch): dasselbe mdi:water wie die
     # Heizstab-Bubble im Energiefluss auf dem Home-Tab (siehe "individual"-
     # Eintrag sensor.ac_elwa_2_power1_solar weiter oben in dieser Datei),
@@ -3179,8 +3323,14 @@ views:
         layout_type: custom:grid-layout
         layout:
           grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
-          grid-template-rows: auto
-          grid-template-areas: '"left right"'
+          # 13.11.2026 (Nutzer-Wunsch, Pi 1600x900): Titel, Diagramme, Tabellen je
+          # eine Rasterzeile, damit links/rechts buendig sind; die Tabellenzeile
+          # waechst bis zum Bildschirmrand (wie Tab Muell).
+          # Tabellenzeile fuellt den Rest bis zum Bildschirmrand: Bildhoehe minus
+          # Kopfleiste minus Titel+Diagramme (~390 CSS-px, auf dem Pi 1600x900
+          # gemessen, 13.11.2026).
+          grid-template-rows: auto auto minmax(calc(100vh - var(--header-height, 56px) - 390px), auto)
+          grid-template-areas: '"lh rh" "lc rc" "lt rt"'
           # Titel+Inhalt jetzt in EINEM vertical-stack pro Spalte statt in
           # getrennten Grid-Zeilen (02.09.2026, Nutzer-Wunsch "genau so wie
           # bei den anderen Tabs, kein row-gap") — s. Kopfkommentar bei der
@@ -3195,7 +3345,7 @@ views:
           - type: markdown
             content: " "
             view_layout:
-              grid-area: left
+              grid-area: lh
             card_mod:
               style: |
                 ha-card {
@@ -3205,48 +3355,49 @@ views:
                   border: none;
                   box-shadow: none;
                   border-radius: 0;
+                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
+                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
                   {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
+                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
                   {% else %}
-                  background: url('/local/bg_grass_night.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
+                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
                   {% endif %}
                 }
 
           # ── Spalte links: HEIZUNG (ÖL), Titel + Inhalt ───────────────
+          - type: custom:button-card
+            view_layout:
+              grid-area: lh
+            template: group_header
+            icon: mdi:radiator
+            name: Heizung (Öl)
+          - type: custom:button-card
+            view_layout:
+              grid-area: rh
+            template: group_header
+            icon: mdi:water-boiler
+            name: Heizstab (elektrisch)
           - type: vertical-stack
             view_layout:
-              grid-area: left
+              grid-area: lc
             cards:
-              - type: custom:button-card
-                template: group_header
-                icon: mdi:radiator
-                name: Heizung (Öl)
               - !include views/heizung_oel_diagramm.yaml
-              - !include views/heizung_oel.yaml
-
-          # ── Spalte rechts: HEIZSTAB (ELEKTRISCH), Titel + Inhalt ─────
           - type: vertical-stack
             view_layout:
-              grid-area: right
+              grid-area: rc
             cards:
-              - type: custom:button-card
-                template: group_header
-                icon: mdi:water-boiler
-                name: Heizstab (elektrisch)
               - !include views/heizstab_diagramm.yaml
+          - type: vertical-stack
+            view_layout:
+              grid-area: lt
+            cards:
+              - !include views/heizung_oel.yaml
+          - type: vertical-stack
+            view_layout:
+              grid-area: rt
+            cards:
               - !include views/heizstab.yaml
 
-  # ═══════════════════════════════════════════════════════════════════════
-  # ═══════════════════════════════════════════════════════════════════════
-  # TAB 3: GRUNDRISS  —  1 Spalte: Haus-Grundriss oben, Garage-Grundriss
-  # darunter (24.08.2026, Nutzer-Entscheidung: vorher 2 Spalten nebeneinander,
-  # die Raumlisten darunter sind jetzt in den eigenen Tab "EnergieInfo"
-  # gewandert — siehe dort. Hier bleiben nur die beiden Grundriss-Bilder).
-  # Haus: picture-elements auf www/grundriss/base.png, State-Overlays für
-  #       Plugs/Sensoren aus packages/devices.yaml (views/floorplan.yaml).
-  # Garage: eigener Plan/Asset, State-Overlays aus packages/devices.yaml +
-  #       avalonq_miner1/2.yaml (views/garage_floorplan.yaml).
-  # ═══════════════════════════════════════════════════════════════════════
   - title: Grundriss
     path: floorplan
     icon: mdi:floor-plan
@@ -3318,10 +3469,12 @@ views:
                   border: none;
                   box-shadow: none;
                   border-radius: 0;
+                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
+                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
                   {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
+                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
                   {% else %}
-                  background: url('/local/bg_grass_night.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
+                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
                   {% endif %}
                 }
 
@@ -3398,6 +3551,338 @@ views:
               - entity: input_boolean.fp_view_garage
                 state: "on"
             card: !include views/garage_floorplan.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB: ABFALL (13.11.2026, Nutzer-Wunsch; zuerst "Haushalt", dann "Muellabfuhr",
+  # beides am selben Tag vom Nutzer verworfen, Wahl: "Abfall"). Kein Teil
+  # des Energiemanagements, ersetzt den Plan auf der separaten App unter .64.
+  # Daten: Integration "Waste Collection Schedule", s. packages/haushalt.yaml
+  # (Dateinamen haushalt_* bewusst behalten: deploy_ha.sh loescht nichts auf
+  # dem Server, ein umbenanntes Paket wuerde den Helfer doppelt definieren).
+  # Layout und Hintergrund 1:1 wie Forschung.
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Müll
+    # 13.11.2026: Titel auf Nutzer-Wunsch "Müll" statt "Abfall"; path bleibt
+    # abfall, damit Lesezeichen und der Kiosk-Link weiter stimmen.
+    path: abfall
+    icon: mdi:trash-can-outline
+    show_icon_and_title: true
+    theme: BitGrid v3
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-areas: '"l r"'
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+          # 13.11.2026, Nutzer-Wunsch: Karten bis zum unteren Bildschirmrand
+          # (Pi-Display). Die Zeile hat als Mindesthoehe die Bildschirmhoehe
+          # minus Kopfleiste und Rand (2 x 14 px Padding); waechst der Inhalt
+          # darueber (schmale Schirme), waechst sie mit (auto). Erster Versuch
+          # mit min-height am Grid + 1fr-Zeile streckte die Zeile nicht
+          # (Pi-Bildschirmfoto), eine Mindest-Spurgroesse loest der Browser
+          # dagegen immer fest auf. Die Spalten fuellen die Zeile
+          # (bitgrid_wide.js).
+          grid-template-rows: minmax(calc(100vh - var(--header-height, 56px) - 28px), auto)
+        cards:
+          - type: markdown
+            view_layout:
+              grid-area: l
+            content: " "
+            card_mod:
+              style: |
+                ha-card {
+                  position: fixed;
+                  inset: 0;
+                  z-index: -1;
+                  border: none;
+                  box-shadow: none;
+                  border-radius: 0;
+                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
+                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
+                  {% if is_state('sun.sun', 'above_horizon') %}
+                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
+                  {% else %}
+                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
+                  {% endif %}
+                }
+          # ── RECHTS: naechste Abholungen (13.11.2026 getauscht, Nutzer-
+          # Wunsch "Kalender links, Termine rechts") ───────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: r
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:format-list-bulleted
+                name: Termine
+              - !include views/haushalt_muell_liste.yaml
+          # ── LINKS: Abfuhrkalender ───────────────────────────────────
+          - type: vertical-stack
+            view_layout:
+              grid-area: l
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:calendar-month
+                name: Kalender
+              - !include views/haushalt_muell_kalender.yaml
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # TAB: FORSCHUNG (13.11.2026, Nutzer-Wunsch). Eigener Ort fuer alles, was
+  # Forschungsdaten auswertet statt das System zu bedienen. Die Karte
+  # "Datenaufzeichnung" ist aus Einstellungen hierher umgezogen. Ausbau-
+  # plan (Optimierungspotenzial: ungenutzter Ueberschuss, Schaltfehler,
+  # Modus-Effizienz, SoC-Baender, KPI gegen Ziel) als Schritt 2, braucht
+  # einen neuen naechtlichen Export und ist noch nicht umgesetzt.
+  # Layout und Hintergrund 1:1 wie Einstellungen.
+  # ═══════════════════════════════════════════════════════════════════════
+  - title: Forschung
+    path: forschung
+    icon: mdi:flask-outline
+    show_icon_and_title: true
+    theme: BitGrid v3
+    panel: true
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        # 13.11.2026, Nutzer-Wunsch "uebersichtlich, Stil wie die anderen
+        # Tabs": zwei Zeilen mit je einem Kartenpaar wie in der Uebersicht
+        # (gleiche Bereichsnamen g1l..g2r, bitgrid_wide.js streckt jedes Paar
+        # auf dieselbe Hoehe). Oben: laeuft die Aufzeichnung | Kalender je
+        # Tag. Unten: Luecken gesamt | welches Gate blockiert.
+        # Gleicher Tag spaeter: oben die Live-Lage (Aufzeichnung | Gate),
+        # unten die Historie (Luecken | Kalender); alles passt nicht auf
+        # einen 10"-Schirm, die oberste Zeile ist so ohne Scrollen ganz da.
+        layout:
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+          grid-template-rows: auto auto auto auto
+          # 13.11.2026 abends: eine BitHamster-Karte (umschaltbar Analyse |
+          # Frag mich, views/forschung_hamster.yaml) statt zwei nebeneinander.
+          # Oben: Hamster | Kalender. Unten: Datenaufzeichnung + Luecken |
+          # Gate-Diagnose (Tausch Kalender/Gate-Diagnose auf Nutzer-Wunsch).
+          # Dritte Zeile (gleicher Abend, Vorschlag des Hamsters): Akku über Nacht |
+          # Solarprognose (views/forschung_kpi.yaml, research_cards.json).
+          grid-template-areas: '"g1l g1r" "g3l g3r" "g4 g4r" "g5l g5r" "g6 g6"'
+          align-items: stretch
+          grid-gap: 14px
+          padding: 14px
+          box-sizing: border-box
+        cards:
+          - type: markdown
+            view_layout:
+              grid-area: g1l
+            content: " "
+            card_mod:
+              style: |
+                ha-card {
+                  position: fixed;
+                  inset: 0;
+                  z-index: -1;
+                  border: none;
+                  box-shadow: none;
+                  border-radius: 0;
+                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
+                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
+                  {% if is_state('sun.sun', 'above_horizon') %}
+                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
+                  {% else %}
+                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
+                  {% endif %}
+                }
+          # ── Zeile 1 links: BitHamster (Analyse | Frag mich, nur lesend),
+          # darunter welches Gate gerade einen Moduswechsel blockiert ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: g1l
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:robot-happy-outline
+                name: BitHamster
+              - !include views/forschung_hamster.yaml
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:shield-search
+                name: Live-Diagnose der Miner
+              - !include views/forschung_gates.yaml
+          # ── Zeile 1 rechts: Datenaufzeichnung als EINE Karte (14.11.2026,
+          # Nutzer-Wunsch): Status, Kalender je Tag und Luecken standen als drei
+          # Karten mit drei Titeln da. Die drei bleiben eigene Elemente (der
+          # Kalender ist ein Stack mit Monatsnavigation), der innere Stack
+          # uebernimmt die sichtbare Huelle, Muster wie die Wetterkarte in der
+          # Uebersicht. Trennlinien setzen Kalender und Luecken selbst.
+          # 14.11.2026 (Nutzer-Wunsch): darueber der Fahrplan Masterarbeit,
+          # die offene Arbeit in der Reihenfolge, in der wir sie angehen.
+          - type: vertical-stack
+            view_layout:
+              grid-area: g1r
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:map-marker-path
+                name: Fahrplan Masterarbeit
+              - type: custom:button-card
+                template: bgai_research_kpi
+                variables:
+                  section: plan
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:database-check
+                name: Datenaufzeichnung
+              - type: vertical-stack
+                card_mod:
+                  style:
+                    ".": |
+                      :host {
+                        --vertical-stack-card-gap: 0 !important;
+                        --stack-card-gap: 0 !important;
+                        border-radius: var(--bgai-card-radius-v3) !important;
+                        flex: 1 1 auto !important;
+                      }
+                      #root > :last-child {
+                        flex: 1 1 auto !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                      }
+                      #root > :last-child > * {
+                        flex: 1 1 auto !important;
+                      }
+                      #root {
+                        height: 100% !important;
+                        box-sizing: border-box !important;
+                        gap: 0 !important;
+                        background: var(--ha-card-background) !important;
+                        border-radius: var(--bgai-card-radius-v3) !important;
+                        border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3) !important;
+                        box-shadow: var(--bgai-card-shadow-v3) !important;
+                        overflow: hidden !important;
+                      }
+                cards:
+                  - type: custom:button-card
+                    template: bgai_recording_status
+                    variables:
+                      section: status
+                    styles:
+                      card:
+                        - background: none
+                        - border: none
+                        - box-shadow: none
+                        - border-radius: 0
+                  - !include views/aufzeichnung_kalender.yaml
+                  - type: custom:button-card
+                    template: bgai_recording_status
+                    variables:
+                      section: gaps
+                    styles:
+                      card:
+                        - background: none
+                        - border: none
+                        - box-shadow: none
+                        - border-radius: 0
+                        - border-top: 1px solid var(--divider-color)
+          # ── Zeile 3 links: reicht die Hausreserve durch die Nacht ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: g3l
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:weather-night
+                name: Akku über Nacht
+              - type: custom:button-card
+                template: bgai_research_kpi
+                variables:
+                  section: nights
+          # ── Zeile 3 rechts: wie gut ist die PV-Prognose ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: g3r
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:weather-partly-cloudy
+                name: Solarprognose
+              - type: custom:button-card
+                template: bgai_research_kpi
+                variables:
+                  section: forecast
+          # ── Zeile 4 links (eine Spalte, Nutzer-Wunsch): Miner-Hardware W/TH, nur reine Eco-Tage ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: g4
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:speedometer
+                name: Hardware-Zustand (W/TH)
+              - type: custom:button-card
+                template: bgai_research_kpi
+                variables:
+                  section: efficiency
+          # ── Zeile 4 rechts: Akku-Hoechststand gegen Eco-Start (Hamster-Vorschlag) ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: g4r
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:battery-arrow-up
+                name: Akku-Höchststand und Start
+              - type: custom:button-card
+                template: bgai_research_kpi
+                variables:
+                  section: peak
+          # ── Zeile 5 links: Einspeisung bei stehenden Minern mit Grund, darunter Sicherheit (14.11.2026) ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: g5l
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:transmission-tower-export
+                name: Ungenutzter Solarüberschuss
+              - type: custom:button-card
+                template: bgai_research_kpi
+                variables:
+                  section: surplus
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:thermometer-alert
+                name: Temperatur und Schaltfehler
+              - type: custom:button-card
+                template: bgai_research_kpi
+                variables:
+                  section: safety
+          # ── Zeile 5 rechts: Schaltwechsel gegen Qualitaetsziel ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: g5r
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:swap-vertical-bold
+                name: Schaltwechsel
+              - type: custom:button-card
+                template: bgai_research_kpi
+                variables:
+                  section: switching
+          # ── Zeile 6 (volle Breite): Merkliste Masterarbeit + offene Punkte ──
+          - type: vertical-stack
+            view_layout:
+              grid-area: g6
+            cards:
+              - type: custom:button-card
+                template: group_header
+                icon: mdi:school
+                name: Masterarbeit
+              - type: custom:button-card
+                template: bgai_research_kpi
+                variables:
+                  section: thesis
 
   # ═══════════════════════════════════════════════════════════════════════
   # TAB (letzter): EINSTELLUNGEN  —  Spiegel von bitgrid_dashboard_v2.yaml,
@@ -3487,10 +3972,12 @@ views:
                   border: none;
                   box-shadow: none;
                   border-radius: 0;
+                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
+                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
                   {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
+                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
                   {% else %}
-                  background: url('/local/bg_grass_night.jpg?v=20260926') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
+                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
                   {% endif %}
                 }
           # ── LINKS: alles, was antippbar/aenderbar ist ────────────────────
@@ -3583,6 +4070,41 @@ views:
                         - color: "var(--primary-text-color)"
                       label:
                         - color: "var(--primary-text-color)"
+                  # ADR 033 (13.11.2026): drei weitere gemessene Groessen der
+                  # Hausreserve-Formel, gleiche Zeilenvorlage wie oben.
+                  - type: custom:button-card
+                    template: [settings_row, settings_row_icon, settings_row_soft]
+                    entity: input_number.mvp_evening_gap_h
+                    name: Abendlücke (Miner-Stopp bis Dunkelheit)
+                    icon: mdi:weather-sunset-down
+                    label: "[[[ return parseFloat(entity.state).toLocaleString('de-DE', {maximumFractionDigits: 2}) + ' h' + `<ha-icon icon='mdi:pencil' style='--mdc-icon-size:14px;opacity:0.55;margin-left:7px;vertical-align:-2px'></ha-icon>`; ]]]"
+                    styles:
+                      icon:
+                        - color: "var(--primary-text-color)"
+                      label:
+                        - color: "var(--primary-text-color)"
+                  - type: custom:button-card
+                    template: [settings_row, settings_row_icon, settings_row_soft]
+                    entity: input_number.mvp_battery_efficiency_pct
+                    name: Akku-Wirkungsgrad
+                    icon: mdi:battery-sync
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' %' + `<ha-icon icon='mdi:pencil' style='--mdc-icon-size:14px;opacity:0.55;margin-left:7px;vertical-align:-2px'></ha-icon>`; ]]]"
+                    styles:
+                      icon:
+                        - color: "var(--primary-text-color)"
+                      label:
+                        - color: "var(--primary-text-color)"
+                  - type: custom:button-card
+                    template: [settings_row, settings_row_icon, settings_row_soft]
+                    entity: input_number.mvp_reserve_floor_pct
+                    name: Akku-Rest am Morgen (Boden)
+                    icon: mdi:battery-10
+                    label: "[[[ return Math.round(parseFloat(entity.state)) + ' %' + `<ha-icon icon='mdi:pencil' style='--mdc-icon-size:14px;opacity:0.55;margin-left:7px;vertical-align:-2px'></ha-icon>`; ]]]"
+                    styles:
+                      icon:
+                        - color: "var(--primary-text-color)"
+                      label:
+                        - color: "var(--primary-text-color)"
               # 25.09.2026, Nutzer-Vorgabe: eigener kleiner Abschnitt DIREKT unter
               # den beiden Stellschrauben oben, damit die Lesereihenfolge fuer
               # Laien stimmt (Ursache -> Wirkung): "das stelle ich ein" oben,
@@ -3639,7 +4161,7 @@ views:
                         # gewesen waere (gesperrter Monat).
                         - color: "var(--bg-color-standard)"
                       label:
-                        - color: "[[[ return entity.state === 'Nur Eco' ? 'var(--bg-color-reserve)' : 'var(--bg-color-standard)'; ]]]"
+                        - color: "[[[ return 'var(--bg-color-standard)'; ]]]"
                   - type: custom:button-card
                     template: [settings_row, settings_row_icon, settings_row_soft]
                     entity: sensor.mvp_saison_status
@@ -3728,7 +4250,7 @@ views:
                       icon:
                         - color: "var(--bg-color-standard)"
                       label:
-                        - color: "[[[ const b = states['sensor.mvp_saison_status']?.state; return b === 'Nur Eco' ? 'var(--bg-color-reserve)' : 'var(--bg-color-standard)'; ]]]"
+                        - color: "[[[ const b = states['sensor.mvp_saison_status']?.state; return 'var(--bg-color-standard)'; ]]]"
                   - type: custom:button-card
                     template: [settings_row, settings_row_icon, settings_row_soft]
                     entity: input_number.mvp_soc_std_off_pct
@@ -3739,7 +4261,7 @@ views:
                       icon:
                         - color: "var(--bg-color-standard)"
                       label:
-                        - color: "[[[ const b = states['sensor.mvp_saison_status']?.state; return b === 'Nur Eco' ? 'var(--bg-color-reserve)' : 'var(--bg-color-standard)'; ]]]"
+                        - color: "[[[ const b = states['sensor.mvp_saison_status']?.state; return 'var(--bg-color-standard)'; ]]]"
                   - type: custom:button-card
                     template: [settings_row, settings_row_icon, settings_row_soft]
                     entity: input_number.mvp_soc_super_pct
@@ -3821,7 +4343,11 @@ views:
                     entity: input_number.hardware_cost_eur
                     name: Investierte Hardware
                     icon: mdi:cash-multiple
-                    label: "[[[ return Math.round(parseFloat(entity.state)).toLocaleString('de-DE') + ' €' + `<ha-icon icon='mdi:pencil' style='--mdc-icon-size:14px;opacity:0.55;margin-left:7px;vertical-align:-2px'></ha-icon>`; ]]]"
+                    # 13.11.2026: oeffnet die Geraeteliste statt des Standard-Dialogs.
+                    tap_action:
+                      action: navigate
+                      navigation_path: "#hardware"
+                    label: "[[[ return parseFloat(entity.state).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €' + `<ha-icon icon='mdi:format-list-bulleted' style='--mdc-icon-size:14px;opacity:0.55;margin-left:7px;vertical-align:-2px'></ha-icon>`; ]]]"
                     styles:
                       icon:
                         - color: "var(--primary-text-color)"
@@ -3952,8 +4478,15 @@ views:
                     [[[
                       const nsStunden = {1:15.75,2:14.5833,3:12.9667,4:11.0667,5:9.3167,6:8.0,7:8.8167,8:10.5,9:12.3167,10:14.1333,11:15.5167,12:15.85};
                       const monate = {1:'Januar',2:'Februar',3:'März',4:'April',5:'Mai',6:'Juni',7:'Juli',8:'August',9:'September',10:'Oktober',11:'November',12:'Dezember'};
-                      const gw = parseFloat(states['input_number.mvp_night_baseload_w']?.state) || 535;
+                      // Jahreszeit hinter dem Monatsnamen (meteorologisch: Dez-Feb Winter usw.).
+                      const saisonEmoji = {12:'❄️',1:'❄️',2:'❄️',3:'🌱',4:'🌱',5:'🌱',6:'☀️',7:'☀️',8:'☀️',9:'🍂',10:'🍂',11:'🍂'};
+                      const gw = parseFloat(states['input_number.mvp_night_baseload_w']?.state) || 570;
                       const kk = parseFloat(states['input_number.battery_capacity_kwh']?.state) || 12.5;
+                      // ADR 033 (13.11.2026): same terms as mvp_saison_automatik.
+                      const num = (id, d) => { const v = parseFloat(states[id]?.state); return isNaN(v) ? d : v; };
+                      const gap = num('input_number.mvp_evening_gap_h', 0.75);
+                      const eta = num('input_number.mvp_battery_efficiency_pct', 80) / 100;
+                      const fl = num('input_number.mvp_reserve_floor_pct', 5);
                       // Lab-Replay (17.10.2026): Monat des abgespielten Tages
                       // (sensor.lab_sim_profile gibt es nur im Lab), sonst heute.
                       const simDayS = states['input_boolean.simulation_mode']?.state === 'on'
@@ -3966,13 +4499,15 @@ views:
                       const stdC = 'var(--bg-color-standard, #26C6DA)';
                       const supC = 'var(--bg-color-super, #F7931A)';
                       const resC = 'var(--bg-color-reserve, #EF5350)';
-                      const th = (label, color) => `<th style="text-align:right;padding:6px 4px;color:${color || white};border:1px solid rgba(255,255,255,0.12);">${label}</th>`;
+                      // 13.11.2026, Nutzer-Wunsch: Icon ueber dem Spaltennamen, dieselben
+                      // Icons wie die Zeilen in Schwellwerte/Freigegebene Modi.
+                      const th = (label, color, icon) => `<th style="text-align:right;padding:6px 4px;color:${color || white};border:1px solid rgba(255,255,255,0.12);vertical-align:bottom;">${label}${icon ? `<ha-icon icon="${icon}" style="--mdc-icon-size:18px;width:18px;height:18px;margin-left:4px;vertical-align:-3px;"></ha-icon>` : ''}</th>`;
                       let rows = '';
                       for (let m = 1; m <= 12; m++) {
                         const h = nsStunden[m];
                         const hS = h.toFixed(1).replace('.', ',') + '&nbsp;h';
-                        const rp = kk > 0 ? (gw * h / 1000 / kk * 100) : 100;
-                        const sp = Math.min(15 + rp, 95);
+                        const rp = kk > 0 && eta > 0 ? (gw * (h + gap) / 1000 / (kk * eta) * 100) : 100;
+                        const sp = Math.min(fl + rp, 95);
                         const isNow = m === curMonth;
                         const stdOffRaw = sp + 20, stdRaw = sp + 25, supOffRaw = sp + 35, supRaw = sp + 40;
                         const stdOffS = stdRaw <= 100 ? Math.round(stdOffRaw) + '%' : '—';
@@ -3988,7 +4523,7 @@ views:
                         const weight = isNow ? '700' : '400';
                         const size = isNow ? '1.08em' : '1em';
                         const td = (val, color, align) => `<td style="text-align:${align || 'right'};padding:10px 4px;color:${isNow ? (color || white) : gray};font-weight:${weight};font-size:${size};white-space:${align === 'left' ? 'nowrap' : 'normal'};border:1px solid rgba(255,255,255,0.08);">${val}</td>`;
-                        rows += `<tr>${td(monate[m], white, 'left')}${td(hS)}${td(blockName, blockColor)}${td(r1S, resC)}${td(r7S, ecoC)}${td(stdS, stdC)}${td(stdOffS, stdC)}${td(supS, supC)}${td(supOffS, supC)}</tr>`;
+                        rows += `<tr>${td(`${monate[m]} ${saisonEmoji[m]}`, white, 'left')}${td(hS)}${td(blockName, blockColor)}${td(r1S, resC)}${td(r7S, ecoC)}${td(stdS, stdC)}${td(stdOffS, stdC)}${td(supS, supC)}${td(supOffS, supC)}</tr>`;
                       }
                       // 27.09.2026, Nutzer-Wunsch "damit man die Rechnung versteht",
                       // danach "uff Bleiwueste": erste Fassung erklaerte den Rechenweg
@@ -4000,25 +4535,17 @@ views:
                       // Alle Zahlen live aus denselben Variablen wie die Tabellenzeilen,
                       // keine fest eingetippten Werte im Text.
                       const hNow = nsStunden[curMonth];
-                      const kwhNow = gw * hNow / 1000;
-                      const antNow = kk > 0 ? (kwhNow / kk * 100) : 100;
-                      const resNow = Math.min(15 + antNow, 95);
+                      const kwhNow = gw * (hNow + gap) / 1000;
+                      const antNow = kk > 0 && eta > 0 ? (kwhNow / (kk * eta) * 100) : 100;
+                      const resNow = Math.min(fl + antNow, 95);
                       const n1 = (v) => v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1});
                       const n0 = (v) => Math.round(v).toLocaleString('de-DE');
                       const chip = (txt, color, strong) => `<span style="display:inline-flex;align-items:center;padding:2px 9px;border-radius:9px;background:rgba(255,255,255,0.07);border:1px solid ${color};color:${white};font-size:0.88em;font-weight:${strong ? 700 : 600};white-space:nowrap;">${txt}</span>`;
                       const op = (t) => `<span style="opacity:0.75;">${t}</span>`;
                       return `<div style="font-size:var(--bg-fs-body, 1rem);line-height:1.5;color:${white};margin-bottom:10px;">
-                          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;margin-bottom:7px;">
-                            ${chip(n0(gw) + ' W', white, true)}${op('×')}${op('Nachtstunden')}${op('÷')}${chip(n1(kk) + ' kWh', white, true)}${op('+ 15')}${op('=')}${chip('Hausreserve', resC, true)}
-                          </div>
-                          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin-bottom:7px;">
-                            ${op('darüber:')}${chip('Eco ab +10', ecoC)}${chip('Standard ab +25', stdC)}${chip('Standard endet +20', stdC)}${chip('Super ab +40', supC)}${chip('Super endet +35', supC)}
-                          </div>
-                          <div style="text-align:center;font-size:0.88em;opacity:0.8;">
-                            Über 100 % = im Monat nicht erreichbar (—), daraus folgt <strong>Block</strong>.
-                          </div>
-                          <div style="text-align:center;font-size:0.88em;opacity:0.8;margin-top:3px;white-space:nowrap;">
-                            ${monate[curMonth]}: ${n1(kwhNow)}&nbsp;kWh ÷ ${n1(kk)}&nbsp;kWh = ${n0(antNow)}&nbsp;% + 15 = <strong>${n0(resNow)}&nbsp;%</strong>
+                          <div style="text-align:center;color:var(--secondary-text-color);margin:0 4px 1em;">
+                            <!-- 13.11.2026, Nutzer-Wunsch: kurze Erklaerung der Karte. -->
+                            Je länger die Nacht, desto mehr Akku braucht das Haus bis zum Morgen. Daraus ergibt sich je Monat die <strong style="color:${white};">Hausreserve</strong>. Die Miner laufen nur darüber, jeder Modus mit eigenem Abstand. Die Tabelle zeigt die Schwellen für jeden Monat.
                           </div>
                         </div>
                         <table style="width:100%;flex:1 1 auto;table-layout:fixed;border-collapse:collapse;font-size:var(--bg-fs-body, 1rem);">
@@ -4028,16 +4555,30 @@ views:
                             <col style="width:11%"><col style="width:11%"><col style="width:11%">
                           </colgroup>
                           <thead><tr>
-                            ${th('Monat').replace('text-align:right', 'text-align:left')}
-                            ${th('Nacht')}
-                            ${th('Block')}
-                            ${th('Haus&shy;reserve', resC)}
-                            ${th('Eco<br>ab', ecoC)}
-                            ${th('Std.<br>ab', stdC)}
-                            ${th('Std.<br>endet', stdC)}
-                            ${th('Super<br>ab', supC)}
-                            ${th('Super<br>endet', supC)}
+                            ${th('Monat', null, 'mdi:calendar-month').replace('text-align:right', 'text-align:left')}
+                            ${th('Nacht', null, 'mdi:weather-night')}
+                            ${th('Modi', null, 'mdi:lock-open-variant')}
+                            ${th('Haus&shy;reserve', resC, 'mdi:home-battery-outline')}
+                            ${th('Eco<br>ab', ecoC, 'mdi:leaf')}
+                            ${th('Standard<br>ab', stdC, 'mdi:gauge')}
+                            ${th('Standard<br>endet', stdC, 'mdi:gauge-low')}
+                            ${th('Super<br>ab', supC, 'mdi:rocket-launch')}
+                            ${th('Super<br>endet', supC, 'mdi:rocket-launch-outline')}
                           </tr></thead>
                           <tbody>${rows}</tbody>
-                        </table>`;
+                        </table>
+                          <div style="border:1px solid var(--divider-color);border-radius:12px;background:rgba(255,255,255,0.03);padding:12px 10px;margin-top:1.2em;">
+                          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;margin-bottom:7px;">
+                            ${chip(n0(gw) + ' W', white, true)}${op('× (Nacht +')}${chip(gap.toLocaleString('de-DE', {maximumFractionDigits: 2}) + ' h', white, true)}${op(') ÷ (')}${chip(n1(kk) + ' kWh', white, true)}${op('×')}${chip(n0(eta * 100) + ' %', white, true)}${op(') +')}${chip(n0(fl) + ' %', white, true)}${op('=')}${chip('Hausreserve', resC, true)}
+                          </div>
+                          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin-bottom:7px;">
+                            ${op('darüber:')}${chip('Eco ab +10', ecoC)}${chip('Standard ab +25', stdC)}${chip('Standard endet +20', stdC)}${chip('Super ab +40', supC)}${chip('Super endet +35', supC)}
+                          </div>
+                          <div style="text-align:center;font-size:0.88em;opacity:0.8;">
+                            Über 100 % = im Monat nicht erreichbar (—), daraus folgen die <strong>Modi</strong>.
+                          </div>
+                          <div style="text-align:center;font-size:0.88em;opacity:0.8;margin-top:3px;white-space:nowrap;">
+                            ${monate[curMonth]}: ${n1(kwhNow)}&nbsp;kWh ÷ ${n1(kk * eta)}&nbsp;kWh = ${n0(antNow)}&nbsp;% + ${n0(fl)} = <strong>${n0(resNow)}&nbsp;%</strong>${fl + antNow > 95 ? ' (Deckel)' : ''}
+                          </div>
+                          </div>`;
                     ]]]

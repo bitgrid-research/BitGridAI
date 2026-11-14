@@ -712,8 +712,134 @@ gar kein Eintrag.
 
 ---
 ---
+## ADR 033 — Hausreserve-Formel mit gemessener Abendlücke, Wirkungsgrad und Boden
+
+**Datum:** 13.11.2026 · **Status:** umgesetzt · **Ersetzt teilweise:** ADR 028 (Formel)
+
+**Kontext.** ADR 028 setzt die Hausreserve als Grundlast × längste Nacht ÷ Akku + 15 %
+(10 % Tiefentladeschutz + 5 % Puffer) und wurde ohne Herbst-/Wintermessung entschieden.
+Die erste Messung (092, Abschnitt 11; `src/data/research_cards.py`) zeigte: Die Miner
+schalten zuverlässig an der Schwelle ab, trotzdem stand der Akku nach Mining-Tagen morgens
+bei 6 % (September) bzw. 2 % (Oktober). Ursachen laut Messung seit 28.08.2026:
+- Abendlücke: Die Miner stoppen im Median **0,75 h** vor der Dunkelheit (40 Mining-Tage,
+  Q1–Q3 0,5–1,33 h); die Formel zählte erst ab Dunkelheit.
+- Wirkungsgrad: Je SoC-Prozent kamen beim Haus im Median nur **80 %** der rechnerischen
+  Energie an (22 Nächte ohne Leerlaufen, Q1–Q3 72–87 %), bezogen auf die bereits als
+  nutzbar gemessenen 12,5 kWh. Wirkt nicht doppelt, weil derselbe Bezug verwendet wird.
+- Grundlast: gemessen **570 W** (Median 569 W, unabhängig von der Außentemperatur,
+  r = −0,01 über 101 Nächte).
+- Boden: Die SMA entlädt nachweislich bis 0 % (über 3.000 Blöcke ≤ 1 % seit 09.2026). Der
+  Tiefentladeschutz liegt im Gerät, die 10 % im Boden waren eine falsche Annahme.
+
+Die Zwischenlösung vom selben Tag (Grundlast 600 W) versteckte Abendlücke und Verluste in
+der Grundlast; die Eingabe trug damit nicht mehr ihre Bedeutung.
+
+**Entscheidung (Nutzer, 13.11.2026).**
+
+> Hausreserve = Grundlast × (Nachtlänge + Abendlücke) ÷ (Akku × Wirkungsgrad) + Boden
+
+mit Grundlast 570 W, Abendlücke 0,75 h, Wirkungsgrad 80 %, **Boden 5 %**; Deckel 95 %,
+Aufschläge (+10/+20/+25/+35/+40) unverändert. Jede Größe ist ein eigenes `input_number`
+(`mvp_night_baseload_w`, `mvp_evening_gap_h`, `mvp_battery_efficiency_pct`,
+`mvp_reserve_floor_pct`) und an allen Stellen gleich gerechnet:
+`sensor.mvp_saison_status` (7 Templates), `automation.mvp_saison_automatik`, Tabelle
+"Saisonale Schwellwerte" (Dashboard v3), `research_cards.season_table`, BitHamster.
+
+**Folgen (mit 12,5 kWh).** Juni/Juli Voll (55/60 %), April/Mai/August Eco + Standard
+(72/62/69 %), September bis März Nur Eco (79 bis 95 %). Gegenüber ADR 028 mit 535 W: Super
+im August und Standard von September bis März entfallen, im Hochsommer bleibt Super erhalten.
+
+**Verworfene Alternativen.**
+- Grundlast 600 W ohne Formeländerung: wirkt ähnlich, aber die Eingabe verliert ihre
+  Bedeutung (Mischwert), Ursachen bleiben unsichtbar.
+- Neue Formel mit Boden 15 %: Super ganzjährig gesperrt, Standard nur Mai bis Juli; beruht
+  auf dem widerlegten 10-%-Tiefentladeschutz.
+- Wirkungsgrad 90 % (Herstellerwert): gegen die eigene Messung.
+- Jahreszeiten statt Monate: Die Nachtlast hängt nicht von der Temperatur ab, nur die
+  Nachtlänge ändert sich, und die ist bereits monatsgenau.
+
+**Grenzen / offen.** Abendlücke und Wirkungsgrad stammen aus Herbstnächten (28.08. bis
+12.11.2026), Wintermessung fehlt. Die Monatsurteile der Nachtbilanz bis 13.11.2026 beziehen
+sich auf Nächte unter der alten Formel. **Wiedervorlage Februar 2027** mit Winternächten;
+die vier Werte sind ohne Code-Änderung nachziehbar. Kein Einfluss auf den
+Entscheidungskern in `core/` (Regelpfad läuft in HA-YAML), deterministisch, alle Eingaben
+im Zustand von HA nachvollziehbar.
+
+Korrektur 14.11.2026: April von „Nur Eco“ auf „Eco + Standard“ berichtigt (Rechenfehler in
+der ADR, Code unverändert). Nachgerechnet mit `sensor.mvp_saison_status`: 5 + 570 W ×
+(11,07 h + 0,75 h) ÷ (12,5 kWh × 0,80) = 72,4 %, Standard ab 97,4 % ≤ 100 %.
+
+---
+
 > **Nächster Schritt:** Die ADRs erklären das "Warum". Im nächsten Schritt betrachten wir die wichtigsten Qualitätsanforderungen im Detail.
 >
 > 👉 Weiter zu **[10 - Qualitätsszenarien](../10_quality_scenarios/README.md)**
 >
 > 🔙 Zurück zur **[Kapitelübersicht](./README.md)**
+
+## ADR 034 — Entscheidungsprotokoll der HA-Steuerung in der Forschungs-DB
+
+**Datum:** 14.11.2026 · **Status:** umgesetzt (Recorder-Teil wirkt ab dem nächsten HA-Neustart)
+
+**Kontext.** Die Forschungs-DB hielt fest, was passiert ist (`energy_states`,
+`miner_states`), aber nicht, warum die Automatik so geschaltet hat. `decision_events`
+endet am 02.07.2026: Die Tabelle gehört dem Python-Kern, der nur im Testbetrieb lief.
+Produktiv steuern die Regeln in `packages/mvp_auto.yaml`. Deren Gründe lagen nur in Home
+Assistant (Recorder 365 Tage, `sensor.miner_N_log` hält 25 Einträge) und wären danach
+verloren. Der Recorder schloss außerdem alle `input_number`/`input_boolean` aus: Für einen
+vergangenen Tag ließ sich nicht sagen, welche Schwelle galt.
+
+**Entscheidung.**
+- `src/data/ha_decision_sync.py` holt nachts (03:50, nur lesend an HA, `INSERT OR IGNORE`)
+  drei Dinge in eigene Tabellen: `ha_decision_log` (Moduswechsel aus
+  `sensor.minerN_workmode_status` seit 07.05.2026, Regelwechsel mit Begründung aus
+  `sensor.miner_N_log` seit 31.08.2026), `ha_diagnose_log` (Soll/Ist-Diagnose seit
+  25.06.2026, eine Zeile je Wechsel von Urteil oder Art der Begründung) und
+  `settings_history` (berechnete Saisonschwellen seit 26.08.2026, Steuer-Helfer als
+  Snapshot, nach dem Neustart mit exaktem Änderungszeitpunkt).
+- Der Recorder zeichnet 19 Steuer-Helfer per `include: entities` auf.
+- Karten im Tab Forschung (`src/data/automation_cards.py`): Ungenutzter Überschuss mit
+  Grund, Schaltwechsel pro Tag gegen das Qualitätsziel, Übertemperatur und Schaltfehler.
+
+**Grundlage.** Transparenz und Reproduzierbarkeit: Eine Entscheidung ist nur
+nachvollziehbar, wenn Grund und geltende Parameter gespeichert sind.
+
+**Verworfene Alternativen.**
+- *In `decision_events` schreiben:* vermischt zwei Entscheidungssysteme (Kern R1 bis R5,
+  HA R1 bis R8 mit anderer Bedeutung). Eigene Tabellen halten die Herkunft eindeutig.
+- *Neue Automation in der Steuerung, die jede Entscheidung meldet:* Eingriff in den
+  Steuerpfad und ohne Rückwirkung. Die vorhandenen Sensoren reichten für das Nachholen.
+- *Gründe aus Messwerten nachberechnen:* wäre eine Rekonstruktion, kein Protokoll.
+  Gespeichert wird nur, was der Watchdog selbst geschrieben hat.
+
+**Grenzen (offen).**
+- Protokolliert ist der Regelzustand (zum Beispiel „R1 Stopp“, Cooldown), nicht der
+  Zweig der Automation, der geschaltet hat. Dafür bräuchte es eine Änderung in
+  `mvp_auto.yaml`; nicht entschieden.
+- Einzelne Handeingriffe sind nicht rekonstruierbar (das Logbook nennt nur das Gerät als
+  Auslöser), nur Phasen mit ausgeschalteter Automatik (Diagnose `auto_off`).
+- Schaltwechsel werden am gemeldeten Modus gezählt, Netzabbrüche eines Miners zählen mit.
+- Ein vollständiger Replay der Produktion ist damit nicht möglich.
+
+**Erste Befunde (Stand 14.11.2026, beschreibend, eine Anlage).** An 64 von 155 Tagen mit
+Mining gab es mehr als 2 Start/Stopp-Wechsel (Ziel aus 01.2 verfehlt). 41,8 Stunden mit
+über 1 kW Einspeisung bei stehenden Minern; wo eine Diagnose vorliegt (28,6 Stunden), war
+in 25,1 Stunden der Akku unter der Stopp-Schwelle. Das Qualitätsziel „Übertemperatur“ in
+01.2 nennt 85 °C, gemessen wird die Chip-Temperatur mit Schutzschwelle 112 °C: Die
+Definition in 01.2 ist noch anzupassen.
+
+
+**Korrektur am selben Tag (14.11.2026).** Zwei Befunde oben waren zu hoch:
+- Schaltwechsel: Ein Aus von unter 15 Minuten zwischen zwei Betriebsmodi ist ein
+  Verbindungsabbruch, kein Stopp und Start (die Automatik sperrt den Neustart nach einem
+  Stopp 15 Minuten). Die Pausen sind zweigeteilt (194 unter 5 Minuten, 324 über eine
+  Stunde, 23 dazwischen). Bereinigt: 17 von 155 Mining-Tagen über dem Ziel (11 %), mit
+  5 Minuten Grenze 21. Die 64 Tage zählten 204 Abbrüche als Schaltwechsel.
+- Datenbasis: 721 Blöcke (117 Stunden, 27.05. bis 25.09.2026) waren gespeichert, aber
+  nicht gemessen (eingefrorene Werte oder Hausverbrauch 0 W) und standen als
+  `quality=ok` in der DB. Entscheidung: in der DB als `quality=warn` markiert (nur
+  `quality` und `missing_signals_json`, Messwerte unverändert, Backup
+  `~/backup/bitgrid-vor-markierung-20261114.db`, `ha_history_sync --mark-unmeasured`),
+  statt sie nur in Auswertungen auszuschließen: Die Information gehört zu den Daten,
+  sonst muss jede künftige Auswertung den Detektor kennen. Tageskarten lassen Tage mit
+  mindestens einer Stunde davon aus. Neue Fälle markiert der Abgleich selbst.

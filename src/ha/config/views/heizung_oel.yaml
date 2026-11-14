@@ -35,6 +35,10 @@ styles:
   card:
     # 17.10.2026: fuellt die Spaltenhoehe (Karten nebeneinander buendig, www/bitgrid_wide.js).
     - height: 100%
+    # 13.11.2026: beide Tabellen gleich hoch bis zum Bildschirmrand (Pi 1600x900:
+    # Kopfleiste + Titel + Diagramme + Abstaende ~390 CSS-px).
+    - min-height: calc(100vh - var(--header-height, 56px) - 390px)
+    - box-sizing: border-box
     - background: var(--ha-card-background)
     - border-radius: var(--bgai-card-radius-v3)
     - overflow: hidden
@@ -44,9 +48,13 @@ styles:
   grid:
     - grid-template-areas: '"body"'
     - grid-template-columns: 1fr
+    - grid-template-rows: 1fr
+    - height: 100%
   custom_fields:
     body:
       - width: 100%
+      - height: 100%
+      - align-self: stretch
       - justify-self: stretch
       - box-sizing: border-box
 custom_fields:
@@ -90,7 +98,11 @@ custom_fields:
               }
               const totalMs = end - midnight.getTime();
               cache[cacheKey] = { ts: Date.now(), pct: totalMs > 0 ? (onMs / totalMs) * 100 : null };
-              try { this.requestUpdate && this.requestUpdate(); } catch (e) {}
+              // 13.11.2026: button-card v7 verwirft ein nacktes requestUpdate() (ihr
+              // shouldUpdate verlangt eine geaenderte Eigenschaft). _updateTimerMS ist
+              // die Eigenschaft, mit der v7 ihren eigenen update_timer ausloest, die
+              // Aenderung erzwingt das Neuzeichnen. requestUpdate bleibt als Fallback.
+              try { this._updateTimerMS = Date.now(); this.requestUpdate && this.requestUpdate(); } catch (e) {}
             })
             .catch(() => { cache[cacheKey] = { ts: Date.now(), pct: null }; });
         }
@@ -102,28 +114,29 @@ custom_fields:
 
       const row = (icon, label, val, color=null) => {
         const c = color ? `color:${color};` : 'color:var(--primary-text-color);';
-        return `<div style="display:flex;align-items:center;padding:7px 2px;gap:8px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <ha-icon icon="${icon}" style="--mdc-icon-size:15px;color:rgba(255,255,255,0.7);"></ha-icon>
+        // 13.11.2026 (Nutzer-Wunsch, Pi 1600x900): Schrift wie im Tab Muell
+        // (--bg-fs-body x 1.15), Zeilen teilen sich die Kartenhoehe (flex:1).
+        return `<div style="display:flex;align-items:center;padding:3px 2px;gap:12px;flex:1 0 auto;">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <ha-icon icon="${icon}" style="--mdc-icon-size:18px;color:rgba(255,255,255,0.75);"></ha-icon>
           </div>
-          <span style="flex:1;min-width:0;color:var(--primary-text-color);font-size:0.92rem;font-weight:600;">${label}</span>
-          <span style="font-size:0.95rem;font-weight:700;${c}white-space:nowrap;">${val}</span>
+          <span style="flex:1;min-width:0;text-align:left;color:var(--primary-text-color);font-size:calc(var(--bg-fs-body, 1rem) * 1.15);font-weight:600;">${label}</span>
+          <span style="font-size:calc(var(--bg-fs-body, 1rem) * 1.25);font-weight:700;${c}white-space:nowrap;">${val}</span>
         </div>`;
       };
       const sep = '<div style="border-top:1px solid rgba(255,255,255,0.06);margin:0 2px;"></div>';
 
       const rows = [
         row('mdi:power', 'Status', running ? 'An' : 'Aus', running ? '#4CAF50' : 'var(--secondary-text-color)'),
-        row('mdi:flash', 'Aktuelle Leistung', fmtW(powerW), '#8D6E63'),
-        row('mdi:counter', 'Energie heute', fmtKwh(kwhToday), '#8D6E63'),
+        row('mdi:flash', 'Aktuelle Leistung', fmtW(powerW), '#fbb210'),
+        row('mdi:counter', 'Energie heute', fmtKwh(kwhToday), '#fbb210'),
         row('mdi:counter', 'Energie gesamt', fmtKwh(kwhTotal)),
-        row('mdi:chart-donut', 'Anteil Tag aktiv', fmtPct(dutyPct), '#8D6E63'),
+        row('mdi:chart-donut', 'Anteil Tag aktiv', fmtPct(dutyPct), '#fbb210'),
       ].join(sep);
 
-      return `<div style="display:flex;flex-direction:column;width:100%">
-        <div style="font-size:1rem;font-weight:700;color:var(--primary-text-color);margin-bottom:6px;padding-left:2px;">Heizung (Öl)</div>
+      return `<div style="display:flex;flex-direction:column;width:100%;min-height:calc(100vh - var(--header-height, 56px) - 425px);">
         ${rows}
-        <div style="font-size:0.72rem;color:var(--secondary-text-color);opacity:0.65;margin-top:8px;padding-left:2px;">
+        <div style="font-size:var(--bg-fs-secondary, 0.875rem);color:var(--secondary-text-color);opacity:0.75;margin-top:8px;padding-left:2px;">
           Elektrische Aufnahme des Brenners (Shelly-Proxy), kein Ölverbrauch.
         </div>
       </div>`;

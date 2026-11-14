@@ -1,0 +1,69 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# BitHamster: Auftraege und Chat (Tab "Forschung", Karte "Frag den Hamster")
+#
+# Seit 13.11.2026. Die Knoepfe im Dashboard tragen hier nur einen Auftrag ein
+# ("<auftrag>|<zeitstempel>"). Ein Dienst auf dem HA-Host (systemd-User-Dienst
+# bithamster-ask, src/explain/bithamster_ki.py --watch) liest diesen Eintrag
+# alle 3 s per GET, baut daraus einen festen Kontext und fragt das lokale
+# Modell auf GX10.
+# Die Antwort landet in www/bithamster_ask.json.
+#
+# Nur lesend: Weder das Modell noch der Job schalten etwas. Diese Helfer
+# beschreibt ausschliesslich der Mensch ueber das Dashboard. Keine Automation
+# reagiert auf sie, sie steuern nichts am Energiesystem.
+# ══════════════════════════════════════════════════════════════════════════════
+
+bithamster:
+
+  input_text:
+    # Letzter Auftrag, Format "<auftrag>|<zeitstempel>". Der Zeitstempel macht
+    # jeden Klick eindeutig, auch denselben Knopf zweimal hintereinander.
+    bithamster_auftrag:
+      name: "BitHamster: Auftrag"
+      icon: mdi:robot-happy-outline
+      max: 255
+    bithamster_frage:
+      name: "Deine Frage an den Hamster"
+      icon: mdi:chat-question-outline
+      max: 255
+      # Leer statt "unknown" nach dem Laden (sonst steht "unknown" im Feld).
+      initial: ""
+
+  input_boolean:
+    # Umschalter in der Hamster-Karte (Tab Forschung): aus = Analyse,
+    # an = "Frag mich" (Auftraege + Chat). Reine Anzeige-Einstellung.
+    bithamster_fragemodus:
+      name: "BitHamster: Fragemodus"
+      icon: mdi:chat-processing-outline
+
+  input_select:
+    # Tab fuer den Auftrag "Tab erklaeren". Titel wie in bitgrid_dashboard_v3.yaml.
+    bithamster_tab:
+      name: "Welcher Tab? (erklären / verbessern)"
+      icon: mdi:tab-search
+      options:
+        - Übersicht
+        - Steuerung
+        - Bitcoin
+        - Energie
+        - Heizung
+        - Grundriss
+        - Müll
+        - Forschung
+        - Einstellungen
+
+  script:
+    bithamster_auftrag:
+      alias: "BitHamster: Auftrag stellen"
+      icon: mdi:robot-happy-outline
+      mode: queued
+      fields:
+        auftrag:
+          description: "optimierung | aufzeichnung | fehler | verbesserung | tab | tabcheck | gesamtcheck | karten | entscheidung | schalten | befunde | thesis_woche | thesis_befunde | thesis_risiken | frage"
+          example: fehler
+      sequence:
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.bithamster_auftrag
+          data:
+            value: "{{ auftrag }}|{{ now().strftime('%Y-%m-%dT%H:%M:%S') }}"

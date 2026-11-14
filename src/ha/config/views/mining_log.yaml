@@ -44,6 +44,9 @@ card_mod:
       overflow: hidden !important;
       contain: paint !important;
     }
+    /* 13.11.2026: Innenabstand und Abstaende wie Mining-Effizienz
+       (www/bitgrid_bar_trend_chart.js .bgai-card padding 14px 18px). */
+    #root { padding: 14px 18px; gap: 6px !important; box-sizing: border-box; }
 cards:
 
   # ── Zeitraum-Typ: Woche / Monat ──────────────────────────────────────
@@ -67,6 +70,7 @@ cards:
                 [[[ return entity.state === 'Woche' ? 'var(--secondary-background-color)' : 'none' ]]]
             - box-shadow: none
             - border: none
+            - border-radius: 8px
             - padding: 6px
           name:
             - font-size: var(--bg-fs-secondary)
@@ -91,6 +95,7 @@ cards:
                 [[[ return entity.state === 'Monat' ? 'var(--secondary-background-color)' : 'none' ]]]
             - box-shadow: none
             - border: none
+            - border-radius: 8px
             - padding: 6px
           name:
             - font-size: var(--bg-fs-secondary)
@@ -119,8 +124,11 @@ cards:
             - box-shadow: none
             - border: none
             - flex: "0 0 auto"
+            - padding: 0
+            - width: 36px
+            - justify-self: start
           icon:
-            - color: var(--secondary-text-color)
+            - color: var(--bgai-section-label-v3)
             - width: 28px
             - height: 28px
 
@@ -166,7 +174,7 @@ cards:
                 label = `${fmt(monday)} – ${fmt(sunday)} ${sunday.getFullYear()}`;
               }
               const tag = offset === 0 ? ' (aktuell)' : '';
-              return `<div style="text-align:center;font-size:var(--bg-fs-body);font-weight:700;color:var(--primary-text-color);margin-top:13px;">${label}${tag}</div>`;
+              return `<div style="text-align:center;font-size:var(--bg-fs-body);font-weight:700;color:var(--primary-text-color);">${label}${tag}</div>`;
             ]]]
 
       - type: custom:button-card
@@ -185,8 +193,11 @@ cards:
             - box-shadow: none
             - border: none
             - flex: "0 0 auto"
+            - padding: 0
+            - width: 36px
+            - justify-self: end
           icon:
-            - color: var(--secondary-text-color)
+            - color: var(--bgai-section-label-v3)
             - width: 28px
             - height: 28px
 
@@ -206,7 +217,7 @@ cards:
         - background: transparent
         - box-shadow: none
         - border: none
-        - padding: 12px 16px
+        - padding: 8px 0 0
       grid:
         - grid-template-areas: '"mining_log"'
         - grid-template-columns: 1fr
@@ -344,7 +355,8 @@ cards:
           const todayInRange = todayIso >= rangeStartIso && todayIso <= rangeEndIso;
           const allRows = todayInRange ? [todayRow, ...parsedEntries] : parsedEntries;
 
-          const cols = '50px 42px 42px 54px 36px 36px 40px 44px 44px 44px 50px 46px';
+          // 13.11.2026: Spalten teilen sich die volle Kartenbreite (Tabelle mittig, kein Leerraum rechts).
+          const cols = 'minmax(0,1.05fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr) repeat(3, minmax(0,1.15fr)) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr) minmax(0,1.15fr)';
           // 26.09.2026, Nutzer-Wunsch "leichte Trennlinien zwischen den
           // Feldern": Spalten-Trenner als border-right je Zelle (ausser der
           // letzten), per <style> im eigenen Shadow-Root dieser Karte (gleiches
@@ -359,18 +371,18 @@ cards:
           // cols nicht aufblaeht (Default waere content-box, die Zelle liefe
           // dann in den 4px-Gap).
           const gridCss = `<style>
-            .bgml-row > div { padding: 4px 4px 4px 0; box-sizing: border-box; }
+            .bgml-row > div { padding: 9px 3px; box-sizing: border-box; }
             .bgml-row > div:not(:last-child) { border-right: 2px solid rgba(255,255,255,0.08); }
           </style>`;
-          const th = (t,r) => `<div style="font-size:var(--bg-fs-label);color:var(--secondary-text-color);font-weight:600;${r?'text-align:right;':''}">${t}</div>`;
+          const th = (t,r) => `<div style="font-size:var(--bg-fs-secondary);line-height:1.2;color:var(--secondary-text-color);font-weight:600;align-self:end;white-space:normal;overflow-wrap:break-word;text-align:center;">${t}</div>`;
           const headers = `<div class="bgml-row" style="display:grid;grid-template-columns:${cols};gap:4px;padding:0 2px;border-bottom:2px solid var(--divider-color);">
-            ${th('Datum')}${th('Start',1)}${th('Stop',1)}${th('Ges.',1)}${th('Eco',1)}${th('Std',1)}${th('Sup',1)}${th('kWh',1)}${th('TH/s',1)}${th('SATs',1)}${th('S/kWh',1)}${th('€/kWh',1)}
+            ${th('Datum')}${th('Start',1)}${th('Stopp',1)}${th('Laufzeit gesamt',1)}${th('Eco',1)}${th('Standard',1)}${th('Super',1)}${th('Energie (kWh)',1)}${th('Pool-Hash&shy;rate (TH/s)',1)}${th('Sats',1)}${th('Sats pro kWh',1)}${th('Euro pro kWh',1)}
           </div>`;
           const rowHtml = (r) => {
             const hl = r.live ? 'background:rgba(255,255,255,0.05);border-radius:5px;' : '';
             const dc = r.live ? 'var(--primary-text-color)' : 'var(--secondary-text-color)';
             const fw = r.live ? '600' : '400';
-            const c  = (v,color) => `<div style="font-size:var(--bg-fs-secondary);text-align:right;color:${color};">${v}</div>`;
+            const c  = (v,color) => `<div style="font-size:var(--bg-fs-body);text-align:center;color:${color};">${v}</div>`;
             const sat    = r.live ? '—' : fmtSat(btcMap[r.d]);
             const ths    = String(settleThs[r.d] ?? thsApi[r.d] ?? thsLog[r.d] ?? csvThs[r.d] ?? (r.live ? liveThs : null) ?? '—').replace('.', ',');
             const satNum = (!r.live && btcMap[r.d] > 0) ? Math.round(btcMap[r.d] * 1e8) : null;
@@ -385,7 +397,7 @@ cards:
               : earnedEur >= 0.078 ? '#FFFFFF'
               : '#9E9E9E';
             return `<div class="bgml-row" style="display:grid;grid-template-columns:${cols};gap:4px;padding:0 2px;${hl}">
-              <div style="font-size:var(--bg-fs-secondary);color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
+              <div style="font-size:var(--bg-fs-body);text-align:center;color:${dc};font-weight:${fw};">${fmtDt(r.d)}</div>
               ${c(r.on,'inherit')}${c(r.off,'inherit')}
               ${c(fmtHm(r.tot),'var(--primary-text-color)')}
               ${c(fmtH1(r.ec)+'h','#4CAF50')}

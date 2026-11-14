@@ -321,6 +321,6 @@ Dateien zusätzlich nach `rgba(255,255,255,` und `rgba(0,0,0,` suchen.
   kein Fix mehr. Entfernen erst nach einem Live-Check, nicht blind.
 - Kontrast der sechs Datenrollen auf `#313a55` ist nicht systematisch geprüft.
 - `bitgrid_dashboard_v1.yaml` und `bitgrid_dashboard_v2.yaml` liegen noch im
-  Repo, sind aber in HA nicht registriert. `views/ki_bitsy.yaml` und
-  `views/ki_beratung.yaml` hängen nur noch an v2, sind also aktuell über kein
-  laufendes Dashboard erreichbar.
+  Repo, sind aber in HA nicht registriert. Der alte ₿itsy-Chat-Tab (v2) ist
+  seit 13.11.2026 samt Dienst entfernt; der BitHamster "Bitsy" lebt im Tab
+  Forschung (`src/explain/bithamster_ki.py`).

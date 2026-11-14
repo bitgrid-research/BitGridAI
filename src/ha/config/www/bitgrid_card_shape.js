@@ -150,6 +150,20 @@ const FORECAST_CSS = `
   .forecast-image-icon > img.bgai-weather-png{width:var(--bgai-forecast-icon-size-v3);height:var(--bgai-forecast-icon-size-v3);object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;display:block;filter:drop-shadow(0 0 1px rgba(0,0,0,.6));}
   .forecast .temp{grid-area:temp;font-size:var(--bg-fs-body)!important;font-weight:normal!important;color:var(--secondary-text-color)!important;text-shadow:var(--bgai-header-halo-v3)!important;}
   .forecast .temp::before{content:"/";margin-right:0;font-weight:700;color:var(--secondary-text-color);}
+  /* 13.11.2026, Tagesvorhersage (forecast_type daily, Nutzer-Wunsch "ausgerichtet,
+     optisch was hermachen"): Tagesspalten haben zusaetzlich .templow. Das
+     Stunden-Raster oben hatte dafuer keinen Platz, die Tiefsttemperatur rutschte
+     linksbuendig in eine eigene Zeile. Eigenes Raster nur fuer Spalten mit
+     .templow (:has), Stundenkarten bleiben unveraendert: Icon gross, Wochentag
+     fett, darunter "Hoch / Tief" mittig in einer Zeile, Hoch weiss und fett,
+     Tief im Grauton. */
+  .forecast > div:has(.templow){grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;grid-template-areas:"icon icon" "label label" "temp templow";row-gap:4px!important;column-gap:0!important;justify-content:stretch!important;}
+  .forecast > div:has(.templow) .forecast-image-icon{--bgai-forecast-icon-size-v3:56px;margin-bottom:2px;}
+  .forecast > div:has(.templow) > div:first-child{font-weight:700!important;color:var(--primary-text-color)!important;letter-spacing:0.04em;text-transform:uppercase;}
+  .forecast > div:has(.templow) .temp{justify-self:end!important;font-weight:700!important;color:var(--primary-text-color)!important;font-size:calc(var(--bg-fs-body) * 1.15)!important;}
+  .forecast > div:has(.templow) .temp::before{content:none;}
+  .forecast > div:has(.templow) .templow{grid-area:templow;justify-self:start!important;font-size:var(--bg-fs-body)!important;color:var(--secondary-text-color)!important;text-shadow:var(--bgai-header-halo-v3)!important;}
+  .forecast > div:has(.templow) .templow::before{content:"/";margin:0 5px;color:var(--secondary-text-color);}
 `;
 
 // 12.09.2026, Nutzer-Wunsch "eigene Pixel-Art-PNGs statt der eingebauten
@@ -236,6 +250,60 @@ function applyTodayIcon(node, todayEl, hass) {
     img.dataset.condition = String(condition);
     img.src = weatherIconUrl(condition);
   }
+}
+
+// 13.11.2026: clock-weather-card v3 (vom Marketplace am 12.11. eingespielt)
+// hat eine andere Struktur als v2. Statt clock-weather-card-today-left
+// img.grow-img rendert sie clock-weather-card-header > clock-weather-card-icon
+// > img, und ihre Unterelemente haben KEINEN eigenen Shadow-Root
+// (createRenderRoot gibt this zurueck): alles liegt im Shadow-Root der Karte.
+// Die Karte setzt src selbst neu, sobald sich die Wetterlage aendert. Der
+// load-Listener tauscht dann sofort zurueck, der 5-s-Takt von apply() ist das
+// Netz darunter. Gleiche Bedingungsquelle wie applyTodayIcon (v2).
+// Nachts zeigt die Karte fuer "sunny" ein Mond-Icon; das wird hier
+// nachgebildet, sonst stuende nachts eine Pixel-Sonne im Kopf.
+// 13.11.2026, Nutzer-Befund "Sonne zu gross, Freitag abgeschnitten":
+//  - img: v3 vergroessert das Bild auf 128/96 der Box und schneidet den Rand
+//    per negativem margin weg (passend zu ihren Meteocons mit Leerraum). Die
+//    Pixel-PNGs reichen bis an den Rand, Strahlen wurden abgeschnitten. Daher
+//    Bild = Box, kein Beschnitt.
+//  - Textzeilen: v3 setzt line-height:1 + overflow:hidden je Segment, die
+//    Unterlaenge (g in "Freitag") fiel heraus. Groessere Zeilenhoehe, Ueberlauf
+//    sichtbar.
+//  - ha-card: wird von bitgrid_wide.js auf Zeilenhoehe gestreckt, der Kopf
+//    klebte oben. Senkrecht zentriert, wie in v2.
+const CLOCK_HEADER_V3_CSS = `
+  ha-card{display:flex!important;flex-direction:column!important;justify-content:center!important;}
+  clock-weather-card-header > clock-weather-card-icon img{width:100%!important;height:auto!important;margin:0!important;object-fit:contain!important;image-rendering:crisp-edges!important;image-rendering:pixelated!important;filter:none!important;}
+  clock-weather-card-header-details{overflow:visible!important;row-gap:4px!important;}
+  clock-weather-card-header-details-row > *{line-height:1.25!important;overflow:visible!important;padding-block:0!important;margin-block:0!important;}
+  clock-weather-card-header-details-row > clock-weather-card-text-segment{margin-inline-start:0!important;}
+`;
+
+function headerIconCondition(node, hass) {
+  const cfg = node.config || node._config || {};
+  const st = hass.states[cfg.entity || WEATHER_ENTITY];
+  let condition = st && st.state;
+  const sun = hass.states[cfg.sun_entity || "sun.sun"];
+  if (condition === "sunny" && sun && sun.state === "below_horizon") condition = "clear-night";
+  return condition;
+}
+
+function applyHeaderIconV3(node, hass) {
+  if (!hass || !node.shadowRoot) return;
+  const img = node.shadowRoot.querySelector("clock-weather-card-header > clock-weather-card-icon img");
+  if (!img) return;
+  const url = weatherIconUrl(headerIconCondition(node, hass));
+  if (!img.__bgaiIconListener) {
+    img.__bgaiIconListener = true;
+    img.addEventListener("load", () => {
+      const ha = document.querySelector("home-assistant");
+      if (!ha || !ha.hass) return;
+      const want = weatherIconUrl(headerIconCondition(node, ha.hass));
+      if (img.getAttribute("src") !== want) img.setAttribute("src", want);
+    });
+  }
+  if (img.getAttribute("src") !== url) img.setAttribute("src", url);
 }
 
 // Der Replay-Neustart per Tipp aufs Heute-Wetter-Icon (15.10.2026) ist am
@@ -414,8 +482,7 @@ setInterval(() => {
   const hour = (hass.states["sensor.lab_sim_clock"]?.state || "").slice(0, 2);
   if (hour && hour !== lastSimHour) {
     lastSimHour = hour;
-    forecastCacheAt = Date.now();
-    refreshForecastCache(hass).then(apply);
+    Promise.all(Object.keys(forecastCaches).map((key) => refreshForecastCache(hass, key))).then(apply);
   }
 }, 250);
 
@@ -498,24 +565,43 @@ function patchClock(node) {
 // ueberein, also einfache Index-Zuordnung ohne weitere Filterung noetig).
 // Gecacht (5 min TTL, Forecast aendert sich nicht minuetlich) statt bei jedem
 // apply()-Tick (alle 5s/800ms) neu abzufragen.
-let forecastCache = null; // Array<condition-string>, in Render-Reihenfolge
-let forecastCacheAt = 0;
-let forecastEntity = WEATHER_ENTITY; // Entity der gerenderten Prognose-Karte
+// 13.11.2026, Nutzer-Wunsch "Tagesvorhersage statt Stunden": der Cache war
+// ein einziges Array, fest mit type "hourly" abgefragt. Eine Karte mit
+// forecast_type daily haette damit die Icons der naechsten Stunden auf ihre
+// Tagesspalten bekommen. Jetzt je Entity UND Vorhersagetyp getrennt
+// ("weather.x|daily"), jede Karte meldet ihren Schluessel an.
+const forecastCaches = {}; // key -> { list: Array<condition>, at: ms }
 const FORECAST_CACHE_TTL_MS = 5 * 60 * 1000;
 
-async function refreshForecastCache(hass) {
+function forecastKeyOf(node) {
+  const cfg = node._config || {};
+  const ent = cfg.entity || WEATHER_ENTITY;
+  const type = cfg.forecast_type === "daily" || cfg.forecast_type === "twice_daily"
+    ? cfg.forecast_type : "hourly";
+  return ent + "|" + type;
+}
+
+function forecastEntry(key) {
+  if (!forecastCaches[key]) forecastCaches[key] = { list: null, at: 0 };
+  return forecastCaches[key];
+}
+
+async function refreshForecastCache(hass, key) {
+  const entry = forecastEntry(key);
+  entry.at = Date.now(); // vor dem await setzen, keine ueberlappenden Calls
+  const [entity, type] = key.split("|");
   try {
     const result = await hass.callWS({
       type: "call_service",
       domain: "weather",
       service: "get_forecasts",
-      service_data: { entity_id: forecastEntity, type: "hourly" },
+      service_data: { entity_id: entity, type },
       return_response: true,
     });
     const entries = result && result.response &&
-      result.response[forecastEntity] && result.response[forecastEntity].forecast;
+      result.response[entity] && result.response[entity].forecast;
     if (Array.isArray(entries)) {
-      forecastCache = entries.map((e) => e.condition);
+      entry.list = entries.map((e) => e.condition);
     }
   } catch (e) {
     // API/Netzwerk-Hickser: alten Cache behalten, naechster TTL-Ablauf
@@ -531,10 +617,11 @@ async function refreshForecastCache(hass) {
 // (z. B. beim naechsten stuendlichen Forecast-Update) das <img> wieder
 // entfernt haben sollte.
 function applyForecastIcons(node) {
-  if (!forecastCache) return;
+  const list = forecastEntry(forecastKeyOf(node)).list;
+  if (!list) return;
   const cols = node.shadowRoot.querySelectorAll(".forecast-image-icon");
   cols.forEach((col, i) => {
-    const condition = forecastCache[i];
+    const condition = list[i];
     let img = col.querySelector("img.bgai-weather-png");
     if (!img) {
       col.innerHTML = "";
@@ -674,6 +761,12 @@ function styleCard(node) {
       const haEl = document.querySelector("home-assistant");
       applyTodayIcon(node, todayEl, haEl && haEl.hass);
     }
+    // v3-Struktur (s. applyHeaderIconV3).
+    if (sr.querySelector("clock-weather-card-header")) {
+      css += CLOCK_HEADER_V3_CSS;
+      const haEl = document.querySelector("home-assistant");
+      applyHeaderIconV3(node, haEl && haEl.hass);
+    }
     if (sr.querySelector("clock-weather-card-forecast")) {
       css += CLOCK_FORECAST_CSS;
     }
@@ -681,11 +774,7 @@ function styleCard(node) {
   if (node.tagName === "HUI-WEATHER-FORECAST-CARD") {
     // Icons fuer die Entity, die diese Karte TATSAECHLICH zeigt (Lab: das
     // Replay-Wetter weather.lab_sim_weather), nicht pauschal WEATHER_ENTITY.
-    const ent = (node._config && node._config.entity) || WEATHER_ENTITY;
-    if (ent !== forecastEntity) {
-      forecastEntity = ent;
-      forecastCacheAt = 0;
-    }
+    forecastEntry(forecastKeyOf(node)); // Schluessel anmelden, apply() holt ihn
     css += FORECAST_CSS;
     applyForecastIcons(node);
     applyForecastDividers(node);
@@ -911,9 +1000,10 @@ function apply() {
   // Im Lab-Replay wechselt die Sim-Stunde alle ~40 s, der 5-min-Cache waere zu
   // traege; dort genuegt der 5-s-Takt von apply().
   const ttl = simNowParts(hass) ? 4000 : FORECAST_CACHE_TTL_MS;
-  if (hass && Date.now() - forecastCacheAt > ttl) {
-    forecastCacheAt = Date.now(); // vor dem await setzen, keine ueberlappenden Calls
-    refreshForecastCache(hass);
+  if (hass) {
+    for (const key of Object.keys(forecastCaches)) {
+      if (Date.now() - forecastCaches[key].at > ttl) refreshForecastCache(hass, key);
+    }
   }
 }
 
@@ -945,8 +1035,12 @@ const PRELOAD_IMAGES = [
   "/local/floorplan/base_night.png?version=63BD476D3D52319852B4400403D2014C",
   "/local/garage_floorplan/base.png?version=AE860AAC9603D3C1A58425DF8407C622",
   "/local/garage_floorplan/base_night.png?version=668308AB46BB030E90EA5DAEDF717654",
-  "/local/bg_grass.jpg?v=20260926",
-  "/local/bg_grass_night.jpg?v=20260926",
+  // Hintergrund der aktuellen Jahreszeit (14.11.2026, wie bitgrid_wide.js).
+  ...(() => {
+    const m = new Date().getMonth() + 1;
+    const sfx = [12, 1, 2].includes(m) ? "_winter" : [3, 4, 5].includes(m) ? "_fruehling" : [9, 10, 11].includes(m) ? "_herbst" : "";
+    return [`/local/bg_grass${sfx}.jpg?v=20261114`, `/local/bg_grass${sfx}_night.jpg?v=20261114`];
+  })(),
 ];
 setTimeout(() => {
   PRELOAD_IMAGES.forEach((src) => {

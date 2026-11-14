@@ -168,6 +168,15 @@ MINER_ENTITY_MAP: dict[str, dict[str, str]] = {
 _RELAY_ON_STATES = {"AN", "an", "on", "ON", "True", "true"}
 
 _CRITICAL_FIELDS = {"pv_power_w", "house_load_w", "battery_soc_pct"}
+# 14.11.2026: windows that were filled, not measured. The house load changes
+# every few seconds while Home Assistant runs; if its newest reading is older
+# than this, HA was down and the block only repeats the last value. And the
+# house never draws 0 W: an exact 0 is a lost source behind a float(0)
+# template. Both mark the block quality=warn with a reason in
+# missing_signals; until then they were stored as "ok" (07./08.08.2026: 23 h
+# of identical numbers, 27.05.2026: 13 h of 0 W while the battery charged).
+_STALE_FIELD = "house_load_w"
+STALE_AFTER = timedelta(minutes=30)
 _HEARTBEAT_FALLBACK = 5.0  # sec — gilt als "ok" wenn kein Signal vorhanden
 
 
@@ -396,9 +405,13 @@ def resample_to_blocks(
         block_id = t.strftime("%Y-%m-%dT%H:%M:%S")
 
         values: dict[str, float | None] = {}
+        stale = False
         for entity_id, field in entity_map:
             readings = entity_readings.get(entity_id, [])
             values[field] = _last_value_in_window(readings, t, win_end)
+            if field == _STALE_FIELD:
+                newest = [ts for ts, v in readings if ts < win_end and v is not None]
+                stale = not newest or win_end - max(newest) > STALE_AFTER
 
         # Qualitaets-Assessment.
         # quality haengt weiter nur an den kritischen Dauersignalen (die sind
@@ -413,6 +426,13 @@ def resample_to_blocks(
             quality = "error" if len(critical_missing) >= 2 else "warn"
         else:
             quality = "ok"
+        if values.get(_STALE_FIELD) is not None:
+            if stale:
+                missing.append(f"{_STALE_FIELD}:held")
+            elif values.get(_STALE_FIELD) == 0:
+                missing.append(f"{_STALE_FIELD}:zero")
+            if (stale or values.get(_STALE_FIELD) == 0) and quality == "ok":
+                quality = "warn"
 
         pv = values.get("pv_power_w") or 0.0
         load = values.get("house_load_w") or 0.0
@@ -442,11 +462,68 @@ def resample_to_blocks(
                 heizstab_power_w=values.get("heizstab_power_w"),
                 energy_price_ct_kwh=values.get("energy_price_ct_kwh"),
                 pv_forecast_kw=values.get("pv_forecast_kw"),
+                # Bugfix 13.11.2026: these six were fetched and resampled since
+                # 23.08.2026 but never handed to EnergyState, so the columns
+                # stayed NULL for every synced block. Backfill: backfill_columns().
+                **{f: values.get(f) for f in BACKFILL_FIELDS},
             )
         )
         t = win_end
 
     return states
+
+
+# Weather/heating/sun fields that resample_to_blocks dropped until 13.11.2026.
+BACKFILL_FIELDS: tuple[str, ...] = (
+    "cloud_coverage_pct",
+    "outdoor_temp_c",
+    "outdoor_humidity_pct",
+    "heizung_energy_kwh_today",
+    "sun_azimuth_deg",
+    "sun_elevation_deg",
+)
+
+
+def backfill_columns(
+    start: datetime,
+    end: datetime,
+    conn: sqlite3.Connection,
+    ha_base_url: str,
+    token: str,
+    fields: tuple[str, ...] = BACKFILL_FIELDS,
+) -> dict[str, int]:
+    """Fill NULL ``fields`` of EXISTING blocks in [start, end) from HA history.
+
+    Only for the columns resample_to_blocks dropped (bug until 13.11.2026).
+    Never touches any other column and never overwrites a value that is
+    already there (``UPDATE ... WHERE col IS NULL``), so measured
+    research data cannot change; blocks that do not exist are not created.
+    Same resampling (last value in the 10-minute window, forward-filled) as
+    the nightly sync. Returns the number of filled cells per column.
+    """
+    field_to_entity = {f: e for e, f in ENTITY_MAP if f in fields}
+    entity_ids = list(field_to_entity.values())
+    readings = fetch_history(start, end, entity_ids, ha_base_url, token)
+    if not readings:
+        log.warning("Backfill: keine HA-Daten fuer %s", ", ".join(entity_ids))
+        return {f: 0 for f in fields}
+    sub_map = [(e, f) for f, e in field_to_entity.items()]
+    blocks = resample_to_blocks(readings, sub_map, start, end)
+    filled = {f: 0 for f in field_to_entity}
+    with conn:
+        for state in blocks:
+            for field in field_to_entity:
+                value = getattr(state, field)
+                if value is None:
+                    continue
+                cur = conn.execute(
+                    f"UPDATE energy_states SET {field} = ? "  # field from constant
+                    f"WHERE block_id = ? AND {field} IS NULL",
+                    (value, state.block_id),
+                )
+                filled[field] += cur.rowcount
+    log.info("Backfill fertig: %s", filled)
+    return filled
 
 
 def apply_battery_power(
@@ -764,6 +841,44 @@ def sync_miners(
     return added, skipped
 
 
+def mark_unmeasured(conn: sqlite3.Connection) -> dict[str, int]:
+    """Mark stored-but-not-measured blocks written before 14.11.2026.
+
+    Uses the detector of recording_status (suspect_runs, see there) and gives
+    those blocks the same marks the sync writes since 14.11.2026:
+    quality ok -> warn and "house_load_w:held" / "house_load_w:zero" in
+    missing_signals_json. Measured values are not touched. Idempotent: a
+    block that already carries the mark is skipped. Reversible: every changed
+    block carries exactly one of the two marks.
+    """
+    from src.data.recording_status import suspect_runs
+
+    rows = conn.execute(
+        "SELECT block_id, house_load_w, battery_soc_pct, grid_import_w,"
+        " pv_power_w FROM energy_states ORDER BY block_id"
+    ).fetchall()
+    changed = {"held": 0, "zero": 0}
+    for run in suspect_runs(rows):
+        mark = f"{_STALE_FIELD}:{run['kind']}"
+        for block_id, quality, raw in conn.execute(
+            "SELECT block_id, quality, missing_signals_json FROM energy_states"
+            " WHERE block_id >= ? AND block_id <= ?",
+            (run["from"], run["to"]),
+        ).fetchall():
+            signals = json.loads(raw or "[]")
+            if mark in signals:
+                continue
+            signals.append(mark)
+            conn.execute(
+                "UPDATE energy_states SET quality = ?, missing_signals_json = ?"
+                " WHERE block_id = ?",
+                ("warn" if quality == "ok" else quality, json.dumps(signals), block_id),
+            )
+            changed[run["kind"]] += 1
+    conn.commit()
+    return changed
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -800,6 +915,22 @@ def _parse_args() -> argparse.Namespace:
         "--ha-url",
         default=None,
         help=f"HA Base URL (default: http://UMBREL_HOST:HA_PORT)",
+    )
+    parser.add_argument(
+        "--mark-unmeasured",
+        action="store_true",
+        help=(
+            "Bloecke ohne echte Messung (eingefroren oder Hausverbrauch 0 W) auf"
+            " quality=warn setzen, Messwerte bleiben (14.11.2026, vorher Backup)"
+        ),
+    )
+    parser.add_argument(
+        "--backfill-weather",
+        action="store_true",
+        help=(
+            "nur leere Wetter-/Sonnen-/Heizungsspalten bestehender Bloecke im"
+            " Zeitraum aus der HA-History fuellen (Bugfix 13.11.2026)"
+        ),
     )
     return parser.parse_args()
 
@@ -858,6 +989,31 @@ def main() -> None:
         end = now
 
     conn = get_connection(args.db)
+    if args.mark_unmeasured:
+        try:
+            done = mark_unmeasured(conn)
+        finally:
+            conn.close()
+        print(
+            f"Markiert: {done['held']} eingefrorene, {done['zero']} Null-Bloecke"
+            " (quality=warn)"
+        )
+        return
+    if args.backfill_weather:
+        try:
+            total: dict[str, int] = {}
+            chunk = start
+            while chunk < end:  # one week per HA request
+                chunk_end = min(chunk + timedelta(days=7), end)
+                for field, n in backfill_columns(
+                    chunk, chunk_end, conn, ha_url, token
+                ).items():
+                    total[field] = total.get(field, 0) + n
+                chunk = chunk_end
+            print("Backfill:", ", ".join(f"{f} +{n}" for f, n in total.items()))
+        finally:
+            conn.close()
+        return
     try:
         added, skipped = sync(start, end, conn, ha_url, token)
         print(f"Sync: +{added} neue Bloecke, {skipped} uebersprungen")

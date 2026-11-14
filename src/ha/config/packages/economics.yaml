@@ -61,10 +61,12 @@ economics:
       name: "Investierte Hardware (€)"
       min: 0
       max: 50000
-      step: 10
+      step: 0.01
       unit_of_measurement: "€"
       mode: box
       icon: mdi:cash-multiple
+      # 13.11.2026: wird von der Geraeteliste (www/bitgrid_hardware_card.js,
+      # Daten in todo.hardware) als Summe gesetzt; Cent-genau, daher step 0.01.
       # 25.08.2026, Nutzer-Wunsch: reines Eingabefeld fuer die Gesamtsumme der
       # Anlage (Miner + ggf. Batterie/PV, vom Nutzer selbst definiert), aktuell
       # OHNE verknuepfte Amortisations-/ROI-Berechnung — dafuer fehlen noch ein

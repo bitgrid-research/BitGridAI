@@ -7,7 +7,7 @@
 # passt zum Rest des Tabs. `avg_7d`/`latest_avg_7d` bleiben im JSON-Artefakt
 # (src/data/energy_to_sats_export.py) fuer andere Konsumenten, diese Karte
 # nutzt sie nicht mehr. Seit 01.09.2026 saisonal gestaffeltes Ziel statt fest
-# 45 sats/kWh (ADR 029, 091_adr_de.md) — der feste Wert war seit Wochen um
+# 45 sats/kWh (ADR 033, 091_adr_de.md) — der feste Wert war seit Wochen um
 # Faktor ~2,8 unterboten. Ziel/Label kommen dynamisch aus dem JSON-Artefakt
 # (target_sats_per_kwh), kein Hardcode hier. Erste sichtbare Nutzung dieser
 # Kennzahl ueberhaupt, siehe ADR 026 (091_adr_de.md) — vorher lebten Sats-

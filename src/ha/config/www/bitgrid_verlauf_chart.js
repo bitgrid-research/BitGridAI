@@ -651,9 +651,11 @@ class BitgridVerlaufChart extends HTMLElement {
         width: 2.5,
         dashArray,
       },
+      // 13.11.2026, Nutzer-Wunsch: keine Flaeche unter den Linien, damit die
+      // farbigen Linien besser zu erkennen sind.
       fill: {
         type: "solid",
-        opacity: opacities,
+        opacity: 0,
       },
       xaxis: {
         type: "category",

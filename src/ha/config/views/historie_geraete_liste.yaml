@@ -188,6 +188,11 @@ custom_fields:
               // hat. Mit Guards, damit ein geaendertes button-card-Innenleben
               // hier nur den alten Zustand ergibt statt einen Fehler zu werfen.
               try {
+                // 13.11.2026: button-card v7 verwirft ein nacktes requestUpdate() (ihr
+                // shouldUpdate verlangt eine geaenderte Eigenschaft). _updateTimerMS ist
+                // die Eigenschaft, mit der v7 ihren eigenen update_timer ausloest, die
+                // Aenderung erzwingt das Neuzeichnen. requestUpdate bleibt als Fallback.
+                if (card) card._updateTimerMS = Date.now();
                 if (card && typeof card.requestUpdate === 'function') card.requestUpdate();
               } catch (e) { /* bewusst ignoriert, reine Anzeige-Optimierung */ }
             });

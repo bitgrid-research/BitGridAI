@@ -91,6 +91,18 @@ Nur reproduzierbare Fakten.
 - **Trennung von Bewertung und Steuerung**  
   KPIs informieren – sie steuern nichts.
 
+- **Sichtbarer Aufzeichnungsstatus**  
+  `src/data/recording_status.py` prüft nächtlich, ob die Kette
+  HA-Recorder → `ha_history_sync` → `bitgrid.db` noch Daten liefert, und schreibt
+  das Ergebnis als lokales JSON-Artefakt (`www/recording_status.json`). Das Modul
+  öffnet die Datenbank nur lesend. Die Karte „Datenaufzeichnung" im Tab
+  Einstellungen zeigt das Artefakt an und prüft sein Alter selbst gegen die
+  aktuelle Uhrzeit: bleibt der Job aus, wird die Anzeige rot (Totmann-Prinzip).  
+  Grenze der Aussage: 144 Blöcke pro Tag heißt vollständig übertragen, nicht
+  lückenlos gemessen. Der Sync füllt Ausfälle von Home Assistant mit dem letzten
+  Wert auf, solche Blöcke sind in der Datenbank derzeit nicht von gemessenen
+  unterscheidbar (offener Punkt am Resampler).
+
 ---
 > **Nächster Schritt:**  
 > Kennzahlen sind berechnet und verständlich aufbereitet.

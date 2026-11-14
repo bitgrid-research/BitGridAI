@@ -1,0 +1,122 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Forschung: "Live-Diagnose der Miner" — Gate-Diagnose je Miner.
+#
+# Herkunft: zweiter Block aus views/waechter_status.yaml (altes v2-Dashboard,
+# Tab "Waechter"). Seit 13.11.2026 als button-card im Stil der anderen Tabs
+# (MDI-Icons in Theme-Farben mit Icon-Schatten, Pills, Divider-Linien) statt
+# Markdown mit Emojis. Die v2-Datei bleibt unveraendert.
+#
+# Zweck im Forschungs-Tab: zeigt, welches Gate gerade einen Moduswechsel
+# verhindert (Cooldown, Temperatur-Lockout, Nacht-Sperre, PV-Schwelle ...).
+# Haeufig blockierende Gates sind Kandidaten fuer zu enge Schwellen, also
+# Optimierungspotenzial. `anomaly` ist ein Bug, kein Betriebszustand.
+#
+# Datenquelle: sensor.miner_1_auto_diagnose / sensor.miner_2_auto_diagnose
+# (packages/mvp_diagnose.yaml), Attribut summary im Format
+# "Ist=<Modus> | Ziel=<Modus> | <Begruendung>". Rein lesend, keine Steuerung.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Forschung"
+# (Bereich g2r).
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+entity: sensor.miner_1_auto_diagnose
+triggers_update:
+  - sensor.miner_1_auto_diagnose
+  - sensor.miner_2_auto_diagnose
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+custom_fields:
+  body: >
+    [[[
+      const CODES = {
+        ok:           ['mdi:check-circle',        'var(--bg-color-eco, #4CAF50)',      'Ist-Modus entspricht Ziel'],
+        cooldown:     ['mdi:timer-sand',          'var(--accent-color, #f59e0b)',      'Moduswechsel gesperrt (Cooldown läuft)'],
+        temp_lockout: ['mdi:thermometer-alert',   'var(--bg-color-heat, #FF7043)',     'Temperatur-Lockout (3 h nach Selbstabschaltung)'],
+        room_hot:     ['mdi:home-thermometer',    'var(--bg-color-heat, #FF7043)',     'Raumtemperatur zu hoch'],
+        night_block:  ['mdi:weather-night',       'var(--bg-color-standard, #26C6DA)', 'Nacht-Sperre aktiv'],
+        pv_wait:      ['mdi:solar-power-variant', 'var(--bgai-pv-v3, #fbb210)',        'Wartet auf PV-Schwelle oder Cooldown'],
+        auto_off:     ['mdi:hand-back-right',     'var(--sidebar-icon-color, #A9BED0)','Auto-Lastmanagement aus (manuell)'],
+        anomaly:      ['mdi:alert-octagon',       'var(--bg-color-reserve, #EF5350)',  'Anomalie: kein Gate erklärt diesen Modus'],
+        unavailable:  ['mdi:help-circle',         'var(--sidebar-icon-color, #A9BED0)','SoC oder Workmode nicht verfügbar'],
+      };
+      const dim = 'var(--secondary-text-color)';
+      const white = 'var(--primary-text-color)';
+      const SHADOW = 'filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));';
+      const LINE = 'background:linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent) top / 100% 1px no-repeat;';
+      const esc = (t) => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const pill = (label, value, active, color) => `
+        <span style="display:inline-flex;align-items:baseline;gap:6px;padding:4px 11px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid ${active ? color : 'transparent'};white-space:nowrap;">
+          <span style="color:${dim};font-size:0.9em;">${label}</span><span style="font-weight:700;color:${active ? color : white};">${value}</span>
+        </span>`;
+
+      const block = (id, name, first) => {
+        const st = states[id];
+        if (!st) return '';
+        const code = st.state;
+        const [icon, color, text] = CODES[code] || ['mdi:help-circle', dim, 'Unbekannter Code: ' + esc(code)];
+        const a = st.attributes || {};
+        // summary: "Ist=Standby | Ziel=Standby | SoC 61.0% < Stop 81.0%, Miner aus (korrekt)"
+        const parts = String(a.summary || '').split(' | ');
+        const ist = parts[0] && parts[0].startsWith('Ist=') ? parts[0].slice(4) : (a.actual_mode || '?');
+        const ziel = parts[1] && parts[1].startsWith('Ziel=') ? parts[1].slice(5) : '?';
+        const reason = parts.length > 2 ? parts.slice(2).join(' | ') : (a.summary || '');
+        const num = (v) => (v === undefined || v === null || v === '') ? null : Number(v);
+        const soc = num(a.soc_pct), down = num(a.downgrade_cooldown_min), up = num(a.upgrade_cooldown_min), lock = num(a.temp_lockout_min);
+        const accent = 'var(--accent-color, #f59e0b)', heat = 'var(--bg-color-heat, #FF7043)';
+        return `
+          <div style="padding:${first ? '2px' : '16px'} 0 4px;${first ? '' : LINE}">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <ha-icon icon="${icon}" style="--mdc-icon-size:40px;width:40px;height:40px;color:${color};flex:0 0 40px;${SHADOW}"></ha-icon>
+              <div style="flex:1 1 auto;min-width:0;">
+                <div style="font-size:1.2em;font-weight:700;">${name}</div>
+                <div style="color:${color};font-weight:600;">${text}</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+                ${pill('Ist', esc(ist), false, color)}
+                ${pill('Ziel', esc(ziel), ist !== ziel, accent)}
+              </div>
+            </div>
+            <div style="margin:10px 0 0 54px;color:${dim};">${esc(reason)}</div>
+            <div style="margin:10px 0 0 54px;display:flex;gap:8px;flex-wrap:wrap;">
+              ${pill('SoC', soc === null ? '?' : soc.toFixed(0) + ' %', false, color)}
+              ${pill('Cooldown runter', down === null ? '?' : down + ' min', down > 0, accent)}
+              ${pill('Cooldown hoch', up === null ? '?' : up + ' min', up > 0, accent)}
+              ${pill('Temp-Lockout', lock === null ? '?' : lock + ' min', lock > 0, heat)}
+            </div>
+          </div>`;
+      };
+
+      return `<div style="font-size:calc(var(--bg-fs-body, 1rem) * 1.15);line-height:1.45;color:${white};text-align:left;">
+        ${block('sensor.miner_1_auto_diagnose', 'Miner 1', true)}
+        ${block('sensor.miner_2_auto_diagnose', 'Miner 2', false)}
+        <div style="margin-top:14px;padding-top:10px;color:${dim};font-size:0.9em;${LINE}">
+          Aktualisiert alle 30 s. „Anomalie“ heißt: Ist-Modus weicht vom Ziel ab und kein bekanntes Gate
+          erklärt es. Das ist dann ein Bug, kein Betriebszustand.
+        </div>
+      </div>`;
+    ]]]
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--bgai-card-radius-v3)
+    - padding: 16px 18px
+    - overflow: hidden
+    - height: 100%
+    - box-sizing: border-box
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+    # Stretched to the row partner's height: content starts at the top.
+    - align-content: start
+  custom_fields:
+    body:
+      - width: 100%
+      - align-self: start
+      - justify-self: stretch
+      - box-sizing: border-box
+      - white-space: normal
+      - overflow: visible
+      - text-overflow: clip

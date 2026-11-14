@@ -1,0 +1,168 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Haushalt: naechste Muellabholungen als Liste.
+#
+# Datenquelle: Sensoren der Integration "Waste Collection Schedule"
+# (sensor.mullabfuhr_*, s. packages/haushalt.yaml). Jeder Sensor traegt alle
+# kommenden Termine als Attribute mit Schluessel YYYY-MM-DD. Die Karte liest
+# sie synchron aus dem HA-Zustand: kein Netzabruf, kein "Lade ..."-Zustand,
+# und button-card zeichnet neu, sobald sich ein gelesener Sensor aendert.
+#
+# Anzeigenamen: "LVP-Abfaelle" heisst im Alltag "Gelber Sack", "Papier" ist
+# die Blaue Tonne (abgeglichen mit dem bisherigen Plan auf .64, 13.11.2026).
+# Farben aus der Dashboard-Palette (themes/bitgrid.yaml, Nutzer-Wunsch
+# 13.11.2026 "Farben aus unserem Design"): Bio = eco-Gruen, Restmuell =
+# helles Blaugrau (sidebar-icon-color; idle-Grau #757575 war auf der
+# Karte zu dunkel), Gelber Sack = PV-Gelb, Blaue Tonne = Netz-Blau, Glas = helles
+# Gesamt-Blau, Umweltmobil = heat-Orange. Hex nur als Fallback. Icon-Schatten
+# wie die Miner-Icons (drop-shadow 1.5px). Kalender nutzt dieselbe Liste.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Abfall",
+# rechte Spalte.
+# ═══════════════════════════════════════════════════════════════════════
+type: custom:button-card
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+custom_fields:
+  body: >
+    [[[
+      const TYPES = [
+        ['sensor.mullabfuhr_bioabfall',   'Bioabfall',   'mdi:trash-can',     'var(--bg-color-eco, #4CAF50)'],
+        ['sensor.mullabfuhr_restmull',    'Restmüll',    'mdi:trash-can',     'var(--sidebar-icon-color, #A9BED0)'],
+        ['sensor.mullabfuhr_lvp_abfalle', 'Gelber Sack', 'mdi:sack',          'var(--bgai-pv-v3, #fbb210)'],
+        ['sensor.mullabfuhr_papier',      'Blaue Tonne', 'mdi:trash-can',     'var(--bgai-grid-v3, #1aaccb)'],
+        ['sensor.mullabfuhr_glas',        'Glas',        'mdi:bottle-wine',   'var(--bgai-total-v3, #CBF1FD)'],
+        ['sensor.mullabfuhr_umweltmobil', 'Umweltmobil', 'mdi:truck-outline', 'var(--bg-color-heat, #FF7043)'],
+      ];
+      // Show the next MAX_WEEKS calendar weeks with pickups (at most MAX_ROWS
+      // rows); the rest is counted in the hint line below.
+      const MAX_WEEKS = 4;
+      const MAX_ROWS = 8;
+      const pad = (n) => String(n).padStart(2, '0');
+      const now = new Date();
+      const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+      const dayDiff = (key) => {
+        const [y, m, d] = key.split('-').map(Number);
+        return Math.round((new Date(y, m - 1, d) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
+      };
+
+      const events = [];
+      let available = 0;
+      for (const [id, name, icon, color] of TYPES) {
+        const st = states[id];
+        if (!st || st.state === 'unavailable' || st.state === 'unknown') continue;
+        available++;
+        for (const key of Object.keys(st.attributes || {})) {
+          if (/^\d{4}-\d{2}-\d{2}$/.test(key) && key >= todayKey) events.push({ key, name, icon, color });
+        }
+      }
+      events.sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : a.name.localeCompare(b.name));
+
+      const dim = 'var(--secondary-text-color)';
+      const white = 'var(--primary-text-color)';
+      // Fills the card height (cards stretch to the screen bottom); rows share it.
+      const wrap = (inner) => `<div style="font-size:var(--bg-fs-body, 1rem);line-height:1.35;color:${white};text-align:left;height:100%;display:flex;flex-direction:column;">${inner}</div>`;
+      if (!available) return wrap(`<div style="padding:18px 0;text-align:center;color:${dim};">Keine Abfuhrdaten: die Integration "Waste Collection Schedule" liefert gerade nichts.</div>`);
+      if (!events.length) return wrap(`<div style="padding:18px 0;text-align:center;color:${dim};">Keine kommenden Termine. Der Landkreis hat den nächsten Kalender vermutlich noch nicht veröffentlicht.</div>`);
+
+      const fmt = (key) => {
+        const [y, m, d] = key.split('-').map(Number);
+        return new Date(y, m - 1, d).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+      };
+      const rel = (diff) => diff === 0 ? 'heute' : diff === 1 ? 'morgen' : `in ${diff} Tagen`;
+      const accent = 'var(--accent-color, #F7931A)';
+
+      // Next pickup date: tinted in the bin colour, same highlight as the calendar.
+      const nextKey = events[0].key;
+      const tint = (c, pct) => `color-mix(in srgb, ${c} ${pct}%, transparent)`;
+      // Calendar-week groups: a labelled divider line before the first pickup
+      // of each ISO week (same week numbers as the calendar on the left). Line
+      // in the dashboard divider style (2px, --divider-color, faded end).
+      const isoWeek = (d) => {
+        const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+        return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+      };
+      const mondayOf = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
+      const thisMonday = mondayOf(now);
+      const weekLabel = (key) => {
+        const [y, m, d] = key.split('-').map(Number);
+        const date = new Date(y, m - 1, d);
+        const weeksAhead = Math.round((mondayOf(date) - thisMonday) / (7 * 86400000));
+        const relW = weeksAhead === 0 ? 'diese Woche' : weeksAhead === 1 ? 'nächste Woche' : `in ${weeksAhead} Wochen`;
+        return { id: mondayOf(date).getTime(), text: `KW ${isoWeek(date)}`, rel: relW, current: weeksAhead === 0 };
+      };
+      let lastWeek = null;
+      const shown = [];
+      const weekIds = new Set();
+      for (const ev of events) {
+        const id = weekLabel(ev.key).id;
+        if (!weekIds.has(id) && weekIds.size >= MAX_WEEKS) break;
+        if (shown.length >= MAX_ROWS) break;
+        weekIds.add(id);
+        shown.push(ev);
+      }
+      const rows = shown.map(ev => {
+        const wk = weekLabel(ev.key);
+        let header = '';
+        if (wk.id !== lastWeek) {
+          // Extra space above every week after the first, so the weeks read as
+          // separate blocks (13.11.2026, Nutzer-Wunsch).
+          // Flexible spacer above every week after the first: the free card
+          // height goes into the gaps between weeks, not into taller rows.
+          const spacer = lastWeek === null ? '' : '<div style="flex:1 1 0;min-height:22px;"></div>';
+          lastWeek = wk.id;
+          const c = wk.current ? accent : dim;
+          header = spacer + `
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex:0 0 auto;">
+            <span style="font-weight:800;font-size:1.1em;letter-spacing:0.05em;color:${c};white-space:nowrap;">${wk.text}</span>
+            <span style="font-size:1em;color:${c};white-space:nowrap;">${wk.rel}</span>
+            <span style="flex:1 1 auto;height:2px;background:linear-gradient(to right, ${wk.current ? accent : 'var(--divider-color)'} 0%, ${wk.current ? accent : 'var(--divider-color)'} 85%, transparent);"></span>
+          </div>`;
+        }
+        const diff = dayDiff(ev.key);
+        const soon = diff <= 1;
+        const isNext = ev.key === nextKey;
+        const bg = isNext ? tint(ev.color, 30) : 'rgba(255,255,255,0.05)';
+        const border = soon ? accent : (isNext ? ev.color : 'transparent');
+        return header + `
+          <div style="flex:0 0 auto;min-height:3.6em;display:flex;align-items:center;gap:16px;padding:8px 16px;margin-top:8px;border-radius:12px;box-sizing:border-box;background:${bg};border:${isNext ? 2 : 1}px solid ${border};${isNext ? `box-shadow:0 0 12px ${tint(ev.color, 55)};` : ''}">
+            <ha-icon icon="${ev.icon}" style="--mdc-icon-size:38px;width:38px;height:38px;color:${ev.color};flex:0 0 38px;filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));"></ha-icon>
+            <div style="flex:1 1 auto;min-width:0;font-weight:700;font-size:1.35em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ev.name}</div>
+            <div style="text-align:right;white-space:nowrap;font-size:1.2em;">
+              <span style="font-weight:600;">${fmt(ev.key)}</span>
+              <span style="margin-left:6px;font-size:0.85em;color:${soon ? accent : dim};font-weight:${soon ? 700 : 400};">(${rel(diff)})</span>
+            </div>
+          </div>`;
+      }).join('');
+      const more = events.length > shown.length
+        ? `<div style="flex:1 1 0;min-height:22px;"></div><div style="color:${dim};font-size:1em;text-align:center;">+ ${events.length - shown.length} weitere Termine im Kalender links</div>` : '';
+      return wrap(rows + more);
+    ]]]
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--bgai-card-radius-v3)
+    # Top padding matches the calendar card next to it: first week line on
+    # the same height as the month name there (13.11.2026, Pi-Screenshot).
+    - padding: 21px 14px 14px 14px
+    - overflow: hidden
+    - height: 100%
+    - box-sizing: border-box
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+    - grid-template-rows: 1fr
+    - height: 100%
+  custom_fields:
+    body:
+      - width: 100%
+      - height: 100%
+      - align-self: stretch
+      - justify-self: stretch
+      - box-sizing: border-box
+      - white-space: normal
+      - overflow: visible
+      - text-overflow: clip

@@ -132,6 +132,6 @@ def test_build_artifact_skips_trailing_none_avg():
     ],
 )
 def test_target_for_month_matches_saison_tiers(month, expected):
-    # Tier-Grenzen aus ADR 029 (091_adr_de.md): Voll = Mai-Aug, Eco+Standard =
+    # Tier-Grenzen aus ADR 033 (091_adr_de.md): Voll = Mai-Aug, Eco+Standard =
     # Maer/Apr/Sep, Nur Eco = Okt-Feb (sensor.mvp_saison_status, ADR 028).
     assert target_for_month(month) == expected

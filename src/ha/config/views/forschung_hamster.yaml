@@ -1,0 +1,700 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Forschung: BitHamster — eine Karte, umschaltbar zwischen
+#   "Analyse"   Lage + Optimierungsideen aus dem 30-Minuten-Lauf
+#               (www/bithamster_ki.json)
+#   "Frag mich" Auftrags-Knoepfe und freie Frage, Antwort aus
+#               www/bithamster_ask.json
+# Umschalter: input_boolean.bithamster_fragemodus (packages/bithamster.yaml).
+#
+# Stil wie das Hamster-Feld in der Uebersicht (13.11.2026, Nutzer-Wunsch):
+# grosses rundes Hamsterbild links, senkrechte Trennlinie, Ueberschrift und
+# Text rechts, gleiche Typo-Tokens (bg-fs-title / bg-fs-body) und Halo.
+#
+# Datenweg (beide Modi): src/explain/bithamster_ki.py auf dem HA-Host (Auftraege:
+# systemd-Dienst bithamster-ask, prueft alle 3 s), liest
+# HA nur per GET und die Forschungs-DB mode=ro, rechnet alle Zahlen in Python,
+# das Modell auf GX10 formuliert nur. Es bekommt keine Werkzeuge und keinen
+# HA-Zugang, schaltet also nichts. Die Knoepfe hier tragen nur einen Auftrag
+# ein (script.bithamster_auftrag); keine Automation reagiert darauf.
+#
+# Knoepfe sind eigene button-cards (tap_action), weil HA inline-onclick in
+# erzeugtem HTML stumm blockiert. Icons als <ha-icon> in custom_fields: das
+# eingebaute Icon der button-card blieb in diesem Raster unsichtbar.
+#
+# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Forschung"
+# (Bereich g1l).
+# ═══════════════════════════════════════════════════════════════════════
+type: vertical-stack
+card_mod:
+  style: |
+    #root {
+      background: var(--ha-card-background) !important;
+      border-radius: var(--bgai-card-radius-v3) !important;
+      border: var(--bgai-card-border-width-v3) solid var(--bgai-card-border-v3) !important;
+      box-shadow: var(--bgai-card-shadow-v3) !important;
+      overflow: hidden !important;
+      gap: 0 !important;
+      padding: 10px 0 12px 0 !important;
+      box-sizing: border-box !important;
+    }
+cards:
+
+  # ── Umschalter Analyse | Frag mich ───────────────────────────────────
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr 1fr
+      grid-gap: 8px
+      padding: 0 14px 4px 14px
+    cards:
+      - &mode_btn
+        type: custom:button-card
+        entity: input_boolean.bithamster_fragemodus
+        show_name: false
+        show_icon: false
+        show_state: false
+        tap_action:
+          action: call-service
+          service: input_boolean.turn_off
+          service_data:
+            entity_id: input_boolean.bithamster_fragemodus
+        variables:
+          label: Analyse
+          icon: mdi:lightbulb-on-outline
+          active_when: "off"
+          # 13.11.2026: eigene Designfarbe je Modus statt Tuerkis (PV-Gelb).
+          accent: "#fbb210"
+        custom_fields:
+          body: >
+            [[[
+              const on = entity && entity.state === variables.active_when;
+              const c = on ? variables.accent : 'var(--secondary-text-color)';
+              // Inline statt Flex: eine Flex-Zeile wird in dieser Karte auseinander-
+              // gezogen (Icon links, Text rechts), gleicher Befund wie 13.11.2026
+              // bei den Zwischenueberschriften der Statuskarte.
+              return `<div style="text-align:center;white-space:nowrap;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;font-size:var(--bg-fs-body, 1rem);color:${c};">
+                <ha-icon icon="${variables.icon}" style="display:inline-block;vertical-align:middle;--mdc-icon-size:22px;width:22px;height:22px;filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));"></ha-icon><span style="display:inline-block;vertical-align:middle;margin-left:8px;">${variables.label}</span></div>`;
+            ]]]
+        styles:
+          card:
+            - padding: 9px 8px
+            - border-radius: 12px
+            - box-shadow: none
+            - background: >
+                [[[ return entity && entity.state === variables.active_when
+                  ? 'color-mix(in srgb, ' + variables.accent + ' 16%, transparent)'
+                  : 'rgba(255,255,255,0.04)'; ]]]
+            - border: >
+                [[[ return '1px solid ' + (entity && entity.state === variables.active_when
+                  ? variables.accent : 'rgba(255,255,255,0.10)'); ]]]
+          grid:
+            - grid-template-areas: '"body"'
+            - grid-template-columns: 1fr
+          custom_fields:
+            body:
+              - width: 100%
+              - justify-self: stretch
+              - text-align: center
+      - <<: *mode_btn
+        tap_action:
+          action: call-service
+          service: input_boolean.turn_on
+          service_data:
+            entity_id: input_boolean.bithamster_fragemodus
+        variables:
+          label: Frag mich
+          icon: mdi:chat-processing-outline
+          active_when: "on"
+          accent: "var(--bg-color-eco, #4CAF50)"
+
+  # ── Hamster-Feld (Stil Uebersicht) + Inhalt des gewaehlten Modus ─────
+  - type: custom:button-card
+    entity: input_boolean.bithamster_fragemodus
+    triggers_update:
+      - input_text.bithamster_auftrag
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    custom_fields:
+      body: >
+        [[[
+          const chat = entity && entity.state === 'on';
+          const redrawAll = (set) => set.forEach(c => {
+            if (!c.isConnected) { set.delete(c); return; }
+            try { c._updateTimerMS = Date.now(); c.requestUpdate && c.requestUpdate(); } catch (e) {}
+          });
+          // Same caches as before (window._bgHamsterKi / _bgHamsterAsk): one
+          // fetch per browser, redraw via _updateTimerMS (button-card v7).
+          const load = (key, file, due) => {
+            if (!window[key]) window[key] = { data: null, fetchedAt: 0, busy: false, cards: new Set(), timer: null };
+            const S = window[key];
+            S.cards.add(this);
+            if (!S.busy && Date.now() - S.fetchedAt > due) {
+              S.busy = true;
+              fetch('/local/' + file + '?v=' + Date.now(), { cache: 'no-store' })
+                .then(r => r.ok ? r.json() : null).catch(() => null)
+                .then(d => { S.data = d; S.fetchedAt = Date.now(); S.busy = false; redrawAll(S.cards); });
+            }
+            return S;
+          };
+          const KI = load('_bgHamsterKi', 'bithamster_ki.json', 5 * 60 * 1000);
+          const reqId = String(states['input_text.bithamster_auftrag']?.state || '');
+          const askPending = reqId.includes('|') && (!window._bgHamsterAsk?.data || window._bgHamsterAsk.data.request_id !== reqId);
+          // Der Dienst auf dem HA-Host antwortet in rund 10 s; waehrend des Wartens
+          // alle 2,5 s nachsehen.
+          const ASK = load('_bgHamsterAsk', 'bithamster_ask.json', askPending ? 2500 : 5 * 60 * 1000);
+          if (chat && askPending && !ASK.timer) ASK.timer = setTimeout(() => { ASK.timer = null; redrawAll(ASK.cards); }, 3000);
+
+          const dim = 'var(--secondary-text-color)';
+          const white = 'var(--primary-text-color)';
+          const kiC = 'var(--bgai-erklaerung-v3, #A2EFED)';
+          const warnC = 'var(--bg-color-heat, #FF7043)';
+          const halo = 'text-shadow:var(--bgai-header-halo-v3);';
+          const esc = (t) => String(t || '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+          const age = (iso) => { const m = (Date.now() - Date.parse(iso)) / 60000;
+            return isNaN(m) ? '' : m < 1 ? 'gerade eben' : m < 120 ? 'vor ' + Math.round(m) + ' min' : 'vor ' + Math.round(m / 60) + ' h'; };
+          // 13.11.2026: Meta-Zeile wie in der Uebersicht (Abstand, links Bitsy +
+          // Modell, rechts nur lesend + Alter), Sekundaerfarbe statt Tuerkis.
+          const badge = (txt, model) => `<div style="display:flex;align-items:center;gap:6px;margin-top:2.2em;font-size:var(--bg-fs-label);line-height:1.2;color:${dim};text-align:left;${halo}">
+              <span style="display:inline-flex;align-items:center;gap:6px;min-width:0;"><ha-icon icon="${model ? 'mdi:robot-happy-outline' : 'mdi:robot-off-outline'}" style="--mdc-icon-size:16px;width:16px;height:16px;"></ha-icon>${model ? 'Bitsy (' + esc(model) + ')' : 'Bitsy · kein Modell geladen'}</span>
+              <span style="margin-left:auto;padding-left:12px;text-align:right;">nur lesend${txt ? ' · ' + txt : ''}</span></div>`;
+          // Hamster field exactly like the overview card: round image, divider, text.
+          const field = (img, head, sub, meta) => `
+            <div style="display:flex;gap:16px;align-items:center">
+              <div style="flex:1;min-width:0;display:flex;justify-content:center">
+                <img src="/local/${img}?v=20261113-8" style="width:100%;max-width:150px;aspect-ratio:1;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 1px rgba(0,0,0,.6))">
+              </div>
+              <div style="width:2px;align-self:stretch;background:linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent)"></div>
+              <div style="flex:2;min-width:0;text-align:center">
+                <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1.1;white-space:normal;overflow-wrap:break-word;color:${white};margin-bottom:6px;${halo}">${head}</div>
+                <div style="font-size:var(--bg-fs-body);color:${dim};line-height:1.3;white-space:normal;overflow-wrap:break-word;${halo}">${sub}</div>
+                ${meta || ''}
+              </div>
+            </div>`;
+          const LINE = 'background:linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent) top / 100% 2px no-repeat;';
+          const wrap = (inner) => `<div style="font-size:var(--bg-fs-body, 1rem);line-height:1.4;color:${white};text-align:left;">${inner}</div>`;
+          const label = (t, c) => `<div style="font-size:var(--bg-fs-label);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;color:${c || dim};">${t}</div>`;
+
+          // ── Modus "Frag mich" ─────────────────────────────────────────
+          if (chat) {
+            const names = { optimierung: 'Optimierung finden', aufzeichnung: 'Datenaufzeichnung prüfen', fehler: 'Fehler finden',
+                            verbesserung: 'Verbesserungsvorschläge', tab: 'Tab erklären', gesamtcheck: 'Alles prüfen',
+                            karten: 'Fehlende KPI-Karten', tabcheck: 'Tab verbessern', frage: 'Deine Frage',
+                            entscheidung: 'Entscheidungen erklären', schalten: 'Schaltverhalten prüfen', befunde: 'Befunde einordnen',
+                            thesis_woche: 'Masterarbeit: diese Woche', thesis_befunde: 'Masterarbeit: Befunde zuordnen', thesis_risiken: 'Masterarbeit: Risiken bis Abgabe' };
+            if (askPending) {
+              return wrap(field('bithamster_forschung_wait.png', 'Ich denke nach …',
+                `Auftrag „${esc(names[reqId.split('|')[0]] || 'Auftrag')}“ ist angekommen. Die Antwort kommt in wenigen Sekunden.`, badge('', KI.data && KI.data.model)));
+            }
+            const d = ASK.data;
+            if (!d) return wrap(field('bithamster_forschung.png', 'Frag mich was', 'Tipp unten auf einen Auftrag oder schreib mir eine Frage.', badge('', KI.data && KI.data.model)));
+            const topic = (d.task === 'tab' || d.task === 'tabcheck') ? `${esc(d.label)}: ${esc(d.tab)}` : d.task === 'frage' ? `„${esc(d.question)}“` : esc(d.label);
+            if (!d.ok || !d.answer) return wrap(field('bithamster_connect.png', 'Da hat was nicht geklappt', `${topic}<br>${esc(d.error)}`, badge(age(d.generated_at), d.model)));
+            const a = d.answer;
+            const points = (a.punkte || []).map(p => `
+              <div style="display:flex;gap:10px;margin-top:6px;">
+                <span style="flex:0 0 8px;width:8px;height:8px;margin-top:0.55em;border-radius:50%;background:${kiC};"></span>
+                <span style="flex:1 1 auto;min-width:0;">${esc(p)}</span>
+              </div>`).join('');
+            // 13.11.2026: deterministic post-checks from bithamster_ki.finish_answer
+            // (numbers missing from the context, existing cards removed, skipped
+            // priority findings added). Shown so nobody trusts a number blindly.
+            const ck = d.checks;
+            let checkHtml = '';
+            if (ck) {
+              const notes = [];
+              const un = ck.unverified_numbers || [];
+              if (un.length) notes.push(`Zahl${un.length > 1 ? 'en' : ''} nicht im Kontext, bitte prüfen: ${un.map(esc).join(', ')}`);
+              const dr = ck.dropped_existing || [];
+              if (dr.length) notes.push(`${dr.length} Vorschlag${dr.length > 1 ? 'e' : ''} aussortiert, die Karte gibt es schon`);
+              const ad = ck.added_findings || [];
+              if (ad.length) notes.push(`${ad.length} Befund${ad.length > 1 ? 'e' : ''} übersehen, fest berechnet ergänzt`);
+              checkHtml = notes.length
+                ? `<div style="margin-top:10px;font-size:var(--bg-fs-label);color:var(--bg-color-heat, #FF7043);">⚠ ${notes.join(' · ')}</div>`
+                : `<div style="margin-top:10px;font-size:var(--bg-fs-label);opacity:0.7;">✓ Alle Zahlen stehen im Kontext</div>`;
+            }
+            return wrap(`
+              ${field('bithamster_forschung.png', esc(a.headline), topic, badge(age(d.generated_at), d.model))}
+              <div style="margin-top:12px;padding-top:10px;${LINE}">
+                <div>${esc(a.text)}</div>
+                ${points}
+                ${checkHtml}
+              </div>`);
+          }
+
+          // ── Modus "Analyse" ───────────────────────────────────────────
+          const d = KI.data;
+          if (!d) return wrap(field('bithamster_connect.png', KI.fetchedAt ? 'Keine Analyse da' : 'Einen Moment', KI.fetchedAt ? 'Die Datei bithamster_ki.json fehlt. Läuft der Job auf dem Server?' : 'Lade die Hamster-Analyse …', ''));
+          const ageMin = (Date.now() - Date.parse(d.generated_at)) / 60000;
+          if (!d.ok) return wrap(field('bithamster_connect.png', 'Ich konnte gerade nicht nachdenken', esc(d.error), badge(age(d.generated_at), d.model)));
+          if (ageMin > 120) return wrap(field('bithamster_connect.png', 'Analyse veraltet', `Die letzte Analyse ist ${age(d.generated_at)} entstanden. Der Job auf dem Server läuft gerade nicht.`, ''));
+          const r = (d.facts && d.facts.research) || {};
+          const fmtDay = (iso) => iso ? new Date(iso + 'T00:00:00Z').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', timeZone: 'UTC' }) : '?';
+          const opts = Array.isArray(d.optimierungen) ? d.optimierungen : [];
+          const part = (t, txt, c) => txt ? `<div style="margin-top:6px;">${label(t, c)}<div>${esc(txt)}</div></div>` : '';
+          const ideas = opts.map((o, i) => `
+            <div style="margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.05);border-left:3px solid ${kiC};">
+              <div style="display:flex;align-items:center;gap:8px;font-weight:800;">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:${kiC};color:#1b2235;font-size:0.8em;flex:0 0 22px;">${i + 1}</span>
+                <span style="flex:1 1 auto;min-width:0;">${esc(o.titel)}</span>
+              </div>
+              ${part('Befund', o.befund)}
+              ${part('Idee', o.vorschlag, kiC)}
+              ${part('Woran du es merkst', o.pruefen)}
+            </div>`).join('');
+          return wrap(`
+            ${field('bithamster_forschung.png', esc(d.lage && d.lage.headline), esc(d.lage && d.lage.text), badge(age(d.generated_at), d.model))}
+            <div style="margin-top:12px;padding-top:10px;${LINE}">
+              ${label('Optimierungsideen · Hypothesen, du entscheidest', kiC)}
+              ${opts.length ? ideas : `<div style="margin-top:6px;color:${dim};">Keine belastbaren Muster in den ausgewerteten Tagen.</div>`}
+              <div style="margin-top:10px;color:${dim};font-size:0.85em;">
+                Grundlage: ${r.days_used || 0} vollständige Tage (${fmtDay(r.first_day)} bis ${fmtDay(r.last_day)}) und die Live-Werte.
+                Die Zahlen rechnet Python, das Modell formuliert nur.
+              </div>
+            </div>`);
+        ]]]
+    styles:
+      card:
+        - background: none
+        - box-shadow: none
+        - border: none
+        - border-radius: 0
+        - padding: 10px 16px 6px 16px
+        - overflow: hidden
+      grid:
+        - grid-template-areas: '"body"'
+        - grid-template-columns: 1fr
+      custom_fields:
+        body:
+          - width: 100%
+          - justify-self: stretch
+          - box-sizing: border-box
+          - white-space: normal
+          - overflow: visible
+          - text-overflow: clip
+
+  # ── Nur im Modus "Frag mich": Auftrags-Knoepfe und Eingaben ──────────
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: input_boolean.bithamster_fragemodus
+        state: "on"
+    card:
+      type: vertical-stack
+      cards:
+        # 14.11.2026, Nutzer-Wunsch: Auftraege nach Zweck gruppiert (vier
+        # Zeilen mit Ueberschrift) und um drei Forscher-Auftraege erweitert
+        # (Entscheidungsprotokoll ADR 034, Forschungsbefunde).
+        - type: custom:button-card
+          name: Überblick und Daten
+          show_icon: false
+          show_state: false
+          tap_action:
+            action: none
+          styles:
+            card:
+              - background: none
+              - border: none
+              - box-shadow: none
+              - padding: 10px 16px 2px 16px
+            name:
+              - justify-self: start
+              - font-size: 0.8em
+              - font-weight: 700
+              - letter-spacing: 0.06em
+              - text-transform: uppercase
+              - color: var(--secondary-text-color)
+        - type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: repeat(3, minmax(0, 1fr))
+            grid-gap: 8px
+            padding: 0 14px
+          cards:
+            - &task_btn
+              type: custom:button-card
+              show_name: false
+              show_icon: false
+              show_state: false
+              variables:
+                label: Alles prüfen
+                icon: mdi:magnify-scan
+                color: "var(--bg-color-standard, #26C6DA)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: gesamtcheck
+              custom_fields:
+                body: >
+                  [[[
+                    // 14.11.2026: lange Woerter brechen an weichen Trennstellen
+                    // (&shy; im Label), sonst wurden sie bei schmalem Fenster
+                    // abgeschnitten ("Datenaufzeichnung", "Verbesserungsvorschlaege").
+                    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;">
+                      <ha-icon icon="${variables.icon}" style="--mdc-icon-size:26px;width:26px;height:26px;color:${variables.color || 'var(--bgai-erklaerung-v3, #A2EFED)'};filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));"></ha-icon>
+                      <span lang="de" style="font-size:var(--bg-fs-body, 1rem);font-weight:600;line-height:1.2;color:var(--primary-text-color);white-space:normal;overflow-wrap:anywhere;hyphens:manual;max-width:100%;">${variables.label}</span></div>`;
+                  ]]]
+              styles:
+                card:
+                  - background: rgba(255,255,255,0.06)
+                  - border: 1px solid rgba(255,255,255,0.12)
+                  - border-radius: 12px
+                  - box-shadow: none
+                  - padding: 10px 6px
+                  - height: 100%
+                grid:
+                  - grid-template-areas: '"body"'
+                  - grid-template-columns: 1fr
+                custom_fields:
+                  body:
+                    - width: 100%
+                    - min-width: 0
+                    - white-space: normal
+            - <<: *task_btn
+              variables:
+                label: "Fehler finden"
+                icon: mdi:bug-outline
+                color: "var(--bg-color-reserve, #EF5350)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: fehler
+            - <<: *task_btn
+              variables:
+                label: "Daten&shy;aufzeichnung prüfen"
+                icon: mdi:database-search-outline
+                color: "var(--bgai-grid-v3, #1aaccb)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: aufzeichnung
+        - type: custom:button-card
+          name: Steuerung verstehen
+          show_icon: false
+          show_state: false
+          tap_action:
+            action: none
+          styles:
+            card:
+              - background: none
+              - border: none
+              - box-shadow: none
+              - padding: 10px 16px 2px 16px
+            name:
+              - justify-self: start
+              - font-size: 0.8em
+              - font-weight: 700
+              - letter-spacing: 0.06em
+              - text-transform: uppercase
+              - color: var(--secondary-text-color)
+        - type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: repeat(3, minmax(0, 1fr))
+            grid-gap: 8px
+            padding: 0 14px
+          cards:
+            # Letzte 24 h aus dem Entscheidungsprotokoll, nur lesend.
+            - <<: *task_btn
+              variables:
+                label: "Entschei&shy;dungen erklären"
+                icon: mdi:timeline-clock-outline
+                color: "var(--bgai-heizstab-v3, #5C9EE2)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: entscheidung
+            - <<: *task_btn
+              variables:
+                label: "Schalt&shy;verhalten prüfen"
+                icon: mdi:swap-vertical-bold
+                color: "var(--bg-color-eco, #4CAF50)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: schalten
+            - <<: *task_btn
+              variables:
+                label: "Optimierung finden"
+                icon: mdi:lightbulb-on-outline
+                color: "var(--bgai-mining-v3, #F7931A)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: optimierung
+        - type: custom:button-card
+          name: Forschung und Haushalt
+          show_icon: false
+          show_state: false
+          tap_action:
+            action: none
+          styles:
+            card:
+              - background: none
+              - border: none
+              - box-shadow: none
+              - padding: 10px 16px 2px 16px
+            name:
+              - justify-self: start
+              - font-size: 0.8em
+              - font-weight: 700
+              - letter-spacing: 0.06em
+              - text-transform: uppercase
+              - color: var(--secondary-text-color)
+        - type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: repeat(3, minmax(0, 1fr))
+            grid-gap: 8px
+            padding: 0 14px
+          cards:
+            - <<: *task_btn
+              variables:
+                label: "Befunde einordnen"
+                icon: mdi:flask-outline
+                color: "#B39DDB"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: befunde
+            - <<: *task_btn
+              variables:
+                label: "Fehlende KPI-Karten"
+                icon: mdi:view-dashboard-edit-outline
+                color: "var(--bgai-geraete-v3, #f49891)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: karten
+            - <<: *task_btn
+              variables:
+                label: "Verbesserungs&shy;vorschläge"
+                icon: mdi:home-lightning-bolt-outline
+                color: "var(--bgai-home-v3, #b3d804)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: verbesserung
+        - type: custom:button-card
+          name: Tab und Frage
+          show_icon: false
+          show_state: false
+          tap_action:
+            action: none
+          styles:
+            card:
+              - background: none
+              - border: none
+              - box-shadow: none
+              - padding: 10px 16px 2px 16px
+            name:
+              - justify-self: start
+              - font-size: 0.8em
+              - font-weight: 700
+              - letter-spacing: 0.06em
+              - text-transform: uppercase
+              - color: var(--secondary-text-color)
+        - type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: repeat(3, minmax(0, 1fr))
+            grid-gap: 8px
+            padding: 0 14px
+          cards:
+            - <<: *task_btn
+              variables:
+                label: "Tab erklären"
+                icon: mdi:tab-search
+                color: "var(--bgai-erklaerung-v3, #A2EFED)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: tab
+            - <<: *task_btn
+              variables:
+                label: "Tab verbessern"
+                icon: mdi:tab-plus
+                color: "var(--bgai-pv-v3, #fbb210)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: tabcheck
+            - <<: *task_btn
+              variables:
+                label: "Frage senden"
+                icon: mdi:send-outline
+                color: "var(--bgai-erklaerung-v3, #A2EFED)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: frage
+        # 14.11.2026: Hilfe bei der Masterarbeit. Bitsy plant, ordnet zu und
+        # warnt, er schreibt keinen Text fuer die Arbeit (THESIS_RULES).
+        - type: custom:button-card
+          name: Masterarbeit
+          show_icon: false
+          show_state: false
+          tap_action:
+            action: none
+          styles:
+            card:
+              - background: none
+              - border: none
+              - box-shadow: none
+              - padding: 10px 16px 2px 16px
+            name:
+              - justify-self: start
+              - font-size: 0.8em
+              - font-weight: 700
+              - letter-spacing: 0.06em
+              - text-transform: uppercase
+              - color: var(--secondary-text-color)
+        - type: custom:layout-card
+          layout_type: custom:grid-layout
+          layout:
+            grid-template-columns: repeat(3, minmax(0, 1fr))
+            grid-gap: 8px
+            padding: 0 14px
+          cards:
+            - <<: *task_btn
+              variables:
+                label: "Diese Woche"
+                icon: mdi:calendar-week
+                color: "var(--bgai-pv-v3, #fbb210)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: thesis_woche
+            - <<: *task_btn
+              variables:
+                label: "Befunde zuordnen"
+                icon: mdi:file-tree-outline
+                color: "#B39DDB"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: thesis_befunde
+            - <<: *task_btn
+              variables:
+                label: "Risiken bis Abgabe"
+                icon: mdi:alert-decagram-outline
+                color: "var(--bg-color-reserve, #EF5350)"
+              tap_action:
+                action: call-service
+                service: script.bithamster_auftrag
+                service_data:
+                  auftrag: thesis_risiken
+        - type: entities
+          entities:
+            - entity: input_select.bithamster_tab
+              name: Tab für „Tab erklären“ und „Tab verbessern“
+            - entity: input_text.bithamster_frage
+              name: Deine Frage (dann „Frage senden“)
+          card_mod:
+            style: |
+              ha-card {
+                background: none !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 4px !important;
+              }
+
+        # ── Verlauf: fruehere Antworten, scrollbar, neueste oben ──────────
+        # Quelle: history in www/bithamster_ask.json (letzte 30, geschrieben
+        # von bithamster_ki --watch). Gleicher Abruf-Cache wie die Antwort
+        # oben (window._bgHamsterAsk); entity = Auftrags-Helfer, damit der
+        # Verlauf nach jeder neuen Antwort mitzieht.
+        - type: custom:button-card
+          entity: input_text.bithamster_auftrag
+          show_name: false
+          show_icon: false
+          show_state: false
+          tap_action:
+            action: none
+          hold_action:
+            action: none
+          double_tap_action:
+            action: none
+          custom_fields:
+            body: >
+              [[[
+                if (!window._bgHamsterAsk) window._bgHamsterAsk = { data: null, fetchedAt: 0, busy: false, cards: new Set(), timer: null };
+                const A = window._bgHamsterAsk;
+                A.cards.add(this);
+                const dim = 'var(--secondary-text-color)';
+                const white = 'var(--primary-text-color)';
+                const kiC = 'var(--bgai-erklaerung-v3, #A2EFED)';
+                const warnC = 'var(--bg-color-heat, #FF7043)';
+                const LINE = 'background:linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent) top / 100% 1px no-repeat;';
+                const esc = (t) => String(t || '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+                const hist = (A.data && Array.isArray(A.data.history)) ? A.data.history : [];
+                const when = (iso) => { const t = Date.parse(iso); return isNaN(t) ? '' :
+                  new Date(t).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); };
+                const topic = (h) => (h.task === 'tab' || h.task === 'tabcheck') ? `${esc(h.label)}: ${esc(h.tab)}` : h.task === 'frage' ? `„${esc(h.question)}“` : esc(h.label);
+                const items = hist.map((h, i) => {
+                  const a = h.answer || {};
+                  const pts = (a.punkte || []).map(p => `<li style="margin-top:2px;">${esc(p)}</li>`).join('');
+                  return `
+                    <div style="padding:10px 0;${i ? LINE : ''}">
+                      <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;">
+                        <span style="font-size:var(--bg-fs-label);font-weight:700;letter-spacing:0.04em;color:${kiC};white-space:nowrap;">${when(h.generated_at)}</span>
+                        <span style="color:${dim};min-width:0;">${topic(h)}</span>
+                      </div>
+                      ${h.ok && a.headline
+                        ? `<div style="margin-top:3px;font-weight:700;">${esc(a.headline)}</div>
+                           <div style="margin-top:2px;color:${dim};">${esc(a.text)}</div>
+                           ${pts ? `<ul style="margin:4px 0 0 0;padding-left:20px;color:${dim};">${pts}</ul>` : ''}`
+                        : `<div style="margin-top:3px;color:${warnC};">Keine Antwort: ${esc(h.error)}</div>`}
+                    </div>`;
+                }).join('');
+                // Fester Scrollbereich (220 px): bei wenigen Eintraegen entstand mit
+                // max-height gar keine Scrollflaeche (Nutzer-Befund 13.11.2026).
+                // touch-action pan-y: Wischen auf dem Pi scrollt den Verlauf.
+                // pointer-events:auto ist entscheidend: button-card gibt einer Karte
+                // ohne Aktion die Klasse "disabled" mit pointer-events:none, das erbt
+                // jedes Kind; ohne diese Zeile kam kein Mausrad und kein Wischen an.
+                return `<style>.bgai-hamster-history::-webkit-scrollbar{width:6px}.bgai-hamster-history::-webkit-scrollbar-thumb{background:${kiC};border-radius:3px}</style>
+                <div style="font-size:var(--bg-fs-body, 1rem);line-height:1.4;color:${white};text-align:left;">
+                  <div style="display:flex;align-items:center;gap:8px;padding-top:10px;${LINE}">
+                    <ha-icon icon="mdi:history" style="--mdc-icon-size:20px;width:20px;height:20px;flex:0 0 20px;color:${kiC};filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));"></ha-icon>
+                    <span style="flex:1 1 auto;font-size:var(--bg-fs-label);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${kiC};">Verlauf (${hist.length})</span>
+                  </div>
+                  ${hist.length
+                    ? `<div class="bgai-hamster-history" style="pointer-events:auto;height:220px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;margin-top:6px;padding:0 8px 0 10px;border-radius:10px;background:rgba(0,0,0,0.14);scrollbar-width:thin;scrollbar-color:${kiC} transparent;">${items}</div>`
+                    : `<div style="margin-top:6px;color:${dim};">Noch keine Antworten gespeichert.</div>`}
+                </div>`;
+              ]]]
+          styles:
+            card:
+              - background: none
+              - box-shadow: none
+              - border: none
+              - border-radius: 0
+              - padding: 4px 16px 4px 16px
+            grid:
+              - grid-template-areas: '"body"'
+              - grid-template-columns: 1fr
+            custom_fields:
+              body:
+                - width: 100%
+                - justify-self: stretch
+                - box-sizing: border-box
+                - white-space: normal
+                - overflow: visible
+                - text-overflow: clip

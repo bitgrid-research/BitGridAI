@@ -1,0 +1,340 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Datenaufzeichnung — Status der Forschungsdatenbank (Produktion).
+#
+# Zeigt, ob die naechtliche Kette HA-Recorder -> ha_history_sync ->
+# bitgrid.db noch Daten liefert. Anlass: im September 2026 stand die DB
+# 24 Tage still, waehrend input_boolean.recording_active "on" zeigte. Ein
+# Schalter ist kein Beleg, deshalb liest diese Karte den echten DB-Zustand.
+#
+# Datenherkunft: src/data/recording_status.py laeuft per Cron auf dem
+# Server (nach dem Sync), oeffnet bitgrid.db nur lesend und schreibt
+# www/recording_status.json. Diese Karte liest ausschliesslich diese lokale
+# Datei (fetch('/local/...')), gleiches Muster wie stats_energy_to_sats.yaml.
+#
+# Totmann-Prinzip: die Ampel im JSON gilt nur fuer den Zeitpunkt der
+# Erzeugung. Ob das JSON selbst noch frisch ist, prueft die Karte gegen die
+# aktuelle Uhrzeit (generated_at aelter als max_age_hours => Rot). Faellt
+# der Cron aus, kann die Karte also nicht gruen stehen bleiben. Fehlt die
+# Datei oder ist sie nicht lesbar, ist das ebenfalls Rot.
+#
+# Grenze der Aussage (steht auch in der Fussnote der Karte): 144/144 heisst
+# "vollstaendig uebertragen", nicht "lueckenlos gemessen". Der Sync fuellt
+# HA-Ausfaelle mit dem letzten Wert auf, solche Bloecke sind in der DB nicht
+# von gemessenen unterscheidbar.
+#
+# KEIN Steuerpfad: reine Anzeige, keine Entity, keine Automation.
+#
+# Aufbau seit 13.11.2026 (Nutzer-Wunsch "Forschungs-Tab uebersichtlich, Stil wie
+# die anderen Tabs"): diese Datei ist ein button-card-TEMPLATE
+# (bgai_recording_status, registriert in button_card_templates.yaml) und
+# zeichnet je nach variables.section einen von zwei Abschnitten:
+#   status  Ampel, juengste Bloecke, naechtlicher Sync, HA-Backup
+#   gaps    Luecken seit Aufzeichnungsbeginn, unvollstaendige Tage
+# Beide Instanzen teilen sich einen Abruf (window._bgRecStatus), ebenso der
+# Monatskalender (views/aufzeichnung_kalender.yaml). Die fruehere 7-Tage-
+# Leiste ist entfallen, der Kalender zeigt dieselben Tage.
+#
+# Verwendet in bitgrid_dashboard_v3.yaml → Tab "Forschung", Bereich g1r:
+# seit 14.11.2026 bilden status, Kalender und gaps EINE Karte
+# "Datenaufzeichnung" (die Huelle zeichnet der innere Stack dort).
+# ═══════════════════════════════════════════════════════════════════════
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+variables:
+  section: status
+# Die Karte hat keine eigene Entity, button-card zeichnet sie deshalb nach dem
+# ersten Rendern nicht von selbst neu. Erste Fassung (12.11.2026) setzte auf
+# triggers_update mit zwei Sensoren: live blieb die Karte auf "Lade ..."
+# stehen, der Trigger greift in dieser button-card-Version nicht. Jetzt wie in
+# views/heizstab.yaml: nach dem Abruf explizit this.requestUpdate(), dazu ein
+# eigener Timer, der die Karte alle 10 min neu zeichnet. Das Neuzeichnen
+# stoesst den naechsten Abruf an und wertet das Alter des Berichts neu aus,
+# die Veraltet-Pruefung laeuft also auch bei dauerhaft offenem Tab weiter.
+custom_fields:
+  body: >
+    [[[
+      const REFETCH_MS = 10 * 60 * 1000;
+      const DEFAULT_MAX_AGE_H = 26;
+      if (!window._bgRecStatus) window._bgRecStatus = { state: 'idle', data: null, fetchedAt: 0, failed: false, cards: new Set() };
+      const S = window._bgRecStatus;
+      // Der Monatskalender weiter unten liest dieselben Daten. Beide Karten
+      // melden sich hier an, damit ein Abruf beide neu zeichnet.
+      S.cards.add(this);
+
+      if (S.state !== 'fetching' && (S.fetchedAt === 0 || Date.now() - S.fetchedAt > REFETCH_MS)) {
+        S.state = 'fetching';
+        fetch('/local/recording_status.json?v=' + Date.now(), { cache: 'no-store' })
+          .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(data => { S.data = data; S.failed = false; })
+          .catch(() => { S.data = null; S.failed = true; })
+          .finally(() => {
+            S.state = 'done';
+            S.fetchedAt = Date.now();
+            const redraw = () => S.cards.forEach(c => {
+              if (!c.isConnected) { S.cards.delete(c); return; }
+              // 13.11.2026: button-card v7 verwirft ein nacktes requestUpdate() (ihr
+              // shouldUpdate verlangt eine geaenderte Eigenschaft). _updateTimerMS ist
+              // die Eigenschaft, mit der v7 ihren eigenen update_timer ausloest, die
+              // Aenderung erzwingt das Neuzeichnen. requestUpdate bleibt als Fallback.
+              try { c._updateTimerMS = Date.now(); c.requestUpdate && c.requestUpdate(); } catch (e) {}
+            });
+            redraw();
+            // Genau ein Timer, auch wenn mehrere Instanzen der Karte existieren.
+            if (S.timer) clearTimeout(S.timer);
+            S.timer = setTimeout(redraw, REFETCH_MS + 1000);
+          });
+      }
+
+        const okC = 'var(--bg-color-eco, #4CAF50)';
+      const warnC = 'var(--bg-color-heat, #FB8C00)';
+      const errC = 'var(--bg-color-reserve, #EF5350)';
+      const dim = 'var(--secondary-text-color)';
+      const white = 'var(--primary-text-color)';
+      const ICON_SHADOW = 'filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));';
+      // Divider in the dashboard style (fades out at both ends, --divider-color).
+      const LINE = 'background:linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent) top / 100% 1px no-repeat;';
+      const esc = (t) => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const section = (typeof variables !== 'undefined' && variables && variables.section) || 'status';
+
+      const head = (icon, color, title, lines) => `
+        <div style="display:flex;align-items:center;gap:14px;">
+          <ha-icon icon="${icon}" style="--mdc-icon-size:38px;width:38px;height:38px;color:${color};flex:0 0 38px;${ICON_SHADOW}"></ha-icon>
+          <div style="flex:1 1 auto;min-width:0;">
+            <div style="font-size:1.2em;font-weight:700;color:${color};">${title}</div>
+            ${lines.map(l => `<div style="color:${dim};">${l}</div>`).join('')}
+          </div>
+        </div>`;
+      const wrap = (inner) => `<div style="font-size:calc(var(--bg-fs-body, 1rem) * 1.15);line-height:1.45;color:${white};text-align:left;">${inner}</div>`;
+
+      if (S.failed) {
+        return wrap(head('mdi:database-remove', errC, 'Status nicht lesbar', [
+          'Die Datei recording_status.json fehlt oder ist defekt.',
+          'Der Statusjob auf dem Server hat sie nicht geschrieben.',
+        ]));
+      }
+      if (!S.data) {
+        return wrap(`<div style="padding:18px 0;text-align:center;color:${dim};">Lade Aufzeichnungsstatus …</div>`);
+      }
+
+      const d = S.data;
+      const now = Date.now();
+      const ageH = (iso) => { const t = Date.parse(iso); return isNaN(t) ? null : (now - t) / 3600000; };
+      const fmtAge = (h) => {
+        if (h === null) return '—';
+        if (h < 1) return 'vor ' + Math.max(0, Math.round(h * 60)) + ' min';
+        if (h < 48) return 'vor ' + Math.round(h) + ' h';
+        return 'vor ' + Math.round(h / 24) + ' Tagen';
+      };
+      const fmtTs = (iso) => {
+        const t = Date.parse(iso);
+        if (isNaN(t)) return '—';
+        return new Date(t).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+      };
+      const kv = (label, value) => `
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;${LINE}">
+          <span style="color:${dim};">${label}</span>
+          <span style="text-align:right;font-weight:600;">${value}</span>
+        </div>`;
+      // Aufklappbare Liste. <details> oeffnet in der button-card nicht (ihr
+      // Action-Handler verwirft den Klick, am Pi per CDP geprueft, 14.11.2026);
+      // darum eigener Umschalter, Zustand ueberlebt das Neuzeichnen.
+      // pointer-events:auto: die Zusatzfelder der button-card stehen auf none,
+      // der Klick ging sonst durch den Umschalter hindurch auf die Karte.
+      window._bgOpen = window._bgOpen || {};
+      // Touch (14.11.2026): auf Tablet/Handy unterdrueckt die button-card den
+      // click nach touchend; darum schaltet auch touchend um. Ein Fingertipp
+      // loest danach oft noch einen click aus, die 600-ms-Sperre verhindert
+      // das doppelte Umschalten. pointerdown/touchstart erreichen die
+      // button-card nicht mehr (kein Ripple, keine Aktion).
+      window._bgFold = window._bgFold || function (e, el, key) {
+        e.stopPropagation();
+        e.preventDefault();
+        var now = Date.now();
+        if (el._bgLast && now - el._bgLast < 600) return;
+        el._bgLast = now;
+        var b = el.nextElementSibling;
+        var o = b.style.display === 'none';
+        b.style.display = o ? '' : 'none';
+        el.firstElementChild.textContent = o ? '▾' : '▸';
+        window._bgOpen[key] = o;
+      };
+      const fold = (key, dflt, summaryHtml, bodyHtml, wrapStyle = '', sumStyle = '') => {
+        const open = Object.prototype.hasOwnProperty.call(window._bgOpen, key) ? window._bgOpen[key] : dflt;
+        return `<div style="${wrapStyle}"><div role="button" tabindex="0" style="cursor:pointer;user-select:none;-webkit-user-select:none;pointer-events:auto;touch-action:manipulation;${sumStyle}" onclick="window._bgFold(event,this,'${key}')" ontouchend="window._bgFold(event,this,'${key}')" onpointerdown="event.stopPropagation()" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()"><span style="display:inline-block;width:1em;">${open ? '▾' : '▸'}</span>${summaryHtml}</div><div style="${open ? '' : 'display:none;'}">${bodyHtml}</div></div>`;
+      };
+      const subhead = (icon, t) => `
+        <div style="display:flex;align-items:center;justify-content:flex-start;gap:8px;margin-top:12px;margin-bottom:2px;font-weight:700;letter-spacing:0.02em;">
+          <ha-icon icon="${icon}" style="--mdc-icon-size:20px;width:20px;height:20px;flex:0 0 20px;color:${dim};${ICON_SHADOW}"></ha-icon><span style="flex:1 1 auto;text-align:left;">${t}</span>
+        </div>`;
+      const tsCell = (iso) => iso ? `${fmtTs(iso)} <span style="color:${dim};font-weight:400;">(${fmtAge(ageH(iso))})</span>` : '—';
+      const fmtDay = (iso, withYear) => new Date(iso + 'T00:00:00Z').toLocaleDateString('de-DE',
+        withYear ? { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' }
+                 : { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
+
+      // ── Abschnitt "gaps": Luecken ueber den gesamten Aufzeichnungszeitraum ──
+      // Rein informativ: alte Luecken aendern die Ampel nicht, sonst bliebe sie
+      // wegen eines Ausfalls von vor Monaten dauerhaft rot und wuerde neue
+      // Probleme verdecken.
+      if (section === 'gaps') {
+        const h = d.history;
+        if (!h) return wrap(`<div style="padding:18px 0;text-align:center;color:${dim};">Keine Verlaufsdaten im Statusbericht.</div>`);
+        const MAX_RANGES = 8, MAX_PARTIAL = 16;
+        const ranges = Array.isArray(h.missing_ranges) ? h.missing_ranges : [];
+        const partial = Array.isArray(h.partial) ? h.partial : [];
+        const tile = (value, label, color) => `
+          <div style="flex:1 1 0;min-width:0;text-align:center;padding:10px 6px 8px;border-radius:12px;background:rgba(255,255,255,0.05);border-bottom:3px solid ${value > 0 ? color : 'rgba(255,255,255,0.15)'};">
+            <div style="font-size:1.7em;font-weight:800;line-height:1.1;color:${value > 0 ? color : dim};">${value}</div>
+            <div style="font-size:0.85em;color:${dim};white-space:nowrap;">${label}</div>
+          </div>`;
+        // 14.11.2026: ein Tag mit mindestens 1 h nicht gemessener Bloecke ist
+        // "fraglich", nicht "vollstaendig" (gleiche Grenze wie der Kalender).
+        const bbd = h.blocks_by_day || {};
+        const nSusp = Object.entries(h.suspect_by_day || {}).filter(([k, n]) => n >= 6 && (Number(bbd[k]) || 0) >= 144).length;
+        const tiles = `
+          <div style="display:flex;gap:10px;">
+            ${tile(Math.max((h.days_complete || 0) - nSusp, 0), 'vollständig', okC)}
+            ${tile(nSusp, 'fraglich', 'var(--bgai-pv-v3, #fbb210)')}
+            ${tile(h.days_partial, 'unvollständig', warnC)}
+            ${tile(h.days_missing, h.days_missing === 1 ? 'fehlt' : 'fehlen', errC)}
+          </div>`;
+        // Two columns: the list stays short enough for one screen.
+        const rangeRows = `<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:24px;">${ranges.slice(0, MAX_RANGES).map(r => kv(
+          r.from === r.to ? fmtDay(r.from) : fmtDay(r.from) + ' bis ' + fmtDay(r.to),
+          `<span style="color:${errC};">${r.days} ${r.days === 1 ? 'Tag' : 'Tage'}</span>`)).join('')}</div>`;
+        const moreRanges = ranges.length > MAX_RANGES ? `<div style="color:${dim};font-size:0.85em;">+ ${ranges.length - MAX_RANGES} weitere Zeiträume</div>` : '';
+        const chips = partial.slice(0, MAX_PARTIAL).map(p =>
+          `<span style="display:inline-block;margin:3px 4px 3px 0;padding:2px 9px;border-radius:9px;background:rgba(255,255,255,0.05);border:1px solid ${warnC};font-size:0.88em;white-space:nowrap;">${fmtDay(p.date)} · ${p.blocks}/144</span>`).join('');
+        const moreChips = partial.length > MAX_PARTIAL ? ` <span style="color:${dim};font-size:0.85em;">+ ${partial.length - MAX_PARTIAL} weitere</span>` : '';
+        const qErr = Number(h.quality_error_blocks) || 0, qWarn = Number(h.quality_warn_blocks) || 0;
+        // 14.11.2026: gespeichert, aber nicht gemessen (recording_status.py,
+        // suspect_runs). Ab 1 h je Zeitraum, zusammengefasst je Ausfall.
+        const runs = (Array.isArray(h.suspect_runs) ? h.suspect_runs : []).filter(r => r.blocks >= 6);
+        const KIND = { held: 'Werte eingefroren', zero: 'Hausverbrauch 0 W' };
+        const hrs = (n) => { const x = n / 6; return (x >= 10 ? Math.round(x) : x.toLocaleString('de-DE', { maximumFractionDigits: 1 })) + ' h'; };
+        const tsDe = (bid) => `${fmtDay(bid.slice(0, 10))} ${bid.slice(11, 16)}`;
+        const suspRows = `<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:24px;">${runs.map(r => kv(
+          `${tsDe(r.from)} <span style="color:${dim};">· ${KIND[r.kind] || r.kind}</span>`,
+          `<span style="color:var(--bgai-pv-v3, #fbb210);">${hrs(r.blocks)}</span>`)).join('')}</div>`;
+        const suspTotal = runs.reduce((a, r) => a + r.blocks, 0);
+        return wrap(`
+          <div style="color:${dim};margin-bottom:10px;">Seit Aufzeichnungsbeginn am ${fmtDay(h.first_day, true)} · ${h.days_total} Tage</div>
+          ${tiles}
+          ${ranges.length ? subhead('mdi:calendar-remove', 'Fehlende Zeiträume') + rangeRows + moreRanges : ''}
+          ${partial.length ? subhead('mdi:calendar-alert', 'Unvollständige Tage (Blöcke von 144)') + `<div style="margin-top:4px;">${chips}${moreChips}</div>` : ''}
+          ${!ranges.length && !partial.length ? `<div style="margin-top:12px;color:${dim};">Kein Tag fehlt.</div>` : ''}
+          ${runs.length ? subhead('mdi:alert-outline', `Gespeichert, aber nicht gemessen (${hrs(suspTotal)})`) + fold('recording_suspect', false, `${runs.length} Zeiträume anzeigen`, suspRows, 'margin-top:2px;', `color:${dim};`) + `<div style="margin-top:4px;color:${dim};font-size:0.9em;">Home Assistant lieferte keine Messwerte, der Abgleich hat trotzdem Blöcke geschrieben: entweder den letzten Wert stundenlang fortgeschrieben (eingefroren) oder 0 W (eine verlorene SMA-Verbindung wird über die Vorgabe 0 zu einem Messwert). Seit 14.11.2026 sind diese Blöcke in der Datenbank als quality=warn markiert (die Messwerte selbst sind unverändert). Die Karten Akku über Nacht, Akku-Höchststand und Prognose lassen Tage mit mindestens einer Stunde davon aus.</div>` : ''}
+          <div style="margin-top:10px;color:${dim};font-size:0.9em;">
+            ${qErr + qWarn > 0 ? `${qErr} Blöcke mit quality=error, ${qWarn} mit quality=warn. ` : ''}144 heißt vollständig
+            übertragen, nicht lückenlos gemessen. Seit 14.11.2026 markiert der Abgleich solche Blöcke selbst als quality=warn.
+          </div>`);
+      }
+
+      // ── Abschnitt "status": Ampel, juengste Bloecke, Sync, HA-Backup ──
+      const maxAge = Number(d.max_age_hours) || DEFAULT_MAX_AGE_H;
+      const genAge = ageH(d.generated_at);
+      const stale = genAge === null || genAge > maxAge;
+
+      let level = d.level === 'ok' || d.level === 'warn' ? d.level : 'error';
+      let reasons = Array.isArray(d.reasons) ? d.reasons.map(esc) : [];
+      if (stale) {
+        level = 'error';
+        reasons = [genAge === null
+          ? 'Der Statusbericht hat keinen gültigen Zeitstempel.'
+          : `Der Statusjob ist seit ${Math.round(genAge)} h nicht gelaufen (Grenze ${maxAge} h). Die Angaben unten sind veraltet.`];
+      }
+      const meta = {
+        ok:    ['mdi:database-check', okC,   'Aufzeichnung läuft'],
+        warn:  ['mdi:database-alert', warnC, 'Aufzeichnung mit Auffälligkeiten'],
+        error: ['mdi:database-remove', errC, stale ? 'Status veraltet' : 'Aufzeichnung gestört'],
+      }[level];
+      if (level === 'ok') reasons = ['Der nächtliche Sync hat Daten geliefert, die letzten 7 Tage sind vollständig.'];
+
+      const tables = d.tables || {};
+      const energy = tables.energy_states || {};
+      // One row while energy, device and miner tables end at the same block;
+      // split into three rows as soon as one of them lags behind.
+      const latest = [['Energie', energy.latest_block], ['Geräte', (tables.device_states || {}).latest_block], ['Miner', (tables.miner_states || {}).latest_block]];
+      const latestRows = latest.every(([, t]) => t && t === latest[0][1])
+        ? kv('Jüngster Block (Energie, Geräte, Miner)', tsCell(latest[0][1]))
+        : latest.map(([label, t]) => kv('Jüngster Block ' + label, tsCell(t))).join('');
+
+      // Zwei verschiedene Laeufe, deshalb getrennt beschriftet: der Sync
+      // uebertraegt Messwerte in die Forschungs-DB, das HA-Backup sichert Home
+      // Assistant selbst (inkl. Recorder), nicht bitgrid.db.
+      const fmtIn = (iso) => {
+        const t = Date.parse(iso);
+        if (isNaN(t)) return '—';
+        const hrs = (t - now) / 3600000;
+        if (hrs <= 0) return 'fällig';
+        return hrs < 1 ? 'in ' + Math.round(hrs * 60) + ' min' : 'in ' + Math.round(hrs) + ' h';
+      };
+      let syncHtml = '';
+      const sy = d.sync;
+      if (sy) {
+        let last;
+        if (!sy.log_readable) last = `<span style="color:${warnC};">Sync-Log nicht lesbar</span>`;
+        else if (!sy.last_start) last = `<span style="color:${warnC};">kein Lauf im Log</span>`;
+        else {
+          const result = sy.ok
+            ? `<span style="color:${okC};">erfolgreich${sy.blocks_added !== null && sy.blocks_added !== undefined ? ', +' + sy.blocks_added + ' Blöcke' : ''}</span>`
+            : `<span style="color:${errC};">abgebrochen</span>`;
+          last = `${tsCell(sy.last_start)} · ${result}`;
+        }
+        syncHtml = subhead('mdi:database-sync', 'Nächtlicher Sync in die Forschungs-DB')
+          + kv('Geplant', sy.schedule ? 'täglich ' + esc(sy.schedule) + ' Uhr' : '—')
+          + kv('Letzter Lauf', last);
+      }
+      const bkState = (id) => { const s = states[id]?.state; return s && s !== 'unknown' && s !== 'unavailable' ? s : null; };
+      const bkOk = bkState('sensor.backup_last_successful_automatic_backup');
+      const bkTry = bkState('sensor.backup_last_attempted_automatic_backup');
+      const bkNext = bkState('sensor.backup_next_scheduled_automatic_backup');
+      let backupHtml = '';
+      if (bkOk || bkTry || bkNext) {
+        // Ein Versuch, der juenger ist als der letzte Erfolg, laeuft entweder
+        // noch (Backup dauert hier rund zwei Stunden) oder ist gescheitert.
+        const running = states['sensor.backup_backup_manager_state']?.state;
+        const pending = bkOk && bkTry && Date.parse(bkTry) > Date.parse(bkOk);
+        const note = !pending ? '' : (running && running !== 'idle'
+          ? ` <span style="color:${dim};font-weight:400;">· neues Backup läuft</span>`
+          : ` <span style="color:${warnC};font-weight:400;">· Versuch vom ${fmtTs(bkTry)} ohne Erfolg</span>`);
+        backupHtml = subhead('mdi:backup-restore', 'Home-Assistant-Backup (automatisch)')
+          + kv('Zuletzt erfolgreich', (bkOk ? tsCell(bkOk) : '—') + note)
+          + kv('Nächstes geplant', bkNext ? `${fmtTs(bkNext)} <span style="color:${dim};font-weight:400;">(${fmtIn(bkNext)})</span>` : '—');
+      }
+
+      return wrap(`
+        ${head(meta[0], meta[1], meta[2], reasons)}
+        ${subhead('mdi:clock-check-outline', 'Jüngste Daten in der DB')}
+        ${kv('Letzte Prüfung', tsCell(d.generated_at))}
+        ${latestRows}
+        ${syncHtml}
+        ${backupHtml}`);
+    ]]]
+styles:
+  card:
+    - background: var(--ha-card-background)
+    - border-radius: var(--bgai-card-radius-v3)
+    - padding: 16px 18px
+    - overflow: hidden
+    - height: 100%
+    - box-sizing: border-box
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+    # Stretched to the row partner's height: content starts at the top.
+    - align-content: start
+  custom_fields:
+    body:
+      - width: 100%
+      - align-self: start
+      - justify-self: stretch
+      - box-sizing: border-box
+      # button-card setzt auf custom_fields per Default white-space: nowrap +
+      # overflow: hidden (fuer kurze Labels gedacht), das schneidet Fliesstext
+      # ab. Gleicher Reset wie bei der Karte "Saisonale Schwellwerte".
+      - white-space: normal
+      - overflow: visible
+      - text-overflow: clip

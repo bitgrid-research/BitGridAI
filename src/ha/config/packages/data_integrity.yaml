@@ -15,6 +15,19 @@
 
 data_integrity:
 
+  # Blaetter-Helfer fuer den Monatskalender der Karte "Datenaufzeichnung"
+  # (views/aufzeichnung_status.yaml). 0 = laufender Monat, 1 = Vormonat usw.
+  # Reine Anzeige-Navigation, kein Messwert und kein Steuersignal. Gleiches
+  # Muster wie input_number.mining_log_offset (packages/stats.yaml).
+  input_number:
+    recording_month_offset:
+      name: "Datenaufzeichnung: Monats-Versatz"
+      icon: mdi:calendar-arrow-left
+      min: 0
+      max: 36
+      step: 1
+      mode: box
+
   script:
     data_integrity_push:
       alias: "Datenintegritaet: Push aufs Handy"

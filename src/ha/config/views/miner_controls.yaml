@@ -929,7 +929,7 @@ cards:
                   // Ueberhitzungs-Badge im Header. Rot bleibt echten technischen
                   // Stoerungen vorbehalten (die anderen fuenf Listen).
                   const ok = rule === 'R1 Stopp'
-                    ? {icon: 'mdi:pause-circle', color: 'var(--accent-color)', title: 'R1 Hausreserve: Miner pausiert, Akku lädt'}
+                    ? {icon: 'mdi:battery-charging-medium', color: 'var(--bg-color-eco)', title: 'R1 Hausreserve: Miner pausiert, Akku lädt'}
                     : rule === 'R2 Temp-Sperre'
                       ? {icon: 'mdi:thermometer-alert', color: 'var(--bg-color-heat)', title: 'R2 Temperatur-Sperre'}
                       : true;
@@ -1716,7 +1716,7 @@ cards:
                   const rule = states['input_text.mvp_miner2_rule']?.state ?? '';
                   // Neutraler Regel-Status statt Stoerung, s. Log bei Miner 1.
                   const ok = rule === 'R1 Stopp'
-                    ? {icon: 'mdi:pause-circle', color: 'var(--accent-color)', title: 'R1 Hausreserve: Miner pausiert, Akku lädt'}
+                    ? {icon: 'mdi:battery-charging-medium', color: 'var(--bg-color-eco)', title: 'R1 Hausreserve: Miner pausiert, Akku lädt'}
                     : rule === 'R2 Temp-Sperre'
                       ? {icon: 'mdi:thermometer-alert', color: 'var(--bg-color-heat)', title: 'R2 Temperatur-Sperre'}
                       : true;

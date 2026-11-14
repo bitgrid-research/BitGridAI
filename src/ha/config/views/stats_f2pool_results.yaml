@@ -56,7 +56,7 @@ custom_fields:
       const btcEur       = parseFloat(states['sensor.btc_eur_price']?.state) || 0;
 
       const fmtBtc  = (v) => v.toLocaleString('de-DE', {minimumFractionDigits: 8, maximumFractionDigits: 8}) + ' BTC';
-      const fmtSats = (v) => Math.round(v * 1e8).toLocaleString('de-DE') + ' sats';
+      const fmtSats = (v) => Math.round(v * 1e8).toLocaleString('de-DE') + ' Sats';
       const fmtEur  = (v) => btcEur > 0 ? (v * btcEur).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €' : '—';
 
       // 26.09.2026, Nutzer-Wunsch "Schrift groesser, vor allem die

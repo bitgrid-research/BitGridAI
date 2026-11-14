@@ -65,11 +65,6 @@ cards:
       - entity: sensor.sma_tripower_pv_power
         name: SMA PV-Leistung
         secondary_info: last-changed
-      - type: section
-        label: Erklaerschicht (MQTT + Ollama, read-only)
-      - entity: sensor.bitsy_advice
-        name: ₿itsy-Status
-        secondary_info: last-changed
 
   # ── Block 2: Wer blockiert gerade ────────────────────────────────────
   # Spiegel der Watchdog-Regelkette aus packages/mvp_diagnose.yaml. Der Kern-

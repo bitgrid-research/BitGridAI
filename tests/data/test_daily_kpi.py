@@ -92,3 +92,66 @@ def test_compute_day_no_blocks_returns_false_and_writes_nothing(db_conn):
     assert compute_day(db_conn, date(2026, 8, 20)) is False
     row = db_conn.execute("SELECT * FROM daily_kpi WHERE day = '2026-08-20'").fetchone()
     assert row is None
+
+
+# ── Schaltfehler-Definition (13.11.2026: Ruhezustaende sind kein Fehler) ──────
+
+
+def _insert_miner(conn, block_id: str, miner: str, cmd: str, status: str) -> None:
+    conn.execute(
+        "INSERT INTO miner_states (block_id, miner, workmode_set, workmode_status)"
+        " VALUES (?, ?, ?, ?)",
+        (block_id, miner, cmd, status),
+    )
+    conn.commit()
+
+
+def test_schaltfehler_ignores_rest_pairs_and_keeps_real_ones(db_conn):
+    _insert_miner(db_conn, "2026-11-07T10:00:00", "miner1", "Standby", "Off")
+    _insert_miner(db_conn, "2026-11-07T10:00:00", "miner2", "Standby", "Idle")
+    _insert_miner(db_conn, "2026-11-07T10:10:00", "miner1", "Eco", "Off")
+    _insert_miner(db_conn, "2026-11-07T10:10:00", "miner2", "Super", "Standby")
+    _insert_miner(db_conn, "2026-11-07T10:20:00", "miner1", "Standby", "Eco")
+    _insert_miner(db_conn, "2026-11-07T10:20:00", "miner2", "Eco", "Eco")
+    rows = db_conn.execute(
+        "SELECT workmode_set, workmode_status FROM v_schaltfehler ORDER BY block_id, miner"
+    ).fetchall()
+    assert rows == [("Eco", "Off"), ("Super", "Standby"), ("Standby", "Eco")]
+
+
+def test_old_schaltfehler_view_is_migrated(tmp_path: Path):
+    path = tmp_path / "old.db"
+    conn = get_connection(path)
+    conn.execute("DROP VIEW v_schaltfehler")
+    conn.execute(
+        "CREATE VIEW v_schaltfehler AS SELECT block_id, miner, workmode_set,"
+        " workmode_status FROM miner_states WHERE workmode_set IS NOT NULL"
+        " AND workmode_status IS NOT NULL AND workmode_set <> workmode_status"
+    )
+    conn.commit()
+    _insert_miner(conn, "2026-11-07T10:00:00", "miner1", "Standby", "Off")
+    assert conn.execute("SELECT COUNT(*) FROM v_schaltfehler").fetchone()[0] == 1
+    conn.close()
+
+    conn = get_connection(path)  # migration runs on open
+    try:
+        assert conn.execute("SELECT COUNT(*) FROM v_schaltfehler").fetchone()[0] == 0
+    finally:
+        conn.close()
+
+
+def test_compute_day_counts_only_real_switch_errors(db_conn):
+    _insert_energy_block(db_conn, "2026-11-07T10:00:00", 0.0)
+    _insert_miner(db_conn, "2026-11-07T10:00:00", "miner1", "Standby", "Off")
+    _insert_miner(db_conn, "2026-11-07T10:00:00", "miner2", "Eco", "Off")
+    assert compute_day(db_conn, date(2026, 11, 7))
+    day = db_conn.execute(
+        "SELECT blocks_switch_mismatch FROM daily_kpi WHERE day = '2026-11-07'"
+    ).fetchone()[0]
+    per_miner = dict(
+        db_conn.execute(
+            "SELECT miner, switch_mismatches FROM daily_miner_kpi WHERE day = '2026-11-07'"
+        ).fetchall()
+    )
+    assert day == 1
+    assert per_miner == {"miner1": 0, "miner2": 1}

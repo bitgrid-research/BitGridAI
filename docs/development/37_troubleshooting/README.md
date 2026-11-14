@@ -38,7 +38,7 @@ git status
 | Core trifft falsche Decisions | [C – Core & Regeln](#c--core--regeln) |
 | MQTT-Nachrichten fehlen | [B – Stack & Laufzeit](#b--stack--laufzeit) |
 | Tests schlagen fehl | [D – Tests & CI](#d--tests--ci) |
-| ₿itsy antwortet nicht | [E – ₿itsy / Hermes Agent](#e--bitsy--hermes-agent) |
+| Agent antwortet nicht | [E – Hermes Agent](#e--hermes-agent) |
 
 &nbsp;
 
@@ -352,7 +352,7 @@ Häufig: fehlende System-Dependencies im Dockerfile, oder `requirements.txt` nic
 
 ---
 
-## E — ₿itsy / Hermes Agent
+## E — Hermes Agent
 
 ### Agent antwortet nicht
 
@@ -363,9 +363,6 @@ curl -s -o /dev/null -w '%{http_code}
 
 # Ollama (KI-Instanz) erreichbar und Modell vorhanden?
 curl -s http://<OLLAMA-HOST>:11434/api/tags
-
-# Bitsy-Status/Chat-Dienst laeuft?
-curl -s -X POST http://umbrel.local:8766/trigger
 
 # Umbrel-Dienst prüfen
 ssh bitgrid "docker ps | grep openclaw"

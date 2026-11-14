@@ -268,7 +268,9 @@ def _soc_lookup(conn: sqlite3.Connection) -> dict[str, float]:
 def switch_mismatch_summary(conn: sqlite3.Connection) -> tuple[int, int]:
     """blocks_switch_mismatch/switch_mismatches messen workmode_set != workmode_status
     (Kommando vs. tatsaechlicher Zustand, z.B. Hardware-Verzoegerung) — das ist NICHT
-    dasselbe wie Moduswechsel-Flapping und wird hier nur zur Einordnung mitgeliefert."""
+    dasselbe wie Moduswechsel-Flapping und wird hier nur zur Einordnung mitgeliefert.
+    Seit 13.11.2026 ohne Paare zweier Ruhezustaende (Standby/Off/Idle), s. v_schaltfehler
+    in src/data/db.py; Summen vor diesem Datum sind damit nicht vergleichbar."""
     daily = conn.execute(
         "SELECT COALESCE(SUM(blocks_switch_mismatch), 0) FROM daily_kpi"
     ).fetchone()[0]

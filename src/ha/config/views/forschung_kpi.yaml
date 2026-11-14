@@ -1,0 +1,620 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Forschungs-KPI-Karten: Akku über Nacht und Solarprognose (Tab Forschung).
+#
+# Seit 13.11.2026. Vorschlag des BitHamsters ("Fehlende KPI-Karten") und
+# Befund der Nachtpruefung: die saisonale Hausreserve (ADR 028) soll (seit ADR 033) 5 %
+# Akku bis zum Morgen lassen, gemessen waren es im Herbst 2 bis 6 %.
+#
+# Datenherkunft: src/data/research_cards.py laeuft per Cron auf dem Server
+# (nach dem KPI-Neubau), oeffnet bitgrid.db nur lesend und schreibt
+# www/research_cards.json. Dieselbe Nachtrechnung speist den BitHamster
+# (src/explain/bithamster_season.py), Karte und Hamster koennen sich also
+# nicht widersprechen.
+#
+# button-card-TEMPLATE (bgai_research_kpi, registriert in
+# button_card_templates.yaml), variables.section waehlt den Abschnitt:
+#   nights    Monatsurteil Hausreserve + letzte 14 Naechte
+#   forecast  Solarprognose: Abweichung, Tagesbalken, Tageszeit-Profil
+#   peak      Akku-Hoechststand gegen Eco-Start je Tag, was zum Start fehlte
+#   efficiency  Miner-Hardware: W/TH je Miner und Monat, nur reine Eco-Tage
+#   surplus     Einspeisung > 1 kW bei stehenden Minern, mit Grund (14.11.2026)
+#   switching   Start/Stopp-Wechsel je Tag gegen das Qualitaetsziel, Handbetrieb
+#   safety      Chip-Temperatur ab 110 Grad und Schaltfehler je Monat
+#   thesis      Merkliste fuer die Masterarbeit + offene Punkte (thesis_open.json)
+#   plan        Fahrplan Masterarbeit: offene Arbeit in Bearbeitungsreihenfolge
+# Alle Instanzen teilen einen Abruf (window._bgResearchKpi), gleiches
+# Neuzeichnen wie views/aufzeichnung_status.yaml.
+#
+# KEIN Steuerpfad: reine Anzeige, keine Entity, keine Automation. Ob die
+# Grundlast angehoben wird, entscheidet der Mensch (Tab Einstellungen).
+# ═══════════════════════════════════════════════════════════════════════
+show_name: false
+show_icon: false
+show_state: false
+tap_action:
+  action: none
+variables:
+  section: nights
+styles:
+  card:
+    - height: 100%
+    - background: var(--ha-card-background)
+    - border-radius: var(--bgai-card-radius-v3)
+    - padding: 14px 16px
+    - box-sizing: border-box
+  grid:
+    - grid-template-areas: '"body"'
+    - grid-template-columns: 1fr
+    - align-content: start
+  custom_fields:
+    body:
+      - width: 100%
+      # Stretched to the row partner's height: content starts at the top.
+      - align-self: start
+      - justify-self: stretch
+      - white-space: normal
+      - overflow: visible
+      - text-overflow: clip
+custom_fields:
+  body: >
+    [[[
+      const REFETCH_MS = 10 * 60 * 1000;
+      const MAX_AGE_H = 26;
+      if (!window._bgResearchKpi) window._bgResearchKpi = { state: 'idle', data: null, fetchedAt: 0, failed: false, cards: new Set() };
+      const S = window._bgResearchKpi;
+      S.cards.add(this);
+      if (S.state !== 'fetching' && (S.fetchedAt === 0 || Date.now() - S.fetchedAt > REFETCH_MS)) {
+        S.state = 'fetching';
+        fetch('/local/research_cards.json?v=' + Date.now(), { cache: 'no-store' })
+          .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(data => { S.data = data; S.failed = false; })
+          // Open points of the thesis (scripts/thesis_open_export.py); optional.
+          .then(() => fetch('/local/thesis_open.json?v=' + Date.now(), { cache: 'no-store' })
+            .then(r => r.ok ? r.json() : null).then(t => { S.thesisOpen = t; }).catch(() => { S.thesisOpen = null; }))
+          .catch(() => { S.data = null; S.failed = true; })
+          .finally(() => {
+            S.state = 'done';
+            S.fetchedAt = Date.now();
+            const redraw = () => S.cards.forEach(c => {
+              if (!c.isConnected) { S.cards.delete(c); return; }
+              // button-card v7: a bare requestUpdate() is dropped, changing
+              // _updateTimerMS forces the redraw (see aufzeichnung_status.yaml).
+              try { c._updateTimerMS = Date.now(); c.requestUpdate && c.requestUpdate(); } catch (e) {}
+            });
+            redraw();
+            if (S.timer) clearTimeout(S.timer);
+            S.timer = setTimeout(redraw, REFETCH_MS + 1000);
+          });
+      }
+
+      const okC = 'var(--bg-color-eco, #4CAF50)';
+      const warnC = 'var(--bg-color-heat, #FB8C00)';
+      const errC = 'var(--bg-color-reserve, #EF5350)';
+      const pvC = 'var(--bgai-pv-v3, #fbb210)';
+      const dim = 'var(--secondary-text-color)';
+      const white = 'var(--primary-text-color)';
+      const ICON_SHADOW = 'filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));';
+      const LINE = 'background:linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent) top / 100% 1px no-repeat;';
+      const section = (typeof variables !== 'undefined' && variables && variables.section) || 'nights';
+      const wrap = (inner) => `<div style="font-size:calc(var(--bg-fs-body, 1rem) * 1.15);line-height:1.45;color:${white};text-align:left;">${inner}</div>`;
+      const n0 = (v) => v === null || v === undefined ? '—' : Math.round(v).toLocaleString('de-DE');
+      const n1 = (v) => v === null || v === undefined ? '—' : Number(v).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      const MONTHS = ['', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+      const fmtDay = (iso) => new Date(iso + 'T00:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', timeZone: 'UTC' });
+      const head = (icon, color, title, sub) => `
+        <div style="display:flex;align-items:center;gap:14px;">
+          <ha-icon icon="${icon}" style="--mdc-icon-size:38px;width:38px;height:38px;color:${color};flex:0 0 38px;${ICON_SHADOW}"></ha-icon>
+          <div style="flex:1 1 auto;min-width:0;">
+            <div style="font-size:1.2em;font-weight:700;color:${color};">${title}</div>
+            <div style="color:${dim};">${sub}</div>
+          </div>
+        </div>`;
+      const note = (t) => `<div style="margin-top:16px;color:${dim};font-size:0.95em;line-height:1.5;">${t}</div>`;
+      // Aufklappbare Liste. <details> oeffnet in der button-card nicht (ihr
+      // Action-Handler verwirft den Klick, am Pi per CDP geprueft, 14.11.2026);
+      // darum eigener Umschalter, Zustand ueberlebt das Neuzeichnen.
+      // pointer-events:auto: die Zusatzfelder der button-card stehen auf none,
+      // der Klick ging sonst durch den Umschalter hindurch auf die Karte.
+      window._bgOpen = window._bgOpen || {};
+      // Touch (14.11.2026): auf Tablet/Handy unterdrueckt die button-card den
+      // click nach touchend; darum schaltet auch touchend um. Ein Fingertipp
+      // loest danach oft noch einen click aus, die 600-ms-Sperre verhindert
+      // das doppelte Umschalten. pointerdown/touchstart erreichen die
+      // button-card nicht mehr (kein Ripple, keine Aktion).
+      window._bgFold = window._bgFold || function (e, el, key) {
+        e.stopPropagation();
+        e.preventDefault();
+        var now = Date.now();
+        if (el._bgLast && now - el._bgLast < 600) return;
+        el._bgLast = now;
+        var b = el.nextElementSibling;
+        var o = b.style.display === 'none';
+        b.style.display = o ? '' : 'none';
+        el.firstElementChild.textContent = o ? '▾' : '▸';
+        window._bgOpen[key] = o;
+      };
+      const fold = (key, dflt, summaryHtml, bodyHtml, wrapStyle = '', sumStyle = '') => {
+        const open = Object.prototype.hasOwnProperty.call(window._bgOpen, key) ? window._bgOpen[key] : dflt;
+        return `<div style="${wrapStyle}"><div role="button" tabindex="0" style="cursor:pointer;user-select:none;-webkit-user-select:none;pointer-events:auto;touch-action:manipulation;${sumStyle}" onclick="window._bgFold(event,this,'${key}')" ontouchend="window._bgFold(event,this,'${key}')" onpointerdown="event.stopPropagation()" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()"><span style="display:inline-block;width:1em;">${open ? '▾' : '▸'}</span>${summaryHtml}</div><div style="${open ? '' : 'display:none;'}">${bodyHtml}</div></div>`;
+      };
+
+      if (S.failed) return wrap(head('mdi:database-remove', errC, 'Keine Daten', 'research_cards.json fehlt. Läuft der Job auf dem Server?'));
+      if (!S.data) return wrap(`<div style="padding:18px 0;text-align:center;color:${dim};">Lade Forschungsdaten …</div>`);
+      const d = S.data;
+      const ageH = (Date.now() - Date.parse(d.generated_at)) / 3600000;
+      const staleHtml = isNaN(ageH) || ageH > MAX_AGE_H
+        ? `<div style="margin-bottom:8px;color:${errC};font-weight:600;">Veraltet: Stand ${isNaN(ageH) ? 'unbekannt' : 'vor ' + Math.round(ageH) + ' h'}, der nächtliche Job läuft nicht.</div>` : '';
+
+      // ── Abschnitt "plan": Fahrplan Masterarbeit (14.11.2026) ─────
+      // Reihenfolge berechnet src/data/thesis_sync.plan (Arbeitsschleife der
+      // Thesis-CLAUDE.md), dieselbe Liste sehen Bitsy und Claude. Die Karte
+      // sortiert nichts selbst.
+      if (section === 'plan') {
+        const o = S.thesisOpen;
+        const steps = (o && Array.isArray(o.plan)) ? o.plan : [];
+        if (!steps.length) return wrap(head('mdi:map-marker-path', dim, 'Noch kein Fahrplan', 'thesis_open.json ohne Fahrplan. Export: python scripts/thesis_open_export.py --thesis-dir … --upload'));
+        const ST = {
+          jetzt: [pvC, 'jetzt'], offen: [white, 'danach'], erledigt: [okC, 'erledigt'],
+          parallel: ['var(--bg-color-standard, #29B6F6)', 'parallel'], spaeter: [dim, 'später'], gesperrt: [dim, 'gesperrt'], wartet: [dim, 'wartet'],
+        };
+        // 14.11.2026: ein Schritt, dessen Punkte alle auf einen Termin warten, ist
+        // 'wartet' (Berechnung in src/data/thesis_sync.py), nie 'jetzt'.
+        const dm = (iso) => iso ? iso.slice(8, 10) + '.' + iso.slice(5, 7) + '.' : '';
+        const jetzt = steps.filter(s => s.state === 'jetzt');
+        const cur = jetzt[0];
+        const ageD = Math.floor((Date.now() - Date.parse(o.exported_at)) / 86400000);
+        const nowRow = (o.schedule || []).find(r => r.now);
+        const sub = `${cur ? 'Jetzt: ' + cur.title + (jetzt.length > 1 ? ' (+' + (jetzt.length - 1) + ' weitere)' : '') : 'Kein offener Schritt'}${nowRow ? ` · Woche ${nowRow.week}` : ''} · noch ${n0(o.days_left)} Tage`;
+        let num = 0;
+        const rows = steps.map(s => {
+          num += 1;
+          const st = ST[s.state] || [dim, s.state];
+          const muted = ['erledigt', 'gesperrt', 'spaeter', 'wartet'].includes(s.state);
+          const items = s.items || [];
+          const badge = `<span style="display:inline-flex;align-items:center;justify-content:center;width:1.7em;height:1.7em;border-radius:50%;flex:0 0 1.7em;font-weight:700;font-size:0.9em;${s.state === 'jetzt' ? `background:${pvC};color:#1b1b1b;` : `border:2px solid ${st[0]};color:${st[0]};`}">${s.state === 'erledigt' ? '✓' : num}</span>`;
+          const title = `<span style="display:inline-flex;gap:10px;align-items:center;"><span>${badge}</span><span style="font-weight:700;${muted ? `color:${dim};` : ''}">${s.title}</span>${items.length ? `<span style="color:${dim};font-weight:400;">(${items.length})</span>` : ''}<span style="font-size:0.8em;font-weight:600;color:${st[0]};text-transform:uppercase;letter-spacing:0.04em;">${s.state === 'wartet' ? (s.wait_who ? 'wartet auf ' + s.wait_who : 'wartet bis ' + dm(s.wait_until)) : st[1]}</span></span>`;
+          const meta = `<div style="margin:2px 0 0 2.7em;color:${dim};font-size:0.92em;">${s.who}${s.why ? ` · ${s.why}` : ''}</div>`;
+          const list = items.map(i => `<div style="display:grid;grid-template-columns:minmax(6.5em,auto) 1fr;gap:10px;padding:5px 0;${LINE}"><span style="color:${dim};white-space:nowrap;">${i.where.length > 28 ? i.where.split(' (')[0].slice(0, 28) : i.where}</span><span>${i.text}${i.am_zug ? `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:0.78em;font-weight:600;color:${i.am_zug === 'Claude' ? 'var(--bg-color-standard, #29B6F6)' : dim};border:1px solid currentColor;white-space:nowrap;">${i.am_zug === 'Artur' ? 'wartet auf Artur' : 'Claude'}</span>` : ''}${i.wartet_bis ? `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:0.78em;font-weight:600;color:${dim};border:1px solid ${dim};white-space:nowrap;">wartet bis ${dm(i.wartet_bis)}</span>` : ''}</span></div>`).join('');
+          const block = items.length
+            ? fold('thesis_plan_' + s.key, s.state === 'jetzt', title, meta + `<div style="margin:6px 0 0 2.7em;">${list}</div>`, `padding:9px 0;${LINE}`, '')
+            : `<div style="padding:9px 0;${LINE}"><span style="display:inline-block;width:1em;"></span>${title}${meta}</div>`;
+          return block;
+        }).join('');
+        return wrap(`
+          ${head('mdi:map-marker-path', pvC, 'Fahrplan Masterarbeit', sub)}
+          <div style="margin-top:10px;">${rows}</div>
+          <div style="margin-top:12px;color:${ageD > 2 ? errC : dim};font-size:0.9em;">Reihenfolge wie die Arbeitsschleife: erst veraltete Fakten, dann klären, belegen, Befunde, schreiben, prüfen. Punkte mit „(Termin TT.MM.)“ im Text warten bis zu diesem Tag und zählen danach wieder normal. Erzeugt aus offene_punkte.md, den Markern im Text und dem Abgleich, ${ageD === 0 ? 'heute' : 'vor ' + ageD + ' Tagen'}.</div>`);
+      }
+
+      // ── Abschnitt "forecast": Solarprognose ──────────────────────
+      if (section === 'forecast') {
+        const f = d.forecast || {};
+        const days = Array.isArray(f.days) ? f.days : [];
+        if (!days.length) return wrap(staleHtml + head('mdi:weather-cloudy-alert', dim, 'Noch keine Vergleichstage', 'Für die letzten 14 Tage fehlt die Prognose in zu vielen Blöcken.'));
+        const bias = f.bias_pct;
+        const bad = bias !== null && Math.abs(bias) > 20;
+        const word = bias === null ? 'unbekannt' : bias > 0 ? `${n0(bias)} % zu hoch` : `${n0(-bias)} % zu niedrig`;
+        const color = bias === null ? dim : bad ? warnC : okC;
+        const maxKwh = Math.max(...days.map(x => Math.max(x.actual_kwh, x.forecast_kwh)), 1);
+        // Tagesbalken: voller Balken = Prognose (Umriss), gefuellt = gemessen.
+        const bars = days.map(x => {
+          const hA = Math.round(x.actual_kwh / maxKwh * 100), hF = Math.round(x.forecast_kwh / maxKwh * 100);
+          return `<div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;">
+            <div style="position:relative;width:70%;height:90px;">
+              <div style="position:absolute;bottom:0;left:0;right:0;height:${hF}%;border:1.5px dashed ${pvC};border-radius:4px 4px 0 0;box-sizing:border-box;"></div>
+              <div style="position:absolute;bottom:0;left:15%;right:15%;height:${hA}%;background:${pvC};border-radius:3px 3px 0 0;"></div>
+            </div>
+            <div style="font-size:0.7em;color:${dim};white-space:nowrap;">${x.day.slice(8, 10)}.</div>
+          </div>`;
+        }).join('');
+        const hours = Array.isArray(f.by_hour) ? f.by_hour : [];
+        const maxKw = Math.max(...hours.map(h => Math.max(h.actual_kw, h.forecast_kw)), 0.1);
+        const hourRows = hours.filter(h => h.forecast_kw >= 0.05 || h.actual_kw >= 0.05).map(h => {
+          const r = h.actual_kw > 0.05 ? h.forecast_kw / h.actual_kw : null;
+          const rc = r === null ? dim : (r > 1.3 || r < 0.7) ? warnC : okC;
+          return `<div style="display:grid;grid-template-columns:3.2em 1fr 4.6em;align-items:center;gap:8px;padding:2px 0;">
+            <span style="color:${dim};">${String(h.hour).padStart(2, '0')} Uhr</span>
+            <div style="position:relative;height:12px;">
+              <div style="position:absolute;top:0;left:0;height:5px;width:${Math.round(h.forecast_kw / maxKw * 100)}%;background:rgba(251,178,16,0.45);border-radius:3px;"></div>
+              <div style="position:absolute;bottom:0;left:0;height:5px;width:${Math.round(h.actual_kw / maxKw * 100)}%;background:${pvC};border-radius:3px;"></div>
+            </div>
+            <span style="text-align:right;color:${rc};font-weight:600;">${r === null ? '—' : '×' + n1(r)}</span>
+          </div>`;
+        }).join('');
+        // 14.11.2026: Monatsvergleich ueber die ganze Aufzeichnung. Die 14 Tage
+        // oben sind im Winter nur Wintertage und wirken allein wie "Prognose
+        // wertlos" (BitHamster); je Monat zeigt sich das Saisonmuster.
+        const fm = (Array.isArray(f.months) ? f.months : []).filter(m => m.days);
+        const FCOLS = 'display:grid;grid-template-columns:6.2em repeat(3, minmax(0,1fr)) 5.5em;gap:10px;align-items:baseline;';
+        const monthRows = fm.length ? `<div style="margin-top:18px;padding-top:14px;${LINE}">
+            <div style="font-weight:700;margin-bottom:4px;">Je Monat <span style="color:${dim};font-weight:400;">(ganze Aufzeichnung, nur Tage mit Prognose in 90 % der Blöcke)</span></div>
+            <div style="${FCOLS}padding:0 0 6px;color:${dim};font-size:0.85em;"><span></span><span style="text-align:right;">gemessen</span><span style="text-align:right;">Prognose</span><span style="text-align:right;">Tage</span><span style="text-align:right;">Abweichung</span></div>
+            ${fm.map(m => {
+              const b = m.bias_pct, bc = b === null ? dim : Math.abs(b) > 20 ? warnC : okC;
+              return `<div style="${FCOLS}padding:7px 0;${LINE}">
+                <span style="font-weight:600;">${MONTHS[Number(m.month.slice(5, 7))]}</span>
+                <span style="text-align:right;">${n0(m.actual_kwh)} kWh</span>
+                <span style="text-align:right;">${n0(m.forecast_kwh)} kWh</span>
+                <span style="text-align:right;color:${m.days < m.days_total / 2 ? warnC : dim};">${m.days}/${m.days_total}</span>
+                <span style="text-align:right;font-weight:700;color:${bc};">${b === null ? '—' : (b > 0 ? '+' : '') + n0(b) + ' %'}</span>
+              </div>`;
+            }).join('')}
+          </div>` : '';
+        const summer = fm.filter(m => ['06', '07'].includes(m.month.slice(5, 7)));
+        const sumBias = summer.length ? summer.reduce((a, m) => a + m.forecast_kwh, 0) / Math.max(summer.reduce((a, m) => a + m.actual_kwh, 0), 1) * 100 - 100 : null;
+        const fsub = `Letzte ${f.days_used} Tage, im Mittel ${n0(f.mae_pct)} % Abweichung je Tag${sumBias !== null ? ` · im Sommer ${sumBias > 0 ? '+' : ''}${n0(sumBias)} %` : ''}`;
+        return wrap(staleHtml + `
+          ${head('mdi:weather-partly-cloudy', color, `Letzte ${f.days_used} Tage: ${word}`, fsub.replace(`Letzte ${f.days_used} Tage, im`, 'Im'))}
+          <div style="margin-top:18px;padding-top:14px;${LINE}">
+            <div style="display:flex;gap:2px;align-items:flex-end;">${bars}</div>
+            <div style="display:flex;gap:16px;justify-content:center;margin-top:6px;font-size:0.85em;color:${dim};">
+              <span><span style="display:inline-block;width:12px;height:12px;background:${pvC};border-radius:2px;vertical-align:-1px;"></span> gemessen</span>
+              <span><span style="display:inline-block;width:12px;height:12px;border:1.5px dashed ${pvC};border-radius:2px;box-sizing:border-box;vertical-align:-1px;"></span> Prognose</span>
+            </div>
+          </div>
+          ${hourRows ? `<div style="margin-top:18px;padding-top:14px;${LINE}">
+            <div style="font-weight:700;margin-bottom:4px;">Nach Tageszeit <span style="color:${dim};font-weight:400;">(oben Prognose, unten gemessen, × = Prognose ÷ Ist)</span></div>
+            ${hourRows}</div>` : ''}
+          ${monthRows}
+          ${note(`Die Abweichung hängt an der Jahreszeit: Im Sommer liegt die Prognose leicht unter der Messung, bei tiefer Wintersonne weit darüber, morgens am stärksten. Das Modell kennt keine Verschattung (Horizont, Bäume, Nachbargebäude); es ist kein Datenfehler. Monate mit wenigen Tagen hatten Lücken in der Prognose (Serverumzug August/September). Prognose = Open-Meteo-Strahlung × Anlagengröße × 0,75, stündlich aktualisiert. Die Zuordnung zur Uhrzeit ist aus den Daten bestimmt (Versatz ${f.lead_min} min) und auf etwa ±30 min genau, Randstunden schwanken daher stärker; Tagessummen hängen davon nicht ab. Die Live-Automatik nutzt die Prognose derzeit nicht; wichtig wird sie für R4 (Prognose-Veto). Tage unter 1 kWh zählen nicht.`)}`);
+      }
+
+      // ── Abschnitt "peak": Akku-Hoechststand gegen Eco-Start je Tag ────
+      if (section === 'peak') {
+        const days = Array.isArray(d.peak) ? d.peak : [];
+        if (!days.length) return wrap(staleHtml + head('mdi:battery-arrow-up', dim, 'Noch keine Tage', 'Für die letzten 14 Tage fehlen vollständige Daten.'));
+        const started = days.filter(x => x.start_blocks > 0).length;
+        const gap = days.filter(x => x.missing).map(x => x.eco_start - x.soc_max);
+        const best = days.reduce((a, x) => (x.soc_max > a.soc_max ? x : a), days[0]);
+        const color = started ? okC : warnC;
+        const last = days[days.length - 1];
+        const rows = days.slice().reverse().map(x => {
+          const socC = x.soc_max >= x.eco_start ? okC : errC;
+          return `<div style="display:grid;grid-template-columns:5.6em 1fr 4.6em 6.4em;gap:8px;align-items:center;padding:3px 0;">
+            <span style="color:${dim};white-space:nowrap;">${fmtDay(x.day)}</span>
+            <div style="position:relative;height:14px;background:rgba(255,255,255,0.06);border-radius:7px;">
+              <div style="position:absolute;top:0;bottom:0;left:0;width:${Math.min(Math.round(x.soc_max), 100)}%;background:${socC};opacity:0.8;border-radius:7px;"></div>
+              <div style="position:absolute;top:-3px;bottom:-3px;left:calc(${Math.min(x.eco_start, 100)}% - 2px);width:2px;background:${white};opacity:0.7;"></div>
+            </div>
+            <span style="text-align:right;white-space:nowrap;"><span style="color:${socC};font-weight:700;">${n0(x.soc_max)} %</span></span>
+            <span style="text-align:right;white-space:nowrap;color:${dim};">☀ ${n1(x.pv_max_w / 1000)} kW${x.missing ? '' : ' ✓'}</span>
+          </div>`;
+        }).join('');
+        return wrap(staleHtml + `
+          ${head('mdi:battery-arrow-up', color, started ? `An ${started} von ${days.length} Tagen Start möglich` : 'Kein Tag mit Eco-Start', `Eco-Start ab ${n0(last.eco_start)} % Akku · bester Tag ${n0(best.soc_max)} % (${fmtDay(best.day)})${gap.length ? ` · im Mittel fehlten ${n0(gap.reduce((a, b) => a + b, 0) / gap.length)} Prozentpunkte` : ''}`)}
+          <div style="margin-top:10px;">${rows}</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:0.85em;color:${dim};">
+            <span>Balken = höchster Akkustand</span>
+            <span><span style="display:inline-block;width:2px;height:12px;background:${white};vertical-align:-1px;"></span> Eco-Start Akku</span>
+            <span>☀ = höchste Solarleistung (nur Info), ✓ = Start möglich</span>
+          </div>
+          ${(() => {
+            // 13.11.2026: Winter-Prioritaet Akku. Der Heizstab (AC ELWA 2) regelt
+            // selbst auf Ueberschuss und ist in HA nur lesbar.
+            const h = d.heizstab || {};
+            if (!h.days || !(h.heizstab_kwh_not_full >= 1)) return '';
+            return `<div style="margin-top:14px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,0.05);border-left:3px solid ${'var(--bgai-heizstab-v3, #5C9EE2)'};">
+              <b style="color:var(--bgai-heizstab-v3, #5C9EE2);">Heizstab nahm ${n1(h.heizstab_kwh_not_full)} kWh</b> Solarstrom, während der Akku nicht voll war (${h.days} Tage, an ${h.empty_mornings} Morgen war der Akku leer).
+              <span style="color:${dim};">Diesen Strom kauft das Haus nachts aus dem Netz nach. Akku-Vorrang lässt sich nur am AC ELWA 2 selbst einstellen.</span></div>`;
+          })()}
+          ${!started && last.eco_start >= 100 ? `<div style="margin-top:14px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,0.05);color:${white};">Im Winter normal: Die Hausreserve ist gedeckelt (Eco-Start 100 %), und die Sonne liefert weniger, als das Haus braucht. Gemint wird erst wieder, wenn der Akku voll wird, meist ab Februar oder März.</div>` : ''}
+          ${note(`Regel R7: Die Miner starten, sobald der Akku den Eco-Start erreicht und seit dem letzten Stopp 1 Stunde vergangen ist; bei Sonne ab ${n1(last.pv_start_w / 1000)} kW schon nach 15 Minuten. Die Sonne ist keine Startbedingung, deshalb entscheidet allein der Akku-Balken. Eco-Start je Monat aus der Saisontabelle (ADR 033), bei gedeckelter Hausreserve 100 %.`)}`);
+      }
+
+      // ── Abschnitt "efficiency": W/TH je Miner, nur reine Eco-Tage ─────
+      if (section === 'efficiency') {
+        const e = d.efficiency || {};
+        const miners = Array.isArray(e.miners) ? e.miners : [];
+        if (!miners.length) return wrap(staleHtml + head('mdi:speedometer', dim, 'Noch keine Eco-Tage', 'Für den Vergleich braucht es Tage, an denen ein Miner nur in Eco lief.'));
+        const n2 = (v) => v === null || v === undefined ? '—' : Number(v).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const worse = miners.filter(m => m.verdict === 'schlechter');
+        const judged = miners.filter(m => m.verdict);
+        const color = worse.length ? warnC : judged.length ? okC : dim;
+        const title = worse.length ? `${worse.map(m => m.miner).join(', ')} braucht mehr Strom je TH` : judged.length ? 'Effizienz stabil' : 'Noch kein Urteil';
+        const all = miners.flatMap(m => m.months.map(x => x.w_per_th));
+        const lo = Math.min(...all) - 0.3, hi = Math.max(...all) + 0.3;
+        const rows = miners.map(m => {
+          const cells = m.months.map(x => {
+            const few = x.days < (e.min_days || 3);
+            const h = Math.round((x.w_per_th - lo) / (hi - lo) * 100);
+            return `<div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;opacity:${few ? 0.45 : 1};">
+              <div style="font-size:0.8em;font-weight:600;">${n2(x.w_per_th)}</div>
+              <div style="position:relative;width:60%;height:60px;"><div style="position:absolute;bottom:0;left:0;right:0;height:${Math.max(h, 4)}%;background:var(--bg-color-eco, #4CAF50);border-radius:3px 3px 0 0;"></div></div>
+              <div style="font-size:0.75em;color:${dim};white-space:nowrap;">${MONTHS[Number(x.month.slice(5, 7))].slice(0, 3)} · ${x.days} T.</div>
+            </div>`;
+          }).join('');
+          const ch = m.change_pct === null ? 'zu wenige Tage' : `${m.change_pct > 0 ? '+' : ''}${n1(m.change_pct)} % seit dem ersten Monat`;
+          return `<div style="margin-top:10px;padding-top:8px;${LINE}">
+            <div style="display:flex;justify-content:space-between;gap:10px;"><span style="font-weight:700;">${String(m.miner).replace(/^miner(\d+)$/, 'Miner $1')}</span><span style="color:${m.verdict === 'schlechter' ? warnC : dim};">${ch}</span></div>
+            <div style="display:flex;gap:4px;align-items:flex-end;margin-top:6px;">${cells}</div>
+          </div>`;
+        }).join('');
+        return wrap(staleHtml + `
+          ${head('mdi:speedometer', color, title, `Watt je Terahash im Monatsmedian, nur Tage rein im Eco-Modus · weniger ist besser`)}
+          ${rows}
+          ${note(`Gezählt werden nur Tage mit mindestens ${n0(e.min_eco_h)} h Eco und ohne Standard oder Super: der Tageswert mischt sonst die Modi (Super braucht etwa 2 W/TH mehr) und zeigt einen Verschleiß, den es nicht gibt. Blasse Monate haben weniger als ${e.min_days} Tage und zählen nicht fürs Urteil. „Schlechter" heißt mehr als +${n0(e.drift_pct)} %: dann Lüfter, Staub und Wärmeleitpaste prüfen.`)}`);
+      }
+
+      // ── Abschnitte "surplus" / "switching" / "safety": Automatik (14.11.2026) ──
+      // Daten: src/data/automation_cards.py, Gruende aus ha_diagnose_log.
+      const au = d.automation || {};
+      const mLabel = (ym) => MONTHS[Number(String(ym).slice(5, 7))] || ym;
+      const dateDe = (iso) => iso ? String(iso).slice(0, 10).split('-').reverse().join('.') : '—';
+      if (section === 'surplus') {
+        const su = au.surplus || {};
+        const months = Array.isArray(su.months) ? su.months : [];
+        if (!months.length) return wrap(staleHtml + head('mdi:transmission-tower-export', okC, 'Kein ungenutzter Überschuss', 'Kein Block mit mehr als 1 kW Einspeisung bei stehenden Minern.'));
+        const tot = {};
+        months.forEach(m => Object.entries(m.reasons || {}).forEach(([k, v]) => { tot[k] = (tot[k] || 0) + v; }));
+        const reasons = Object.entries(tot).sort((a, b) => b[1] - a[1]);
+        const maxR = reasons.length ? reasons[0][1] : 1;
+        const COLS = 'display:grid;grid-template-columns:6.2em 5em 5.5em minmax(0,1fr);gap:10px;align-items:baseline;';
+        const rows = `<div style="${COLS}padding:0 0 6px;color:${dim};font-size:0.85em;"><span></span><span style="text-align:right;">Stunden</span><span style="text-align:right;">Einspeisung</span><span>Häufigster Grund</span></div>` + months.map(m => {
+          const top = Object.entries(m.reasons || {})[0];
+          return `<div style="${COLS}padding:9px 0;${LINE}">
+            <span style="font-weight:600;">${mLabel(m.month)}</span>
+            <span style="text-align:right;">${n1(m.hours)} h</span>
+            <span style="text-align:right;">${n1(m.export_kwh)} kWh</span>
+            <span style="color:${dim};">${top ? `${top[0]} (${n1(top[1])} h)` : '—'}</span>
+          </div>`;
+        }).join('');
+        const bars = reasons.map(([k, v]) => `<div style="display:grid;grid-template-columns:minmax(0,13em) 1fr 4.5em;gap:10px;align-items:center;padding:3px 0;">
+            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${k}</span>
+            <div style="height:14px;background:rgba(255,255,255,0.06);border-radius:7px;"><div style="height:100%;width:${Math.max(Math.round(v / maxR * 100), 2)}%;background:${k === 'unbekannt' ? 'rgba(255,255,255,0.35)' : warnC};border-radius:7px;"></div></div>
+            <span style="text-align:right;font-weight:700;">${n1(v)} h</span>
+          </div>`).join('');
+        return wrap(staleHtml + `
+          ${head('mdi:transmission-tower-export', warnC, `${n1(su.hours)} Stunden Überschuss ungenutzt`, `Mehr als 1 kW eingespeist, während die Miner standen · zusammen ${n1(su.export_kwh)} kWh`)}
+          <div style="margin-top:10px;">${rows}</div>
+          <div style="margin-top:18px;padding-top:14px;${LINE}">
+            <div style="font-weight:700;margin-bottom:4px;">Warum standen die Miner? <span style="color:${dim};font-weight:400;">(Zustand der Automatik in diesen Blöcken)</span></div>
+            ${bars}
+          </div>
+          ${note(`„Akku unter Stopp-Schwelle“ heißt: Der Akku lud an seiner Leistungsgrenze, der Rest der Solarleistung ging ins Netz, und die Regel Akku vor Mining hielt die Miner aus. Das ist gewollt, kostet aber Ertrag. Grund = Diagnose von Miner 1; vor dem 25.06.2026 gibt es keine Diagnose („unbekannt“). Blöcke mit Qualitätsfehler zählen nicht.`)}`);
+      }
+      if (section === 'switching') {
+        const sw = au.switching || {};
+        const months = (Array.isArray(sw.months) ? sw.months : []).filter(m => m.mining_days || m.manual_h);
+        if (!months.length) return wrap(staleHtml + head('mdi:swap-vertical-bold', dim, 'Noch keine Schaltdaten', 'Das Entscheidungsprotokoll ist leer. Läuft der Abgleich um 03:50?'));
+        const days = months.reduce((a, m) => a + m.mining_days, 0);
+        const over = months.reduce((a, m) => a + m.days_over, 0);
+        const share = days ? over / days : 0;
+        const color = share > 0.25 ? errC : over ? warnC : okC;
+        const COLS = 'display:grid;grid-template-columns:6.2em repeat(6, minmax(0,1fr));gap:10px;align-items:baseline;';
+        const rows = `<div style="${COLS}padding:0 0 6px;color:${dim};font-size:0.85em;"><span></span><span style="text-align:right;">Mining-Tage</span><span style="text-align:right;">über Ziel</span><span style="text-align:right;">Mittel</span><span style="text-align:right;">Höchstwert</span><span style="text-align:right;">Abbrüche</span><span style="text-align:right;">Handbetrieb</span></div>` + months.map(m => `<div style="${COLS}padding:9px 0;${LINE}">
+            <span style="font-weight:600;">${mLabel(m.month)}</span>
+            <span style="text-align:right;">${n0(m.mining_days)}</span>
+            <span style="text-align:right;font-weight:700;color:${m.days_over ? (m.days_over / Math.max(m.mining_days, 1) > 0.25 ? errC : warnC) : okC};">${n0(m.days_over)}</span>
+            <span style="text-align:right;">${m.mean_start_stop === null ? '—' : n1(m.mean_start_stop)}</span>
+            <span style="text-align:right;">${n0(m.max_start_stop)}</span>
+            <span style="text-align:right;color:${m.dropouts ? white : dim};">${n0(m.dropouts || 0)}</span>
+            <span style="text-align:right;color:${m.manual_h ? white : dim};">${n1(m.manual_h)} h</span>
+          </div>`).join('');
+        const recent = Array.isArray(sw.recent) ? sw.recent : [];
+        const cap = Math.max(...recent.map(x => x.start_stop), sw.target * 2, 1);
+        const recRows = recent.slice().reverse().map(x => `<div style="display:grid;grid-template-columns:5.6em 1fr 12em;gap:10px;align-items:center;padding:3px 0;">
+            <span style="color:${dim};white-space:nowrap;">${fmtDay(x.day)}</span>
+            <div style="position:relative;height:14px;background:rgba(255,255,255,0.06);border-radius:7px;">
+              <div style="position:absolute;top:0;bottom:0;left:0;width:${Math.round(x.start_stop / cap * 100)}%;background:${x.start_stop > sw.target ? errC : okC};border-radius:7px;"></div>
+              <div style="position:absolute;top:-3px;bottom:-3px;left:${Math.round(sw.target / cap * 100)}%;width:2px;background:${white};opacity:0.7;"></div>
+            </div>
+            <span style="text-align:right;white-space:nowrap;"><span style="font-weight:700;color:${x.start_stop > sw.target ? errC : okC};">${n0(x.start_stop)}</span> <span style="color:${dim};">${x.level ? ` · ${n0(x.level)} ${x.level === 1 ? 'Stufe' : 'Stufen'}` : ''}${x.dropout ? ` · ${n0(x.dropout)} ${x.dropout === 1 ? 'Abbruch' : 'Abbrüche'}` : ''}</span></span>
+          </div>`).join('');
+        return wrap(staleHtml + `
+          ${head('mdi:swap-vertical-bold', color, `An ${n0(over)} von ${n0(days)} Mining-Tagen zu oft geschaltet`, `Ziel: höchstens ${sw.target} Start/Stopp-Wechsel je Tag · gezählt seit ${dateDe(sw.since)}`)}
+          <div style="margin-top:10px;">${rows}</div>
+          <div style="margin-top:18px;padding-top:14px;${LINE}">
+            <div style="font-weight:700;margin-bottom:4px;">Letzte Tage mit Mining <span style="color:${dim};font-weight:400;">(Start/Stopp-Wechsel, dazu Stufenwechsel und Abbrüche)</span></div>
+            ${recRows}
+            <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:0.85em;color:${dim};"><span><span style="display:inline-block;width:2px;height:12px;background:${white};vertical-align:-1px;"></span> Ziel</span></div>
+          </div>
+          ${(() => {
+            const ch = Array.isArray(sw.threshold_changes) ? sw.threshold_changes : [];
+            if (!ch.length) return '';
+            const SRC = { history: 'exakt', snapshot: 'Tagesstand' };
+            const tsDe = (iso) => { const t = new Date(iso); return isNaN(t) ? '—' : t.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); };
+            return `<div style="margin-top:18px;padding-top:14px;${LINE}">
+              <div style="font-weight:700;margin-bottom:4px;">Schwellen geändert <span style="color:${dim};font-weight:400;">(neueste zuerst · alt → neu)</span></div>
+              ${(() => {
+                // 14.11.2026: Aenderungen derselben Minute sind ein Ereignis
+                // (Neustart, Saison-Automatik): eine Zeile statt sechs.
+                const ORDER = ['Stopp', 'Eco ab', 'Standard endet', 'Standard ab', 'Super endet', 'Super ab'];
+                const groups = [];
+                ch.forEach(c => {
+                  const key = String(c.timestamp).slice(0, 16) + c.source;
+                  let g = groups.find(x => x.key === key);
+                  if (!g) { g = { key, ts: c.timestamp, source: c.source, items: [] }; groups.push(g); }
+                  g.items.push(c);
+                });
+                return groups.map(g => {
+                  const items = g.items.slice().sort((a, b) => ORDER.indexOf(a.label) - ORDER.indexOf(b.label));
+                  const up = items.every(c => Number(c.new) >= Number(c.old)), down = items.every(c => Number(c.new) <= Number(c.old));
+                  const tag = up ? 'angehoben' : down ? 'abgesenkt' : 'geändert';
+                  return `<div style="display:grid;grid-template-columns:7.4em minmax(0,1fr) 6em;gap:10px;align-items:baseline;padding:6px 0;${LINE}">
+                    <span style="color:${dim};white-space:nowrap;">${tsDe(g.ts)}</span>
+                    <span><b>${items.length} ${items.length === 1 ? 'Schwelle' : 'Schwellen'} ${tag}:</b> <span style="color:${dim};">${items.map(c => `${c.label} ${n0(Number(c.old))} → ${n0(Number(c.new))} %`).join(' · ')}</span></span>
+                    <span style="text-align:right;color:${dim};">${SRC[g.source] || g.source}</span>
+                  </div>`;
+                }).join('');
+              })()}
+            </div>`;
+          })()}
+          ${note(`Gezählt wird der Modus, den der Miner meldet, je Tag der Miner mit den meisten Wechseln. Ein Aus von unter ${sw.dropout_max_min || 15} Minuten zwischen zwei Betriebsmodi zählt als Abbruch (Miner oder Steckdose kurz nicht erreichbar), nicht als Stopp und Start: Nach einem Stopp sperrt die Automatik den Neustart 15 Minuten lang. Wechsel zwischen Standby und Aus zählen nicht. Handbetrieb = Stunden beider Miner mit ausgeschalteter Automatik. „Tagesstand“ heißt: Wert beim nächtlichen Abgleich gelesen, Zeitpunkt der Änderung unbekannt.`)}`);
+      }
+      if (section === 'safety') {
+        const sf = au.safety || {};
+        const all = Array.isArray(sf.rows) ? sf.rows : [];
+        if (!all.length) return wrap(staleHtml + head('mdi:shield-check', dim, 'Noch keine Daten', 'Keine Tageswerte je Miner vorhanden.'));
+        const byMonth = {};
+        all.forEach(r => { (byMonth[r.month] = byMonth[r.month] || {})[r.miner] = r; });
+        const miners = [...new Set(all.map(r => r.miner))].sort();
+        const color = sf.hot_blocks_total ? warnC : okC;
+        const COLS = `display:grid;grid-template-columns:6.2em repeat(${miners.length}, minmax(0,1fr)) 6em;gap:10px;align-items:baseline;`;
+        const rows = `<div style="${COLS}padding:0 0 6px;color:${dim};font-size:0.85em;"><span></span>${miners.map(m => `<span style="text-align:right;">${m.replace('miner', 'Miner ')}</span>`).join('')}<span style="text-align:right;">Schaltfehler</span></div>` + Object.keys(byMonth).sort().map(mo => {
+          const errs = miners.reduce((a, m) => a + ((byMonth[mo][m] || {}).errors || 0), 0);
+          return `<div style="${COLS}padding:9px 0;${LINE}">
+            <span style="font-weight:600;">${mLabel(mo)}</span>
+            ${miners.map(m => { const r = byMonth[mo][m] || {}; return `<span style="text-align:right;">${r.tmax_c === null || r.tmax_c === undefined ? '—' : n0(r.tmax_c) + ' °C'} <span style="font-weight:700;color:${r.hot_blocks ? errC : dim};">· ${n0(r.hot_blocks || 0)}</span></span>`; }).join('')}
+            <span style="text-align:right;font-weight:700;color:${errs ? warnC : dim};">${n0(errs)}</span>
+          </div>`;
+        }).join('');
+        const lh = sf.last_hot, le = sf.last_error;
+        return wrap(staleHtml + `
+          ${head(sf.hot_blocks_total ? 'mdi:thermometer-alert' : 'mdi:shield-check', color, `${n0(sf.hot_blocks_total)} Blöcke ab ${sf.tmax_limit_c} °C · ${n0(sf.errors_total)} Schaltfehler`, `Je Monat: höchste Chip-Temperatur · Blöcke (10 Minuten) ab ${sf.tmax_limit_c} °C`)}
+          <div style="margin-top:10px;">${rows}</div>
+          ${note(`${lh ? `Zuletzt zu heiß: ${dateDe(lh.day)}, ${lh.miner.replace('miner', 'Miner ')} mit ${n0(lh.tmax_c)} °C. ` : ''}${le ? `Letzter Schaltfehler: ${dateDe(le.block)} (${le.miner.replace('miner', 'Miner ')}: befohlen ${le.set}, gemeldet ${le.status}). ` : ''}92 der Schaltfehler liegen am 12. und 13.08.2026, dem Umzug des Servers, und sind kein Fehler der Steuerung. Die Automatik stuft ab 112 °C zurück; Schaltfehler = befohlener und gemeldeter Modus weichen ab.`)}`);
+      }
+      if (section === 'thesis') {
+        const notes = Array.isArray(d.thesis) ? d.thesis : [];
+        const o = S.thesisOpen;
+        const groups = [];
+        notes.forEach(x => { let g = groups.find(y => y.name === x.group); if (!g) { g = { name: x.group, items: [] }; groups.push(g); } g.items.push(x); });
+        // 14.11.2026: Gruppen aufklappbar (die Karte war ueber drei
+        // Bildschirmhoehen lang). Die Titel bleiben als Liste sichtbar, der
+        // Text erst nach dem Aufklappen; Einordnung und Befunde stehen offen.
+        const OPEN_GROUPS = ['Einordnung', 'Befunde aus den Produktivdaten'];
+        // 14.11.2026 Stand-Abgleich (src/data/thesis_sync.py): wo die Arbeit
+        // einen Befund zitiert ("% Befund: <id>") und ob sich seine Zahlen
+        // seit dem zitierten Stichtag geaendert haben.
+        const sy = (o && o.sync) || null;
+        const bfRows = {};
+        ((sy && sy.befunde && sy.befunde.notes) || []).forEach(r => { bfRows[r.id] = r; });
+        const STATE = { aktuell: [okC, 'aktuell'], geaendert: [warnC, 'Zahlen geändert'], neu_seit_stichtag: [warnC, 'nach Stichtag neu'], ohne_abzug: [dim, 'ohne Abzug'] };
+        const tag = (c, t) => `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:0.78em;font-weight:600;color:${c};border:1px solid ${c};white-space:nowrap;">${t}</span>`;
+        const citeTag = (x) => {
+          const r = bfRows[x.id];
+          if (!r) return '';
+          if (!r.places.length) return r.needs_text ? tag(errC, 'fehlt im Text') : '';
+          return r.places.map(p => { const st = STATE[p.state] || [dim, p.state]; return tag(st[0], `${p.file.split('/').pop().replace('.tex', '')}:${p.line} · ${st[1]}`); }).join('');
+        };
+        const noteHtml = groups.map((g, gi) => fold(
+          'thesis_note_' + gi,
+          OPEN_GROUPS.includes(g.name),
+          `${g.name} <span style="color:${dim};">(${g.items.length})</span>`,
+          g.items.map(x => `<div style="padding:8px 0;${LINE}"><div style="font-weight:700;">${x.title}${citeTag(x)}</div><div style="color:${dim};">${x.text}</div></div>`).join(''),
+          'margin-top:14px;',
+          `font-weight:700;color:${pvC};text-transform:uppercase;letter-spacing:0.04em;font-size:0.85em;margin-bottom:4px;`,
+        )).join('');
+        let openHtml = `<div style="margin-top:16px;color:${dim};">Die Liste der offenen Punkte fehlt (thesis_open.json). Export: python scripts/thesis_open_export.py --thesis-dir … --upload</div>`;
+        let sub = 'Was aus den Produktivdaten in die Arbeit gehört';
+        if (o) {
+          const now = (o.schedule || []).find(r => r.now);
+          const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+          const daysLeft = Math.round((new Date(o.deadline + 'T00:00:00').getTime() - t0.getTime()) / 86400000);
+          sub = `Noch ${n0(daysLeft)} Tage bis zur Abgabe am ${dateDe(o.deadline)} · ${n0(o.open_total)} offene Punkte · ${n0(o.markers_offen + o.markers_pruefen)} Marker im Text`;
+          const week = now ? `<div style="margin-top:14px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,0.05);border-left:3px solid ${pvC};"><b>Diese Woche laut Zeitplan (${now.week}):</b> ${now.write}${now.parallel ? ` <span style="color:${dim};">· parallel: ${now.parallel}</span>` : ''}</div>` : '';
+          const secs = (o.sections || []).map((s, si) => fold(
+            'thesis_open_' + si,
+            false,
+            `${s.section} <span style="color:${warnC};">(${s.items.length})</span>`,
+            `<ul style="margin:6px 0 0;padding-left:1.2em;color:${dim};">${s.items.map(i => `<li style="margin:4px 0;">${i}</li>`).join('')}</ul>`,
+            `padding:8px 0;${LINE}`,
+            'font-weight:700;',
+          )).join('');
+          const marks = (o.markers || []).filter(m => m.offen || m.pruefen).map(m => `<span style="display:inline-block;margin:3px 6px 3px 0;padding:3px 10px;border-radius:10px;background:rgba(255,255,255,0.06);white-space:nowrap;">${m.file.replace(/^(kapitel|anhang|vorspann)\//, '').replace('.tex', '')} <b style="color:${errC};">${m.offen}</b> · <b style="color:${warnC};">${m.pruefen}</b> <span style="color:${dim};">· ${n0(m.words)} W.</span></span>`).join('');
+          const ageD = Math.floor((Date.now() - Date.parse(o.exported_at)) / 86400000);
+          let syncHtml = '';
+          if (sy) {
+            const where = (e) => `${String(e.file).split('/').pop().replace('.tex', '')}:${e.line}`;
+            const rep = sy.replaced || [], ch = sy.changed || [];
+            const bf = sy.befunde, miss = (bf && bf.missing) || [];
+            const stale = Object.values(bfRows).reduce((n, r) => n + r.places.filter(p => p.state === 'geaendert' || p.state === 'neu_seit_stichtag').length, 0);
+            const strong = rep.length + stale;
+            const repRows = rep.map(r => `<div style="padding:6px 0;${LINE}"><b>${where(r)}</b> <span style="color:${dim};">(${r.section || '—'}, Stand ${dateDe(r.stand)})</span><br>zitiert ADR ${String(r.adr).padStart(3, '0')}, ersetzt durch <b>ADR ${String(r.by).padStart(3, '0')}</b> <span style="color:${dim};">${r.by_title}</span></div>`).join('');
+            const chRows = ch.map(c => `<div style="padding:6px 0;${LINE}"><b>${String(c.path).replace(/^thesis:/, 'Arbeit: ')}</b> <span style="color:${dim};">geändert ${dateDe(c.changed)} · ${c.entries.length} ${c.entries.length === 1 ? 'Eintrag' : 'Einträge'}: ${c.entries.slice(0, 6).map(where).join(', ')}${c.entries.length > 6 ? ' …' : ''}</span></div>`).join('');
+            const uncited = (sy.adr_uncited || []).filter(u => u.date).map(u => `ADR ${String(u.adr).padStart(3, '0')} ${u.title}`);
+            syncHtml = `<div style="margin-top:14px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,0.05);border-left:3px solid ${strong ? errC : okC};">
+                <b>Abgleich mit Code, Studie und Forschung:</b> ${strong ? `<b style="color:${errC};">${n0(strong)} veraltete ${strong === 1 ? 'Stelle' : 'Stellen'}</b>` : `<b style="color:${okC};">keine veraltete Stelle</b>`}${bf ? ` · ${miss.length ? `<b style="color:${warnC};">${n0(miss.length)} Befunde fehlen im Text</b>` : 'alle Befunde zitiert'}` : ' · <span style="color:' + warnC + ';">Merkliste nicht erreichbar</span>'} <span style="color:${dim};">· ${n0(ch.length)} zitierte Dateien geändert · ${n0(sy.entries)} Einträge geprüft</span>
+              </div>
+              ${rep.length ? fold('thesis_sync_rep', true, `Zitierte ADR ist ersetzt <span style="color:${errC};">(${rep.length})</span>`, repRows, `padding:8px 0;${LINE}`, 'font-weight:700;') : ''}
+              ${ch.length ? fold('thesis_sync_ch', false, `Zitierte Datei seit dem Stand geändert <span style="color:${warnC};">(${ch.length})</span> <span style="color:${dim};font-weight:400;">schwaches Signal</span>`, chRows, `padding:8px 0;${LINE}`, 'font-weight:700;') : ''}
+              ${uncited.length ? `<div style="padding:8px 0;${LINE}color:${dim};">Neue ADR, die die Arbeit noch nicht zitiert: ${uncited.join(' · ')}</div>` : ''}`;
+          }
+          openHtml = `${week}${syncHtml}
+            <div style="margin-top:16px;break-inside:avoid;">
+              <div style="font-weight:700;color:${pvC};text-transform:uppercase;letter-spacing:0.04em;font-size:0.85em;margin-bottom:4px;">Noch offen für die Arbeit (${n0(o.open_total)} Punkte, ${n0(o.done_total)} erledigt)</div>
+              ${secs}
+            </div>
+            <div style="margin-top:16px;break-inside:avoid;">
+              <div style="font-weight:700;color:${pvC};text-transform:uppercase;letter-spacing:0.04em;font-size:0.85em;margin-bottom:4px;">Marker im Text <span style="color:${dim};text-transform:none;letter-spacing:0;">(<b style="color:${errC};">fehlt</b> · <b style="color:${warnC};">prüfen</b> · Wörter)</span></div>
+              ${marks}
+            </div>
+            <div style="margin-top:12px;color:${ageD > 7 ? errC : dim};font-size:0.9em;">Quelle: notizen/offene_punkte.md im Thesis-Ordner (Stand ${o.list_stand || '—'}), kopiert ${ageD === 0 ? 'heute' : 'vor ' + ageD + ' Tagen'}. Die Liste dort bleibt maßgeblich.</div>`;
+        }
+        return wrap(staleHtml + `
+          ${head('mdi:school', pvC, 'Merkliste und offene Punkte', sub)}
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 28em), 1fr));gap:0 32px;align-items:start;">
+            <div>${noteHtml}</div>
+            <div>${openHtml}</div>
+          </div>
+          ${note('Merkliste, kein Text für die Arbeit. Die Zahlen der Befunde stammen aus der Forschungs-Datenbank und ändern sich täglich. In der Arbeit jede übernommene Zahl mit <code>% Befund: &lt;id&gt; (Stichtag TT.MM.JJJJ)</code> markieren; der Server legt jede Nacht einen Abzug ab, der Abgleich meldet spätere Änderungen. Ein gemeldeter Eintrag ist erledigt, sobald seine <code>% Stand:</code>-Zeile ein neueres Datum trägt.')}`);
+      }
+
+      // ── Abschnitt "nights": Akku über Nacht ───────────────────────────────
+      const nt = d.nights || {};
+      const floorP = Math.round(((d.settings || {}).floor_pct ?? 5));
+      const months = Array.isArray(nt.months) ? nt.months : [];
+      const recent = Array.isArray(nt.recent) ? nt.recent : [];
+      if (!recent.length) return wrap(staleHtml + head('mdi:weather-night', dim, 'Noch keine Nächte', 'Seit Einführung der Formel gibt es keine vollständige Nacht.'));
+      const judged = months.filter(m => m.verdict);
+      const nowMonth = new Date().getMonth() + 1;
+      const cur = months.find(m => m.month === nowMonth);
+      const winterHint = cur && !cur.mined_nights
+        ? `<div style="margin-top:14px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,0.05);">${MONTHS[nowMonth]}: noch keine Nacht nach einem Mining-Tag, die Miner ruhen. Im Winter normal; das Urteil oben stammt aus dem letzten Monat mit Mining.</div>`
+        : '';
+      const latest = judged.length ? judged[judged.length - 1] : null;
+      const VERD = {
+        zu_niedrig: [errC, 'Hausreserve zu niedrig', 'Nach Mining-Tagen reicht der Akku nicht bis zum Morgen.'],
+        zu_hoch: [warnC, 'Hausreserve zu hoch', `Morgens bleibt deutlich mehr als ${floorP} % übrig.`],
+        passt: [okC, 'Hausreserve passt', `Nach Mining-Tagen bleiben morgens rund ${floorP} %.`],
+      };
+      let v = latest ? VERD[latest.verdict] : [dim, 'Noch kein Urteil', 'Zu wenige Nächte nach Mining-Tagen.'];
+      // 14.11.2026: ein Urteil aus Naechten vor ADR 033 (13.11.2026) ist kein
+      // aktueller Alarm mehr, die Formel ist korrigiert. Vergangenheit, gedaempft.
+      const oldFormula = latest && latest.before_formula_v2;
+      if (oldFormula) v = [warnC, `${MONTHS[latest.month]}: ${v[1].replace('Hausreserve ', 'Hausreserve war ')}`, 'Seit ADR 033 (13.11.2026) gilt eine neue Formel; ihr erstes Urteil kommt mit der nächsten Nacht nach einem Mining-Tag.'];
+      const sub = latest ? `${MONTHS[latest.month]}: Akku morgens im Mittel ${n0(latest.morning_after_mining)} % (Ziel ${floorP} %) · ${v[2]}` : v[2];
+      // 13.11.2026 (Lesbarkeit): Spalten statt Fliesstext, nichts bricht um.
+      const MCOLS = 'display:grid;grid-template-columns:6.2em repeat(4, minmax(0,1fr)) 6.5em;gap:10px;align-items:baseline;';
+      const monthHead = `<div style="${MCOLS}padding:0 0 6px;color:${dim};font-size:0.85em;">
+          <span></span><span style="text-align:right;">Reserve</span><span style="text-align:right;">Nächte mit Mining</span>
+          <span style="text-align:right;">Akku morgens</span><span style="text-align:right;">Netz nach Mining</span><span></span></div>`;
+      const monthRows = monthHead + months.map(m => {
+        const mv = m.verdict ? VERD[m.verdict] : null;
+        return `<div style="${MCOLS}padding:9px 0;${LINE}">
+          <span style="font-weight:600;">${MONTHS[m.month]}</span>
+          <span style="text-align:right;">${m.stop_target} %</span>
+          <span style="text-align:right;">${m.mined_nights}/${m.nights}</span>
+          <span style="text-align:right;">${n0(m.morning_after_mining ?? m.morning_soc)} %</span>
+          <span style="text-align:right;">${n1(m.grid_kwh_after_mining)} kWh</span>
+          <span style="font-weight:700;text-align:right;color:${mv ? mv[0] : dim};white-space:nowrap;">${mv ? mv[1].replace('Hausreserve ', '') : '—'}</span>
+        </div>`;
+      }).join('');
+      // Letzte Naechte: Balken von Abend- zu Morgen-SoC, Strich = Hausreserve.
+      const nightRows = recent.slice().reverse().map(x => {
+        const from = x.mined && x.stop_soc !== null ? x.stop_soc : x.eve_soc;
+        const mornC = x.morning_soc < Math.max(floorP - 3, 1) ? errC : x.morning_soc < floorP ? warnC : okC;
+        return `<div style="display:grid;grid-template-columns:5.6em 1fr 7.4em;gap:10px;align-items:center;padding:3px 0;">
+          <span style="color:${dim};white-space:nowrap;">${fmtDay(x.day)}</span>
+          <div style="position:relative;height:14px;background:rgba(255,255,255,0.06);border-radius:7px;">
+            <div style="position:absolute;top:0;bottom:0;left:${Math.round(x.morning_soc)}%;width:${Math.max(Math.round(from - x.morning_soc), 1)}%;background:linear-gradient(to right, ${mornC}, ${x.mined ? 'var(--bg-color-eco, #4CAF50)' : 'rgba(255,255,255,0.35)'});border-radius:7px;"></div>
+            <div style="position:absolute;top:-3px;bottom:-3px;left:${x.stop_target}%;width:2px;background:${white};opacity:0.7;"></div>
+          </div>
+          <span style="text-align:right;white-space:nowrap;"><span style="color:${mornC};font-weight:700;">${n0(x.morning_soc)} %</span> <span style="color:${dim};">· ${n1(x.grid_kwh)} kWh</span></span>
+        </div>`;
+      }).join('');
+      return wrap(staleHtml + `
+        ${head('mdi:weather-night', v[0], v[1], sub)}
+        <div style="margin-top:10px;">${monthRows}</div>
+        ${winterHint}
+        <div style="margin-top:18px;padding-top:14px;${LINE}">
+          <div style="font-weight:700;margin-bottom:4px;">Letzte Nächte <span style="color:${dim};font-weight:400;">(Akku von Miner-Stopp bzw. Abend bis Morgen · Netzbezug nachts)</span></div>
+          ${nightRows}
+          <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:0.85em;color:${dim};">
+            <span><span style="display:inline-block;width:12px;height:12px;background:var(--bg-color-eco, #4CAF50);border-radius:2px;vertical-align:-1px;"></span> Miner liefen</span>
+            <span><span style="display:inline-block;width:12px;height:12px;background:rgba(255,255,255,0.35);border-radius:2px;vertical-align:-1px;"></span> kein Mining</span>
+            <span><span style="display:inline-block;width:2px;height:12px;background:${white};vertical-align:-1px;"></span> Hausreserve</span>
+          </div>
+        </div>
+        ${note(`Ziel der Hausreserve: ${floorP} % Akku am Morgen (ADR 033; die Monatsurteile bis 13.11. stammen aus Nächten mit der alten Formel). Urteil nur aus Nächten nach Mining-Tagen; ohne Mining wird der Akku vom Haus geleert, nicht von den Minern. Gemessene Nacht-Grundlast ${n0(nt.measured_load_w)} W, eingestellt ${n0((d.settings || {}).baseload_w)} W. Seit ${nt.since ? nt.since.split('-').reverse().join('.') : '—'}.`)}`);
+    ]]]

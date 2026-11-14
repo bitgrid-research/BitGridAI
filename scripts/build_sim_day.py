@@ -35,7 +35,8 @@ Data provenance, recorded per row in [37] (0 = recorded, 1 = constructed):
   - Static prod snapshot (15.10.2026): miner firmware/model/pool/share counters
     (src/ha/lab_only/prod_snapshot_20261015.json).
   - CONSTRUCTED (study requirement: every explanation branch must occur once,
-    see CONSTRUCTED below): a sensor outage at the start and one over-temperature
+    except "Warten auf Sonne", which the study day does not contain; see
+    CONSTRUCTED below): a sensor outage at the start and one over-temperature
     stop with lockout and restart. Fan speeds while mining are constructed too
     (never recorded anywhere).
   - CAPPED (consistency, 17.10.2026): the device plugs taken from the October
@@ -108,10 +109,14 @@ THRESHOLDS = {
     "input_number.mvp_soc_stop_pct": 60,
     "input_number.mvp_soc_eco_start_pct": 70,
     "input_number.mvp_soc_std_pct": 85,
-    # 83 on the day; the current +20 deadband (ADR 028, 27.08.2026) gives 80. Set
-    # to 80 so the season table in Einstellungen, the threshold chart and the
-    # texts agree. No switch of the day depends on it: the replay never steps
-    # Standard -> Eco with the battery between 80 and 83 % (17.10.2026).
+    # 70 on the day: Standard-aus was tied to Eco-Start then (commit e0f7025 of
+    # 11.07.2026, mvp_auto.yaml Z. 280); the current +20 deadband (ADR 028,
+    # 27.08.2026) gives 80. Set to 80 so the season table in Einstellungen, the
+    # threshold chart and the texts agree. Corrected 14.11.2026: this comment
+    # used to say 83 on the day and that no switch depends on the value. It does:
+    # miner 2 ran Standard at 78/75/72 % SoC (19:10 to 19:30 local) and dropped
+    # to Eco only at 69 % (19:40), so in these three blocks the Standard-aus
+    # shown (80 %) is not the one the replayed miner follows.
     "input_number.mvp_soc_std_off_pct": 80,
     "input_number.mvp_soc_super_pct": 100,
     "input_number.mvp_soc_super_off_pct": 95,

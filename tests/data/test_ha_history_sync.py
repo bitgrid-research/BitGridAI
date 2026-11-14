@@ -351,3 +351,121 @@ def test_find_gaps_empty_db_returns_full_range(db_conn) -> None:
     gaps = find_gaps(db_conn, start, end)
     assert len(gaps) == 1
     assert gaps[0] == (start, end)
+
+
+# ---------------------------------------------------------------------------
+# Weather/sun/heating fields (bug until 13.11.2026: fetched, never stored)
+# ---------------------------------------------------------------------------
+
+
+def test_resample_passes_weather_fields_to_state() -> None:
+    blocks = resample_to_blocks(
+        _build_entity_readings(), ENTITY_MAP, T0, T0 + timedelta(minutes=10)
+    )
+    b = blocks[0]
+    assert b.outdoor_temp_c == 20.3
+    assert b.outdoor_humidity_pct == 44.0
+    assert b.heizung_energy_kwh_today == 0.1
+    assert b.sun_azimuth_deg == 180.0
+    assert b.sun_elevation_deg == 45.0
+    assert b.cloud_coverage_pct is not None
+
+
+def test_weather_fields_reach_the_database(db_conn) -> None:
+    blocks = resample_to_blocks(
+        _build_entity_readings(), ENTITY_MAP, T0, T0 + timedelta(minutes=10)
+    )
+    StateStore(db_conn).write(blocks[0])
+    row = db_conn.execute(
+        "SELECT outdoor_temp_c, sun_elevation_deg FROM energy_states"
+    ).fetchone()
+    assert tuple(row) == (20.3, 45.0)
+
+
+def test_backfill_fills_only_null_cells_of_existing_blocks(
+    db_conn, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from src.data import ha_history_sync as hs
+
+    readings = _build_entity_readings()
+    blocks = resample_to_blocks(readings, ENTITY_MAP, T0, T0 + timedelta(minutes=20))
+    store = StateStore(db_conn)
+    for b in blocks:  # stored like the buggy sync did: weather NULL
+        store.write(hs.dataclasses.replace(b, **{f: None for f in hs.BACKFILL_FIELDS}))
+    db_conn.execute(
+        "UPDATE energy_states SET outdoor_temp_c = 5.0 WHERE block_id = ?",
+        (blocks[0].block_id,),
+    )
+    db_conn.commit()
+    before = db_conn.execute(
+        "SELECT block_id, pv_power_w, house_load_w, battery_soc_pct FROM energy_states"
+        " ORDER BY block_id"
+    ).fetchall()
+
+    monkeypatch.setattr(hs, "fetch_history", lambda *a, **k: readings)
+    filled = hs.backfill_columns(
+        T0, T0 + timedelta(minutes=30), db_conn, "http://ha", "token"
+    )
+    # 2 existing blocks; the third (10:20) does not exist and is not created.
+    assert filled["sun_elevation_deg"] == 2
+    assert filled["outdoor_temp_c"] == 1  # the measured 5.0 is not overwritten
+    rows = db_conn.execute(
+        "SELECT outdoor_temp_c, sun_elevation_deg FROM energy_states ORDER BY block_id"
+    ).fetchall()
+    assert [tuple(r) for r in rows] == [(5.0, 45.0), (20.3, 45.0)]
+    after = db_conn.execute(
+        "SELECT block_id, pv_power_w, house_load_w, battery_soc_pct FROM energy_states"
+        " ORDER BY block_id"
+    ).fetchall()
+    assert [tuple(r) for r in after] == [tuple(r) for r in before]
+
+
+def test_resample_marks_held_and_zero_house_load_as_warn() -> None:
+    # 14.11.2026: a window without readings repeats the last value; when the
+    # house load is older than 30 min HA was down, and 0 W is never real.
+    from src.data.ha_history_sync import STALE_AFTER
+
+    load = "sensor.house_load_w"
+    emap = [
+        (load, "house_load_w"),
+        ("sensor.pv_power_w", "pv_power_w"),
+        ("sensor.battery_soc_pct", "battery_soc_pct"),
+    ]
+    readings = {
+        load: [(T0, 450.0), (T0 + timedelta(minutes=50), 0.0)],
+        "sensor.pv_power_w": [(T0, 100.0)],
+        "sensor.battery_soc_pct": [(T0, 50.0)],
+    }
+    states = resample_to_blocks(readings, emap, T0, T0 + timedelta(minutes=60))
+    by_id = {s.block_id[11:16]: s for s in states}
+    assert STALE_AFTER == timedelta(minutes=30)
+    assert by_id["10:00"].quality == "ok"
+    assert by_id["10:20"].quality == "ok"  # last reading 30 min old: still fine
+    assert by_id["10:30"].quality == "warn"
+    assert "house_load_w:held" in by_id["10:30"].missing_signals
+    assert by_id["10:50"].quality == "warn"
+    assert "house_load_w:zero" in by_id["10:50"].missing_signals
+
+
+def test_mark_unmeasured_sets_warn_once_and_keeps_values(db_conn) -> None:
+    from src.data.ha_history_sync import mark_unmeasured
+
+    for i in range(8):
+        b = (T0 + timedelta(minutes=10 * i)).strftime("%Y-%m-%dT%H:%M:%S")
+        load = 0.0 if i < 4 else 300.0 + i
+        db_conn.execute(
+            "INSERT INTO energy_states (block_id, window_start, window_end,"
+            " pv_power_w, house_load_w, grid_import_w, battery_soc_pct,"
+            " miner_temp_c, miner_heartbeat_age_sec, surplus_kw, quality,"
+            " missing_signals_json) VALUES (?, ?, ?, 0, ?, 0, 50, 0, 0, 0, 'ok', '[]')",
+            (b, b, b, load),
+        )
+    db_conn.commit()
+    assert mark_unmeasured(db_conn) == {"held": 0, "zero": 4}
+    assert mark_unmeasured(db_conn) == {"held": 0, "zero": 0}
+    rows = db_conn.execute(
+        "SELECT quality, missing_signals_json, house_load_w FROM energy_states"
+        " ORDER BY block_id"
+    ).fetchall()
+    assert [r[0] for r in rows] == ["warn"] * 4 + ["ok"] * 4
+    assert rows[0][1] == '["house_load_w:zero"]' and rows[0][2] == 0.0
