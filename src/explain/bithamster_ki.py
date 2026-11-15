@@ -1414,19 +1414,237 @@ CARD_FINDINGS: dict[str, tuple[str, ...]] = {
 CARD_DECISION_HOURS: dict[str, int] = {"surplus": 72, "switching": 72, "gates": 24}
 
 
+# 16.11.2026, user wish: three questions of their own per card instead of
+# the same three modes everywhere. card key -> question -> (label, question,
+# base mode). The base mode decides context and filters (CARD_MODES). Only
+# questions the card context can answer: "Wartung fällig?" or forecast
+# outlier days were left out, the context has no data for them.
+CARD_QUESTIONS: dict[str, dict[str, tuple[str, str, str]]] = {
+    "aufzeichnung": {
+        "luecken": (
+            "Lücken erklären",
+            "Welche Lücken und unvollständigen Tage gibt es, wann, und woran lag"
+            " es laut Kontext? Was davon ist erledigt, was noch offen?",
+            "karte_daten",
+        ),
+        "nullwerte": (
+            "Ausfall oder echte 0?",
+            "Wo könnten Nullwerte ein Ausfall statt ein Messwert sein? Nutze die"
+            " NICHT GEMESSENEN TAGE (Hausverbrauch 0 W ist ein Ausfall). Sag klar,"
+            " was der Kontext belegt und was nicht.",
+            "karte_daten",
+        ),
+        "thesis": (
+            "Taugen die Daten für die Thesis?",
+            "Reicht die Datenlage für eine belastbare Auswertung: wie viele"
+            " vollständige Tage, welche Zeiträume fallen heraus, welche"
+            " Einschränkung muss man beim Berichten nennen?",
+            "karte_daten",
+        ),
+    },
+    "nights": {
+        "reserve": (
+            "Reicht die Hausreserve?",
+            "Hat die Hausreserve in den Nächten nach Mining-Tagen gereicht? Nenne"
+            " die Urteile je Monat und welche davon noch unter der alten Formel"
+            " vor ADR 033 lagen.",
+            "karte_auffaellig",
+        ),
+        "netzbezug": (
+            "Netzbezug nachts erklären",
+            "Warum zieht das Haus nachts Netzstrom? Trenne leeren Akku im Winter"
+            " von einer zu knappen Reserve nach Mining-Tagen.",
+            "karte_auffaellig",
+        ),
+        "winter": (
+            "Was heißt das im Winter?",
+            "Was sagt diese Karte gerade im Winter aus, und ab wann wird ihr"
+            " Urteil wieder belastbar (Nächte nach Mining-Tagen)?",
+            "karte_auffaellig",
+        ),
+    },
+    "forecast": {
+        "veto": (
+            "Taugt die Prognose als Veto?",
+            "Taugt die Solarprognose gerade als Startsignal, als Veto (R4) oder"
+            " gar nicht? Begründe mit der Abweichung je Monat.",
+            "karte_auffaellig",
+        ),
+        "faktor": (
+            "Korrektur je Monat",
+            "Erkläre die KORREKTURFAKTOREN JE MONAT aus dem Kontext: was sie"
+            " bedeuten, wie viele Tage dahinterstehen, welche belastbar sind."
+            " Rechne NICHT selbst, nimm nur die fest berechneten Faktoren.",
+            "karte_auffaellig",
+        ),
+        "saison": (
+            "Sommer gegen Winter",
+            "Vergleiche die Abweichung im Sommer mit der im Winter: Was ist das"
+            " Muster, und was folgt daraus für die Automatik?",
+            "karte_auffaellig",
+        ),
+    },
+    "efficiency": {
+        "trend": (
+            "Verschleiß-Trend bewerten",
+            "Zeigen die W-pro-TH-Werte der Miner einen Verschleiß? Bewerte die"
+            " Änderung seit dem ersten Monat und wie belastbar sie ist (reine"
+            " Eco-Tage, Monate mit mindestens 3 Tagen).",
+            "karte_auffaellig",
+        ),
+        "vergleich": (
+            "Miner vergleichen",
+            "Vergleiche die Miner miteinander: Unterscheidet sich ihre Effizienz"
+            " oder ihr Trend, und ist der Unterschied groß genug, um etwas zu"
+            " bedeuten?",
+            "karte_auffaellig",
+        ),
+        "messbar": (
+            "Wann wieder messbar?",
+            "Warum gibt es gerade keine neuen Werte, und unter welchen Bedingungen"
+            " (Mining-Tage im Eco-Modus) liefert die Karte wieder einen"
+            " Monatswert?",
+            "karte_daten",
+        ),
+    },
+    "peak": {
+        "kein_start": (
+            "Warum kein Start?",
+            "Warum starten die Miner gerade nicht? Vergleiche den höchsten"
+            " Akkustand je Tag mit der Eco-Start-Schwelle und nenne die Rolle der"
+            " Saison-Automatik.",
+            "karte_auffaellig",
+        ),
+        "schwelle": (
+            "Eco-Start-Schwelle prüfen",
+            "Ist die Eco-Start-Schwelle für die aktuelle Jahreszeit sinnvoll"
+            " gesetzt, gemessen an den erreichten Akku-Höchstständen? Nur ein"
+            " Vorschlag, du schaltest nichts.",
+            "karte_verbessern",
+        ),
+        "heizstab": (
+            "Heizstab gegen Akku",
+            "Wie viel Solarstrom nahm der Heizstab, während der Akku nicht voll"
+            " war, und was erklärt das, was nicht?",
+            "karte_auffaellig",
+        ),
+    },
+    "surplus": {
+        "verlust": (
+            "Verlust beziffern",
+            "Wie viel Solarstrom wurde bei stehenden Minern eingespeist (Stunden,"
+            " kWh), und welcher Teil davon war gewollt (Akku vor Mining)?",
+            "karte_auffaellig",
+        ),
+        "stopp": (
+            "Stopp-Schwelle abwägen",
+            "Würde eine andere Stopp-Schwelle mehr Überschuss nutzen, und was"
+            " kostet das an Hausreserve? Nur mit Zahlen aus dem Kontext, nur ein"
+            " Vorschlag.",
+            "karte_verbessern",
+        ),
+        "unbekannt": (
+            "„Unbekannt“ auflösen",
+            "Welche Stunden haben keinen klaren Grund aus der Diagnose, und was"
+            " zeigt das Entscheidungsprotokoll dazu? Sag ehrlich, wenn der Kontext"
+            " es nicht hergibt.",
+            "karte_auffaellig",
+        ),
+    },
+    "switching": {
+        "ursache": (
+            "Ursache vieler Wechsel",
+            "An welchen Tagen lagen die Wechsel über dem Ziel, und was zeigt das"
+            " Entscheidungsprotokoll über die Ursache? Kurze Abbrüche sind keine"
+            " Wechsel.",
+            "karte_auffaellig",
+        ),
+        "hysterese": (
+            "Hysterese vorschlagen",
+            "Würde mehr Abstand zwischen Start- und Stopp-Schwelle oder eine"
+            " längere Wartezeit die Wechsel senken? Begründe mit Zahlen aus dem"
+            " Kontext, nur ein Vorschlag.",
+            "karte_verbessern",
+        ),
+        "sprung": (
+            "Schwellen-Änderung prüfen",
+            "Welche Schwellen-Änderung steht im Kontext, wann, von welchem auf"
+            " welchen Wert, und passt sie zur Saison-Automatik?",
+            "karte_auffaellig",
+        ),
+    },
+    "safety": {
+        "hitze": (
+            "Hitze-Risiko bewerten",
+            "Wie oft lagen die Miner über der Temperaturgrenze, wann, und ist das"
+            " ein aktuelles Risiko oder Vergangenheit?",
+            "karte_auffaellig",
+        ),
+        "fehler": (
+            "Schaltfehler einordnen",
+            "Welche Schaltfehler sind echte Fehler der Steuerung und welche haben"
+            " eine bekannte Ursache (zum Beispiel der Serverumzug)?",
+            "karte_auffaellig",
+        ),
+        "karte": (
+            "Karte verbessern",
+            "Wie wird diese Karte nützlicher, ohne Inhalte zu wiederholen, die"
+            " sie schon zeigt?",
+            "karte_verbessern",
+        ),
+    },
+    "gates": {
+        "blockade": (
+            "Blockade erklären",
+            "Welche Regel (Gate) blockiert gerade welchen Miner, und warum? In"
+            " einfachen Worten.",
+            "karte_auffaellig",
+        ),
+        "soll_ist": (
+            "Soll gegen Ist",
+            "Stimmen Soll-Modus und gemeldeter Modus der Miner überein? Wo nicht,"
+            " ist es ein Fehler oder erklärt (Handbetrieb, Verbindung)?",
+            "karte_auffaellig",
+        ),
+        "start": (
+            "Was fehlt zum Start?",
+            "Welche Bedingungen müssten erfüllt sein, damit die Miner starten, und"
+            " wie weit ist der aktuelle Stand davon entfernt?",
+            "karte_auffaellig",
+        ),
+    },
+}
+
+
 def split_card_task(task: str) -> tuple[str, str] | None:
-    """(mode, card key) for "<mode>@<card key>", None for anything else."""
-    mode, sep, key = task.partition("@")
-    if sep and mode in CARD_MODES and key in CARD_KEYS:
-        return mode, key
-    return None
+    """(base mode, card key) for "<mode or question>@<card key>", else None."""
+    name, sep, key = task.partition("@")
+    if not sep or key not in CARD_KEYS:
+        return None
+    if name in CARD_MODES:
+        return name, key
+    question = CARD_QUESTIONS.get(key, {}).get(name)
+    return (question[2], key) if question else None
+
+
+def card_question(task: str) -> tuple[str, str]:
+    """(label, instruction) of a per-card task; task must be a card task."""
+    name, _, key = task.partition("@")
+    question = CARD_QUESTIONS.get(key, {}).get(name)
+    if question:
+        rules = (
+            " Nur Zahlen aus dem Kontext; trenne erklärtes Verhalten (Winter,"
+            " Saison-Automatik, bekannte Ereignisse) von offenem Befund."
+        )
+        return question[0], question[1] + rules
+    return CARD_MODES[name]
 
 
 def task_label(task: str) -> str:
     """Label shown on the cards; per-card tasks name the card too."""
     card = split_card_task(task)
     if card:
-        return f"{CARD_MODES[card[0]][0]}: {CARD_KEYS[card[1]]}"
+        return f"{card_question(task)[0]}: {CARD_KEYS[card[1]]}"
     return TASKS[task][0]
 
 
@@ -1475,7 +1693,36 @@ def card_context_lines(
         lines += ["", "FORSCHUNGSBEFUNDE zu dieser Karte (fest berechnet)"] + found
     if key == "aufzeichnung":
         lines += ["", "AUFZEICHNUNGSSTATUS"] + recording_lines(recording)
+    if key == "forecast":
+        lines += forecast_factor_lines(cards)
     return lines + CARD_TERMS
+
+
+def forecast_factor_lines(cards: dict[str, Any] | None) -> list[str]:
+    """Correction factor per month, measured / forecast = 1 / (1 + bias).
+
+    Live eval 16.11.2026: asked for factors, the model computed 0,8 for the
+    summer, where the forecast was too LOW (correct is above 1). Python
+    computes, the model only explains.
+    """
+    months = [
+        m
+        for m in ((cards or {}).get("forecast") or {}).get("months") or []
+        if m.get("bias_pct") is not None
+        and m.get("days")
+        and float(m["bias_pct"]) > -100
+    ]
+    if not months:
+        return []
+    return [
+        "",
+        "KORREKTURFAKTOR JE MONAT (fest berechnet: Messung geteilt durch"
+        " Prognose; unter 1 = Prognose zu hoch, über 1 = zu niedrig)",
+    ] + [
+        f"- {m['month']}: Faktor {de_num(1 / (1 + float(m['bias_pct']) / 100), 2)}"
+        f" (Abweichung {de_num(float(m['bias_pct']), 0)} %, {m['days']} Tage)"
+        for m in months
+    ]
 
 
 # Fixed terms for every card request. Live eval 15.11.2026: the model read
@@ -1538,7 +1785,7 @@ def dashboard_tabs(path: str | Path) -> dict[str, list[str]]:
             current = m.group(1).strip().strip("\"'")
             tabs[current] = list(TAB_NOTES.get(current, []))
             continue
-        if current and re.match(r"^\s+template: group_header(?:_ki)?\s*$", line):
+        if current and re.match(r"^\s+template: group_header\s*$", line):
             pending = 4
             continue
         if pending and current:
@@ -1624,7 +1871,7 @@ def tab_card_sources(path: str | Path, tab: str) -> list[tuple[str, str]]:
     heads = [
         i
         for i, ln in enumerate(lines)
-        if re.match(r"^\s+template: group_header(?:_ki)?\s*$", ln)
+        if re.match(r"^\s+template: group_header\s*$", ln)
     ]
     cuts = [0] + heads + [len(lines)]
     out: list[tuple[str, str]] = []
@@ -2676,7 +2923,7 @@ def build_ask_prompt(
     if card:
         label = task_label(task)
         instruction = (
-            CARD_MODES[card[0]][1] + " Bleib bei dieser Karte; andere Karten"
+            card_question(task)[1] + " Bleib bei dieser Karte; andere Karten"
             " nur nennen, wenn die Antwort dort steht."
         )
     else:

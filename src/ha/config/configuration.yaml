@@ -17,7 +17,7 @@ frontend:
     # 12.09.2026: war seit Einfuehrung nie hier eingetragen, deshalb lief die
     # in bitgrid_dashboard_v2/v3.yaml (Header-Kommentar) behauptete volle
     # Breite + zentrierter Titel bislang gar nicht, unabhaengig vom Cache.
-    - /local/bitgrid_wide.js?v=20261115l
+    - /local/bitgrid_wide.js?v=20261116a
 
 lovelace:
   resource_mode: yaml

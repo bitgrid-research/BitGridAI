@@ -59,7 +59,7 @@ bithamster:
       mode: queued
       fields:
         auftrag:
-          description: "optimierung | aufzeichnung | fehler | verbesserung | tab | tabcheck | gesamtcheck | karten | entscheidung | schalten | befunde | thesis_woche | thesis_befunde | thesis_risiken | thesis_mittwoch | thesis_konsistenz | thesis_freeze | frage | karte_daten@<karte> | karte_auffaellig@<karte> | karte_verbessern@<karte> (Karten siehe bithamster_ki.CARD_KEYS)"
+          description: "optimierung | aufzeichnung | fehler | verbesserung | tab | tabcheck | gesamtcheck | karten | entscheidung | schalten | befunde | thesis_woche | thesis_befunde | thesis_risiken | thesis_mittwoch | thesis_konsistenz | thesis_freeze | frage | <frage>@<karte> (bithamster_ki.CARD_QUESTIONS)"
           example: fehler
       sequence:
         - action: input_text.set_value

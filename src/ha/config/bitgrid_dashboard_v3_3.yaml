@@ -3561,11 +3561,9 @@ views:
                 variables:
                   section: plan
               - type: custom:button-card
-                template: group_header_ki
+                template: group_header
                 icon: mdi:database-check
                 name: Datenaufzeichnung
-                variables:
-                  card_key: aufzeichnung
               - type: vertical-stack
                 card_mod:
                   style:
@@ -3623,11 +3621,9 @@ views:
               grid-area: g3l
             cards:
               - type: custom:button-card
-                template: group_header_ki
+                template: group_header
                 icon: mdi:weather-night
                 name: Akku über Nacht
-                variables:
-                  card_key: nights
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3638,11 +3634,9 @@ views:
               grid-area: g3r
             cards:
               - type: custom:button-card
-                template: group_header_ki
+                template: group_header
                 icon: mdi:weather-partly-cloudy
                 name: Solarprognose
-                variables:
-                  card_key: forecast
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3653,11 +3647,9 @@ views:
               grid-area: g4
             cards:
               - type: custom:button-card
-                template: group_header_ki
+                template: group_header
                 icon: mdi:speedometer
                 name: Hardware-Zustand (W/TH)
-                variables:
-                  card_key: efficiency
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3668,11 +3660,9 @@ views:
               grid-area: g4r
             cards:
               - type: custom:button-card
-                template: group_header_ki
+                template: group_header
                 icon: mdi:battery-arrow-up
                 name: Akku-Höchststand und Start
-                variables:
-                  card_key: peak
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3683,21 +3673,17 @@ views:
               grid-area: g5l
             cards:
               - type: custom:button-card
-                template: group_header_ki
+                template: group_header
                 icon: mdi:transmission-tower-export
                 name: Ungenutzter Solarüberschuss
-                variables:
-                  card_key: surplus
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
                   section: surplus
               - type: custom:button-card
-                template: group_header_ki
+                template: group_header
                 icon: mdi:thermometer-alert
                 name: Temperatur und Schaltfehler
-                variables:
-                  card_key: safety
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3708,11 +3694,9 @@ views:
               grid-area: g5r
             cards:
               - type: custom:button-card
-                template: group_header_ki
+                template: group_header
                 icon: mdi:swap-vertical-bold
                 name: Schaltwechsel
-                variables:
-                  card_key: switching
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3724,11 +3708,9 @@ views:
               grid-area: g6
             cards:
               - type: custom:button-card
-                template: group_header_ki
+                template: group_header
                 icon: mdi:shield-search
                 name: Live-Diagnose der Miner
-                variables:
-                  card_key: gates
               - !include views/forschung_gates.yaml
 
   # ═══════════════════════════════════════════════════════════════════════

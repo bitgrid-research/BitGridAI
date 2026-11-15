@@ -187,7 +187,7 @@ cards:
                             thesis_mittwoch: 'Masterarbeit: Mittwoch mit Wallach', thesis_konsistenz: 'Masterarbeit: Konsistenz prüfen', thesis_freeze: 'Masterarbeit: Vor dem Datenfreeze' };
             if (askPending) {
               return wrap(field('bithamster_forschung_wait.png', 'Ich denke nach …',
-                `Auftrag „${esc(names[reqId.split('|')[0]] || 'Auftrag')}“ ist angekommen. Die Antwort kommt in wenigen Sekunden.`, badge('', KI.data && KI.data.model)));
+                `Auftrag „${esc(names[reqId.split('|')[0]] || (reqId.startsWith('karte_') ? 'Karte prüfen' : 'Auftrag'))}“ ist angekommen. Die Antwort kommt in wenigen Sekunden.`, badge('', KI.data && KI.data.model)));
             }
             const d = ASK.data;
             if (!d) return wrap(field('bithamster_forschung.png', 'Frag mich was', 'Tipp unten auf einen Auftrag oder schreib mir eine Frage.', badge('', KI.data && KI.data.model)));
@@ -532,8 +532,443 @@ cards:
                 padding: 0 4px !important;
               }
 
+        # 16.11.2026, Nutzer-Wunsch: KI-Auftraege je Forschungskarte hier in
+        # der Liste, je Karte eine eigene Klappliste mit drei eigenen Fragen.
+        # Jeder Knopf schickt "<frage>@<karte>" (bithamster_ki.CARD_QUESTIONS);
+        # Kontext nur aus dieser Karte, Antwort oben im Hamster-Feld. Die
+        # Unterlisten liegen in einem eigenen Stapel, damit "4" sie gemeinsam
+        # klappt (_bgaiFoldNext klappt bis zur naechsten Klapp-Ueberschrift).
         - type: custom:button-card
-          name: 4 · Forschung und Haushalt
+          name: 4 · Karten prüfen
+          show_icon: false
+          show_state: false
+          tap_action:
+            action: javascript
+            javascript: "[[[ window._bgaiFoldNext && window._bgaiFoldNext(this, 'bitsy_karten') ]]]"
+          styles:
+            card:
+              - background: none
+              - border: none
+              - box-shadow: none
+              - padding: 10px 16px 2px 16px
+            name:
+              - justify-self: center
+              - font-size: 0.8em
+              - font-weight: 700
+              - letter-spacing: 0.06em
+              - text-transform: uppercase
+              - color: var(--secondary-text-color)
+        - type: vertical-stack
+          cards:
+            - &karte_head
+              type: custom:button-card
+              name: "Datenaufzeichnung"
+              icon: mdi:database-check
+              show_state: false
+              tap_action:
+                action: javascript
+                javascript: "[[[ window._bgaiFoldNext && window._bgaiFoldNext(this, 'bitsy_karte_aufzeichnung') ]]]"
+              styles:
+                card:
+                  - background: none
+                  - border: none
+                  - box-shadow: none
+                  - padding: 6px 40px 2px 24px
+                grid:
+                  - grid-template-areas: '"i n"'
+                  - grid-template-columns: min-content 1fr
+                icon:
+                  - width: 20px
+                  - color: var(--bgai-erklaerung-v3, #A2EFED)
+                name:
+                  - justify-self: start
+                  - padding-left: 8px
+                  - font-size: 0.85em
+                  - font-weight: 600
+                  - color: var(--primary-text-color)
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+                grid-gap: 8px
+                padding: 0 14px 6px 14px
+              cards:
+                - <<: *task_btn
+                  variables:
+                    label: "Lücken erklären"
+                    icon: mdi:database-search-outline
+                    color: "var(--bgai-grid-v3, #1aaccb)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: luecken@aufzeichnung
+                - <<: *task_btn
+                  variables:
+                    label: "Ausfall oder echte 0?"
+                    icon: mdi:database-search-outline
+                    color: "var(--bgai-grid-v3, #1aaccb)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: nullwerte@aufzeichnung
+                - <<: *task_btn
+                  variables:
+                    label: "Taugen die Daten für die Thesis?"
+                    icon: mdi:database-search-outline
+                    color: "var(--bgai-grid-v3, #1aaccb)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: thesis@aufzeichnung
+            - <<: *karte_head
+              name: "Akku über Nacht"
+              icon: mdi:weather-night
+              tap_action:
+                action: javascript
+                javascript: "[[[ window._bgaiFoldNext && window._bgaiFoldNext(this, 'bitsy_karte_nights') ]]]"
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+                grid-gap: 8px
+                padding: 0 14px 6px 14px
+              cards:
+                - <<: *task_btn
+                  variables:
+                    label: "Reicht die Hausreserve?"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: reserve@nights
+                - <<: *task_btn
+                  variables:
+                    label: "Netzbezug nachts erklären"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: netzbezug@nights
+                - <<: *task_btn
+                  variables:
+                    label: "Was heißt das im Winter?"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: winter@nights
+            - <<: *karte_head
+              name: "Solarprognose"
+              icon: mdi:weather-partly-cloudy
+              tap_action:
+                action: javascript
+                javascript: "[[[ window._bgaiFoldNext && window._bgaiFoldNext(this, 'bitsy_karte_forecast') ]]]"
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+                grid-gap: 8px
+                padding: 0 14px 6px 14px
+              cards:
+                - <<: *task_btn
+                  variables:
+                    label: "Taugt die Prognose als Veto?"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: veto@forecast
+                - <<: *task_btn
+                  variables:
+                    label: "Korrektur je Monat"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: faktor@forecast
+                - <<: *task_btn
+                  variables:
+                    label: "Sommer gegen Winter"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: saison@forecast
+            - <<: *karte_head
+              name: "Hardware-Zustand (W/TH)"
+              icon: mdi:speedometer
+              tap_action:
+                action: javascript
+                javascript: "[[[ window._bgaiFoldNext && window._bgaiFoldNext(this, 'bitsy_karte_efficiency') ]]]"
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+                grid-gap: 8px
+                padding: 0 14px 6px 14px
+              cards:
+                - <<: *task_btn
+                  variables:
+                    label: "Verschleiß-Trend bewerten"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: trend@efficiency
+                - <<: *task_btn
+                  variables:
+                    label: "Miner vergleichen"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: vergleich@efficiency
+                - <<: *task_btn
+                  variables:
+                    label: "Wann wieder messbar?"
+                    icon: mdi:database-search-outline
+                    color: "var(--bgai-grid-v3, #1aaccb)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: messbar@efficiency
+            - <<: *karte_head
+              name: "Akku-Höchststand und Start"
+              icon: mdi:battery-arrow-up
+              tap_action:
+                action: javascript
+                javascript: "[[[ window._bgaiFoldNext && window._bgaiFoldNext(this, 'bitsy_karte_peak') ]]]"
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+                grid-gap: 8px
+                padding: 0 14px 6px 14px
+              cards:
+                - <<: *task_btn
+                  variables:
+                    label: "Warum kein Start?"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: kein_start@peak
+                - <<: *task_btn
+                  variables:
+                    label: "Eco-Start-Schwelle prüfen"
+                    icon: mdi:lightbulb-on-outline
+                    color: "var(--bgai-pv-v3, #fbb210)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: schwelle@peak
+                - <<: *task_btn
+                  variables:
+                    label: "Heizstab gegen Akku"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: heizstab@peak
+            - <<: *karte_head
+              name: "Ungenutzter Solarüberschuss"
+              icon: mdi:transmission-tower-export
+              tap_action:
+                action: javascript
+                javascript: "[[[ window._bgaiFoldNext && window._bgaiFoldNext(this, 'bitsy_karte_surplus') ]]]"
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+                grid-gap: 8px
+                padding: 0 14px 6px 14px
+              cards:
+                - <<: *task_btn
+                  variables:
+                    label: "Verlust beziffern"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: verlust@surplus
+                - <<: *task_btn
+                  variables:
+                    label: "Stopp-Schwelle abwägen"
+                    icon: mdi:lightbulb-on-outline
+                    color: "var(--bgai-pv-v3, #fbb210)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: stopp@surplus
+                - <<: *task_btn
+                  variables:
+                    label: "„Unbekannt“ auflösen"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: unbekannt@surplus
+            - <<: *karte_head
+              name: "Schaltwechsel"
+              icon: mdi:swap-vertical-bold
+              tap_action:
+                action: javascript
+                javascript: "[[[ window._bgaiFoldNext && window._bgaiFoldNext(this, 'bitsy_karte_switching') ]]]"
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+                grid-gap: 8px
+                padding: 0 14px 6px 14px
+              cards:
+                - <<: *task_btn
+                  variables:
+                    label: "Ursache vieler Wechsel"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: ursache@switching
+                - <<: *task_btn
+                  variables:
+                    label: "Hysterese vorschlagen"
+                    icon: mdi:lightbulb-on-outline
+                    color: "var(--bgai-pv-v3, #fbb210)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: hysterese@switching
+                - <<: *task_btn
+                  variables:
+                    label: "Schwellen-Änderung prüfen"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: sprung@switching
+            - <<: *karte_head
+              name: "Temperatur und Schaltfehler"
+              icon: mdi:thermometer-alert
+              tap_action:
+                action: javascript
+                javascript: "[[[ window._bgaiFoldNext && window._bgaiFoldNext(this, 'bitsy_karte_safety') ]]]"
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+                grid-gap: 8px
+                padding: 0 14px 6px 14px
+              cards:
+                - <<: *task_btn
+                  variables:
+                    label: "Hitze-Risiko bewerten"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: hitze@safety
+                - <<: *task_btn
+                  variables:
+                    label: "Schaltfehler einordnen"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: fehler@safety
+                - <<: *task_btn
+                  variables:
+                    label: "Karte verbessern"
+                    icon: mdi:lightbulb-on-outline
+                    color: "var(--bgai-pv-v3, #fbb210)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: karte@safety
+            - <<: *karte_head
+              name: "Live-Diagnose der Miner"
+              icon: mdi:shield-search
+              tap_action:
+                action: javascript
+                javascript: "[[[ window._bgaiFoldNext && window._bgaiFoldNext(this, 'bitsy_karte_gates') ]]]"
+            - type: custom:layout-card
+              layout_type: custom:grid-layout
+              layout:
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+                grid-gap: 8px
+                padding: 0 14px 6px 14px
+              cards:
+                - <<: *task_btn
+                  variables:
+                    label: "Blockade erklären"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: blockade@gates
+                - <<: *task_btn
+                  variables:
+                    label: "Soll gegen Ist"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: soll_ist@gates
+                - <<: *task_btn
+                  variables:
+                    label: "Was fehlt zum Start?"
+                    icon: mdi:magnify-scan
+                    color: "var(--bg-color-reserve, #EF5350)"
+                  tap_action:
+                    action: call-service
+                    service: script.bithamster_auftrag
+                    service_data:
+                      auftrag: start@gates
+        - type: custom:button-card
+          name: 5 · Forschung und Haushalt
           show_icon: false
           show_state: false
           # 15.11.2026: Gruppe aufklappbar (window._bgaiFoldNext in www/bitgrid_wide.js)
@@ -593,7 +1028,7 @@ cards:
         # 14.11.2026: Hilfe bei der Masterarbeit. Bitsy plant, ordnet zu und
         # warnt, er schreibt keinen Text fuer die Arbeit (THESIS_RULES).
         - type: custom:button-card
-          name: 5 · Masterarbeit
+          name: 6 · Masterarbeit
           show_icon: false
           show_state: false
           # 15.11.2026: Gruppe aufklappbar (window._bgaiFoldNext in www/bitgrid_wide.js)
@@ -681,7 +1116,7 @@ cards:
                 service_data:
                   auftrag: thesis_freeze
         - type: custom:button-card
-          name: 6 · Verlauf
+          name: 7 · Verlauf
           show_icon: false
           show_state: false
           tap_action:

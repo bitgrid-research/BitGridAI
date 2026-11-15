@@ -171,6 +171,17 @@ Antwortzeit gemessen 8,5 bis 9,5 s (13.11.2026), davon rund 7 s Modell.
 Fehler (HA-Neustart, GX10 ausgelastet) werden geloggt und nach 30 s erneut
 versucht. Log: `journalctl --user -u bithamster-ask`.
 
+Karten prüfen (seit 16.11.2026): Punkt „4 · Karten prüfen“ in der
+Aufklappliste der Hamster-Karte (Modus „Frag mich“), darin je Forschungskarte
+eine eigene Klappliste mit drei Knöpfen (Daten prüfen, Auffälligkeiten finden,
+Karte verbessern), Auftrag `<modus>@<karte>`. Auftrag `<modus>@<karte>` (`CARD_MODES` ×
+`CARD_KEYS`), Kontext nur aus dieser Karte (`card_context_lines`): Kartenbe-
+schreibung, Sensorwerte, Zeilen aus `research_cards.json`, passende
+Forschungsbefunde, feste Begriffe (`CARD_TERMS`). Nicht gemessene Tage nur
+bei „Daten prüfen“. Die Antwort erscheint im Hamster-Feld wie bei den übrigen Aufträgen. Eval: 27 Szenarien in `bithamster_eval.SCENARIOS`; live 15.11.:
+keine erfundenen Zahlen, aber Deutungsfehler (Schaltwechsel-Ziel als
+Mindestwert gelesen, „oft“ für 11 %), daher bleibt jede Antwort ein Vorschlag.
+
 Der Kontext enthält außerdem einen Vergleich mit den 30 Tagen davor und eine
 fest berechnete Einordnung "erwartbar / auffällig / gut" samt Gesamturteil.
 Das Modell hatte eine nur in Worten gegebene Regel ignoriert und einen

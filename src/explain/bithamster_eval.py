@@ -63,9 +63,9 @@ SCENARIOS: list[tuple[str, str, str | None, str | None]] = [
 ]
 # 15.11.2026: the header buttons of the Forschung cards, every mode x card.
 SCENARIOS += [
-    (f"{mode}@{card}", f"{mode}@{card}", None, None)
-    for card in ki.CARD_KEYS
-    for mode in ki.CARD_MODES
+    (f"{q}@{card}", f"{q}@{card}", None, None)
+    for card, questions in ki.CARD_QUESTIONS.items()
+    for q in questions
 ]
 
 # Wrong claims seen in live runs (13.11.2026), as (regex, reason).

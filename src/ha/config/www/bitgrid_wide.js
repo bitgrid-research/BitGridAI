@@ -699,12 +699,11 @@ function applyClock() {
 setInterval(applyClock, 2000);
 applyClock();
 
-// 14.11.2026: Passen die (schon verkleinerten) Tabs nicht in die Leiste,
-// zeigen die inaktiven nur ihr Icon (CSS-Regel bg-compact oben). Gemessen
-// wird die Breite im vollen Zustand; zurueck geht es erst, wenn genau diese
-// Breite mit 16 px Reserve wieder passt, sonst wuerde die Leiste pendeln.
-// Messung statt fester Bildschirmbreite, weil die Seitenleiste den Platz mit
-// bestimmt (gemessen: ohne Icon-Modus passt die Leiste erst ab ca. 1800 px).
+// 14.11.2026: inaktive Tabs zeigen nur ihr Icon (CSS-Regel bg-compact oben).
+// 16.11.2026: immer, nicht mehr nur bei Ueberlauf. Vorher entschied eine
+// Breitenmessung; auf dem Pi-Kiosk (1600 CSS-px, keine Seitenleiste) passte
+// die volle Leiste, dort standen alle Tabs ausgeschrieben und die
+// Animation griff nie. Nutzer-Wunsch: ueberall dasselbe Verhalten.
 function fitTabs() {
   const hui = findHuiRoot(document.querySelector('home-assistant'));
   const r = hui && hui.shadowRoot;
@@ -714,23 +713,9 @@ function fitTabs() {
   const nav = sr && sr.querySelector('.nav');
   if (!tabs || !nav) return;
   const items = [...group.querySelectorAll('ha-tab-group-tab')];
-  if (!items.length) return;
-  const avail = nav.clientWidth;
-  const marked = items.filter((t) => t.hasAttribute('bg-compact')).length;
-  if (marked && marked < items.length) {
-    // Header re-rendered some tabs: keep the mode that was decided.
-    items.forEach((t) => t.setAttribute('bg-compact', ''));
-    return;
-  }
-  const compact = marked === items.length;
-  if (!compact) {
-    const need = tabs.scrollWidth;
-    group.dataset.bgFull = String(need);
-    if (need > avail + 2) items.forEach((t) => t.setAttribute('bg-compact', ''));
-    return;
-  }
-  const full = Number(group.dataset.bgFull) || Infinity;
-  if (full <= avail - 16) items.forEach((t) => t.removeAttribute('bg-compact'));
+  items.forEach((t) => {
+    if (!t.hasAttribute('bg-compact')) t.setAttribute('bg-compact', '');
+  });
   syncScrollArrow(group, tabs, nav);
 }
 

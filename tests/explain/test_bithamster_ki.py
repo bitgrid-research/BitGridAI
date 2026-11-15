@@ -1391,7 +1391,7 @@ def test_card_context_only_holds_the_requested_card(tmp_path: Path) -> None:
         "  - title: Forschung\n"
         "    cards:\n"
         "      - type: custom:button-card\n"
-        "        template: group_header_ki\n"
+        "        template: group_header\n"
         "        icon: mdi:x\n"
         "        name: Schaltwechsel\n"
         "      - entity: sensor.wechsel_heute\n"
@@ -1424,7 +1424,6 @@ def test_card_context_only_holds_the_requested_card(tmp_path: Path) -> None:
     assert "sensor.prognose" not in text
     assert "Schaltwechsel: an 2 von 10" in text
     assert "Ungenutzter Solarüberschuss" not in text
-    # The new header template still counts as a card title.
     assert bk.dashboard_tabs(dash)["Forschung"] == ["Schaltwechsel", "Solarprognose"]
 
 
@@ -1470,3 +1469,39 @@ def test_card_task_drops_claim_that_the_card_shows_nothing() -> None:
     assert answer["punkte"] == ["Im Sommer prüfen"]
     assert "keine Werte" not in answer["text"]
     assert len(dropped) == 2
+
+
+def test_card_questions_resolve_to_base_mode_and_own_label() -> None:
+    assert bk.split_card_task("kein_start@peak") == ("karte_auffaellig", "peak")
+    assert bk.split_card_task("hysterese@switching") == (
+        "karte_verbessern",
+        "switching",
+    )
+    assert bk.split_card_task("kein_start@switching") is None  # other card
+    assert bk.task_label("kein_start@peak") == (
+        "Warum kein Start?: Akku-Höchststand und Start"
+    )
+    assert bk.parse_request("veto@forecast|2026-11-16T09:00:00") == "veto@forecast"
+
+
+def test_every_card_has_three_questions_with_known_base() -> None:
+    assert set(bk.CARD_QUESTIONS) == set(bk.CARD_KEYS)
+    for questions in bk.CARD_QUESTIONS.values():
+        assert len(questions) == 3
+        assert all(q[2] in bk.CARD_MODES for q in questions.values())
+
+
+def test_forecast_factors_are_computed_not_left_to_the_model() -> None:
+    cards = {
+        "forecast": {
+            "months": [
+                {"month": "2026-07", "bias_pct": -20.0, "days": 31},
+                {"month": "2026-11", "bias_pct": 75.0, "days": 14},
+                {"month": "2026-12", "bias_pct": None, "days": 0},
+            ]
+        }
+    }
+    text = "\n".join(bk.forecast_factor_lines(cards))
+    assert "2026-07: Faktor 1,25" in text  # forecast too low -> above 1
+    assert "2026-11: Faktor 0,57" in text
+    assert "2026-12" not in text
