@@ -269,7 +269,7 @@ Antwort nachträglich prüfen und vor/nach einer Änderung vergleichen.
 
 ```bash
 python -m src.explain.bithamster_eval --db data/bitgrid.db \
-  --soul <ha-config>/bithamster_SOUL.md --dashboard <ha-config>/bitgrid_dashboard_v3.yaml \
+  --soul <ha-config>/bithamster_SOUL.md --dashboard <ha-config>/bitgrid_dashboard_v3_3.yaml \
   --recording-status <ha-config>/www/recording_status.json \
   --log-db data/bithamster_log.db --runs 3
 # Geloggte Antworten mit geänderten Prüfungen neu bewerten, ohne Modellaufruf:

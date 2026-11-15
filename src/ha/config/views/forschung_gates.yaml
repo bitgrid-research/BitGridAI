@@ -15,7 +15,7 @@
 # (packages/mvp_diagnose.yaml), Attribut summary im Format
 # "Ist=<Modus> | Ziel=<Modus> | <Begruendung>". Rein lesend, keine Steuerung.
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Forschung"
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml → Tab "Forschung"
 # (Bereich g2r).
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:button-card

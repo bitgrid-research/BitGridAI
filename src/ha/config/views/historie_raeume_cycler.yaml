@@ -3,7 +3,7 @@
 # 25.08.2026, Nutzer-Vorgabe: "immer nur einen graph anzeige und obendrüber
 # mit den pfeilen durchwechseln kann durch die räume ähnlich wie beim
 # floorplan tab" — gleiches Muster wie der Haus/Garage-Umschalter im Tab
-# "Grundriss" (bitgrid_dashboard_v3.yaml, input_boolean.fp_view_garage),
+# "Grundriss" (bitgrid_dashboard_v3_3.yaml, input_boolean.fp_view_garage),
 # hier mit input_select.historie_raum (configuration.yaml) statt
 # input_boolean, da 7 statt nur 2 Zustände.
 #
@@ -17,7 +17,7 @@
 # 3) "wechsel die position von unten die pfeile für raumwechsel soll oben
 #    sein" — Pfeile jetzt wieder VOR den Graph-Karten (waren zwischenzeitlich
 #    darunter, siehe Git-Historie), Zeitraum-Umschalter (historie_zeitraum_
-#    cycler.yaml) wandert im Gegenzug in bitgrid_dashboard_v3.yaml nach
+#    cycler.yaml) wandert im Gegenzug in bitgrid_dashboard_v3_3.yaml nach
 #    diesem Include, also unter den Graph.
 # 4) 03.09.2026, gegenteiliger Nutzer-Wunsch: Raumname jetzt DOCH wieder
 #    sichtbar, aber nicht mehr als apexcharts-Chart-Title (dort entfernt,
@@ -33,7 +33,7 @@
 # früherer Anlauf mit custom:layout-card (min-content-Spalten +
 # justify-content) hat GAR NICHTS gerendert (leere Fläche, live bestätigt).
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "EnergieInfo".
 # ═══════════════════════════════════════════════════════════════════════
 type: vertical-stack
 cards:

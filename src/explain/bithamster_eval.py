@@ -61,10 +61,22 @@ SCENARIOS: list[tuple[str, str, str | None, str | None]] = [
     ),
     ("frage_reserve", "frage", None, "Soll ich die Hausreserve erhöhen?"),
 ]
+# 15.11.2026: the header buttons of the Forschung cards, every mode x card.
+SCENARIOS += [
+    (f"{mode}@{card}", f"{mode}@{card}", None, None)
+    for card in ki.CARD_KEYS
+    for mode in ki.CARD_MODES
+]
 
 # Wrong claims seen in live runs (13.11.2026), as (regex, reason).
 # Applied only when the context rules them out, see claim_flags().
 CLAIM_PATTERNS: list[tuple[str, str, str]] = [
+    # 15.11.2026, card requests: misread terms (see ki.CARD_TERMS).
+    (
+        r"(ziel|wechsel)[^.]{0,50}(unrealistisch|nicht erreichbar|selten erreicht)",
+        "BEGRIFFE (fest, nicht umdeuten)",
+        "liest das Schaltwechsel-Ziel als Mindestwert",
+    ),
     (
         r"sats?\s+(verloren|verschenkt)|verlorene\s+sats",
         "KEINE verpasste Gelegenheit",
@@ -270,7 +282,7 @@ def run_eval(
             result: dict[str, Any] = {
                 "request_id": f"{eval_run}|{name}|{i}",
                 "task": task,
-                "label": ki.TASKS[task][0],
+                "label": ki.task_label(task),
                 "tab": tab,
                 "question": question,
                 "generated_at": datetime.now(timezone.utc).isoformat(),

@@ -118,7 +118,12 @@ def test_build_cards_nights_and_verdict() -> None:
     months = {m["month"]: m for m in cards["nights"]["months"]}
     oct_ = months[10]
     assert oct_["verdict"] == "zu_niedrig"
-    assert oct_["rule_holds"] is True and oct_["at_stop"] == oct_["mined_nights"]
+    assert oct_["at_stop"] == oct_["mined_nights"]
+    # October ran before ADR 033: today's rule is not judged on it, the
+    # measured stop is shown instead.
+    assert oct_["before_formula_v2"] is True and oct_["rule_holds"] is None
+    assert oct_["stop_measured"] == oct_["stop_target"]
+    assert all(r["before_formula_v2"] for r in cards["nights"]["recent"])
     assert oct_["grid_kwh_after_mining"] == oct_["grid_kwh"] > 0
     recent = cards["nights"]["recent"]
     assert len(recent) == rc.CARD_NIGHTS
@@ -209,6 +214,19 @@ def test_efficiency_flags_drift_and_needs_enough_days() -> None:
     _miner_kpi(conn, rows)
     m = rc.efficiency_trend(conn)["miners"][0]
     assert m["verdict"] == "schlechter" and m["change_pct"] == pytest.approx(7.5)
+
+
+def test_efficiency_skips_days_with_unmeasured_blocks() -> None:
+    conn = _db()
+    conn.execute("ALTER TABLE energy_states ADD COLUMN quality TEXT")
+    conn.executemany(
+        "INSERT INTO energy_states (block_id, quality) VALUES (?, 'warn')",
+        [(f"2026-10-01T0{h}:00:00",) for h in range(rc.UNMEASURED_MIN_BLOCKS)],
+    )
+    rows = [(f"2026-10-{d:02d}", 6.0, 0.0, 16.0) for d in range(1, 5)]
+    _miner_kpi(conn, rows)
+    m = rc.efficiency_trend(conn)["miners"][0]
+    assert [x["days"] for x in m["months"]] == [3]
 
 
 def test_efficiency_without_table_is_empty() -> None:

@@ -78,8 +78,13 @@ Richtungsumkehr gegenüber der ursprünglichen Entscheidung:
 
 - **Referenz ist künftig der Produktivbetrieb:** Das Energielabor (Bitaxe Gamma + NerdQaxe++) bildet
   die Avalon-Q-Steuerung **maßstabsgetreu** nach — SoC-Schwellen identisch (dimensionslos), nur die
-  Leistung wird per Dreisatz auf die kleinen Miner skaliert. Das ist **keine** Divergenz, sondern ein
-  verkleinertes Abbild (Skalierungstabelle: Thesis §4.6.7, Studie 2024d).
+  Leistung der Miner-Stufen ist auf die kleinen Miner übertragen. Das ist **keine** Divergenz, sondern
+  ein verkleinertes Abbild. **Stand 16.10.2026 (ersetzt den Dreisatz):** Die Stufen sind auf die im
+  Produktivbetrieb **gemessenen** Avalon-Q-Anteile kalibriert (Eco 50,1 %, Standard 81,8 % von Super;
+  Shelly, stabile 10-min-Blöcke 07.05.–25.09.2026), Kalibrierung in
+  `src/ha/lab_only/lab_miner_sim.yaml` (Stufentabelle, Studie 2024d). PV, Akku und SoC werden im
+  Labor **nicht** skaliert: Das Dashboard zeigt die abgespielten Produktivwerte, die echten Miner
+  folgen nur dem Modus.
 - **Kern-Angleichung (umgesetzt, additiv):** Der Kern unterstützt nun neben der Surplus-kW-Logik
   eine wählbare **SoC-Band-Strategie** (`RuleEngineConfig(strategy="soc_band")`, Modul
   `src/core/rules/r1_soc_band.py`), die das Produktiv-Schema nachbildet (Reserve-Stop 50 % · Eco 58 % ·
@@ -544,6 +549,35 @@ Label dynamisch aus dem JSON-Artefakt statt hartkodiertem "45 sats/kWh"-Text.
   oben, nicht nur die SoC-Schwellen.
 - Betrifft nur die Anzeige/das KPI-Ziel, keine Regel in `core/` — R1-R8 lesen `energy_to_sats`
   nicht als Steuersignal.
+
+**Nachtrag 15.11.2026: Modellwerte durch Messung ersetzt.** Für alle drei Tiers liegen jetzt
+echte Monate vor. Gerechnet je Monat als Summe Sats durch Summe kWh, nur gemessene Tage mit
+`mining_kwh >= 1` und `energy_to_sats > 0` (Quelle: `daily_kpi` auf dem HA-Host):
+
+| Tier | Monat | Tage | kWh | Modusanteil Eco/Std/Super | sats/kWh | Ziel alt | Ziel neu |
+| :--- | :--- | ---: | ---: | :--- | ---: | ---: | ---: |
+| Voll | Aug 2026 | 10 | 110 | 84/12/4 % | 123,4 | 125 | 125 |
+| Eco + Standard | Sep 2026 | 19 | 203 | 70/18/12 % | 119,2 | 130 (modelliert) | 120 |
+| Nur Eco | Okt 2026 | 10 | 58 | 98/2/0 % | 121,9 | 135 (modelliert) | 120 |
+
+**Befund:** Die Modellannahme (weniger W/TH, also mehr sats/kWh im Eco-Betrieb) wird nicht
+bestätigt. Der fast reine Eco-Oktober liegt unter dem August. Wahrscheinlichste Erklärung ist die
+oben als Unsicherheit 1 benannte Difficulty-Drift, die den Effizienzgewinn aufzehrt; belegt ist
+das nicht, Difficulty wird nicht erfasst. Der Super-Anteil im September stammt teils aus dem
+Regelfehler aus ADR 030 (vor 25.09.2026), entspricht also nicht dem Tier.
+
+**Datenfehler, beim Nachtrag gefunden:**
+- 11 Mining-Tage (27.08. bis 15.09.2026, 3 bis 16 kWh) stehen mit `energy_to_sats = 0` in
+  `daily_kpi`, weil `earned_btc` 0 ist. Das ist eine fehlende Abrechnung, keine echte Null, und
+  widerspricht der Zusage aus ADR 026 („keine erfundene Null"). Behoben am 15.11.2026: `daily_kpi.compute_day()` wertet `earned_btc <= 0` als fehlende Abrechnung (NULL). Die 11 Rohzeilen bleiben als Prüfspur in `bitcoin_daily_settlement`, die Tage wurden auf dem HA-Host neu berechnet (Backup `bitgrid.db.bak-20261115-sats`).
+- An Standby-Tagen (ca. 0,44 kWh) zahlt der Pool Restbeträge, das ergibt scheinbar ~120 sats/kWh
+  ohne Mining. Deshalb die 1-kWh-Schwelle; ohne sie bestünde der November komplett aus
+  Artefakten.
+
+**Grenzen:** n je Tier 10 bis 19 Tage aus je einem Monat; der Oktober beruht auf nur 58 kWh. Die
+neuen Ziele sind Messwerte eines Jahres und keine Saisonkonstanten. Keine Steuerregel liest
+`energy_to_sats`, die Änderung betrifft nur Anzeige und KPI-Ziel
+(`src/data/energy_to_sats_export.py`).
 
 ---
 

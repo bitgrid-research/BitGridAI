@@ -43,19 +43,23 @@ from src.data.db import get_connection
 # anderen sind Modellschaetzungen (Eco ist pro kWh effizienter als Super,
 # siehe ADR 033), ausdruecklich vorlaeufig bis echte Daten aus den jeweiligen
 # Monaten vorliegen. Tier-Zuordnung folgt sensor.mvp_saison_status (ADR 028).
+# ADR 029, Nachtrag 15.11.2026: alle drei Tiers gemessen (Summe Sats durch
+# Summe kWh, nur Mining-Tage >= 1 kWh mit Abrechnung > 0), auf 5 gerundet.
+# Voll Aug 123,4 (n=10), Eco + Standard Sep 119,2 (n=19), Nur Eco Okt 121,9
+# (n=10, nur 58 kWh: schwach belegt). Die modellierten 130/135 sind ersetzt.
 _SEASONAL_TARGETS: dict[int, float] = {
-    1: 135.0,
-    2: 135.0,  # Nur Eco (Jan/Feb)
-    3: 130.0,
-    4: 130.0,  # Eco + Standard (Maer/Apr)
+    1: 120.0,
+    2: 120.0,  # Nur Eco (Jan/Feb), gemessen Okt 2026
+    3: 120.0,
+    4: 120.0,  # Eco + Standard (Maer/Apr), gemessen Sep 2026
     5: 125.0,
     6: 125.0,
     7: 125.0,
-    8: 125.0,  # Voll — gemessen, 15.-31.08.2026, n=17
-    9: 130.0,  # Eco + Standard (Sep)
-    10: 135.0,
-    11: 135.0,
-    12: 135.0,  # Nur Eco (Okt-Dez)
+    8: 125.0,  # Voll, gemessen Aug 2026
+    9: 120.0,  # Eco + Standard, gemessen Sep 2026
+    10: 120.0,
+    11: 120.0,
+    12: 120.0,  # Nur Eco (Okt-Dez), gemessen Okt 2026
 }
 
 

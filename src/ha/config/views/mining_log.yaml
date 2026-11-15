@@ -3,13 +3,13 @@
 # Eingebunden via !include in:
 #   - views/miner_stats.yaml      → Dev-"Miner"-Tab (rechte Spalte)
 #   - bitgrid_dashboard_v2.yaml     → Tab "Steuerung", unter den Minern
-#   - bitgrid_dashboard_v3.yaml     → Tab "BitcoinInfo", rechte Spalte
+#   - bitgrid_dashboard_v3_3.yaml     → Tab "BitcoinInfo", rechte Spalte
 # Reine custom:button-card, kein button_card_templates-Bezug. Quellen/Logik
 # (Settlement-History → payout_history → daily_log) unverändert aus miner_stats.
 #
 # Kein eigener Karten-Header mehr (entfernt 26.08.2026, Nutzer-Wunsch): in
 # v3 uebernimmt ein externer Abschnittstitel "MINING VERLAUF" diese Rolle
-# (bitgrid_dashboard_v3.yaml, grid-area "tr"). v2/Dev-Miner-Tab zeigen die
+# (bitgrid_dashboard_v3_3.yaml, grid-area "tr"). v2/Dev-Miner-Tab zeigen die
 # Tabelle seitdem ohne Titel darueber — bei Bedarf dort ebenfalls einen
 # Abschnittstitel ergaenzen, nicht den Header hier wieder einbauen (geteilte
 # Datei).

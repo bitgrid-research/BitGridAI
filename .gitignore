@@ -398,8 +398,11 @@ src/ha/lab_only/
 # Local helper: reads the private thesis folder, knows the server path
 scripts/thesis_open_export.py
 data/thesis_open.json
+data/thesis_plan_done.json
+data/lab_stimulus/
 
 # Local helper for the thesis window: read-only HA screenshots/states
 # (token of the non-admin user thesis-leser from the thesis .env)
 scripts/ha_view.py
 data/ha_shots/
+scripts/thesis_llm_test.py

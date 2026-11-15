@@ -59,6 +59,12 @@ THRESHOLD_LABELS = {
     "input_number.mvp_soc_super_pct": "Super ab",
 }
 THRESHOLD_CHANGES_SHOWN = 12
+# settings_history has no row between 07.05. and 14.11.2026 (the recorder
+# did not keep the thresholds). A "change" whose previous row is older than
+# this is no change but the first reading after a gap: the old value is
+# unknown (15.11.2026, the card showed "Eco ab 58 -> 100 angehoben", 58 being
+# the May value).
+THRESHOLD_GAP = timedelta(days=7)
 TOP_DAYS = 5
 REASON_MINER = "miner1"
 UNKNOWN_REASON = "unbekannt"
@@ -226,17 +232,18 @@ def threshold_changes(conn: sqlite3.Connection) -> list[dict[str, Any]]:
         tuple(THRESHOLD_LABELS),
     )
     out: list[dict[str, Any]] = []
-    prev: dict[str, str] = {}
+    prev: dict[str, tuple[str, str]] = {}
     for ts, entity, value, source in rows:
-        old = prev.get(str(entity))
-        prev[str(entity)] = str(value)
-        if old is None or old == str(value):
+        before = prev.get(str(entity))
+        prev[str(entity)] = (str(ts), str(value))
+        if before is None or before[1] == str(value):
             continue
+        gap = _parse(str(ts)) - _parse(before[0]) > THRESHOLD_GAP
         out.append(
             {
                 "timestamp": str(ts),
                 "label": THRESHOLD_LABELS[str(entity)],
-                "old": old,
+                "old": None if gap else before[1],
                 "new": str(value),
                 "source": str(source),
             }

@@ -279,7 +279,7 @@ class BitgridBtcKursChart extends HTMLElement {
         :host { display: block; }
         /* Anders als bitgrid_regelschwellen_chart.js sitzt dieses Element
            NICHT in einem gemeinsam umrandeten Stack, sondern direkt als
-           eigene Kachel im Grid von bitgrid_dashboard_v3.yaml (vorher
+           eigene Kachel im Grid von bitgrid_dashboard_v3_3.yaml (vorher
            stats_btc_price.yaml mit denselben vier Werten) — braucht deshalb
            die volle Kartenhuelle selbst. */
         .bgai-card {

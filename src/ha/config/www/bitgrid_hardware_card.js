@@ -35,6 +35,15 @@ const price = (it) => {
   const v = parseFloat(String(it.description ?? "").replace(",", "."));
   return Number.isFinite(v) ? v : 0;
 };
+// German input: "3.198,00", "3198,5", "3.198" -> 3198; "12.5" -> 12.5.
+// Dots are thousands separators when a comma is present or when every dot
+// group has exactly three digits.
+const parseEur = (raw) => {
+  let s = String(raw ?? "").trim().replace(/[\s€]/g, "");
+  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, "");
+  return /^\d+(\.\d+)?$/.test(s) ? parseFloat(s) : NaN;
+};
 const iconFor = (name) => (ICONS.find(([re]) => re.test(name)) || [null, "mdi:chip"])[1];
 
 class BitgridHardwareCard extends HTMLElement {
@@ -81,7 +90,7 @@ class BitgridHardwareCard extends HTMLElement {
   async _add() {
     const r = this.shadowRoot;
     const name = r.getElementById("name").value.trim();
-    const p = parseFloat(r.getElementById("price").value.replace(",", "."));
+    const p = parseEur(r.getElementById("price").value);
     const date = r.getElementById("date").value;
     const msg = r.getElementById("msg");
     if (!name) return (msg.textContent = "Bitte einen Gerätenamen eingeben.");
@@ -94,7 +103,12 @@ class BitgridHardwareCard extends HTMLElement {
 
   async _remove(uid, name) {
     if (!confirm(`"${name}" aus der Liste entfernen?`)) return;
-    await this._hass.callWS({ type: "todo/item/delete", entity_id: TODO, uids: [uid] });
+    // HA has no "todo/item/delete" WS command; the service accepts uid or summary.
+    try {
+      await this._hass.callService("todo", "remove_item", { entity_id: TODO, item: uid || name });
+    } catch (e) {
+      this.shadowRoot.getElementById("msg").textContent = `Entfernen fehlgeschlagen: ${e.message || e}`;
+    }
   }
 
   _render(items, error) {

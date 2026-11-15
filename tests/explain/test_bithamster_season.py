@@ -246,7 +246,10 @@ def test_inventory_marks_stale_tables_and_drops_cards_on_them() -> None:
     now = datetime(2026, 11, 13, 12, tzinfo=timezone.utc)
     inv = ki.data_inventory(conn, now)
     text = "\n".join(ki.inventory_lines(inv))
-    assert "Python-Kerns (nur Testbetrieb, NICHT die Produktion): VERALTET" in text
+    assert (
+        "NICHT die Produktion; in keiner Karte gezeigt, auch nicht in Datenaufzeichnung): VERALTET"
+        in text
+    )
     assert "2026-07-02" in text
     # Since 14.11.2026 the production log lives in ha_decision_log: a card on
     # "why was it switched" is supported now, one on the Python core is not.
@@ -279,3 +282,14 @@ def test_findings_mark_months_fixed_by_adr033() -> None:
     assert "bei 75 % ab" in text and len(text) <= 260
     open_check = dict(check, last_day="2026-11-20")
     assert "BEREITS" not in season_findings(table, {10: open_check})[0]
+
+
+def test_unmeasured_hours_are_a_priority_finding() -> None:
+    from src.explain import bithamster_ki as ki
+
+    rec = {"history": {"suspect_runs": [{"blocks": 12, "kind": "held"}, {"blocks": 3}]}}
+    found = ki.priority_findings([], None, {}, rec)
+    assert len(found) == 1
+    assert "2 Stunden gespeichert, aber nicht gemessen" in found[0]["text"]
+    answer = {"text": "Alles vollständig.", "punkte": ["keine Datenlücken"]}
+    assert not ki.finding_mentioned(found[0], answer)

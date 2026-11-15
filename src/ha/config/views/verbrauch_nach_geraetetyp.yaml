@@ -21,7 +21,7 @@
 # Kategorien/Sensoren: packages/devices.yaml, typ_*_power_w — Zuordnung nach
 # den echten Live-Friendly-Names der Shelly-Plugs, nicht nach altem
 # Kommentarblock in devices.yaml.
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "EnergieInfo".
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:button-card
 show_name: false
@@ -33,7 +33,7 @@ styles:
   card:
     # 27.09.2026, Nutzer-Wunsch "aus zwei Karten eine machen": eigener
     # Kartenrahmen entfaellt, den zeichnet jetzt der umgebende vertical-stack
-    # in bitgrid_dashboard_v3.yaml. Nur die obere Kante bleibt als Trennlinie
+    # in bitgrid_dashboard_v3_3.yaml. Nur die obere Kante bleibt als Trennlinie
     # zwischen Tacho-Abschnitt und Geraetetyp-Abschnitt stehen. border-top
     # MUSS nach border stehen, button-card wendet die Liste in Reihenfolge an.
     - background: none

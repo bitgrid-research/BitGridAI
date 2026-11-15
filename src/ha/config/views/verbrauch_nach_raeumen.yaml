@@ -10,7 +10,7 @@
 # Zeitreihen gebaut, kein sauberer Weg für "mehrere Sensoren als
 # Vergleichsbalken nebeneinander", siehe Recherche). Stattdessen reines
 # SVG in custom:button-card, gleiche bewährte Technik wie die SoC-Band-
-# Visualisierung im Steuerung-Tab (bitgrid_dashboard_v3.yaml) — volle
+# Visualisierung im Steuerung-Tab (bitgrid_dashboard_v3_3.yaml) — volle
 # Kontrolle, keine Bibliotheks-Eigenheiten, live per custom_fields-Template.
 #
 # 25.08.2026, Nachtrag "lesbarer machen": vertikale Balken mit auf -40°
@@ -38,7 +38,7 @@
 # Cyan→Violett-Verlauf (#f49891 → #7C4DFF) umgestellt, den die Ring-Gauges
 # in den Raum-Kacheln und im Feld "Gerätetyp" bereits nutzen — einheitliche
 # Akzentfarbe über den ganzen Tab.
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "EnergieInfo".
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:button-card
 show_name: false

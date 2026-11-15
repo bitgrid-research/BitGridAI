@@ -52,10 +52,10 @@
 # Zweiter Schritt (noch NICHT ausgeführt, laut Nutzer-Vorgabe erst nach
 # Live-Verifikation): sobald diese Liste auf dem Tablet nachweislich korrekt
 # pro Raum trackt, entfällt der Abschnitt "Verbrauch nach Räumen (heute)"
-# (bitgrid_dashboard_v3.yaml, grid-area "full", verbrauch_nach_raeumen_heute.
+# (bitgrid_dashboard_v3_3.yaml, grid-area "full", verbrauch_nach_raeumen_heute.
 # yaml + raumkachel_*.yaml + zugehörige input_boolean.raumkachel_*-Toggles).
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo",
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "EnergieInfo",
 # direkt nach views/historie_zeitraum_cycler.yaml (innerhalb derselben
 # Historie-Kartenhülle).
 # ═══════════════════════════════════════════════════════════════════════

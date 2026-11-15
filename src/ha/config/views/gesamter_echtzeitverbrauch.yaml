@@ -17,7 +17,7 @@
 # wuerde die Nadelposition zwischen Tagen unvergleichbar machen. Werte ueber
 # max kappen NUR die Nadel, die Zahl zeigt seit diesem Datum den echten Wert
 # (vorher wurde auch die Zahl auf 6.000 W abgeschnitten).
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "EnergieInfo".
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:button-card
 show_name: false
@@ -29,7 +29,7 @@ styles:
   card:
     # 27.09.2026, Nutzer-Wunsch "aus zwei Karten eine machen": eigener
     # Kartenrahmen entfaellt, den zeichnet jetzt der umgebende vertical-stack
-    # in bitgrid_dashboard_v3.yaml (gemeinsame Karte mit der Geraetetyp-Liste).
+    # in bitgrid_dashboard_v3_3.yaml (gemeinsame Karte mit der Geraetetyp-Liste).
     - background: none
     - border-radius: 0
     - overflow: hidden

@@ -13,7 +13,7 @@ Verwendung:
   python -m src.sim.mqtt_recorder --topic "shellies/#"    # andere Topics
 
 Hardcoded Defaults:
-  MQTT_HOST      = 192.168.1.10
+  MQTT_HOST      = Pflicht (.env oder --host)
   RECORDER_TOPIC = #          (alle Topics)
   RECORDER_OUT   = recordings/session.jsonl
 """
@@ -33,7 +33,7 @@ from src.adapters.mqtt_client import MqttClient
 
 log = logging.getLogger(__name__)
 
-_DEFAULT_MQTT_HOST = os.getenv("MQTT_HOST", "192.168.1.10")
+_DEFAULT_MQTT_HOST = os.getenv("MQTT_HOST")
 _DEFAULT_MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 _DEFAULT_TOPIC = os.getenv("RECORDER_TOPIC", "#")
 _DEFAULT_OUT = os.getenv("RECORDER_OUT", "recordings/session.jsonl")
@@ -106,6 +106,8 @@ def main() -> None:
         help="Ausgabedatei (JSONL, default: recordings/session.jsonl)",
     )
     args = parser.parse_args()
+    if not args.host:
+        parser.error("MQTT_HOST is not set: add it to .env or pass --host")
 
     mqtt = MqttClient(
         host=args.host,

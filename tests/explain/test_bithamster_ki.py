@@ -796,7 +796,10 @@ def test_drop_existing_cards_removes_known_titles() -> None:
         "Miner-Verfügbarkeit (Forschung): Zeiten ohne Meldung.",
     ]
     keep, dropped = bk.drop_existing_cards(points, tabs)
-    assert [p.split(" (")[0] for p in keep] == ["Akku über Nacht", "Miner-Verfügbarkeit"]
+    assert [p.split(" (")[0] for p in keep] == [
+        "Akku über Nacht",
+        "Miner-Verfügbarkeit",
+    ]
     assert len(dropped) == 2
 
 
@@ -1359,3 +1362,111 @@ def test_recording_lines_report_stored_but_not_measured_hours() -> None:
     assert "ACHTUNG" in text and "35 Stunden in 2 Zeiträumen" in text
     assert "23,2 h, Werte eingefroren" in text
     assert "11,5 h, Hausverbrauch 0 W" in text
+
+
+# ── per-card requests from the header buttons (15.11.2026) ──────────────
+
+
+def test_parse_request_accepts_card_tasks_only_for_known_cards() -> None:
+    assert (
+        bk.parse_request("karte_daten@nights|2026-11-15T10:00:00")
+        == "karte_daten@nights"
+    )
+    assert bk.parse_request("karte_daten@unbekannt|2026-11-15T10:00:00") is None
+    assert bk.parse_request("karte_foo@nights|2026-11-15T10:00:00") is None
+    assert bk.parse_request("karte_daten@nights") is None
+
+
+def test_task_label_names_mode_and_card() -> None:
+    assert bk.task_label("karte_verbessern@switching") == (
+        "Karte verbessern: Schaltwechsel"
+    )
+    assert bk.task_label("fehler") == "Fehler finden"
+
+
+def test_card_context_only_holds_the_requested_card(tmp_path: Path) -> None:
+    dash = tmp_path / "dash.yaml"
+    dash.write_text(
+        "views:\n"
+        "  - title: Forschung\n"
+        "    cards:\n"
+        "      - type: custom:button-card\n"
+        "        template: group_header_ki\n"
+        "        icon: mdi:x\n"
+        "        name: Schaltwechsel\n"
+        "      - entity: sensor.wechsel_heute\n"
+        "      - type: custom:button-card\n"
+        "        template: group_header\n"
+        "        icon: mdi:y\n"
+        "        name: Solarprognose\n"
+        "      - entity: sensor.prognose\n",
+        encoding="utf-8",
+    )
+    states = {
+        "sensor.wechsel_heute": {"state": "3", "attributes": {"friendly_name": "W"}},
+        "sensor.prognose": {"state": "9", "attributes": {"friendly_name": "P"}},
+    }
+    cards = {
+        "automation": {
+            "switching": {
+                "target": 2,
+                "months": [{"mining_days": 10, "days_over": 2, "dropouts": 1}],
+            },
+            "surplus": {"hours": 4.0, "export_kwh": 9.0, "months": []},
+        }
+    }
+    lines = bk.card_context_lines(
+        "switching", dashboard=dash, states=states, cards=cards, recording=None
+    )
+    text = "\n".join(lines)
+    assert "KARTE: Schaltwechsel" in text
+    assert "sensor.wechsel_heute" in text
+    assert "sensor.prognose" not in text
+    assert "Schaltwechsel: an 2 von 10" in text
+    assert "Ungenutzter Solarüberschuss" not in text
+    # The new header template still counts as a card title.
+    assert bk.dashboard_tabs(dash)["Forschung"] == ["Schaltwechsel", "Solarprognose"]
+
+
+def test_card_prompt_uses_card_instruction_and_inventory(db_path: Path) -> None:
+    conn = bk.open_readonly(db_path)
+    try:
+        research = bk.research_facts(conn, NOW)
+    finally:
+        conn.close()
+    prompt = bk.build_ask_prompt(
+        "karte_daten@nights",
+        live=bk.live_facts(_states()),
+        research=research,
+        now=NOW,
+        states=_states(),
+        recording=None,
+        tabs={},
+        tab=None,
+        question=None,
+        inventory=["DATENBESTAND: test"],
+        research_lines=["KARTE: Akku über Nacht (Tab Forschung)"],
+    )
+    assert "AUFTRAG: Daten prüfen: Akku über Nacht." in prompt
+    assert "Bleib bei dieser Karte" in prompt
+    assert "DATENBESTAND: test" in prompt
+
+
+def test_card_context_fixes_terms() -> None:
+    lines = bk.card_context_lines(
+        "switching", dashboard=None, states={}, cards=None, recording=None
+    )
+    text = "\n".join(lines)
+    assert "Obergrenze" in text
+
+
+def test_card_task_drops_claim_that_the_card_shows_nothing() -> None:
+    answer = {
+        "headline": "x",
+        "text": "Die Karte zeigt keine Werte für W pro TH. Im Sommer wieder.",
+        "punkte": ["Karte zeigt keine Werte je Monat", "Im Sommer prüfen"],
+    }
+    dropped = bk.drop_shown_claims(answer, "Hardware-Zustand (W/TH)")
+    assert answer["punkte"] == ["Im Sommer prüfen"]
+    assert "keine Werte" not in answer["text"]
+    assert len(dropped) == 2

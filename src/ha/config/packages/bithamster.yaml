@@ -37,7 +37,7 @@ bithamster:
       icon: mdi:chat-processing-outline
 
   input_select:
-    # Tab fuer den Auftrag "Tab erklaeren". Titel wie in bitgrid_dashboard_v3.yaml.
+    # Tab fuer den Auftrag "Tab erklaeren". Titel wie in bitgrid_dashboard_v3_3.yaml.
     bithamster_tab:
       name: "Welcher Tab? (erklären / verbessern)"
       icon: mdi:tab-search
@@ -59,7 +59,7 @@ bithamster:
       mode: queued
       fields:
         auftrag:
-          description: "optimierung | aufzeichnung | fehler | verbesserung | tab | tabcheck | gesamtcheck | karten | entscheidung | schalten | befunde | thesis_woche | thesis_befunde | thesis_risiken | frage"
+          description: "optimierung | aufzeichnung | fehler | verbesserung | tab | tabcheck | gesamtcheck | karten | entscheidung | schalten | befunde | thesis_woche | thesis_befunde | thesis_risiken | thesis_mittwoch | thesis_konsistenz | thesis_freeze | frage | karte_daten@<karte> | karte_auffaellig@<karte> | karte_verbessern@<karte> (Karten siehe bithamster_ki.CARD_KEYS)"
           example: fehler
       sequence:
         - action: input_text.set_value

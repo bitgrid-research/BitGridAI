@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════
-# HEIZUNG (ÖL) — Tabelle im Tab "Heizung" (bitgrid_dashboard_v3.yaml).
+# HEIZUNG (ÖL) — Tabelle im Tab "Heizung" (bitgrid_dashboard_v3_3.yaml).
 #
 # Kein direkter Öl-/Brennwertsensor vorhanden (kein entsprechendes Gerät in
 # HA eingebunden). Einziger Messpunkt ist der Shelly 1PM Gen4

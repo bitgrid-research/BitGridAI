@@ -23,7 +23,7 @@
 # KEIN Steuerpfad: reine Anzeige, beeinflusst keine Mining-Entscheidung
 # in core/ (KPIs informieren, sie steuern nichts, 05243_kpi_reporting.md).
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Statistik",
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml → Tab "Statistik",
 # linke Spalte.
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:button-card

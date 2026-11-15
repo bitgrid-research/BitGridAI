@@ -17,6 +17,8 @@ import os
 import threading
 from pathlib import Path
 
+from src.ops.env import require_env
+
 log = logging.getLogger(__name__)
 
 
@@ -79,7 +81,7 @@ def main(rules_path: str, db_path: str) -> None:
     # MQTT
     # ------------------------------------------------------------------
     mqtt = MqttClient(
-        host=os.getenv("MQTT_HOST", "192.168.1.10"),
+        host=require_env("MQTT_HOST"),
         port=int(os.getenv("MQTT_PORT", "1883")),
         user=os.getenv("MQTT_USER", ""),
         password=os.getenv("MQTT_PASSWORD", ""),

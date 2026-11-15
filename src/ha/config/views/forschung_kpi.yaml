@@ -96,8 +96,18 @@ custom_fields:
       const ICON_SHADOW = 'filter:drop-shadow(0 0 1.5px rgba(0,0,0,.75));';
       const LINE = 'background:linear-gradient(to right, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent) top / 100% 1px no-repeat;';
       const section = (typeof variables !== 'undefined' && variables && variables.section) || 'nights';
-      const wrap = (inner) => `<div style="font-size:calc(var(--bg-fs-body, 1rem) * 1.15);line-height:1.45;color:${white};text-align:left;">${inner}</div>`;
+      const wrap = (inner) => `<div style="font-size:var(--bg-fs-card, 1rem);line-height:1.45;color:${white};text-align:left;">${inner}</div>`;
       const n0 = (v) => v === null || v === undefined ? '—' : Math.round(v).toLocaleString('de-DE');
+      // 15.11.2026, Nutzer-Wunsch: lange Punkte lesbar umbrechen. "(1) ... (2) ..."
+      // wird je Nummer eine Zeile, eine Kette mit mindestens zwei "; " je Teil eine.
+      const brk = (t) => {
+        if (typeof t !== 'string') return t;
+        // Unterpunkte aus offene_punkte.md (Export trennt sie mit Zeilenumbruch und •).
+        if (t.includes('\n')) return t.split('\n').map((x, k) => k ? `<div style="margin-left:1.2em;color:${dim};">${x}</div>` : x).join('');
+        if (/\(1\)/.test(t) && /\(2\)/.test(t)) return t.replace(/\s*\((\d{1,2})\)\s*/g, (m, n) => `<br><span style="color:${dim};">(${n})</span> `).replace(/^<br>/, '');
+        if ((t.match(/; /g) || []).length >= 2) return t.split('; ').join(';<br>');
+        return t;
+      };
       const n1 = (v) => v === null || v === undefined ? '—' : Number(v).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
       const MONTHS = ['', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
       const fmtDay = (iso) => new Date(iso + 'T00:00:00Z').toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', timeZone: 'UTC' });
@@ -105,11 +115,11 @@ custom_fields:
         <div style="display:flex;align-items:center;gap:14px;">
           <ha-icon icon="${icon}" style="--mdc-icon-size:38px;width:38px;height:38px;color:${color};flex:0 0 38px;${ICON_SHADOW}"></ha-icon>
           <div style="flex:1 1 auto;min-width:0;">
-            <div style="font-size:1.2em;font-weight:700;color:${color};">${title}</div>
+            <div style="font-size:var(--bg-fs-card-title, 1.2em);font-weight:700;color:${color};">${title}</div>
             <div style="color:${dim};">${sub}</div>
           </div>
         </div>`;
-      const note = (t) => `<div style="margin-top:16px;color:${dim};font-size:0.95em;line-height:1.5;">${t}</div>`;
+      const note = (t) => `<div style="margin-top:16px;color:${dim};font-size:var(--bg-fs-card-small, 0.85em);line-height:1.5;">${t}</div>`;
       // Aufklappbare Liste. <details> oeffnet in der button-card nicht (ihr
       // Action-Handler verwirft den Klick, am Pi per CDP geprueft, 14.11.2026);
       // darum eigener Umschalter, Zustand ueberlebt das Neuzeichnen.
@@ -153,9 +163,47 @@ custom_fields:
         const o = S.thesisOpen;
         const steps = (o && Array.isArray(o.plan)) ? o.plan : [];
         if (!steps.length) return wrap(head('mdi:map-marker-path', dim, 'Noch kein Fahrplan', 'thesis_open.json ohne Fahrplan. Export: python scripts/thesis_open_export.py --thesis-dir … --upload'));
+        // Zustand -> [Farbe, Wort, Symbol im Kreis (null = Zahl), Kreis gefüllt, Legendentext].
+        // Farben nur aus Theme-Rollen (bitgrid.yaml). Farbe nie allein: Wort-Badge
+        // und eigenes Symbol je Zustand. 'wartet' nutzt --info-color (HA-Standardrolle),
+        // weil das Theme keine kühle Status-Rolle außer Cyan (= parallel) kennt.
+        const infoC = 'var(--info-color, var(--secondary-text-color))';
+        const idleC = 'var(--bg-color-idle, #757575)';
         const ST = {
-          jetzt: [pvC, 'jetzt'], offen: [white, 'danach'], erledigt: [okC, 'erledigt'],
-          parallel: ['var(--bg-color-standard, #29B6F6)', 'parallel'], spaeter: [dim, 'später'], gesperrt: [dim, 'gesperrt'], wartet: [dim, 'wartet'],
+          jetzt: [pvC, 'jetzt', 'mdi:progress-pencil', true, 'daran arbeiten wir'],
+          erledigt: [okC, 'erledigt', 'mdi:check', false, 'fertig, nichts mehr zu tun'],
+          wartet: [infoC, 'wartet', 'mdi:clock-outline', false, 'wartet bis zu einem Datum (oder auf Artur)'],
+          offen: [errC, 'offen', 'mdi:alert-circle-outline', false, 'war dran und hat noch offene Punkte'],
+          danach: [white, 'danach', 'mdi:arrow-right', false, 'kommt als nächstes'],
+          parallel: ['var(--bg-color-standard, #26C6DA)', 'parallel', 'mdi:call-split', false, 'läuft neben dem Schreiben, blockiert nichts'],
+          // 15.11.2026: Zeitplan = Soll-Woche, keine Sperre. 'bereit' = darf jederzeit los.
+          bereit: [okC, 'bereit', 'mdi:play-outline', false, 'kann jederzeit angefangen werden, Soll-Woche im Text'],
+          spaeter: [idleC, 'später', 'mdi:calendar-clock', false, 'erst ab einem festen Datum möglich'],
+          gesperrt: [idleC, 'gesperrt', 'mdi:lock-outline', false, 'erst nach dem Datenfreeze'],
+        };
+        // Symbol je Art des Schritts (key aus dem Export); neue Schritte: eine Zeile.
+        const KIND_ICON = {
+          veraltet: 'mdi:file-alert-outline', klaeren: 'mdi:help-circle-outline',
+          belegen: 'mdi:check-decagram-outline', befunde: 'mdi:chart-box-outline',
+          prosa: 'mdi:pencil-outline', anhang_fh: 'mdi:paperclip',
+          pruefen: 'mdi:file-check-outline', parallel: 'mdi:flask-outline',
+          literatur_tonalitaet: 'mdi:book-open-variant-outline', literatur: 'mdi:book-open-variant-outline',
+          naechste: 'mdi:arrow-right-circle-outline', spaeter_befunde: 'mdi:chart-timeline-variant',
+          fristen: 'mdi:school-outline', freeze: 'mdi:snowflake',
+          wallach: 'mdi:account-question-outline', sonstiges: 'mdi:dots-horizontal-circle-outline',
+          auswertung_vorb: 'mdi:calculator-variant-outline',
+          erklaertexte: 'mdi:text-box-search-outline', summary: 'mdi:translate',
+          anhang_j: 'mdi:robot-outline', kolloquium: 'mdi:presentation',
+          anlagen: 'mdi:folder-zip-outline', anhaenge: 'mdi:paperclip', abbildungen: 'mdi:camera-outline', datenfreeze: 'mdi:database-lock-outline',
+        };
+        const kindIcon = (key) => KIND_ICON[key] || (/^prosa_\d+$/.test(key) ? KIND_ICON.prosa : 'mdi:circle-small');
+        const circle = (stKey, label, num, withIcon = true) => {
+          const c = ST[stKey];
+          // 15.11.2026: Kreis zeigt immer die Nummer. Das Status-Symbol steht in der
+          // Legende rechts daneben, in den Schritten in der Status-Pille (withIcon false).
+          const inner = num;
+          const stIcon = withIcon && c[2] ? `<ha-icon icon="${c[2]}" style="--mdc-icon-size:1.1em;width:1.1em;height:1.1em;flex:0 0 1.1em;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;color:${c[0]};"></ha-icon>` : '';
+          return `<span style="display:inline-flex;align-items:center;justify-content:center;width:1.7em;height:1.7em;box-sizing:border-box;line-height:1;border-radius:50%;flex:0 0 1.7em;font-weight:700;font-size:var(--bg-fs-card-small, 0.85em);${c[3] ? `background:${c[0]};color:#1b1b1b;` : `border:2px solid ${c[0]};color:${c[0]};`}">${inner}</span>${stIcon}`;
         };
         // 14.11.2026: ein Schritt, dessen Punkte alle auf einen Termin warten, ist
         // 'wartet' (Berechnung in src/data/thesis_sync.py), nie 'jetzt'.
@@ -164,26 +212,96 @@ custom_fields:
         const cur = jetzt[0];
         const ageD = Math.floor((Date.now() - Date.parse(o.exported_at)) / 86400000);
         const nowRow = (o.schedule || []).find(r => r.now);
-        const sub = `${cur ? 'Jetzt: ' + cur.title + (jetzt.length > 1 ? ' (+' + (jetzt.length - 1) + ' weitere)' : '') : 'Kein offener Schritt'}${nowRow ? ` · Woche ${nowRow.week}` : ''} · noch ${n0(o.days_left)} Tage`;
+        // Banner: je Schritt die naechste Frist, nur in den naechsten 14 Tagen (sonst
+        // stuenden die vier Anlagen-Punkte mit Frist 10.01. schon im November oben).
+        const fristItems = steps.filter(s => s.state !== 'erledigt').flatMap(s => (s.items || []).filter(i => i.frist && !i.siehe_auch && !i.erledigt).slice(0, 1))
+          .filter(i => Date.parse(i.frist + 'T23:59:59') - Date.now() < 14 * 86400000);
+        // Frist (Punkt bis zu diesem Tag erledigt): rot, ab 3 Tagen vorher gefüllt, danach 'überfällig'.
+        const fristBadge = (i) => { if (!i.frist) return ''; const dd = Math.ceil((Date.parse(i.frist + 'T23:59:59') - Date.now()) / 86400000); const over = dd < 0; const hot = dd <= 3; return `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:var(--bg-fs-pill, 0.85em);font-weight:700;white-space:nowrap;border:1px solid ${errC};${hot ? `background:${errC};color:#1b1b1b;` : `color:${white};`}">${over ? 'überfällig seit ' + dm(i.frist) : 'bis ' + dm(i.frist)}</span>`; };
+        // 15.11.2026 (Artur: Fristen direkt sichtbar, farbig): Dringlichkeit je Frist.
+        // Tipp-Texte: HTML maskieren (<Datei>), `code` als Code zeigen.
+        const tipHtml = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/`([^`]+)`/g, '<code style="font-size:var(--bg-fs-card-small, 0.85em);padding:0 3px;border-radius:4px;background:rgba(255,255,255,0.08);">$1</code>');
+        const daysTo = (iso) => Math.ceil((Date.parse(iso + 'T23:59:59') - Date.now()) / 86400000);
+        const urgC = (dd) => dd <= 3 ? errC : dd <= 14 ? warnC : dim;
+        const dueTxt = (iso) => { const dd = daysTo(iso); return dd < 0 ? 'überfällig seit ' + dm(iso) : dd === 0 ? 'heute fällig' : dd === 1 ? 'bis morgen' : `bis ${dm(iso)} (${dd} T.)`; };
+        const stepFrist = (s) => (s.items || []).filter(i => i.frist && !i.siehe_auch && !i.erledigt).map(i => i.frist).sort()[0];
+        const fristPill = (iso) => { const dd = daysTo(iso); const c = urgC(dd); return `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:9px;font-size:var(--bg-fs-pill, 0.85em);font-weight:700;white-space:nowrap;border:1px solid ${c};${dd <= 7 ? `background:${c};color:#1b1b1b;` : `color:${dd <= 14 ? c : white};`}"><ha-icon icon="mdi:calendar-alert" style="--mdc-icon-size:1em;width:1em;height:1em;"></ha-icon>Frist ${dueTxt(iso)}</span>`; };
+        const sollPill = (iso) => { const over = daysTo(iso) < 0; return `<span style="padding:1px 8px;border-radius:9px;font-size:var(--bg-fs-pill, 0.85em);font-weight:600;white-space:nowrap;border:1px ${over ? 'solid' : 'dashed'} ${over ? warnC : dim};color:${over ? warnC : dim};">${over ? 'Soll überschritten (' + dm(iso) + ')' : 'Soll bis ' + dm(iso)}</span>`; };
+        const nextFrist = steps.filter(s => s.state !== 'erledigt').map(s => [stepFrist(s), s]).filter(x => x[0]).sort((a, b) => a[0].localeCompare(b[0]))[0];
+        const sub = `${nextFrist ? 'Nächste Frist: ' + dueTxt(nextFrist[0]) + ', ' + nextFrist[1].title + ' · ' : ''}${cur ? 'Jetzt: ' + cur.title + (jetzt.length > 1 ? ' (+' + (jetzt.length - 1) + ' weitere)' : '') : 'Kein offener Schritt'}${nowRow ? ` · Woche ${nowRow.week}` : ''} · noch ${n0(o.days_left)} Tage`;
         let num = 0;
-        const rows = steps.map(s => {
-          num += 1;
-          const st = ST[s.state] || [dim, s.state];
+        const firstNow = steps.findIndex(x => x.state === 'jetzt');
+        // 15.11.2026: erledigte Schritte unten in einer eigenen Gruppe (Nr. und Datum).
+        // 15.11.2026 (Artur: 'zu gequetscht'): Abschnitte mit Trennlinie wie in den
+        // anderen Karten, mehr Luft je Schritt. Abschnitt kommt aus dem Export (phase).
+        let lastPhase = null;
+        const phaseHead = (name) => {
+          const firstHead = lastPhase === null;
+          lastPhase = name;
+          return `<div style="margin:${firstHead ? 4 : 26}px 0 2px;padding-top:${firstHead ? 0 : 14}px;${firstHead ? '' : LINE}font-size:1em;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${white};">${name}</div>`;
+        };
+        const rows = steps.map((s, idx) => {
+          num = s.nr || idx + 1;
+          if (s.state === 'erledigt') return '';
+          const ph = s.phase && s.phase !== lastPhase ? phaseHead(s.phase) : '';
+          // Zustand 'offen' hinter dem laufenden Schritt: Anzeige 'danach' (grau).
+          const view = s.state === 'offen' && firstNow >= 0 && idx > firstNow ? 'danach' : s.state;
+          const st = ST[view] || [dim, s.state, null, false, ''];
           const muted = ['erledigt', 'gesperrt', 'spaeter', 'wartet'].includes(s.state);
+          // 15.11.2026: zwei getrennte Zahlen als Pillen, offene Punkte und
+          // \prosa-Entwuerfe (vorher nur eine Zahl, beim Prosa-Schritt nur die
+          // Entwuerfe; abgearbeitete Marker zeigten keinen Fortschritt).
+          const openN = s.offen !== undefined ? s.offen : (s.items || []).filter(x => !x.siehe_auch && !x.erledigt).length;
+          const countPill = (n, label, c) => `<span style="font-size:var(--bg-fs-pill, 0.85em);font-weight:600;color:${white};padding:1px 8px;border-radius:9px;border:1px solid ${c};white-space:nowrap;">${n0(n)} ${label}</span>`;
+          const counts = (openN ? countPill(openN, 'offen', dim) : '') + (s.prosa ? countPill(s.prosa, 'Prosa', pvC) : '');
+          const dimmed = ['erledigt', 'spaeter'].includes(s.state);
           const items = s.items || [];
-          const badge = `<span style="display:inline-flex;align-items:center;justify-content:center;width:1.7em;height:1.7em;border-radius:50%;flex:0 0 1.7em;font-weight:700;font-size:0.9em;${s.state === 'jetzt' ? `background:${pvC};color:#1b1b1b;` : `border:2px solid ${st[0]};color:${st[0]};`}">${s.state === 'erledigt' ? '✓' : num}</span>`;
-          const title = `<span style="display:inline-flex;gap:10px;align-items:center;"><span>${badge}</span><span style="font-weight:700;${muted ? `color:${dim};` : ''}">${s.title}</span>${items.length ? `<span style="color:${dim};font-weight:400;">(${items.length})</span>` : ''}<span style="font-size:0.8em;font-weight:600;color:${st[0]};text-transform:uppercase;letter-spacing:0.04em;">${s.state === 'wartet' ? (s.wait_who ? 'wartet auf ' + s.wait_who : 'wartet bis ' + dm(s.wait_until)) : st[1]}</span></span>`;
-          const meta = `<div style="margin:2px 0 0 2.7em;color:${dim};font-size:0.92em;">${s.who}${s.why ? ` · ${s.why}` : ''}</div>`;
-          const list = items.map(i => `<div style="display:grid;grid-template-columns:minmax(6.5em,auto) 1fr;gap:10px;padding:5px 0;${LINE}"><span style="color:${dim};white-space:nowrap;">${i.where.length > 28 ? i.where.split(' (')[0].slice(0, 28) : i.where}</span><span>${i.text}${i.am_zug ? `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:0.78em;font-weight:600;color:${i.am_zug === 'Claude' ? 'var(--bg-color-standard, #29B6F6)' : dim};border:1px solid currentColor;white-space:nowrap;">${i.am_zug === 'Artur' ? 'wartet auf Artur' : 'Claude'}</span>` : ''}${i.wartet_bis ? `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:0.78em;font-weight:600;color:${dim};border:1px solid ${dim};white-space:nowrap;">wartet bis ${dm(i.wartet_bis)}</span>` : ''}</span></div>`).join('');
-          const block = items.length
-            ? fold('thesis_plan_' + s.key, s.state === 'jetzt', title, meta + `<div style="margin:6px 0 0 2.7em;">${list}</div>`, `padding:9px 0;${LINE}`, '')
-            : `<div style="padding:9px 0;${LINE}"><span style="display:inline-block;width:1em;"></span>${title}${meta}</div>`;
-          return block;
+          const badge = circle(view, st[1], num, false);
+          const wordTxt = s.state === 'wartet' ? (s.wait_who ? 'wartet auf ' + (s.wait_who.split(', ').length > 1 ? s.wait_who.split(', ')[0] + ' +' + (s.wait_who.split(', ').length - 1) : s.wait_who) : 'wartet bis ' + dm(s.wait_until)) : st[1];
+          // Wort-Badge: Text in Textfarbe (Kontrast), Farbe trägt der Umriss.
+          // 15.11.2026, Nutzer-Wunsch: Status als erste Pille direkt neben der
+          // Nummer, mit seinem Symbol (Farbe des Status) vor dem Wort.
+          const stPillIcon = st[2] ? `<ha-icon icon="${st[2]}" style="--mdc-icon-size:1.15em;width:1.15em;height:1.15em;color:${st[0]};"></ha-icon>` : '';
+          const word = `<span style="display:inline-flex;align-items:center;gap:4px;font-size:var(--bg-fs-pill, 0.85em);font-weight:600;color:${white};text-transform:uppercase;letter-spacing:0.04em;padding:1px 8px;border-radius:9px;border:1px solid ${st[0]};white-space:nowrap;">${stPillIcon}${wordTxt}</span>`;
+          const kind = `<ha-icon icon="${kindIcon(s.key)}" style="--mdc-icon-size:1.1em;width:1.1em;height:1.1em;flex:0 0 1.1em;display:flex;align-items:center;justify-content:center;${dimmed ? `color:${dim};opacity:0.7;` : ''}"></ha-icon>`;
+          const fr = stepFrist(s);
+          const due = fr ? fristPill(fr) : (s.soll_bis && s.state !== 'gesperrt' ? sollPill(s.soll_bis) : '');
+          const bar = fr && daysTo(fr) <= 7 ? `border-left:4px solid ${urgC(daysTo(fr))};padding-left:8px;margin-left:-12px;` : '';
+          // 15.11.2026, Nutzer-Wunsch: zwei Zeilen statt alles aneinander.
+          // Oben Nummer, Status, Frist und rechts die Zaehler; darunter Art
+          // und Titel, eingerueckt, damit die Titel untereinander stehen.
+          const title = `<span style="display:inline-flex;flex-direction:column;gap:6px;width:calc(100% - 1.4em);vertical-align:top;"><span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span style="display:inline-flex;align-items:center;">${badge}</span>${word}${due}<span style="margin-left:auto;display:inline-flex;gap:6px;">${counts}</span></span><span style="display:flex;gap:8px;align-items:flex-start;justify-content:flex-start;text-align:left;padding-left:2.6em;">${kind}<span style="flex:1 1 auto;text-align:left;font-weight:700;${muted ? `color:${dim};` : ''}">${s.title}</span></span></span>`;
+          const meta = `<div style="margin:2px 0 0 2.7em;color:${dim};font-size:var(--bg-fs-card-small, 0.85em);">${s.who}${s.why ? ` · ${s.why}` : ''}</div>`;
+          const itemRows = items.map((i, k) => `${i.group && (k === 0 || items[k - 1].group !== i.group) ? `<div style="margin:${k ? 10 : 2}px 0 2px;font-weight:700;font-size:var(--bg-fs-card-small, 0.85em);">${i.group}</div>` : ''}<div style="display:grid;grid-template-columns:minmax(6.5em,auto) 1fr;gap:10px;padding:5px 0;${LINE}"><span style="color:${dim};white-space:nowrap;">${i.where.length > 28 ? i.where.split(' (')[0].slice(0, 28) : i.where}</span><span style="${i.erledigt ? `color:${dim};` : ''}">${i.frist && !i.erledigt && !i.siehe_auch ? fristPill(i.frist) + ' ' : ''}${i.erledigt ? `<ha-icon icon="mdi:check" style="--mdc-icon-size:1em;width:1em;height:1em;color:${okC};vertical-align:-0.15em;margin-right:4px;"></ha-icon>` : ''}${brk(i.text)}${i.bereit ? `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:var(--bg-fs-pill, 0.85em);font-weight:600;border:1px solid ${okC};">bereit</span>` : ''}${i.am_zug ? `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:var(--bg-fs-pill, 0.85em);font-weight:600;color:${i.am_zug === 'Claude' ? 'var(--bg-color-standard, #29B6F6)' : dim};border:1px solid currentColor;white-space:nowrap;">${i.am_zug.includes('Claude') ? i.am_zug : 'wartet auf ' + i.am_zug}</span>` : ''}${i.wartet_bis ? `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:var(--bg-fs-pill, 0.85em);font-weight:600;color:${dim};border:1px solid ${dim};white-space:nowrap;">wartet bis ${dm(i.wartet_bis)}</span>` : ''}${i.fehlt_in_liste ? `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:var(--bg-fs-pill, 0.85em);font-weight:600;border:1px solid ${warnC};white-space:nowrap;">fehlt in offene_punkte.md</span>` : ''}${i.tip ? `<div style="margin-top:4px;color:${dim};font-size:var(--bg-fs-card-small, 0.85em);"><ha-icon icon="mdi:lightbulb-on-outline" style="--mdc-icon-size:1em;width:1em;height:1em;vertical-align:-0.15em;margin-right:4px;color:${pvC};"></ha-icon><b style="color:${white};font-weight:600;">Lösung:</b> ${tipHtml(i.tip)}</div>` : ''}</span></div>`);
+          const list = itemRows.join('');
+          // 15.11.2026, Nutzer-Wunsch: ab 6 Punkten nur die ersten 5, der Rest
+          // hinter "weitere anzeigen" (eigener Abschnitt, zu beim Oeffnen).
+          const SHOWN = 5;
+          const listHtml = itemRows.length > SHOWN
+            ? itemRows.slice(0, SHOWN).join('') + fold('thesis_plan_more_' + s.key, false, `<span style="color:${dim};">weitere ${itemRows.length - SHOWN} anzeigen</span>`, itemRows.slice(SHOWN).join(''), 'padding:6px 0;', '')
+            : list;
+          // 15.11.2026: 'So gehst du vor' je Schritt (Text aus thesis_sync.STEP_TIPS).
+          const tipSteps = Array.isArray(s.tip) ? s.tip : (s.tip ? [s.tip] : []);
+          const tipBox = tipSteps.length ? `<div style="margin:8px 0 0 2.7em;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.05);display:flex;gap:8px;align-items:flex-start;"><ha-icon icon="mdi:lightbulb-on-outline" style="--mdc-icon-size:1.1em;width:1.1em;height:1.1em;flex:0 0 1.1em;color:${pvC};"></ha-icon><div><b>So gehst du vor</b><ol style="margin:4px 0 0;padding-left:1.3em;">${tipSteps.map(t => `<li style="margin:2px 0;">${tipHtml(t)}</li>`).join('')}</ol></div></div>` : '';
+          const block = items.length || s.tip
+            ? fold('thesis_plan_' + s.key, false, title, meta + tipBox + (items.length ? `<div style="margin:8px 0 0 2.7em;">${listHtml}</div>` : ''), `padding:12px 0;${LINE}${bar}`, '')
+            : `<div style="padding:12px 0;${LINE}${bar}"><span style="display:inline-block;width:1em;"></span>${title}${meta}</div>`;
+          return ph + block;
         }).join('');
+        const doneSteps = steps.filter(s => s.state === 'erledigt').sort((x, y) => (y.done_at || '').localeCompare(x.done_at || ''));
+        const legend = `<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--divider-color);font-size:var(--bg-fs-card-small, 0.85em);">
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(15em,1fr));gap:6px 14px;">${Object.keys(ST).map(k => `<div style="display:flex;gap:8px;align-items:center;">${circle(k, ST[k][1], '1')}<span><b>${ST[k][1]}</b> <span style="color:${dim};">${ST[k][4]}</span></span></div>`).join('')}</div>
+            <div style="margin-top:8px;color:${dim};">Symbole nach Art des Schritts: ${[['prosa', 'Prosa'], ['literatur', 'Literatur'], ['parallel', 'Erhebung'], ['pruefen', 'Prüfen'], ['erklaertexte', 'Erklärtexte'], ['summary', 'Extended Summary'], ['anhang_j', 'Anhang J'], ['fristen', 'Hochschule'], ['anlagen', 'Anlagen'], ['kolloquium', 'Kolloquium'], ['wallach', 'Wallach']].map(([k, w]) => `<span style="white-space:nowrap;margin-right:10px;"><ha-icon icon="${KIND_ICON[k]}" style="--mdc-icon-size:1.1em;width:1.1em;height:1.1em;vertical-align:-0.2em;"></ha-icon> ${w}</span>`).join('')}</div>
+          </div>`;
         return wrap(`
           ${head('mdi:map-marker-path', pvC, 'Fahrplan Masterarbeit', sub)}
-          <div style="margin-top:10px;">${rows}</div>
-          <div style="margin-top:12px;color:${ageD > 2 ? errC : dim};font-size:0.9em;">Reihenfolge wie die Arbeitsschleife: erst veraltete Fakten, dann klären, belegen, Befunde, schreiben, prüfen. Punkte mit „(Termin TT.MM.)“ im Text warten bis zu diesem Tag und zählen danach wieder normal. Erzeugt aus offene_punkte.md, den Markern im Text und dem Abgleich, ${ageD === 0 ? 'heute' : 'vor ' + ageD + ' Tagen'}.</div>`);
+          ${fristItems.length ? `<div style="margin-top:10px;padding:8px 12px;border-radius:10px;border:1px solid ${errC};display:flex;gap:10px;align-items:flex-start;"><ha-icon icon="mdi:calendar-alert" style="--mdc-icon-size:1.3em;width:1.3em;height:1.3em;flex:0 0 1.3em;color:${errC};"></ha-icon><div>${fristItems.map(i => `<div><b>Frist</b>${fristBadge(i)} ${brk(i.text)}</div>`).join('')}</div></div>` : ''}
+          <div style="margin-top:14px;">${rows}</div>
+          <div style="margin-top:22px;"></div>
+          ${doneSteps.length ? fold('thesis_plan_done', false, `<span style="display:inline-flex;gap:8px;align-items:center;"><ha-icon icon="mdi:check-all" style="--mdc-icon-size:1.1em;width:1.1em;height:1.1em;color:${okC};"></ha-icon><span style="font-weight:700;">Erledigt</span><span style="color:${dim};">(${doneSteps.length})</span></span>`, `<div style="margin:6px 0 0 2.7em;">${doneSteps.map(s => `<div style="display:grid;grid-template-columns:3.2em 1fr auto;gap:10px;padding:5px 0;${LINE}"><span style="color:${dim};white-space:nowrap;">Nr. ${s.nr || ''}</span><span style="color:${dim};">${s.title} <code style="font-size:var(--bg-fs-card-small, 0.85em);">${s.key}</code></span><span style="color:${dim};white-space:nowrap;">${s.done_at ? 'am ' + dm(s.done_at) : ''}</span></div>`).join('')}</div>`, `padding:9px 0;${LINE}`, '') : ''}
+          ${fold('thesis_plan_legend', false, `<span style="font-weight:700;">Legende</span> <span style="color:${dim};font-weight:400;">(Zustände und Symbole)</span>`, legend, 'margin-top:12px;', '')}
+          <div style="margin-top:12px;color:${ageD > 2 ? errC : dim};font-size:var(--bg-fs-card-small, 0.85em);">Reihenfolge wie die Arbeitsschleife: erst veraltete Fakten, dann klären, belegen, Befunde, schreiben, prüfen. Punkte mit „(Termin TT.MM.)“ im Text warten bis zu diesem Tag und zählen danach wieder normal. Erzeugt aus offene_punkte.md, den Markern im Text und dem Abgleich, ${ageD === 0 ? 'heute' : 'vor ' + ageD + ' Tagen'}.</div>`);
       }
 
       // ── Abschnitt "forecast": Solarprognose ──────────────────────
@@ -204,7 +322,7 @@ custom_fields:
               <div style="position:absolute;bottom:0;left:0;right:0;height:${hF}%;border:1.5px dashed ${pvC};border-radius:4px 4px 0 0;box-sizing:border-box;"></div>
               <div style="position:absolute;bottom:0;left:15%;right:15%;height:${hA}%;background:${pvC};border-radius:3px 3px 0 0;"></div>
             </div>
-            <div style="font-size:0.7em;color:${dim};white-space:nowrap;">${x.day.slice(8, 10)}.</div>
+            <div style="font-size:var(--bg-fs-pill, 0.85em);color:${dim};white-space:nowrap;">${x.day.slice(8, 10)}.</div>
           </div>`;
         }).join('');
         const hours = Array.isArray(f.by_hour) ? f.by_hour : [];
@@ -228,7 +346,7 @@ custom_fields:
         const FCOLS = 'display:grid;grid-template-columns:6.2em repeat(3, minmax(0,1fr)) 5.5em;gap:10px;align-items:baseline;';
         const monthRows = fm.length ? `<div style="margin-top:18px;padding-top:14px;${LINE}">
             <div style="font-weight:700;margin-bottom:4px;">Je Monat <span style="color:${dim};font-weight:400;">(ganze Aufzeichnung, nur Tage mit Prognose in 90 % der Blöcke)</span></div>
-            <div style="${FCOLS}padding:0 0 6px;color:${dim};font-size:0.85em;"><span></span><span style="text-align:right;">gemessen</span><span style="text-align:right;">Prognose</span><span style="text-align:right;">Tage</span><span style="text-align:right;">Abweichung</span></div>
+            <div style="${FCOLS}padding:0 0 6px;color:${dim};font-size:var(--bg-fs-card-small, 0.85em);"><span></span><span style="text-align:right;">gemessen</span><span style="text-align:right;">Prognose</span><span style="text-align:right;">Tage</span><span style="text-align:right;">Abweichung</span></div>
             ${fm.map(m => {
               const b = m.bias_pct, bc = b === null ? dim : Math.abs(b) > 20 ? warnC : okC;
               return `<div style="${FCOLS}padding:7px 0;${LINE}">
@@ -247,7 +365,7 @@ custom_fields:
           ${head('mdi:weather-partly-cloudy', color, `Letzte ${f.days_used} Tage: ${word}`, fsub.replace(`Letzte ${f.days_used} Tage, im`, 'Im'))}
           <div style="margin-top:18px;padding-top:14px;${LINE}">
             <div style="display:flex;gap:2px;align-items:flex-end;">${bars}</div>
-            <div style="display:flex;gap:16px;justify-content:center;margin-top:6px;font-size:0.85em;color:${dim};">
+            <div style="display:flex;gap:16px;justify-content:center;margin-top:6px;font-size:var(--bg-fs-card-small, 0.85em);color:${dim};">
               <span><span style="display:inline-block;width:12px;height:12px;background:${pvC};border-radius:2px;vertical-align:-1px;"></span> gemessen</span>
               <span><span style="display:inline-block;width:12px;height:12px;border:1.5px dashed ${pvC};border-radius:2px;box-sizing:border-box;vertical-align:-1px;"></span> Prognose</span>
             </div>
@@ -283,7 +401,7 @@ custom_fields:
         return wrap(staleHtml + `
           ${head('mdi:battery-arrow-up', color, started ? `An ${started} von ${days.length} Tagen Start möglich` : 'Kein Tag mit Eco-Start', `Eco-Start ab ${n0(last.eco_start)} % Akku · bester Tag ${n0(best.soc_max)} % (${fmtDay(best.day)})${gap.length ? ` · im Mittel fehlten ${n0(gap.reduce((a, b) => a + b, 0) / gap.length)} Prozentpunkte` : ''}`)}
           <div style="margin-top:10px;">${rows}</div>
-          <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:0.85em;color:${dim};">
+          <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:var(--bg-fs-card-small, 0.85em);color:${dim};">
             <span>Balken = höchster Akkustand</span>
             <span><span style="display:inline-block;width:2px;height:12px;background:${white};vertical-align:-1px;"></span> Eco-Start Akku</span>
             <span>☀ = höchste Solarleistung (nur Info), ✓ = Start möglich</span>
@@ -318,9 +436,9 @@ custom_fields:
             const few = x.days < (e.min_days || 3);
             const h = Math.round((x.w_per_th - lo) / (hi - lo) * 100);
             return `<div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;opacity:${few ? 0.45 : 1};">
-              <div style="font-size:0.8em;font-weight:600;">${n2(x.w_per_th)}</div>
+              <div style="font-size:var(--bg-fs-pill, 0.85em);font-weight:600;">${n2(x.w_per_th)}</div>
               <div style="position:relative;width:60%;height:60px;"><div style="position:absolute;bottom:0;left:0;right:0;height:${Math.max(h, 4)}%;background:var(--bg-color-eco, #4CAF50);border-radius:3px 3px 0 0;"></div></div>
-              <div style="font-size:0.75em;color:${dim};white-space:nowrap;">${MONTHS[Number(x.month.slice(5, 7))].slice(0, 3)} · ${x.days} T.</div>
+              <div style="font-size:var(--bg-fs-pill, 0.85em);color:${dim};white-space:nowrap;">${MONTHS[Number(x.month.slice(5, 7))].slice(0, 3)} · ${x.days} T.</div>
             </div>`;
           }).join('');
           const ch = m.change_pct === null ? 'zu wenige Tage' : `${m.change_pct > 0 ? '+' : ''}${n1(m.change_pct)} % seit dem ersten Monat`;
@@ -332,6 +450,7 @@ custom_fields:
         return wrap(staleHtml + `
           ${head('mdi:speedometer', color, title, `Watt je Terahash im Monatsmedian, nur Tage rein im Eco-Modus · weniger ist besser`)}
           ${rows}
+          ${(() => { const nm = new Date().getMonth() + 1; const has = miners.some(m => m.months.some(x => Number(x.month.slice(5, 7)) === nm)); return has ? '' : `<div style="margin-top:14px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,0.05);">${MONTHS[nm]}: noch kein Tag rein im Eco-Modus, die Miner ruhen. Im Winter normal; ohne Laufzeit gibt es keinen Messwert, die Monate oben bleiben die letzte Messung.</div>`; })()}
           ${note(`Gezählt werden nur Tage mit mindestens ${n0(e.min_eco_h)} h Eco und ohne Standard oder Super: der Tageswert mischt sonst die Modi (Super braucht etwa 2 W/TH mehr) und zeigt einen Verschleiß, den es nicht gibt. Blasse Monate haben weniger als ${e.min_days} Tage und zählen nicht fürs Urteil. „Schlechter" heißt mehr als +${n0(e.drift_pct)} %: dann Lüfter, Staub und Wärmeleitpaste prüfen.`)}`);
       }
 
@@ -343,13 +462,13 @@ custom_fields:
       if (section === 'surplus') {
         const su = au.surplus || {};
         const months = Array.isArray(su.months) ? su.months : [];
-        if (!months.length) return wrap(staleHtml + head('mdi:transmission-tower-export', okC, 'Kein ungenutzter Überschuss', 'Kein Block mit mehr als 1 kW Einspeisung bei stehenden Minern.'));
+        if (!months.length) return wrap(staleHtml + head('mdi:transmission-tower-export', okC, 'Kein ungenutzter Überschuss', 'Kein Block mit mehr als 1 kW Einspeisung bei stehenden Minern.' + ([11, 12, 1, 2].includes(new Date().getMonth() + 1) ? ' Im Winter normal: die Sonne deckt kaum den Hausverbrauch, die Karte zählt erst im Frühjahr wieder.' : '')));
         const tot = {};
         months.forEach(m => Object.entries(m.reasons || {}).forEach(([k, v]) => { tot[k] = (tot[k] || 0) + v; }));
         const reasons = Object.entries(tot).sort((a, b) => b[1] - a[1]);
         const maxR = reasons.length ? reasons[0][1] : 1;
         const COLS = 'display:grid;grid-template-columns:6.2em 5em 5.5em minmax(0,1fr);gap:10px;align-items:baseline;';
-        const rows = `<div style="${COLS}padding:0 0 6px;color:${dim};font-size:0.85em;"><span></span><span style="text-align:right;">Stunden</span><span style="text-align:right;">Einspeisung</span><span>Häufigster Grund</span></div>` + months.map(m => {
+        const rows = `<div style="${COLS}padding:0 0 6px;color:${dim};font-size:var(--bg-fs-card-small, 0.85em);"><span></span><span style="text-align:right;">Stunden</span><span style="text-align:right;">Einspeisung</span><span>Häufigster Grund</span></div>` + months.map(m => {
           const top = Object.entries(m.reasons || {})[0];
           return `<div style="${COLS}padding:9px 0;${LINE}">
             <span style="font-weight:600;">${mLabel(m.month)}</span>
@@ -381,7 +500,7 @@ custom_fields:
         const share = days ? over / days : 0;
         const color = share > 0.25 ? errC : over ? warnC : okC;
         const COLS = 'display:grid;grid-template-columns:6.2em repeat(6, minmax(0,1fr));gap:10px;align-items:baseline;';
-        const rows = `<div style="${COLS}padding:0 0 6px;color:${dim};font-size:0.85em;"><span></span><span style="text-align:right;">Mining-Tage</span><span style="text-align:right;">über Ziel</span><span style="text-align:right;">Mittel</span><span style="text-align:right;">Höchstwert</span><span style="text-align:right;">Abbrüche</span><span style="text-align:right;">Handbetrieb</span></div>` + months.map(m => `<div style="${COLS}padding:9px 0;${LINE}">
+        const rows = `<div style="${COLS}padding:0 0 6px;color:${dim};font-size:var(--bg-fs-card-small, 0.85em);"><span></span><span style="text-align:right;">Mining-Tage</span><span style="text-align:right;">über Ziel</span><span style="text-align:right;">Mittel</span><span style="text-align:right;">Höchstwert</span><span style="text-align:right;">Abbrüche</span><span style="text-align:right;">Handbetrieb</span></div>` + months.map(m => `<div style="${COLS}padding:9px 0;${LINE}">
             <span style="font-weight:600;">${mLabel(m.month)}</span>
             <span style="text-align:right;">${n0(m.mining_days)}</span>
             <span style="text-align:right;font-weight:700;color:${m.days_over ? (m.days_over / Math.max(m.mining_days, 1) > 0.25 ? errC : warnC) : okC};">${n0(m.days_over)}</span>
@@ -406,7 +525,7 @@ custom_fields:
           <div style="margin-top:18px;padding-top:14px;${LINE}">
             <div style="font-weight:700;margin-bottom:4px;">Letzte Tage mit Mining <span style="color:${dim};font-weight:400;">(Start/Stopp-Wechsel, dazu Stufenwechsel und Abbrüche)</span></div>
             ${recRows}
-            <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:0.85em;color:${dim};"><span><span style="display:inline-block;width:2px;height:12px;background:${white};vertical-align:-1px;"></span> Ziel</span></div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:var(--bg-fs-card-small, 0.85em);color:${dim};"><span><span style="display:inline-block;width:2px;height:12px;background:${white};vertical-align:-1px;"></span> Ziel</span></div>
           </div>
           ${(() => {
             const ch = Array.isArray(sw.threshold_changes) ? sw.threshold_changes : [];
@@ -428,11 +547,14 @@ custom_fields:
                 });
                 return groups.map(g => {
                   const items = g.items.slice().sort((a, b) => ORDER.indexOf(a.label) - ORDER.indexOf(b.label));
+                  // 15.11.2026: old = null heisst Vorwert nicht aufgezeichnet
+                  // (Luecke in settings_history), also keine Aenderung.
+                  const unknown = items.every(c => c.old === null || c.old === undefined);
                   const up = items.every(c => Number(c.new) >= Number(c.old)), down = items.every(c => Number(c.new) <= Number(c.old));
-                  const tag = up ? 'angehoben' : down ? 'abgesenkt' : 'geändert';
+                  const tag = unknown ? 'gelesen (vorher nicht aufgezeichnet)' : up ? 'angehoben' : down ? 'abgesenkt' : 'geändert';
                   return `<div style="display:grid;grid-template-columns:7.4em minmax(0,1fr) 6em;gap:10px;align-items:baseline;padding:6px 0;${LINE}">
                     <span style="color:${dim};white-space:nowrap;">${tsDe(g.ts)}</span>
-                    <span><b>${items.length} ${items.length === 1 ? 'Schwelle' : 'Schwellen'} ${tag}:</b> <span style="color:${dim};">${items.map(c => `${c.label} ${n0(Number(c.old))} → ${n0(Number(c.new))} %`).join(' · ')}</span></span>
+                    <span><b>${items.length} ${items.length === 1 ? 'Schwelle' : 'Schwellen'} ${tag}:</b> <span style="color:${dim};">${items.map(c => c.old === null || c.old === undefined ? `${c.label} ${n0(Number(c.new))} %` : `${c.label} ${n0(Number(c.old))} → ${n0(Number(c.new))} %`).join(' · ')}</span></span>
                     <span style="text-align:right;color:${dim};">${SRC[g.source] || g.source}</span>
                   </div>`;
                 }).join('');
@@ -450,7 +572,7 @@ custom_fields:
         const miners = [...new Set(all.map(r => r.miner))].sort();
         const color = sf.hot_blocks_total ? warnC : okC;
         const COLS = `display:grid;grid-template-columns:6.2em repeat(${miners.length}, minmax(0,1fr)) 6em;gap:10px;align-items:baseline;`;
-        const rows = `<div style="${COLS}padding:0 0 6px;color:${dim};font-size:0.85em;"><span></span>${miners.map(m => `<span style="text-align:right;">${m.replace('miner', 'Miner ')}</span>`).join('')}<span style="text-align:right;">Schaltfehler</span></div>` + Object.keys(byMonth).sort().map(mo => {
+        const rows = `<div style="${COLS}padding:0 0 6px;color:${dim};font-size:var(--bg-fs-card-small, 0.85em);"><span></span>${miners.map(m => `<span style="text-align:right;">${m.replace('miner', 'Miner ')}</span>`).join('')}<span style="text-align:right;">Schaltfehler</span></div>` + Object.keys(byMonth).sort().map(mo => {
           const errs = miners.reduce((a, m) => a + ((byMonth[mo][m] || {}).errors || 0), 0);
           return `<div style="${COLS}padding:9px 0;${LINE}">
             <span style="font-weight:600;">${mLabel(mo)}</span>
@@ -471,8 +593,9 @@ custom_fields:
         notes.forEach(x => { let g = groups.find(y => y.name === x.group); if (!g) { g = { name: x.group, items: [] }; groups.push(g); } g.items.push(x); });
         // 14.11.2026: Gruppen aufklappbar (die Karte war ueber drei
         // Bildschirmhoehen lang). Die Titel bleiben als Liste sichtbar, der
-        // Text erst nach dem Aufklappen; Einordnung und Befunde stehen offen.
-        const OPEN_GROUPS = ['Einordnung', 'Befunde aus den Produktivdaten'];
+        // Text erst nach dem Aufklappen. 15.11.2026, Nutzer-Wunsch: beim
+        // Oeffnen des Tabs ist alles zugeklappt, auch Einordnung und Befunde.
+        const OPEN_GROUPS = [];
         // 14.11.2026 Stand-Abgleich (src/data/thesis_sync.py): wo die Arbeit
         // einen Befund zitiert ("% Befund: <id>") und ob sich seine Zahlen
         // seit dem zitierten Stichtag geaendert haben.
@@ -480,7 +603,7 @@ custom_fields:
         const bfRows = {};
         ((sy && sy.befunde && sy.befunde.notes) || []).forEach(r => { bfRows[r.id] = r; });
         const STATE = { aktuell: [okC, 'aktuell'], geaendert: [warnC, 'Zahlen geändert'], neu_seit_stichtag: [warnC, 'nach Stichtag neu'], ohne_abzug: [dim, 'ohne Abzug'] };
-        const tag = (c, t) => `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:0.78em;font-weight:600;color:${c};border:1px solid ${c};white-space:nowrap;">${t}</span>`;
+        const tag = (c, t) => `<span style="display:inline-block;margin-left:8px;padding:1px 8px;border-radius:9px;font-size:var(--bg-fs-pill, 0.85em);font-weight:600;color:${c};border:1px solid ${c};white-space:nowrap;">${t}</span>`;
         const citeTag = (x) => {
           const r = bfRows[x.id];
           if (!r) return '';
@@ -491,9 +614,9 @@ custom_fields:
           'thesis_note_' + gi,
           OPEN_GROUPS.includes(g.name),
           `${g.name} <span style="color:${dim};">(${g.items.length})</span>`,
-          g.items.map(x => `<div style="padding:8px 0;${LINE}"><div style="font-weight:700;">${x.title}${citeTag(x)}</div><div style="color:${dim};">${x.text}</div></div>`).join(''),
+          g.items.map(x => `<div style="padding:8px 0;${LINE}"><div style="font-weight:700;">${x.title}${citeTag(x)}</div><div style="color:${dim};">${brk(x.text)}</div></div>`).join(''),
           'margin-top:14px;',
-          `font-weight:700;color:${pvC};text-transform:uppercase;letter-spacing:0.04em;font-size:0.85em;margin-bottom:4px;`,
+          `font-weight:700;color:${pvC};text-transform:uppercase;letter-spacing:0.04em;font-size:var(--bg-fs-card-small, 0.85em);margin-bottom:4px;`,
         )).join('');
         let openHtml = `<div style="margin-top:16px;color:${dim};">Die Liste der offenen Punkte fehlt (thesis_open.json). Export: python scripts/thesis_open_export.py --thesis-dir … --upload</div>`;
         let sub = 'Was aus den Produktivdaten in die Arbeit gehört';
@@ -526,28 +649,32 @@ custom_fields:
             syncHtml = `<div style="margin-top:14px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,0.05);border-left:3px solid ${strong ? errC : okC};">
                 <b>Abgleich mit Code, Studie und Forschung:</b> ${strong ? `<b style="color:${errC};">${n0(strong)} veraltete ${strong === 1 ? 'Stelle' : 'Stellen'}</b>` : `<b style="color:${okC};">keine veraltete Stelle</b>`}${bf ? ` · ${miss.length ? `<b style="color:${warnC};">${n0(miss.length)} Befunde fehlen im Text</b>` : 'alle Befunde zitiert'}` : ' · <span style="color:' + warnC + ';">Merkliste nicht erreichbar</span>'} <span style="color:${dim};">· ${n0(ch.length)} zitierte Dateien geändert · ${n0(sy.entries)} Einträge geprüft</span>
               </div>
-              ${rep.length ? fold('thesis_sync_rep', true, `Zitierte ADR ist ersetzt <span style="color:${errC};">(${rep.length})</span>`, repRows, `padding:8px 0;${LINE}`, 'font-weight:700;') : ''}
+              ${rep.length ? fold('thesis_sync_rep', false, `Zitierte ADR ist ersetzt <span style="color:${errC};">(${rep.length})</span>`, repRows, `padding:8px 0;${LINE}`, 'font-weight:700;') : ''}
               ${ch.length ? fold('thesis_sync_ch', false, `Zitierte Datei seit dem Stand geändert <span style="color:${warnC};">(${ch.length})</span> <span style="color:${dim};font-weight:400;">schwaches Signal</span>`, chRows, `padding:8px 0;${LINE}`, 'font-weight:700;') : ''}
               ${uncited.length ? `<div style="padding:8px 0;${LINE}color:${dim};">Neue ADR, die die Arbeit noch nicht zitiert: ${uncited.join(' · ')}</div>` : ''}`;
           }
           openHtml = `${week}${syncHtml}
             <div style="margin-top:16px;break-inside:avoid;">
-              <div style="font-weight:700;color:${pvC};text-transform:uppercase;letter-spacing:0.04em;font-size:0.85em;margin-bottom:4px;">Noch offen für die Arbeit (${n0(o.open_total)} Punkte, ${n0(o.done_total)} erledigt)</div>
+              <div style="font-weight:700;color:${pvC};text-transform:uppercase;letter-spacing:0.04em;font-size:var(--bg-fs-card-small, 0.85em);margin-bottom:4px;">Noch offen für die Arbeit (${n0(o.open_total)} Punkte, ${n0(o.done_total)} erledigt)</div>
               ${secs}
             </div>
             <div style="margin-top:16px;break-inside:avoid;">
-              <div style="font-weight:700;color:${pvC};text-transform:uppercase;letter-spacing:0.04em;font-size:0.85em;margin-bottom:4px;">Marker im Text <span style="color:${dim};text-transform:none;letter-spacing:0;">(<b style="color:${errC};">fehlt</b> · <b style="color:${warnC};">prüfen</b> · Wörter)</span></div>
+              <div style="font-weight:700;color:${pvC};text-transform:uppercase;letter-spacing:0.04em;font-size:var(--bg-fs-card-small, 0.85em);margin-bottom:4px;">Marker im Text <span style="color:${dim};text-transform:none;letter-spacing:0;">(<b style="color:${errC};">fehlt</b> · <b style="color:${warnC};">prüfen</b> · Wörter)</span></div>
               ${marks}
             </div>
-            <div style="margin-top:12px;color:${ageD > 7 ? errC : dim};font-size:0.9em;">Quelle: notizen/offene_punkte.md im Thesis-Ordner (Stand ${o.list_stand || '—'}), kopiert ${ageD === 0 ? 'heute' : 'vor ' + ageD + ' Tagen'}. Die Liste dort bleibt maßgeblich.</div>`;
+            <div style="margin-top:12px;color:${ageD > 7 ? errC : dim};font-size:var(--bg-fs-card-small, 0.85em);">Quelle: notizen/offene_punkte.md im Thesis-Ordner (Stand ${o.list_stand || '—'}), kopiert ${ageD === 0 ? 'heute' : 'vor ' + ageD + ' Tagen'}. Die Liste dort bleibt maßgeblich.</div>`;
         }
-        return wrap(staleHtml + `
-          ${head('mdi:school', pvC, 'Merkliste und offene Punkte', sub)}
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 28em), 1fr));gap:0 32px;align-items:start;">
+        // 15.11.2026, Nutzer-Wunsch: die Karte steht jetzt links unter dem
+        // BitHamster und ist lang; standardmaessig zugeklappt, Kopf und
+        // Kurzzeile bleiben sichtbar. Aufgeklappt gelten die Gruppen-Defaults.
+        const body = `<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 28em), 1fr));gap:0 32px;align-items:start;">
             <div>${noteHtml}</div>
             <div>${openHtml}</div>
           </div>
-          ${note('Merkliste, kein Text für die Arbeit. Die Zahlen der Befunde stammen aus der Forschungs-Datenbank und ändern sich täglich. In der Arbeit jede übernommene Zahl mit <code>% Befund: &lt;id&gt; (Stichtag TT.MM.JJJJ)</code> markieren; der Server legt jede Nacht einen Abzug ab, der Abgleich meldet spätere Änderungen. Ein gemeldeter Eintrag ist erledigt, sobald seine <code>% Stand:</code>-Zeile ein neueres Datum trägt.')}`);
+          ${note('Merkliste, kein Text für die Arbeit. Die Zahlen der Befunde stammen aus der Forschungs-Datenbank und ändern sich täglich. In der Arbeit jede übernommene Zahl mit <code>% Befund: &lt;id&gt; (Stichtag TT.MM.JJJJ)</code> markieren; der Server legt jede Nacht einen Abzug ab, der Abgleich meldet spätere Änderungen. Ein gemeldeter Eintrag ist erledigt, sobald seine <code>% Stand:</code>-Zeile ein neueres Datum trägt.')}`;
+        return wrap(staleHtml + `
+          ${head('mdi:school', pvC, 'Merkliste und offene Punkte', sub)}
+          ${fold('thesis_all', false, `Merkliste anzeigen <span style="color:${dim};font-weight:400;">(${n0(notes.length)} Einträge, offene Punkte nach Abschnitt, Marker im Text)</span>`, body, `margin-top:14px;padding-top:10px;${LINE}`, `font-weight:700;color:${pvC};`)}`);
       }
 
       // ── Abschnitt "nights": Akku über Nacht ───────────────────────────────
@@ -576,14 +703,14 @@ custom_fields:
       const sub = latest ? `${MONTHS[latest.month]}: Akku morgens im Mittel ${n0(latest.morning_after_mining)} % (Ziel ${floorP} %) · ${v[2]}` : v[2];
       // 13.11.2026 (Lesbarkeit): Spalten statt Fliesstext, nichts bricht um.
       const MCOLS = 'display:grid;grid-template-columns:6.2em repeat(4, minmax(0,1fr)) 6.5em;gap:10px;align-items:baseline;';
-      const monthHead = `<div style="${MCOLS}padding:0 0 6px;color:${dim};font-size:0.85em;">
+      const monthHead = `<div style="${MCOLS}padding:0 0 6px;color:${dim};font-size:var(--bg-fs-card-small, 0.85em);">
           <span></span><span style="text-align:right;">Reserve</span><span style="text-align:right;">Nächte mit Mining</span>
           <span style="text-align:right;">Akku morgens</span><span style="text-align:right;">Netz nach Mining</span><span></span></div>`;
       const monthRows = monthHead + months.map(m => {
         const mv = m.verdict ? VERD[m.verdict] : null;
         return `<div style="${MCOLS}padding:9px 0;${LINE}">
           <span style="font-weight:600;">${MONTHS[m.month]}</span>
-          <span style="text-align:right;">${m.stop_target} %</span>
+          <span style="text-align:right;${m.before_formula_v2 ? `color:${dim};` : ''}">${m.before_formula_v2 ? (m.stop_measured != null ? `${m.stop_measured} %*` : '—') : `${m.stop_target} %`}</span>
           <span style="text-align:right;">${m.mined_nights}/${m.nights}</span>
           <span style="text-align:right;">${n0(m.morning_after_mining ?? m.morning_soc)} %</span>
           <span style="text-align:right;">${n1(m.grid_kwh_after_mining)} kWh</span>
@@ -598,7 +725,7 @@ custom_fields:
           <span style="color:${dim};white-space:nowrap;">${fmtDay(x.day)}</span>
           <div style="position:relative;height:14px;background:rgba(255,255,255,0.06);border-radius:7px;">
             <div style="position:absolute;top:0;bottom:0;left:${Math.round(x.morning_soc)}%;width:${Math.max(Math.round(from - x.morning_soc), 1)}%;background:linear-gradient(to right, ${mornC}, ${x.mined ? 'var(--bg-color-eco, #4CAF50)' : 'rgba(255,255,255,0.35)'});border-radius:7px;"></div>
-            <div style="position:absolute;top:-3px;bottom:-3px;left:${x.stop_target}%;width:2px;background:${white};opacity:0.7;"></div>
+            ${x.before_formula_v2 ? '' : `<div style="position:absolute;top:-3px;bottom:-3px;left:${x.stop_target}%;width:2px;background:${white};opacity:0.7;"></div>`}
           </div>
           <span style="text-align:right;white-space:nowrap;"><span style="color:${mornC};font-weight:700;">${n0(x.morning_soc)} %</span> <span style="color:${dim};">· ${n1(x.grid_kwh)} kWh</span></span>
         </div>`;
@@ -610,11 +737,11 @@ custom_fields:
         <div style="margin-top:18px;padding-top:14px;${LINE}">
           <div style="font-weight:700;margin-bottom:4px;">Letzte Nächte <span style="color:${dim};font-weight:400;">(Akku von Miner-Stopp bzw. Abend bis Morgen · Netzbezug nachts)</span></div>
           ${nightRows}
-          <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:0.85em;color:${dim};">
+          <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:var(--bg-fs-card-small, 0.85em);color:${dim};">
             <span><span style="display:inline-block;width:12px;height:12px;background:var(--bg-color-eco, #4CAF50);border-radius:2px;vertical-align:-1px;"></span> Miner liefen</span>
             <span><span style="display:inline-block;width:12px;height:12px;background:rgba(255,255,255,0.35);border-radius:2px;vertical-align:-1px;"></span> kein Mining</span>
             <span><span style="display:inline-block;width:2px;height:12px;background:${white};vertical-align:-1px;"></span> Hausreserve</span>
           </div>
         </div>
-        ${note(`Ziel der Hausreserve: ${floorP} % Akku am Morgen (ADR 033; die Monatsurteile bis 13.11. stammen aus Nächten mit der alten Formel). Urteil nur aus Nächten nach Mining-Tagen; ohne Mining wird der Akku vom Haus geleert, nicht von den Minern. Gemessene Nacht-Grundlast ${n0(nt.measured_load_w)} W, eingestellt ${n0((d.settings || {}).baseload_w)} W. Seit ${nt.since ? nt.since.split('-').reverse().join('.') : '—'}.`)}`);
+        ${note(`Ziel der Hausreserve: ${floorP} % Akku am Morgen (ADR 033; die Monatsurteile bis 13.11. stammen aus Nächten mit der alten Formel). * Monate vor ADR 033: gemessener Miner-Stopp (Median) statt der heutigen Formel, die damals nicht galt; dort und bei Nächten vor dem 13.11. fehlt deshalb der Strich der Hausreserve. Urteil nur aus Nächten nach Mining-Tagen; ohne Mining wird der Akku vom Haus geleert, nicht von den Minern. Gemessene Nacht-Grundlast ${n0(nt.measured_load_w)} W, eingestellt ${n0((d.settings || {}).baseload_w)} W. Seit ${nt.since ? nt.since.split('-').reverse().join('.') : '—'}.`)}`);
     ]]]

@@ -173,3 +173,26 @@ def test_threshold_changes_lists_restart_reset_newest_first(tmp_path: Path) -> N
         ("Stopp", "60.0", "95.0"),
         ("Stopp", "95.0", "60.0"),
     ]
+
+
+def test_threshold_change_after_a_recording_gap_has_no_old_value(
+    tmp_path: Path,
+) -> None:
+    conn = get_connection(tmp_path / "t.db")
+    try:
+        for ts, value, source in (
+            ("2026-05-07T17:29:16+00:00", "58.0", "history"),
+            ("2026-11-14T01:44:33+00:00", "100.0", "snapshot"),
+        ):
+            conn.execute(
+                "INSERT INTO settings_history VALUES (?, ?, 'state', ?, ?)",
+                (ts, "input_number.mvp_soc_eco_start_pct", value, source),
+            )
+        conn.commit()
+        out = ac.threshold_changes(conn)
+    finally:
+        conn.close()
+    # 58 % is the May value, not the value before 14.11.: no "angehoben".
+    assert [(c["label"], c["old"], c["new"]) for c in out] == [
+        ("Eco ab", None, "100.0")
+    ]

@@ -122,6 +122,9 @@ views:
     # 26.09.2026, Nutzer-Vorgabe: beide Kacheln neu aus hintergrund_32_ohne_blume(_night).png
     # (1842x854, gleiche Pillow-Encodierung, ~170KB). Seitenverhaeltnis ist nicht mehr 2:1,
     # deshalb background-size 800px auto statt 800px 400px (sonst gestaucht).
+    # 15.11.2026: Die Gras-Karte je Tab ist entfernt. Den Rasen malt seither
+    # nur noch die feste Ebene #bgai-grass aus www/bitgrid_wide.js (Jahreszeit,
+    # Tag/Nacht), die beim Tabwechsel stehen bleibt; das Theme ist durchsichtig.
     panel: true
     # View-scoped Flaechen-/Textfarben (24.08.2026, Nutzer-Vorgabe): CSS-
     # Custom-Properties auf :host der View gesetzt, vererben sich an alle
@@ -171,38 +174,6 @@ views:
           padding: 14px
           box-sizing: border-box
         cards:
-          # Unsichtbare Vollbild-Hintergrundkarte (13.09.2026, Tag/Nacht-
-          # Umschaltung): view-level und layout-card/vertical-stack-card_mod
-          # (:host bzw. hui-view) griffen nachweislich NICHT — card-mod wirkt
-          # laut Community-Praxis zuverlässig nur auf Karten mit echtem
-          # ha-card-Element, nicht auf reine Layout-/Stack-Wrapper. Deshalb
-          # eine eigene, inhaltsleere Karte mit echtem ha-card, per position:
-          # fixed aus dem Grid-Fluss gelöst und mit z-index:-1 hinter alle
-          # echten Karten gelegt. grid-area wird trotzdem gesetzt (Pflichtfeld
-          # fürs Grid), wirkt sich aber wegen position:fixed nicht mehr auf
-          # die sichtbare Platzierung aus.
-          - type: markdown
-            content: " "
-            view_layout:
-              grid-area: g1l
-            card_mod:
-              style: |
-                ha-card {
-                  position: fixed;
-                  inset: 0;
-                  z-index: -1;
-                  border: none;
-                  box-shadow: none;
-                  border-radius: 0;
-                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
-                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
-                  {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
-                  {% else %}
-                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
-                  {% endif %}
-                }
-
           # ═══════════════════════════════════════════════════════════
           # ZEILE 1 LINKS  —  Hamster-Erklärung (g1l), gepaart mit Wetter (g1r).
           # Eigener vertical-stack, per align-items:stretch auf Zeilenhöhe.
@@ -914,24 +885,24 @@ views:
                       // Ohne gueltigen KI-Text sagt sie, warum der Regeltext steht.
                       const kiModel = kd && kd.model ? kiEsc(kd.model) : '';
                       const kiMeta = (icon, left, right) => `
-                            <div style="display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:6px;margin-top:2.2em;font-size:var(--bg-fs-label);
+                            <div style="display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:6px;margin-top:auto;padding:8px 4px 0;font-size:var(--bg-fs-label);
                                         line-height:1.2;color:var(--secondary-text-color);${halo}">
-                              <span style="display:inline-flex;align-items:center;gap:6px;flex:0 1 auto;min-width:0;">
+                              <span style="display:inline-flex;align-items:center;gap:6px;flex:0 1 auto;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
                                 <ha-icon icon="${icon}" style="--mdc-icon-size:16px;width:16px;height:16px;margin:0;padding:0;"></ha-icon>${left}</span>
-                              <span style="margin-left:auto;padding-left:12px;text-align:right;">${right}</span>
+                              <span style="margin-left:auto;padding-left:12px;text-align:right;flex:0 0 auto;white-space:nowrap;">${right}</span>
                             </div>`;
                       let kiFoot = '';
                       if (kd && kd.ok && kd.lage && kiAgeMin <= 120 && !simOn && kiSame) {
-                        const nOpt = Array.isArray(kd.optimierungen) ? kd.optimierungen.length : 0;
-                        const ageTxt = kiAgeMin < 1 ? 'gerade eben' : 'vor ' + Math.round(kiAgeMin) + ' min';
-                        const optTxt = nOpt ? ` · ${nOpt} ${nOpt === 1 ? 'Idee' : 'Ideen'} im Tab Forschung` : '';
+                                                const ageTxt = kiAgeMin < 1 ? 'gerade eben' : 'vor ' + Math.round(kiAgeMin) + ' min';
+                        // 15.11.2026 (Nutzer-Wunsch): Meta-Zeile nur Modell + Alter; 'nur lesend' und
+                        // der Ideen-Hinweis waren Rauschen und liessen die Zeile ueberlappen.
                         kiHtml = `
-                          <div style="margin-top:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.05);
+                          <div style="margin-top:10px;padding:8px 12px;border-radius:10px;flex:1;display:flex;flex-direction:column;background:rgba(255,255,255,0.05);
                                       border-left:3px solid var(--divider-color);text-align:left;">
-                            <div style="font-size:var(--bg-fs-body);color:var(--primary-text-color);line-height:1.3;
+                            <div style="font-size:var(--bg-fs-body);color:var(--primary-text-color);line-height:1.3;min-height:3.9em;
                                         white-space:normal;overflow-wrap:break-word;${halo}">${kiEsc(kiText)}</div>
-                            ${kiMeta(kiModel ? 'mdi:robot-happy-outline' : 'mdi:robot-off-outline', kiModel ? `Bitsy (${kiModel})` : 'Bitsy · kein Modell geladen', `nur lesend · ${ageTxt}${optTxt}`)}
-                          </div>`;
+                          </div>
+                          ${kiMeta(kiModel ? 'mdi:robot-happy-outline' : 'mdi:robot-off-outline', kiModel ? `Bitsy · ${kiModel}` : 'Bitsy · kein Modell geladen', ageTxt)}`;
                       } else if (!simOn) {
                         const why = !kd || !kd.ok ? 'kein Sprachmodell erreichbar'
                           : kiAgeMin > 120 ? 'letzter Text zu alt'
@@ -957,7 +928,7 @@ views:
                                           object-fit:cover;filter:drop-shadow(0 0 1px rgba(0,0,0,.6))">
                             </div>
                             <div style="width:2px;align-self:stretch;background:linear-gradient(to bottom, transparent, var(--divider-color) 15%, var(--divider-color) 85%, transparent)"></div>
-                            <div style="flex:2;min-width:0">
+                            <div style="flex:2;min-width:0;align-self:stretch;display:flex;flex-direction:column">
                               <div style="font-size:var(--bg-fs-title);font-weight:700;line-height:1.1;
                                           white-space:normal;overflow-wrap:break-word;
                                           color:var(--primary-text-color);margin-bottom:6px;${halo}">${kiHtml && kd.lage.headline ? kiEsc(kd.lage.headline) : head}</div>
@@ -1973,6 +1944,9 @@ views:
     # 26.09.2026, Nutzer-Vorgabe: beide Kacheln neu aus hintergrund_32_ohne_blume(_night).png
     # (1842x854, gleiche Pillow-Encodierung, ~170KB). Seitenverhaeltnis ist nicht mehr 2:1,
     # deshalb background-size 800px auto statt 800px 400px (sonst gestaucht).
+    # 15.11.2026: Die Gras-Karte je Tab ist entfernt. Den Rasen malt seither
+    # nur noch die feste Ebene #bgai-grass aus www/bitgrid_wide.js (Jahreszeit,
+    # Tag/Nacht), die beim Tabwechsel stehen bleibt; das Theme ist durchsichtig.
     panel: true
     # View-scoped Flaechen-/Textfarben (24.08.2026, Nutzer-Vorgabe): CSS-
     # Custom-Properties auf :host der View gesetzt, vererben sich an alle
@@ -2024,30 +1998,6 @@ views:
           padding: 14px
           box-sizing: border-box
         cards:
-          # Unsichtbare Vollbild-Hintergrundkarte, Tag/Nacht via sun.sun
-          # (Begruendung/Funktionsweise: s. Tab "BitGridAI", identisches Muster).
-          - type: markdown
-            content: " "
-            view_layout:
-              grid-area: miner
-            card_mod:
-              style: |
-                ha-card {
-                  position: fixed;
-                  inset: 0;
-                  z-index: -1;
-                  border: none;
-                  box-shadow: none;
-                  border-radius: 0;
-                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
-                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
-                  {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
-                  {% else %}
-                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
-                  {% endif %}
-                }
-
           # ── Spalte links: MINER (Titel + Steuerungs-Grid, geteilt aus
           # views/miner_controls.yaml) ────────────────────────────────
           - type: vertical-stack
@@ -2898,6 +2848,9 @@ views:
     # 26.09.2026, Nutzer-Vorgabe: beide Kacheln neu aus hintergrund_32_ohne_blume(_night).png
     # (1842x854, gleiche Pillow-Encodierung, ~170KB). Seitenverhaeltnis ist nicht mehr 2:1,
     # deshalb background-size 800px auto statt 800px 400px (sonst gestaucht).
+    # 15.11.2026: Die Gras-Karte je Tab ist entfernt. Den Rasen malt seither
+    # nur noch die feste Ebene #bgai-grass aus www/bitgrid_wide.js (Jahreszeit,
+    # Tag/Nacht), die beim Tabwechsel stehen bleibt; das Theme ist durchsichtig.
     panel: true
     # View-scoped Flaechen-/Textfarben (24.08.2026, Nutzer-Vorgabe): CSS-
     # Custom-Properties auf :host der View gesetzt, vererben sich an alle
@@ -2930,30 +2883,6 @@ views:
           padding: 14px
           box-sizing: border-box
         cards:
-          # Unsichtbare Vollbild-Hintergrundkarte, Tag/Nacht via sun.sun
-          # (Begruendung/Funktionsweise: s. Tab "BitGridAI", identisches Muster).
-          - type: markdown
-            content: " "
-            view_layout:
-              grid-area: r1l
-            card_mod:
-              style: |
-                ha-card {
-                  position: fixed;
-                  inset: 0;
-                  z-index: -1;
-                  border: none;
-                  box-shadow: none;
-                  border-radius: 0;
-                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
-                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
-                  {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
-                  {% else %}
-                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
-                  {% endif %}
-                }
-
           # ── Zeile 1 links: POOLERTRÄGE ──
           - type: vertical-stack
             view_layout:
@@ -3077,6 +3006,9 @@ views:
     # 26.09.2026, Nutzer-Vorgabe: beide Kacheln neu aus hintergrund_32_ohne_blume(_night).png
     # (1842x854, gleiche Pillow-Encodierung, ~170KB). Seitenverhaeltnis ist nicht mehr 2:1,
     # deshalb background-size 800px auto statt 800px 400px (sonst gestaucht).
+    # 15.11.2026: Die Gras-Karte je Tab ist entfernt. Den Rasen malt seither
+    # nur noch die feste Ebene #bgai-grass aus www/bitgrid_wide.js (Jahreszeit,
+    # Tag/Nacht), die beim Tabwechsel stehen bleibt; das Theme ist durchsichtig.
     panel: true
     # View-scoped Flaechen-/Textfarben, wie alle uebrigen v3-Tabs.
     # Keine View-scoped Design-Overrides mehr (16.09.2026): sie waren
@@ -3105,29 +3037,6 @@ views:
           padding: 14px
           box-sizing: border-box
         cards:
-          # Unsichtbare Vollbild-Hintergrundkarte, Tag/Nacht via sun.sun
-          # (Begruendung/Funktionsweise: s. Tab "BitGridAI", identisches Muster).
-          - type: markdown
-            content: " "
-            view_layout:
-              grid-area: left
-            card_mod:
-              style: |
-                ha-card {
-                  position: fixed;
-                  inset: 0;
-                  z-index: -1;
-                  border: none;
-                  box-shadow: none;
-                  border-radius: 0;
-                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
-                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
-                  {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
-                  {% else %}
-                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
-                  {% endif %}
-                }
           - type: vertical-stack
             view_layout:
               grid-area: left
@@ -3311,6 +3220,9 @@ views:
     # 26.09.2026, Nutzer-Vorgabe: beide Kacheln neu aus hintergrund_32_ohne_blume(_night).png
     # (1842x854, gleiche Pillow-Encodierung, ~170KB). Seitenverhaeltnis ist nicht mehr 2:1,
     # deshalb background-size 800px auto statt 800px 400px (sonst gestaucht).
+    # 15.11.2026: Die Gras-Karte je Tab ist entfernt. Den Rasen malt seither
+    # nur noch die feste Ebene #bgai-grass aus www/bitgrid_wide.js (Jahreszeit,
+    # Tag/Nacht), die beim Tabwechsel stehen bleibt; das Theme ist durchsichtig.
     panel: true
     # View-scoped Flaechen-/Textfarben, wie alle uebrigen v3-Tabs.
     # Keine View-scoped Design-Overrides mehr (16.09.2026): sie waren
@@ -3340,30 +3252,6 @@ views:
           padding: 14px
           box-sizing: border-box
         cards:
-          # Unsichtbare Vollbild-Hintergrundkarte, Tag/Nacht via sun.sun
-          # (Begruendung/Funktionsweise: s. Tab "BitGridAI", identisches Muster).
-          - type: markdown
-            content: " "
-            view_layout:
-              grid-area: lh
-            card_mod:
-              style: |
-                ha-card {
-                  position: fixed;
-                  inset: 0;
-                  z-index: -1;
-                  border: none;
-                  box-shadow: none;
-                  border-radius: 0;
-                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
-                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
-                  {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
-                  {% else %}
-                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
-                  {% endif %}
-                }
-
           # ── Spalte links: HEIZUNG (ÖL), Titel + Inhalt ───────────────
           - type: custom:button-card
             view_layout:
@@ -3433,6 +3321,9 @@ views:
     # 26.09.2026, Nutzer-Vorgabe: beide Kacheln neu aus hintergrund_32_ohne_blume(_night).png
     # (1842x854, gleiche Pillow-Encodierung, ~170KB). Seitenverhaeltnis ist nicht mehr 2:1,
     # deshalb background-size 800px auto statt 800px 400px (sonst gestaucht).
+    # 15.11.2026: Die Gras-Karte je Tab ist entfernt. Den Rasen malt seither
+    # nur noch die feste Ebene #bgai-grass aus www/bitgrid_wide.js (Jahreszeit,
+    # Tag/Nacht), die beim Tabwechsel stehen bleibt; das Theme ist durchsichtig.
     panel: true
     # View-scoped Flaechen-/Textfarben (24.08.2026, Nutzer-Vorgabe): CSS-
     # Custom-Properties auf :host der View gesetzt, vererben sich an alle
@@ -3455,29 +3346,6 @@ views:
               overflow-y: hidden;
             }
         cards:
-          # Unsichtbare Vollbild-Hintergrundkarte, Tag/Nacht via sun.sun
-          # (Begruendung/Funktionsweise: s. Tab "BitGridAI", identisches Muster).
-          # Kein view_layout noetig: dieser vertical-stack hat kein Grid.
-          - type: markdown
-            content: " "
-            card_mod:
-              style: |
-                ha-card {
-                  position: fixed;
-                  inset: 0;
-                  z-index: -1;
-                  border: none;
-                  box-shadow: none;
-                  border-radius: 0;
-                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
-                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
-                  {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
-                  {% else %}
-                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
-                  {% endif %}
-                }
-
           # ── Umschalter Obergeschoss/Untergeschoss ───────────────────────
           # Ersetzt die frühere Übereinander-Stapelung (Haus 16:9 + Garage
           # 16:21 hochkant = sehr lange Scroll-Seite, Nutzer-Feedback
@@ -3588,27 +3456,6 @@ views:
           # (bitgrid_wide.js).
           grid-template-rows: minmax(calc(100vh - var(--header-height, 56px) - 28px), auto)
         cards:
-          - type: markdown
-            view_layout:
-              grid-area: l
-            content: " "
-            card_mod:
-              style: |
-                ha-card {
-                  position: fixed;
-                  inset: 0;
-                  z-index: -1;
-                  border: none;
-                  box-shadow: none;
-                  border-radius: 0;
-                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
-                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
-                  {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
-                  {% else %}
-                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
-                  {% endif %}
-                }
           # ── RECHTS: naechste Abholungen (13.11.2026 getauscht, Nutzer-
           # Wunsch "Kalender links, Termine rechts") ───────────────────
           - type: vertical-stack
@@ -3672,29 +3519,10 @@ views:
           padding: 14px
           box-sizing: border-box
         cards:
-          - type: markdown
-            view_layout:
-              grid-area: g1l
-            content: " "
-            card_mod:
-              style: |
-                ha-card {
-                  position: fixed;
-                  inset: 0;
-                  z-index: -1;
-                  border: none;
-                  box-shadow: none;
-                  border-radius: 0;
-                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
-                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
-                  {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
-                  {% else %}
-                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
-                  {% endif %}
-                }
           # ── Zeile 1 links: BitHamster (Analyse | Frag mich, nur lesend),
-          # darunter welches Gate gerade einen Moduswechsel blockiert ──
+          # darunter Merkliste Masterarbeit + offene Punkte (15.11.2026,
+          # Nutzer-Wunsch: Platz getauscht mit der Live-Diagnose, die jetzt
+          # unten ueber die volle Breite steht) ──
           - type: vertical-stack
             view_layout:
               grid-area: g1l
@@ -3706,9 +3534,12 @@ views:
               - !include views/forschung_hamster.yaml
               - type: custom:button-card
                 template: group_header
-                icon: mdi:shield-search
-                name: Live-Diagnose der Miner
-              - !include views/forschung_gates.yaml
+                icon: mdi:school
+                name: Masterarbeit
+              - type: custom:button-card
+                template: bgai_research_kpi
+                variables:
+                  section: thesis
           # ── Zeile 1 rechts: Datenaufzeichnung als EINE Karte (14.11.2026,
           # Nutzer-Wunsch): Status, Kalender je Tag und Luecken standen als drei
           # Karten mit drei Titeln da. Die drei bleiben eigene Elemente (der
@@ -3730,9 +3561,11 @@ views:
                 variables:
                   section: plan
               - type: custom:button-card
-                template: group_header
+                template: group_header_ki
                 icon: mdi:database-check
                 name: Datenaufzeichnung
+                variables:
+                  card_key: aufzeichnung
               - type: vertical-stack
                 card_mod:
                   style:
@@ -3790,9 +3623,11 @@ views:
               grid-area: g3l
             cards:
               - type: custom:button-card
-                template: group_header
+                template: group_header_ki
                 icon: mdi:weather-night
                 name: Akku über Nacht
+                variables:
+                  card_key: nights
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3803,9 +3638,11 @@ views:
               grid-area: g3r
             cards:
               - type: custom:button-card
-                template: group_header
+                template: group_header_ki
                 icon: mdi:weather-partly-cloudy
                 name: Solarprognose
+                variables:
+                  card_key: forecast
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3816,9 +3653,11 @@ views:
               grid-area: g4
             cards:
               - type: custom:button-card
-                template: group_header
+                template: group_header_ki
                 icon: mdi:speedometer
                 name: Hardware-Zustand (W/TH)
+                variables:
+                  card_key: efficiency
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3829,9 +3668,11 @@ views:
               grid-area: g4r
             cards:
               - type: custom:button-card
-                template: group_header
+                template: group_header_ki
                 icon: mdi:battery-arrow-up
                 name: Akku-Höchststand und Start
+                variables:
+                  card_key: peak
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3842,17 +3683,21 @@ views:
               grid-area: g5l
             cards:
               - type: custom:button-card
-                template: group_header
+                template: group_header_ki
                 icon: mdi:transmission-tower-export
                 name: Ungenutzter Solarüberschuss
+                variables:
+                  card_key: surplus
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
                   section: surplus
               - type: custom:button-card
-                template: group_header
+                template: group_header_ki
                 icon: mdi:thermometer-alert
                 name: Temperatur und Schaltfehler
+                variables:
+                  card_key: safety
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
@@ -3863,26 +3708,28 @@ views:
               grid-area: g5r
             cards:
               - type: custom:button-card
-                template: group_header
+                template: group_header_ki
                 icon: mdi:swap-vertical-bold
                 name: Schaltwechsel
+                variables:
+                  card_key: switching
               - type: custom:button-card
                 template: bgai_research_kpi
                 variables:
                   section: switching
-          # ── Zeile 6 (volle Breite): Merkliste Masterarbeit + offene Punkte ──
+          # ── Zeile 6 (volle Breite): welches Gate gerade einen Moduswechsel
+          # blockiert (15.11.2026 von Zeile 1 links hierher getauscht) ──
           - type: vertical-stack
             view_layout:
               grid-area: g6
             cards:
               - type: custom:button-card
-                template: group_header
-                icon: mdi:school
-                name: Masterarbeit
-              - type: custom:button-card
-                template: bgai_research_kpi
+                template: group_header_ki
+                icon: mdi:shield-search
+                name: Live-Diagnose der Miner
                 variables:
-                  section: thesis
+                  card_key: gates
+              - !include views/forschung_gates.yaml
 
   # ═══════════════════════════════════════════════════════════════════════
   # TAB (letzter): EINSTELLUNGEN  —  Spiegel von bitgrid_dashboard_v2.yaml,
@@ -3924,6 +3771,9 @@ views:
     # 26.09.2026, Nutzer-Vorgabe: beide Kacheln neu aus hintergrund_32_ohne_blume(_night).png
     # (1842x854, gleiche Pillow-Encodierung, ~170KB). Seitenverhaeltnis ist nicht mehr 2:1,
     # deshalb background-size 800px auto statt 800px 400px (sonst gestaucht).
+    # 15.11.2026: Die Gras-Karte je Tab ist entfernt. Den Rasen malt seither
+    # nur noch die feste Ebene #bgai-grass aus www/bitgrid_wide.js (Jahreszeit,
+    # Tag/Nacht), die beim Tabwechsel stehen bleibt; das Theme ist durchsichtig.
     panel: true
     # View-scoped Flaechen-/Textfarben (24.08.2026, Nutzer-Vorgabe): CSS-
     # Custom-Properties auf :host der View gesetzt, vererben sich an alle
@@ -3954,32 +3804,6 @@ views:
           padding: 14px
           box-sizing: border-box
         cards:
-          # Unsichtbare Vollbild-Hintergrundkarte, Tag/Nacht via sun.sun
-          # (Begruendung/Funktionsweise: s. Tab "BitGridAI", identisches
-          # Muster). Kein view_layout noetig: dieses Grid kennt keine
-          # benannten Areas, Auto-Placement reicht (position:fixed loest die
-          # Karte ohnehin aus dem Grid-Fluss).
-          - type: markdown
-            view_layout:
-              grid-area: l
-            content: " "
-            card_mod:
-              style: |
-                ha-card {
-                  position: fixed;
-                  inset: 0;
-                  z-index: -1;
-                  border: none;
-                  box-shadow: none;
-                  border-radius: 0;
-                  {# Jahreszeit wie die Monats-Emojis in Einstellungen (14.11.2026) #}
-                  {% set m = now().month %}{% set sfx = '_winter' if m in [12, 1, 2] else '_fruehling' if m in [3, 4, 5] else '_herbst' if m in [9, 10, 11] else '' %}
-                  {% if is_state('sun.sun', 'above_horizon') %}
-                  background: url('/local/bg_grass{{ sfx }}.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #5F8F4A 0%, #3F6B2E 100%);
-                  {% else %}
-                  background: url('/local/bg_grass{{ sfx }}_night.jpg?v=20261114') repeat 0 0 / 800px auto, linear-gradient(135deg, #16232f 0%, #0d151c 100%);
-                  {% endif %}
-                }
           # ── LINKS: alles, was antippbar/aenderbar ist ────────────────────
           # 26.08.2026, Nutzer-Vorgabe: saemtliche Einstellungen (vorher auf
           # beide Spalten verteilt) stehen jetzt geschlossen links. Rechts
@@ -4576,9 +4400,10 @@ views:
                           </div>
                           <div style="text-align:center;font-size:0.88em;opacity:0.8;">
                             Über 100 % = im Monat nicht erreichbar (—), daraus folgen die <strong>Modi</strong>.
+                            Hausreserve höchstens 95 %, Eco ab höchstens 100 % (dann startet Eco erst bei vollem Akku).
                           </div>
                           <div style="text-align:center;font-size:0.88em;opacity:0.8;margin-top:3px;white-space:nowrap;">
-                            ${monate[curMonth]}: ${n1(kwhNow)}&nbsp;kWh ÷ ${n1(kk * eta)}&nbsp;kWh = ${n0(antNow)}&nbsp;% + ${n0(fl)} = <strong>${n0(resNow)}&nbsp;%</strong>${fl + antNow > 95 ? ' (Deckel)' : ''}
+                            ${monate[curMonth]}: ${n1(kwhNow)}&nbsp;kWh ÷ ${n1(kk * eta)}&nbsp;kWh = ${n0(antNow)}&nbsp;% + ${n0(fl)} = ${fl + antNow > 95 ? `${n0(fl + antNow)}&nbsp;%, gedeckelt auf <strong>${n0(resNow)}&nbsp;%</strong>` : `<strong>${n0(resNow)}&nbsp;%</strong>`}
                           </div>
                           </div>`;
                     ]]]

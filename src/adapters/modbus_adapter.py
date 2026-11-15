@@ -19,6 +19,7 @@ import time
 from typing import TYPE_CHECKING
 
 from src.core.signals import Signal
+from src.ops.env import require_env
 from .telemetry_ingest import TelemetryIngest
 
 if TYPE_CHECKING:
@@ -45,9 +46,7 @@ class ModbusAdapter:
         poll_interval_sec: float | None = None,
     ) -> None:
         self._ingest = ingest
-        self._host = (
-            host if host is not None else os.getenv("MODBUS_HOST", "192.168.1.100")
-        )
+        self._host = host if host is not None else require_env("MODBUS_HOST")
         self._port = port if port is not None else int(os.getenv("MODBUS_PORT", "502"))
         self._soc_register = (
             soc_register

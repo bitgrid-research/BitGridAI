@@ -15,7 +15,7 @@
 # fallen und aus den Pulsen verschwinden.
 # Gleiche apexcharts-card-Technik wie views/energieverlauf_tag.yaml (dort
 # der volle Begründungskommentar zu graph_span/span/extend_to).
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Heizung".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "Heizung".
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:apexcharts-card
 # 12.09.2026, Nutzer-Wunsch "gleiche Anwenden auf die anderen Tabs": diese

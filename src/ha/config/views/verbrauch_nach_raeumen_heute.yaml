@@ -30,12 +30,12 @@
 # Raum-Geraete-Zuordnung: identisch zu raum_*_power_w (packages/devices.yaml)
 # — live aus HAs Area-Registry verifiziert, nicht aus altem Kommentarblock.
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "EnergieInfo".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "EnergieInfo".
 # ═══════════════════════════════════════════════════════════════════════
 type: vertical-stack
 cards:
   # 25.08.2026, Nutzer-Vorgabe: transparenter Gruppentitel-Stil statt
-  # gekachelter Markdown-Karte, siehe bitgrid_dashboard_v3.yaml
+  # gekachelter Markdown-Karte, siehe bitgrid_dashboard_v3_3.yaml
   # ("Echtzeitverbrauch"-Titel) für die volle Begründung.
   - type: custom:button-card
     icon: mdi:home-analytics
@@ -75,7 +75,7 @@ cards:
     layout_type: custom:grid-layout
     layout:
       # 25.08.2026: erst 4 Spalten, dann 2, dann alle 6 Räume in einer Zeile
-      # (volle Seitenbreite verfügbar, siehe bitgrid_dashboard_v3.yaml,
+      # (volle Seitenbreite verfügbar, siehe bitgrid_dashboard_v3_3.yaml,
       # grid-area "full"). Nutzer-Feedback zur 6er-Reihe: Kacheln zu schmal,
       # Schrift kaum lesbar — jetzt 3 Spalten × 2 Zeilen, dafür größere
       # Schrift in den Kacheln selbst (raumkachel_*.yaml, window.bgRoomKachel).

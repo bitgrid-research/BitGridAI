@@ -36,6 +36,6 @@
 # die volle aktuelle Stunde ein (nicht mehr minutengenau), weil eine
 # category-Achse keine gebrochenen Zwischenpositionen kennt.
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Home".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "Home".
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:bitgrid-verlauf-chart

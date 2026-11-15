@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════
-# HEIZSTAB (ELEKTRISCH) — Tabelle im Tab "Heizung" (bitgrid_dashboard_v3.yaml).
+# HEIZSTAB (ELEKTRISCH) — Tabelle im Tab "Heizung" (bitgrid_dashboard_v3_3.yaml).
 #
 # AC-ELWA-2 (Warmwasser-Heizstab, zwei Leistungskanäle solar-/netzbezogen).
 # Gleiche Entities wie im "Heizstab"-Block auf dem Dev-Dashboard

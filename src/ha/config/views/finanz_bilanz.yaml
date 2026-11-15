@@ -25,7 +25,7 @@
 #
 # Kein Titel im Chart (Nutzer-Entscheidung 23.08.2026: die Karte braucht
 # keine eigene Überschrift, der Gruppentitel "Finanzen (heute)" in
-# bitgrid_dashboard_v3.yaml uebernimmt das).
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Home".
+# bitgrid_dashboard_v3_3.yaml uebernimmt das).
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "Home".
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:bitgrid-finanz-chart

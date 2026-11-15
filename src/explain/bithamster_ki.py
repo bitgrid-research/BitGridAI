@@ -598,7 +598,7 @@ def rules_in_words(
 
 NIGHT_ACTIVE_ENTITY = "binary_sensor.mvp_nacht_sperre_aktiv"
 # Same order and titles as the hamster card in the Übersicht
-# (bitgrid_dashboard_v3.yaml, key/head). Live 13.11.2026: the card showed
+# (bitgrid_dashboard_v3_3.yaml, key/head). Live 13.11.2026: the card showed
 # "Akku lädt zuerst" with the resting winter hamster, the KI text said
 # "ich schlafe"; sleeping is the night-block picture only.
 CARD_STATES: dict[str, str] = {
@@ -1019,9 +1019,24 @@ TASK_MAX_POINTS = {
     "thesis_woche": 6,
     "thesis_befunde": 6,
     "thesis_risiken": 6,
+    "thesis_mittwoch": 6,
+    "thesis_konsistenz": 5,
+    "thesis_freeze": 6,
 }
 # Master's thesis tasks (bithamster_research.thesis_lines).
-THESIS_TASKS = ("thesis_woche", "thesis_befunde", "thesis_risiken")
+THESIS_TASKS = (
+    "thesis_woche",
+    "thesis_befunde",
+    "thesis_risiken",
+    "thesis_mittwoch",
+    "thesis_konsistenz",
+    "thesis_freeze",
+)
+# Plan steps whose points a thesis task gets one by one.
+THESIS_DETAIL = {
+    "thesis_mittwoch": ("wallach", "anhang_fh", "auswertung_vorb"),
+    "thesis_konsistenz": ("veraltet", "pruefen"),
+}
 THESIS_RULES = (
     " Schreibe KEINEN Text für die Arbeit (keine Absätze, keine Formulierungs-"
     "vorschläge), nenne keine Quellen und nimm keine Studienergebnisse vorweg:"
@@ -1091,7 +1106,7 @@ DATA_TABLES: list[tuple[str, str, str, tuple[str, ...]]] = [
         "decision_events",
         "block_id",
         "Entscheidungs-Ereignisse des Python-Kerns (nur Testbetrieb, NICHT die"
-        " Produktion)",
+        " Produktion; in keiner Karte gezeigt, auch nicht in Datenaufzeichnung)",
         ("python-kern", "decision_events"),
     ),
     # Since 14.11.2026 (ADR 034): the production log. Live the same day the
@@ -1306,12 +1321,174 @@ TASKS: dict[str, tuple[str, str]] = {
         " welche Klärungen brauchen Vorlauf, welche Kapitel sind am weitesten"
         " zurück (Wörter, fehlt-Marker)? Größtes Risiko zuerst." + THESIS_RULES,
     ),
+    "thesis_mittwoch": (
+        "Masterarbeit: Mittwoch mit Wallach",
+        "Bereite das nächste Mittwochsgespräch mit Prof. Wallach vor (Datum"
+        " steht im Kontext). Sortiere die Punkte aus „Fragen an Prof. Wallach“"
+        " und die Punkte, die auf Wallach warten, nach Dringlichkeit: zuerst"
+        " alles, was vor dem Datenfreeze im Nachtrag 2 festgelegt sein muss"
+        " (sonst ist es nicht präregistriert), dann was Kapitel oder Abgabe"
+        " blockiert, zuletzt Form- und Stilfragen. Bis zum Datenfreeze gibt es"
+        " nur noch die Mittwoche davor: sag, was in DIESEM Gespräch entschieden"
+        " werden muss und was eine Woche warten kann." + THESIS_RULES,
+    ),
+    "thesis_konsistenz": (
+        "Masterarbeit: Konsistenz prüfen",
+        "Ordne den STAND-ABGLEICH ein: Welche Meldungen betreffen den Text"
+        " wirklich (ersetzte ADR, geänderte Befundzahlen, Befunde, die im Text"
+        " fehlen, obwohl ihr Kapitel dran ist), und welche sind nur ein"
+        " schwaches Signal (zitierte Datei geändert, Inhalt vermutlich gleich)?"
+        " Nenne je Meldung Datei und Zeile und was zu prüfen ist. Erfinde keine"
+        " Abweichung, die nicht im Abgleich steht." + THESIS_RULES,
+    ),
+    "thesis_freeze": (
+        "Masterarbeit: Vor dem Datenfreeze",
+        "Nimm die Liste VOR DEM DATENFREEZE aus dem Kontext (sie ist"
+        " vollständig, ergänze nichts, lass nichts weg). Verteile jede"
+        " Entscheidung auf eines der Gespräche mit Prof. Wallach vor dem Freeze"
+        " oder auf Artur allein, je nachdem, wer am Zug ist: zuerst, was eine"
+        " andere Entscheidung blockiert (Umpolung vor Mindestzahl der Items),"
+        " dann, was Daten oder eine Person braucht. Sag ausdrücklich, welche"
+        " Punkte im ersten Gespräch fallen müssen, weil danach nur noch eins"
+        " bleibt. Nenne je Punkt die Nummer aus der Liste." + THESIS_RULES,
+    ),
     "frage": (
         "Frage",
         "Beantworte die Frage des Nutzers aus dem Kontext. Geben die Daten die"
         " Antwort nicht her, sag das ehrlich.",
     ),
 }
+
+# 15.11.2026: per-card requests from the header buttons of the Forschung
+# cards ("<mode>@<card key>|<timestamp>"). Same read-only path as the other
+# tasks; the context is narrowed to the one card so the answer stays on it.
+CARD_MODES: dict[str, tuple[str, str]] = {
+    "karte_daten": (
+        "Daten prüfen",
+        "Prüfe die Datengrundlage dieser einen Karte: Fehlen Tage oder Monate,"
+        " sind Werte veraltet, nicht verfügbar oder auffällig rund (0 statt"
+        " Ausfall), reicht die Zahl der Tage für das Urteil der Karte? Nutze"
+        " DATENBESTAND und NICHT GEMESSENE TAGE. Sag klar, ob man der Karte"
+        " gerade trauen kann, und was zu tun wäre.",
+    ),
+    "karte_auffaellig": (
+        "Auffälligkeiten finden",
+        "Finde in den Zahlen dieser einen Karte Ausreißer, Sprünge und Muster:"
+        " einzelne Tage oder Monate, die aus der Reihe fallen, mit Zahl und"
+        " Datum. Trenne klar zwischen erklärtem Verhalten (Winter, Saison-"
+        " Automatik, bekannte Ereignisse aus dem Kontext) und offenem Befund."
+        " Erfinde keine Ursache; eine Zahl allein ist keine Ursache.",
+    ),
+    "karte_verbessern": (
+        "Karte verbessern",
+        "Wie wird diese eine Karte nützlicher? Was ist unklar, fehlt zum"
+        " Verstehen oder Optimieren, oder kann weg? Nur mit Daten, die laut"
+        " DATENBESTAND gefüllt und aktuell sind. Keine Inhalte vorschlagen, die"
+        " die Karte laut Beschreibung schon zeigt. Eine Karte, die im Winter"
+        " wenig zeigt, wird im Sommer gebraucht. Pro Punkt: was genau, warum,"
+        " mit Wert aus dem Kontext.",
+    ),
+}
+# card key (header variable in the dashboard) -> group_header title
+CARD_KEYS: dict[str, str] = {
+    "aufzeichnung": "Datenaufzeichnung",
+    "nights": "Akku über Nacht",
+    "forecast": "Solarprognose",
+    "efficiency": "Hardware-Zustand (W/TH)",
+    "peak": "Akku-Höchststand und Start",
+    "surplus": "Ungenutzter Solarüberschuss",
+    "switching": "Schaltwechsel",
+    "safety": "Temperatur und Schaltfehler",
+    "gates": "Live-Diagnose der Miner",
+}
+CARD_TAB = "Forschung"
+# Lines of research_findings_lines that belong to a card (by prefix).
+CARD_FINDINGS: dict[str, tuple[str, ...]] = {
+    "forecast": ("- Solarprognose",),
+    "peak": ("- Heizstab",),
+    "surplus": ("- Ungenutzter Solarüberschuss",),
+    "switching": ("- Schaltwechsel", "- Letzte Schwellen-Änderung"),
+    "safety": ("- Übertemperatur",),
+}
+# Cards whose answer needs the production decision log (hours back).
+CARD_DECISION_HOURS: dict[str, int] = {"surplus": 72, "switching": 72, "gates": 24}
+
+
+def split_card_task(task: str) -> tuple[str, str] | None:
+    """(mode, card key) for "<mode>@<card key>", None for anything else."""
+    mode, sep, key = task.partition("@")
+    if sep and mode in CARD_MODES and key in CARD_KEYS:
+        return mode, key
+    return None
+
+
+def task_label(task: str) -> str:
+    """Label shown on the cards; per-card tasks name the card too."""
+    card = split_card_task(task)
+    if card:
+        return f"{CARD_MODES[card[0]][0]}: {CARD_KEYS[card[1]]}"
+    return TASKS[task][0]
+
+
+def _block(lines: list[str], head: str) -> list[str]:
+    """Lines from the one starting with head up to the next "Karte " line."""
+    out: list[str] = []
+    for line in lines:
+        if line.startswith(head):
+            out.append(line)
+        elif out and line.startswith("Karte "):
+            break
+        elif out:
+            out.append(line)
+    return out
+
+
+def card_context_lines(
+    key: str,
+    *,
+    dashboard: str | Path | None,
+    states: dict[str, dict[str, Any]],
+    cards: dict[str, Any] | None,
+    recording: dict[str, Any] | None,
+) -> list[str]:
+    """Everything the one card shows, from the same sources it renders."""
+    title = CARD_KEYS[key]
+    lines = [f"KARTE: {title} (Tab {CARD_TAB})"]
+    if title in CARD_SHOWS:
+        lines.append(f"Die Karte zeigt: {CARD_SHOWS[title]}")
+    if dashboard:
+        values = tab_value_lines(dashboard, CARD_TAB, states)
+        own = _block(values, f"Karte {title}:")
+        if own:
+            lines += ["", "SENSORWERTE der Karte (live, ROH)"] + own
+        research = research_card_lines(
+            Path(dashboard).parent / "www" / "research_cards.json", CARD_TAB
+        )
+        own = _block(research, f"Karte {title}")
+        if own:
+            lines += ["", research[0]] + own
+    prefixes = CARD_FINDINGS.get(key, ())
+    found = [
+        x for x in br.research_findings_lines(cards) if x.startswith(prefixes or "\0")
+    ]
+    if found:
+        lines += ["", "FORSCHUNGSBEFUNDE zu dieser Karte (fest berechnet)"] + found
+    if key == "aufzeichnung":
+        lines += ["", "AUFZEICHNUNGSSTATUS"] + recording_lines(recording)
+    return lines + CARD_TERMS
+
+
+# Fixed terms for every card request. Live eval 15.11.2026: the model read
+# the switching target as a minimum ("2 Wechsel im Winter unrealistisch")
+# (the stop threshold IS the Hausreserve in percent, ADR 033; not a term to fix).
+CARD_TERMS: list[str] = [
+    "",
+    "BEGRIFFE (fest, nicht umdeuten)",
+    "- Schaltwechsel-Ziel: HÖCHSTENS so viele Start/Stopp-Wechsel je"
+    " Mining-Tag wie angegeben. Das ist eine Obergrenze: weniger ist besser,"
+    " null Wechsel ist kein Problem und kein verfehltes Ziel.",
+]
+
 
 # Cards without a group_header title, described by hand.
 TAB_NOTES: dict[str, list[str]] = {
@@ -1346,7 +1523,8 @@ def parse_request(state: Any) -> str | None:
     """Task key from "<task>|<timestamp>", or None for empty/unknown values."""
     text = str(state or "")
     task = text.split("|", 1)[0].strip()
-    return task if "|" in text and task in TASKS else None
+    known = task in TASKS or split_card_task(task) is not None
+    return task if "|" in text and known else None
 
 
 def dashboard_tabs(path: str | Path) -> dict[str, list[str]]:
@@ -1360,7 +1538,7 @@ def dashboard_tabs(path: str | Path) -> dict[str, list[str]]:
             current = m.group(1).strip().strip("\"'")
             tabs[current] = list(TAB_NOTES.get(current, []))
             continue
-        if current and re.match(r"^\s+template: group_header\s*$", line):
+        if current and re.match(r"^\s+template: group_header(?:_ki)?\s*$", line):
             pending = 4
             continue
         if pending and current:
@@ -1446,7 +1624,7 @@ def tab_card_sources(path: str | Path, tab: str) -> list[tuple[str, str]]:
     heads = [
         i
         for i, ln in enumerate(lines)
-        if re.match(r"^\s+template: group_header\s*$", ln)
+        if re.match(r"^\s+template: group_header(?:_ki)?\s*$", ln)
     ]
     cuts = [0] + heads + [len(lines)]
     out: list[tuple[str, str]] = []
@@ -1525,6 +1703,13 @@ CARD_SHOWS: dict[str, str] = {
     " Leistung und Energie heute (Strom des Brenners, kein Ölverbrauch)",
     "Heizstab (elektrisch)": "Tagesverlauf Leistung und Kesseltemperatur,"
     " Tabelle Zustand, Temperatur, Leistung Solar und Leistung Netz",
+    # 15.11.2026: without these two, "Karte verbessern" claimed "die Karte
+    # zeigt keine Werte" for Hardware-Zustand (live eval).
+    "Hardware-Zustand (W/TH)": "Werte je Miner: W pro TH je Monat aus reinen"
+    " Eco-Tagen, Urteil stabil oder schlechter und Änderung in Prozent seit"
+    " dem ersten Monat; ohne Mining keine neuen Monatswerte",
+    "Live-Diagnose der Miner": "je Miner Soll-Modus, gemeldeter Modus und"
+    " welche Regel (Gate) gerade einen Wechsel blockiert, mit Begründung",
     "Akku über Nacht": "je Nacht: Akku abends und morgens, Entladung, Netzbezug,"
     " Grundlast, ob die Hausreserve gereicht hat (aus 10-Minuten-Blöcken)",
     "Datenaufzeichnung": "Ampel der Aufzeichnung, letzter Abgleich und Backup,"
@@ -1619,7 +1804,13 @@ def research_card_lines(path: str | Path, tab: str) -> list[str]:
     d = _read_json(path)
     if not d:
         return ["Karten aus research_cards.json: Datei nicht lesbar."]
-    lines: list[str] = []
+    # 15.11.2026: origin and validity with every number, so an outdated
+    # verdict is not taken for a current problem (October "zu_niedrig" came
+    # from nights under the formula before ADR 033).
+    lines: list[str] = [
+        f"Herkunft: research_cards.json, erzeugt {local_ts(d.get('generated_at'))}"
+        " Uhr aus der Forschungs-DB (Daten bis zum Vortag)."
+    ]
     nights = d.get("nights") or {}
     months = nights.get("months") or []
     if months:
@@ -1632,9 +1823,16 @@ def research_card_lines(path: str | Path, tab: str) -> list[str]:
                 if m.get("verdict")
                 else "noch kein Urteil (zu wenige Nächte nach Mining-Tagen)"
             )
+            old = (
+                " ERKLÄRT, gilt nicht mehr: Nächte unter der alten Formel vor"
+                " ADR 033 (13.11.2026); gemessener Miner-Stopp"
+                f" {de_num(m.get('stop_measured'), 0)} %"
+                if m.get("before_formula_v2")
+                else ""
+            )
             lines.append(
                 f"- Monat {m['month']}: {m.get('nights')} Nächte, davon"
-                f" {m.get('mined_nights')} nach Mining-Tagen; {judged}."
+                f" {m.get('mined_nights')} nach Mining-Tagen; {judged}.{old}"
             )
         recent = nights.get("recent") or []
         if recent:
@@ -1650,7 +1848,14 @@ def research_card_lines(path: str | Path, tab: str) -> list[str]:
             f"- {f['days_used']} Tage verglichen, Prognose im Mittel"
             f" {de_num(f.get('bias_pct'), 0)} % daneben (positiv = zu hoch), mittlere"
             f" Abweichung je Tag {de_num(f.get('mae_pct'), 0)} %; Tagesbalken und"
-            " Profil nach Tageszeit.",
+            " Profil nach Tageszeit. Gilt für die letzten 14 Tage (Winter); je"
+            " Monat: "
+            + ", ".join(
+                f"{x['month']} {de_num(x.get('bias_pct'), 0)} %"
+                for x in (f.get("months") or [])
+                if x.get("bias_pct") is not None
+            )
+            + " (saisonal, kein Defekt).",
         ]
     eff = (d.get("efficiency") or {}).get("miners") or []
     if eff:
@@ -1658,6 +1863,8 @@ def research_card_lines(path: str | Path, tab: str) -> list[str]:
         lines += [
             f"- {m['miner']}: {m.get('verdict') or 'kein Urteil'},"
             f" Änderung {de_num(m.get('change_pct'))} % seit dem ersten Monat"
+            " (nur reine Eco-Tage, Monate mit mindestens 3 Tagen; seit November"
+            " kein Mining, also keine neuen Werte)"
             for m in eff
         ]
     peak = d.get("peak") or []
@@ -1667,7 +1874,9 @@ def research_card_lines(path: str | Path, tab: str) -> list[str]:
         lines += [
             "Karte Akku-Höchststand und Start:",
             f"- an {started} von {len(peak)} Tagen Start möglich, bester Tag"
-            f" {de_num(best, 0)} % Akku, Eco-Start {de_num(peak[-1]['eco_start'], 0)} %.",
+            f" {de_num(best, 0)} % Akku, Eco-Start {de_num(peak[-1]['eco_start'], 0)} %."
+            " ERKLÄRT: Im Winter setzt die Saison-Automatik Eco-Start 100 % (Akku"
+            " zuerst); kein Start ist der erwartete Winterbetrieb, kein Fehler.",
         ]
     return lines
 
@@ -1925,6 +2134,24 @@ def priority_findings(
                 "keys": ["Überschuss"],
             }
         )
+    # Live 14.11.2026, "Fehler finden": "Aufzeichnung vollständig, keine
+    # Datenlücken" although 117 h were stored but not measured.
+    runs = [
+        r
+        for r in ((recording or {}).get("history") or {}).get("suspect_runs") or []
+        if r.get("blocks", 0) >= 6
+    ]
+    if runs:
+        hours = de_num(sum(r["blocks"] for r in runs) / 6, 0)
+        out.append(
+            {
+                "text": (
+                    f"Aufzeichnung: {hours} Stunden gespeichert, aber nicht gemessen"
+                    " (Werte eingefroren oder 0 W); diese Tage zählen als vollständig."
+                ),
+                "keys": [hours, "gemessen"],
+            }
+        )
     missing = ((recording or {}).get("history") or {}).get("days_missing")
     if missing:
         out.append(
@@ -2145,6 +2372,7 @@ def prepare_ask(
 ) -> dict[str, Any]:
     """Build the full user prompt for one task (shared by run_ask and the eval)."""
     live = live_facts(states)
+    card = split_card_task(task)
     season: list[str] | None = None
     findings_season: list[str] = []
     inv: dict[str, Any] | None = None
@@ -2162,6 +2390,10 @@ def prepare_ask(
             end = now.astimezone(timezone.utc)
             hours = DECISION_TASKS[task]
             window = (end - timedelta(hours=hours), end, f"letzte {hours} Stunden")
+        elif card and card[1] in CARD_DECISION_HOURS:
+            end = now.astimezone(timezone.utc)
+            hours = CARD_DECISION_HOURS[card[1]]
+            window = (end - timedelta(hours=hours), end, f"letzte {hours} Stunden")
         if window:
             decisions = br.decision_lines(conn, window, local)
         research = research_facts(conn, now)
@@ -2170,7 +2402,9 @@ def prepare_ask(
         season_tab = task in TAB_TASKS and tab in ("Einstellungen", "Steuerung")
         if task in ("optimierung", "frage") + OVERVIEW_TASKS or season_tab:
             season, findings_season = season_context(conn, states, now)
-        if task in OVERVIEW_TASKS + ("tabcheck",):
+        if task in OVERVIEW_TASKS + ("tabcheck",) or (
+            card and card[0] != "karte_auffaellig"
+        ):
             inv = data_inventory(conn, now)
     finally:
         conn.close()
@@ -2192,7 +2426,24 @@ def prepare_ask(
         else None
     )
     research_lines: list[str] | None
-    if task in THESIS_TASKS:
+    if card:
+        # Only this card plus the days that were not measured: the full
+        # findings list pulled earlier answers to other cards.
+        research_lines = card_context_lines(
+            card[1],
+            dashboard=dashboard,
+            states=states,
+            cards=cards,
+            recording=recording,
+        ) + (
+            # Old unmeasured days only for the data check: given to every
+            # card, the model called them a weakness of cards they do not
+            # touch (live eval 15.11.2026, Hardware-Zustand, Live-Diagnose).
+            [""] + unmeasured
+            if unmeasured and card[0] == "karte_daten"
+            else []
+        )
+    elif task in THESIS_TASKS:
         # Only the thesis context: live values and seasonal tables would
         # pull the answer back to the plant.
         research_lines = br.thesis_lines(
@@ -2203,6 +2454,8 @@ def prepare_ask(
                 else None
             ),
             now,
+            THESIS_DETAIL.get(task, ()),
+            task == "thesis_freeze",
         ) or ["MASTERARBEIT: keine Daten lesbar (thesis_open.json fehlt)."]
     else:
         research_lines = (
@@ -2221,6 +2474,8 @@ def prepare_ask(
         # finding down, 13.11.2026).
         open_season = [f for f in findings_season if "BEREITS KORRIGIERT" not in f]
         findings = priority_findings(open_season, None, {}, None)
+    elif task == "fehler":
+        findings = priority_findings([], None, {}, recording)
     else:
         findings = []
     prompt = build_ask_prompt(
@@ -2247,6 +2502,7 @@ def prepare_ask(
         "findings": findings,
         "inventory": inv,
         "tab": tab,
+        "card": card[1] if card else None,
     }
 
 
@@ -2297,14 +2553,20 @@ _SHOWN_CLAIM_RE = re.compile(
 _WORD_RE = re.compile(r"[A-Za-zÄÖÜäöüß]{4,}")
 
 
-def _contradicts_card(sentence: str) -> bool:
-    """True if the sentence says a card lacks what CARD_SHOWS says it shows."""
+def _contradicts_card(sentence: str, card: str | None = None) -> bool:
+    """True if the sentence says a card lacks what CARD_SHOWS says it shows.
+
+    card: title of the card a per-card request is about; there the model
+    writes "die Karte" instead of the title (live eval 15.11.2026:
+    "Die Karte zeigt keine Werte" for Hardware-Zustand).
+    """
     low = sentence.lower()
     m = _SHOWN_CLAIM_RE.search(sentence)
     if not m:
         return False
     for title, shows in CARD_SHOWS.items():
-        if title.lower() not in low:
+        about = title.lower() in low or (title == card and "karte" in low)
+        if not about:
             continue
         if m.group(1).lower() == "zeigt nur":
             return True
@@ -2315,7 +2577,7 @@ def _contradicts_card(sentence: str) -> bool:
     return False
 
 
-def drop_shown_claims(answer: dict[str, Any]) -> list[str]:
+def drop_shown_claims(answer: dict[str, Any], card: str | None = None) -> list[str]:
     """Remove claims that a card lacks something it displays (tabcheck).
 
     Live 13.11.2026, twice in a row and despite the card description in the
@@ -2325,12 +2587,12 @@ def drop_shown_claims(answer: dict[str, Any]) -> list[str]:
     dropped: list[str] = []
     keep: list[str] = []
     for point in list(answer.get("punkte") or []):
-        (dropped if _contradicts_card(point) else keep).append(point)
+        (dropped if _contradicts_card(point, card) else keep).append(point)
     answer["punkte"] = keep
     text = str(answer.get("text") or "")
     sentences = re.split(r"(?<=[.!?])\s+", text)
-    kept = [x for x in sentences if not _contradicts_card(x)]
-    dropped += [x for x in sentences if _contradicts_card(x)]
+    kept = [x for x in sentences if not _contradicts_card(x, card)]
+    dropped += [x for x in sentences if _contradicts_card(x, card)]
     answer["text"] = " ".join(kept)
     return dropped
 
@@ -2366,8 +2628,15 @@ def finish_answer(
         answer["punkte"], no_data = drop_unsupported_cards(
             answer["punkte"], prepared.get("inventory")
         )
+    card = split_card_task(task)
+    if card:
+        dropped += drop_shown_claims(answer, CARD_KEYS[card[1]])
+    if card and card[0] == "karte_verbessern":
+        answer["punkte"], no_data = drop_unsupported_cards(
+            list(answer.get("punkte") or []), prepared.get("inventory")
+        )
     reviewed: list[str] = []
-    if task in PROPOSAL_TASKS:
+    if task in PROPOSAL_TASKS or (card and card[0] == "karte_verbessern"):
         answer["punkte"], reviewed = br.drop_reviewed(list(answer.get("punkte") or []))
     model_covered = [finding_mentioned(f, answer) for f in prepared["findings"]]
     added = ensure_findings(answer, prepared["findings"], max_points)
@@ -2403,7 +2672,15 @@ def build_ask_prompt(
     decisions: list[str] | None = None,
 ) -> str:
     """User message for one request: instruction, answer format, fixed context."""
-    label, instruction = TASKS[task]
+    card = split_card_task(task)
+    if card:
+        label = task_label(task)
+        instruction = (
+            CARD_MODES[card[0]][1] + " Bleib bei dieser Karte; andere Karten"
+            " nur nennen, wenn die Antwort dort steht."
+        )
+    else:
+        label, instruction = TASKS[task]
     points = TASK_MAX_POINTS.get(task, MAX_POINTS)
     words = 40 if task in OVERVIEW_TASKS + ("tabcheck",) else 30
     parts = [
@@ -2482,6 +2759,10 @@ def build_ask_prompt(
             if other != name
         ]
         parts += [""] + (inventory or ["DATENBESTAND: nicht lesbar."])
+    if card and card[0] != "karte_auffaellig":
+        parts += [""] + (inventory or ["DATENBESTAND: nicht lesbar."])
+    if card and card[0] == "karte_verbessern":
+        parts += [""] + br.reviewed_lines()
     if task == "frage":
         parts += ["", f"FRAGE DES NUTZERS: {question or '(leer)'}"]
     return "\n".join(parts)
@@ -2547,8 +2828,9 @@ def run_ask(
         "schema": SCHEMA_VERSION,
         "request_id": request_id,
         "task": task,
-        "label": TASKS[task][0],
+        "label": task_label(task),
         "tab": None,
+        "card": (split_card_task(task) or (None, None))[1],
         "question": None,
         "generated_at": now.isoformat(),
         "model": model,
@@ -2603,6 +2885,7 @@ _HISTORY_FIELDS = (
     "task",
     "label",
     "tab",
+    "card",
     "question",
     "generated_at",
     "ok",

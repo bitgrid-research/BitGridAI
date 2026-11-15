@@ -182,6 +182,46 @@ const CSS = `
     font-size: clamp(12px, calc(1vw + 2px), 16px) !important;
   }
 
+  /* 14.11.2026, Nutzer-Wunsch: nur der aktive Tab ist gross, die anderen
+     werden kleiner, damit alle Tabs in die Leiste passen; mit Animation.
+     Web Awesome setzt das Attribut "active" auf den gewaehlten Tab (live
+     gemessen). Der Tabtext ist ein loser Textknoten neben ha-icon und erbt
+     seine Groesse ueber den Slot vom Basis-div [part=base]; deshalb steuern
+     diese Regeln die Schrift dort, im Shadow-Root des Tabs (:host()). Das
+     Icon skaliert per transform, das veraendert die Breite nicht und
+     laesst sich animieren. */
+  :host(ha-tab-group-tab) [part~="base"] {
+    transition: font-size 0.35s ease, padding 0.35s ease;
+  }
+  :host(ha-tab-group-tab) ::slotted(ha-icon) {
+    transition: transform 0.35s ease;
+  }
+  /* 15.11.2026, Nutzer-Wunsch: aktiver Tab 1,25-fach (Schrift und Icon)
+     gegenueber der normalen Tabgroesse clamp(12px, 1vw + 2px, 16px). */
+  :host(ha-tab-group-tab[active]) [part~="base"] {
+    font-size: clamp(15px, calc(1.25vw + 2.5px), 20px) !important;
+  }
+  :host(ha-tab-group-tab[active]) ::slotted(ha-icon) {
+    transform: scale(1.25);
+  }
+  :host(ha-tab-group-tab:not([active])) [part~="base"] {
+    font-size: clamp(11px, calc(0.6vw + 3px), 13px) !important;
+    padding-left: clamp(5px, calc(1vw - 6px), 10px) !important;
+    padding-right: clamp(5px, calc(1vw - 6px), 10px) !important;
+  }
+  :host(ha-tab-group-tab:not([active])) ::slotted(ha-icon) {
+    transform: scale(0.85);
+  }
+  /* Reicht auch das nicht (fitTabs() unten misst die Leiste und setzt dann
+     bg-compact auf alle Tabs), zeigen die inaktiven Tabs nur ihr Icon: der
+     Text schrumpft animiert auf 0. Der Name steht weiter als Tooltip am Icon
+     (title) und als aria-label am Tab. */
+  :host(ha-tab-group-tab[bg-compact]:not([active])) [part~="base"] {
+    font-size: 0 !important;
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+  }
+
   /* 13.10.2026: Spalten-Zoom, unabhaengig von card-mod.
      Befund (Lab, Playwright): die Spalten-Stacks erzeugt layout-card selbst
      (ohne hui-card-Huelle), ihr card_mod ":host { zoom: 0.8 }" kommt dort
@@ -341,7 +381,7 @@ function walkAll(node) {
 // also durch; Dashboards decken sie mit ihrem eigenen Hintergrund ab. Gleiche
 // Datei und Kachelung wie lovelace-background in themes/bitgrid.yaml.
 // 14.11.2026: Hintergrund je Jahreszeit, gleiche Monate wie die Emojis in
-// Einstellungen (Saisonale Schwellwerte) und wie bitgrid_dashboard_v3.yaml.
+// Einstellungen (Saisonale Schwellwerte) und wie bitgrid_dashboard_v3_3.yaml.
 function seasonSuffix(month) {
   if ([12, 1, 2].includes(month)) return '_winter';
   if ([3, 4, 5].includes(month)) return '_fruehling';
@@ -460,7 +500,7 @@ document.addEventListener('visibilitychange', () => {
 // ── Rasen-Hintergrund auch ausserhalb des Dashboards ─────────────────────────
 // 13.11.2026, Nutzer-Wunsch: Profil, Einstellungen, Benachrichtigungen zeigten
 // nur die flache primary-background-color. Das Dashboard legt den Rasen als
-// eigene Karte hinter die Ansicht (bitgrid_dashboard_v3.yaml, gleiche Bilder,
+// eigene Karte hinter die Ansicht (bitgrid_dashboard_v3_3.yaml, gleiche Bilder,
 // Tag/Nacht nach sun.sun). Hier dieselbe Ebene fuer alle Seiten: ein fester
 // div ganz hinten, primary-background-color durchsichtig, damit er durch-
 // scheint. Im Dashboard liegt die Dashboard-Karte darueber, nichts doppelt.
@@ -485,6 +525,13 @@ function applyGrass() {
   }
   const hass = document.querySelector('home-assistant')?.hass;
   const sun = hass?.states?.['sun.sun']?.state;
+  // 15.11.2026, Bug: right after a reload hass is not there yet; the unknown
+  // sun counted as night and stayed until the next minute tick. Now nothing is
+  // painted until the sun is known, and the check repeats every 0.5 s.
+  if (!sun) {
+    setTimeout(applyGrass, 500);
+    return;
+  }
   // Mode key includes the season, so the layer also switches at a month change.
   const mode = `${sun || ''}${seasonSuffix(new Date().getMonth() + 1)}`;
   if (layer.dataset.mode !== mode) {
@@ -495,6 +542,103 @@ function applyGrass() {
 applyGrass();
 setInterval(applyGrass, 60 * 1000);
 window.addEventListener('location-changed', () => setTimeout(applyGrass, 300));
+// Tablet wakes up after hours (sunrise or sunset while hidden): switch at once.
+document.addEventListener('visibilitychange', () => setTimeout(applyGrass, 300));
+
+// ── Tab Forschung: alles zugeklappt beim Oeffnen (15.11.2026, Nutzer-Wunsch) ──
+// Die Karten (views/forschung_kpi.yaml, aufzeichnung_status.yaml) merken sich
+// geoeffnete Abschnitte in window._bgOpen, damit das Neuzeichnen sie nicht
+// schliesst. Beim Betreten des Tabs wird das vergessen und jeder schon
+// gezeichnete Abschnitt geschlossen; der Umschalter ist das Element mit
+// onclick="window._bgFold(...)", der Inhalt sein naechstes Geschwister.
+function collapseFolds(node) {
+  if (!node || !node.shadowRoot) return;
+  node.shadowRoot.querySelectorAll('[onclick^="window._bgFold"]').forEach((el) => {
+    const body = el.nextElementSibling;
+    if (body && body.style.display !== 'none') {
+      body.style.display = 'none';
+      if (el.firstElementChild) el.firstElementChild.textContent = '▸';
+    }
+  });
+  node.shadowRoot.querySelectorAll('*').forEach(collapseFolds);
+}
+// Klapp-Ueberschriften (15.11.2026, Bitsy-Karte): eine button-card mit
+//   tap_action: {action: javascript, javascript: "[[[ window._bgaiFoldNext(this, 'key') ]]]"}
+// klappt die Karten danach im selben Stapel auf und zu, bis zur naechsten
+// solchen Ueberschrift. Zustand wie die uebrigen Abschnitte in window._bgOpen
+// (zu beim Betreten des Tabs).
+function foldKey(card) {
+  const js = card && card._config && card._config.tap_action && card._config.tap_action.javascript;
+  const m = typeof js === 'string' && js.match(/_bgaiFoldNext\(this,\s*'([^']+)'/);
+  return m ? m[1] : null;
+}
+function foldTargets(card) {
+  const el = card.parentElement && card.parentElement.tagName === 'HUI-CARD' ? card.parentElement : card;
+  const out = [];
+  for (let n = el.nextElementSibling; n; n = n.nextElementSibling) {
+    const inner = n.tagName === 'HUI-CARD' ? n.firstElementChild : n;
+    if (foldKey(inner)) break;
+    out.push(n);
+  }
+  return out;
+}
+function setFold(card, open) {
+  foldTargets(card).forEach((n) => { n.style.display = open ? '' : 'none'; });
+  const nm = card.shadowRoot && card.shadowRoot.querySelector('#name');
+  if (nm) nm.textContent = nm.textContent.replace(/^[▸▾]\s*/, '');
+  // 15.11.2026, Nutzer-Wunsch: typical expander chevron on the right instead
+  // of the small text triangle; turns 180° when open.
+  const hc = card.shadowRoot && card.shadowRoot.querySelector('ha-card');
+  if (!hc) return;
+  let chev = hc.querySelector('.bgai-chev');
+  if (!chev) {
+    chev = document.createElement('ha-icon');
+    chev.className = 'bgai-chev';
+    chev.setAttribute('icon', 'mdi:chevron-down');
+    chev.style.cssText = 'position:absolute;right:16px;top:calc(50% + 8px);--mdc-icon-size:24px;display:flex;' +
+      'color:var(--secondary-text-color);transition:transform .2s ease;pointer-events:none;';
+    if (getComputedStyle(hc).position === 'static') hc.style.position = 'relative';
+    hc.append(chev);
+  }
+  // Centred on the rendered name text (measured), not on padding guesses.
+  if (nm) {
+    const nr = nm.getBoundingClientRect();
+    const hr = hc.getBoundingClientRect();
+    if (nr.height) chev.style.top = (nr.top - hr.top + nr.height / 2) + 'px';
+  }
+  chev.style.transform = 'translateY(-50%) ' + (open ? 'rotate(180deg)' : 'rotate(0deg)');
+}
+window._bgaiFoldNext = function (card, key) {
+  window._bgOpen = window._bgOpen || {};
+  window._bgOpen[key] = !window._bgOpen[key];
+  setFold(card, window._bgOpen[key]);
+};
+function applyFoldHeaders(node) {
+  if (!node || !node.shadowRoot) return;
+  node.shadowRoot.querySelectorAll('*').forEach((el) => {
+    if (el.tagName === 'BUTTON-CARD') {
+      const key = foldKey(el);
+      if (key) setFold(el, !!(window._bgOpen || {})[key]);
+    }
+    applyFoldHeaders(el);
+  });
+}
+// Erster Aufruf des Tabs ohne Tabwechsel (Seite neu geladen): die
+// Ueberschriften zeichnen sich erst nach und nach, darum mehrfach.
+[1500, 3000, 6000, 10000].forEach((ms) => setTimeout(() => {
+  if (/\/forschung\/?$/.test(window.location.pathname)) applyFoldHeaders(document.querySelector('home-assistant'));
+}, ms));
+
+function onResearchTab() {
+  if (!/\/forschung\/?$/.test(window.location.pathname)) return;
+  window._bgOpen = {};
+  [300, 1200, 3000].forEach((ms) =>
+    setTimeout(() => applyFoldHeaders(document.querySelector('home-assistant')), ms));
+  // The view may still be building: collapse again once it is drawn.
+  [200, 1000, 2500].forEach((ms) =>
+    setTimeout(() => collapseFolds(document.querySelector('home-assistant')), ms));
+}
+window.addEventListener('location-changed', onResearchTab);
 
 // ── Uhr in der Tab-Leiste (13.11.2026, Nutzer-Wunsch "Uhrzeit in jedem Tab") ──
 // Sitzt rechts neben dem ⋮-Menue (Nutzer-Wunsch 13.11.2026) im Kopf von hui-root, damit sie in allen
@@ -530,9 +674,13 @@ function applyClock() {
     clock = document.createElement('div');
     clock.id = 'bgai-clock';
     clock.style.cssText =
-      'display:flex;align-items:center;padding:2px 14px;margin:0 10px 0 4px;flex:0 0 auto;' +
+      // 15.11.2026: 14px left gap so the clock no longer sits on the 3-dot menu.
+      'display:flex;align-items:center;padding:2px 14px;margin:0 10px 0 14px;flex:0 0 auto;' +
       // 14.11.2026, Nutzer-Wunsch: Rahmen wie die Karten, gegen den Rasen.
-      'background:var(--ha-card-background);border-radius:999px;' +
+      // 15.11.2026, Nutzer-Wunsch: nur leicht gerundete Ecken statt Kapsel.
+      // 15.11.2026, test: light glass effect, card colour at ~60 % plus blur.
+      'background:color-mix(in srgb, var(--ha-card-background) 60%, transparent);' +
+      'backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:10px;' +
       'border:var(--bgai-card-border-width-v3, 1px) solid var(--bgai-card-border-v3, rgba(0,0,0,.55));' +
       // Outline like the cards (1px border + 1px ring), no soft shadow: the
       // card token's 0 4px 16px looked like a thick dark halo here.
@@ -550,3 +698,55 @@ function applyClock() {
 
 setInterval(applyClock, 2000);
 applyClock();
+
+// 14.11.2026: Passen die (schon verkleinerten) Tabs nicht in die Leiste,
+// zeigen die inaktiven nur ihr Icon (CSS-Regel bg-compact oben). Gemessen
+// wird die Breite im vollen Zustand; zurueck geht es erst, wenn genau diese
+// Breite mit 16 px Reserve wieder passt, sonst wuerde die Leiste pendeln.
+// Messung statt fester Bildschirmbreite, weil die Seitenleiste den Platz mit
+// bestimmt (gemessen: ohne Icon-Modus passt die Leiste erst ab ca. 1800 px).
+function fitTabs() {
+  const hui = findHuiRoot(document.querySelector('home-assistant'));
+  const r = hui && hui.shadowRoot;
+  const group = r && r.querySelector('ha-tab-group');
+  const sr = group && group.shadowRoot;
+  const tabs = sr && sr.querySelector('.tabs');
+  const nav = sr && sr.querySelector('.nav');
+  if (!tabs || !nav) return;
+  const items = [...group.querySelectorAll('ha-tab-group-tab')];
+  if (!items.length) return;
+  const avail = nav.clientWidth;
+  const marked = items.filter((t) => t.hasAttribute('bg-compact')).length;
+  if (marked && marked < items.length) {
+    // Header re-rendered some tabs: keep the mode that was decided.
+    items.forEach((t) => t.setAttribute('bg-compact', ''));
+    return;
+  }
+  const compact = marked === items.length;
+  if (!compact) {
+    const need = tabs.scrollWidth;
+    group.dataset.bgFull = String(need);
+    if (need > avail + 2) items.forEach((t) => t.setAttribute('bg-compact', ''));
+    return;
+  }
+  const full = Number(group.dataset.bgFull) || Infinity;
+  if (full <= avail - 16) items.forEach((t) => t.removeAttribute('bg-compact'));
+  syncScrollArrow(group, tabs, nav);
+}
+
+// 15.11.2026: the tab group only re-checks its scroll arrow on a resize of
+// the nav, not when bg-compact shrinks the tabs. The arrow then stayed visible
+// (and the strip scrolled) although everything fits. Re-sync it ourselves.
+function syncScrollArrow(group, tabs, nav) {
+  const overflow = tabs.scrollWidth > nav.clientWidth + 2;
+  if (overflow) return;
+  if (typeof group.updateScrollControls === 'function') group.updateScrollControls();
+  if (typeof group.updateScrollButtons === 'function') group.updateScrollButtons();
+  if ('hasScrollControls' in group && group.hasScrollControls) group.hasScrollControls = false;
+  if (tabs.scrollLeft) tabs.scrollLeft = 0;
+  if (nav.scrollLeft) nav.scrollLeft = 0;
+}
+
+setInterval(fitTabs, 1500);
+window.addEventListener('resize', () => setTimeout(fitTabs, 400));
+window.addEventListener('location-changed', () => setTimeout(fitTabs, 500));

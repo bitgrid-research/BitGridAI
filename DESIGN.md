@@ -99,7 +99,7 @@ nachweislich, die View-Variante tat es nicht. Vor einer Erhöhung der
    Parse des Dashboards und prüft dafür offenbar nur den Zeitstempel der
    Wurzeldatei, nicht den der `!include`-Dateien. Am 16.09.2026 mehrfach
    reproduziert: geänderte View-Datei auf dem Server, HA lieferte per
-   `lovelace/config` weiter die alte Struktur, bis `bitgrid_dashboard_v3.yaml`
+   `lovelace/config` weiter die alte Struktur, bis `bitgrid_dashboard_v3_3.yaml`
    selbst angefasst wurde. Beim Deploy einzelner Views also dort eine Zeile
    ändern (oder neu starten).
 
@@ -126,7 +126,7 @@ gleich `custom:layout-card` mit `grid-template-columns` nehmen, so gelöst in
 
 Der sichtbare View-Hintergrund ist nicht dieser Verlauf, sondern die
 Pixel-Grastextur, die jeder View als eigene Vollbildkarte setzt
-(`bitgrid_dashboard_v3.yaml`, Tag/Nacht über `sun.sun`):
+(`bitgrid_dashboard_v3_3.yaml`, Tag/Nacht über `sun.sun`):
 
 | Zustand | Wert |
 |---|---|
@@ -307,7 +307,7 @@ Haus-Config.
 rohem Inline-SVG (per JS-Template in `custom:button-card`) ist es ebenfalls
 unzuverlässig. Dort stehen literale Hex- und `rgba()`-Werte:
 
-- `bitgrid_dashboard_v3.yaml`, Miner-Sparkline (Achsen, Gitter, Text)
+- `bitgrid_dashboard_v3_3.yaml`, Miner-Sparkline (Achsen, Gitter, Text)
 - `www/bitgrid_verlauf_chart.js` und `www/bitgrid_finanz_chart.js`
   (Serienfarben, Achsen, Legende, Tooltip)
 

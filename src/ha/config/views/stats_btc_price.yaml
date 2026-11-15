@@ -15,7 +15,7 @@
 # Kein Steuerpfad: reine Anzeige, beeinflusst keine Mining-Entscheidung in
 # core/.
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "BitcoinInfo",
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml → Tab "BitcoinInfo",
 # linke Spalte, unter stats_energy_to_sats.yaml.
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:button-card
@@ -62,7 +62,7 @@ custom_fields:
         : (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + ' % heute';
 
       // Kein eigener Karten-Header: Abschnittstitel "BITCOIN-KURS" sitzt als
-      // eigene Gruppentitel-Karte davor (bitgrid_dashboard_v3.yaml).
+      // eigene Gruppentitel-Karte davor (bitgrid_dashboard_v3_3.yaml).
       const header = `
         <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
           <span style="font-size:1.6rem;font-weight:700;color:var(--primary-text-color);white-space:nowrap;">${btcEur > 0 ? btcEur.toLocaleString('de-DE') + ' €' : '—'}</span>

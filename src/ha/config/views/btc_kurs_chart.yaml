@@ -7,9 +7,9 @@
 # Element, kein button-card-Wrapper. Design/Stil s. Kommentarkopf der JS-
 # Datei. stats_btc_price.yaml bleibt unbenutzt im Repo liegen (gleiche
 # Praxis wie stats_retro_vergleich.yaml, s. Kommentar in
-# bitgrid_dashboard_v3.yaml), falls die schlanke 90-Tage-Variante spaeter
+# bitgrid_dashboard_v3_3.yaml), falls die schlanke 90-Tage-Variante spaeter
 # wieder gebraucht wird.
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "BitcoinInfo".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "BitcoinInfo".
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:bitgrid-btc-kurs-chart

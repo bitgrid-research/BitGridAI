@@ -9,7 +9,7 @@
 # Kommentarkopf der JS-Datei. stats_energy_to_sats.yaml bleibt unbenutzt im
 # Repo liegen (gleiche Praxis wie stats_retro_vergleich.yaml).
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "BitcoinInfo".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "BitcoinInfo".
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:bitgrid-bar-trend-chart
 mode: efficiency

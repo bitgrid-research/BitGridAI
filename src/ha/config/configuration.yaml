@@ -17,7 +17,7 @@ frontend:
     # 12.09.2026: war seit Einfuehrung nie hier eingetragen, deshalb lief die
     # in bitgrid_dashboard_v2/v3.yaml (Header-Kommentar) behauptete volle
     # Breite + zentrierter Titel bislang gar nicht, unabhaengig vom Cache.
-    - /local/bitgrid_wide.js?v=20261114b
+    - /local/bitgrid_wide.js?v=20261115l
 
 lovelace:
   resource_mode: yaml
@@ -57,7 +57,7 @@ lovelace:
       type: module
     # bitgrid-hardware-card (eigenes Modul, 13.11.2026): Geraeteliste im
     # Popup "Investierte Hardware" (Tab Einstellungen), Daten in todo.hardware.
-    - url: /local/bitgrid_hardware_card.js?v=20261113b
+    - url: /local/bitgrid_hardware_card.js?v=20261115b
       type: module
     # bitgrid-verlauf-chart (eigenes Modul, kein HACS): ersetzt custom:
     # apexcharts-card NUR fuer die Tages-Verlaufskarte im Home-Tab
@@ -126,7 +126,7 @@ lovelace:
     # manuell auf /bitgridai-v3/home neu gesetzt werden.
     bitgridai-v3:
       mode: yaml
-      filename: bitgrid_dashboard_v3.yaml
+      filename: bitgrid_dashboard_v3_3.yaml
       title: BitGridAI v3.3
       icon: mdi:bitcoin
       show_in_sidebar: true

@@ -74,13 +74,20 @@ BitGrid v3: &bitgrid_v3
 
   # ── Hintergrund ─────────────────────────────────────────────────────
   # Der sichtbare View-Hintergrund ist die Pixel-Grastextur, die jeder View
-  # als eigene Vollbildkarte setzt (bitgrid_dashboard_v3.yaml, Tag/Nacht über
+  # als eigene Vollbildkarte setzt (bitgrid_dashboard_v3_3.yaml, Tag/Nacht über
   # sun.sun). Diese Theme-Ebene liegt dahinter und trägt DIESELBE Grastextur als
   # robusten Fallback: auf Tabs mit funktionierender Gras-Karte wird sie ohnehin
   # verdeckt, füllt aber die Default-View (Home), falls die card-mod-Karte beim
   # Erst-Render aussetzt (card-mod-Template-Timing). Der Grünverlauf bleibt als
   # letzter CSS-Fallback, falls das Bild selbst nicht lädt.
-  lovelace-background: "url('/local/bg_grass.jpg?v=20260930') repeat 0 0 / 800px auto, linear-gradient(150deg, #1a2e1a 0%, #3F6B2E 46%, #5F8F4A 100%)"
+  # 15.11.2026, Nutzer-Befund: beim Tabwechsel war ~0,5 s der alte Sommer-
+  # Rasen zu sehen. Gemessen (Playwright): hui-view-background malte diese
+  # Theme-Ebene (bg_grass.jpg), bis die Gras-Karte des neuen Tabs ihr Jinja-
+  # Template vom Server zurückbekam. Seither durchsichtig: dahinter liegt die
+  # feste Ebene #bgai-grass aus www/bitgrid_wide.js, die Jahreszeit und
+  # Tag/Nacht ohne Server-Rundreise kennt und beim Tabwechsel stehen bleibt.
+  # Ohne das Skript bleibt primary-background-color (dunkles Grün) sichtbar.
+  lovelace-background: "transparent"
   primary-background-color: "#1a2e1a"
 
   # ── Karten ──────────────────────────────────────────────────────────
@@ -134,6 +141,13 @@ BitGrid v3: &bitgrid_v3
   bg-fs-body: "1rem"             # Fließtext
   bg-fs-secondary: "0.875rem"    # Sekundärtext
   bg-fs-label: "0.75rem"         # Mini-Labels (UPPERCASE)
+  # Text-Karten (15.11.2026, Nutzer-Wunsch: Tab Forschung wie Tab Müll).
+  # Werte aus haushalt_muell_*.yaml: Fließtext 1rem, Zeilentitel 1.2em,
+  # Nebentext und Pillen 0.85em. Relativ zur Karte (em), außer dem Grundwert.
+  bg-fs-card: "var(--bg-fs-body, 1rem)"  # Fließtext einer Text-Karte
+  bg-fs-card-title: "1.2em"      # Kopfzeile / Zeilentitel in der Karte
+  bg-fs-card-small: "0.85em"     # Nebentext, Tabellenköpfe, Notizen
+  bg-fs-pill: "0.85em"           # Pillen und Status-Wörter
 
   # ── Sektionslabels und Halo ─────────────────────────────────────────
   # Die Gruppentitel stehen auf der Grastextur, nicht auf einer Karte: eine
@@ -294,8 +308,8 @@ BitGrid v3: &bitgrid_v3
   sidebar-background-color: "#313a55"
   sidebar-text-color: "#D3DEEA"
   sidebar-icon-color: "#A9BED0"
-  sidebar-selected-text-color: "#4CAF50"
-  sidebar-selected-icon-color: "#4CAF50"
+  sidebar-selected-text-color: "#F7931A"   # Bitcoin-Orange (15.11.2026)
+  sidebar-selected-icon-color: "#F7931A"
 
 # ═══════════════════════════════════════════════════════════════════════
 # Alias auf dieselbe Definition (YAML-Anker, keine Wertverdopplung).

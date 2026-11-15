@@ -1,7 +1,7 @@
 // BitGridAI — Regelschwellen-Chart als eigenstaendiges Custom-Element mit
 // rohem ApexCharts.js. Loest das handgeschriebene Inline-SVG ab, das bisher
 // als custom_fields.chart-Template einer custom:button-card direkt in
-// bitgrid_dashboard_v3.yaml lag (~180 Zeilen JS in einem YAML-Block).
+// bitgrid_dashboard_v3_3.yaml lag (~180 Zeilen JS in einem YAML-Block).
 //
 // Zwei Gruende, 25.09.2026, Nutzer-Vorgabe:
 //   1. "Regelschwellen soll aussehen wie beim Verlauf vom Stil her" — der
@@ -433,7 +433,7 @@ class BitgridRegelschwellenChart extends HTMLElement {
   _buildDom() {
     const root = this.attachShadow({ mode: "open" });
     // standalone: false (Default) laesst Rahmen, Hintergrund und Radius weg.
-    // Grund: diese Karte sitzt in bitgrid_dashboard_v3.yaml als erste Karte in
+    // Grund: diese Karte sitzt in bitgrid_dashboard_v3_3.yaml als erste Karte in
     // einem vertical-stack, der per card_mod bereits EINEN gemeinsamen Rahmen
     // um Chart + alle Detailgruppen zieht (Nutzer-Vorgabe 31.08.2026: "soll
     // auch alles in einer Karte stecken"). Ein eigener Rahmen ergaebe dort

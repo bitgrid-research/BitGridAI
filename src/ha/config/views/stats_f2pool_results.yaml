@@ -15,10 +15,10 @@
 # core/.
 #
 # Kein eigener Karten-Header (entfernt 26.08.2026, Nutzer-Wunsch): der
-# Gruppen-Titel "POOLERTRÄGE" darueber (bitgrid_dashboard_v3.yaml, grid-area
+# Gruppen-Titel "POOLERTRÄGE" darueber (bitgrid_dashboard_v3_3.yaml, grid-area
 # "tl") uebernimmt diese Rolle bereits.
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "BitcoinInfo",
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml → Tab "BitcoinInfo",
 # linke Spalte, oberste Karte.
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:button-card

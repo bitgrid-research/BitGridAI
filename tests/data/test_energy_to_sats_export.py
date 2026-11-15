@@ -117,18 +117,18 @@ def test_build_artifact_skips_trailing_none_avg():
 @pytest.mark.parametrize(
     "month,expected",
     [
-        (1, 135.0),
-        (2, 135.0),
-        (3, 130.0),
-        (4, 130.0),
+        (1, 120.0),
+        (2, 120.0),
+        (3, 120.0),
+        (4, 120.0),
         (5, 125.0),
         (6, 125.0),
         (7, 125.0),
         (8, 125.0),
-        (9, 130.0),
-        (10, 135.0),
-        (11, 135.0),
-        (12, 135.0),
+        (9, 120.0),
+        (10, 120.0),
+        (11, 120.0),
+        (12, 120.0),
     ],
 )
 def test_target_for_month_matches_saison_tiers(month, expected):

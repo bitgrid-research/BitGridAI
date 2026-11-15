@@ -16,7 +16,7 @@
 # Gesamt-Blau, Umweltmobil = heat-Orange. Hex nur als Fallback. Icon-Schatten
 # wie die Miner-Icons (drop-shadow 1.5px). Kalender nutzt dieselbe Liste.
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Abfall",
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml → Tab "Abfall",
 # rechte Spalte.
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:button-card

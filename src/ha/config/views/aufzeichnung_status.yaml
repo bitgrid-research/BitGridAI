@@ -34,7 +34,7 @@
 # Monatskalender (views/aufzeichnung_kalender.yaml). Die fruehere 7-Tage-
 # Leiste ist entfallen, der Kalender zeigt dieselben Tage.
 #
-# Verwendet in bitgrid_dashboard_v3.yaml → Tab "Forschung", Bereich g1r:
+# Verwendet in bitgrid_dashboard_v3_3.yaml → Tab "Forschung", Bereich g1r:
 # seit 14.11.2026 bilden status, Kalender und gaps EINE Karte
 # "Datenaufzeichnung" (die Huelle zeichnet der innere Stack dort).
 # ═══════════════════════════════════════════════════════════════════════
@@ -103,11 +103,11 @@ custom_fields:
         <div style="display:flex;align-items:center;gap:14px;">
           <ha-icon icon="${icon}" style="--mdc-icon-size:38px;width:38px;height:38px;color:${color};flex:0 0 38px;${ICON_SHADOW}"></ha-icon>
           <div style="flex:1 1 auto;min-width:0;">
-            <div style="font-size:1.2em;font-weight:700;color:${color};">${title}</div>
+            <div style="font-size:var(--bg-fs-card-title, 1.2em);font-weight:700;color:${color};">${title}</div>
             ${lines.map(l => `<div style="color:${dim};">${l}</div>`).join('')}
           </div>
         </div>`;
-      const wrap = (inner) => `<div style="font-size:calc(var(--bg-fs-body, 1rem) * 1.15);line-height:1.45;color:${white};text-align:left;">${inner}</div>`;
+      const wrap = (inner) => `<div style="font-size:var(--bg-fs-card, 1rem);line-height:1.45;color:${white};text-align:left;">${inner}</div>`;
 
       if (S.failed) {
         return wrap(head('mdi:database-remove', errC, 'Status nicht lesbar', [
@@ -187,7 +187,7 @@ custom_fields:
         const tile = (value, label, color) => `
           <div style="flex:1 1 0;min-width:0;text-align:center;padding:10px 6px 8px;border-radius:12px;background:rgba(255,255,255,0.05);border-bottom:3px solid ${value > 0 ? color : 'rgba(255,255,255,0.15)'};">
             <div style="font-size:1.7em;font-weight:800;line-height:1.1;color:${value > 0 ? color : dim};">${value}</div>
-            <div style="font-size:0.85em;color:${dim};white-space:nowrap;">${label}</div>
+            <div style="font-size:var(--bg-fs-card-small, 0.85em);color:${dim};white-space:nowrap;">${label}</div>
           </div>`;
         // 14.11.2026: ein Tag mit mindestens 1 h nicht gemessener Bloecke ist
         // "fraglich", nicht "vollstaendig" (gleiche Grenze wie der Kalender).
@@ -204,10 +204,10 @@ custom_fields:
         const rangeRows = `<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:24px;">${ranges.slice(0, MAX_RANGES).map(r => kv(
           r.from === r.to ? fmtDay(r.from) : fmtDay(r.from) + ' bis ' + fmtDay(r.to),
           `<span style="color:${errC};">${r.days} ${r.days === 1 ? 'Tag' : 'Tage'}</span>`)).join('')}</div>`;
-        const moreRanges = ranges.length > MAX_RANGES ? `<div style="color:${dim};font-size:0.85em;">+ ${ranges.length - MAX_RANGES} weitere Zeiträume</div>` : '';
+        const moreRanges = ranges.length > MAX_RANGES ? `<div style="color:${dim};font-size:var(--bg-fs-card-small, 0.85em);">+ ${ranges.length - MAX_RANGES} weitere Zeiträume</div>` : '';
         const chips = partial.slice(0, MAX_PARTIAL).map(p =>
           `<span style="display:inline-block;margin:3px 4px 3px 0;padding:2px 9px;border-radius:9px;background:rgba(255,255,255,0.05);border:1px solid ${warnC};font-size:0.88em;white-space:nowrap;">${fmtDay(p.date)} · ${p.blocks}/144</span>`).join('');
-        const moreChips = partial.length > MAX_PARTIAL ? ` <span style="color:${dim};font-size:0.85em;">+ ${partial.length - MAX_PARTIAL} weitere</span>` : '';
+        const moreChips = partial.length > MAX_PARTIAL ? ` <span style="color:${dim};font-size:var(--bg-fs-card-small, 0.85em);">+ ${partial.length - MAX_PARTIAL} weitere</span>` : '';
         const qErr = Number(h.quality_error_blocks) || 0, qWarn = Number(h.quality_warn_blocks) || 0;
         // 14.11.2026: gespeichert, aber nicht gemessen (recording_status.py,
         // suspect_runs). Ab 1 h je Zeitraum, zusammengefasst je Ausfall.
@@ -225,8 +225,8 @@ custom_fields:
           ${ranges.length ? subhead('mdi:calendar-remove', 'Fehlende Zeiträume') + rangeRows + moreRanges : ''}
           ${partial.length ? subhead('mdi:calendar-alert', 'Unvollständige Tage (Blöcke von 144)') + `<div style="margin-top:4px;">${chips}${moreChips}</div>` : ''}
           ${!ranges.length && !partial.length ? `<div style="margin-top:12px;color:${dim};">Kein Tag fehlt.</div>` : ''}
-          ${runs.length ? subhead('mdi:alert-outline', `Gespeichert, aber nicht gemessen (${hrs(suspTotal)})`) + fold('recording_suspect', false, `${runs.length} Zeiträume anzeigen`, suspRows, 'margin-top:2px;', `color:${dim};`) + `<div style="margin-top:4px;color:${dim};font-size:0.9em;">Home Assistant lieferte keine Messwerte, der Abgleich hat trotzdem Blöcke geschrieben: entweder den letzten Wert stundenlang fortgeschrieben (eingefroren) oder 0 W (eine verlorene SMA-Verbindung wird über die Vorgabe 0 zu einem Messwert). Seit 14.11.2026 sind diese Blöcke in der Datenbank als quality=warn markiert (die Messwerte selbst sind unverändert). Die Karten Akku über Nacht, Akku-Höchststand und Prognose lassen Tage mit mindestens einer Stunde davon aus.</div>` : ''}
-          <div style="margin-top:10px;color:${dim};font-size:0.9em;">
+          ${runs.length ? subhead('mdi:alert-outline', `Gespeichert, aber nicht gemessen (${hrs(suspTotal)})`) + fold('recording_suspect', false, `${runs.length} Zeiträume anzeigen`, suspRows, 'margin-top:2px;', `color:${dim};`) + `<div style="margin-top:4px;color:${dim};font-size:var(--bg-fs-card-small, 0.85em);">Home Assistant lieferte keine Messwerte, der Abgleich hat trotzdem Blöcke geschrieben: entweder den letzten Wert stundenlang fortgeschrieben (eingefroren) oder 0 W (eine verlorene SMA-Verbindung wird über die Vorgabe 0 zu einem Messwert). Seit 14.11.2026 sind diese Blöcke in der Datenbank als quality=warn markiert (die Messwerte selbst sind unverändert). Die Karten Akku über Nacht, Akku-Höchststand und Prognose lassen Tage mit mindestens einer Stunde davon aus.</div>` : ''}
+          <div style="margin-top:10px;color:${dim};font-size:var(--bg-fs-card-small, 0.85em);">
             ${qErr + qWarn > 0 ? `${qErr} Blöcke mit quality=error, ${qWarn} mit quality=warn. ` : ''}144 heißt vollständig
             übertragen, nicht lückenlos gemessen. Seit 14.11.2026 markiert der Abgleich solche Blöcke selbst als quality=warn.
           </div>`);

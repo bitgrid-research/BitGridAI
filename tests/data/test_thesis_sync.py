@@ -261,18 +261,21 @@ def test_plan_orders_work_and_scopes_to_the_week_chapter() -> None:
     prep = {i["text"].split(" (")[0]: i["where"] for i in by["naechste"]["items"]}
     assert prep["M"] == "Kap. 5 · 16.-22.11." and "P" not in prep and "L" not in prep
     far = {i["text"].split(" (")[0]: i["where"] for i in by["spaeter_befunde"]["items"]}
-    assert far == {"P": "Kap. 6 · 07.-13.12.", "L": "Kap. 7 · 14.-20.12."}
-    assert by["spaeter_befunde"]["state"] == "spaeter"
-    # Literature has its own step right after "Vorbereiten", before the
-    # deferred findings; the Prüfungsamt deadlines stay under "fristen".
+    # Production findings belong to Kap. 7 (variant b, Artur 15.11.2026).
+    assert far == {"P": "Kap. 7 · 14.-20.12.", "L": "Kap. 7 · 14.-20.12."}
+    assert by["spaeter_befunde"]["state"] == "bereit"
+    # Order (Artur, 15.11.2026): the chapter block ("Vorbereiten", the
+    # other chapters, their findings) before what runs alongside (literature)
+    # and before the Hochschule.
     order = [s["key"] for s in steps]
-    assert order.index("naechste") + 1 == order.index("literatur")
-    assert order.index("literatur") + 1 == order.index("spaeter_befunde")
+    assert order.index("naechste") < order.index("spaeter_befunde")
+    assert order.index("spaeter_befunde") < order.index("literatur")
+    assert order.index("literatur") < order.index("fristen")
     assert [i["text"] for i in by["literatur"]["items"]] == ["Paper X"]
     assert [i["text"] for i in by["fristen"]["items"]] == ["Titel"]
     assert by["literatur"]["who"] == "Artur mit Claude"
     assert "nachweislich existiert" in by["literatur"]["why"]
-    assert by["literatur"]["state"] == "spaeter"
+    assert by["literatur"]["state"] == "bereit"
     assert by["freeze"]["state"] == "gesperrt"
     assert by["sonstiges"]["items"][0]["text"] == "z"
     after = ts.plan(_plan_data("2026-11-29"), date(2026, 12, 1))
@@ -349,7 +352,8 @@ def test_plan_step_waits_when_every_point_waits_for_a_termin() -> None:
     assert [i["wartet_bis"] for i in by["belegen"]["items"]] == ["2026-11-17"] * 2
     # "jetzt" moves on to the next step with real work.
     assert by["klaeren"]["state"] == "jetzt"
-    assert [s["key"] for s in steps if s["state"] == "jetzt"] == ["klaeren"]
+    # The Wallach meeting is always "jetzt" (Artur, 15.11.2026).
+    assert [s["key"] for s in steps if s["state"] == "jetzt"] == ["klaeren", "wallach"]
 
 
 def test_plan_wait_ends_after_the_termin_day() -> None:

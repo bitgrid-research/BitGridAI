@@ -23,6 +23,9 @@ from src.data.recording_status import suspect_by_day, suspect_runs
 G_FRAME = "Einordnung"
 G_FINDING = "Befunde aus den Produktivdaten"
 G_METHOD = "Datenbasis und Methodik"
+# 15.11.2026, Artur: measured values that a design decision rests on belong
+# to the system chapter (Kap. 4).
+G_SYSTEM = "Systementwurf (Messwerte hinter Designentscheidungen)"
 G_LIMIT = "Limitationen, die genannt werden müssen"
 G_EXPLAIN = "Erklärschicht (Sprachmodell)"
 G_OPEN = "Aus dem System noch offen"
@@ -287,6 +290,25 @@ def _cards(cards: dict[str, Any]) -> list[dict[str, str]]:
                 " Vergleich ist erst mit den Winterdaten möglich.",
             )
         )
+    # 15.11.2026, Artur: Kap. 4 cites the ADR 033 inputs. The values in force
+    # come from the cards (read live from HA), so a change at the February 2027
+    # review changes this text; the sample sizes are those of the ADR.
+    st = cards.get("settings") or {}
+    if all(st.get(k) is not None for k in ("baseload_w", "gap_h", "efficiency")):
+        out.append(
+            _note(
+                "hausreserve_herleitung",
+                G_SYSTEM,
+                "Herleitung der Hausreserve (ADR 033)",
+                f"In Kraft: Grundlast {de(st['baseload_w'])} W, Abendlücke"
+                f" {de(st['gap_h'], 2)} h, Wirkungsgrad"
+                f" {de(st['efficiency'] * 100)} %, Boden"
+                f" {de(st.get('floor_pct'))} %. Stichproben laut ADR 033"
+                " (Messung 28.08. bis 12.11.2026): Grundlast Median 569 W über"
+                " 101 Nächte, Abendlücke aus 40 Mining-Tagen, Wirkungsgrad aus"
+                " 22 Nächten. Wiedervorlage Februar 2027 mit Winternächten.",
+            )
+        )
     hz = cards.get("heizstab") or {}
     if hz.get("days"):
         out.append(
@@ -335,6 +357,71 @@ def _cards(cards: dict[str, Any]) -> list[dict[str, str]]:
             )
         )
     return out
+
+
+# 15.11.2026: a mining day needs at least 1 kWh. Standby draws ~0,44 kWh/day
+# and the pool still pays residuals, which gave fake ~120 sats/kWh on days
+# without mining (all of November).
+MIN_MINING_KWH = 1.0
+
+
+def _sats(conn: sqlite3.Connection) -> list[dict[str, str]]:
+    """Energy-to-Sats (ADR 026/029): the system's target metric.
+
+    Measured mining days with a settlement above zero. A stored 0 on a day
+    with mining is a missing settlement (Aug/Sep 2026), not an earning of
+    zero. Per month sum(sats) / sum(kWh): weights short days by their energy,
+    so a payout shifted across midnight does not dominate.
+    """
+    try:
+        rows = conn.execute(
+            "SELECT day, energy_to_sats, mining_kwh FROM daily_kpi"
+            " WHERE energy_to_sats > 0 AND mining_kwh >= ?"
+            f" AND {_MEASURED} ORDER BY day",
+            (MIN_MINING_KWH,),
+        ).fetchall()
+        zeros = conn.execute(
+            "SELECT COUNT(*) FROM daily_kpi WHERE energy_to_sats = 0"
+            f" AND mining_kwh >= ? AND {_MEASURED}",
+            (MIN_MINING_KWH,),
+        ).fetchone()[0]
+    except sqlite3.OperationalError:
+        return []
+    if not rows:
+        return []
+    months: dict[str, list[float]] = {}
+    for day, sats, kwh in rows:
+        acc = months.setdefault(str(day)[:7], [0.0, 0.0, 0.0])
+        acc[0] += float(sats) * float(kwh)
+        acc[1] += float(kwh)
+        acc[2] += 1
+    parts = ", ".join(
+        f"{MONTHS[int(m[5:7])]} {de(a[0] / a[1], 1)}"
+        f" ({de(a[2])} {'Tag' if a[2] == 1 else 'Tage'}, {de(a[1])} kWh)"
+        for m, a in months.items()
+    )
+    gap = (
+        f" {de(zeros)} Mining-Tage mit gespeicherter 0 sind fehlende"
+        " Abrechnungen und nicht mitgezählt."
+        if zeros
+        else ""
+    )
+    return [
+        _note(
+            "energy_to_sats",
+            G_FINDING,
+            "Energy-to-Sats: Zielgröße des Systems (ADR 026, ADR 029)",
+            f"{de(len(rows))} gemessene Mining-Tage mit Abrechnung,"
+            f" {de_day(str(rows[0][0]))} bis {de_day(str(rows[-1][0]))}."
+            f" Sats je kWh nach Monat (Summe Sats durch Summe kWh): {parts}."
+            f"{gap} Tage unter {de(MIN_MINING_KWH)} kWh sind Standby. Die"
+            " Annahme aus ADR 029, reiner Eco-Betrieb im Winter bringe mehr"
+            " Sats je kWh, bestätigen die Daten bisher nicht (Nachtrag"
+            " 15.11.2026). Der Wert hängt auch an Netzwerk-Difficulty und"
+            " Pool-Glück, nicht nur an der Steuerung: ein Monatsvergleich"
+            " zeigt keine Wirkung der Regeln.",
+        )
+    ]
 
 
 def _log_sources(conn: sqlite3.Connection) -> list[dict[str, str]]:
@@ -411,18 +498,10 @@ FIXED_NOTES: tuple[dict[str, str], ...] = (
         " wird) und Kapitel 7 (Limitationen). Für Kapitel 4 liefert die"
         " Merkliste nur den Befund zur Erklärschicht.",
     ),
-    _note(
-        "kap4_hausreserve",
-        G_OPEN,
-        "Kapitel 4.5 Saisonale Hausreserve ist überholt",
-        "Der Entwurf beschreibt die Grundlast 535 W als bewusste Abwägung."
-        " Seit ADR 033 (13.11.2026) gilt eine neue Formel mit 570 W,"
-        " Abendlücke 0,75 h, Wirkungsgrad 80 % und Boden 5 %. Entschieden"
-        " am 14.11.2026: Kapitel 4 beschreibt nur den aktuellen Stand (ADR"
-        " 033), die alte Formel entfällt. Ausnahme: Zeigt der Stimulus der"
-        " Studie Werte der alten Formel, nennt Kapitel 5 diese Werte so, wie"
-        " die Teilnehmenden sie sahen.",
-    ),
+    # 15.11.2026: "kap4_hausreserve" (Kap. 4.5 auf ADR 033) entfernt, erledigt
+    # am 14.11.2026 (Abgleich: Befund hausreserve "aktuell"). Offene Notizen
+    # hier haben kein Ablaufdatum: ist ein Punkt erledigt, die Notiz löschen,
+    # sonst meldet Bitsy ihn weiter als offen.
     _note(
         "sprachmodell",
         G_EXPLAIN,
@@ -435,6 +514,19 @@ FIXED_NOTES: tuple[dict[str, str], ...] = (
         " vorgeschlagen, Rohwert falsch gelesen. Einzelbeobachtung ohne"
         " Zweitprüfer, kein Gütemaß. Stützt die Architekturentscheidung: das"
         " Modell erklärt und schlägt vor, es schaltet nichts.",
+    ),
+    _note(
+        "saisonsperre_bug",
+        G_LIMIT,
+        "Regelfehler in der Produktion: Saison-Sperre (ADR 030)",
+        "Am 25.09.2026 lief ein Miner in Super, obwohl die Saison Super"
+        " sperrte. Ursache: die Schwelle wurde nur auf 100 % gedeckelt statt"
+        " unerreichbar gemacht, bei vollem Akku griff R3 trotzdem; R5 war"
+        " gleich gebaut. Behoben in den Home-Assistant-Regeln, nicht im"
+        " Python-Kern. Zeigt: deterministisch heißt nachvollziehbar, nicht"
+        " fehlerfrei. Der Fehler war nur auffindbar, weil Anzeige und"
+        " Schaltlogik sichtbar widersprachen. Super-Phasen vor dem 25.09.2026"
+        " in Übergangsmonaten sind kein gewolltes Regelverhalten.",
     ),
     _note(
         "winter",
@@ -460,7 +552,7 @@ FIXED_NOTES: tuple[dict[str, str], ...] = (
     ),
 )
 
-GROUP_ORDER = (G_FRAME, G_FINDING, G_METHOD, G_LIMIT, G_EXPLAIN, G_OPEN)
+GROUP_ORDER = (G_FRAME, G_SYSTEM, G_FINDING, G_METHOD, G_LIMIT, G_EXPLAIN, G_OPEN)
 
 
 def build(conn: sqlite3.Connection, cards: dict[str, Any]) -> list[dict[str, str]]:
@@ -469,6 +561,7 @@ def build(conn: sqlite3.Connection, cards: dict[str, Any]) -> list[dict[str, str
         _automation(cards.get("automation") or {})
         + _cards(cards)
         + _recording(conn)
+        + _sats(conn)
         + _log_sources(conn)
         + list(FIXED_NOTES)
     )

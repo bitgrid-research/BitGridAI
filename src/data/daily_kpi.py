@@ -147,7 +147,17 @@ def compute_day(conn: sqlite3.Connection, day: date) -> bool:
         (day.isoformat(),),
     ).fetchone()
     energy_to_sats = None
-    if settlement is not None and mining_kwh and mining_kwh > 0:
+    # 15.11.2026: earned_btc <= 0 is "not yet settled", never an earning of
+    # zero. 11 fallback rows (27.08.-15.09.2026) predate the filter in
+    # pool_settlement_sync and stay as an audit trail; they must not become
+    # energy_to_sats = 0 (ADR 029, Nachtrag 15.11.2026).
+    if (
+        settlement is not None
+        and settlement[0] is not None
+        and settlement[0] > 0
+        and mining_kwh
+        and mining_kwh > 0
+    ):
         energy_to_sats = round(settlement[0] * 1e8 / mining_kwh, 2)
 
     conn.execute(

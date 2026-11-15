@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from typing import Any, Optional, cast
 
 from src.core.signals import Signal
+from src.ops.env import require_env
 from .mqtt_client import MqttClient
 from .telemetry_ingest import TelemetryIngest
 
@@ -86,7 +87,7 @@ class CanaanAdapter:
     @staticmethod
     def _hosts_from_env() -> list[MinerHost]:
         """Fallback: MINER_HOST / MINER_API_PORT für Einzel-Miner-Betrieb."""
-        host = os.getenv("MINER_HOST", "192.168.1.50")
+        host = require_env("MINER_HOST")
         port = int(os.getenv("MINER_API_PORT", "4028"))
         worker_id = os.getenv("MINER_WORKER_ID", "")
         return [MinerHost(host=host, port=port, worker_id=worker_id)]

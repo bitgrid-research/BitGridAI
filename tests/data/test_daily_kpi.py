@@ -155,3 +155,22 @@ def test_compute_day_counts_only_real_switch_errors(db_conn):
     )
     assert day == 1
     assert per_miner == {"miner1": 0, "miner2": 1}
+
+
+def test_compute_day_zero_settlement_leaves_energy_to_sats_null(db_conn):
+    """A stored 0 (old fallback row, not yet settled) is no earning of zero."""
+    _insert_energy_block(db_conn, "2026-08-27T10:00:00", 1500)
+    db_conn.execute(
+        "INSERT INTO bitcoin_daily_settlement (day, earned_btc, pool_ths_avg,"
+        " btc_eur_price_approx, source, captured_at) VALUES"
+        " ('2026-08-27', 0.0, NULL, 60000.0,"
+        " 'ha:pool_btc_daily_log', '2026-08-28T02:00:01')"
+    )
+    db_conn.commit()
+
+    assert compute_day(db_conn, date(2026, 8, 27)) is True
+
+    row = db_conn.execute(
+        "SELECT energy_to_sats FROM daily_kpi WHERE day = '2026-08-27'"
+    ).fetchone()
+    assert row[0] is None

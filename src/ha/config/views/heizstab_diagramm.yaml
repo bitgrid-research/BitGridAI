@@ -10,7 +10,7 @@
 # group_by 5min statt 1h (wie im PV/Netz-Verlauf): der Heizstab taktet
 # hart im Minutenbereich, eine Stundenmittelung würde die Ein/Aus-Stufen
 # aus der Skizze zu einer sanften Welle verschmieren.
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Heizung".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "Heizung".
 # ═══════════════════════════════════════════════════════════════════════
 type: custom:apexcharts-card
 # 12.09.2026, s. views/heizung_oel_diagramm.yaml fuer die volle Begruendung

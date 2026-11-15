@@ -435,6 +435,8 @@ def drop_reviewed(points: list[str]) -> tuple[list[str], list[str]]:
 # write passages for the thesis (scientific integrity; every AI use is listed
 # in appendix J anyway).
 THESIS_ITEM_MAX = 220
+# Weekly meeting with Prof. Wallach: Wednesday (Artur, 14.11.2026).
+MEETING_WEEKDAY = 2
 THESIS_ITEMS_PER_SECTION = 6
 
 
@@ -492,10 +494,69 @@ def _sync_lines(sync: Any) -> list[str]:
     return lines if len(lines) > 1 else []
 
 
+def freeze_lines(check: Any) -> list[str]:
+    """Decisions due before the data freeze, as facts (not to be re-counted)."""
+    if not isinstance(check, dict) or not check.get("freeze"):
+        return ["VOR DEM DATENFREEZE: keine Prüfung im Export (freeze_check fehlt)."]
+    f = str(check["freeze"])
+    meetings = ", ".join(
+        f"Mi {str(m)[8:10]}.{str(m)[5:7]}." for m in check.get("meetings") or []
+    )
+    items = [i for i in check.get("items") or [] if isinstance(i, dict)]
+    lines = [
+        "VOR DEM DATENFREEZE (deterministisch geprüft, vollständige Liste, nichts"
+        " ergänzen): Datenfreeze am"
+        f" {f[8:10]}.{f[5:7]}.{f[:4]}, noch {check.get('days_left')} Tage."
+        f" Gespräche mit Prof. Wallach bis dahin: {meetings or 'keins mehr'}."
+        f" {len(items)} offene Entscheidungen; was danach festgelegt wird, ist"
+        " nicht präregistriert. Zuständig ist allein, wer hinter „am Zug“ steht;"
+        " „Ort“ ist nur die Fundstelle (live 15.11.2026 wurde Punkt 3 Annika"
+        " zugeschrieben, weil ihr Name im Ort stand). Keine Reihenfolge"
+        " zwischen Punkten erfinden, die hier nicht steht.",
+    ]
+    for n, it in enumerate(items, start=1):
+        text = str(it.get("text") or "")
+        if len(text) > THESIS_ITEM_MAX:
+            text = text[: THESIS_ITEM_MAX - 1].rstrip() + "…"
+        lines.append(
+            f"  {n}. [am Zug: {it.get('am_zug')}; Quelle: {it.get('quelle')};"
+            f" Ort: {it.get('where')}] {text}"
+        )
+    return lines
+
+
+def _detail_line(item: dict[str, Any]) -> str:
+    """One point of a plan step with who or what it waits for."""
+    text = str(item.get("text") or "")
+    if len(text) > THESIS_ITEM_MAX:
+        text = text[: THESIS_ITEM_MAX - 1].rstrip() + "…"
+    tags = []
+    if item.get("am_zug"):
+        who = str(item["am_zug"])
+        tags.append(who if who == "Claude" else f"wartet auf {who}")
+    for key, word in (("wartet_bis", "wartet bis"), ("frist", "Frist")):
+        if item.get(key):
+            d = str(item[key])
+            tags.append(f"{word} {d[8:10]}.{d[5:7]}.")
+    where = f"{item.get('where')}: " if item.get("where") else ""
+    return f"    - {where}{text}" + (f" [{'; '.join(tags)}]" if tags else "")
+
+
 def thesis_lines(
-    cards: dict[str, Any] | None, open_points: dict[str, Any] | None, now: datetime
+    cards: dict[str, Any] | None,
+    open_points: dict[str, Any] | None,
+    now: datetime,
+    detail_steps: tuple[str, ...] = (),
+    with_freeze: bool = False,
 ) -> list[str]:
-    """Context for the thesis tasks; empty if neither source is readable."""
+    """Context for the thesis tasks; empty if neither source is readable.
+
+    ``with_freeze``: add the decisions due before the data freeze
+    (thesis_sync.freeze_check, deterministic) for the freeze task.
+
+    ``detail_steps``: plan steps (keys) whose points are listed one by one,
+    for tasks that work on them (e.g. the meeting with Prof. Wallach).
+    """
     lines: list[str] = []
     if open_points:
         try:
@@ -507,6 +568,14 @@ def thesis_lines(
         lines.append(
             "MASTERARBEIT, OFFENE PUNKTE (aus notizen/offene_punkte.md, Stand der"
             f" Liste {open_points.get('list_stand') or '?'}, kopiert {exported})"
+        )
+        today = now.astimezone().date()
+        # Same rule as thesis_sync.next_meeting (that module is not on the
+        # server): weekly on MEETING_WEEKDAY, today included.
+        meeting = today + timedelta(days=(MEETING_WEEKDAY - today.weekday()) % 7)
+        lines.append(
+            f"- Nächstes Gespräch mit Prof. Wallach: Mi {meeting:%d.%m.%Y}"
+            " (wöchentlich mittwochs)."
         )
         if deadline:
             lines.append(
@@ -548,11 +617,16 @@ def thesis_lines(
                 )
             )
         lines += _sync_lines(open_points.get("sync"))
+        if with_freeze:
+            lines += freeze_lines(open_points.get("freeze_check"))
         plan = [s for s in open_points.get("plan") or [] if isinstance(s, dict)]
         if plan:
             lines.append(
                 "FAHRPLAN (feste Reihenfolge aus thesis_sync.plan, nicht"
-                " umsortieren, nur kommentieren):"
+                " umsortieren, nur kommentieren). Zustände: jetzt = dran;"
+                " bereit = darf jederzeit angefangen werden, die Woche ist nur"
+                " ein Soll; parallel = läuft nebenher; wartet = auf Datum,"
+                " Person oder Daten; gesperrt = erst nach dem Datenfreeze:"
             )
             for no, step in enumerate(plan, start=1):
                 state = str(step.get("state"))
@@ -562,10 +636,36 @@ def thesis_lines(
                     state += f" bis {until[8:10]}.{until[5:7]}."
                 elif state == "wartet" and step.get("wait_who"):
                     state += f" auf {step['wait_who']}"
+                # Ticked parts (analysis) are shown on the card, not work.
+                items = [
+                    i
+                    for i in step.get("items") or []
+                    if not (isinstance(i, dict) and i.get("erledigt"))
+                ]
+                open_n = step.get("offen", len(items))
+                size = f"{open_n} offen" + (
+                    f", {step['prosa']} Prosa-Entwürfe" if step.get("prosa") else ""
+                )
+                for it in items:
+                    if isinstance(it, dict) and it.get("frist"):
+                        f = str(it["frist"])
+                        lines.append(
+                            f"  FRIST bis {f[8:10]}.{f[5:7]}.: {it.get('text')}"
+                        )
+                detail = (
+                    [
+                        _detail_line(it)
+                        for it in items
+                        if isinstance(it, dict) and not it.get("siehe_auch")
+                    ]
+                    if step.get("key") in detail_steps
+                    else []
+                )
                 lines.append(
                     f"- {no}. [{state}] {step.get('title')}"
-                    f" ({len(step.get('items') or [])} Punkte; {step.get('who')})"
+                    f" ({size}; {step.get('who')})"
                 )
+                lines += detail
     notes = (cards or {}).get("thesis") or []
     if notes:
         lines.append(

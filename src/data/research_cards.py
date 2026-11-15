@@ -563,7 +563,12 @@ def efficiency_trend(conn: sqlite3.Connection) -> dict[str, Any]:
     except sqlite3.OperationalError:
         rows = []
     groups: dict[str, dict[str, list[float]]] = {}
+    # Same day rule as the other cards (15.11.2026): days with blocks that
+    # were stored but not measured (filled-in values) are left out.
+    skip = unmeasured_days(conn)
     for miner, day, wpt in rows:
+        if str(day)[:10] in skip:
+            continue
         groups.setdefault(str(miner), {}).setdefault(str(day)[:7], []).append(
             float(wpt)
         )
@@ -762,6 +767,13 @@ def build_cards(
         c = months[month]
         target = table[month]["stop"]
         at_stop, holds = rule_holds(c, target) if c["mined_nights"] else (0, False)
+        old_formula = str(c.get("last_day") or "") < RESERVE_FORMULA_V2_SINCE
+        # 15.11.2026: before ADR 033 another formula set the stop; today's
+        # target says nothing about those nights. The measured stop (SoC at
+        # the last mining block, median) is what applied then.
+        stop_measured = (
+            round(statistics.median(c["stop_socs"])) if c["stop_socs"] else None
+        )
         month_rows.append(
             {
                 "month": month,
@@ -769,7 +781,12 @@ def build_cards(
                 "nights": c["nights"],
                 "mined_nights": c["mined_nights"],
                 "at_stop": at_stop,
-                "rule_holds": holds if c["mined_nights"] >= MIN_MINED_NIGHTS else None,
+                "rule_holds": (
+                    holds
+                    if c["mined_nights"] >= MIN_MINED_NIGHTS and not old_formula
+                    else None
+                ),
+                "stop_measured": stop_measured,
                 "load_w": c["load_w"],
                 "morning_soc": c["morning_soc"],
                 "morning_after_mining": c["morning_after_mining"],
@@ -778,8 +795,7 @@ def build_cards(
                 "verdict": reserve_verdict(c),
                 # The month's last night ran before ADR 033: its verdict
                 # describes the old formula (card shows it in past tense).
-                "before_formula_v2": str(c.get("last_day") or "")
-                < RESERVE_FORMULA_V2_SINCE,
+                "before_formula_v2": old_formula,
             }
         )
     recent = []
@@ -792,6 +808,7 @@ def build_cards(
                 "stop_block": n["stop_block"],
                 "stop_soc": n["stop_soc"],
                 "stop_target": table[month]["stop"],
+                "before_formula_v2": n["day"] < RESERVE_FORMULA_V2_SINCE,
                 "eve_soc": n["eve_soc"],
                 "morning_soc": n["morning_soc"],
                 "hours": round(n["hours"], 1),

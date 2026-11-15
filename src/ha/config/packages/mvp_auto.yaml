@@ -221,7 +221,7 @@ mvp_auto:
       initial: true
 
     # Aufklapp-Zustand der "Übersicht"-Gruppen im Steuerung-Tab
-    # (bitgrid_dashboard_v3.yaml, Grid-Area "regel"). Reiner UI-Zustand,
+    # (bitgrid_dashboard_v3_3.yaml, Grid-Area "regel"). Reiner UI-Zustand,
     # keine Steuerlogik — analog zu den miner1/2_detail_*-Helfern in
     # packages/avalonq_miner1.yaml. Ersetzt seit 26.08.2026 das einzelne
     # mvp_regelschwellen_detail (eine Liste mit 11 Punkten) durch sechs

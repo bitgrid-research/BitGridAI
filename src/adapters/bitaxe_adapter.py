@@ -35,9 +35,13 @@ class BitaxeAdapter:
         poll_interval_sec: float | None = None,
     ) -> None:
         self._ingest = ingest
-        self._host = (
-            host if host is not None else os.getenv("BITAXE_HOST", "192.168.1.60")
-        )
+        # Host only from the caller or .env, never a code default (no IPs in git).
+        resolved = host if host is not None else os.getenv("BITAXE_HOST")
+        if not resolved:
+            raise ValueError(
+                "BITAXE_HOST is not set: add it to .env or pass host= explicitly"
+            )
+        self._host = resolved
         self._port = port if port is not None else int(os.getenv("BITAXE_PORT", "80"))
         self._poll_interval_sec = (
             poll_interval_sec

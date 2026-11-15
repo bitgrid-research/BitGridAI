@@ -250,9 +250,9 @@ def test_thesis_lines_carry_the_sync_check_as_facts() -> None:
     ]
     open_points = {"deadline": "2027-01-15", "sync": sync, "plan": plan}
     text = "\n".join(br.thesis_lines(None, open_points, NOW))
-    assert "- 1. [jetzt] Veraltete Stellen (1 Punkte; Claude)" in text
+    assert "- 1. [jetzt] Veraltete Stellen (1 offen; Claude)" in text
     # A waiting step names its date, so the model does not read it as work now.
-    assert "- 2. [wartet bis 17.11.] Stellen belegen (1 Punkte; Claude)" in text
+    assert "- 2. [wartet bis 17.11.] Stellen belegen (1 offen; Claude)" in text
     assert "VERALTET 04_system:343 (Saisonale Hausreserve): zitiert ADR 028" in text
     assert "ZAHLEN GEÄNDERT: Befund schaltwechsel in 04.tex:9" in text
     assert "noch nicht im Text: ueberschuss" in text
@@ -261,4 +261,62 @@ def test_thesis_lines_carry_the_sync_check_as_facts() -> None:
     # No sync block -> no heading without content.
     assert "STAND-ABGLEICH" not in "\n".join(
         br.thesis_lines(None, {"deadline": "2027-01-15", "sync": {}}, NOW)
+    )
+
+
+def test_thesis_lines_name_the_next_meeting_and_list_detail_steps() -> None:
+    open_points = {
+        "deadline": "2027-01-15",
+        "sync": {},
+        "plan": [
+            {
+                "key": "wallach",
+                "title": "Fragen an Prof. Wallach",
+                "who": "Artur mit Prof. Wallach",
+                "state": "parallel",
+                "items": [
+                    {"text": "Ethikvotum nötig?", "where": "Prof. Wallach"},
+                    {"text": "Titel", "where": "Hochschule", "siehe_auch": "1"},
+                    {"text": "H2 streichen", "where": "f.tex:1", "am_zug": "Wallach"},
+                ],
+            }
+        ],
+    }
+    # NOW is a Saturday or any day: the meeting is the next Wednesday.
+    plain = "\n".join(br.thesis_lines(None, open_points, NOW))
+    assert "Nächstes Gespräch mit Prof. Wallach: Mi" in plain
+    assert "Ethikvotum" not in plain  # points only when asked for
+    detail = "\n".join(br.thesis_lines(None, open_points, NOW, ("wallach",)))
+    assert "    - Prof. Wallach: Ethikvotum nötig?" in detail
+    assert "    - f.tex:1: H2 streichen [wartet auf Wallach]" in detail
+    assert "Titel" not in detail  # counted elsewhere, not repeated
+
+
+def test_freeze_lines_number_the_fixed_list() -> None:
+    check = {
+        "freeze": "2026-11-29",
+        "days_left": 15,
+        "meetings": ["2026-11-18", "2026-11-25"],
+        "items": [
+            {
+                "text": "H2 streichen",
+                "where": "f.tex:1",
+                "am_zug": "Wallach",
+                "quelle": "Präregistrierung",
+            },
+        ],
+    }
+    lines = br.freeze_lines(check)
+    assert "Datenfreeze am 29.11.2026, noch 15 Tage" in lines[0]
+    assert "Mi 18.11., Mi 25.11." in lines[0]
+    assert (
+        lines[1]
+        == "  1. [am Zug: Wallach; Quelle: Präregistrierung; Ort: f.tex:1] H2 streichen"
+    )
+    assert "freeze_check fehlt" in br.freeze_lines(None)[0]
+    # Only the freeze task gets the list.
+    op = {"deadline": "2027-01-15", "sync": {}, "freeze_check": check}
+    assert "VOR DEM DATENFREEZE" not in "\n".join(br.thesis_lines(None, op, NOW))
+    assert "VOR DEM DATENFREEZE" in "\n".join(
+        br.thesis_lines(None, op, NOW, with_freeze=True)
     )

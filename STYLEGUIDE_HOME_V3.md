@@ -4,7 +4,7 @@ Abgeleitet aus dem Live-Zustand des Home-Tabs (`/bitgridai-v3/home`), Stand
 16.09.2026. Beschreibt die **effektiv gerenderten** Werte, nicht die
 deklarierten: wo beides auseinanderfällt, steht die Ursache dabei.
 
-Quelldateien, alle unter `src/ha/config/`: `bitgrid_dashboard_v3.yaml`
+Quelldateien, alle unter `src/ha/config/`: `bitgrid_dashboard_v3_3.yaml`
 (View `home`, Zeilen 100 bis 1450), `themes/bitgrid.yaml`,
 `button_card_templates.yaml` (`group_header`), `views/steuerung_quick.yaml`,
 `views/energieverlauf_tag.yaml`, `views/finanz_bilanz.yaml`,

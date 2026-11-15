@@ -12,7 +12,7 @@
 # stats_pool_monthly.yaml bleibt unbenutzt im Repo liegen (gleiche Praxis wie
 # stats_retro_vergleich.yaml).
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "BitcoinInfo".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "BitcoinInfo".
 # ═══════════════════════════════════════════════════════════════════════
 # height 210 statt der Vorgabe 260 (27.09.2026, Nutzer-Wunsch): die Karte soll
 # so hoch sein wie "Mining Verlauf" daneben in derselben Grid-Zeile. Dessen

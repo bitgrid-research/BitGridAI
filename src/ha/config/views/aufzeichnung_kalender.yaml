@@ -14,14 +14,14 @@
 # Abruf alle angemeldeten Karten neu zeichnen laesst. Steht die Statuskarte
 # nicht auf derselben Seite, bleibt der Kalender auf "Lade ...".
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Forschung",
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml → Tab "Forschung",
 # rechte Spalte oben.
 # ═══════════════════════════════════════════════════════════════════════
 type: vertical-stack
 card_mod:
   style: |
     /* 14.11.2026: no shell of its own any more. The calendar is the middle
-       part of the one card "Datenaufzeichnung" (bitgrid_dashboard_v3.yaml,
+       part of the one card "Datenaufzeichnung" (bitgrid_dashboard_v3_3.yaml,
        area g1r), whose inner stack draws background, border and radius. Only
        the divider to the status part above remains here. */
     #root {

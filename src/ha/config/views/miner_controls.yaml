@@ -887,7 +887,7 @@ cards:
 
           # ─────────────────────────────────────────
           # LOG — Begruendung aus mvp_miner1_watchdog (mvp_auto.yaml), vorher
-          # als eigene markdown-Karte unter beiden Minern (bitgrid_dashboard_v3.yaml,
+          # als eigene markdown-Karte unter beiden Minern (bitgrid_dashboard_v3_3.yaml,
           # 27.08.2026) angezeigt, jetzt als 6. Akkordeon je Miner (31.08.2026,
           # Nutzer-Wunsch: konsistent mit den anderen 5 Detail-Listen).
           # ─────────────────────────────────────────

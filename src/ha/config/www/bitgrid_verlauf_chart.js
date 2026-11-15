@@ -121,7 +121,7 @@ const SERIES_DEFS = [
     // 12.09.2026, Bug gefunden: #C9814A war die gedriftete themes/bitgrid.
     // yaml-Farbe (s. dortiger Kommentar), nicht die dokumentierte Geraete/
     // Rosa-Rolle (bgai-geraete-v3, DESIGN.md im Repo-Root), die Hausverbrauch laut Kommentar in
-    // bitgrid_dashboard_v3.yaml (PFCP-Home-Ring) absichtlich teilen soll.
+    // bitgrid_dashboard_v3_3.yaml (PFCP-Home-Ring) absichtlich teilen soll.
     // 16.09.2026: Rolle auf #f49891 umgestellt, zieht mit der Geraete-Rolle mit.
     color: "#f49891",
     yaxis: "power",

@@ -211,7 +211,7 @@ settings_pill:
     card:
       # var()-Fallback = alter Literal-Wert, damit v1 (kennt --bgai-pill-bg-v3
       # nicht) unveraendert bleibt; v3 ueberschreibt die Variable pro View
-      # (bitgrid_dashboard_v3.yaml :host, 12.09.2026 Hell-Umbau).
+      # (bitgrid_dashboard_v3_3.yaml :host, 12.09.2026 Hell-Umbau).
       - background: "var(--bgai-pill-bg-v3)"
       - border-radius: "9px"
       - padding: "7px 8px"
@@ -268,7 +268,7 @@ settings_row:
     action: more-info
   # Hover-Kommentar s. settings_pill oben (identisches Muster). Verifiziert
   # (11.09.2026): keine der 26 settings_row(-icon)-Nutzungen in
-  # bitgrid_dashboard_v3.yaml setzt einen eigenen card_mod, der das hier
+  # bitgrid_dashboard_v3_3.yaml setzt einen eigenen card_mod, der das hier
   # ueberschreiben wuerde.
   card_mod:
     style: |
@@ -317,7 +317,7 @@ settings_row:
 
 # Icon-Ergaenzung zu settings_row, additiv per `template: [settings_row,
 # settings_row_icon]` kombiniert (25.08.2026, Nutzer-Feedback: Zeilen im
-# Einstellungen-Tab wirkten ohne Icon leer). Nur in bitgrid_dashboard_v3.yaml
+# Einstellungen-Tab wirkten ohne Icon leer). Nur in bitgrid_dashboard_v3_3.yaml
 # genutzt: settings_row selbst bleibt unveraendert (show_icon: false), v2
 # nutzt weiterhin nur settings_row pur und ist von dieser Ergaenzung nicht
 # betroffen (gleiches Isolationsprinzip wie beim v3-Farbschema).
@@ -389,7 +389,7 @@ group_header:
       # pro Art").
       # --bg-fs-group-header mit Fallback auf --bg-fs-body (02.09.2026,
       # Nutzer-Wunsch "Ueberschriften in jedem Tab wie Home"): sollte ueber
-      # eine View-:host-Umleitung in bitgrid_dashboard_v3.yaml wirken — genau
+      # eine View-:host-Umleitung in bitgrid_dashboard_v3_3.yaml wirken — genau
       # dieser Mechanismus erreicht tief verschachtelte Custom-Cards laut
       # 12.09.2026-Befund (s. DESIGN.md im Repo-Root) nachweislich NICHT, v1 und v3 landen
       # hier also faktisch schon auf demselben (Root-)Wert. bgai-header-
@@ -446,6 +446,119 @@ group_header:
               stroke-width: 1.5px;
               paint-order: stroke fill;
             }
+
+# Gruppentitel mit KI-Knoepfen (15.11.2026, Nutzer-Wunsch "mehr LLM-Knoepfe
+# fuer die Karten, mit denen ich Infos sammle"). Wie group_header, rechts drei
+# Knoepfe: Daten pruefen, Auffaelligkeiten, Karte verbessern. Ein Tipp setzt
+# nur script.bithamster_auftrag ("<modus>@<card_key>"); der Dienst
+# bithamster_ki --watch baut den Kontext NUR aus dieser Karte und schreibt
+# www/bithamster_ask.json. Die Antwort klappt unter dem Titel auf, solange sie
+# zu dieser Karte gehoert und juenger als 60 min ist. Nur lesend: kein Knopf
+# schaltet etwas am Energiesystem (kein browser_mod im Setup, daher kein Popup).
+# variables.card_key: Schluessel aus bithamster_ki.CARD_KEYS.
+group_header_ki:
+  template: group_header
+  triggers_update:
+    - input_text.bithamster_auftrag
+  variables:
+    card_key: ""
+  styles:
+    grid:
+      - grid-template-areas: '"i n k" "a a a"'
+      - grid-template-columns: min-content 1fr auto
+    custom_fields:
+      k:
+        - justify-self: end
+        - align-self: center
+      a:
+        - justify-self: stretch
+        - width: 100%
+        - text-align: left
+        - white-space: normal
+  custom_fields:
+    k:
+      card:
+        type: horizontal-stack
+        cards:
+          - &ki_btn
+            type: custom:button-card
+            icon: mdi:database-search-outline
+            show_name: false
+            tap_action:
+              action: call-service
+              service: script.bithamster_auftrag
+              service_data:
+                auftrag: "[[[ return 'karte_daten@' + variables.card_key ]]]"
+            styles:
+              card:
+                - background: rgba(0,0,0,0.35)
+                - border: 1px solid rgba(255,255,255,0.18)
+                - border-radius: 10px
+                - box-shadow: none
+                - padding: 4px
+                - width: 34px
+                - height: 34px
+                - margin-left: 6px
+              icon:
+                - width: 22px
+                - color: var(--bgai-erklaerung-v3, #A2EFED)
+          - <<: *ki_btn
+            icon: mdi:magnify-scan
+            tap_action:
+              action: call-service
+              service: script.bithamster_auftrag
+              service_data:
+                auftrag: "[[[ return 'karte_auffaellig@' + variables.card_key ]]]"
+          - <<: *ki_btn
+            icon: mdi:lightbulb-on-outline
+            tap_action:
+              action: call-service
+              service: script.bithamster_auftrag
+              service_data:
+                auftrag: "[[[ return 'karte_verbessern@' + variables.card_key ]]]"
+    a: >
+      [[[
+        const key = variables.card_key;
+        const reqId = String(states['input_text.bithamster_auftrag']?.state || '');
+        const reqTask = reqId.split('|')[0];
+        const mine = reqTask.endsWith('@' + key);
+        if (!window._bgHamsterAsk) window._bgHamsterAsk = { data: null, fetchedAt: 0, busy: false, cards: new Set(), timer: null };
+        const S = window._bgHamsterAsk;
+        S.cards.add(this);
+        const pending = mine && (!S.data || S.data.request_id !== reqId);
+        const redraw = () => S.cards.forEach(c => {
+          if (!c.isConnected) { S.cards.delete(c); return; }
+          try { c._updateTimerMS = Date.now(); c.requestUpdate && c.requestUpdate(); } catch (e) {}
+        });
+        if (!S.busy && Date.now() - S.fetchedAt > (pending ? 2500 : 5 * 60 * 1000)) {
+          S.busy = true;
+          fetch('/local/bithamster_ask.json?v=' + Date.now(), { cache: 'no-store' })
+            .then(r => r.ok ? r.json() : null).catch(() => null)
+            .then(d => { S.data = d; S.fetchedAt = Date.now(); S.busy = false; redraw(); });
+        }
+        if (pending && !S.timer) S.timer = setTimeout(() => { S.timer = null; redraw(); }, 3000);
+        const box = (inner) => `<div style="margin:8px 0 2px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,0.55);border-left:3px solid var(--bgai-erklaerung-v3, #A2EFED);font-size:var(--bg-fs-body, 1rem);font-weight:400;text-transform:none;letter-spacing:normal;line-height:1.4;color:var(--primary-text-color);">${inner}</div>`;
+        const esc = (t) => String(t || '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+        if (pending) return box('<ha-icon icon="mdi:robot-happy-outline" style="--mdc-icon-size:18px;"></ha-icon> Bitsy denkt nach …');
+        const d = S.data;
+        if (!d || !String(d.task || '').endsWith('@' + key)) return '';
+        const ageMin = (Date.now() - Date.parse(d.generated_at)) / 60000;
+        if (!(ageMin < 60)) return '';
+        if (!d.ok || !d.answer) return box(`${esc(d.label)}: hat nicht geklappt. ${esc(d.error)}`);
+        const a = d.answer;
+        const pts = (a.punkte || []).map(p => `<li style="margin-top:4px;">${esc(p)}</li>`).join('');
+        const ck = d.checks || {};
+        const un = ck.unverified_numbers || [];
+        const warn = un.length
+          ? `<div style="margin-top:6px;font-size:var(--bg-fs-label);color:var(--bg-color-heat, #FF7043);">⚠ Nicht im Kontext, bitte prüfen: ${un.map(esc).join(', ')}</div>`
+          : `<div style="margin-top:6px;font-size:var(--bg-fs-label);opacity:0.7;">✓ Alle Zahlen stehen im Kontext</div>`;
+        return box(`<div style="font-size:var(--bg-fs-label);opacity:0.75;">${esc(d.label)} · Bitsy · ${esc(d.model)} · vor ${Math.max(0, Math.round(ageMin))} min</div>
+          <div style="font-weight:700;margin-top:4px;">${esc(a.headline)}</div>
+          <div style="margin-top:4px;">${esc(a.text)}</div>
+          ${pts ? `<ul style="margin:4px 0 0;padding-left:18px;">${pts}</ul>` : ''}
+          ${warn}
+          <div style="margin-top:4px;font-size:var(--bg-fs-label);opacity:0.7;">Nur Vorschlag, schaltet nichts. Du entscheidest.</div>`);
+      ]]]
 
 # Geräte-Kachel (Tab "Geräte"): Icon + Name + aktuelle Leistung + Tages-kWh.
 # entity = Leistungs-Sensor des Plugs; variables.energy_daily = Entity-ID des

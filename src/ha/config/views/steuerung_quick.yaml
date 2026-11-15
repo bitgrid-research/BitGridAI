@@ -11,10 +11,10 @@
 # 23.08.2026): die beiden Miner-Karten haben schon je ihre eigene Glasbox,
 # ein zusätzlicher äußerer Rahmen + "Steuerung"-Titel war doppelt gerahmt.
 # Navigation in den vollen Tab bleibt über die Tab-Leiste oben (Hammer-Icon).
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml, Tab "Home".
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml, Tab "Home".
 # KEIN flex:1/Höhenangleichung an Finanzen — zweiter Fehlversuch (02.09.2026,
 # Nutzer-Feedback "kaputt, zu viel Padding nach unten"): identische Lehre wie
-# bei Energiefluss/PFCP am selben Tag (s. bitgrid_dashboard_v3.yaml) —
+# bei Energiefluss/PFCP am selben Tag (s. bitgrid_dashboard_v3_3.yaml) —
 # erzwungenes Strecken auf einen deutlich hoeheren Partner sieht bei diesem
 # kompakten Button-Panel nicht gut aus, auch nicht mit justify-content:
 # space-between statt :center. Miner-Boxen bleiben bei ihrer natuerlichen
@@ -41,7 +41,7 @@ cards:
                  Strecken auf einen viel groesseren Partner funktioniert bei
                  diesen Karten nicht, unabhaengig von der Technik. Zurueck
                  zur natuerlichen Hoehe (plus align-self:start auf g3l, s.
-                 bitgrid_dashboard_v3.yaml). */
+                 bitgrid_dashboard_v3_3.yaml). */
               height: fit-content !important;
               display: flex !important;
               flex-direction: column !important;
@@ -65,7 +65,7 @@ cards:
             # unveraendert. Feste Card-Hoehe (Template: 56px) mit erhoeht,
             # sonst schneidet die groessere Schrift oben/unten ab. Diese
             # Zeile ist NICHT an Finanzen gestretcht (align-self:start, s.
-            # bitgrid_dashboard_v3.yaml g3l), darum kein Ueberlauf-Risiko wie
+            # bitgrid_dashboard_v3_3.yaml g3l), darum kein Ueberlauf-Risiko wie
             # bei Hamster/Wetter.
             # 26.09.2026, Nutzer-Befund "Schatten fehlt" (Schrift + Icons der
             # ganzen Miner-Karte): die Icons referenzierten --bgai-header-
@@ -167,7 +167,7 @@ cards:
               # bitgrid_card_shape.js erzwungenem border-radius, dadurch die
               # gerundeten Enden. Unabhaengige Linie stattdessen, exakt
               # dasselbe Pseudo-Element-Muster wie beim Wetter-Uhr-Divider
-              # (bitgrid_dashboard_v3.yaml, clock-weather-card-today::before)
+              # (bitgrid_dashboard_v3_3.yaml, clock-weather-card-today::before)
               # — auf #root des horizontal-stacks selbst, komplett losgeloest
               # vom Radius/Box-Model der einzelnen Buttons. ".": |-Punktform
               # noetig (nicht der einfache style:|-String), s. Begruendung
@@ -534,7 +534,7 @@ cards:
             # unveraendert. Feste Card-Hoehe (Template: 56px) mit erhoeht,
             # sonst schneidet die groessere Schrift oben/unten ab. Diese
             # Zeile ist NICHT an Finanzen gestretcht (align-self:start, s.
-            # bitgrid_dashboard_v3.yaml g3l), darum kein Ueberlauf-Risiko wie
+            # bitgrid_dashboard_v3_3.yaml g3l), darum kein Ueberlauf-Risiko wie
             # bei Hamster/Wetter.
             # 26.09.2026, nur Schatten (keine Outline), Werte per Alias aus
             # den Ankern am Miner-#1-Header, s. dort fuer die Begruendung.
@@ -602,7 +602,7 @@ cards:
               # bitgrid_card_shape.js erzwungenem border-radius, dadurch die
               # gerundeten Enden. Unabhaengige Linie stattdessen, exakt
               # dasselbe Pseudo-Element-Muster wie beim Wetter-Uhr-Divider
-              # (bitgrid_dashboard_v3.yaml, clock-weather-card-today::before)
+              # (bitgrid_dashboard_v3_3.yaml, clock-weather-card-today::before)
               # — auf #root des horizontal-stacks selbst, komplett losgeloest
               # vom Radius/Box-Model der einzelnen Buttons. ".": |-Punktform
               # noetig (nicht der einfache style:|-String), s. Begruendung

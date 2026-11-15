@@ -13,7 +13,7 @@
 # sensor.mullabfuhr_* (Schluessel YYYY-MM-DD), synchron gelesen, kein
 # Netzabruf. Namen/Farben dort begruendet und hier identisch gehalten.
 #
-# Eingebunden via !include in bitgrid_dashboard_v3.yaml → Tab "Abfall",
+# Eingebunden via !include in bitgrid_dashboard_v3_3.yaml → Tab "Abfall",
 # linke Spalte.
 # ═══════════════════════════════════════════════════════════════════════
 type: vertical-stack

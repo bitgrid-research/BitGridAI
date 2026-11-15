@@ -42,7 +42,7 @@ const SHAPED_CARDS = new Set([
 // Element statt :host, dann Idle-Stufe ganz weggelassen) blieb die Geraete-
 // Bubble grau ueberlagert, Root Cause nie gefunden. Alle Individual-Bubbles
 // (Miner #1/#2, Heizstab, Geraete) zeigen jetzt nur noch ihre statische
-// Farbe aus der Lovelace-Config (bitgrid_dashboard_v3.yaml, individual.
+// Farbe aus der Lovelace-Config (bitgrid_dashboard_v3_3.yaml, individual.
 // color), keine dynamische Einfaerbung mehr.
 
 // clock-weather-card: zwei Instanzen, getrennt nach Sektion. Welche eine
@@ -126,10 +126,10 @@ const CLOCK_FORECAST_CSS = `
 // 2x2-Grid pro Spalte umgebaut (Icon oben ueber volle Breite, Uhrzeit+Temperatur
 // nebeneinander in der unteren Zeile) — dieselbe display:contents/Grid-Technik
 // wie beim Today-Bereich der Uhr-Karte (styles.ts kennt kein natives Reordering,
-// s. bitgrid_dashboard_v3.yaml). Groesse/Farbe jetzt ueber dieselben Tokens wie
+// s. bitgrid_dashboard_v3_3.yaml). Groesse/Farbe jetzt ueber dieselben Tokens wie
 // die uebrige v3-Typo-Skala (--bg-fs-body/--secondary-/--primary-text-color)
 // statt freihaendiger rem-Werte — Custom Properties durchqueren den Shadow-Root
-// problemlos, sind View-weit gesetzt (bitgrid_dashboard_v3.yaml) und muessen
+// problemlos, sind View-weit gesetzt (bitgrid_dashboard_v3_3.yaml) und muessen
 // hier nur referenziert werden. Temperatur zunaechst auf --bg-fs-title (wie der
 // grosse Stat-Wert der Hamster-Karte) versucht, Nutzer-Feedback direkt danach:
 // zu gross im Verhaeltnis zur Uhrzeit — beide jetzt einheitlich --bg-fs-body,
@@ -137,11 +137,11 @@ const CLOCK_FORECAST_CSS = `
 // 26.09.2026, Nutzer-Wunsch "Uhrzeit/Temperatur im Grauton der Hamster-
 // Erklaerung": Label, Temperatur und Trenner jetzt alle auf
 // --secondary-text-color, exakt dasselbe Token wie der Erklaertext unter der
-// Hamster-Ueberschrift (bitgrid_dashboard_v3.yaml, BitGridAI-Karte, "sub").
+// Hamster-Ueberschrift (bitgrid_dashboard_v3_3.yaml, BitGridAI-Karte, "sub").
 // Ein Zwischenschritt mit --disabled-text-color (40 % Deckkraft) war live zu
 // dunkel. Greift nur, weil der fruehere lokale Override
 // --secondary-text-color:#F5F8FC am :host der weather-forecast-Karte
-// (bitgrid_dashboard_v3.yaml) entfernt wurde, sonst loeste das Token dort
+// (bitgrid_dashboard_v3_3.yaml) entfernt wurde, sonst loeste das Token dort
 // weiter auf Weiss auf.
 const FORECAST_CSS = `
   .forecast > div{display:grid!important;height:100%!important;grid-template-columns:auto auto;grid-template-rows:auto auto;grid-template-areas:"icon icon" "label temp";justify-items:center!important;align-items:center!important;justify-content:center!important;align-content:center!important;column-gap:6px!important;}
@@ -1027,7 +1027,7 @@ setInterval(apply, 5000);
 // werden sonst erst beim ersten Wechsel geladen, die Grundrisse sind je 1,2 bis
 // 1,6 MB PNG (auf dem Wandtablet ueber WLAN sichtbar). Einmal nach dem
 // Seitenaufbau in den Browser-Cache vorladen. Die URLs muessen exakt denen in
-// views/floorplan.yaml, views/garage_floorplan.yaml und bitgrid_dashboard_v3.yaml
+// views/floorplan.yaml, views/garage_floorplan.yaml und bitgrid_dashboard_v3_3.yaml
 // entsprechen (inkl. ?version/?v), sonst greift der Cache nicht; nach einem
 // Bildwechsel dort auch hier anpassen.
 const PRELOAD_IMAGES = [
@@ -1084,7 +1084,7 @@ function reportStudyTablet() {
   if (!hass || !hass.states[STUDY_PULSE] || !hass.states[STUDY_SHOWN]) return;
   if (!location.pathname.startsWith("/bitgridai-home/") || document.hidden) return;
   // Hamster-Karte: Bild und Ueberschrift so, wie sie gerade im DOM stehen
-  // (bitgrid_dashboard_v3.yaml: Bild-Spalte, Trennstrich, Text-Spalte).
+  // (bitgrid_dashboard_v3_3.yaml: Bild-Spalte, Trennstrich, Text-Spalte).
   const img = findHamsterCard(ha);
   const row = img && img.parentElement && img.parentElement.parentElement;
   const head = row && row.children[2] && row.children[2].children[0];

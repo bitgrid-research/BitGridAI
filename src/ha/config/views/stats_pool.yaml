@@ -2,7 +2,7 @@
 # Linke Spalte Statistik-Tab: Energie-Status + F2Pool Live-Snapshot.
 # Entities: siehe energy_status_bar.yaml und stats_f2pool_live.yaml.
 # Genutzt von bitgrid_dashboard_v2.yaml (Tab Statistik, Spalte links).
-# bitgrid_dashboard_v3.yaml hat diese Spalte 24.08.2026 auf Nutzer-Wunsch
+# bitgrid_dashboard_v3_3.yaml hat diese Spalte 24.08.2026 auf Nutzer-Wunsch
 # entfernt, diese Datei bleibt fuer v2 bestehen.
 # ═══════════════════════════════════════════════════════════════════════
 type: vertical-stack

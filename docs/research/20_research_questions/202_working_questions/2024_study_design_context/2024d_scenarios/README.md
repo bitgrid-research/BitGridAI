@@ -41,9 +41,9 @@ Alle Werte beziehen sich auf die Default-Schwellen der `RuleEngineConfig`:
 **Ziel:** Das **Energielabor** bildet den **Realbetrieb maßstabsgetreu** nach — die kleinen
 Labor-Miner (**Bitaxe Gamma, NerdQaxe++**) ahmen die Steuerung der **2× Avalon Q** nach:
 dasselbe **SoC-Band-Schema** mit denselben **Betriebsmodi** (Eco/Standard/Super). Die
-**SoC-Schwellen (50/58/80/90 %) bleiben identisch** (dimensionslos); nur die **Leistungswerte**
-werden vom kW-Bereich der Avalon Q auf den Watt-Bereich der Lab-Miner **heruntergerechnet** —
-stufenweise über die drei Modi.
+**SoC-Schwellen (50/58/80/90 %) bleiben identisch** (dimensionslos); nur die **Stufenleistung** der
+Lab-Miner ist übertragen: auf die gemessenen Avalon-Q-Anteile kalibriert (16.10.2026, Tabelle
+unten), nicht per Dreisatz heruntergerechnet.
 
 Der **deterministische Kern** (`RuleEngineConfig`, identisch im HA-„Rule Lab" `rule_lab.yaml`)
 nutzt für die Studie weiterhin die **kW-Überschuss-Logik** (R1, Default `strategy="surplus"`);
@@ -68,24 +68,28 @@ Gegenüberstellung der Werte:
 
 > **Einordnung:** Lab und Realbetrieb sollen **strukturgleich** sein (gleiche Steuerung, nur
 > leistungsskaliert) — keine bewusste Divergenz, sondern ein verkleinertes Abbild. Die
-> SoC-Schwellen sind **1:1** übernommen, die Leistungs- und PV-Schwellen sind der **einzige**
-> skalierte Anteil. Der **Kern** unterstützt das SoC-Band-Schema inzwischen **additiv** als wählbare
+> SoC-Schwellen sind **1:1** übernommen, ebenso die PV-Startschwelle (6000 W, abgespielte
+> Produktivwerte). Einziger übertragener Anteil ist die Stufenleistung der Labor-Miner
+> (Kalibrierung 16.10.2026, Tabelle unten). Der **Kern** unterstützt das SoC-Band-Schema inzwischen **additiv** als wählbare
 > Strategie (`RuleEngineConfig(strategy="soc_band")`); Default bleibt die Surplus-kW-Logik, daher läuft
 > die Studie weiterhin replay-basiert darauf (Frozen-Set S1–S10 unberührt).
 
-**Stufen-Skalierung (Dreisatz — Avalon-Q-Modi als Anteil vom Maximum):**
+**Stufen-Kalibrierung (Stand 16.10.2026, ersetzt den früheren Dreisatz 47,8 / 77,7 %):**
+Ziel sind die im Produktivbetrieb **gemessenen** Avalon-Q-Anteile (Shelly, stabile 10-min-Blöcke
+07.05.–25.09.2026): Eco 50,1 %, Standard 81,8 % von Super. Gemessen an der Steckdose (Shelly,
+60 s Einschwingen + 180 s Mittel); Frequenz/Spannung je Stufe, nie über Werkseinstellung.
+Quelle: `src/ha/lab_only/lab_miner_sim.yaml` (Kommentar „Calibration 16.10.2026“).
 
-| Modus | Anteil | Avalon Q | Bitaxe Gamma | NerdQaxe++ |
-|---|---|---|---|---|
-| Eco | 47,8 % | 800 W | ~8,6 W | ~36 W |
-| Standard | 77,7 % | 1300 W | ~14,0 W | ~59 W |
-| Super | 100 % | 1674 W | ~18 W | ~76 W |
-| *Hashrate (Super)* | — | 90 TH/s | 1,2 TH/s | 4,8 TH/s |
+| Modus | Avalon Q (Anteil gemessen) | NerdQAxe++ (MHz/mV, Anteil) | Bitaxe Gamma (MHz/mV, Anteil) |
+|---|---|---|---|
+| Eco | 50,1 % | 280/1100, 50,0 % | 325/1000, 50,0 % |
+| Standard | 81,8 % | 500/1120, 81,7 % | 485/1075, 81,0 % |
+| Super | 100 % | 600/1150 (Werk), 82,7 W | 525/1150 (Werk), 22,5 W |
 
-> **TODO (nach Realtest):** Sobald die drei Stufen auf Bitaxe/NerdQaxe programmiert und getestet
-> sind, die **real gemessenen Werte je Stufe** eintragen — **Hashrate (TH/s)** und **Spannung (V)**
-> sowie die tatsächliche Leistung (W). Die Lab-Maxima 18 W / 76 W sind nur Stock-Referenz; Eco/Standard
-> sind daraus per Dreisatz abgeleitet und nach der Messung zu ersetzen.
+> Standby = Steckdose aus (die kleinen Miner haben kein Soft-Standby). Die Dashboard-Werte im
+> Studienlauf sind die **abgespielten Produktivwerte** (Avalon Q 800/1300/1674 W), nicht die
+> Steckdosenwerte der Labor-Miner; PV, Akku und SoC werden nicht skaliert. Hashrate und Spannung je
+> Stufe als Messreihe sind nicht dokumentiert.
 
 ---
 
